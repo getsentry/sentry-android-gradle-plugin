@@ -233,7 +233,7 @@ class SentryPlugin implements Plugin<Project> {
                         project.logger.info("manifestPath: ${manifestPath}")
                     }
 
-                    def mappingFile = variant.getMappingFile()
+                    def mappingFile = getMappingFile(variant)
                     def transformerTask = getTransformerTask(project, variant)
 
                     def dexTask = getDexTask(project, variant)
@@ -264,7 +264,7 @@ class SentryPlugin implements Plugin<Project> {
                         project.logger.info("transformerTask ${transformerTask.path}")
                     }
 
-//                     create a task to configure proguard automatically unless the user disabled it.
+                    // create a task to configure proguard automatically unless the user disabled it.
                     if (extension.autoProguardConfig) {
                         def addProguardSettingsTaskName = "addSentryProguardSettingsFor${variant.name.capitalize()}"
                         if (!project.tasks.findByName(addProguardSettingsTaskName)) {
@@ -562,5 +562,18 @@ class SentryPlugin implements Plugin<Project> {
         ]
 
         return names.findResult { project.tasks.findByName(it) }
+    }
+
+    /**
+     * Returns the mapping file
+     * @param variant the ApplicationVariant
+     * @return the file or null if not found
+     */
+    static File getMappingFile(ApplicationVariant variant) {
+        try {
+            return variant.getMappingFileProvider().get().singleFile
+        } catch (Exception ignored) {
+            return variant.getMappingFile()
+        }
     }
 }
