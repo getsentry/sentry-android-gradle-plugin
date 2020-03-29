@@ -130,7 +130,8 @@ class SentryPlugin implements Plugin<Project> {
                 // Android Studio 3.3 includes the R8 shrinker.
                 "transformClassesAndResourcesWithR8For${variant.name.capitalize()}",
                 "transformClassesAndResourcesWithProguardFor${variant.name.capitalize()}",
-                "minify${variant.name.capitalize()}WithR8"
+                "minify${variant.name.capitalize()}WithR8",
+                "minify${variant.name.capitalize()}WithProguard"
         ]
 
         return names.findResult { project.tasks.findByName(it) } ?: project.tasks.findByName("proguard${names[1]}")
