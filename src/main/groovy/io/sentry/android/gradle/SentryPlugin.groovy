@@ -234,7 +234,7 @@ class SentryPlugin implements Plugin<Project> {
                         project.logger.info("manifestPath: ${manifestPath}")
                     }
 
-                    def mappingFile = getMappingFile(variant)
+                    def mappingFile = getMappingFile(variant, project)
                     def transformerTask = getTransformerTask(project, variant)
 
                     def dexTask = getDexTask(project, variant)
@@ -423,7 +423,7 @@ class SentryPlugin implements Plugin<Project> {
                     }
 
                     // find the assemble task
-                    def assembleTask = findAssembleTask(variant)
+                    def assembleTask = findAssembleTask(variant, project)
                     if (assembleTask != null) {
                         project.logger.info("assembleTask ${assembleTask.path}")
                     } else {
@@ -497,10 +497,11 @@ class SentryPlugin implements Plugin<Project> {
      * @param variant the given variant
      * @return the task if found or null otherwise
      */
-    static Task findAssembleTask(ApplicationVariant variant) {
+    static Task findAssembleTask(ApplicationVariant variant, Project project) {
         try {
             return variant.assembleProvider.get()
         } catch (Exception ignored) {
+            project.logger.error(ignored.getMessage())
             return variant.assemble
         }
     }
@@ -570,10 +571,19 @@ class SentryPlugin implements Plugin<Project> {
      * @param variant the ApplicationVariant
      * @return the file or null if not found
      */
-    static File getMappingFile(ApplicationVariant variant) {
+    static File getMappingFile(ApplicationVariant variant, Project project) {
         try {
-            return variant.getMappingFileProvider().get().singleFile
+            def files = variant.getMappingFileProvider().get().files
+            if (files.isEmpty()) {
+                project.logger.warn("mappingFileProvider.files is empty")
+                return null
+            }
+            project.logger.info("mapping files size: ${files.size()}")
+            def file = files.iterator().next()
+            project.logger.info("mapping file: ${file.path}")
+            return file
         } catch (Exception ignored) {
+            project.logger.error(ignored.getMessage())
             return variant.getMappingFile()
         }
     }
