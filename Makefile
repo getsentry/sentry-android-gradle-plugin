@@ -1,6 +1,6 @@
 .PHONY: release clean compile dryRelease doRelease all
 
-release: clean assemble doRelease
+release: clean compile doRelease
 
 clean:
 	./gradlew clean
