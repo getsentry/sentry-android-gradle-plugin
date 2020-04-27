@@ -575,12 +575,12 @@ class SentryPlugin implements Plugin<Project> {
         try {
             def files = variant.getMappingFileProvider().get().files
             if (files.isEmpty()) {
-                project.logger.warn("mappingFileProvider.files is empty")
+                project.logger.debug("mappingFileProvider.files is empty for ${variant.name}")
                 return null
             }
-            project.logger.info("mapping files size: ${files.size()}")
+            project.logger.info("mapping files size: ${files.size()} for ${variant.name}")
             def file = files.iterator().next()
-            project.logger.info("mapping file: ${file.path}")
+            project.logger.info("mapping file: ${file.path} for ${variant.name}")
             return file
         } catch (Exception ignored) {
             project.logger.error(ignored.getMessage())
