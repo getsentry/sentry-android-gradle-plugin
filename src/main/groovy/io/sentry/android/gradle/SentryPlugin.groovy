@@ -219,8 +219,8 @@ class SentryPlugin implements Plugin<Project> {
 
             project.android.applicationVariants.all { ApplicationVariant variant ->
                 variant.outputs.each { variantOutput ->
-                    def manifestPath = extension.manifestPath
-                    if (manifestPath == null) {
+                    def manifestFile = null
+                    if (extension.manifestPath == null) {
                         def dir = findAndroidManifestFileDir(project, variantOutput)
                         if (dir != null) {
                             project.logger.info("manifestDir: ${dir.path}")
@@ -228,11 +228,11 @@ class SentryPlugin implements Plugin<Project> {
                             project.logger.info("manifestDir is null")
                         }
 
-                        manifestPath = new File(new File(dir, variantOutput.dirName), "AndroidManifest.xml")
-                        project.logger.info("manifestPath: ${manifestPath}")
+                        manifestFile = new File(new File(dir, variantOutput.dirName), "AndroidManifest.xml")
                     } else {
-                        project.logger.info("manifestPath: ${manifestPath}")
+                        manifestFile = new File(extension.manifestPath)
                     }
+                    project.logger.info("manifestFile: ${manifestFile.absolutePath}")
 
                     def mappingFile = getMappingFile(variant, project)
                     def transformerTask = getTransformerTask(project, variant)
@@ -303,7 +303,7 @@ class SentryPlugin implements Plugin<Project> {
                                 cli,
                                 "upload-proguard",
                                 "--android-manifest",
-                                manifestPath,
+                                manifestFile,
                                 "--write-properties",
                                 debugMetaPropPath,
                                 mappingFile
@@ -334,6 +334,17 @@ class SentryPlugin implements Plugin<Project> {
                         project.logger.info("args executed.")
 
                         enabled true
+                    }
+
+                    // when running AS v4.x and split ABIs is enabled, AS generates
+                    // only the files related to your device/emulator, and this breaks the plugin,
+                    // so in case that the files don't exist for this variant, we skip it.
+                    persistIdsTask.onlyIf {
+                        def exist = manifestFile.exists()
+                        if (!exist) {
+                            project.logger.info("${manifestFile.absolutePath} doesn't exist, ${variant.name} won't upload-proguard files")
+                        }
+                        return exist
                     }
 
                     // create and hooks the uploading of native symbols task after the assembling task
@@ -414,7 +425,7 @@ class SentryPlugin implements Plugin<Project> {
                     if (packageTask != null) {
                         project.logger.info("packageTask ${packageTask.path}")
                     } else {
-                        packageTask.logger.info("packageTask is null")
+                        project.logger.info("packageTask is null")
                     }
 
                     // the package task will only be executed if the persistIdsTask has already been executed.
@@ -427,7 +438,7 @@ class SentryPlugin implements Plugin<Project> {
                     if (assembleTask != null) {
                         project.logger.info("assembleTask ${assembleTask.path}")
                     } else {
-                        assembleTask.logger.info("assembleTask is null")
+                        project.logger.info("assembleTask is null")
                     }
 
                     // uploadNativeSymbolsTask only will be executed after the assemble task
@@ -441,7 +452,7 @@ class SentryPlugin implements Plugin<Project> {
                                 bundleTask.finalizedBy uploadNativeSymbolsTask
                             }
                         } else {
-                            assembleTask.logger.info("uploadNativeSymbolsTask won't be executed")
+                            project.logger.info("uploadNativeSymbolsTask won't be executed")
                         }
                     }
                 }
