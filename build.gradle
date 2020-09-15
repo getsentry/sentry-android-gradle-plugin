@@ -62,7 +62,7 @@ modifyPom {
 
         developers {
             developer {
-                id 'sentry-io'
+                id 'getsentry'
                 name 'Sentry Team and Contributors'
                 email 'oss@sentry.io'
             }
