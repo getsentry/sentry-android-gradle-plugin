@@ -4,12 +4,14 @@ import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariantOutput
+import com.android.build.gradle.tasks.ProcessApplicationManifest
+import com.android.build.gradle.tasks.ProcessMultiApkApplicationManifest
 import org.apache.commons.compress.utils.IOUtils
+import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.Exec
-import org.apache.tools.ant.taskdefs.condition.Os
 
 class SentryPlugin implements Plugin<Project> {
     static final String GROUP_NAME = 'Sentry'
@@ -33,7 +35,7 @@ class SentryPlugin implements Plugin<Project> {
         try {
             sentryProps.load(new FileInputStream(propertiesFile))
         } catch (FileNotFoundException ignored) {
-            project.logger.error(ignored.getMessage())
+            project.logger.error("getSentryCli(): ${ignored.getMessage()}")
             // it's okay, we can ignore it.
         }
 
@@ -469,36 +471,56 @@ class SentryPlugin implements Plugin<Project> {
         // new Task Avoidance API can be used instead.
         // (https://docs.gradle.org/current/userguide/task_configuration_avoidance.html)
 
+        try { // Android Gradle Plugin >= 4.1.0
+            def provider = variantOutput.processManifestProvider.get()
+
+            // it can be a ProcessMultiApkApplicationManifest
+            if (provider instanceof ProcessMultiApkApplicationManifest) {
+                def multiProvider = (ProcessMultiApkApplicationManifest) provider
+                def file = multiProvider.mainMergedManifest.get().asFile
+                return file.parentFile
+            }
+
+            // or a ProcessApplicationManifest
+            if (provider instanceof ProcessApplicationManifest) {
+                def processProvider = (ProcessApplicationManifest) provider
+                def file = processProvider.mergedManifest.get().asFile
+                return file.parentFile
+            }
+        } catch (Exception ignored) {
+            project.logger.error("findAndroidManifestFileDir(>= 4.1): ${ignored.getMessage()}")
+        }
+
         try { // Android Gradle Plugin >= 3.3.0
             return variantOutput.processManifestProvider.get().manifestOutputDirectory.get().asFile
         } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir 1: ${ignored.getMessage()}")
+            project.logger.error("findAndroidManifestFileDir(>= 3.3): ${ignored.getMessage()}")
         }
 
         try { // Android Gradle Plugin >= 3.0.0
             return variantOutput.processManifest.manifestOutputDirectory.get().asFile
         } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir 2: ${ignored.getMessage()}")
+            project.logger.error("findAndroidManifestFileDir(>= 3.0): ${ignored.getMessage()}")
         }
 
         // Android Gradle Plugin < 3.0.0
         try {
             return new File(variantOutput.processManifest.manifestOutputFile).parentFile
         } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir 3: ${ignored.getMessage()}")
+            project.logger.error("findAndroidManifestFileDir(< 3.0): ${ignored.getMessage()}")
         }
 
         // https://github.com/Tencent/tinker/pull/620/files
         try {
             return variantOutput.processResourcesProvider.get().manifestFile.parentFile
         } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir 4: ${ignored.getMessage()}")
+            project.logger.error("findAndroidManifestFileDir(processResourcesProvider): ${ignored.getMessage()}")
         }
 
         try {
             return variantOutput.processResources.manifestFile.parentFile
         } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir 5: ${ignored.getMessage()}")
+            project.logger.error("findAndroidManifestFileDir(processResources): ${ignored.getMessage()}")
         }
     }
 
@@ -512,7 +534,7 @@ class SentryPlugin implements Plugin<Project> {
         try {
             return variant.assembleProvider.get()
         } catch (Exception ignored) {
-            project.logger.error(ignored.getMessage())
+            project.logger.error("findAssembleTask(): ${ignored.getMessage()}")
             return variant.assemble
         }
     }
@@ -594,7 +616,7 @@ class SentryPlugin implements Plugin<Project> {
             project.logger.info("mapping file: ${file.path} for ${variant.name}")
             return file
         } catch (Exception ignored) {
-            project.logger.error(ignored.getMessage())
+            project.logger.error("getMappingFile(): ${ignored.getMessage()}")
             return variant.getMappingFile()
         }
     }
