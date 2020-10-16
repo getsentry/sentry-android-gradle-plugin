@@ -3,13 +3,12 @@ package io.sentry.android.gradle
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.ApplicationVariant
-import com.android.build.gradle.api.BaseVariantOutput
 import org.apache.commons.compress.utils.IOUtils
+import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.Exec
-import org.apache.tools.ant.taskdefs.condition.Os
 
 class SentryPlugin implements Plugin<Project> {
     static final String GROUP_NAME = 'Sentry'
@@ -33,7 +32,7 @@ class SentryPlugin implements Plugin<Project> {
         try {
             sentryProps.load(new FileInputStream(propertiesFile))
         } catch (FileNotFoundException ignored) {
-            project.logger.error(ignored.getMessage())
+            project.logger.error("getSentryCli(): ${ignored.getMessage()}")
             // it's okay, we can ignore it.
         }
 
@@ -219,20 +218,6 @@ class SentryPlugin implements Plugin<Project> {
 
             project.android.applicationVariants.all { ApplicationVariant variant ->
                 variant.outputs.each { variantOutput ->
-                    def manifestFile = null
-                    if (extension.manifestPath == null) {
-                        def dir = findAndroidManifestFileDir(project, variantOutput)
-                        if (dir != null) {
-                            project.logger.info("manifestDir: ${dir.path}")
-                        } else {
-                            project.logger.info("manifestDir is null")
-                        }
-
-                        manifestFile = new File(new File(dir, variantOutput.dirName), "AndroidManifest.xml")
-                    } else {
-                        manifestFile = new File(extension.manifestPath)
-                    }
-                    project.logger.info("manifestFile: ${manifestFile.absolutePath}")
 
                     def mappingFile = getMappingFile(variant, project)
                     def transformerTask = getTransformerTask(project, variant)
@@ -302,8 +287,6 @@ class SentryPlugin implements Plugin<Project> {
                         def args = [
                                 cli,
                                 "upload-proguard",
-                                "--android-manifest",
-                                manifestFile,
                                 "--write-properties",
                                 debugMetaPropPath,
                                 mappingFile
@@ -334,17 +317,6 @@ class SentryPlugin implements Plugin<Project> {
                         project.logger.info("args executed.")
 
                         enabled true
-                    }
-
-                    // when running AS v4.x and split ABIs is enabled, AS generates
-                    // only the files related to your device/emulator, and this breaks the plugin,
-                    // so in case that the files don't exist for this variant, we skip it.
-                    persistIdsTask.onlyIf {
-                        def exist = manifestFile.exists()
-                        if (!exist) {
-                            project.logger.info("${manifestFile.absolutePath} doesn't exist, ${variant.name} won't upload-proguard files")
-                        }
-                        return exist
                     }
 
                     // create and hooks the uploading of native symbols task after the assembling task
@@ -460,48 +432,6 @@ class SentryPlugin implements Plugin<Project> {
         }
     }
 
-    static File findAndroidManifestFileDir(Project project, BaseVariantOutput variantOutput) {
-        // Gradle 4.7 introduced the lazy task API and AGP 3.3+ adopts that,
-        // so we apparently have a Provider<File> here instead
-        // TODO: This will let us depend on the configuration of each flavor's
-        // manifest creation task and their transitive dependencies, which in
-        // turn prolongs the configuration time accordingly. Evaluate how Gradle's
-        // new Task Avoidance API can be used instead.
-        // (https://docs.gradle.org/current/userguide/task_configuration_avoidance.html)
-
-        try { // Android Gradle Plugin >= 3.3.0
-            return variantOutput.processManifestProvider.get().manifestOutputDirectory.get().asFile
-        } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir 1: ${ignored.getMessage()}")
-        }
-
-        try { // Android Gradle Plugin >= 3.0.0
-            return variantOutput.processManifest.manifestOutputDirectory.get().asFile
-        } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir 2: ${ignored.getMessage()}")
-        }
-
-        // Android Gradle Plugin < 3.0.0
-        try {
-            return new File(variantOutput.processManifest.manifestOutputFile).parentFile
-        } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir 3: ${ignored.getMessage()}")
-        }
-
-        // https://github.com/Tencent/tinker/pull/620/files
-        try {
-            return variantOutput.processResourcesProvider.get().manifestFile.parentFile
-        } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir 4: ${ignored.getMessage()}")
-        }
-
-        try {
-            return variantOutput.processResources.manifestFile.parentFile
-        } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir 5: ${ignored.getMessage()}")
-        }
-    }
-
     /**
      * Returns the assemble task
      * @param project the given project
@@ -512,7 +442,7 @@ class SentryPlugin implements Plugin<Project> {
         try {
             return variant.assembleProvider.get()
         } catch (Exception ignored) {
-            project.logger.error(ignored.getMessage())
+            project.logger.error("findAssembleTask(): ${ignored.getMessage()}")
             return variant.assemble
         }
     }
@@ -594,7 +524,7 @@ class SentryPlugin implements Plugin<Project> {
             project.logger.info("mapping file: ${file.path} for ${variant.name}")
             return file
         } catch (Exception ignored) {
-            project.logger.error(ignored.getMessage())
+            project.logger.error("getMappingFile(): ${ignored.getMessage()}")
             return variant.getMappingFile()
         }
     }

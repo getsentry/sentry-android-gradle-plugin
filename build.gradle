@@ -20,7 +20,7 @@ compileGroovy {
 dependencies {
     compileOnly gradleApi()
     compileOnly localGroovy()
-    compileOnly 'com.android.tools.build:gradle:4.0.0'
+    compileOnly 'com.android.tools.build:gradle:4.1.0'
 }
 
 publishing {
