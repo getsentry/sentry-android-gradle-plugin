@@ -3,9 +3,6 @@ package io.sentry.android.gradle
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.ApplicationVariant
-import com.android.build.gradle.api.BaseVariantOutput
-import com.android.build.gradle.tasks.ProcessApplicationManifest
-import com.android.build.gradle.tasks.ProcessMultiApkApplicationManifest
 import org.apache.commons.compress.utils.IOUtils
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.Plugin
@@ -221,20 +218,6 @@ class SentryPlugin implements Plugin<Project> {
 
             project.android.applicationVariants.all { ApplicationVariant variant ->
                 variant.outputs.each { variantOutput ->
-                    def manifestFile = null
-                    if (extension.manifestPath == null) {
-                        def dir = findAndroidManifestFileDir(project, variantOutput)
-                        if (dir != null) {
-                            project.logger.info("manifestDir: ${dir.path}")
-                        } else {
-                            project.logger.info("manifestDir is null")
-                        }
-
-                        manifestFile = new File(new File(dir, variantOutput.dirName), "AndroidManifest.xml")
-                    } else {
-                        manifestFile = new File(extension.manifestPath)
-                    }
-                    project.logger.info("manifestFile: ${manifestFile.absolutePath}")
 
                     def mappingFile = getMappingFile(variant, project)
                     def transformerTask = getTransformerTask(project, variant)
@@ -304,8 +287,6 @@ class SentryPlugin implements Plugin<Project> {
                         def args = [
                                 cli,
                                 "upload-proguard",
-                                "--android-manifest",
-                                manifestFile,
                                 "--write-properties",
                                 debugMetaPropPath,
                                 mappingFile
@@ -336,17 +317,6 @@ class SentryPlugin implements Plugin<Project> {
                         project.logger.info("args executed.")
 
                         enabled true
-                    }
-
-                    // when running AS v4.x and split ABIs is enabled, AS generates
-                    // only the files related to your device/emulator, and this breaks the plugin,
-                    // so in case that the files don't exist for this variant, we skip it.
-                    persistIdsTask.onlyIf {
-                        def exist = manifestFile.exists()
-                        if (!exist) {
-                            project.logger.info("${manifestFile.absolutePath} doesn't exist, ${variant.name} won't upload-proguard files")
-                        }
-                        return exist
                     }
 
                     // create and hooks the uploading of native symbols task after the assembling task
@@ -459,68 +429,6 @@ class SentryPlugin implements Plugin<Project> {
                     }
                 }
             }
-        }
-    }
-
-    static File findAndroidManifestFileDir(Project project, BaseVariantOutput variantOutput) {
-        // Gradle 4.7 introduced the lazy task API and AGP 3.3+ adopts that,
-        // so we apparently have a Provider<File> here instead
-        // TODO: This will let us depend on the configuration of each flavor's
-        // manifest creation task and their transitive dependencies, which in
-        // turn prolongs the configuration time accordingly. Evaluate how Gradle's
-        // new Task Avoidance API can be used instead.
-        // (https://docs.gradle.org/current/userguide/task_configuration_avoidance.html)
-
-        try { // Android Gradle Plugin >= 4.1.0
-            def provider = variantOutput.processManifestProvider.get()
-
-            // it can be a ProcessMultiApkApplicationManifest
-            if (provider instanceof ProcessMultiApkApplicationManifest) {
-                def multiProvider = (ProcessMultiApkApplicationManifest) provider
-                def file = multiProvider.mainMergedManifest.get().asFile
-                return file.parentFile
-            }
-
-            // or a ProcessApplicationManifest
-            if (provider instanceof ProcessApplicationManifest) {
-                def processProvider = (ProcessApplicationManifest) provider
-                def file = processProvider.mergedManifest.get().asFile
-                return file.parentFile
-            }
-        } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir(>= 4.1): ${ignored.getMessage()}")
-        }
-
-        try { // Android Gradle Plugin >= 3.3.0
-            return variantOutput.processManifestProvider.get().manifestOutputDirectory.get().asFile
-        } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir(>= 3.3): ${ignored.getMessage()}")
-        }
-
-        try { // Android Gradle Plugin >= 3.0.0
-            return variantOutput.processManifest.manifestOutputDirectory.get().asFile
-        } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir(>= 3.0): ${ignored.getMessage()}")
-        }
-
-        // Android Gradle Plugin < 3.0.0
-        try {
-            return new File(variantOutput.processManifest.manifestOutputFile).parentFile
-        } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir(< 3.0): ${ignored.getMessage()}")
-        }
-
-        // https://github.com/Tencent/tinker/pull/620/files
-        try {
-            return variantOutput.processResourcesProvider.get().manifestFile.parentFile
-        } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir(processResourcesProvider): ${ignored.getMessage()}")
-        }
-
-        try {
-            return variantOutput.processResources.manifestFile.parentFile
-        } catch (Exception ignored) {
-            project.logger.error("findAndroidManifestFileDir(processResources): ${ignored.getMessage()}")
         }
     }
 
