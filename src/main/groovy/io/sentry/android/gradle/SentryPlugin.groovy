@@ -117,7 +117,7 @@ class SentryPlugin implements Plugin<Project> {
     }
 
     static String getPropertiesFile(Project project) {
-        def projectProperties = new File("${project.getProjectDir.toPath()}/sentry.properties")
+        def projectProperties = new File("${project.getProjectDir().toPath()}/sentry.properties")
         if (projectProperties.exists()) {
             return projectProperties.toPath().toString()
         } else {
