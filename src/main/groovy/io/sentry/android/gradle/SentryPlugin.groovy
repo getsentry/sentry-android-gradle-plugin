@@ -25,7 +25,7 @@ class SentryPlugin implements Plugin<Project> {
      */
     static String getSentryCli(Project project) {
         // if a path is provided explicitly use that first
-        def propertiesFile = "${project.rootDir.toPath()}/sentry.properties"
+        def propertiesFile = getPropertiesFile(project)
         project.logger.info("propertiesFile: ${propertiesFile}")
 
         Properties sentryProps = new Properties()
@@ -114,6 +114,15 @@ class SentryPlugin implements Plugin<Project> {
         }
 
         return "sentry-cli"
+    }
+
+    static String getPropertiesFile(Project project) {
+        def projectProperties = new File("${project.getProjectDir.toPath()}/sentry.properties")
+        if (projectProperties.exists()) {
+            return projectProperties.toPath().toString()
+        } else {
+            return "${project.rootDir.toPath()}/sentry.properties"
+        }
     }
 
     /**
@@ -471,6 +480,7 @@ class SentryPlugin implements Plugin<Project> {
                 "${project.projectDir}/src/${buildTypeName}/${flavorName}/${propName}",
                 "${project.projectDir}/src/${flavorName}/${buildTypeName}/${propName}",
                 "${project.projectDir}/src/${flavorName}/${propName}",
+                "${project.projectDir}/${propName}",
                 "${project.rootDir.toPath()}/src/${flavorName}/${propName}",
         ] + possibleProps + [
                 "${project.rootDir.toPath()}/src/${buildTypeName}/${propName}",
