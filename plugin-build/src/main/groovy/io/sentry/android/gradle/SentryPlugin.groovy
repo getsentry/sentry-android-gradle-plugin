@@ -1,5 +1,6 @@
 package io.sentry.android.gradle
 
+import com.android.Version
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.ApplicationVariant
@@ -9,6 +10,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.Exec
+import org.gradle.util.VersionNumber
 
 class SentryPlugin implements Plugin<Project> {
     static final String GROUP_NAME = 'Sentry'
@@ -184,39 +186,6 @@ class SentryPlugin implements Plugin<Project> {
         return project.tasks.findByName("bundle${variant.name.capitalize()}")
     }
 
-    /**
-     * Returns the path to the debug meta properties file for the given variant.
-     *
-     * @param project
-     * @param variant
-     * @return
-     */
-    static String getDebugMetaPropPath(Project project, ApplicationVariant variant) {
-        try {
-            return variant.mergeAssetsProvider.get().outputDir.get().file("sentry-debug-meta.properties").getAsFile().path
-        } catch (Exception ignored) {
-            project.logger.error("getDebugMetaPropPath 1: ${ignored.getMessage()}")
-        }
-
-        try {
-            return variant.mergeAssets.outputDir.get().file("sentry-debug-meta.properties").getAsFile().path
-        } catch (Exception ignored) {
-            project.logger.error("getDebugMetaPropPath 2: ${ignored.getMessage()}")
-        }
-
-        try {
-            return "${variant.mergeAssets.outputDir.get().asFile.path}/sentry-debug-meta.properties"
-        } catch (Exception ignored) {
-            project.logger.error("getDebugMetaPropPath 3: ${ignored.getMessage()}")
-        }
-
-        try {
-            return "${variant.mergeAssets.outputDir}/sentry-debug-meta.properties"
-        } catch (Exception ignored) {
-            project.logger.error("getDebugMetaPropPath 4: ${ignored.getMessage()}")
-        }
-    }
-
     void apply(Project project) {
         SentryPluginExtension extension = project.extensions.create("sentry", SentryPluginExtension)
 
@@ -261,59 +230,47 @@ class SentryPlugin implements Plugin<Project> {
 
                     def cli = getSentryCli(project)
 
-                    def persistIdsTaskName = "persistSentryProguardUuidsFor${variant.name.capitalize()}${variantOutput.name.capitalize()}"
+                    def generateUuidTask = project.tasks.create(
+                            name: "generateSentryProguardUuid${variant.name.capitalize()}${variantOutput.name.capitalize()}",
+                            type: GenerateSentryProguardUuidTask) {
+                        outputDirectory.set(project.file("build/generated/assets/sentry/${variant.name}"))
+
+                        doFirst {
+                            project.logger.info("debugMetaPropPath: ${getOutputFile().get()}")
+                        }
+                    }
+
+                    if (VersionNumber.parse(Version.ANDROID_GRADLE_PLUGIN_VERSION) >= new VersionNumber(3, 3, 0, null)) {
+                        variant.mergeAssetsProvider.configure {
+                            dependsOn(generateUuidTask)
+                        }
+                    } else {
+                        //noinspection GrDeprecatedAPIUsage
+                        variant.mergeAssets.dependsOn(generateUuidTask)
+                    }
+
                     // create a task that persists our proguard uuid as android asset
-                    def persistIdsTask = project.tasks.create(
-                            name: persistIdsTaskName,
-                            type: Exec) {
-                        description "Write references to proguard UUIDs to the android assets."
+                    def uploadSentryProguardMappingsTask = project.tasks.create(
+                            name: "uploadSentryProguardMappings${variant.name.capitalize()}${variantOutput.name.capitalize()}",
+                            type: SentryUploadProguardMappingsTask) {
+                        dependsOn(generateUuidTask)
                         workingDir project.rootDir
-
-                        def propsFile = getPropsString(project, variant)
-
-                        if (propsFile != null) {
-                            environment("SENTRY_PROPERTIES", propsFile)
-                        } else {
-                            project.logger.info("propsFile is null")
-                        }
-
-                        def debugMetaPropPath = getDebugMetaPropPath(project, variant)
-                        project.logger.info("debugMetaPropPath: ${debugMetaPropPath}")
-
-                        def args = [
-                                cli,
-                                "upload-proguard",
-                                "--write-properties",
-                                debugMetaPropPath,
-                                mappingFile
-                        ]
-
-                        if (!extension.autoUpload) {
-                            args << "--no-upload"
-                        }
-
+                        getCliExecutable().set(cli)
+                        getSentryProperties().set(project.file(getPropsString(project, variant)))
+                        mappingsUuid.set(generateUuidTask.outputUuid)
+                        getMappingsFile().set(mappingFile)
+                        getAutoUpload().set(extension.autoUpload)
                         def buildTypeProperties = variant.buildType.ext
                         if (buildTypeProperties.has(SENTRY_ORG_PARAMETER)) {
-                            args.add("--org")
-                            args.add(buildTypeProperties.get(SENTRY_ORG_PARAMETER).toString())
+                            getSentryOrganization().set(buildTypeProperties.get(SENTRY_ORG_PARAMETER).toString())
                         }
                         if (buildTypeProperties.has(SENTRY_PROJECT_PARAMETER)) {
-                            args.add("--project")
-                            args.add(buildTypeProperties.get(SENTRY_PROJECT_PARAMETER).toString())
+                            getSentryProject().set(buildTypeProperties.get(SENTRY_PROJECT_PARAMETER).toString())
                         }
-
-                        project.logger.info("cli args: ${args.toString()}")
-
-                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                            commandLine("cmd", "/c", *args)
-                        } else {
-                            commandLine(*args)
-                        }
-
-                        project.logger.info("args executed.")
-
-                        enabled true
                     }
+
+                    variant.register(uploadSentryProguardMappingsTask)
+                    project.android.sourceSets[variant.name].assets.srcDir(generateUuidTask.outputDirectory)
 
                     // create and hooks the uploading of native symbols task after the assembling task
                     def variantOutputName = "${variant.name.capitalize()}${variantOutput.name.capitalize()}"
@@ -376,16 +333,16 @@ class SentryPlugin implements Plugin<Project> {
                     // we set ourselves as dependency, otherwise we just hack outselves into
                     // the proguard task's doLast.
                     if (dexTask != null) {
-                        dexTask.dependsOn persistIdsTask
+                        dexTask.dependsOn uploadSentryProguardMappingsTask
                     }
 
                     if (transformerTask != null) {
-                        transformerTask.finalizedBy persistIdsTask
+                        transformerTask.finalizedBy uploadSentryProguardMappingsTask
                     }
 
                     // To include proguard uuid file into aab, run before bundle task.
                     if (preBundleTask != null) {
-                        preBundleTask.dependsOn persistIdsTask
+                        preBundleTask.dependsOn uploadSentryProguardMappingsTask
                     }
 
                     // find the package task
@@ -396,9 +353,9 @@ class SentryPlugin implements Plugin<Project> {
                         project.logger.info("packageTask is null")
                     }
 
-                    // the package task will only be executed if the persistIdsTask has already been executed.
+                    // the package task will only be executed if the uploadSentryProguardMappingsTask has already been executed.
                     if (packageTask != null) {
-                        packageTask.dependsOn persistIdsTask
+                        packageTask.dependsOn uploadSentryProguardMappingsTask
                     }
 
                     // find the assemble task
