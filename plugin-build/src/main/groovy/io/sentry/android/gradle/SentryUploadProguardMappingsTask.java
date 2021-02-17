@@ -50,7 +50,7 @@ abstract class SentryUploadProguardMappingsTask extends Exec {
             getLogger().info("propsFile is null");
         }
 
-        ArrayList<Object> args = new ArrayList<>();
+        ArrayList<Object> args = new ArrayList<Object>();
 
         args.add(getCliExecutable().get());
         args.add("upload-proguard");
