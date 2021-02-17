@@ -1,5 +1,6 @@
 package io.sentry.android.gradle
 
+
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.ApplicationVariant
@@ -9,6 +10,7 @@ import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.gradle.util.VersionNumber
 
@@ -187,11 +189,29 @@ class SentryPlugin implements Plugin<Project> {
     }
 
     void apply(Project project) {
-        SentryPluginExtension extension = project.extensions.create("sentry", SentryPluginExtension)
+        SentryExtension extension = project.extensions.create("sentry", SentryExtension)
 
         project.afterEvaluate {
             if (!project.plugins.hasPlugin(AppPlugin) && !project.getPlugins().hasPlugin(LibraryPlugin)) {
                 throw new IllegalStateException('Must apply \'com.android.application\' first!')
+            }
+
+
+            Provider<SentryProguardConfigTask> sentryProguardConfigTask = null
+            // create a task to configure proguard automatically unless the user disabled it.
+            if (extension.autoProguardConfig.get()) {
+                def addProguardSettingsTaskName = "addSentryProguardSettings"
+                if (!project.tasks.findByName(addProguardSettingsTaskName)) {
+                    def outputFile = new File(project.buildDir, "intermediates/sentry/sentry.pro")
+                    sentryProguardConfigTask = project.tasks.register(
+                            addProguardSettingsTaskName,
+                            SentryProguardConfigTask
+                    ) {
+                        it.outputFile.set(outputFile)
+                    }
+
+                    project.android.defaultConfig.proguardFiles(outputFile)
+                }
             }
 
             project.android.applicationVariants.all { ApplicationVariant variant ->
@@ -228,17 +248,8 @@ class SentryPlugin implements Plugin<Project> {
                         project.logger.info("transformerTask ${transformerTask.path}")
                     }
 
-                    // create a task to configure proguard automatically unless the user disabled it.
-                    if (extension.autoProguardConfig) {
-                        def addProguardSettingsTaskName = "addSentryProguardSettingsFor${variant.name.capitalize()}"
-                        if (!project.tasks.findByName(addProguardSettingsTaskName)) {
-                            SentryProguardConfigTask proguardConfigTask = project.tasks.create(
-                                    addProguardSettingsTaskName,
-                                    SentryProguardConfigTask)
-                            proguardConfigTask.group = GROUP_NAME
-                            proguardConfigTask.applicationVariant = variant
-                            transformerTask.dependsOn proguardConfigTask
-                        }
+                    if (sentryProguardConfigTask != null) {
+                        transformerTask.dependsOn(sentryProguardConfigTask)
                     }
 
                     def cli = getSentryCli(project)
@@ -261,7 +272,6 @@ class SentryPlugin implements Plugin<Project> {
                         //noinspection GrDeprecatedAPIUsage
                         variant.mergeAssets.dependsOn(generateUuidTask)
                     }
-
                     // create a task that persists our proguard uuid as android asset
                     def uploadSentryProguardMappingsTask = project.tasks.create(
                             name: "uploadSentryProguardMappings${variant.name.capitalize()}${variantOutput.name.capitalize()}",
@@ -338,9 +348,8 @@ class SentryPlugin implements Plugin<Project> {
 
                         project.logger.info("nativeArgs executed.")
 
-                        enabled true
+                        enabled = !project.property("sentry.internal.skipUpload")?.toString()?.toBoolean()
                     }
-
 
                     // and run before dex transformation.  If we managed to find the dex task
                     // we set ourselves as dependency, otherwise we just hack outselves into
