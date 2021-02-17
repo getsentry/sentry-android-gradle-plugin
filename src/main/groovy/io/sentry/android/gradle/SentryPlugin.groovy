@@ -338,7 +338,7 @@ class SentryPlugin implements Plugin<Project> {
 
                         project.logger.info("nativeArgs executed.")
 
-                        enabled true
+                        enabled !getProject().property("sentry.internal.skipUpload")?.toString()?.toBoolean()
                     }
 
 

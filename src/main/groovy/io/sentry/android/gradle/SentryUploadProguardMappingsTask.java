@@ -10,6 +10,7 @@ import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Optional;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.UUID;
 
 abstract class SentryUploadProguardMappingsTask extends Exec {
@@ -82,6 +83,8 @@ abstract class SentryUploadProguardMappingsTask extends Exec {
 
         getLogger().info("cli args: " + getArgs());
 
-        super.exec();
+        if (!Boolean.parseBoolean(Objects.toString(getProject().property("sentry.internal.skipUpload")))) {
+            super.exec();
+        }
     }
 }
