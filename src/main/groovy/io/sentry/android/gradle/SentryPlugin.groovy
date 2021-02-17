@@ -1,9 +1,9 @@
 package io.sentry.android.gradle
 
-import com.android.Version
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.ApplicationVariant
+import com.android.builder.model.Version
 import org.apache.commons.compress.utils.IOUtils
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.Plugin
