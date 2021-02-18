@@ -2,7 +2,6 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    groovy
     kotlin("jvm") version "1.4.30"
     `maven-publish`
     `java-gradle-plugin`
@@ -23,14 +22,6 @@ repositories {
     mavenCentral()
     jcenter()
     mavenLocal()
-}
-
-tasks.compileGroovy {
-    sourceCompatibility = "1.8"
-    targetCompatibility = "1.8"
-    // This is temporary and is only needed while Groovy is used
-    dependsOn(tasks.compileKotlin)
-    classpath += files(tasks.compileKotlin.map { it.destinationDir })
 }
 
 tasks.withType<KotlinCompile> {
@@ -112,7 +103,6 @@ tasks.check {
 
 dependencies {
     compileOnly(gradleApi())
-    compileOnly(localGroovy())
     compileOnly("com.android.tools.build:gradle:4.1.0")
 
     add("funcTestImplementation", gradleTestKit())

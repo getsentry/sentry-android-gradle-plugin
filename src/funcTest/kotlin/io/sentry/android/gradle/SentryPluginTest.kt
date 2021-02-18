@@ -16,6 +16,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @Suppress("FunctionName", "UnusedProperty")
@@ -81,6 +82,10 @@ class SentryPluginTest(
                       minifyEnabled true
                       proguardFiles("$releaseProguardRules")
                     }
+                  }
+                  packagingOptions {
+                    // We don't want to force the NDK to be installed so we disable stripping
+                    doNotStrip("*.so")
                   }
                 }
               }
@@ -167,6 +172,36 @@ class SentryPluginTest(
         )
 
         runner.build()
+    }
+
+    @Test
+    fun `fails without android plugin`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+                plugins {
+                  java
+                  id "io.sentry.android.gradle"
+                }
+            """.trimIndent()
+        )
+
+        runner.buildAndFail()
+    }
+
+    @Test
+    fun `fails without on library module`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+                plugins {
+                  id "com.android.library"
+                  id "io.sentry.android.gradle"
+                }
+            """.trimIndent()
+        )
+
+        runner.buildAndFail()
     }
 
     @Test
@@ -258,11 +293,202 @@ class SentryPluginTest(
 
     @Test
     fun `proguard config task is cached`() {
-        runner.appendArguments(":app:addSentryProguardSettings")
+        runner.appendArguments(":app:generateSentryProguardSettings")
 
         runner.build()
         val result = runner.build()
-        assertEquals(TaskOutcome.UP_TO_DATE, result.task(":app:addSentryProguardSettings")?.outcome)
+        assertEquals(TaskOutcome.UP_TO_DATE, result.task(":app:generateSentryProguardSettings")?.outcome)
+    }
+
+    @Test
+    fun `allows filtering variants`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+                plugins {
+                  id "com.android.application"
+                  id "io.sentry.android.gradle"
+                }
+                
+                sentry {
+                  variantFilter { variant -> false }
+                }
+            """.trimIndent()
+        )
+
+        runner
+            .appendArguments(":app:assembleRelease")
+            .build()
+
+        val apk = testProjectDir.root.resolve("app/build/outputs/apk/release/app-release-unsigned.apk")
+        with(ZipFile(apk)) {
+            assertNull(getEntry("assets/sentry-debug-meta.properties"))
+        }
+    }
+
+    @Test
+    fun `uploads native symbols if enabled`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+                plugins {
+                  id "com.android.application"
+                  id "io.sentry.android.gradle"
+                }
+                
+                sentry {
+                  uploadNativeSymbols = true
+                }
+            """.trimIndent()
+        )
+        testProjectDir.root.resolve("app/src/main/jniLibs/arm64-v8a")
+            .apply { mkdirs() }
+            .resolve("libexample.so")
+            .writeText("")
+
+        val uploadSentryNativeSymbols = runner
+            .appendArguments(":app:assembleRelease")
+            .build()
+            .task(":app:uploadSentryNativeSymbolsRelease")
+
+        assertEquals(TaskOutcome.SUCCESS, uploadSentryNativeSymbols?.outcome)
+    }
+
+    @Test
+    fun `skips native symbol uploading by default`() {
+        testProjectDir.root.resolve("app/src/main/jniLibs/arm64-v8a")
+            .apply { mkdirs() }
+            .resolve("libexample.so")
+            .writeText("")
+
+        val uploadSentryNativeSymbols = runner
+            .appendArguments(":app:assembleRelease")
+            .build()
+            .task(":app:uploadSentryNativeSymbolsRelease")
+
+        assertEquals(TaskOutcome.SKIPPED, uploadSentryNativeSymbols?.outcome)
+    }
+
+    @Test
+    fun `the project and org can be set per`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+                import io.sentry.android.gradle.SentryUploadTask
+                
+                plugins {
+                  id "com.android.application"
+                  id "io.sentry.android.gradle"
+                }
+                
+                sentry {
+                  organization = "example-org"
+                  project = "example-project"
+                }
+                
+                afterEvaluate {
+                  tasks.withType(SentryUploadTask).each { task ->
+                    if (task.sentryOrganization.orNull != "example-org") {
+                      throw new AssertionError("Invalid organization for task ${'$'}{task.name}: ${'$'}{task.sentryOrganization.orNull}")
+                    }
+                    if (task.sentryProject.orNull != "example-project") {
+                      throw new AssertionError("Invalid project for task ${'$'}{task.name}: ${'$'}{task.sentryProject.orNull}")
+                    }
+                  }
+                }
+            """.trimIndent()
+        )
+
+        runner.build()
+    }
+
+    @Test
+    fun `the project and org can be set per build type`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+                import io.sentry.android.gradle.SentryUploadTask
+                
+                plugins {
+                  id "com.android.application"
+                  id "io.sentry.android.gradle"
+                }
+                
+                android {
+                  buildTypes {
+                    release {
+                      sentry {
+                        organization = "example-org"
+                        project = "example-project"
+                      }
+                    }
+                  }
+                }
+                
+                sentry {
+                  organization = "default-org"
+                  project = "default-project"
+                }
+                
+                afterEvaluate {
+                  def task = tasks.getByName("uploadSentryNativeSymbolsRelease") as SentryUploadTask
+
+                  if (task.sentryOrganization.orNull != "example-org") {
+                    throw new AssertionError("Invalid organization: ${'$'}{task.sentryOrganization.orNull}")
+                  }
+                  if (task.sentryProject.orNull != "example-project") {
+                    throw new AssertionError("Invalid project: ${'$'}{task.sentryProject.orNull}")
+                  }
+                }
+            """.trimIndent()
+        )
+
+        runner.build()
+    }
+
+    @Test
+    fun `build type extension works with Kotlin DSL`() {
+        appBuildFile.writeText(
+            //language=kotlin
+            """
+                import io.sentry.android.gradle.SentryUploadTask
+                
+                plugins {
+                  id("com.android.application")
+                  id("io.sentry.android.gradle")
+                }
+                
+                android {
+                  buildTypes {
+                    getByName("release") {
+                      sentry {
+                        organization.set("example-org")
+                        project.set("example-project")
+                      }
+                    }
+                  }
+                }
+                
+                sentry {
+                  organization.set("default-org")
+                  project.set("default-project")
+                }
+                
+                afterEvaluate {
+                  val task = tasks.getByName("uploadSentryNativeSymbolsRelease") as SentryUploadTask
+
+                  if (task.sentryOrganization.orNull != "example-org") {
+                    throw AssertionError("Invalid organization: ${'$'}{task.sentryOrganization.orNull}")
+                  }
+                  if (task.sentryProject.orNull != "example-project") {
+                    throw AssertionError("Invalid project: ${'$'}{task.sentryProject.orNull}")
+                  }
+                }
+            """.trimIndent()
+        )
+        appBuildFile.renameTo(appBuildFile.resolveSibling("build.gradle.kts"))
+
+        runner.build()
     }
 
     private fun verifyProguardUuid(variant: String = "release"): UUID {
@@ -279,8 +505,10 @@ class SentryPluginTest(
         return UUID.fromString(matcher.groupValues[1])
     }
 
+
     companion object {
-        private val assetPattern = Regex("""^io\.sentry\.ProguardUuids=([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$""".trimMargin())
+        private val assetPattern =
+            Regex("""^io\.sentry\.ProguardUuids=([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$""".trimMargin())
 
         @OptIn(ExperimentalStdlibApi::class)
         @Parameterized.Parameters(name = "AGP {0}, Gradle {1}")
@@ -289,9 +517,6 @@ class SentryPluginTest(
             // The supported Gradle version can be found here:
             // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
             // The pair is [AGP Version, Gradle Version]
-            add(arrayOf("3.4.3", "6.1.1"))
-            add(arrayOf("3.5.4", "6.1.1"))
-            add(arrayOf("3.6.4", "6.1.1"))
             add(arrayOf("4.0.0", "6.1.1"))
             add(arrayOf("4.1.2", "6.5"))
             add(arrayOf("4.1.2", "6.8.1"))
