@@ -64,7 +64,11 @@ abstract class SentryUploadTask : Exec() {
             }
         })
         logger.info("Sentry CLI arguments: $args")
-        if (!project.property("sentry.internal.skipUpload").toString().toBoolean()) {
+
+        if (
+            !project.hasProperty("sentry.internal.skipUpload") ||
+            !project.property("sentry.internal.skipUpload").toString().toBoolean()
+        ) {
             super.exec()
         }
     }
