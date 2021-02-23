@@ -11,4 +11,4 @@ targets:
   - name: registry
     type: sdk
     config:
-      canonical: "maven:io.sentry:sentry-android-gradle-plugin"
+      canonical: "maven:io.sentry/sentry-android-gradle-plugin"
