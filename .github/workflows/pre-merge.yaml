@@ -1,0 +1,35 @@
+name: Pre Merge Checks
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  pre-merge-checks:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Cache Gradle Files
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches/
+            ~/.gradle/wrapper/
+          key: cache-gradle-${{ matrix.os }}
+          restore-keys: |
+            cache-gradle-
+
+      - name: Run Gradle tasks
+        run: ./gradlew preMerge --continue
+
+      - name: Run the persistSentryProguardUuids task
+        run: ./gradlew persistSentryProguardUuidsForReleaseRelease

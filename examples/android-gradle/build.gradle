@@ -1,0 +1,35 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:$BuildPluginsVersion.AGP"
+        classpath "io.sentry:sentry-android-gradle-plugin"
+    }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'io.sentry.android.gradle'
+
+android {
+    compileSdkVersion = 30
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode = 1
+        versionName = "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+        }
+    }
+}
+
+sentry {
+    autoProguardConfig = true
+    autoUpload = true
+}
