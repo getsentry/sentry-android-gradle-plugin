@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - feat/gradle-plugin-v2
   pull_request:
     branches:
       - '*'
