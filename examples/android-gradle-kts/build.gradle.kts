@@ -19,6 +19,5 @@ android {
 }
 
 sentry {
-    autoProguardConfig = true
-    autoUpload = true
+    autoUpload = false
 }
