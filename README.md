@@ -6,7 +6,7 @@
     <h1>Gradle plugin for Sentry Android</h1>
 </p>
 
-Upload proguard, debug files, and more.
+Upload proguard and debug files.
 
 ## Resources
 
