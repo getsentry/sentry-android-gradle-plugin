@@ -1,6 +1,8 @@
 plugins {
     id 'groovy'
     id 'com.bmuschko.nexus' version '2.3.1'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.31'
+    id 'java-gradle-plugin'
 }
 apply plugin: 'maven-publish'
 
@@ -21,6 +23,19 @@ dependencies {
     compileOnly gradleApi()
     compileOnly localGroovy()
     compileOnly 'com.android.tools.build:gradle:4.1.0'
+
+    testImplementation gradleTestKit()
+    testImplementation "junit:junit:4.13"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:1.4.31"
+}
+
+gradlePlugin {
+    plugins {
+        register("io.sentry.android.gradle") {
+            id = "io.sentry.android.gradle"
+            implementationClass = "io.sentry.android.gradle.SentryPlugin"
+        }
+    }
 }
 
 publishing {
