@@ -25,10 +25,12 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            proguardFiles getDefaultProguardFile(
+              'proguard-android-optimize.txt')
         }
     }
 }
 
 sentry {
-    autoUpload = false
+    autoUpload = System.getenv("AUTO_UPLOAD") ?: false
 }

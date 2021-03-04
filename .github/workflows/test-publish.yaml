@@ -1,0 +1,40 @@
+name: Test Publishing UUID
+
+on:
+  push:
+    branches:
+      - master
+      - feat/gradle-plugin-v2
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  publish:
+    if: ${{ github.repository == 'getsentry/sentry-android-gradle-plugin'}}
+    runs-on: ubuntu-latest
+
+    env:
+      AUTO_UPLOAD: true
+      AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Cache Gradle Files
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches/
+            ~/.gradle/wrapper/
+          key: cache-gradle-${{ matrix.os }}
+          restore-keys: |
+            cache-gradle-
+
+      - name: Setup API Key
+        run: |
+          echo "\nauth.token=$AUTH_TOKEN" >> ./examples/android-gradle/sentry.properties
+          echo "\nauth.token=$AUTH_TOKEN" >> ./examples/android-gradle-kts/sentry.properties
+
+      - name: Run the persistSentryProguardUuids task
+        run: ./gradlew persistSentryProguardUuidsForReleaseRelease

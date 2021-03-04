@@ -14,10 +14,11 @@ android {
     buildTypes {
         getByName("release") {
             minifyEnabled(true)
+            proguardFiles.add(getDefaultProguardFile("proguard-android-optimize.txt"))
         }
     }
 }
 
 sentry {
-    autoUpload = false
+    autoUpload = System.getenv("AUTO_UPLOAD")?.toBoolean() ?: false
 }
