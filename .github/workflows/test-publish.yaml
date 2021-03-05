@@ -16,7 +16,7 @@ jobs:
 
     env:
       AUTO_UPLOAD: true
-      AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
     steps:
       - name: Checkout Repo
@@ -30,11 +30,6 @@ jobs:
           key: cache-gradle-${{ matrix.os }}
           restore-keys: |
             cache-gradle-
-
-      - name: Setup API Key
-        run: |
-          echo "\nauth.token=$AUTH_TOKEN" >> ./examples/android-gradle/sentry.properties
-          echo "\nauth.token=$AUTH_TOKEN" >> ./examples/android-gradle-kts/sentry.properties
 
       - name: Run the persistSentryProguardUuids task
         run: ./gradlew persistSentryProguardUuidsForReleaseRelease
