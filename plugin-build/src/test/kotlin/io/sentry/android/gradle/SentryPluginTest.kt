@@ -9,8 +9,6 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.io.File
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 @Suppress("FunctionName")
 @RunWith(Parameterized::class)
