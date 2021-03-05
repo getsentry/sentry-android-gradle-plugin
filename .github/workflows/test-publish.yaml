@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - feat/gradle-plugin-v2
+      - fix/gh-secret-token
   pull_request:
     branches:
       - '*'
