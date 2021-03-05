@@ -105,67 +105,6 @@ class SentryPluginTest(
         runner.build()
     }
 
-    @Test
-    fun `generates proguard files when enabled`() {
-        appBuildFile.writeText(
-            // language=Groovy
-            """
-                plugins {
-                  id "com.android.application"
-                  id "io.sentry.android.gradle"
-                }
-
-                sentry {
-                  autoUpload = false
-                  autoProguardConfig = true
-                }
-            """.trimIndent()
-        )
-
-        runner
-            .appendArguments(":app:assembleRelease")
-            .build()
-
-        testProjectDir.root.walkTopDown().forEach {
-            System.err.println(it)
-        }
-
-        val generatedMappings = testProjectDir.root.resolve("app/build/intermediates/sentry/sentry.pro")
-            .readText()
-        val finalMappings = testProjectDir.root.resolve("app/src/release/configuration.txt")
-            .readText()
-
-        assertTrue(generatedMappings in finalMappings)
-    }
-
-    @Test
-    fun `skips proguard config when disabled`() {
-        appBuildFile.writeText(
-            // language=Groovy
-            """
-                plugins {
-                  id "com.android.application"
-                  id "io.sentry.android.gradle"
-                }
-
-                sentry {
-                  autoUpload = false
-                  autoProguardConfig = false
-                }
-            """.trimIndent()
-        )
-
-        runner
-            .appendArguments(":app:assembleRelease")
-            .build()
-
-        assertFalse(testProjectDir.root.resolve("app/build/intermediates/sentry/sentry.pro").exists())
-        val finalMappings = testProjectDir.root.resolve("app/src/release/configuration.txt")
-            .readText()
-
-        assertFalse("sentry.pro" in finalMappings)
-    }
-
     companion object {
         @Parameterized.Parameters(name = "AGP {0}, Gradle {1}")
         @JvmStatic
@@ -181,9 +120,6 @@ class SentryPluginTest(
             arrayOf("4.1.2", "6.8.1"),
             arrayOf("4.2.0-beta04", "6.8.1"),
         )
-
-        private fun GradleRunner.appendArguments(vararg arguments: String) =
-            withArguments(this.arguments + arguments)
 
         private fun TemporaryFolder.writeFile(fileName: String, text: () -> String): File {
             val file = File(root, fileName)
