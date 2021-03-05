@@ -1,12 +1,14 @@
 package io.sentry.android.gradle
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 
 import com.android.build.gradle.api.ApplicationVariant
 
 class SentryProguardConfigTask extends DefaultTask {
 
+    @Internal
     ApplicationVariant applicationVariant
 
     SentryProguardConfigTask() {
