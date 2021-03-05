@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN apply false
     id("com.android.application") version BuildPluginsVersion.AGP apply false
+    id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
 }
 
 allprojects {
@@ -8,6 +9,26 @@ allprojects {
         google()
         mavenCentral()
         jcenter()
+    }
+}
+
+subprojects {
+    apply {
+        plugin("org.jlleitschuh.gradle.ktlint")
+    }
+
+    ktlint {
+        debug.set(false)
+        version.set(Versions.KTLINT)
+        verbose.set(true)
+        android.set(true)
+        outputToConsole.set(true)
+        ignoreFailures.set(false)
+        enableExperimentalRules.set(true)
+        filter {
+            exclude("**/generated/**")
+            include("**/kotlin/**")
+        }
     }
 }
 

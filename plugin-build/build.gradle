@@ -3,6 +3,7 @@ plugins {
     id 'com.bmuschko.nexus' version '2.3.1'
     id 'org.jetbrains.kotlin.jvm' version '1.4.31'
     id 'java-gradle-plugin'
+    id 'org.jlleitschuh.gradle.ktlint' version '10.0.0'
 }
 apply plugin: 'maven-publish'
 
@@ -51,6 +52,24 @@ publishing {
     repositories {
         maven {
             url "$buildDir/repo"
+        }
+    }
+}
+
+subprojects {
+    apply plugin: "org.jlleitschuh.gradle.ktlint"
+
+    ktlint {
+        debug = false
+        version = "0.40.0"
+        verbose = true
+        android = true
+        outputToConsole = true
+        ignoreFailures = false
+        enableExperimentalRules = true
+        filter {
+            exclude("**/generated/**")
+            include("**/kotlin/**")
         }
     }
 }
