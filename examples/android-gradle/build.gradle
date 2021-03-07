@@ -1,4 +1,6 @@
 buildscript {
+    def agpVersion = System.getenv("VERSION_AGP") ?: BuildPluginsVersion.AGP
+
     repositories {
         google()
         mavenCentral()
@@ -6,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:$BuildPluginsVersion.AGP"
+        classpath "com.android.tools.build:gradle:$agpVersion"
         classpath "io.sentry:sentry-android-gradle-plugin"
     }
 }
