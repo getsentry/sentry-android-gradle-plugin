@@ -1,8 +1,6 @@
 plugins {
-    val agpVersion = System.getenv("VERSION_AGP") ?: BuildPluginsVersion.AGP
-
     kotlin("jvm") version BuildPluginsVersion.KOTLIN apply false
-    id("com.android.application") version agpVersion apply false
+    id("com.android.application") version BuildPluginsVersion.AGP apply false
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
 }
 
