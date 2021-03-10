@@ -32,6 +32,7 @@ class SentryPluginTest(
 
         val pluginClasspath = PluginUnderTestMetadataReading.readImplementationClasspath()
             .joinToString(separator = ", ") { "\"$it\"" }
+            .replace(File.separator, "/")
 
         appBuildFile = File(testProjectDir.root, "app/build.gradle")
         rootBuildFile = testProjectDir.writeFile("build.gradle") {
