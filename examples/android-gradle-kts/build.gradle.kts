@@ -13,7 +13,7 @@ android {
     }
     buildTypes {
         getByName("release") {
-            minifyEnabled(true)
+            setMinifyEnabled(true)
             proguardFiles.add(getDefaultProguardFile("proguard-android-optimize.txt"))
         }
     }

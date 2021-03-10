@@ -1,0 +1,76 @@
+name: Test Publishing Dry Run
+
+on:
+  push:
+    branches:
+      - master
+      - feat/gradle-plugin-v2
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  publish-dry-run:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        agp: ["4.1.0"]
+        gradle: ["6.8.3"]
+        experimental: [false]
+        name: ["stable"]
+        include:
+          - agp: "3.4.3"
+            gradle: "6.1.1"
+            experimental: false
+            name: AGP-3.4.3
+          - agp: "3.5.4"
+            gradle: "6.1.1"
+            experimental: false
+            name: AGP-3.5.4
+          - agp: "3.6.4"
+            gradle: "6.1.1"
+            experimental: false
+            name: AGP-3.6.4
+          - agp: "4.0.0"
+            gradle: "6.1.1"
+            experimental: false
+            name: AGP-4.0.0
+          - agp: "4.1.2"
+            gradle: "6.5"
+            experimental: false
+            name: AGP-4.1.2
+          - agp: "4.1.2"
+            gradle: "6.8.3"
+            experimental: false
+            name: AGP-4.1.2-Gradle-6.8.3
+          - agp: "4.2.0-beta04"
+            gradle: "6.8.3"
+            experimental: false
+            name: AGP-4.2.x-Gradle-6.8.3
+
+    continue-on-error: ${{ matrix.experimental }}
+    name: Publish Dry Run - ${{ matrix.name }} - Experimental ${{ matrix.experimental }}
+    env:
+      VERSION_AGP: ${{ matrix.agp }}
+      VERSION_GRADLE: ${{ matrix.gradle }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Cache Gradle Files
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches/
+            ~/.gradle/wrapper/
+          key: cache-gradle-${{ matrix.gradle }}-${{ matrix.agp }}
+          restore-keys: |
+            cache-gradle-${{ matrix.gradle }}-
+            cache-gradle-
+
+      - name: Set Gradle Version
+        run: ./gradlew wrapper --gradle-version $VERSION_GRADLE --distribution-type=all
+
+      - name: Run the persistSentryProguardUuids task
+        run: ./gradlew assembleRelease persistSentryProguardUuidsForReleaseRelease
