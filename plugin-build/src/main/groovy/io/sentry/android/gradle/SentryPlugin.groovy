@@ -259,19 +259,6 @@ class SentryPlugin implements Plugin<Project> {
                         project.logger.info("transformerTask ${transformerTask.path}")
                     }
 
-                    // create a task to configure proguard automatically unless the user disabled it.
-                    if (extension.autoProguardConfig) {
-                        def addProguardSettingsTaskName = "addSentryProguardSettingsFor${variant.name.capitalize()}"
-                        if (!project.tasks.findByName(addProguardSettingsTaskName)) {
-                            SentryProguardConfigTask proguardConfigTask = project.tasks.create(
-                                    addProguardSettingsTaskName,
-                                    SentryProguardConfigTask)
-                            proguardConfigTask.group = GROUP_NAME
-                            proguardConfigTask.applicationVariant = variant
-                            transformerTask.dependsOn proguardConfigTask
-                        }
-                    }
-
                     def cli = getSentryCli(project)
 
                     def persistIdsTaskName = "persistSentryProguardUuidsFor${variant.name.capitalize()}${variantOutput.name.capitalize()}"
