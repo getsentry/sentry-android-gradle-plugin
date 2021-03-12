@@ -32,5 +32,5 @@ jobs:
       - name: Run Gradle tasks
         run: ./gradlew preMerge --continue
 
-      - name: Run the persistSentryProguardUuids task
-        run: ./gradlew persistSentryProguardUuidsForReleaseRelease
+      - name: Run the uploadSentryProguardMappings task
+        run: ./gradlew uploadSentryProguardMappingsReleaseRelease

@@ -4,6 +4,8 @@ import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.builder.model.Version
+import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
+import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import org.apache.commons.compress.utils.IOUtils
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.Plugin
@@ -232,7 +234,7 @@ class SentryPlugin implements Plugin<Project> {
 
                     def generateUuidTask = project.tasks.create(
                             name: "generateSentryProguardUuid${variant.name.capitalize()}${variantOutput.name.capitalize()}",
-                            type: GenerateSentryProguardUuidTask) {
+                            type: SentryGenerateProguardUuidTask) {
                         outputDirectory.set(project.file("build/generated/assets/sentry/${variant.name}"))
 
                         doFirst {
@@ -249,7 +251,7 @@ class SentryPlugin implements Plugin<Project> {
                         variant.mergeAssets.dependsOn(generateUuidTask)
                     }
 
-                    // create a task that persists our proguard uuid as android asset
+                    // create a task that uploads the proguard mapping and UUIDs
                     def uploadSentryProguardMappingsTask = project.tasks.create(
                             name: "uploadSentryProguardMappings${variant.name.capitalize()}${variantOutput.name.capitalize()}",
                             type: SentryUploadProguardMappingsTask) {
