@@ -33,4 +33,4 @@ jobs:
         run: ./gradlew preMerge --continue
 
       - name: Run the uploadSentryProguardMappings task
-        run: ./gradlew uploadSentryProguardMappingsReleaseRelease
+        run: ./gradlew assembleRelease uploadSentryProguardMappingsReleaseRelease

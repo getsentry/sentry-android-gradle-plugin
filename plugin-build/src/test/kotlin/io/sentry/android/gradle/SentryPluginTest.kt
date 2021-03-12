@@ -9,6 +9,10 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.io.File
+import java.util.UUID
+import java.util.zip.ZipFile
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
 
 @Suppress("FunctionName")
 @RunWith(Parameterized::class)
@@ -50,7 +54,7 @@ class SentryPluginTest(
                 classpath files($pluginClasspath)
               }
             }
-            
+
             allprojects {
               repositories {
                 google()
@@ -94,7 +98,7 @@ class SentryPluginTest(
                   id "com.android.application"
                   id "io.sentry.android.gradle"
                 }
-                
+
                 sentry {
                   autoUpload = false
                 }
@@ -104,7 +108,46 @@ class SentryPluginTest(
         runner.build()
     }
 
+    @Test
+    fun `regenerates UUID every build`() {
+        runner.appendArguments(":app:assembleRelease")
+
+        runner.build()
+        val uuid1 = verifyProguardUuid()
+
+        runner.build()
+        val uuid2 = verifyProguardUuid()
+
+        assertNotEquals(uuid1, uuid2)
+    }
+
+    @Test
+    fun `includes a UUID in the APK`() {
+        runner
+            .appendArguments(":app:assembleRelease")
+            .build()
+
+        verifyProguardUuid()
+    }
+
+    private fun verifyProguardUuid(variant: String = "release"): UUID {
+        val apk = testProjectDir.root.resolve("app/build/outputs/apk/$variant/app-$variant-unsigned.apk")
+        val sentryProperties = with(ZipFile(apk)) {
+            val entry = getEntry("assets/sentry-debug-meta.properties")
+            assertNotNull(entry, "Asset not included")
+            getInputStream(entry).bufferedReader().use {
+                it.readText()
+            }
+        }
+        val matcher = assetPattern.matchEntire(sentryProperties)
+        assertNotNull(matcher, "$sentryProperties does not match pattern $assetPattern")
+        return UUID.fromString(matcher.groupValues[1])
+    }
+
     companion object {
+        private val assetPattern =
+            Regex("""^io\.sentry\.ProguardUuids=([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$""".trimMargin())
+
         @Parameterized.Parameters(name = "AGP {0}, Gradle {1}")
         @JvmStatic
         fun parameters() = listOf(
@@ -119,6 +162,9 @@ class SentryPluginTest(
             arrayOf("4.1.2", "6.8.1"),
             arrayOf("4.2.0-beta04", "6.8.1"),
         )
+
+        private fun GradleRunner.appendArguments(vararg arguments: String) =
+            withArguments(this.arguments + arguments)
 
         private fun TemporaryFolder.writeFile(fileName: String, text: () -> String): File {
             val file = File(root, fileName)

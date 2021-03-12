@@ -3,4 +3,6 @@ plugins {
     id "io.sentry.android.gradle"
 }
 
-apply plugin: 'com.android.application'
+sentry {
+    autoUpload = false
+}

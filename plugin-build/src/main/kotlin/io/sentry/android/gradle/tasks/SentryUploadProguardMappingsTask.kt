@@ -41,8 +41,6 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     abstract val autoUpload: Property<Boolean>
 
     override fun exec() {
-        super.exec()
-
         val sentryProperties = sentryProperties.orNull
 
         if (sentryProperties != null) {
@@ -81,5 +79,6 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
         commandLine(args)
 
         logger.info("cli args: " + getArgs())
+        super.exec()
     }
 }
