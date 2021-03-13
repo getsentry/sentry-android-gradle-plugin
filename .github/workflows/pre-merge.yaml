@@ -14,6 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+      fail-fast: false
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -31,6 +32,13 @@ jobs:
 
       - name: Run Gradle tasks
         run: ./gradlew preMerge --continue
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results-${{ matrix.os }}
+          path: plugin-build/build/reports/tests/
+        if: always()
 
       - name: Run the uploadSentryProguardMappings task
         run: ./gradlew assembleRelease uploadSentryProguardMappingsReleaseRelease

@@ -13,7 +13,7 @@ import java.util.UUID
 abstract class SentryUploadProguardMappingsTask : Exec() {
 
     init {
-        description = "Uploads the proguard mappings file"
+        description = "Uploads the proguard mappings file to Sentry"
     }
 
     @get:Input
@@ -41,14 +41,25 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     abstract val autoUpload: Property<Boolean>
 
     override fun exec() {
-        val sentryProperties = sentryProperties.orNull
+        computeCommandLineArgs().let {
+            commandLine(it)
+            logger.info("cli args: $it")
+            System.err.println("cli args: $it")
+        }
+        setSentryPropertiesEnv()
+        super.exec()
+    }
 
+    internal fun setSentryPropertiesEnv() {
+        val sentryProperties = sentryProperties.orNull
         if (sentryProperties != null) {
             environment("SENTRY_PROPERTIES", sentryProperties)
         } else {
             logger.info("propsFile is null")
         }
+    }
 
+    internal fun computeCommandLineArgs(): List<String> {
         val args = mutableListOf(
             cliExecutable.get(),
             "upload-proguard",
@@ -75,10 +86,6 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             args.add(0, "cmd")
             args.add(1, "/c")
         }
-
-        commandLine(args)
-
-        logger.info("cli args: " + getArgs())
-        super.exec()
+        return args
     }
 }

@@ -90,9 +90,10 @@ class SentryPlugin implements Plugin<Project> {
             def fsPath = SentryPlugin.class.getResource(resPath).getFile()
 
             // if we are not in a jar, we can use the file directly
-            if ((new File(fsPath)).exists()) {
+            def fileFromFsPath = new File(fsPath)
+            if (fileFromFsPath.exists()) {
                 project.logger.info("fsPath: ${fsPath}")
-                return fsPath
+                return fileFromFsPath.absolutePath
             } else {
                 project.logger.info("fsPath doesnt exist")
             }

@@ -27,9 +27,10 @@ abstract class SentryGenerateProguardUuidTask : DefaultTask() {
     val outputFile: Provider<RegularFile> get() = outputDirectory.file("sentry-debug-meta.properties")
 
     @TaskAction
-    protected fun generateProperties() {
+    fun generateProperties() {
         UUID.randomUUID().also {
             outputUuid.set(it)
+            outputFile.get().asFile.parentFile.mkdirs()
             outputFile.get().asFile.writeText("io.sentry.ProguardUuids=$it")
         }
     }
