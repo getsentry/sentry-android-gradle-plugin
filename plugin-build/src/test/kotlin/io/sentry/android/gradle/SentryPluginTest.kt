@@ -9,10 +9,7 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.io.File
-import java.util.UUID
-import java.util.zip.ZipFile
 import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
 
 @Suppress("FunctionName")
 @RunWith(Parameterized::class)
@@ -113,10 +110,10 @@ class SentryPluginTest(
         runner.appendArguments(":app:assembleRelease")
 
         runner.build()
-        val uuid1 = verifyProguardUuid()
+        val uuid1 = verifyProguardUuid(testProjectDir.root)
 
         runner.build()
-        val uuid2 = verifyProguardUuid()
+        val uuid2 = verifyProguardUuid(testProjectDir.root)
 
         assertNotEquals(uuid1, uuid2)
     }
@@ -127,26 +124,10 @@ class SentryPluginTest(
             .appendArguments(":app:assembleRelease")
             .build()
 
-        verifyProguardUuid()
-    }
-
-    private fun verifyProguardUuid(variant: String = "release"): UUID {
-        val apk = testProjectDir.root.resolve("app/build/outputs/apk/$variant/app-$variant-unsigned.apk")
-        val sentryProperties = with(ZipFile(apk)) {
-            val entry = getEntry("assets/sentry-debug-meta.properties")
-            assertNotNull(entry, "Asset not included")
-            getInputStream(entry).bufferedReader().use {
-                it.readText()
-            }
-        }
-        val matcher = assetPattern.matchEntire(sentryProperties)
-        assertNotNull(matcher, "$sentryProperties does not match pattern $assetPattern")
-        return UUID.fromString(matcher.groupValues[1])
+        verifyProguardUuid(testProjectDir.root)
     }
 
     companion object {
-        private val assetPattern =
-            Regex("""^io\.sentry\.ProguardUuids=([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$""".trimMargin())
 
         @Parameterized.Parameters(name = "AGP {0}, Gradle {1}")
         @JvmStatic
