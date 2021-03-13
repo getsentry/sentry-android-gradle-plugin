@@ -31,5 +31,5 @@ jobs:
           restore-keys: |
             cache-gradle-
 
-      - name: Run the persistSentryProguardUuids task
-        run: ./gradlew assembleRelease persistSentryProguardUuidsForReleaseRelease
+      - name: Run the uploadSentryProguardMappings task
+        run: ./gradlew assembleRelease uploadSentryProguardMappingsReleaseRelease

@@ -72,5 +72,14 @@ jobs:
       - name: Set Gradle Version
         run: ./gradlew wrapper --gradle-version $VERSION_GRADLE --distribution-type=all
 
-      - name: Run the persistSentryProguardUuids task
-        run: ./gradlew assembleRelease persistSentryProguardUuidsForReleaseRelease
+      - name: Run the uploadSentryProguardMappings task
+        run: ./gradlew assembleRelease uploadSentryProguardMappingsReleaseRelease
+
+      - name: Check sentry-debug-meta.properties inside APKs
+        run: |
+          unzip ./examples/android-gradle/build/outputs/apk/release/android-gradle-release-unsigned.apk -d output
+          cat output/assets/sentry-debug-meta.properties
+          rm -r output
+          unzip ./examples/android-gradle-kts/build/outputs/apk/release/android-gradle-kts-release-unsigned.apk -d output
+          cat output/assets/sentry-debug-meta.properties
+          rm -r output
