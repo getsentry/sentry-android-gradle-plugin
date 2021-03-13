@@ -190,7 +190,7 @@ class SentryPlugin implements Plugin<Project> {
     }
 
     void apply(Project project) {
-        SentryPluginExtension extension = project.extensions.create("sentry", SentryPluginExtension)
+        SentryPluginExtension extension = project.extensions.create("sentry", SentryPluginExtension, project)
 
         project.afterEvaluate {
             if (!project.plugins.hasPlugin(AppPlugin) && !project.getPlugins().hasPlugin(LibraryPlugin)) {
@@ -262,7 +262,7 @@ class SentryPlugin implements Plugin<Project> {
                         getSentryProperties().set(project.file(getPropsString(project, variant)))
                         mappingsUuid.set(generateUuidTask.outputUuid)
                         getMappingsFile().set(mappingFile)
-                        getAutoUpload().set(extension.autoUpload)
+                        getAutoUpload().set(extension.autoUpload.get())
                         def buildTypeProperties = variant.buildType.ext
                         if (buildTypeProperties.has(SENTRY_ORG_PARAMETER)) {
                             getSentryOrganization().set(buildTypeProperties.get(SENTRY_ORG_PARAMETER).toString())
@@ -314,7 +314,7 @@ class SentryPlugin implements Plugin<Project> {
                         nativeArgs.add("${symbolsPath}")
 
                         // only include sources if includeNativeSources is enabled, this is opt-in feature
-                        if (extension.includeNativeSources) {
+                        if (extension.includeNativeSources.get()) {
                             nativeArgs.add("--include-sources")
                         }
 
@@ -372,7 +372,7 @@ class SentryPlugin implements Plugin<Project> {
                     // uploadNativeSymbolsTask only will be executed after the assemble task
                     // and also only if uploadNativeSymbols is enabled, this is opt-in feature
                     if (assembleTask != null) {
-                        if (extension.uploadNativeSymbols) {
+                        if (extension.uploadNativeSymbols.get()) {
                             assembleTask.finalizedBy uploadNativeSymbolsTask
 
                             // if its a bundle aab, assemble might not be executed, so we hook into bundle task
