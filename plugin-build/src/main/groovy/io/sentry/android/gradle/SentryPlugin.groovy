@@ -6,7 +6,6 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.android.builder.model.Version
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
-import org.apache.commons.compress.utils.IOUtils
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -18,117 +17,6 @@ class SentryPlugin implements Plugin<Project> {
     static final String GROUP_NAME = 'Sentry'
     private static final String SENTRY_ORG_PARAMETER = "sentryOrg"
     private static final String SENTRY_PROJECT_PARAMETER = "sentryProject"
-
-    /**
-     * Return the correct sentry-cli executable path to use for the given project.  This
-     * will look for a sentry-cli executable in a local node_modules in case it was put
-     * there by sentry-react-native or others before falling back to the global installation.
-     *
-     * @param project
-     * @return
-     */
-    static String getSentryCli(Project project) {
-        // if a path is provided explicitly use that first
-        def propertiesFile = getPropertiesFile(project)
-        project.logger.info("propertiesFile: ${propertiesFile}")
-
-        Properties sentryProps = new Properties()
-        try {
-            sentryProps.load(new FileInputStream(propertiesFile))
-        } catch (FileNotFoundException ignored) {
-            project.logger.error("getSentryCli(): ${ignored.getMessage()}")
-            // it's okay, we can ignore it.
-        }
-
-        def rv = sentryProps.getProperty("cli.executable")
-        if (rv != null) {
-            return rv
-        } else {
-            project.logger.info("cli.executable is null")
-        }
-
-        // in case there is a version from npm right around the corner use that one.  This
-        // is the case for react-native-sentry for instance
-        def possibleExePaths = [
-                "${project.rootDir.toPath()}/../node_modules/@sentry/cli/bin/sentry-cli",
-                "${project.rootDir.toPath()}/../node_modules/sentry-cli-binary/bin/sentry-cli"
-        ]
-
-        possibleExePaths.each {
-            if ((new File(it)).exists()) {
-                project.logger.info("possibleExePaths: ${it}")
-                return it
-            }
-            if ((new File(it + ".exe")).exists()) {
-                project.logger.info("possibleExePaths: ${it}.exe")
-                return it + ".exe"
-            }
-            project.logger.info("possibleExePaths files dont exist")
-        }
-
-        // next up try a packaged version of sentry-cli
-        def cliSuffix
-        def osName = System.getProperty("os.name").toLowerCase()
-        project.logger.info("osName: ${osName}")
-
-        if (osName.indexOf("mac") >= 0) {
-            cliSuffix = "Darwin-x86_64"
-        } else if (osName.indexOf("linux") >= 0) {
-            def arch = System.getProperty("os.arch")
-            if (arch == "amd64") {
-                arch = "x86_64"
-            }
-            cliSuffix = "Linux-" + arch
-        } else if (osName.indexOf("win") >= 0) {
-            cliSuffix = "Windows-i686.exe"
-        } else {
-            project.logger.info("cliSuffix not assigned")
-        }
-
-        if (cliSuffix != null) {
-            def resPath = "/bin/sentry-cli-${cliSuffix}"
-            def fsPath = SentryPlugin.class.getResource(resPath).getFile()
-
-            // if we are not in a jar, we can use the file directly
-            def fileFromFsPath = new File(fsPath)
-            if (fileFromFsPath.exists()) {
-                project.logger.info("fsPath: ${fsPath}")
-                return fileFromFsPath.absolutePath
-            } else {
-                project.logger.info("fsPath doesnt exist")
-            }
-
-            // otherwise we need to unpack into a file
-            def resStream = SentryPlugin.class.getResourceAsStream(resPath)
-            File tempFile = File.createTempFile(".sentry-cli", ".exe")
-            if (tempFile != null) {
-                project.logger.info("tempFile: ${tempFile.path}")
-            } else {
-                project.logger.info("tempFile is null")
-            }
-
-            tempFile.deleteOnExit()
-            def out = new FileOutputStream(tempFile)
-            try {
-                IOUtils.copy(resStream, out)
-            } finally {
-                out.close()
-            }
-            tempFile.setExecutable(true)
-            return tempFile.getAbsolutePath()
-        }
-
-        return "sentry-cli"
-    }
-
-    static String getPropertiesFile(Project project) {
-        def projectProperties = new File("${project.getProjectDir().toPath()}/sentry.properties")
-        if (projectProperties.exists()) {
-            return projectProperties.toPath().toString()
-        } else {
-            return "${project.rootDir.toPath()}/sentry.properties"
-        }
-    }
 
     /**
      * Returns the transformer task for the given project and variant.
@@ -231,7 +119,7 @@ class SentryPlugin implements Plugin<Project> {
                         project.logger.info("transformerTask ${transformerTask.path}")
                     }
 
-                    def cli = getSentryCli(project)
+                    def cli = SentryCliProvider.getSentryCliPath(project)
 
                     def generateUuidTask = project.tasks.create(
                             name: "generateSentryProguardUuid${variant.name.capitalize()}${variantOutput.name.capitalize()}",
