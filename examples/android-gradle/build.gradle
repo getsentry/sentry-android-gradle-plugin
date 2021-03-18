@@ -32,5 +32,5 @@ android {
 }
 
 sentry {
-    autoUpload = System.getenv("AUTO_UPLOAD") ?: false
+    autoUpload = System.getenv("AUTO_UPLOAD")?.toBoolean() ?: false
 }
