@@ -117,41 +117,51 @@ class SentryCliProviderTest {
 
     @Test
     fun `searchCliInResources finds the file correctly`() {
-        val resourcePath = "/testFixtures/bin/dummy-sentry-cli"
+        val resourcePath = "./dummy-bin/dummy-sentry-cli"
+        val resourceFile = javaClass.getResource(".")
+            ?.let { File(it.file, resourcePath) }
+            ?.apply {
+                parentFile.mkdirs()
+                createNewFile()
+            }
 
         val foundPath = searchCliInResources(resourcePath)
         assertNotNull(foundPath)
-        assertTrue(foundPath.endsWith(resourcePath))
+        assertTrue(foundPath.endsWith("/dummy-bin/dummy-sentry-cli"))
+
+        resourceFile?.delete()
     }
 
     @Test
     fun `searchCliInResources returns null if file does not exist`() {
-        val resourcePath = "/testFixtures/bin/i-dont-exist"
+        val resourcePath = "./dummy-bin/i-dont-exist"
 
         assertNull(searchCliInResources(resourcePath))
     }
 
     @Test
     fun `loadCliFromResourcesToTemp finds the file correctly`() {
-        val resourcePath = "/testFixtures/bin/dummy-sentry-cli"
+        val resourcePath = "./dummy-bin/dummy-sentry-cli"
+        val resourceFile = javaClass.getResource(".")
+            ?.let { File(it.file, resourcePath) }
+            ?.apply {
+                parentFile.mkdirs()
+                createNewFile()
+                writeText("echo \"This is just a dummy script\"")
+            }
 
         val loadedPath = loadCliFromResourcesToTemp(resourcePath)
         assertNotNull(loadedPath)
 
         val binContent = File(loadedPath).readText()
-        assertEquals(
-            """
-            #!/bin/bash
-            echo "This is just a dummy script"
+        assertEquals("echo \"This is just a dummy script\"", binContent)
 
-            """.trimIndent(),
-            binContent
-        )
+        resourceFile?.delete()
     }
 
     @Test
     fun `loadCliFromResourcesToTemp returns null if file does not exist`() {
-        val resourcePath = "/testFixtures/bin/i-dont-exist"
+        val resourcePath = "./dummy-bin/i-dont-exist"
 
         assertNull(loadCliFromResourcesToTemp(resourcePath))
     }
