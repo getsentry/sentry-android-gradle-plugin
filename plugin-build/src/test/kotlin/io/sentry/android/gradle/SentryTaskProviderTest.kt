@@ -7,6 +7,8 @@ import io.sentry.android.gradle.SentryTasksProvider.getDexTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageTask
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
+import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
@@ -28,34 +30,30 @@ class SentryTaskProviderTest {
 
     @Test
     fun `getTransformerTask returns transform for R8`() {
-        val project = ProjectBuilder.builder().build()
-        val task = project.tasks.register("transformClassesAndResourcesWithR8ForDebug")
+        val (project, task) = getTestProjectWithTask("transformClassesAndResourcesWithR8ForDebug")
 
-        assertEquals(task.get(), getTransformerTask(project, "debug"))
+        assertEquals(task, getTransformerTask(project, "debug"))
     }
 
     @Test
     fun `getTransformerTask returns transform for Proguard`() {
-        val project = ProjectBuilder.builder().build()
-        val task = project.tasks.register("transformClassesAndResourcesWithProguardForDebug")
+        val (project, task) = getTestProjectWithTask("transformClassesAndResourcesWithProguardForDebug")
 
-        assertEquals(task.get(), getTransformerTask(project, "debug"))
+        assertEquals(task, getTransformerTask(project, "debug"))
     }
 
     @Test
     fun `getTransformerTask returns minify for R8`() {
-        val project = ProjectBuilder.builder().build()
-        val task = project.tasks.register("minifyDebugWithR8")
+        val (project, task) = getTestProjectWithTask("minifyDebugWithR8")
 
-        assertEquals(task.get(), getTransformerTask(project, "debug"))
+        assertEquals(task, getTransformerTask(project, "debug"))
     }
 
     @Test
     fun `getTransformerTask returns minify for Proguard`() {
-        val project = ProjectBuilder.builder().build()
-        val task = project.tasks.register("minifyDebugWithProguard")
+        val (project, task) = getTestProjectWithTask("minifyDebugWithProguard")
 
-        assertEquals(task.get(), getTransformerTask(project, "debug"))
+        assertEquals(task, getTransformerTask(project, "debug"))
     }
 
     @Test
@@ -67,26 +65,23 @@ class SentryTaskProviderTest {
 
     @Test
     fun `getDexTask returns transform with Dex`() {
-        val project = ProjectBuilder.builder().build()
-        val task = project.tasks.register("transformClassesWithDexForDebug")
+        val (project, task) = getTestProjectWithTask("transformClassesWithDexForDebug")
 
-        assertEquals(task.get(), getDexTask(project, "debug"))
+        assertEquals(task, getDexTask(project, "debug"))
     }
 
     @Test
     fun `getDexTask returns transform with Dex builder`() {
-        val project = ProjectBuilder.builder().build()
-        val task = project.tasks.register("transformClassesWithDexBuilderForDebug")
+        val (project, task) = getTestProjectWithTask("transformClassesWithDexBuilderForDebug")
 
-        assertEquals(task.get(), getDexTask(project, "debug"))
+        assertEquals(task, getDexTask(project, "debug"))
     }
 
     @Test
     fun `getDexTask returns transform with Dex shrinker`() {
-        val project = ProjectBuilder.builder().build()
-        val task = project.tasks.register("transformClassesAndDexWithShrinkResForDebug")
+        val (project, task) = getTestProjectWithTask("transformClassesAndDexWithShrinkResForDebug")
 
-        assertEquals(task.get(), getDexTask(project, "debug"))
+        assertEquals(task, getDexTask(project, "debug"))
     }
 
     @Test
@@ -98,10 +93,9 @@ class SentryTaskProviderTest {
 
     @Test
     fun `getPreBundleTask returns correct task`() {
-        val project = ProjectBuilder.builder().build()
-        val task = project.tasks.register("buildDebugPreBundle")
+        val (project, task) = getTestProjectWithTask("buildDebugPreBundle")
 
-        assertEquals(task.get(), getPreBundleTask(project, "debug"))
+        assertEquals(task, getPreBundleTask(project, "debug"))
     }
 
     @Test
@@ -113,10 +107,9 @@ class SentryTaskProviderTest {
 
     @Test
     fun `getBundleTask returns correct task`() {
-        val project = ProjectBuilder.builder().build()
-        val task = project.tasks.register("bundleDebug")
+        val (project, task) = getTestProjectWithTask("bundleDebug")
 
-        assertEquals(task.get(), getBundleTask(project, "debug"))
+        assertEquals(task, getBundleTask(project, "debug"))
     }
 
     @Test
@@ -128,18 +121,16 @@ class SentryTaskProviderTest {
 
     @Test
     fun `getPackageTask returns plain package task`() {
-        val project = ProjectBuilder.builder().build()
-        val task = project.tasks.register("packageDebug")
+        val (project, task) = getTestProjectWithTask("packageDebug")
 
-        assertEquals(task.get(), getPackageTask(project, "debug"))
+        assertEquals(task, getPackageTask(project, "debug"))
     }
 
     @Test
     fun `getPackageTask returns package bundle task`() {
-        val project = ProjectBuilder.builder().build()
-        val task = project.tasks.register("packageDebugBundle")
+        val (project, task) = getTestProjectWithTask("packageDebugBundle")
 
-        assertEquals(task.get(), getPackageTask(project, "debug"))
+        assertEquals(task, getPackageTask(project, "debug"))
     }
 
     @Test
@@ -160,5 +151,10 @@ class SentryTaskProviderTest {
                 assertEquals("assembleRelease", getAssembleTask(project, it).name)
             }
         }
+    }
+
+    private fun getTestProjectWithTask(taskName: String) : Pair<Project, Task> {
+        val project = ProjectBuilder.builder().build()
+        return project to project.tasks.register(taskName).get()
     }
 }
