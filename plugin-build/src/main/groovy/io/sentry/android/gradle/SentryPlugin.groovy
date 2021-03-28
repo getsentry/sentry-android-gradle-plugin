@@ -9,7 +9,6 @@ import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.tasks.Exec
 import org.gradle.util.VersionNumber
 
@@ -17,65 +16,6 @@ class SentryPlugin implements Plugin<Project> {
     static final String GROUP_NAME = 'Sentry'
     private static final String SENTRY_ORG_PARAMETER = "sentryOrg"
     private static final String SENTRY_PROJECT_PARAMETER = "sentryProject"
-
-    /**
-     * Returns the transformer task for the given project and variant.
-     * It could be either ProGuard or R8
-     *
-     * @param project the given project
-     * @param variant the given variant
-     * @return the task or null otherwise
-     */
-    static Task getTransformerTask(Project project, ApplicationVariant variant) {
-        def names = [
-                // Android Studio 3.3 includes the R8 shrinker.
-                "transformClassesAndResourcesWithR8For${variant.name.capitalize()}",
-                "transformClassesAndResourcesWithProguardFor${variant.name.capitalize()}",
-                "minify${variant.name.capitalize()}WithR8",
-                "minify${variant.name.capitalize()}WithProguard"
-        ]
-
-        return names.findResult { project.tasks.findByName(it) } ?: project.tasks.findByName("proguard${names[1]}")
-    }
-
-    /**
-     * Returns the dex task for the given project and variant.
-     *
-     * @param project
-     * @param variant
-     * @return
-     */
-    static Task getDexTask(Project project, ApplicationVariant variant) {
-        def names = [
-                "transformClassesWithDexFor${variant.name.capitalize()}",
-                "transformClassesWithDexBuilderFor${variant.name.capitalize()}",
-                "transformClassesAndDexWithShrinkResFor${variant.name.capitalize()}"
-        ]
-
-        return names.findResult { project.tasks.findByName(it) } ?: project.tasks.findByName("dex${names[0]}")
-    }
-
-    /**
-     * Returns the pre bundle task for the given project and variant.
-     *
-     * @param project
-     * @param variant
-     * @return
-     */
-    static Task getPreBundleTask(Project project, ApplicationVariant variant) {
-        return project.tasks.findByName("build${variant.name.capitalize()}PreBundle")
-    }
-
-    /**
-     * Returns the pre bundle task for the given project and variant.
-     *
-     * @param project
-     * @param variant
-     * @return
-     */
-    static Task getBundleTask(Project project, ApplicationVariant variant) {
-        return project.tasks.findByName("bundle${variant.name.capitalize()}")
-    }
 
     void apply(Project project) {
         SentryPluginExtension extension = project.extensions.create("sentry", SentryPluginExtension, project)
@@ -89,23 +29,23 @@ class SentryPlugin implements Plugin<Project> {
                 variant.outputs.each { variantOutput ->
 
                     def mappingFile = getMappingFile(variant, project)
-                    def transformerTask = getTransformerTask(project, variant)
+                    def transformerTask = SentryTasksProvider.getTransformerTask(project, variant.name)
 
-                    def dexTask = getDexTask(project, variant)
+                    def dexTask = SentryTasksProvider.getDexTask(project, variant.name)
                     if (dexTask != null) {
                         project.logger.info("dexTask ${dexTask.path}")
                     } else {
                         project.logger.info("dexTask is null")
                     }
 
-                    def preBundleTask = getPreBundleTask(project, variant)
+                    def preBundleTask = SentryTasksProvider.getPreBundleTask(project, variant.name)
                     if (preBundleTask != null) {
                         project.logger.info("preBundleTask ${preBundleTask.path}")
                     } else {
                         project.logger.info("preBundleTask is null")
                     }
 
-                    def bundleTask = getBundleTask(project, variant)
+                    def bundleTask = SentryTasksProvider.getBundleTask(project, variant.name)
                     if (bundleTask != null) {
                         project.logger.info("bundleTask ${bundleTask.path}")
                     } else {
@@ -237,7 +177,7 @@ class SentryPlugin implements Plugin<Project> {
                     }
 
                     // find the package task
-                    def packageTask = getPackageTask(project, variant)
+                    def packageTask = SentryTasksProvider.getPackageTask(project, variant.name)
                     if (packageTask != null) {
                         project.logger.info("packageTask ${packageTask.path}")
                     } else {
@@ -250,7 +190,7 @@ class SentryPlugin implements Plugin<Project> {
                     }
 
                     // find the assemble task
-                    def assembleTask = findAssembleTask(variant, project)
+                    def assembleTask = SentryTasksProvider.getAssembleTask(project, variant)
                     if (assembleTask != null) {
                         project.logger.info("assembleTask ${assembleTask.path}")
                     } else {
@@ -273,21 +213,6 @@ class SentryPlugin implements Plugin<Project> {
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Returns the assemble task
-     * @param project the given project
-     * @param variant the given variant
-     * @return the task if found or null otherwise
-     */
-    static Task findAssembleTask(ApplicationVariant variant, Project project) {
-        try {
-            return variant.assembleProvider.get()
-        } catch (Exception ignored) {
-            project.logger.error("findAssembleTask(): ${ignored.getMessage()}")
-            return variant.assemble
         }
     }
 
@@ -335,21 +260,6 @@ class SentryPlugin implements Plugin<Project> {
         }
 
         return propsFile
-    }
-
-    /**
-     * Returns the package task
-     * @param project the given project
-     * @param variant the given variant
-     * @return the package task or null if not found
-     */
-    static Task getPackageTask(Project project, ApplicationVariant variant) {
-        def names = [
-                "package${variant.name.capitalize()}",
-                "package${variant.name.capitalize()}Bundle"
-        ]
-
-        return names.findResult { project.tasks.findByName(it) }
     }
 
     /**
