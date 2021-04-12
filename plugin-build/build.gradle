@@ -64,7 +64,6 @@ subprojects {
 
     ktlint {
         debug = false
-        version = "0.40.0"
         verbose = true
         android = true
         outputToConsole = true
