@@ -19,7 +19,6 @@ subprojects {
 
     ktlint {
         debug.set(false)
-        version.set(Versions.KTLINT)
         verbose.set(true)
         android.set(true)
         outputToConsole.set(true)

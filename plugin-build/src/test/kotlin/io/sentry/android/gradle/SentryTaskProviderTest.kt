@@ -153,7 +153,7 @@ class SentryTaskProviderTest {
         }
     }
 
-    private fun getTestProjectWithTask(taskName: String) : Pair<Project, Task> {
+    private fun getTestProjectWithTask(taskName: String): Pair<Project, Task> {
         val project = ProjectBuilder.builder().build()
         return project to project.tasks.register(taskName).get()
     }

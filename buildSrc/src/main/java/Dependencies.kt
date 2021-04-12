@@ -3,7 +3,3 @@ object BuildPluginsVersion {
     const val KOTLIN = "1.4.21"
     const val KTLINT = "10.0.0"
 }
-
-object Versions {
-    const val KTLINT = "0.40.0"
-}
