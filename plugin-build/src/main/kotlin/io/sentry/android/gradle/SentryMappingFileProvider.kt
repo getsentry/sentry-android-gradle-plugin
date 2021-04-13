@@ -24,7 +24,6 @@ internal object SentryMappingFileProvider {
             }
         } catch (ignored: Throwable) {
             project.logger.error("[sentry] .mappingFileProvider failed with: ${ignored.message}")
-            ignored.printStackTrace()
             variant.mappingFile
         }
 }

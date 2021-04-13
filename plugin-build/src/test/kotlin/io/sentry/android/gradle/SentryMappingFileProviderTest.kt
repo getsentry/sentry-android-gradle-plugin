@@ -4,10 +4,13 @@ import com.android.build.gradle.AppExtension
 import io.sentry.android.gradle.SentryMappingFileProvider.getMappingFile
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
+import java.io.File
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class SentryMappingFileProviderTest {
+
+    private val sep = File.separator
 
     @Test
     fun `getMappingFile works correctly when minify enabled`() {
@@ -26,10 +29,10 @@ class SentryMappingFileProviderTest {
         project.getTasksByName("assembleDebug", false)
 
         val debugVariant = android.applicationVariants.first { it.name == "debug" }
-        assertTrue { getMappingFile(project, debugVariant)!!.endsWith("build/outputs/mapping/debug/mapping.txt") }
+        assertTrue { getMappingFile(project, debugVariant)!!.endsWith("build${sep}outputs${sep}mapping${sep}debug${sep}mapping.txt") }
 
         val releaseVariant = android.applicationVariants.first { it.name == "release" }
-        assertTrue { getMappingFile(project, releaseVariant)!!.endsWith("build/outputs/mapping/release/mapping.txt") }
+        assertTrue { getMappingFile(project, releaseVariant)!!.endsWith("build${sep}outputs${sep}mapping${sep}release${sep}mapping.txt") }
     }
 
     @Test
