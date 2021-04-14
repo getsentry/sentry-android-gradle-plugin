@@ -28,7 +28,7 @@ class SentryPlugin implements Plugin<Project> {
             project.android.applicationVariants.all { ApplicationVariant variant ->
                 variant.outputs.each { variantOutput ->
 
-                    def mappingFile = getMappingFile(variant, project)
+                    def mappingFile = SentryMappingFileProvider.getMappingFile(project, variant)
                     def transformerTask = SentryTasksProvider.getTransformerTask(project, variant.name)
 
                     def dexTask = SentryTasksProvider.getDexTask(project, variant.name)
@@ -260,27 +260,5 @@ class SentryPlugin implements Plugin<Project> {
         }
 
         return propsFile
-    }
-
-    /**
-     * Returns the mapping file
-     * @param variant the ApplicationVariant
-     * @return the file or null if not found
-     */
-    static File getMappingFile(ApplicationVariant variant, Project project) {
-        try {
-            def files = variant.getMappingFileProvider().get().files
-            if (files.isEmpty()) {
-                project.logger.debug("mappingFileProvider.files is empty for ${variant.name}")
-                return null
-            }
-            project.logger.info("mapping files size: ${files.size()} for ${variant.name}")
-            def file = files.iterator().next()
-            project.logger.info("mapping file: ${file.path} for ${variant.name}")
-            return file
-        } catch (Exception ignored) {
-            project.logger.error("getMappingFile(): ${ignored.getMessage()}")
-            return variant.getMappingFile()
-        }
     }
 }

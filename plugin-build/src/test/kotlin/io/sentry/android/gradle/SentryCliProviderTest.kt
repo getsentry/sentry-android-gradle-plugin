@@ -5,6 +5,8 @@ import io.sentry.android.gradle.SentryCliProvider.getSentryPropertiesPath
 import io.sentry.android.gradle.SentryCliProvider.loadCliFromResourcesToTemp
 import io.sentry.android.gradle.SentryCliProvider.searchCliInPropertiesFile
 import io.sentry.android.gradle.SentryCliProvider.searchCliInResources
+import io.sentry.android.gradle.utils.SystemPropertyRule
+import io.sentry.android.gradle.utils.WithSystemProperty
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
@@ -19,6 +21,9 @@ class SentryCliProviderTest {
 
     @get:Rule
     val testProjectDir = TemporaryFolder()
+
+    @get:Rule
+    val systemPropertyRule = SystemPropertyRule()
 
     @Test
     fun `getSentryPropertiesPath returns local properties file`() {
@@ -127,7 +132,7 @@ class SentryCliProviderTest {
 
         val foundPath = searchCliInResources(resourcePath)
         assertNotNull(foundPath)
-        assertTrue(foundPath.endsWith("/dummy-bin/dummy-sentry-cli"))
+        assertTrue(foundPath.endsWith("${File.separator}dummy-bin${File.separator}dummy-sentry-cli"))
 
         resourceFile?.delete()
     }
@@ -167,39 +172,32 @@ class SentryCliProviderTest {
     }
 
     @Test
+    @WithSystemProperty(["os.name"], ["mac"])
     fun `getCliSuffix on mac returns Darwin`() {
-        System.setProperty("os.name", "mac")
-
         assertEquals("Darwin-x86_64", getCliSuffix())
     }
 
     @Test
+    @WithSystemProperty(["os.name", "os.arch"], ["linux", "amd64"])
     fun `getCliSuffix on linux amd64 returns Linux-x86_64`() {
-        System.setProperty("os.name", "linux")
-        System.setProperty("os.arch", "amd64")
-
         assertEquals("Linux-x86_64", getCliSuffix())
     }
 
     @Test
+    @WithSystemProperty(["os.name", "os.arch"], ["linux", "armV7"])
     fun `getCliSuffix on linux armV7 returns Linux-armV7`() {
-        System.setProperty("os.name", "linux")
-        System.setProperty("os.arch", "armV7")
-
         assertEquals("Linux-armV7", getCliSuffix())
     }
 
     @Test
+    @WithSystemProperty(["os.name"], ["windows"])
     fun `getCliSuffix on win returns Windows-i686`() {
-        System.setProperty("os.name", "windows")
-
         assertEquals("Windows-i686.exe", getCliSuffix())
     }
 
     @Test
+    @WithSystemProperty(["os.name"], ["¯\\_(ツ)_/¯"])
     fun `getCliSuffix on an unknown platform returns null`() {
-        System.setProperty("os.name", "¯\\_(ツ)_/¯")
-
         assertNull(getCliSuffix())
     }
 }

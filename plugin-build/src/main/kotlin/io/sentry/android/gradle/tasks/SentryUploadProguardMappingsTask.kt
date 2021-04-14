@@ -44,7 +44,6 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
         computeCommandLineArgs().let {
             commandLine(it)
             logger.info("cli args: $it")
-            System.err.println("cli args: $it")
         }
         setSentryPropertiesEnv()
         super.exec()
