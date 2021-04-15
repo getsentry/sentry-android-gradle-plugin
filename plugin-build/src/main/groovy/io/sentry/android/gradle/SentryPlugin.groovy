@@ -190,7 +190,7 @@ class SentryPlugin implements Plugin<Project> {
                     }
 
                     // find the assemble task
-                    def assembleTask = SentryTasksProvider.getAssembleTask(project, variant)
+                    def assembleTask = SentryTasksProvider.getAssembleTask(variant)
                     if (assembleTask != null) {
                         project.logger.info("assembleTask ${assembleTask.path}")
                     } else {

@@ -20,18 +20,6 @@ jobs:
         experimental: [false]
         name: ["stable"]
         include:
-          - agp: "3.4.3"
-            gradle: "6.1.1"
-            experimental: false
-            name: AGP-3.4.3
-          - agp: "3.5.4"
-            gradle: "6.1.1"
-            experimental: false
-            name: AGP-3.5.4
-          - agp: "3.6.4"
-            gradle: "6.1.1"
-            experimental: false
-            name: AGP-3.6.4
           - agp: "4.0.0"
             gradle: "6.1.1"
             experimental: false

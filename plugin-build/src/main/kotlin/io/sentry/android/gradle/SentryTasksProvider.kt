@@ -72,14 +72,8 @@ internal object SentryTasksProvider {
      * @return the task if found or null otherwise
      */
     @JvmStatic
-    fun getAssembleTask(project: Project, variant: ApplicationVariant): Task {
-        return try {
-            variant.assembleProvider.get()
-        } catch (ignored: Exception) {
-            project.logger.error("[sentry] .assembleProvider failed with: ${ignored.message}")
-            variant.assemble
-        }
-    }
+    fun getAssembleTask(variant: ApplicationVariant): Task =
+        variant.assembleProvider.get()
 
     private fun Project.findTask(vararg taskName: String): Task? =
         taskName.mapNotNull { project.tasks.findByName(it) }.firstOrNull()

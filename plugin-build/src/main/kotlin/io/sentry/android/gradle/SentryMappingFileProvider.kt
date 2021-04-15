@@ -23,7 +23,7 @@ internal object SentryMappingFileProvider {
                 mappingFiles.first()
             }
         } catch (ignored: Throwable) {
-            project.logger.error("[sentry] .mappingFileProvider failed with: ${ignored.message}")
-            variant.mappingFile
+            project.logger.error("[sentry] .mappingFileProvider is missing for $variant - Error: ${ignored.message}")
+            null
         }
 }
