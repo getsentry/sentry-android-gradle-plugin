@@ -87,7 +87,7 @@ class SentryPlugin implements Plugin<Project> {
                         dependsOn(generateUuidTask)
                         workingDir project.rootDir
                         getCliExecutable().set(cli)
-                        getSentryProperties().set(project.file(getPropsString(project, variant)))
+                        getSentryProperties().set(project.file(SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)))
                         mappingsUuid.set(generateUuidTask.outputUuid)
                         getMappingsFile().set(mappingFile)
                         getAutoUpload().set(extension.autoUpload.get())
@@ -112,7 +112,7 @@ class SentryPlugin implements Plugin<Project> {
                         description "Uploads Native symbols."
                         workingDir project.rootDir
 
-                        def propsFile = getPropsString(project, variant)
+                        def propsFile = SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)
 
                         if (propsFile != null) {
                             environment("SENTRY_PROPERTIES", propsFile)
@@ -214,51 +214,5 @@ class SentryPlugin implements Plugin<Project> {
                 }
             }
         }
-    }
-
-    /**
-     * Returns the GString with the current read'ed properties
-     * @param project the given project
-     * @param variant the given variant
-     * @return the GString if found or null otherwise
-     */
-    static GString getPropsString(Project project, ApplicationVariant variant) {
-        def buildTypeName = variant.buildType.name
-        def flavorName = variant.flavorName
-        // When flavor is used in combination with dimensions, variant.flavorName will be a concatenation
-        // of flavors of different dimensions
-        def propName = "sentry.properties"
-        // current flavor name takes priority
-        def possibleProps = []
-        variant.productFlavors.each {
-            // flavors used with dimension come in second
-            possibleProps.push("${project.projectDir}/src/${it.name}/${propName}")
-        }
-
-        possibleProps = [
-                "${project.projectDir}/src/${buildTypeName}/${propName}",
-                "${project.projectDir}/src/${buildTypeName}/${flavorName}/${propName}",
-                "${project.projectDir}/src/${flavorName}/${buildTypeName}/${propName}",
-                "${project.projectDir}/src/${flavorName}/${propName}",
-                "${project.projectDir}/${propName}",
-                "${project.rootDir.toPath()}/src/${flavorName}/${propName}",
-        ] + possibleProps + [
-                "${project.rootDir.toPath()}/src/${buildTypeName}/${propName}",
-                "${project.rootDir.toPath()}/src/${buildTypeName}/${flavorName}/${propName}",
-                "${project.rootDir.toPath()}/src/${flavorName}/${buildTypeName}/${propName}",
-                // Root sentry.properties is the last to be looked up
-                "${project.rootDir.toPath()}/${propName}"
-        ]
-
-        def propsFile = null
-        possibleProps.each {
-            project.logger.info("Looking for Sentry properties at: $it")
-            if (propsFile == null && new File(it).isFile()) {
-                propsFile = it
-                project.logger.info("Found Sentry properties in: $it")
-            }
-        }
-
-        return propsFile
     }
 }
