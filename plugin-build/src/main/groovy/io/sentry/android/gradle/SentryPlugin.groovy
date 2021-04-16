@@ -5,11 +5,10 @@ import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.builder.model.Version
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
+import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
-import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.tasks.Exec
 import org.gradle.util.VersionNumber
 
 class SentryPlugin implements Plugin<Project> {
@@ -105,60 +104,22 @@ class SentryPlugin implements Plugin<Project> {
 
                     // create and hooks the uploading of native symbols task after the assembling task
                     def variantOutputName = "${variant.name.capitalize()}${variantOutput.name.capitalize()}"
-                    def uploadNativeSymbolsTaskName = "uploadNativeSymbolsFor${variantOutputName}"
                     def uploadNativeSymbolsTask = project.tasks.create(
-                            name: uploadNativeSymbolsTaskName,
-                            type: Exec) {
-                        description "Uploads Native symbols."
+                            name: "uploadNativeSymbolsFor${variantOutputName}",
+                            type: SentryUploadNativeSymbolsTask) {
                         workingDir project.rootDir
-
-                        def propsFile = SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)
-
-                        if (propsFile != null) {
-                            environment("SENTRY_PROPERTIES", propsFile)
-                        } else {
-                            project.logger.info("propsFile is null")
-                        }
-
-                        def nativeArgs = [
-                                cli,
-                                "upload-dif",
-                        ]
-
+                        getCliExecutable().set(cli)
+                        getSentryProperties().set(project.file(SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)))
+                        getIncludeNativeSources().set(extension.includeNativeSources.get())
+                        getVariantName().set(variant.name)
                         def buildTypeProperties = variant.buildType.ext
                         if (buildTypeProperties.has(SENTRY_ORG_PARAMETER)) {
-                            nativeArgs.add("-o")
-                            nativeArgs.add(buildTypeProperties.get(SENTRY_ORG_PARAMETER).toString())
+                            getSentryOrganization().set(buildTypeProperties.get(SENTRY_ORG_PARAMETER).toString())
                         }
                         if (buildTypeProperties.has(SENTRY_PROJECT_PARAMETER)) {
-                            nativeArgs.add("-p")
-                            nativeArgs.add(buildTypeProperties.get(SENTRY_PROJECT_PARAMETER).toString())
+                            getSentryProject().set(buildTypeProperties.get(SENTRY_PROJECT_PARAMETER).toString())
                         }
-
-                        // eg absoluteProjectFolderPath/build/intermediates/merged_native_libs/{variant} where {variant} could be debug/release...
-                        def symbolsPath = "${project.projectDir}${File.separator}build${File.separator}intermediates${File.separator}merged_native_libs${File.separator}${variant.name}"
-                        project.logger.info("symbolsPath: ${symbolsPath}")
-
-                        nativeArgs.add("${symbolsPath}")
-
-                        // only include sources if includeNativeSources is enabled, this is opt-in feature
-                        if (extension.includeNativeSources.get()) {
-                            nativeArgs.add("--include-sources")
-                        }
-
-                        project.logger.info("nativeArgs args: ${nativeArgs.toString()}")
-
-                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                            commandLine("cmd", "/c", *nativeArgs)
-                        } else {
-                            commandLine(*nativeArgs)
-                        }
-
-                        project.logger.info("nativeArgs executed.")
-
-                        enabled true
                     }
-
 
                     // and run before dex transformation.  If we managed to find the dex task
                     // we set ourselves as dependency, otherwise we just hack outselves into
