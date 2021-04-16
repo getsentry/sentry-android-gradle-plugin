@@ -135,9 +135,6 @@ class SentryPluginTest(
             // The supported Gradle version can be found here:
             // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
             // The pair is [AGP Version, Gradle Version]
-            arrayOf("3.4.3", "6.1.1"),
-            arrayOf("3.5.4", "6.1.1"),
-            arrayOf("3.6.4", "6.1.1"),
             arrayOf("4.0.0", "6.1.1"),
             arrayOf("4.1.2", "6.5"),
             arrayOf("4.1.2", "6.8.1"),

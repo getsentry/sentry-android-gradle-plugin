@@ -146,9 +146,9 @@ class SentryTaskProviderTest {
 
         android.applicationVariants.all {
             if (it.name == "debug") {
-                assertEquals("assembleDebug", getAssembleTask(project, it).name)
+                assertEquals("assembleDebug", getAssembleTask(it).name)
             } else {
-                assertEquals("assembleRelease", getAssembleTask(project, it).name)
+                assertEquals("assembleRelease", getAssembleTask(it).name)
             }
         }
     }
