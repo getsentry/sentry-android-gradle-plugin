@@ -14,13 +14,8 @@ class SentryPropertiesFileProviderTest {
 
     @Test
     fun `getPropertiesFilePath finds file inside debug folder`() {
-        val project = ProjectBuilder.builder().build()
-        project.plugins.apply("com.android.application")
-        val android = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
-        }
-        project.evaluate()
-        createTestFile(project.projectDir, "src/debug/sentry.properties")
+        val (project, android) = createTestAndroidProject()
+        createTestFile(project.projectDir, "src${sep}debug${sep}sentry.properties")
 
         val variant = android.applicationVariants.first { it.name == "debug" }
 
@@ -29,12 +24,7 @@ class SentryPropertiesFileProviderTest {
 
     @Test
     fun `getPropertiesFilePath finds file inside project folder`() {
-        val project = ProjectBuilder.builder().build()
-        project.plugins.apply("com.android.application")
-        val android = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
-        }
-        project.evaluate()
+        val (project, android) = createTestAndroidProject()
         createTestFile(project.projectDir, "sentry.properties")
 
         val variant = android.applicationVariants.first()
@@ -44,16 +34,12 @@ class SentryPropertiesFileProviderTest {
 
     @Test
     fun `getPropertiesFilePath finds file inside flavorName folder`() {
-        val project = ProjectBuilder.builder().build()
-        project.plugins.apply("com.android.application")
-        val android = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
+        val (project, android) = createTestAndroidProject {
             flavorDimensions("version")
             productFlavors.create("lite")
             productFlavors.create("full")
         }
-        project.evaluate()
-        createTestFile(project.projectDir, "src/lite/sentry.properties")
+        createTestFile(project.projectDir, "src${sep}lite${sep}sentry.properties")
 
         val variant = android.applicationVariants.first { it.name == "liteDebug" }
 
@@ -62,16 +48,12 @@ class SentryPropertiesFileProviderTest {
 
     @Test
     fun `getPropertiesFilePath finds file inside flavorName-buildType folder`() {
-        val project = ProjectBuilder.builder().build()
-        project.plugins.apply("com.android.application")
-        val android = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
+        val (project, android) = createTestAndroidProject {
             flavorDimensions("version")
             productFlavors.create("lite")
             productFlavors.create("full")
         }
-        project.evaluate()
-        createTestFile(project.projectDir, "src/lite/debug/sentry.properties")
+        createTestFile(project.projectDir, "src${sep}lite${sep}debug${sep}sentry.properties")
 
         val variant = android.applicationVariants.first { it.name == "liteDebug" }
 
@@ -80,16 +62,12 @@ class SentryPropertiesFileProviderTest {
 
     @Test
     fun `getPropertiesFilePath finds file inside buildType-flavorName folder`() {
-        val project = ProjectBuilder.builder().build()
-        project.plugins.apply("com.android.application")
-        val android = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
+        val (project, android) = createTestAndroidProject {
             flavorDimensions("version")
             productFlavors.create("lite")
             productFlavors.create("full")
         }
-        project.evaluate()
-        createTestFile(project.projectDir, "src/debug/lite/sentry.properties")
+        createTestFile(project.projectDir, "src${sep}debug${sep}lite${sep}sentry.properties")
 
         val variant = android.applicationVariants.first { it.name == "liteDebug" }
 
@@ -98,10 +76,7 @@ class SentryPropertiesFileProviderTest {
 
     @Test
     fun `getPropertiesFilePath with multiple flavorDimensions finds file inside flavor folder`() {
-        val project = ProjectBuilder.builder().build()
-        project.plugins.apply("com.android.application")
-        val android = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
+        val (project, android) = createTestAndroidProject {
             flavorDimensions("version", "api")
             productFlavors.create("lite") {
                 it.dimension("version")
@@ -110,8 +85,7 @@ class SentryPropertiesFileProviderTest {
                 it.dimension("api")
             }
         }
-        project.evaluate()
-        createTestFile(project.projectDir, "src/liteApi30/sentry.properties")
+        createTestFile(project.projectDir, "src${sep}liteApi30${sep}sentry.properties")
 
         val variant = android.applicationVariants.first { it.name == "liteApi30Debug" }
 
@@ -120,10 +94,7 @@ class SentryPropertiesFileProviderTest {
 
     @Test
     fun `getPropertiesFilePath finds file inside other productFlavor folders`() {
-        val project = ProjectBuilder.builder().build()
-        project.plugins.apply("com.android.application")
-        val android = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
+        val (project, android) = createTestAndroidProject {
             flavorDimensions("version", "api")
             productFlavors.create("lite") {
                 it.dimension("version")
@@ -132,8 +103,7 @@ class SentryPropertiesFileProviderTest {
                 it.dimension("api")
             }
         }
-        project.evaluate()
-        createTestFile(project.projectDir, "src/api30/sentry.properties")
+        createTestFile(project.projectDir, "src${sep}api30${sep}sentry.properties")
 
         val variant = android.applicationVariants.first { it.name == "liteApi30Debug" }
 
@@ -143,12 +113,7 @@ class SentryPropertiesFileProviderTest {
     @Test
     fun `getPropertiesFilePath finds file inside root project folder`() {
         val rootProject = ProjectBuilder.builder().build()
-        val project = ProjectBuilder.builder().withParent(rootProject).build()
-        project.plugins.apply("com.android.application")
-        val android = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
-        }
-        project.evaluate()
+        val (project, android) = createTestAndroidProject(parent = rootProject)
         createTestFile(rootProject.projectDir, "sentry.properties")
 
         val variant = android.applicationVariants.first()
@@ -159,13 +124,8 @@ class SentryPropertiesFileProviderTest {
     @Test
     fun `getPropertiesFilePath finds file inside root buildType folder`() {
         val rootProject = ProjectBuilder.builder().build()
-        val project = ProjectBuilder.builder().withParent(rootProject).build()
-        project.plugins.apply("com.android.application")
-        val android = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
-        }
-        project.evaluate()
-        createTestFile(rootProject.projectDir, "src/debug/sentry.properties")
+        val (project, android) = createTestAndroidProject(parent = rootProject)
+        createTestFile(rootProject.projectDir, "src${sep}debug${sep}sentry.properties")
 
         val variant = android.applicationVariants.first { it.name == "debug" }
 
@@ -175,15 +135,11 @@ class SentryPropertiesFileProviderTest {
     @Test
     fun `getPropertiesFilePath finds file inside root flavor folder`() {
         val rootProject = ProjectBuilder.builder().build()
-        val project = ProjectBuilder.builder().withParent(rootProject).build()
-        project.plugins.apply("com.android.application")
-        val android = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
+        val (project, android) = createTestAndroidProject(parent = rootProject) {
             flavorDimensions("version")
             productFlavors.create("lite")
         }
-        project.evaluate()
-        createTestFile(rootProject.projectDir, "src/lite/sentry.properties")
+        createTestFile(rootProject.projectDir, "src${sep}lite${sep}sentry.properties")
 
         val variant = android.applicationVariants.first { it.name == "liteDebug" }
 
@@ -193,15 +149,11 @@ class SentryPropertiesFileProviderTest {
     @Test
     fun `getPropertiesFilePath finds file inside root flavor buildType folder`() {
         val rootProject = ProjectBuilder.builder().build()
-        val project = ProjectBuilder.builder().withParent(rootProject).build()
-        project.plugins.apply("com.android.application")
-        val android = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
+        val (project, android) = createTestAndroidProject(parent = rootProject) {
             flavorDimensions("version")
             productFlavors.create("lite")
         }
-        project.evaluate()
-        createTestFile(rootProject.projectDir, "src/lite/debug/sentry.properties")
+        createTestFile(rootProject.projectDir, "src${sep}lite${sep}debug${sep}sentry.properties")
 
         val variant = android.applicationVariants.first { it.name == "liteDebug" }
 
@@ -211,23 +163,33 @@ class SentryPropertiesFileProviderTest {
     @Test
     fun `getPropertiesFilePath finds file inside root buildType flavor folder`() {
         val rootProject = ProjectBuilder.builder().build()
-        val project = ProjectBuilder.builder().withParent(rootProject).build()
-        project.plugins.apply("com.android.application")
-        val android = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
+        val (project, android) = createTestAndroidProject(parent = rootProject) {
             flavorDimensions("version")
             productFlavors.create("lite")
         }
-        project.evaluate()
-        createTestFile(rootProject.projectDir, "src/debug/lite/sentry.properties")
+        createTestFile(rootProject.projectDir, "src${sep}debug${sep}lite${sep}sentry.properties")
 
         val variant = android.applicationVariants.first { it.name == "liteDebug" }
 
         assertEquals("42", File(getPropertiesFilePath(project, variant)!!).readText())
     }
 
-    private fun Project.evaluate() {
+    private fun createTestAndroidProject(
+        parent: Project? = null,
+        block: AppExtension.() -> Unit = {}
+    ): Pair<Project, AppExtension> {
+        val project = ProjectBuilder
+            .builder()
+            .apply { parent?.let { withParent(parent) } }
+            .build()
+        project.plugins.apply("com.android.application")
+        val appExtension = project.extensions.getByType(AppExtension::class.java).apply {
+            compileSdkVersion(30)
+            this.block()
+        }
+        // This will force the project to be evaluated
         project.getTasksByName("assembleDebug", false)
+        return project to appExtension
     }
 
     private fun createTestFile(parent: File, path: String) =

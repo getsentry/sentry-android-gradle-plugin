@@ -22,28 +22,30 @@ internal object SentryPropertiesFileProvider {
         val projDir = project.projectDir
         val rootDir = project.rootDir
 
+        val sep = File.separator
+
         // Local Project dirs
         val possibleFiles = mutableListOf(
-            "$projDir/src/$buildTypeName/$FILENAME"
+            "${projDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME"
         )
         if (flavorName.isNotBlank()) {
-            possibleFiles.add("$projDir/src/$buildTypeName/$flavorName/$FILENAME")
-            possibleFiles.add("$projDir/src/$flavorName/$buildTypeName/$FILENAME")
-            possibleFiles.add("$projDir/src/$flavorName/$FILENAME")
+            possibleFiles.add("${projDir}${sep}src${sep}${buildTypeName}${sep}$flavorName${sep}$FILENAME")
+            possibleFiles.add("${projDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME")
+            possibleFiles.add("${projDir}${sep}src${sep}${flavorName}${sep}$FILENAME")
         }
-        possibleFiles.add("$projDir/$FILENAME")
+        possibleFiles.add("${projDir}${sep}$FILENAME")
 
         // Other flavors dirs
-        possibleFiles.addAll(variant.productFlavors.map { "$projDir/src/${it.name}/$FILENAME" })
+        possibleFiles.addAll(variant.productFlavors.map { "${projDir}${sep}src${sep}${it.name}${sep}$FILENAME" })
 
         // Root project dirs
-        possibleFiles.add("$rootDir/src/$buildTypeName/$FILENAME")
+        possibleFiles.add("${rootDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME")
         if (flavorName.isNotBlank()) {
-            possibleFiles.add("$rootDir/src/$flavorName/$FILENAME")
-            possibleFiles.add("$rootDir/src/$buildTypeName/$flavorName/$FILENAME")
-            possibleFiles.add("$rootDir/src/$flavorName/$buildTypeName/$FILENAME")
+            possibleFiles.add("${rootDir}${sep}src${sep}${flavorName}${sep}$FILENAME")
+            possibleFiles.add("${rootDir}${sep}src${sep}${buildTypeName}${sep}${flavorName}${sep}$FILENAME")
+            possibleFiles.add("${rootDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME")
         }
-        possibleFiles.add("$rootDir/$FILENAME")
+        possibleFiles.add("${rootDir}${sep}$FILENAME")
 
         return possibleFiles.distinct().asSequence()
             .onEach { project.logger.info("[sentry] Looking for $FILENAME at: $it") }
