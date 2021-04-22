@@ -1,5 +1,4 @@
 plugins {
-    id 'groovy'
     id 'com.bmuschko.nexus' version '2.3.1'
     id 'org.jetbrains.kotlin.jvm' version '1.4.31'
     id 'java-gradle-plugin'
@@ -15,16 +14,8 @@ repositories {
     google()
 }
 
-compileGroovy {
-    sourceCompatibility = '1.6'
-    targetCompatibility = '1.6'
-    dependsOn tasks.getByPath('compileKotlin')
-    classpath += files(compileKotlin.destinationDir)
-}
-
 dependencies {
     compileOnly gradleApi()
-    compileOnly localGroovy()
     compileOnly 'com.android.tools.build:gradle:4.1.0'
 
     testImplementation gradleTestKit()
