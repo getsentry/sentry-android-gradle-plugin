@@ -20,7 +20,7 @@ internal object SentryCliProvider {
         searchCliInPropertiesFile(project)?.let {
             project.logger.info("[sentry] cli Found: $it")
             return@getSentryCliPath it
-        } ?: project.logger.warn("[sentry] sentry-cli not found in sentry.properties file")
+        } ?: project.logger.info("[sentry] sentry-cli not found in sentry.properties file")
 
         // next up try a packaged version of sentry-cli
         val cliSuffix = getCliSuffix()
@@ -35,7 +35,7 @@ internal object SentryCliProvider {
             searchCliInResources(resourcePath)?.let {
                 project.logger.info("[sentry] cli Found: $it")
                 return@getSentryCliPath it
-            } ?: project.logger.warn("[sentry] Failed to load sentry-cli from resource folder")
+            } ?: project.logger.info("[sentry] Failed to load sentry-cli from resource folder")
 
             // otherwise we need to unpack into a file
             project.logger.info("[sentry] Trying to load cli from $resourcePath in a temp file...")
@@ -43,7 +43,7 @@ internal object SentryCliProvider {
             loadCliFromResourcesToTemp(resourcePath)?.let {
                 project.logger.info("[sentry] cli Found: $it")
                 return@getSentryCliPath it
-            } ?: project.logger.warn("[sentry] Failed to load sentry-cli from resource folder")
+            } ?: project.logger.info("[sentry] Failed to load sentry-cli from resource folder")
         }
 
         project.logger.error("[sentry] Falling back to invoking `sentry-cli` from shell")

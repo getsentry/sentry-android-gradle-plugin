@@ -28,6 +28,8 @@ abstract class SentryGenerateProguardUuidTask : DefaultTask() {
 
     @TaskAction
     fun generateProperties() {
+        project.logger.info("[sentry] SentryGenerateProguardUuidTask - outputFile: ${outputFile.get()}")
+
         UUID.randomUUID().also {
             outputUuid.set(it)
             outputFile.get().asFile.parentFile.mkdirs()
