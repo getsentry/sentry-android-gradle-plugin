@@ -18,9 +18,11 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtraPropertiesExtension
+import java.io.File
 import java.util.Locale
 
 class SentryPlugin : Plugin<Project> {
+    @OptIn(ExperimentalStdlibApi::class)
     override fun apply(project: Project) {
         val extension = project.extensions.create("sentry", SentryPluginExtension::class.java, project)
         project.afterEvaluate {
@@ -32,7 +34,7 @@ class SentryPlugin : Plugin<Project> {
 
             androidExtension.applicationVariants.all { variant ->
                 variant.outputs.all { variantOutput ->
-                    val taskSuffix = "${variant.name.capitalize()}${variantOutput.name.capitalize()}"
+                    val taskSuffix = "${variant.name.capitalize(Locale.ROOT)}${variantOutput.name.capitalize(Locale.ROOT)}"
 
                     fun withLogging(varName: String, initializer: () -> Task?) =
                         initializer().also { project.logger.info("[sentry] $varName is ${it?.path}") }
@@ -54,13 +56,14 @@ class SentryPlugin : Plugin<Project> {
 
                     val mappingFile = getMappingFile(project, variant)
                     val cliExecutable = getSentryCliPath(project)
+                    val sep = File.separator
 
                     // Setup the task to generate a UUID asset file
                     val generateUuidTask = project.tasks.create(
                         "generateSentryProguardUuid$taskSuffix",
                         SentryGenerateProguardUuidTask::class.java
                     ) {
-                        it.outputDirectory.set(project.file("build/generated/assets/sentry/${variant.name}"))
+                        it.outputDirectory.set(project.file("build${sep}generated${sep}assets${sep}sentry${sep}${variant.name}"))
                     }
                     variant.mergeAssetsProvider.configure { it.dependsOn(generateUuidTask) }
 
