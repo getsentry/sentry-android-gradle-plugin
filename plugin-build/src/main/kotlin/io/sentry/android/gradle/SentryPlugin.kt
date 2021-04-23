@@ -32,8 +32,7 @@ class SentryPlugin : Plugin<Project> {
 
             androidExtension.applicationVariants.all { variant ->
                 variant.outputs.all { variantOutput ->
-                    val taskSuffix =
-                        "${variant.name.capitalize(Locale.US)}${variantOutput.name.capitalize(Locale.US)}"
+                    val taskSuffix = "${variant.name.capitalize()}${variantOutput.name.capitalize()}"
 
                     fun withLogging(varName: String, initializer: () -> Task?) =
                         initializer().also { project.logger.info("[sentry] $varName is ${it?.path}") }
