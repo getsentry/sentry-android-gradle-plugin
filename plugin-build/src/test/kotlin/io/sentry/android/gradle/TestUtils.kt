@@ -9,8 +9,13 @@ import java.util.zip.ZipInputStream
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+/* ktlint-disable max-line-length */
 private val ASSET_PATTERN =
-    Regex("""^io\.sentry\.ProguardUuids=([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$""".trimMargin())
+    Regex(
+        """^io\.sentry\.ProguardUuids=([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$"""
+            .trimMargin()
+    )
+/* ktlint-enable max-line-length */
 
 internal fun verifyProguardUuid(rootFile: File, variant: String = "release"): UUID {
     val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant-unsigned.apk")

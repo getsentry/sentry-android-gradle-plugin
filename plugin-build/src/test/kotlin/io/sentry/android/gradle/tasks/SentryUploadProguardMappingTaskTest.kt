@@ -1,14 +1,14 @@
 package io.sentry.android.gradle.tasks
 
-import org.gradle.api.Project
-import org.gradle.api.tasks.TaskProvider
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Test
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.gradle.api.Project
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Test
 
 class SentryUploadProguardMappingTaskTest {
 
@@ -18,7 +18,10 @@ class SentryUploadProguardMappingTaskTest {
         val randomUuid = UUID.randomUUID()
         val mappingFile = project.file("dummy/folder/mapping.txt")
         val task: TaskProvider<SentryUploadProguardMappingsTask> =
-            project.tasks.register("testUploadProguardMapping", SentryUploadProguardMappingsTask::class.java) {
+            project.tasks.register(
+                "testUploadProguardMapping",
+                SentryUploadProguardMappingsTask::class.java
+            ) {
                 it.cliExecutable.set("sentry-cli")
                 it.mappingsUuid.set(randomUuid)
                 it.mappingsFile.set(mappingFile)
@@ -41,7 +44,10 @@ class SentryUploadProguardMappingTaskTest {
         val randomUuid = UUID.randomUUID()
         val mappingFile = project.file("dummy/folder/mapping.txt")
         val task: TaskProvider<SentryUploadProguardMappingsTask> =
-            project.tasks.register("testUploadProguardMapping", SentryUploadProguardMappingsTask::class.java) {
+            project.tasks.register(
+                "testUploadProguardMapping",
+                SentryUploadProguardMappingsTask::class.java
+            ) {
                 it.cliExecutable.set("sentry-cli")
                 it.mappingsUuid.set(randomUuid)
                 it.mappingsFile.set(mappingFile)
@@ -58,20 +64,29 @@ class SentryUploadProguardMappingTaskTest {
         val project = createProject()
         val propertiesFile = project.file("dummy/folder/sentry.properties")
         val task: TaskProvider<SentryUploadProguardMappingsTask> =
-            project.tasks.register("testUploadProguardMapping", SentryUploadProguardMappingsTask::class.java) {
+            project.tasks.register(
+                "testUploadProguardMapping",
+                SentryUploadProguardMappingsTask::class.java
+            ) {
                 it.sentryProperties.set(propertiesFile)
             }
 
         task.get().setSentryPropertiesEnv()
 
-        assertEquals(propertiesFile.absolutePath, task.get().environment["SENTRY_PROPERTIES"].toString())
+        assertEquals(
+            propertiesFile.absolutePath,
+            task.get().environment["SENTRY_PROPERTIES"].toString()
+        )
     }
 
     @Test
     fun `without sentryProperties file SENTRY_PROPERTIES is not set`() {
         val project = createProject()
         val task: TaskProvider<SentryUploadProguardMappingsTask> =
-            project.tasks.register("testUploadProguardMapping", SentryUploadProguardMappingsTask::class.java)
+            project.tasks.register(
+                "testUploadProguardMapping",
+                SentryUploadProguardMappingsTask::class.java
+            )
 
         task.get().setSentryPropertiesEnv()
 
@@ -82,7 +97,10 @@ class SentryUploadProguardMappingTaskTest {
     fun `with sentryOrganization adds --org`() {
         val project = createProject()
         val task: TaskProvider<SentryUploadProguardMappingsTask> =
-            project.tasks.register("testUploadProguardMapping", SentryUploadProguardMappingsTask::class.java) {
+            project.tasks.register(
+                "testUploadProguardMapping",
+                SentryUploadProguardMappingsTask::class.java
+            ) {
                 it.cliExecutable.set("sentry-cli")
                 it.mappingsUuid.set(UUID.randomUUID())
                 it.mappingsFile.set(project.file("dummy/folder/mapping.txt"))
@@ -100,7 +118,10 @@ class SentryUploadProguardMappingTaskTest {
     fun `with sentryProject adds --project`() {
         val project = createProject()
         val task: TaskProvider<SentryUploadProguardMappingsTask> =
-            project.tasks.register("testUploadProguardMapping", SentryUploadProguardMappingsTask::class.java) {
+            project.tasks.register(
+                "testUploadProguardMapping",
+                SentryUploadProguardMappingsTask::class.java
+            ) {
                 it.cliExecutable.set("sentry-cli")
                 it.mappingsUuid.set(UUID.randomUUID())
                 it.mappingsFile.set(project.file("dummy/folder/mapping.txt"))

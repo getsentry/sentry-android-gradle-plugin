@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
 import org.gradle.api.file.RegularFileProperty
@@ -9,7 +10,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import java.io.File
 
 abstract class SentryUploadNativeSymbolsTask : Exec() {
 
@@ -76,7 +76,10 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
 
         // eg absoluteProjectFolderPath/build/intermediates/merged_native_libs/{variantName}
         // where {variantName} could be debug/release...
-        args.add("${project.projectDir}${sep}build${sep}intermediates${sep}merged_native_libs${sep}${variantName.get()}")
+        args.add(
+            "${project.projectDir}${sep}build${sep}intermediates" +
+                "${sep}merged_native_libs${sep}${variantName.get()}"
+        )
 
         // Only include sources if includeNativeSources is enabled, as this is opt-in feature
         if (includeNativeSources.get()) {

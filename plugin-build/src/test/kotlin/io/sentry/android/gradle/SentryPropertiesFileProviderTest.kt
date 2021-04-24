@@ -2,11 +2,11 @@ package io.sentry.android.gradle
 
 import com.android.build.gradle.AppExtension
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
+import java.io.File
+import kotlin.test.assertEquals
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
-import java.io.File
-import kotlin.test.assertEquals
 
 class SentryPropertiesFileProviderTest {
 

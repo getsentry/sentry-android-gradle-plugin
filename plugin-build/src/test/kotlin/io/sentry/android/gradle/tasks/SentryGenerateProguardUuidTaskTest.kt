@@ -1,22 +1,24 @@
 package io.sentry.android.gradle.tasks
 
-import org.gradle.api.Project
-import org.gradle.api.tasks.TaskProvider
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Test
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.gradle.api.Project
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Test
 
 class SentryGenerateProguardUuidTaskTest {
 
     @Test
     fun `generate proguard UUID sets the output file correctly`() {
-
         val project = createProject()
         val task: TaskProvider<SentryGenerateProguardUuidTask> =
-            project.tasks.register("testGenerateProguardUuid", SentryGenerateProguardUuidTask::class.java) {
+            project.tasks.register(
+                "testGenerateProguardUuid",
+                SentryGenerateProguardUuidTask::class.java
+            ) {
                 it.outputDirectory.set(project.file("dummy/folder/"))
             }
 
@@ -28,10 +30,12 @@ class SentryGenerateProguardUuidTaskTest {
 
     @Test
     fun `generate proguard UUID generates the UUID correctly`() {
-
         val project = createProject()
         val task: TaskProvider<SentryGenerateProguardUuidTask> =
-            project.tasks.register("testGenerateProguardUuid", SentryGenerateProguardUuidTask::class.java) {
+            project.tasks.register(
+                "testGenerateProguardUuid",
+                SentryGenerateProguardUuidTask::class.java
+            ) {
                 it.outputDirectory.set(project.file("dummy/folder/"))
             }
 
@@ -44,10 +48,12 @@ class SentryGenerateProguardUuidTaskTest {
 
     @Test
     fun `generate proguard UUID overrides the UUID on subsequent calls`() {
-
         val project = createProject()
         val task: TaskProvider<SentryGenerateProguardUuidTask> =
-            project.tasks.register("testGenerateProguardUuid", SentryGenerateProguardUuidTask::class.java) {
+            project.tasks.register(
+                "testGenerateProguardUuid",
+                SentryGenerateProguardUuidTask::class.java
+            ) {
                 it.outputDirectory.set(project.file("dummy/folder/"))
             }
         val expectedFile = File(project.projectDir, "dummy/folder/sentry-debug-meta.properties")

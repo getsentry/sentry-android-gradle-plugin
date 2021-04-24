@@ -1,8 +1,8 @@
 package io.sentry.android.gradle
 
+import javax.inject.Inject
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
-import javax.inject.Inject
 
 abstract class SentryPluginExtension @Inject constructor(project: Project) {
 
@@ -21,7 +21,9 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      * you don't need to do it manually.
      * Default is disabled.
      */
-    val uploadNativeSymbols: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
+    val uploadNativeSymbols: Property<Boolean> = objects.property(Boolean::class.java).convention(
+        false
+    )
 
     /**
      * Includes or not the source code of native code for Sentry.
@@ -29,5 +31,7 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      * you don't need to do it manually.
      * Default is disabled.
      */
-    val includeNativeSources: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
+    val includeNativeSources: Property<Boolean> = objects.property(Boolean::class.java).convention(
+        false
+    )
 }

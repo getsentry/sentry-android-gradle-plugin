@@ -14,17 +14,21 @@ import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
+import java.io.File
+import java.util.Locale
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtraPropertiesExtension
-import java.io.File
-import java.util.Locale
 
 class SentryPlugin : Plugin<Project> {
     @OptIn(ExperimentalStdlibApi::class)
     override fun apply(project: Project) {
-        val extension = project.extensions.create("sentry", SentryPluginExtension::class.java, project)
+        val extension = project.extensions.create(
+            "sentry",
+            SentryPluginExtension::class.java,
+            project
+        )
         project.afterEvaluate {
             check(project.plugins.hasPlugin(AppPlugin::class.java)) {
                 "[sentry] Must apply `com.android.application` first!"
@@ -34,25 +38,40 @@ class SentryPlugin : Plugin<Project> {
 
             androidExtension.applicationVariants.all { variant ->
                 variant.outputs.all { variantOutput ->
-                    val taskSuffix = "${variant.name.capitalize(Locale.ROOT)}${variantOutput.name.capitalize(Locale.ROOT)}"
+                    val taskSuffix = variant.name.capitalize(Locale.ROOT) +
+                        variantOutput.name.capitalize(Locale.ROOT)
 
                     fun withLogging(varName: String, initializer: () -> Task?) =
-                        initializer().also { project.logger.info("[sentry] $varName is ${it?.path}") }
+                        initializer().also {
+                            project.logger.info("[sentry] $varName is ${it?.path}")
+                        }
 
                     val dexTask = withLogging("dexTask") { getDexTask(project, variant.name) }
-                    val preBundleTask = withLogging("preBundleTask") { getPreBundleTask(project, variant.name) }
-                    val bundleTask = withLogging("bundleTask") { getBundleTask(project, variant.name) }
-                    val transformerTask = withLogging("transformerTask") { getTransformerTask(project, variant.name) }
-                    val packageTask = withLogging("packageTask") { getPackageTask(project, variant.name) }
+                    val preBundleTask = withLogging("preBundleTask") {
+                        getPreBundleTask(project, variant.name)
+                    }
+                    val bundleTask = withLogging("bundleTask") {
+                        getBundleTask(project, variant.name)
+                    }
+                    val transformerTask = withLogging("transformerTask") {
+                        getTransformerTask(project, variant.name)
+                    }
+                    val packageTask = withLogging("packageTask") {
+                        getPackageTask(project, variant.name)
+                    }
                     val assembleTask = withLogging("assembleTask") { getAssembleTask(variant) }
 
                     val sentryProperties = getPropertiesFilePath(project, variant)
 
-                    val extraProperties = project.extensions.getByName("ext") as ExtraPropertiesExtension
-                    val sentryOrgParameter =
-                        runCatching { extraProperties.get(SENTRY_ORG_PARAMETER).toString() }.getOrNull()
-                    val sentryProjectParameter =
-                        runCatching { extraProperties.get(SENTRY_PROJECT_PARAMETER).toString() }.getOrNull()
+                    val extraProperties = project.extensions.getByName("ext")
+                        as ExtraPropertiesExtension
+
+                    val sentryOrgParameter = runCatching {
+                        extraProperties.get(SENTRY_ORG_PARAMETER).toString()
+                    }.getOrNull()
+                    val sentryProjectParameter = runCatching {
+                        extraProperties.get(SENTRY_PROJECT_PARAMETER).toString()
+                    }.getOrNull()
 
                     val mappingFile = getMappingFile(project, variant)
                     val cliExecutable = getSentryCliPath(project)
@@ -63,7 +82,11 @@ class SentryPlugin : Plugin<Project> {
                         "generateSentryProguardUuid$taskSuffix",
                         SentryGenerateProguardUuidTask::class.java
                     ) {
-                        it.outputDirectory.set(project.file("build${sep}generated${sep}assets${sep}sentry${sep}${variant.name}"))
+                        it.outputDirectory.set(
+                            project.file(
+                                "build${sep}generated${sep}assets${sep}sentry${sep}${variant.name}"
+                            )
+                        )
                     }
                     variant.mergeAssetsProvider.configure { it.dependsOn(generateUuidTask) }
 
@@ -75,7 +98,9 @@ class SentryPlugin : Plugin<Project> {
                         it.dependsOn(generateUuidTask)
                         it.workingDir(project.rootDir)
                         it.cliExecutable.set(cliExecutable)
-                        it.sentryProperties.set(sentryProperties?.let { file -> project.file(file) })
+                        it.sentryProperties.set(
+                            sentryProperties?.let { file -> project.file(file) }
+                        )
                         it.mappingsUuid.set(generateUuidTask.outputUuid)
                         it.mappingsFile.set(mappingFile)
                         it.autoUpload.set(extension.autoUpload.get())
@@ -83,7 +108,9 @@ class SentryPlugin : Plugin<Project> {
                         it.sentryProject.set(sentryProjectParameter)
                     }
                     variant.register(uploadSentryProguardMappingsTask)
-                    androidExtension.sourceSets.getByName(variant.name).assets.srcDir(generateUuidTask.outputDirectory)
+                    androidExtension.sourceSets.getByName(variant.name).assets.srcDir(
+                        generateUuidTask.outputDirectory
+                    )
 
                     // Setup the task to upload native symbols task after the assembling task
                     val uploadNativeSymbolsTask = project.tasks.create(
@@ -92,7 +119,9 @@ class SentryPlugin : Plugin<Project> {
                     ) {
                         it.workingDir(project.rootDir)
                         it.cliExecutable.set(cliExecutable)
-                        it.sentryProperties.set(sentryProperties?.let { file -> project.file(file) })
+                        it.sentryProperties.set(
+                            sentryProperties?.let { file -> project.file(file) }
+                        )
                         it.includeNativeSources.set(extension.includeNativeSources.get())
                         it.variantName.set(variant.name)
                         it.sentryOrganization.set(sentryOrgParameter)

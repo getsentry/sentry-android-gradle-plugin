@@ -2,11 +2,11 @@ package io.sentry.android.gradle
 
 import com.android.build.gradle.AppExtension
 import io.sentry.android.gradle.SentryMappingFileProvider.getMappingFile
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Test
 import java.io.File
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Test
 
 class SentryMappingFileProviderTest {
 
@@ -29,10 +29,18 @@ class SentryMappingFileProviderTest {
         project.getTasksByName("assembleDebug", false)
 
         val debugVariant = android.applicationVariants.first { it.name == "debug" }
-        assertTrue { getMappingFile(project, debugVariant)!!.endsWith("build${sep}outputs${sep}mapping${sep}debug${sep}mapping.txt") }
+        assertTrue {
+            getMappingFile(project, debugVariant)!!.endsWith(
+                "build${sep}outputs${sep}mapping${sep}debug${sep}mapping.txt"
+            )
+        }
 
         val releaseVariant = android.applicationVariants.first { it.name == "release" }
-        assertTrue { getMappingFile(project, releaseVariant)!!.endsWith("build${sep}outputs${sep}mapping${sep}release${sep}mapping.txt") }
+        assertTrue {
+            getMappingFile(project, releaseVariant)!!.endsWith(
+                "build${sep}outputs${sep}mapping${sep}release${sep}mapping.txt"
+            )
+        }
     }
 
     @Test

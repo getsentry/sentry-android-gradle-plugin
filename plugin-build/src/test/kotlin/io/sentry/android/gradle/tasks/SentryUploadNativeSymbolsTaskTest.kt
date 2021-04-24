@@ -1,13 +1,13 @@
 package io.sentry.android.gradle.tasks
 
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Test
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.gradle.api.Project
+import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Test
 
 class SentryUploadNativeSymbolsTaskTest {
 
@@ -25,7 +25,9 @@ class SentryUploadNativeSymbolsTaskTest {
 
         assertTrue("sentry-cli" in args)
         assertTrue("upload-dif" in args)
-        assertTrue("${project.projectDir}${sep}build${sep}intermediates${sep}merged_native_libs${sep}debug" in args)
+        val path = "${project.projectDir}${sep}build${sep}intermediates" +
+            "${sep}merged_native_libs${sep}debug"
+        assertTrue(path in args)
         assertFalse("--include-sources" in args)
     }
 
@@ -109,7 +111,8 @@ class SentryUploadNativeSymbolsTaskTest {
         project: Project,
         block: (SentryUploadNativeSymbolsTask) -> Unit = {}
     ): SentryUploadNativeSymbolsTask =
-        project.tasks.register("testUploadNativeSymbols", SentryUploadNativeSymbolsTask::class.java) {
-            block(it)
-        }.get()
+        project.tasks.register(
+            "testUploadNativeSymbols",
+            SentryUploadNativeSymbolsTask::class.java
+        ) { block(it) }.get()
 }

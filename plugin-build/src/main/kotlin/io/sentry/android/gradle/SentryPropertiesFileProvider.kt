@@ -1,8 +1,8 @@
 package io.sentry.android.gradle
 
 import com.android.build.gradle.api.ApplicationVariant
-import org.gradle.api.Project
 import java.io.File
+import org.gradle.api.Project
 
 internal object SentryPropertiesFileProvider {
 
@@ -29,21 +29,31 @@ internal object SentryPropertiesFileProvider {
             "${projDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME"
         )
         if (flavorName.isNotBlank()) {
-            possibleFiles.add("${projDir}${sep}src${sep}${buildTypeName}${sep}$flavorName${sep}$FILENAME")
-            possibleFiles.add("${projDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME")
+            possibleFiles.add(
+                "${projDir}${sep}src${sep}${buildTypeName}${sep}$flavorName${sep}$FILENAME"
+            )
+            possibleFiles.add(
+                "${projDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME"
+            )
             possibleFiles.add("${projDir}${sep}src${sep}${flavorName}${sep}$FILENAME")
         }
         possibleFiles.add("${projDir}${sep}$FILENAME")
 
         // Other flavors dirs
-        possibleFiles.addAll(variant.productFlavors.map { "${projDir}${sep}src${sep}${it.name}${sep}$FILENAME" })
+        possibleFiles.addAll(
+            variant.productFlavors.map { "${projDir}${sep}src${sep}${it.name}${sep}$FILENAME" }
+        )
 
         // Root project dirs
         possibleFiles.add("${rootDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME")
         if (flavorName.isNotBlank()) {
             possibleFiles.add("${rootDir}${sep}src${sep}${flavorName}${sep}$FILENAME")
-            possibleFiles.add("${rootDir}${sep}src${sep}${buildTypeName}${sep}${flavorName}${sep}$FILENAME")
-            possibleFiles.add("${rootDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME")
+            possibleFiles.add(
+                "${rootDir}${sep}src${sep}${buildTypeName}${sep}${flavorName}${sep}$FILENAME"
+            )
+            possibleFiles.add(
+                "${rootDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME"
+            )
         }
         possibleFiles.add("${rootDir}${sep}$FILENAME")
 

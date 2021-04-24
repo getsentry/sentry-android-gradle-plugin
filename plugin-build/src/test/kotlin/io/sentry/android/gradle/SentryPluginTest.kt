@@ -1,5 +1,7 @@
 package io.sentry.android.gradle
 
+import java.io.File
+import kotlin.test.assertNotEquals
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.junit.Before
@@ -8,8 +10,6 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import java.io.File
-import kotlin.test.assertNotEquals
 
 @Suppress("FunctionName")
 @RunWith(Parameterized::class)
@@ -28,7 +28,6 @@ class SentryPluginTest(
 
     @Before
     fun setup() {
-
         projectTemplateFolder.copyRecursively(testProjectDir.root)
 
         val pluginClasspath = PluginUnderTestMetadataReading.readImplementationClasspath()
@@ -136,9 +135,10 @@ class SentryPluginTest(
             // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
             // The pair is [AGP Version, Gradle Version]
             arrayOf("4.0.0", "6.1.1"),
-            arrayOf("4.1.2", "6.5"),
-            arrayOf("4.1.2", "6.8.1"),
-            arrayOf("4.2.0-beta04", "6.8.1"),
+            arrayOf("4.1.3", "6.5"),
+            arrayOf("4.1.3", "6.8.1"),
+            arrayOf("4.1.3", "7.0"),
+            arrayOf("4.2.0-rc01", "6.8.1"),
         )
 
         private fun GradleRunner.appendArguments(vararg arguments: String) =
