@@ -24,6 +24,11 @@ dependencies {
     testImplementation(Libs.JUNIT)
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
         jvmTarget = "1.8"
