@@ -17,7 +17,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = ("sentry-android-gradle-plugin")
+rootProject.name = ("sentry-android-gradle-plugin-composite-build")
 
 include(":examples:android-gradle")
 include(":examples:android-gradle-kts")
