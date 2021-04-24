@@ -6,7 +6,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:$BuildPluginsVersion.AGP"
+        classpath Libs.AGP
         classpath "io.sentry:sentry-android-gradle-plugin"
     }
 }

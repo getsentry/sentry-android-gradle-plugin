@@ -7,15 +7,15 @@ import io.sentry.android.gradle.SentryCliProvider.searchCliInPropertiesFile
 import io.sentry.android.gradle.SentryCliProvider.searchCliInResources
 import io.sentry.android.gradle.utils.SystemPropertyRule
 import io.sentry.android.gradle.utils.WithSystemProperty
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
 
 class SentryCliProviderTest {
 
@@ -132,7 +132,9 @@ class SentryCliProviderTest {
 
         val foundPath = searchCliInResources(resourcePath)
         assertNotNull(foundPath)
-        assertTrue(foundPath.endsWith("${File.separator}dummy-bin${File.separator}dummy-sentry-cli"))
+        assertTrue(
+            foundPath.endsWith("${File.separator}dummy-bin${File.separator}dummy-sentry-cli")
+        )
 
         resourceFile?.delete()
     }

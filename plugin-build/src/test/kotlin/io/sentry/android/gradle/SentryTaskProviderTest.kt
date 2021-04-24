@@ -7,14 +7,14 @@ import io.sentry.android.gradle.SentryTasksProvider.getDexTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageTask
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 class SentryTaskProviderTest {
 
@@ -37,7 +37,9 @@ class SentryTaskProviderTest {
 
     @Test
     fun `getTransformerTask returns transform for Proguard`() {
-        val (project, task) = getTestProjectWithTask("transformClassesAndResourcesWithProguardForDebug")
+        val (project, task) = getTestProjectWithTask(
+            "transformClassesAndResourcesWithProguardForDebug"
+        )
 
         assertEquals(task, getTransformerTask(project, "debug"))
     }

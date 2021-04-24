@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import java.util.UUID
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
 import org.gradle.api.file.RegularFileProperty
@@ -8,7 +9,6 @@ import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
-import java.util.UUID
 
 abstract class SentryUploadProguardMappingsTask : Exec() {
 

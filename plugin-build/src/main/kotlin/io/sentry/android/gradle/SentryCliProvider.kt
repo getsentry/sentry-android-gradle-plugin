@@ -1,10 +1,10 @@
 package io.sentry.android.gradle
 
-import org.gradle.api.Project
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.Properties
+import org.gradle.api.Project
 
 internal object SentryCliProvider {
     /**
