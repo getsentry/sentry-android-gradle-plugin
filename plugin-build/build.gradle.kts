@@ -1,10 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.32"
+    kotlin("jvm") version BuildPluginsVersion.KOTLIN
     id("java-gradle-plugin")
     id("maven-publish")
-    id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
+    id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
 }
 
 repositories {
@@ -16,12 +16,12 @@ repositories {
 
 dependencies {
     compileOnly(gradleApi())
-    compileOnly("com.android.tools.build:gradle:4.1.3")
+    compileOnly(Libs.AGP)
 
     testImplementation(gradleTestKit())
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:1.4.32")
-    testImplementation("com.android.tools.build:gradle:4.1.3")
+    testImplementation(kotlin("test"))
+    testImplementation(Libs.AGP)
+    testImplementation(Libs.JUNIT)
 }
 
 tasks.withType<KotlinCompile>().configureEach {
