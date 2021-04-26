@@ -4,6 +4,8 @@ plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN
     id("java-gradle-plugin")
     id("maven-publish")
+    id("signing")
+    id("io.github.gradle-nexus.publish-plugin") version BuildPluginsVersion.NEXUS
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
 }
 
@@ -58,6 +60,20 @@ ktlint {
     }
 }
 
+nexusPublishing {
+    repositories {
+        // Maven Central (Sonatype) login info go to:
+        // ~/.gradle/gradle.properties
+        //
+        // mavenCentralRepositoryUsername=user name
+        // mavenCentralRepositoryPassword=password
+        sonatype {
+            username.set(findProperty("mavenCentralRepositoryUsername") as? String)
+            password.set(findProperty("mavenCentralRepositoryPassword") as? String)
+        }
+    }
+}
+
 /* ktlint-disable max-line-length */
 publishing {
     publications {
@@ -96,6 +112,21 @@ publishing {
                 }
             }
         }
+    }
+
+    if (!version.toString().endsWith("-SNAPSHOT")) {
+        signing {
+            useGpgCmd()
+            publishing.publications.all {
+                sign(this)
+            }
+        }
+        // signing info and maven central info go to:
+        // ~/.gradle/gradle.properties
+        //
+        // signing.keyId=id
+        // signing.password=password
+        // signing.secretKeyRingFile=file path
     }
 }
 /* ktlint-enable max-line-length */
