@@ -2,7 +2,7 @@ object BuildPluginsVersion {
     val AGP = System.getenv("VERSION_AGP") ?: "4.1.3"
     const val KOTLIN = "1.4.32"
     const val KTLINT = "10.0.0"
-    const val NEXUS = "1.1.0"
+    const val MAVEN_PUBLISH = "0.15.0"
 }
 
 object LibsVersion {

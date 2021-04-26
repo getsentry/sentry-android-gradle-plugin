@@ -5,7 +5,7 @@ plugins {
     id("java-gradle-plugin")
     id("maven-publish")
     id("signing")
-    id("io.github.gradle-nexus.publish-plugin") version BuildPluginsVersion.NEXUS
+    id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
 }
 
@@ -60,22 +60,19 @@ ktlint {
     }
 }
 
-nexusPublishing {
-    repositories {
-        // Maven Central (Sonatype) login info go to:
-        // ~/.gradle/gradle.properties
-        //
-        // mavenCentralRepositoryUsername=user name
-        // mavenCentralRepositoryPassword=password
-        sonatype {
-            username.set(findProperty("mavenCentralRepositoryUsername") as? String)
-            password.set(findProperty("mavenCentralRepositoryPassword") as? String)
-        }
-    }
-}
-
 /* ktlint-disable max-line-length */
 publishing {
+    // signing info and maven central info go to:
+    // ~/.gradle/gradle.properties
+    //
+    // # Sonatype Login
+    // mavenCentralRepositoryUsername=user name
+    // mavenCentralRepositoryPassword=password
+    //
+    // # Singing Config
+    // signing.keyId=id
+    // signing.password=password
+    // signing.secretKeyRingFile=file path
     publications {
         this.withType(MavenPublication::class.java) {
             pom {
@@ -112,21 +109,6 @@ publishing {
                 }
             }
         }
-    }
-
-    if (!version.toString().endsWith("-SNAPSHOT")) {
-        signing {
-            useGpgCmd()
-            publishing.publications.all {
-                sign(this)
-            }
-        }
-        // signing info and maven central info go to:
-        // ~/.gradle/gradle.properties
-        //
-        // signing.keyId=id
-        // signing.password=password
-        // signing.secretKeyRingFile=file path
     }
 }
 /* ktlint-enable max-line-length */
