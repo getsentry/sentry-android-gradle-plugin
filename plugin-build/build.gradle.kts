@@ -2,8 +2,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN
+    id("org.jetbrains.dokka") version BuildPluginsVersion.DOKKA
     id("java-gradle-plugin")
-    id("maven-publish")
+    id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
 }
 
@@ -24,11 +25,6 @@ dependencies {
     testImplementation(Libs.JUNIT)
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
         jvmTarget = "1.8"
@@ -45,6 +41,10 @@ gradlePlugin {
     }
 }
 
+mavenPublish {
+  releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
+}
+
 ktlint {
     debug.set(false)
     verbose.set(true)
@@ -57,45 +57,3 @@ ktlint {
         include("**/kotlin/**")
     }
 }
-
-/* ktlint-disable max-line-length */
-publishing {
-    publications {
-        this.withType(MavenPublication::class.java) {
-            pom {
-                name.set("Sentry Android Gradle Plugin")
-                description.set("Sentry Android Gradle Plugin")
-                url.set("https://github.com/getsentry/sentry-android-gradle-plugin")
-
-                scm {
-                    url.set("https://github.com/getsentry/sentry-android-gradle-plugin")
-                    connection.set(
-                        "scm:https://github.com/getsentry/sentry-android-gradle-plugin.git"
-                    )
-                    developerConnection.set(
-                        "scm:git@github.com:getsentry/sentry-android-gradle-plugin.git"
-                    )
-                }
-
-                licenses {
-                    license {
-                        name.set("MIT")
-                        url.set(
-                            "https://github.com/getsentry/sentry-android-gradle-plugin/blob/master/LICENSE"
-                        )
-                        distribution.set("repo")
-                    }
-                }
-
-                developers {
-                    developer {
-                        id.set("getsentry")
-                        name.set("Sentry Team and Contributors")
-                        email.set("oss@sentry.io")
-                    }
-                }
-            }
-        }
-    }
-}
-/* ktlint-enable max-line-length */
