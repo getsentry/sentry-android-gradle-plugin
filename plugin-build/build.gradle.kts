@@ -42,7 +42,7 @@ gradlePlugin {
 }
 
 mavenPublish {
-  releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
+    releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
 }
 
 ktlint {
