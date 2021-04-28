@@ -41,6 +41,10 @@ gradlePlugin {
     }
 }
 
+mavenPublish {
+  releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
+}
+
 ktlint {
     debug.set(false)
     verbose.set(true)
