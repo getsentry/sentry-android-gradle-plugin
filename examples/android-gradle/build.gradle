@@ -1,0 +1,36 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath Libs.AGP
+        classpath "io.sentry:sentry-android-gradle-plugin"
+    }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'io.sentry.android.gradle'
+
+android {
+    compileSdkVersion = 30
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode = 1
+        versionName = "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile(
+              'proguard-android-optimize.txt')
+        }
+    }
+}
+
+sentry {
+    autoUpload = System.getenv("AUTO_UPLOAD")?.toBoolean() ?: false
+}

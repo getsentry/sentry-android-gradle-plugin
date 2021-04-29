@@ -1,0 +1,8 @@
+plugins {
+    id "com.android.application"
+    id "io.sentry.android.gradle"
+}
+
+sentry {
+    autoUpload = false
+}
