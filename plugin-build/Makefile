@@ -14,7 +14,7 @@ dryRelease:
 
 # clean, build and deploy to maven central
 doRelease:
-	./download-sentry-cli.sh
-	./gradlew uploadArchives
+	./gradlew publishMavenPublicationToMavenCentralRepository
+	./gradlew closeAndReleaseRepository
 
 all: clean compile dryRelease
