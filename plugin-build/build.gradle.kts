@@ -1,10 +1,11 @@
+import com.vanniktech.maven.publish.MavenPublishPluginExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN
     id("org.jetbrains.dokka") version BuildPluginsVersion.DOKKA
     id("java-gradle-plugin")
-    id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH
+    id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
 }
 
@@ -41,10 +42,6 @@ gradlePlugin {
     }
 }
 
-mavenPublish {
-  releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
-}
-
 ktlint {
     debug.set(false)
     verbose.set(true)
@@ -56,4 +53,15 @@ ktlint {
         exclude("**/generated/**")
         include("**/kotlin/**")
     }
+}
+
+// We conditionally apply the maven.publish plugin only if we're on Gradle 6.6.0+
+// as such plugin is not compatible with lower versions of Gradle and will break
+// the CI matrix.
+if (gradle.gradleVersion >= "6.6.0") {
+    apply {
+        plugin("com.vanniktech.maven.publish")
+    }
+    extensions.getByType(MavenPublishPluginExtension::class.java).releaseSigningEnabled =
+        BuildUtils.shouldSignArtifacts()
 }
