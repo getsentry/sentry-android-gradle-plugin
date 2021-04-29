@@ -107,7 +107,6 @@ class SentryPlugin : Plugin<Project> {
                         it.sentryOrganization.set(sentryOrgParameter)
                         it.sentryProject.set(sentryProjectParameter)
                     }
-                    variant.register(uploadSentryProguardMappingsTask)
                     androidExtension.sourceSets.getByName(variant.name).assets.srcDir(
                         generateUuidTask.outputDirectory
                     )
@@ -128,17 +127,20 @@ class SentryPlugin : Plugin<Project> {
                         it.sentryProject.set(sentryProjectParameter)
                     }
 
-                    // and run before dex transformation. If we managed to find the dex task
-                    // we set ourselves as dependency, otherwise we just hack ourselves into
-                    // the proguard task's doLast.
-                    dexTask?.dependsOn(uploadSentryProguardMappingsTask)
-                    transformerTask?.finalizedBy(uploadSentryProguardMappingsTask)
 
-                    // To include proguard uuid file into aab, run before bundle task.
-                    preBundleTask?.dependsOn(uploadSentryProguardMappingsTask)
+                    if (variant.buildType.isMinifyEnabled) {
+                        // and run before dex transformation. If we managed to find the dex task
+                        // we set ourselves as dependency, otherwise we just hack ourselves into
+                        // the proguard task's doLast.
+                        dexTask?.dependsOn(uploadSentryProguardMappingsTask)
+                        transformerTask?.finalizedBy(uploadSentryProguardMappingsTask)
 
-                    // The package task will only be executed if the uploadSentryProguardMappingsTask has already been executed.
-                    packageTask?.dependsOn(uploadSentryProguardMappingsTask)
+                        // To include proguard uuid file into aab, run before bundle task.
+                        preBundleTask?.dependsOn(uploadSentryProguardMappingsTask)
+
+                        // The package task will only be executed if the uploadSentryProguardMappingsTask has already been executed.
+                        packageTask?.dependsOn(uploadSentryProguardMappingsTask)
+                    }
 
                     // uploadNativeSymbolsTask will only be executed after the assemble task
                     // and also only if `uploadNativeSymbols` is enabled, as this is an opt-in feature.
