@@ -25,9 +25,9 @@ class SentryPlugin : Plugin<Project> {
     @OptIn(ExperimentalStdlibApi::class)
     override fun apply(project: Project) {
         val extension = project.extensions.create(
-                "sentry",
-                SentryPluginExtension::class.java,
-                project
+            "sentry",
+            SentryPluginExtension::class.java,
+            project
         )
         project.afterEvaluate {
             check(project.plugins.hasPlugin(AppPlugin::class.java)) {
@@ -37,14 +37,14 @@ class SentryPlugin : Plugin<Project> {
             val androidExtension = project.extensions.getByType(AppExtension::class.java)
 
             fun withLogging(varName: String, initializer: () -> Task?) =
-                    initializer().also {
-                        project.logger.info("[sentry] $varName is ${it?.path}")
-                    }
+                initializer().also {
+                    project.logger.info("[sentry] $varName is ${it?.path}")
+                }
 
             val cliExecutable = getSentryCliPath(project)
 
             val extraProperties = project.extensions.getByName("ext")
-                    as ExtraPropertiesExtension
+                as ExtraPropertiesExtension
 
             val sentryOrgParameter = runCatching {
                 extraProperties.get(SENTRY_ORG_PARAMETER).toString()
@@ -96,27 +96,27 @@ class SentryPlugin : Plugin<Project> {
                     if (isMinifyEnabled) {
                         // Setup the task to generate a UUID asset file
                         val generateUuidTask = project.tasks.register(
-                                "generateSentryProguardUuid$taskSuffix",
-                                SentryGenerateProguardUuidTask::class.java
+                            "generateSentryProguardUuid$taskSuffix",
+                            SentryGenerateProguardUuidTask::class.java
                         ) {
                             it.outputDirectory.set(
-                                    project.file(
-                                            "build${sep}generated${sep}assets${sep}sentry${sep}${variant.name}"
-                                    )
+                                project.file(
+                                    "build${sep}generated${sep}assets${sep}sentry${sep}${variant.name}"
+                                )
                             )
                         }
                         variant.mergeAssetsProvider.configure { it.dependsOn(generateUuidTask) }
 
                         // Setup the task that uploads the proguard mapping and UUIDs
                         val uploadSentryProguardMappingsTask = project.tasks.register(
-                                "uploadSentryProguardMappings$taskSuffix",
-                                SentryUploadProguardMappingsTask::class.java
+                            "uploadSentryProguardMappings$taskSuffix",
+                            SentryUploadProguardMappingsTask::class.java
                         ) {
                             it.dependsOn(generateUuidTask)
                             it.workingDir(project.rootDir)
                             it.cliExecutable.set(cliExecutable)
                             it.sentryProperties.set(
-                                    sentryProperties?.let { file -> project.file(file) }
+                                sentryProperties?.let { file -> project.file(file) }
                             )
                             it.mappingsUuid.set(generateUuidTask.get().outputUuid)
                             mappingFile?.let { mapFile ->
@@ -128,7 +128,7 @@ class SentryPlugin : Plugin<Project> {
                         }
                         variant.register(uploadSentryProguardMappingsTask.get())
                         androidExtension.sourceSets.getByName(variant.name).assets.srcDir(
-                                generateUuidTask.get().outputDirectory
+                            generateUuidTask.get().outputDirectory
                         )
 
                         // and run before dex transformation. If we managed to find the dex task
@@ -146,13 +146,13 @@ class SentryPlugin : Plugin<Project> {
 
                     // Setup the task to upload native symbols task after the assembling task
                     val uploadNativeSymbolsTask = project.tasks.register(
-                            "uploadNativeSymbolsFor$taskSuffix",
-                            SentryUploadNativeSymbolsTask::class.java
+                        "uploadNativeSymbolsFor$taskSuffix",
+                        SentryUploadNativeSymbolsTask::class.java
                     ) {
                         it.workingDir(project.rootDir)
                         it.cliExecutable.set(cliExecutable)
                         it.sentryProperties.set(
-                                sentryProperties?.let { file -> project.file(file) }
+                            sentryProperties?.let { file -> project.file(file) }
                         )
                         it.includeNativeSources.set(extension.includeNativeSources.get())
                         it.variantName.set(variant.name)
