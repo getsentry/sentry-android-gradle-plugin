@@ -102,7 +102,7 @@ class SentryPlugin : Plugin<Project> {
                             it.outputDirectory.set(
                                 project.file(
                                     "build${sep}generated${sep}assets${sep}sentry" +
-                                            "${sep}${variant.name}"
+                                        "${sep}${variant.name}"
                                 )
                             )
                         }
