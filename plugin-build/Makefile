@@ -15,6 +15,7 @@ dryRelease:
 # clean, build and deploy to maven central
 doRelease:
 	./gradlew publishMavenPublicationToMavenCentralRepository
+	./gradlew publishSentryPluginPluginMarkerMavenPublicationToMavenCentralRepository
 	./gradlew closeAndReleaseRepository
 
 all: clean compile dryRelease
