@@ -1,5 +1,7 @@
 # Unreleased
 
+* Fix: use File.separator instead of OS dependent separator
+
 # 2.0.0-alpha.1
 
 * Feat: Gradle plugin v2 (#50) @cortinico
