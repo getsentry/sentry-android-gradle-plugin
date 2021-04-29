@@ -27,7 +27,9 @@ internal object SentryCliProvider {
         project.logger.info("[sentry] cliSuffix is $cliSuffix")
 
         if (!cliSuffix.isNullOrBlank()) {
-            val resourcePath = "/bin/sentry-cli-$cliSuffix"
+            val sep = File.separator
+
+            val resourcePath = "{$sep}bin{$sep}sentry-cli-$cliSuffix"
 
             // if we are not in a jar, we can use the file directly
             project.logger.info("[sentry] Searching for $resourcePath in resources folder...")
