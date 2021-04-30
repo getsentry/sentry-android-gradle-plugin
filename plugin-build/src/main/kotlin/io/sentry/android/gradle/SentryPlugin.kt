@@ -127,7 +127,6 @@ class SentryPlugin : Plugin<Project> {
                         it.sentryProject.set(sentryProjectParameter)
                     }
 
-
                     if (variant.buildType.isMinifyEnabled) {
                         // and run before dex transformation. If we managed to find the dex task
                         // we set ourselves as dependency, otherwise we just hack ourselves into
