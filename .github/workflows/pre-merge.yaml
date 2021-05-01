@@ -39,5 +39,8 @@ jobs:
           path: plugin-build/build/reports/tests/
         if: always()
 
+      - name: Build the Debug variant
+        run: ./gradlew assembleDebug
+
       - name: Run the uploadSentryProguardMappings task
         run: ./gradlew assembleRelease uploadSentryProguardMappingsReleaseRelease
