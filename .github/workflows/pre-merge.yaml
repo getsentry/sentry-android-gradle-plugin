@@ -29,6 +29,12 @@ jobs:
           restore-keys: |
             cache-gradle-
 
+      - name: Setup Java Version
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+
       - name: Run Gradle tasks
         run: ./gradlew preMerge --continue
 
