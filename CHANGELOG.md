@@ -2,10 +2,18 @@
 
 * Fix: use File.separator instead of OS dependent separator
 
+# 2.0.0-alpha.3
+
+* Fix: Only wire upload mapping task if minifyEnabled (#86) @cerisier
+
+# 2.0.0-alpha.2
+
+* Fix: Publish Plugin Marker on maven central @marandaneto
+
 # 2.0.0-alpha.1
 
 * Feat: Gradle plugin v2 (#50) @cortinico
-* Allow module level sentry properties file (#33) @MatthewTPage
+* Enhancement: Allow module level sentry properties file (#33) @MatthewTPage
 
 # 1.x
 
