@@ -132,9 +132,9 @@ class SentryCliProviderTest {
 
         val foundPath = searchCliInResources(resourcePath)
         assertNotNull(foundPath)
-        val sep = File.separator
+
         assertTrue(
-            foundPath.endsWith("${sep}dummy-bin${sep}dummy-sentry-cli")
+            foundPath.endsWith("/dummy-bin/dummy-sentry-cli")
         )
 
         resourceFile?.delete()

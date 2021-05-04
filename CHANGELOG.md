@@ -1,7 +1,5 @@
 # Unreleased
 
-* Fix: use File.separator instead of OS dependent separator
-
 # 2.0.0-alpha.3
 
 * Fix: Only wire upload mapping task if minifyEnabled (#86) @cerisier
