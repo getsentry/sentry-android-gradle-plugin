@@ -1,4 +1,4 @@
-name: Test Publishing Dry Run
+name: Test Publishing UUID Dry Run
 
 on:
   push:
