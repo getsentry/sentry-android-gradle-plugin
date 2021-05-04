@@ -1,5 +1,7 @@
 # Unreleased
 
+* Bump: sentry-cli to 1.64.1
+
 # 2.0.0-alpha.3
 
 * Fix: Only wire upload mapping task if minifyEnabled (#86) @cerisier
