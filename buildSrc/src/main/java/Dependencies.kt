@@ -3,7 +3,7 @@ object BuildPluginsVersion {
     const val DOKKA = "1.4.32"
     const val KOTLIN = "1.4.32"
     const val KTLINT = "10.0.0"
-    const val MAVEN_PUBLISH = "0.15.0"
+    const val MAVEN_PUBLISH = "0.15.1"
 }
 
 object LibsVersion {

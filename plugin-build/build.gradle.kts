@@ -65,9 +65,4 @@ if (gradle.gradleVersion >= "6.6.0") {
 
     val publish = extensions.getByType(MavenPublishPluginExtension::class.java)
     publish.releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
-
-    // https://github.com/vanniktech/gradle-maven-publish-plugin/issues/234
-    publish.nexus {
-        stagingProfile = group.toString()
-    }
 }
