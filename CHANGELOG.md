@@ -1,6 +1,7 @@
 # Unreleased
 
 * Bump: sentry-cli to 1.64.1
+* Bump: AGP to 4.2.0
 
 # 2.0.0-alpha.3
 
