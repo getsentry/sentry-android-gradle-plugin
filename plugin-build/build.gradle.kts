@@ -1,4 +1,6 @@
 import com.vanniktech.maven.publish.MavenPublishPluginExtension
+import org.gradle.api.internal.classpath.ModuleRegistry
+import org.gradle.configurationcache.extensions.serviceOf
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -24,6 +26,13 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(Libs.AGP)
     testImplementation(Libs.JUNIT)
+
+    testRuntimeOnly(
+        files(
+            serviceOf<ModuleRegistry>().getModule("gradle-tooling-api-builders")
+                .classpath.asFiles.first()
+        )
+    )
 }
 
 tasks.withType<KotlinCompile>().configureEach {
