@@ -11,6 +11,6 @@ object LibsVersion {
 }
 
 object Libs {
-    conval AGP = "com.android.tools.build:gradle:${BuildPluginsVersion.AGP}"
-    val JUNIT = "junit:junit:${LibsVersion.JUNIT}"
+    const val AGP = "com.android.tools.build:gradle:${BuildPluginsVersion.AGP}"
+    const val JUNIT = "junit:junit:${LibsVersion.JUNIT}"
 }
