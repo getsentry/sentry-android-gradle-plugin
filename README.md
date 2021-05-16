@@ -11,8 +11,6 @@ Gradle Plugin for Sentry Android
 [![build](https://github.com/getsentry/sentry-android-gradle-plugin/workflows/Test%20Publishing%20UUID%20Dry%20Run/badge.svg?branch=main)](https://github.com/getsentry/sentry-android-gradle-plugin/actions?query=branch%3Amain)
 [![build](https://github.com/getsentry/sentry-android-gradle-plugin/workflows/Test%20Publishing%20UUID/badge.svg?branch=main)](https://github.com/getsentry/sentry-android-gradle-plugin/actions?query=branch%3Amain)
 [![build](https://github.com/getsentry/sentry-android-gradle-plugin/workflows/Pre%20Merge%20Checks/badge.svg?branch=main)](https://github.com/getsentry/sentry-android-gradle-plugin/actions?query=branch%3Amain)
-[![line count](https://tokei.rs/b1/github/getsentry/sentry-android-gradle-plugin/)](https://github.com/getsentry/sentry-android-gradle-plugin/tree/main)
-[![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)  
 
 Upload proguard, debug files, and more.
 
