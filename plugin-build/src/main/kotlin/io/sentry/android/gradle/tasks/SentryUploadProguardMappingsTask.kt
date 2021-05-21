@@ -1,13 +1,17 @@
 package io.sentry.android.gradle.tasks
 
-import java.util.UUID
+import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 
 abstract class SentryUploadProguardMappingsTask : Exec() {
@@ -20,7 +24,11 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     abstract val cliExecutable: Property<String>
 
     @get:Input
-    abstract val mappingsUuid: Property<UUID>
+    abstract val uuidDirectory: DirectoryProperty
+
+    @get:Internal
+    val uuidFile: Provider<RegularFile>
+        get() = uuidDirectory.file("sentry-debug-meta.properties")
 
     @get:InputFile
     abstract val mappingsFile: RegularFileProperty
@@ -59,11 +67,12 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     }
 
     internal fun computeCommandLineArgs(): List<String> {
+        val uuid = readUuidFromFile(uuidFile.get().asFile)
         val args = mutableListOf(
             cliExecutable.get(),
             "upload-proguard",
             "--uuid",
-            mappingsUuid.get().toString(),
+            uuid,
             mappingsFile.get().toString()
         )
 
@@ -86,5 +95,20 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             args.add(1, "/c")
         }
         return args
+    }
+
+    companion object {
+        private const val PROPERTY_PREFIX = "io.sentry.ProguardUuids="
+
+        fun readUuidFromFile(file: File): String {
+            check(file.exists()) {
+                "UUID properties file is missing"
+            }
+            val content = file.readText().trim()
+            check(content.startsWith(PROPERTY_PREFIX)) {
+                "io.sentry.ProguardUuids property is missing"
+            }
+            return content.removePrefix(PROPERTY_PREFIX)
+        }
     }
 }

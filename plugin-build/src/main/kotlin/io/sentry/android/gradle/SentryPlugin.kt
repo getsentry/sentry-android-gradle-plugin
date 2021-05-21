@@ -55,13 +55,13 @@ class SentryPlugin : Plugin<Project> {
 
             androidExtension.applicationVariants.all { variant ->
 
-                val varNameCapitalize = variant.name.capitalize(Locale.ROOT)
-
                 val bundleTask = withLogging("bundleTask") {
                     getBundleTask(project, variant.name)
                 }
 
-                val assembleTask = withLogging("assembleTask") { getAssembleTask(variant) }
+                val assembleTask = withLogging("assembleTask") {
+                    getAssembleTask(variant)
+                }
 
                 val sentryProperties = getPropertiesFilePath(project, variant)
 
@@ -75,7 +75,9 @@ class SentryPlugin : Plugin<Project> {
                 val sep = File.separator
 
                 if (isMinifyEnabled) {
-                    dexTask = withLogging("dexTask") { getDexTask(project, variant.name) }
+                    dexTask = withLogging("dexTask") {
+                        getDexTask(project, variant.name)
+                    }
                     preBundleTask = withLogging("preBundleTask") {
                         getPreBundleTask(project, variant.name)
                     }
@@ -87,24 +89,25 @@ class SentryPlugin : Plugin<Project> {
                     }
                     mappingFile = getMappingFile(project, variant)
                 } else {
-                    project.logger.info("[sentry] isMinifyEnabled is disabled.")
+                    project.logger.info(
+                        "[sentry] isMinifyEnabled is false for variant ${variant.name}."
+                    )
                 }
 
                 variant.outputs.all { variantOutput ->
-                    val taskSuffix = varNameCapitalize + variantOutput.name.capitalize(Locale.ROOT)
+                    val taskSuffix = variant.name.capitalize(Locale.ROOT) +
+                        variantOutput.name.capitalize(Locale.ROOT)
 
                     if (isMinifyEnabled) {
                         // Setup the task to generate a UUID asset file
+                        val uuidOutputDirectory = project.file(
+                            "build${sep}generated${sep}assets${sep}sentry${sep}${variant.name}"
+                        )
                         val generateUuidTask = project.tasks.register(
                             "generateSentryProguardUuid$taskSuffix",
                             SentryGenerateProguardUuidTask::class.java
                         ) {
-                            it.outputDirectory.set(
-                                project.file(
-                                    "build${sep}generated${sep}assets${sep}sentry" +
-                                        "${sep}${variant.name}"
-                                )
-                            )
+                            it.outputDirectory.set(uuidOutputDirectory)
                         }
                         variant.mergeAssetsProvider.configure { it.dependsOn(generateUuidTask) }
 
@@ -119,7 +122,7 @@ class SentryPlugin : Plugin<Project> {
                             it.sentryProperties.set(
                                 sentryProperties?.let { file -> project.file(file) }
                             )
-                            it.mappingsUuid.set(generateUuidTask.get().outputUuid)
+                            it.uuidDirectory.set(uuidOutputDirectory)
                             mappingFile?.let { mapFile ->
                                 it.mappingsFile.set(mapFile)
                             }
@@ -127,9 +130,8 @@ class SentryPlugin : Plugin<Project> {
                             it.sentryOrganization.set(sentryOrgParameter)
                             it.sentryProject.set(sentryProjectParameter)
                         }
-                        variant.register(uploadSentryProguardMappingsTask.get())
                         androidExtension.sourceSets.getByName(variant.name).assets.srcDir(
-                            generateUuidTask.get().outputDirectory
+                            uuidOutputDirectory
                         )
 
                         // and run before dex transformation. If we managed to find the dex task
