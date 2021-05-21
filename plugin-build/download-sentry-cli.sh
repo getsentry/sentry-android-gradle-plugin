@@ -15,5 +15,5 @@ for plat in $PLATFORMS; do
   fn="src/main/resources/bin/sentry-cli-${plat}${suffix}"
   curl -SL --progress-bar "$download_url" -o "$fn"
   chmod +x "$fn"
-  md5sum src/main/resources/bin/sentry-cli-* > src/main/resources/bin/checksums.md5
+  md5sum src/main/resources/bin/sentry-cli-* > src/main/resources/bin/checksums.md5 || md5 src/main/resources/bin/sentry-cli-* > src/main/resources/bin/checksums.md5
 done
