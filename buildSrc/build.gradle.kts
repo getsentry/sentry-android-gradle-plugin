@@ -15,15 +15,15 @@ if(shouldDownloadSentryCli()) {
 }
 
 /**
- * When bumping the Sentry CLI, you should update the `expected-checksums.md5` file inside `buildSrc`
- * to match the `checksums.md5` file from `./plugin-build/src/main/resources/bin/`
+ * When bumping the Sentry CLI, you should update the `expected-checksums.sha` file inside `buildSrc`
+ * to match the `checksums.sha` file from `./plugin-build/src/main/resources/bin/`
  *
  * That's to retrigger a download of the cli upon a bump.
  */
 fun shouldDownloadSentryCli() : Boolean {
     val cliDir: Array<File> = File("./plugin-build/src/main/resources/bin/").listFiles() ?: emptyArray()
-    val expectedChecksums = File("./buildSrc/expected-checksums.md5")
-    val actualChecksums = File("./plugin-build/src/main/resources/bin/checksums.md5")
+    val expectedChecksums = File("./buildSrc/expected-checksums.sha")
+    val actualChecksums = File("./plugin-build/src/main/resources/bin/checksums.sha")
     return when {
         cliDir.size <= 2 -> {
             logger.lifecycle("Sentry CLI is missing")
