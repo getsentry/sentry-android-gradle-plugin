@@ -14,21 +14,25 @@ internal object SentryMappingFileProvider {
     @JvmStatic
     fun getMappingFile(project: Project, variant: ApplicationVariant): File? =
         try {
-            val mappingFiles = variant.mappingFileProvider.get().files
-            if (mappingFiles.isEmpty()) {
-                project.logger.warn(
-                    "[sentry] .mappingFileProvider.files is empty for ${variant.name}"
+            if (!variant.mappingFileProvider.isPresent) {
+                project.logger.info(
+                    "[sentry] .mappingFileProvider is missing for $variant"
                 )
                 null
             } else {
-                project.logger.info(
+                val mappingFiles = variant.mappingFileProvider.get().files
+                val logMessage = if (mappingFiles.isEmpty()) {
+                    "[sentry] .mappingFileProvider.files is empty for ${variant.name}"
+                } else {
                     "[sentry] Mapping File ${mappingFiles.first()} for ${variant.name}"
-                )
-                mappingFiles.first()
+                }
+                project.logger.info(logMessage)
+                mappingFiles.firstOrNull()
             }
         } catch (ignored: Throwable) {
-            project.logger.error(
-                "[sentry] .mappingFileProvider is missing for $variant - Error: ${ignored.message}"
+            project.logger.info(
+                "[sentry] .mappingFileProvider is missing for $variant - Error: ${ignored.message}",
+                ignored
             )
             null
         }
