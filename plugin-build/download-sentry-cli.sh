@@ -15,5 +15,5 @@ for plat in $PLATFORMS; do
   fn="src/main/resources/bin/sentry-cli-${plat}${suffix}"
   curl -SL --progress-bar "$download_url" -o "$fn"
   chmod +x "$fn"
-  shasum src/main/resources/bin/sentry-cli-* > src/main/resources/bin/checksums.sha
+  sha1sum src/main/resources/bin/sentry-cli-* > src/main/resources/bin/checksums.sha || shasum src/main/resources/bin/sentry-cli-* > src/main/resources/bin/checksums.sha
 done
