@@ -2,6 +2,7 @@
 
 * Silence the warning for missing mapping file on variants that don't enable minification (#111)
 * Bump: sentry-cli to 1.64.1
+* Add support for hashing sentry-cli to trigger a re-download upon bumps (#110)
 
 # 2.0.0-alpha.3
 
