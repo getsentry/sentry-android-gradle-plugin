@@ -36,83 +36,119 @@ class SentryPlugin : Plugin<Project> {
 
             val androidExtension = project.extensions.getByType(AppExtension::class.java)
 
+            fun withLogging(varName: String, initializer: () -> Task?) =
+                initializer().also {
+                    project.logger.info("[sentry] $varName is ${it?.path}")
+                }
+
+            val cliExecutable = getSentryCliPath(project)
+
+            val extraProperties = project.extensions.getByName("ext")
+                as ExtraPropertiesExtension
+
+            val sentryOrgParameter = runCatching {
+                extraProperties.get(SENTRY_ORG_PARAMETER).toString()
+            }.getOrNull()
+            val sentryProjectParameter = runCatching {
+                extraProperties.get(SENTRY_PROJECT_PARAMETER).toString()
+            }.getOrNull()
+
             androidExtension.applicationVariants.all { variant ->
+
+                val bundleTask = withLogging("bundleTask") {
+                    getBundleTask(project, variant.name)
+                }
+
+                val assembleTask = withLogging("assembleTask") {
+                    getAssembleTask(variant)
+                }
+
+                val sentryProperties = getPropertiesFilePath(project, variant)
+
+                val isMinifyEnabled = variant.buildType.isMinifyEnabled
+
+                var dexTask: Task? = null
+                var preBundleTask: Task? = null
+                var transformerTask: Task? = null
+                var packageTask: Task? = null
+                var mappingFile: File? = null
+                val sep = File.separator
+
+                if (isMinifyEnabled) {
+                    dexTask = withLogging("dexTask") {
+                        getDexTask(project, variant.name)
+                    }
+                    preBundleTask = withLogging("preBundleTask") {
+                        getPreBundleTask(project, variant.name)
+                    }
+                    transformerTask = withLogging("transformerTask") {
+                        getTransformerTask(project, variant.name)
+                    }
+                    packageTask = withLogging("packageTask") {
+                        getPackageTask(project, variant.name)
+                    }
+                    mappingFile = getMappingFile(project, variant)
+                } else {
+                    project.logger.info(
+                        "[sentry] isMinifyEnabled is false for variant ${variant.name}."
+                    )
+                }
+
                 variant.outputs.all { variantOutput ->
                     val taskSuffix = variant.name.capitalize(Locale.ROOT) +
                         variantOutput.name.capitalize(Locale.ROOT)
 
-                    fun withLogging(varName: String, initializer: () -> Task?) =
-                        initializer().also {
-                            project.logger.info("[sentry] $varName is ${it?.path}")
+                    if (isMinifyEnabled) {
+                        // Setup the task to generate a UUID asset file
+                        val uuidOutputDirectory = project.file(
+                            "build${sep}generated${sep}assets${sep}sentry${sep}${variant.name}"
+                        )
+                        val generateUuidTask = project.tasks.register(
+                            "generateSentryProguardUuid$taskSuffix",
+                            SentryGenerateProguardUuidTask::class.java
+                        ) {
+                            it.outputDirectory.set(uuidOutputDirectory)
                         }
+                        variant.mergeAssetsProvider.configure { it.dependsOn(generateUuidTask) }
 
-                    val dexTask = withLogging("dexTask") { getDexTask(project, variant.name) }
-                    val preBundleTask = withLogging("preBundleTask") {
-                        getPreBundleTask(project, variant.name)
-                    }
-                    val bundleTask = withLogging("bundleTask") {
-                        getBundleTask(project, variant.name)
-                    }
-                    val transformerTask = withLogging("transformerTask") {
-                        getTransformerTask(project, variant.name)
-                    }
-                    val packageTask = withLogging("packageTask") {
-                        getPackageTask(project, variant.name)
-                    }
-                    val assembleTask = withLogging("assembleTask") { getAssembleTask(variant) }
-
-                    val sentryProperties = getPropertiesFilePath(project, variant)
-
-                    val extraProperties = project.extensions.getByName("ext")
-                        as ExtraPropertiesExtension
-
-                    val sentryOrgParameter = runCatching {
-                        extraProperties.get(SENTRY_ORG_PARAMETER).toString()
-                    }.getOrNull()
-                    val sentryProjectParameter = runCatching {
-                        extraProperties.get(SENTRY_PROJECT_PARAMETER).toString()
-                    }.getOrNull()
-
-                    val mappingFile = getMappingFile(project, variant)
-                    val cliExecutable = getSentryCliPath(project)
-                    val sep = File.separator
-
-                    // Setup the task to generate a UUID asset file
-                    val generateUuidTask = project.tasks.create(
-                        "generateSentryProguardUuid$taskSuffix",
-                        SentryGenerateProguardUuidTask::class.java
-                    ) {
-                        it.outputDirectory.set(
-                            project.file(
-                                "build${sep}generated${sep}assets${sep}sentry${sep}${variant.name}"
+                        // Setup the task that uploads the proguard mapping and UUIDs
+                        val uploadSentryProguardMappingsTask = project.tasks.register(
+                            "uploadSentryProguardMappings$taskSuffix",
+                            SentryUploadProguardMappingsTask::class.java
+                        ) {
+                            it.dependsOn(generateUuidTask)
+                            it.workingDir(project.rootDir)
+                            it.cliExecutable.set(cliExecutable)
+                            it.sentryProperties.set(
+                                sentryProperties?.let { file -> project.file(file) }
                             )
+                            it.uuidDirectory.set(uuidOutputDirectory)
+                            mappingFile?.let { mapFile ->
+                                it.mappingsFile.set(mapFile)
+                            }
+                            it.autoUpload.set(extension.autoUpload.get())
+                            it.sentryOrganization.set(sentryOrgParameter)
+                            it.sentryProject.set(sentryProjectParameter)
+                        }
+                        androidExtension.sourceSets.getByName(variant.name).assets.srcDir(
+                            uuidOutputDirectory
                         )
-                    }
-                    variant.mergeAssetsProvider.configure { it.dependsOn(generateUuidTask) }
 
-                    // Setup the task that uploads the proguard mapping and UUIDs
-                    val uploadSentryProguardMappingsTask = project.tasks.create(
-                        "uploadSentryProguardMappings$taskSuffix",
-                        SentryUploadProguardMappingsTask::class.java
-                    ) {
-                        it.dependsOn(generateUuidTask)
-                        it.workingDir(project.rootDir)
-                        it.cliExecutable.set(cliExecutable)
-                        it.sentryProperties.set(
-                            sentryProperties?.let { file -> project.file(file) }
-                        )
-                        it.mappingsUuid.set(generateUuidTask.outputUuid)
-                        it.mappingsFile.set(mappingFile)
-                        it.autoUpload.set(extension.autoUpload.get())
-                        it.sentryOrganization.set(sentryOrgParameter)
-                        it.sentryProject.set(sentryProjectParameter)
+                        // and run before dex transformation. If we managed to find the dex task
+                        // we set ourselves as dependency, otherwise we just hack ourselves into
+                        // the proguard task's doLast.
+                        dexTask?.dependsOn(uploadSentryProguardMappingsTask)
+                        transformerTask?.finalizedBy(uploadSentryProguardMappingsTask)
+
+                        // To include proguard uuid file into aab, run before bundle task.
+                        preBundleTask?.dependsOn(uploadSentryProguardMappingsTask)
+
+                        // The package task will only be executed if the uploadSentryProguardMappingsTask has already been executed.
+                        packageTask?.dependsOn(uploadSentryProguardMappingsTask)
                     }
-                    androidExtension.sourceSets.getByName(variant.name).assets.srcDir(
-                        generateUuidTask.outputDirectory
-                    )
 
                     // Setup the task to upload native symbols task after the assembling task
-                    val uploadNativeSymbolsTask = project.tasks.create(
+                    val uploadNativeSymbolsTask = project.tasks.register(
                         "uploadNativeSymbolsFor$taskSuffix",
                         SentryUploadNativeSymbolsTask::class.java
                     ) {
@@ -125,20 +161,6 @@ class SentryPlugin : Plugin<Project> {
                         it.variantName.set(variant.name)
                         it.sentryOrganization.set(sentryOrgParameter)
                         it.sentryProject.set(sentryProjectParameter)
-                    }
-
-                    if (variant.buildType.isMinifyEnabled) {
-                        // and run before dex transformation. If we managed to find the dex task
-                        // we set ourselves as dependency, otherwise we just hack ourselves into
-                        // the proguard task's doLast.
-                        dexTask?.dependsOn(uploadSentryProguardMappingsTask)
-                        transformerTask?.finalizedBy(uploadSentryProguardMappingsTask)
-
-                        // To include proguard uuid file into aab, run before bundle task.
-                        preBundleTask?.dependsOn(uploadSentryProguardMappingsTask)
-
-                        // The package task will only be executed if the uploadSentryProguardMappingsTask has already been executed.
-                        packageTask?.dependsOn(uploadSentryProguardMappingsTask)
                     }
 
                     // uploadNativeSymbolsTask will only be executed after the assemble task
