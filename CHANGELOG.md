@@ -1,7 +1,7 @@
-# Unreleased
+# 2.0.0-beta.1
 
-* Support Configuration Avoidance (#112)
-* Silence the warning for missing mapping file on variants that don't enable minification (#111)
+* Feat: Support Configuration Avoidance (#112)
+* Fix: Silence the warning for missing mapping file on variants that don't enable minification (#111)
 * Bump: sentry-cli to 1.64.1
 
 # 2.0.0-alpha.3
