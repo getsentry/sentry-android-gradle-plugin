@@ -13,7 +13,6 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
         google()
-        jcenter()
     }
 }
 
