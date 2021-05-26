@@ -55,7 +55,6 @@ class SentryPluginTest(
               repositories {
                 google()
                 mavenCentral()
-                jcenter()
               }
             }
             subprojects {
