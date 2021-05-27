@@ -1,6 +1,6 @@
 # Unreleased
 
-* Enhancement: Use pluginManager instead of project.afterEvaluate
+* Enhancement: Use pluginManager instead of project.afterEvaluate (#119)
 
 # 2.0.0-beta.1
 
