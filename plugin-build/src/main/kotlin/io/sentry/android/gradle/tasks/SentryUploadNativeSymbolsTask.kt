@@ -10,8 +10,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
 
 abstract class SentryUploadNativeSymbolsTask : Exec() {
 
@@ -24,7 +22,6 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
 
     @get:InputFile
     @get:Optional
-    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val sentryProperties: RegularFileProperty
 
     @get:Input

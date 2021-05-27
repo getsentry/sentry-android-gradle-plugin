@@ -8,16 +8,12 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
 
-@CacheableTask
 abstract class SentryUploadProguardMappingsTask : Exec() {
 
     init {
@@ -35,12 +31,10 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
         get() = uuidDirectory.file("sentry-debug-meta.properties")
 
     @get:InputFile
-    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val mappingsFile: RegularFileProperty
 
     @get:InputFile
     @get:Optional
-    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val sentryProperties: RegularFileProperty
 
     @get:Input

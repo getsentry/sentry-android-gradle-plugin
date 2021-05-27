@@ -5,7 +5,6 @@ import com.android.build.gradle.AppPlugin
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.SentryMappingFileProvider.getMappingFile
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
-import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getDexTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageTask
@@ -15,7 +14,6 @@ import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
-import io.sentry.android.gradle.util.SentryPluginUtils.withLoggingProvider
 import java.io.File
 import java.util.Locale
 import org.gradle.api.Plugin
@@ -53,10 +51,6 @@ class SentryPlugin : Plugin<Project> {
 
                 val bundleTask = withLogging(project.logger, "bundleTask") {
                     getBundleTask(project, variant.name)
-                }
-
-                val assembleTask = withLoggingProvider(project.logger, "assembleTask") {
-                    getAssembleTaskProvider(variant)
                 }
 
                 val sentryProperties = getPropertiesFilePath(project, variant)
@@ -162,7 +156,11 @@ class SentryPlugin : Plugin<Project> {
                     // uploadNativeSymbolsTask will only be executed after the assemble task
                     // and also only if `uploadNativeSymbols` is enabled, as this is an opt-in feature.
                     if (extension.uploadNativeSymbols.get()) {
-                        assembleTask?.configure { it.finalizedBy(uploadNativeSymbolsTask) }
+                        variant.assembleProvider?.configure {
+                            it.finalizedBy(
+                                uploadNativeSymbolsTask
+                            )
+                        }
                         // if its a bundle aab, assemble might not be executed, so we hook into bundle task
                         bundleTask?.finalizedBy(uploadNativeSymbolsTask)
                     } else {
