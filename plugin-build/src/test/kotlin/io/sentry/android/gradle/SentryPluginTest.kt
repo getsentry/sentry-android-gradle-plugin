@@ -15,7 +15,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 class SentryPluginTest(
     private val androidGradlePluginVersion: String,
-    private val gradleVersion: String,
+    private val gradleVersion: String
 ) {
     @get:Rule
     val testProjectDir = TemporaryFolder()
@@ -139,7 +139,7 @@ class SentryPluginTest(
             arrayOf("4.1.3", "7.0.2"),
             arrayOf("4.2.1", "6.8.3"),
             arrayOf("4.2.1", "7.0.2"),
-            arrayOf("7.0.0-beta02", "7.0.2"),
+            arrayOf("7.0.0-beta02", "7.0.2")
         )
 
         private fun GradleRunner.appendArguments(vararg arguments: String) =

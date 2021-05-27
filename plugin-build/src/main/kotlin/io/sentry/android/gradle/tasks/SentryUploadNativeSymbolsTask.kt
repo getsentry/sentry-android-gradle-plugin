@@ -59,7 +59,7 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
     internal fun computeCommandLineArgs(): List<String> {
         val args = mutableListOf(
             cliExecutable.get(),
-            "upload-dif",
+            "upload-dif"
         )
 
         sentryOrganization.orNull?.let {

@@ -18,10 +18,8 @@ class SentryMappingFileProviderTest {
         project.plugins.apply("com.android.application")
         val android = project.extensions.getByType(AppExtension::class.java).apply {
             compileSdkVersion(30)
-            buildTypes {
-                it.all { buildType ->
-                    buildType.setMinifyEnabled(true)
-                }
+            buildTypes.all {
+                it.setMinifyEnabled(true)
             }
         }
 
