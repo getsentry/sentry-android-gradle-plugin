@@ -88,7 +88,13 @@ class SentryPlugin : Plugin<Project> {
                     )
                 }
 
-                var taskSuffix = variant.name.capitalizeUS()
+                var taskSuffix = variant.name
+                // capitalizeUS
+                taskSuffix = if (taskSuffix.isEmpty()) {
+                    ""
+                } else {
+                    taskSuffix.substring(0, 1).toUpperCase(Locale.US) + taskSuffix.substring(1)
+                }
 
                 if (isMinifyEnabled) {
                     // Setup the task to generate a UUID asset file
@@ -172,10 +178,4 @@ class SentryPlugin : Plugin<Project> {
         const val SENTRY_ORG_PARAMETER = "sentryOrg"
         const val SENTRY_PROJECT_PARAMETER = "sentryProject"
     }
-}
-
-fun String.capitalizeUS() = if (isEmpty()) {
-    ""
-} else {
-    substring(0, 1).toUpperCase(Locale.US) + substring(1)
 }
