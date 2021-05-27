@@ -1,6 +1,5 @@
 package io.sentry.android.gradle
 
-import android.databinding.tool.ext.capitalizeUS
 import com.android.build.gradle.AppExtension
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.SentryMappingFileProvider.getMappingFile
@@ -15,6 +14,7 @@ import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import java.io.File
+import java.util.Locale
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -88,7 +88,7 @@ class SentryPlugin : Plugin<Project> {
                     )
                 }
 
-                val taskSuffix = variant.name.capitalizeUS()
+                val taskSuffix = variant.name.capitalize(Locale.ROOT)
 
                 if (isMinifyEnabled) {
                     // Setup the task to generate a UUID asset file
