@@ -88,7 +88,7 @@ class SentryPlugin : Plugin<Project> {
                     )
                 }
 
-                val taskSuffix = variant.name.capitalize(Locale.ROOT)
+                var taskSuffix = variant.name.capitalizeUS()
 
                 if (isMinifyEnabled) {
                     // Setup the task to generate a UUID asset file
@@ -172,4 +172,10 @@ class SentryPlugin : Plugin<Project> {
         const val SENTRY_ORG_PARAMETER = "sentryOrg"
         const val SENTRY_PROJECT_PARAMETER = "sentryProject"
     }
+}
+
+fun String.capitalizeUS() = if (isEmpty()) {
+    ""
+} else {
+    substring(0, 1).toUpperCase(Locale.US) + substring(1)
 }
