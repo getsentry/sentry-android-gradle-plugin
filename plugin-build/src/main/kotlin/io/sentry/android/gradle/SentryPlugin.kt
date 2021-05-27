@@ -5,7 +5,6 @@ import com.android.build.gradle.AppPlugin
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.SentryMappingFileProvider.getMappingFile
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
-import io.sentry.android.gradle.SentryTasksProvider.getAssembleTask
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getDexTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageTask
@@ -14,6 +13,7 @@ import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
+import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
 import java.io.File
 import java.util.Locale
 import org.gradle.api.Plugin
@@ -35,12 +35,6 @@ class SentryPlugin : Plugin<Project> {
             }
 
             val androidExtension = project.extensions.getByType(AppExtension::class.java)
-
-            fun withLogging(varName: String, initializer: () -> Task?) =
-                initializer().also {
-                    project.logger.info("[sentry] $varName is ${it?.path}")
-                }
-
             val cliExecutable = getSentryCliPath(project)
 
             val extraProperties = project.extensions.getByName("ext")
@@ -55,12 +49,8 @@ class SentryPlugin : Plugin<Project> {
 
             androidExtension.applicationVariants.all { variant ->
 
-                val bundleTask = withLogging("bundleTask") {
+                val bundleTask = withLogging(project.logger, "bundleTask") {
                     getBundleTask(project, variant.name)
-                }
-
-                val assembleTask = withLogging("assembleTask") {
-                    getAssembleTask(variant)
                 }
 
                 val sentryProperties = getPropertiesFilePath(project, variant)
@@ -75,16 +65,16 @@ class SentryPlugin : Plugin<Project> {
                 val sep = File.separator
 
                 if (isMinifyEnabled) {
-                    dexTask = withLogging("dexTask") {
+                    dexTask = withLogging(project.logger, "dexTask") {
                         getDexTask(project, variant.name)
                     }
-                    preBundleTask = withLogging("preBundleTask") {
+                    preBundleTask = withLogging(project.logger, "preBundleTask") {
                         getPreBundleTask(project, variant.name)
                     }
-                    transformerTask = withLogging("transformerTask") {
+                    transformerTask = withLogging(project.logger, "transformerTask") {
                         getTransformerTask(project, variant.name)
                     }
-                    packageTask = withLogging("packageTask") {
+                    packageTask = withLogging(project.logger, "packageTask") {
                         getPackageTask(project, variant.name)
                     }
                     mappingFile = getMappingFile(project, variant)
@@ -166,7 +156,11 @@ class SentryPlugin : Plugin<Project> {
                     // uploadNativeSymbolsTask will only be executed after the assemble task
                     // and also only if `uploadNativeSymbols` is enabled, as this is an opt-in feature.
                     if (extension.uploadNativeSymbols.get()) {
-                        assembleTask?.finalizedBy(uploadNativeSymbolsTask)
+                        variant.assembleProvider?.configure {
+                            it.finalizedBy(
+                                uploadNativeSymbolsTask
+                            )
+                        }
                         // if its a bundle aab, assemble might not be executed, so we hook into bundle task
                         bundleTask?.finalizedBy(uploadNativeSymbolsTask)
                     } else {

@@ -1,5 +1,7 @@
 # Unreleased
 
+* Use assembleTaskProvider lazily (#121)
+
 # 2.0.0-beta.1
 
 * Feat: Support Configuration Avoidance (#112)

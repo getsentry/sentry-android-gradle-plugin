@@ -3,6 +3,7 @@ package io.sentry.android.gradle
 import com.android.build.gradle.api.ApplicationVariant
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.tasks.TaskProvider
 
 internal object SentryTasksProvider {
 
@@ -72,8 +73,8 @@ internal object SentryTasksProvider {
      * @return the task if found or null otherwise
      */
     @JvmStatic
-    fun getAssembleTask(variant: ApplicationVariant): Task =
-        variant.assembleProvider.get()
+    fun getAssembleTaskProvider(variant: ApplicationVariant): TaskProvider<Task> =
+        variant.assembleProvider
 
     private fun Project.findTask(vararg taskName: String): Task? =
         taskName.mapNotNull { project.tasks.findByName(it) }.firstOrNull()
