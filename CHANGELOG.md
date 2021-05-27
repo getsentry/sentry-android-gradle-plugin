@@ -1,5 +1,7 @@
 # Unreleased
 
+* Enhancement: Use pluginManager instead of project.afterEvaluate
+
 # 2.0.0-beta.1
 
 * Feat: Support Configuration Avoidance (#112)
