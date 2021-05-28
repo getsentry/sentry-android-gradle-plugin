@@ -3,6 +3,7 @@ package io.sentry.android.gradle.tasks
 import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
@@ -31,7 +32,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
         get() = uuidDirectory.file("sentry-debug-meta.properties")
 
     @get:InputFile
-    abstract val mappingsFile: RegularFileProperty
+    abstract val mappingFiles: ConfigurableFileCollection
 
     @get:InputFile
     @get:Optional
@@ -73,7 +74,8 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             "upload-proguard",
             "--uuid",
             uuid,
-            mappingsFile.get().toString()
+            // throws Value 'file collection' specified for property 'mappingFiles' cannot be converted to a file.
+            mappingFiles.first().absolutePath
         )
 
         if (!autoUpload.get()) {

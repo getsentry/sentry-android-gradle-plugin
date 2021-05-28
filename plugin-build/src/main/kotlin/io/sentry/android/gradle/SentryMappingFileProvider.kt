@@ -4,6 +4,7 @@ import com.android.build.gradle.api.ApplicationVariant
 import java.io.File
 import org.gradle.api.Project
 
+// can be deleted probably
 internal object SentryMappingFileProvider {
 
     /**
