@@ -1,7 +1,7 @@
 package io.sentry.android.gradle
 
 import com.android.build.gradle.AppExtension
-import io.sentry.android.gradle.SentryTasksProvider.getAssembleTask
+import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getDexTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageTask
@@ -148,9 +148,9 @@ class SentryTaskProviderTest {
 
         android.applicationVariants.all {
             if (it.name == "debug") {
-                assertEquals("assembleDebug", getAssembleTask(it).name)
+                assertEquals("assembleDebug", getAssembleTaskProvider(it).name)
             } else {
-                assertEquals("assembleRelease", getAssembleTask(it).name)
+                assertEquals("assembleRelease", getAssembleTaskProvider(it).name)
             }
         }
     }
