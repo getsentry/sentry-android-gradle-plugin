@@ -18,6 +18,7 @@ repositories {
 dependencies {
     compileOnly(gradleApi())
     compileOnly(Libs.AGP)
+    implementation("io.sentry:sentry:4.3.0")
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
