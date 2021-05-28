@@ -138,16 +138,9 @@ class SentryTaskProviderTest {
 
     @Test
     fun `getAssembleTaskProvider works correctly for all the variants`() {
-        val project = ProjectBuilder.builder().build()
-        project.plugins.apply("com.android.application")
-        val android = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
-        }
+        val android = getAndroidExtFromProject()
 
-        // This forces the project to be evaluated
-        project.getTasksByName("assembleDebug", false)
-
-        android.applicationVariants.all {
+        android.applicationVariants.configureEach {
             if (it.name == "debug") {
                 assertEquals("assembleDebug", getAssembleTaskProvider(it)?.name)
             } else {
@@ -158,6 +151,18 @@ class SentryTaskProviderTest {
 
     @Test
     fun `getMergeAssetsProvider works correctly for all the variants`() {
+        val android = getAndroidExtFromProject()
+
+        android.applicationVariants.configureEach {
+            if (it.name == "debug") {
+                assertEquals("mergeDebugAssets", getMergeAssetsProvider(it)?.name)
+            } else {
+                assertEquals("mergeReleaseAssets", getMergeAssetsProvider(it)?.name)
+            }
+        }
+    }
+
+    private fun getAndroidExtFromProject(): AppExtension {
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("com.android.application")
         val android = project.extensions.getByType(AppExtension::class.java).apply {
@@ -166,14 +171,7 @@ class SentryTaskProviderTest {
 
         // This forces the project to be evaluated
         project.getTasksByName("assembleDebug", false)
-
-        android.applicationVariants.all {
-            if (it.name == "debug") {
-                assertEquals("mergeDebugAssets", getMergeAssetsProvider(it)?.name)
-            } else {
-                assertEquals("mergeReleaseAssets", getMergeAssetsProvider(it)?.name)
-            }
-        }
+        return android
     }
 
     private fun getTestProjectWithTask(taskName: String): Pair<Project, Task> {
