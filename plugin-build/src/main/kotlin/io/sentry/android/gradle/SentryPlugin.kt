@@ -1,6 +1,7 @@
 package io.sentry.android.gradle
 
 import com.android.build.gradle.AppExtension
+import io.sentry.Sentry
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.SentryMappingFileProvider.getMappingFile
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
@@ -19,9 +20,17 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtraPropertiesExtension
+import org.gradle.util.GradleVersion
 
 class SentryPlugin : Plugin<Project> {
     override fun apply(project: Project) {
+        Sentry.init {
+            it.dsn = "https://1053864c67cc410aa1ffc9701bd6f93d@o447951.ingest.sentry.io/5428559"
+            // read release dynamically somehow
+            it.release = "io.sentry.android.gradle@2.0.0-beta.2-SNAPSHOT"
+            it.addInAppInclude("io.sentry.android.gradle")
+        }
+
         val extension = project.extensions.create(
             "sentry",
             SentryPluginExtension::class.java,
@@ -50,6 +59,9 @@ class SentryPlugin : Plugin<Project> {
                 val sentryProperties = getPropertiesFilePath(project, variant)
 
                 val isMinifyEnabled = variant.buildType.isMinifyEnabled
+                Sentry.setTag("isMinifyEnabled", isMinifyEnabled.toString())
+                Sentry.setTag("gradleVersion", GradleVersion.current().version)
+//                Sentry.setTag("agpVersion", how?)
 
                 var dexTask: Task? = null
                 var preBundleTask: Task? = null
