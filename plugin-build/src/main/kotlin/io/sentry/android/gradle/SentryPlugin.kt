@@ -1,6 +1,5 @@
 package io.sentry.android.gradle
 
-import io.sentry.android.gradle.util.capitalizeUS
 import com.android.build.gradle.AppExtension
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.SentryMappingFileProvider.getMappingFile
@@ -14,6 +13,7 @@ import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
+import io.sentry.android.gradle.util.capitalizeUS
 import java.io.File
 import org.gradle.api.Plugin
 import org.gradle.api.Project
