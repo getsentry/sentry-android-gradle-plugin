@@ -69,7 +69,7 @@ jobs:
         run: ./gradlew wrapper --gradle-version $VERSION_GRADLE --distribution-type=all
 
       - name: Run the uploadSentryProguardMappings task
-        run: ./gradlew assembleRelease uploadSentryProguardMappingsReleaseRelease
+        run: ./gradlew assembleRelease uploadSentryProguardMappingsRelease
 
       - name: Check sentry-debug-meta.properties inside APKs
         run: |

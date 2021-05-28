@@ -1,6 +1,8 @@
 package io.sentry.android.gradle
 
 import com.android.build.gradle.api.ApplicationVariant
+import com.android.build.gradle.tasks.MergeSourceSetFolders
+import io.sentry.android.gradle.util.capitalizeUS
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
@@ -61,23 +63,32 @@ internal object SentryTasksProvider {
      * @return the package task or null if not found
      */
     @JvmStatic
-    fun getPackageTask(project: Project, variantName: String) =
+    fun getPackageTask(project: Project, variantName: String): Task? =
         project.findTask(
             "package${variantName.capitalized}",
             "package${variantName.capitalized}Bundle"
         )
 
     /**
-     * Returns the assemble task
+     * Returns the assemble task provider
      *
-     * @return the task if found or null otherwise
+     * @return the provider if found or null otherwise
      */
     @JvmStatic
-    fun getAssembleTaskProvider(variant: ApplicationVariant): TaskProvider<Task> =
+    fun getAssembleTaskProvider(variant: ApplicationVariant): TaskProvider<Task>? =
         variant.assembleProvider
+
+    /**
+     * Returns the merge asset provider
+     *
+     * @return the provider if found or null otherwise
+     */
+    @JvmStatic
+    fun getMergeAssetsProvider(variant: ApplicationVariant): TaskProvider<MergeSourceSetFolders>? =
+        variant.mergeAssetsProvider
 
     private fun Project.findTask(vararg taskName: String): Task? =
         taskName.mapNotNull { project.tasks.findByName(it) }.firstOrNull()
 
-    private val String.capitalized: String get() = this.capitalize()
+    private val String.capitalized: String get() = this.capitalizeUS()
 }
