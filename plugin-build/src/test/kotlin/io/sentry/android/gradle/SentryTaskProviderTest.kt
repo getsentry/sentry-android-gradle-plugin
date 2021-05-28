@@ -2,6 +2,7 @@ package io.sentry.android.gradle
 
 import com.android.build.gradle.AppExtension
 import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
+import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getDexTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageTask
@@ -136,7 +137,7 @@ class SentryTaskProviderTest {
     }
 
     @Test
-    fun `getAssembleTask works correctly for all the variants`() {
+    fun `getAssembleTaskProvider works correctly for all the variants`() {
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("com.android.application")
         val android = project.extensions.getByType(AppExtension::class.java).apply {
@@ -148,9 +149,29 @@ class SentryTaskProviderTest {
 
         android.applicationVariants.all {
             if (it.name == "debug") {
-                assertEquals("assembleDebug", getAssembleTaskProvider(it).name)
+                assertEquals("assembleDebug", getAssembleTaskProvider(it)?.name)
             } else {
-                assertEquals("assembleRelease", getAssembleTaskProvider(it).name)
+                assertEquals("assembleRelease", getAssembleTaskProvider(it)?.name)
+            }
+        }
+    }
+
+    @Test
+    fun `getMergeAssetsProvider works correctly for all the variants`() {
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply("com.android.application")
+        val android = project.extensions.getByType(AppExtension::class.java).apply {
+            compileSdkVersion(30)
+        }
+
+        // This forces the project to be evaluated
+        project.getTasksByName("assembleDebug", false)
+
+        android.applicationVariants.all {
+            if (it.name == "debug") {
+                assertEquals("mergeDebugAssets", getMergeAssetsProvider(it)?.name)
+            } else {
+                assertEquals("mergeReleaseAssets", getMergeAssetsProvider(it)?.name)
             }
         }
     }

@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.utils
+package io.sentry.android.gradle.util
 
 /**
  * Annotation to specify arrays of key-values to override
