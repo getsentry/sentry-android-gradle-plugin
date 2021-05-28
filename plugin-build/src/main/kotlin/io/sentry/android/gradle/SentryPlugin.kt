@@ -92,7 +92,8 @@ class SentryPlugin : Plugin<Project> {
                         it.outputDirectory.set(uuidOutputDirectory)
                     }
                     SentryTasksProvider.getMergeAssetsProvider(variant)?.configure {
-                        it.dependsOn(generateUuidTask) }
+                        it.dependsOn(generateUuidTask)
+                    }
 
                     // Setup the task that uploads the proguard mapping and UUIDs
                     val uploadSentryProguardMappingsTask = project.tasks.register(
