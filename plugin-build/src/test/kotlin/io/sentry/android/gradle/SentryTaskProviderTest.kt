@@ -157,21 +157,8 @@ class SentryTaskProviderTest {
     }
 
     @Test
-    fun `getPackageProvider works correctly for all the variants (APK)`() {
+    fun `getPackageProvider works correctly for all the variants`() {
         val android = getAndroidExtFromProject()
-
-        android.applicationVariants.configureEach {
-            if (it.name == "debug") {
-                assertEquals("packageDebug", getPackageProvider(it)?.name)
-            } else {
-                assertEquals("packageRelease", getPackageProvider(it)?.name)
-            }
-        }
-    }
-
-    @Test
-    fun `getPackageProvider works correctly for all the variants (Bundle)`() {
-        val android = getAndroidExtFromProject("bundleRelease")
 
         android.applicationVariants.configureEach {
             if (it.name == "debug") {
