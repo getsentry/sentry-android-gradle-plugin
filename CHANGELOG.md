@@ -2,6 +2,7 @@
 
 * Enhancement: Use pluginManager instead of project.afterEvaluate (#119)
 * Enhancement: Use assembleTaskProvider lazily (#121)
+* Enhancement: Use packageProvider lazily (#121)
 
 # 2.0.0-beta.1
 

@@ -2,6 +2,7 @@ package io.sentry.android.gradle
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
+import com.android.build.gradle.tasks.PackageAndroidArtifact
 import io.sentry.android.gradle.util.capitalizeUS
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -17,6 +18,7 @@ internal object SentryTasksProvider {
      */
     @JvmStatic
     fun getTransformerTask(project: Project, variantName: String): Task? =
+        // previously accessed via ApkVariant#getDex, no way to access it anymore directly
         project.findTask(
             // Android Studio 3.3 includes the R8 shrinker.
             "transformClassesAndResourcesWithR8For${variantName.capitalized}",
@@ -32,6 +34,7 @@ internal object SentryTasksProvider {
      */
     @JvmStatic
     fun getDexTask(project: Project, variantName: String): Task? =
+        // previously accessed via ApkVariant#getDex, no way to access it anymore directly
         project.findTask(
             // Android Studio 3.3 includes the R8 shrinker.
             "transformClassesWithDexFor${variantName.capitalized}",
@@ -58,14 +61,14 @@ internal object SentryTasksProvider {
         project.findTask("bundle${variantName.capitalized}")
 
     /**
-     * Returns the package task
+     * Returns the package bundle task (App Bundle only)
      *
      * @return the package task or null if not found
      */
     @JvmStatic
-    fun getPackageTask(project: Project, variantName: String): Task? =
+    fun getPackageBundleTask(project: Project, variantName: String): Task? =
+        // for APK it uses getPackageProvider
         project.findTask(
-            "package${variantName.capitalized}",
             "package${variantName.capitalized}Bundle"
         )
 
@@ -86,6 +89,16 @@ internal object SentryTasksProvider {
     @JvmStatic
     fun getMergeAssetsProvider(variant: ApplicationVariant): TaskProvider<MergeSourceSetFolders>? =
         variant.mergeAssetsProvider
+
+    /**
+     * Returns the package provider
+     *
+     * @return the provider if found or null otherwise
+     */
+    @JvmStatic
+    fun getPackageProvider(variant: ApplicationVariant): TaskProvider<PackageAndroidArtifact>? =
+        // for App Bundle it ses getPackageBundleTask
+        variant.packageApplicationProvider
 
     private fun Project.findTask(vararg taskName: String): Task? =
         taskName.mapNotNull { project.tasks.findByName(it) }.firstOrNull()

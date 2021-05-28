@@ -4,9 +4,12 @@ import com.android.build.gradle.AppExtension
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.SentryMappingFileProvider.getMappingFile
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
+import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getDexTask
-import io.sentry.android.gradle.SentryTasksProvider.getPackageTask
+import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
+import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
+import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
@@ -54,7 +57,7 @@ class SentryPlugin : Plugin<Project> {
                 var dexTask: Task? = null
                 var preBundleTask: Task? = null
                 var transformerTask: Task? = null
-                var packageTask: Task? = null
+                var packageBundleTask: Task? = null
                 var mappingFile: File? = null
                 val sep = File.separator
 
@@ -68,8 +71,8 @@ class SentryPlugin : Plugin<Project> {
                     transformerTask = withLogging(project.logger, "transformerTask") {
                         getTransformerTask(project, variant.name)
                     }
-                    packageTask = withLogging(project.logger, "packageTask") {
-                        getPackageTask(project, variant.name)
+                    packageBundleTask = withLogging(project.logger, "packageBundleTask") {
+                        getPackageBundleTask(project, variant.name)
                     }
                     mappingFile = getMappingFile(project, variant)
                 } else {
@@ -91,7 +94,7 @@ class SentryPlugin : Plugin<Project> {
                     ) {
                         it.outputDirectory.set(uuidOutputDirectory)
                     }
-                    SentryTasksProvider.getMergeAssetsProvider(variant)?.configure {
+                    getMergeAssetsProvider(variant)?.configure {
                         it.dependsOn(generateUuidTask)
                     }
 
@@ -128,7 +131,11 @@ class SentryPlugin : Plugin<Project> {
                     preBundleTask?.dependsOn(uploadSentryProguardMappingsTask)
 
                     // The package task will only be executed if the uploadSentryProguardMappingsTask has already been executed.
-                    packageTask?.dependsOn(uploadSentryProguardMappingsTask)
+                    getPackageProvider(variant)?.configure {
+                        it.dependsOn(uploadSentryProguardMappingsTask)
+                    }
+                    // App bundle has different package task
+                    packageBundleTask?.dependsOn(uploadSentryProguardMappingsTask)
                 }
 
                 // Setup the task to upload native symbols task after the assembling task
@@ -150,7 +157,7 @@ class SentryPlugin : Plugin<Project> {
                 // uploadNativeSymbolsTask will only be executed after the assemble task
                 // and also only if `uploadNativeSymbols` is enabled, as this is an opt-in feature.
                 if (extension.uploadNativeSymbols.get()) {
-                    SentryTasksProvider.getAssembleTaskProvider(variant)?.configure {
+                    getAssembleTaskProvider(variant)?.configure {
                         it.finalizedBy(
                             uploadNativeSymbolsTask
                         )
