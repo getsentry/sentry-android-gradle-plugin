@@ -52,7 +52,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
 
     override fun exec() {
         if (!mappingsFiles.isPresent || mappingsFiles.get().isEmpty) {
-            error("[sentry] Mapping files is missing!")
+            error("[sentry] Mapping files are missing!")
         }
         computeCommandLineArgs().let {
             commandLine(it)
