@@ -17,9 +17,7 @@ import java.io.File
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.ExtraPropertiesExtension
-import org.gradle.api.provider.Provider
 
 class SentryPlugin : Plugin<Project> {
     override fun apply(project: Project) {
