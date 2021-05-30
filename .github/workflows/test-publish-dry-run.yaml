@@ -68,7 +68,7 @@ jobs:
       - name: Set Gradle Version
         run: ./gradlew wrapper --gradle-version $VERSION_GRADLE --distribution-type=all
 
-      - name: Run the uploadSentryProguardMappings task
+      - name: Build the release APK and run uploadSentryProguardMappings task
         run: ./gradlew assembleRelease uploadSentryProguardMappingsRelease
 
       - name: Check sentry-debug-meta.properties inside APKs
@@ -78,4 +78,16 @@ jobs:
           rm -r output
           unzip ./examples/android-gradle-kts/build/outputs/apk/release/android-gradle-kts-release-unsigned.apk -d output
           cat output/assets/sentry-debug-meta.properties
+          rm -r output
+
+      - name: Build the release App Bundle and run uploadSentryProguardMappings task
+        run: ./gradlew bundleRelease uploadSentryProguardMappingsRelease
+
+      - name: Check sentry-debug-meta.properties inside App Bundle
+        run: |
+          unzip ./examples/android-gradle/build/outputs/bundle/release/android-gradle-release.aab -d output
+          cat output/base/assets/sentry-debug-meta.properties
+          rm -r output
+          unzip ./examples/android-gradle-kts/build/outputs/bundle/release/android-gradle-kts-release.aab -d output
+          cat output/base/assets/sentry-debug-meta.properties
           rm -r output
