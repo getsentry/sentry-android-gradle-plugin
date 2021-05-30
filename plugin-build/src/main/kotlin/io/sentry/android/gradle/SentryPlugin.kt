@@ -56,7 +56,6 @@ class SentryPlugin : Plugin<Project> {
                 var preBundleTask: Task? = null
                 var transformerTask: Task? = null
                 var packageTask: Task? = null
-                var mappingFileProvider: Provider<FileCollection> = variant.mappingFileProvider
                 val sep = File.separator
 
                 if (isMinifyEnabled) {
@@ -107,7 +106,7 @@ class SentryPlugin : Plugin<Project> {
                             sentryProperties?.let { file -> project.file(file) }
                         )
                         it.uuidDirectory.set(uuidOutputDirectory)
-                        it.mappingsFiles = mappingFileProvider
+                        it.mappingsFiles = variant.mappingFileProvider
                         it.autoUpload.set(extension.autoUpload.get())
                         it.sentryOrganization.set(sentryOrgParameter)
                         it.sentryProject.set(sentryProjectParameter)
