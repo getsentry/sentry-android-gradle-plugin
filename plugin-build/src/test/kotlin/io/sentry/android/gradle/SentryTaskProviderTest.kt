@@ -169,7 +169,7 @@ class SentryTaskProviderTest {
         }
     }
 
-    private fun getAndroidExtFromProject(evaluateTask: String = "assembleDebug"): AppExtension {
+    private fun getAndroidExtFromProject(): AppExtension {
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("com.android.application")
         val android = project.extensions.getByType(AppExtension::class.java).apply {
@@ -177,7 +177,7 @@ class SentryTaskProviderTest {
         }
 
         // This forces the project to be evaluated
-        project.getTasksByName(evaluateTask, false)
+        project.getTasksByName("assembleDebug", false)
         return android
     }
 
