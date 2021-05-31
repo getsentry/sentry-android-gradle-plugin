@@ -5,7 +5,8 @@ import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getDexTask
 import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
-import io.sentry.android.gradle.SentryTasksProvider.getPackageTask
+import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
+import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
 import kotlin.test.assertEquals
@@ -116,24 +117,17 @@ class SentryTaskProviderTest {
     }
 
     @Test
-    fun `getPackageTask returns null for missing task`() {
+    fun `getPackageBundleTask returns null for missing task`() {
         val project = ProjectBuilder.builder().build()
 
-        assertNull(getPackageTask(project, "debug"))
+        assertNull(getPackageBundleTask(project, "debug"))
     }
 
     @Test
-    fun `getPackageTask returns plain package task`() {
-        val (project, task) = getTestProjectWithTask("packageDebug")
-
-        assertEquals(task, getPackageTask(project, "debug"))
-    }
-
-    @Test
-    fun `getPackageTask returns package bundle task`() {
+    fun `getPackageBundleTask returns package bundle task`() {
         val (project, task) = getTestProjectWithTask("packageDebugBundle")
 
-        assertEquals(task, getPackageTask(project, "debug"))
+        assertEquals(task, getPackageBundleTask(project, "debug"))
     }
 
     @Test
@@ -158,6 +152,19 @@ class SentryTaskProviderTest {
                 assertEquals("mergeDebugAssets", getMergeAssetsProvider(it)?.name)
             } else {
                 assertEquals("mergeReleaseAssets", getMergeAssetsProvider(it)?.name)
+            }
+        }
+    }
+
+    @Test
+    fun `getPackageProvider works correctly for all the variants`() {
+        val android = getAndroidExtFromProject()
+
+        android.applicationVariants.configureEach {
+            if (it.name == "debug") {
+                assertEquals("packageDebug", getPackageProvider(it)?.name)
+            } else {
+                assertEquals("packageRelease", getPackageProvider(it)?.name)
             }
         }
     }
