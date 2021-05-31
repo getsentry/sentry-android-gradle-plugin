@@ -1,6 +1,6 @@
 # Unreleased
 
-* Enhancement: Clean up deprecated/removed Dex and Transform tasks (#)
+* Enhancement: Clean up deprecated/removed Dex and Transform tasks (#130)
 
 # 2.0.0-beta.2
 
