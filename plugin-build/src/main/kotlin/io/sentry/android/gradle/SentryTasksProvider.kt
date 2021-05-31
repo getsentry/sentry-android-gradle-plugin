@@ -97,7 +97,7 @@ internal object SentryTasksProvider {
      */
     @JvmStatic
     fun getPackageProvider(variant: ApplicationVariant): TaskProvider<PackageAndroidArtifact>? =
-        // for App Bundle it ses getPackageBundleTask
+        // for App Bundle it uses getPackageBundleTask
         variant.packageApplicationProvider
 
     private fun Project.findTask(vararg taskName: String): Task? =
