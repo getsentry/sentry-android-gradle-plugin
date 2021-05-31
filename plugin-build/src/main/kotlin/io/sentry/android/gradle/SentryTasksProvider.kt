@@ -6,6 +6,8 @@ import com.android.build.gradle.tasks.PackageAndroidArtifact
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.FileCollection
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
 internal object SentryTasksProvider {
@@ -89,6 +91,15 @@ internal object SentryTasksProvider {
     @JvmStatic
     fun getMergeAssetsProvider(variant: ApplicationVariant): TaskProvider<MergeSourceSetFolders>? =
         variant.mergeAssetsProvider
+
+    /**
+     * Returns the mapping file provider
+     *
+     * @return the provider if found or null otherwise
+     */
+    @JvmStatic
+    fun getMappingFileProvider(variant: ApplicationVariant): Provider<FileCollection> =
+        variant.mappingFileProvider
 
     /**
      * Returns the package provider
