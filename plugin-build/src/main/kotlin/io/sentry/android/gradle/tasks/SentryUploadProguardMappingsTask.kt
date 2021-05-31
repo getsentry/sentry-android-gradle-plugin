@@ -4,6 +4,7 @@ import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -11,6 +12,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 
@@ -30,8 +32,8 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     val uuidFile: Provider<RegularFile>
         get() = uuidDirectory.file("sentry-debug-meta.properties")
 
-    @get:InputFile
-    abstract val mappingsFile: RegularFileProperty
+    @get:InputFiles
+    abstract var mappingsFiles: Provider<FileCollection>
 
     @get:InputFile
     @get:Optional
@@ -49,6 +51,9 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     abstract val autoUpload: Property<Boolean>
 
     override fun exec() {
+        if (!mappingsFiles.isPresent || mappingsFiles.get().isEmpty) {
+            error("[sentry] Mapping files are missing!")
+        }
         computeCommandLineArgs().let {
             commandLine(it)
             logger.info("cli args: $it")
@@ -73,7 +78,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             "upload-proguard",
             "--uuid",
             uuid,
-            mappingsFile.get().toString()
+            mappingsFiles.get().files.first().toString()
         )
 
         if (!autoUpload.get()) {

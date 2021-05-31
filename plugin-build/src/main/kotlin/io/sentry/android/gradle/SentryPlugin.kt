@@ -2,7 +2,6 @@ package io.sentry.android.gradle
 
 import com.android.build.gradle.AppExtension
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
-import io.sentry.android.gradle.SentryMappingFileProvider.getMappingFile
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getDexTask
@@ -55,7 +54,6 @@ class SentryPlugin : Plugin<Project> {
                 var preBundleTask: Task? = null
                 var transformerTask: Task? = null
                 var packageTask: Task? = null
-                var mappingFile: File? = null
                 val sep = File.separator
 
                 if (isMinifyEnabled) {
@@ -71,7 +69,6 @@ class SentryPlugin : Plugin<Project> {
                     packageTask = withLogging(project.logger, "packageTask") {
                         getPackageTask(project, variant.name)
                     }
-                    mappingFile = getMappingFile(project, variant)
                 } else {
                     project.logger.info(
                         "[sentry] isMinifyEnabled is false for variant ${variant.name}."
@@ -107,9 +104,7 @@ class SentryPlugin : Plugin<Project> {
                             sentryProperties?.let { file -> project.file(file) }
                         )
                         it.uuidDirectory.set(uuidOutputDirectory)
-                        mappingFile?.let { mapFile ->
-                            it.mappingsFile.set(mapFile)
-                        }
+                        it.mappingsFiles = variant.mappingFileProvider
                         it.autoUpload.set(extension.autoUpload.get())
                         it.sentryOrganization.set(sentryOrgParameter)
                         it.sentryProject.set(sentryProjectParameter)
