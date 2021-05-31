@@ -3,7 +3,7 @@ package io.sentry.android.gradle
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
 import com.android.build.gradle.tasks.PackageAndroidArtifact
-import io.sentry.android.gradle.util.capitalizeUS
+import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
