@@ -1,5 +1,7 @@
 # Unreleased
 
+* Enhancement: Clean up deprecated/removed Dex and Transform tasks (#)
+
 # 2.0.0-beta.2
 
 * Enhancement: Use pluginManager instead of project.afterEvaluate (#119)

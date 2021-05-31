@@ -20,28 +20,10 @@ internal object SentryTasksProvider {
      */
     @JvmStatic
     fun getTransformerTask(project: Project, variantName: String): Task? =
-        // previously accessed via ApkVariant#getDex, no way to access it anymore directly
         project.findTask(
-            // Android Studio 3.3 includes the R8 shrinker.
-            "transformClassesAndResourcesWithR8For${variantName.capitalized}",
-            "transformClassesAndResourcesWithProguardFor${variantName.capitalized}",
+            // AGP 3.3 includes the R8 shrinker.
             "minify${variantName.capitalized}WithR8",
             "minify${variantName.capitalized}WithProguard"
-        )
-
-    /**
-     * Returns the dex task for the given project and variant.
-     *
-     * @return the task or null otherwise
-     */
-    @JvmStatic
-    fun getDexTask(project: Project, variantName: String): Task? =
-        // previously accessed via ApkVariant#getDex, no way to access it anymore directly
-        project.findTask(
-            // Android Studio 3.3 includes the R8 shrinker.
-            "transformClassesWithDexFor${variantName.capitalized}",
-            "transformClassesWithDexBuilderFor${variantName.capitalized}",
-            "transformClassesAndDexWithShrinkResFor${variantName.capitalized}"
         )
 
     /**
