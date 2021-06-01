@@ -1,5 +1,7 @@
 # Unreleased
 
+* Bump: sentry-cli to 1.65.0 (#133)
+
 # 2.0.0-beta.3
 
 * Enhancement: Clean up deprecated/removed Dex and Transform tasks (#130)
