@@ -3,7 +3,6 @@ package io.sentry.android.gradle
 import com.android.build.gradle.AppExtension
 import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
-import io.sentry.android.gradle.SentryTasksProvider.getDexTask
 import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
@@ -31,22 +30,6 @@ class SentryTaskProviderTest {
     }
 
     @Test
-    fun `getTransformerTask returns transform for R8`() {
-        val (project, task) = getTestProjectWithTask("transformClassesAndResourcesWithR8ForDebug")
-
-        assertEquals(task, getTransformerTask(project, "debug"))
-    }
-
-    @Test
-    fun `getTransformerTask returns transform for Proguard`() {
-        val (project, task) = getTestProjectWithTask(
-            "transformClassesAndResourcesWithProguardForDebug"
-        )
-
-        assertEquals(task, getTransformerTask(project, "debug"))
-    }
-
-    @Test
     fun `getTransformerTask returns minify for R8`() {
         val (project, task) = getTestProjectWithTask("minifyDebugWithR8")
 
@@ -58,34 +41,6 @@ class SentryTaskProviderTest {
         val (project, task) = getTestProjectWithTask("minifyDebugWithProguard")
 
         assertEquals(task, getTransformerTask(project, "debug"))
-    }
-
-    @Test
-    fun `getDexTask returns null for missing task`() {
-        val project = ProjectBuilder.builder().build()
-
-        assertNull(getDexTask(project, "debug"))
-    }
-
-    @Test
-    fun `getDexTask returns transform with Dex`() {
-        val (project, task) = getTestProjectWithTask("transformClassesWithDexForDebug")
-
-        assertEquals(task, getDexTask(project, "debug"))
-    }
-
-    @Test
-    fun `getDexTask returns transform with Dex builder`() {
-        val (project, task) = getTestProjectWithTask("transformClassesWithDexBuilderForDebug")
-
-        assertEquals(task, getDexTask(project, "debug"))
-    }
-
-    @Test
-    fun `getDexTask returns transform with Dex shrinker`() {
-        val (project, task) = getTestProjectWithTask("transformClassesAndDexWithShrinkResForDebug")
-
-        assertEquals(task, getDexTask(project, "debug"))
     }
 
     @Test

@@ -5,7 +5,6 @@ import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
-import io.sentry.android.gradle.SentryTasksProvider.getDexTask
 import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
@@ -54,7 +53,6 @@ class SentryPlugin : Plugin<Project> {
 
                 val isMinifyEnabled = variant.buildType.isMinifyEnabled
 
-                var dexTask: Task? = null
                 var preBundleTask: Task? = null
                 var transformerTask: Task? = null
                 var packageBundleTask: Task? = null
@@ -62,9 +60,6 @@ class SentryPlugin : Plugin<Project> {
                 val sep = File.separator
 
                 if (isMinifyEnabled) {
-                    dexTask = withLogging(project.logger, "dexTask") {
-                        getDexTask(project, variant.name)
-                    }
                     preBundleTask = withLogging(project.logger, "preBundleTask") {
                         getPreBundleTask(project, variant.name)
                     }
@@ -118,10 +113,7 @@ class SentryPlugin : Plugin<Project> {
                         uuidOutputDirectory
                     )
 
-                    // and run before dex transformation. If we managed to find the dex task
-                    // we set ourselves as dependency, otherwise we just hack ourselves into
-                    // the proguard task's doLast.
-                    dexTask?.dependsOn(uploadSentryProguardMappingsTask)
+                    // we just hack ourselves into the proguard task's doLast.
                     transformerTask?.finalizedBy(uploadSentryProguardMappingsTask)
 
                     // To include proguard uuid file into aab, run before bundle task.
