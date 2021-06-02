@@ -1,6 +1,33 @@
-# Unreleased
+# 2.0.0
+
+This release comes with a full rewrite of the Sentry Gradle Plugin.
+
+Here is the [Migration Guide](https://docs.sentry.io/platforms/android/migration/#migrating-from-iosentrysentry-android-gradle-plugin-1x-to-iosentrysentry-android-gradle-plugin-200).
+
+Improvements:
+
+* Using lazily Providers
+* Support for Configuration Avoidance
+* Only try to upload mapping file if 'minifyEnabled' is enabled
+* Plugin Marker is published, so you may use the 'plugins' block
+* Rewritten in Kotlin
+* Unit and Integration tests
+* CI Matrix that runs against different AGP/Gradle/Java and OS versions
+
+Breaking changes:
+
+* Sentry Android Gradle Plugin requires Android Gradle Plugin >= 4.0.0
+
+Changes:
 
 * Bump: sentry-cli to 1.65.0 (#133)
+* Bump: Gradle 7.0.2 (#135)
+
+Thank you:
+
+* @cortinico for coding most of it.
+* @ansman for driving the first PoC of the full rewrite.
+* @cerisier for EA and small fixes.
 
 # 2.0.0-beta.3
 
