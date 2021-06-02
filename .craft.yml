@@ -7,4 +7,3 @@ targets:
   - name: registry
     sdks:
       maven:io.sentry:sentry-android-gradle-plugin:
-        name: registry
