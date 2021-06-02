@@ -10,8 +10,8 @@ Improvements:
 
 * Using lazily Providers
 * Support for Configuration Avoidance
-* Only try to upload mapping file if 'minifyEnabled' is enabled
-* Plugin Marker is published, so you may use the 'plugins' block
+* Only try to upload mapping file if `minifyEnabled` is enabled
+* Plugin Marker is published, so you may use the `plugins` block
 * Rewritten in Kotlin
 * Unit and Integration tests
 * CI Matrix that runs against different AGP/Gradle/Java and OS versions
@@ -19,6 +19,7 @@ Improvements:
 Breaking changes:
 
 * Sentry Android Gradle Plugin requires Android Gradle Plugin >= 4.0.0
+* The `autoProguardConfig` flag has been removed
 
 Changes:
 
