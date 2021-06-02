@@ -1,9 +1,9 @@
-name: Test Publishing Dry Run
+name: Test Publishing UUID Dry Run
 
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
       - '*'
@@ -16,32 +16,31 @@ jobs:
       matrix:
         agp: ["4.1.0"]
         gradle: ["6.8.3"]
-        experimental: [false]
-        name: ["stable"]
+        java: ["8"]
         include:
           - agp: "4.0.0"
             gradle: "6.1.1"
-            experimental: false
-            name: AGP-4.0.0
+            java: "8"
           - agp: "4.1.3"
             gradle: "6.5"
-            experimental: false
-            name: AGP-4.1.3
+            java: "8"
           - agp: "4.1.3"
             gradle: "6.8.3"
-            experimental: false
-            name: AGP-4.1.3-Gradle-6.8.3
+            java: "8"
           - agp: "4.1.3"
-            gradle: "7.0"
-            experimental: false
-            name: AGP-4.1.3-Gradle-7.0
-          - agp: "4.2.0-rc01"
+            gradle: "7.0.2"
+            java: "8"
+          - agp: "4.2.1"
             gradle: "6.8.3"
-            experimental: false
-            name: AGP-4.2.x-Gradle-6.8.3
+            java: "8"
+          - agp: "4.2.1"
+            gradle: "7.0.2"
+            java: "8"
+          - agp: "7.0.0-beta02"
+            gradle: "7.0.2"
+            java: "11"
 
-    continue-on-error: ${{ matrix.experimental }}
-    name: Publish Dry Run - ${{ matrix.name }} - Experimental ${{ matrix.experimental }}
+    name: Publish Dry Run - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
     env:
       VERSION_AGP: ${{ matrix.agp }}
       VERSION_GRADLE: ${{ matrix.gradle }}
@@ -60,11 +59,17 @@ jobs:
             cache-gradle-${{ matrix.gradle }}-
             cache-gradle-
 
+      - name: Setup Java Version
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: ${{ matrix.java }}
+
       - name: Set Gradle Version
         run: ./gradlew wrapper --gradle-version $VERSION_GRADLE --distribution-type=all
 
-      - name: Run the uploadSentryProguardMappings task
-        run: ./gradlew assembleRelease uploadSentryProguardMappingsReleaseRelease
+      - name: Build the release APK and run uploadSentryProguardMappings task
+        run: ./gradlew assembleRelease uploadSentryProguardMappingsRelease
 
       - name: Check sentry-debug-meta.properties inside APKs
         run: |
@@ -73,4 +78,16 @@ jobs:
           rm -r output
           unzip ./examples/android-gradle-kts/build/outputs/apk/release/android-gradle-kts-release-unsigned.apk -d output
           cat output/assets/sentry-debug-meta.properties
+          rm -r output
+
+      - name: Build the release App Bundle and run uploadSentryProguardMappings task
+        run: ./gradlew bundleRelease uploadSentryProguardMappingsRelease
+
+      - name: Check sentry-debug-meta.properties inside App Bundle
+        run: |
+          unzip ./examples/android-gradle/build/outputs/bundle/release/android-gradle-release.aab -d output
+          cat output/base/assets/sentry-debug-meta.properties
+          rm -r output
+          unzip ./examples/android-gradle-kts/build/outputs/bundle/release/android-gradle-kts-release.aab -d output
+          cat output/base/assets/sentry-debug-meta.properties
           rm -r output

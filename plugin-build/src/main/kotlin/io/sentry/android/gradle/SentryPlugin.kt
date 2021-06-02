@@ -1,97 +1,99 @@
 package io.sentry.android.gradle
 
 import com.android.build.gradle.AppExtension
-import com.android.build.gradle.AppPlugin
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
-import io.sentry.android.gradle.SentryMappingFileProvider.getMappingFile
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
-import io.sentry.android.gradle.SentryTasksProvider.getAssembleTask
+import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
-import io.sentry.android.gradle.SentryTasksProvider.getDexTask
-import io.sentry.android.gradle.SentryTasksProvider.getPackageTask
+import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
+import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
+import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
+import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
+import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
+import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
 import java.io.File
-import java.util.Locale
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtraPropertiesExtension
 
 class SentryPlugin : Plugin<Project> {
-    @OptIn(ExperimentalStdlibApi::class)
     override fun apply(project: Project) {
         val extension = project.extensions.create(
             "sentry",
             SentryPluginExtension::class.java,
             project
         )
-        project.afterEvaluate {
-            check(project.plugins.hasPlugin(AppPlugin::class.java)) {
-                "[sentry] Must apply `com.android.application` first!"
-            }
-
+        project.pluginManager.withPlugin("com.android.application") {
             val androidExtension = project.extensions.getByType(AppExtension::class.java)
+            val cliExecutable = getSentryCliPath(project)
 
-            androidExtension.applicationVariants.all { variant ->
-                variant.outputs.all { variantOutput ->
-                    val taskSuffix = variant.name.capitalize(Locale.ROOT) +
-                        variantOutput.name.capitalize(Locale.ROOT)
+            val extraProperties = project.extensions.getByName("ext")
+                as ExtraPropertiesExtension
 
-                    fun withLogging(varName: String, initializer: () -> Task?) =
-                        initializer().also {
-                            project.logger.info("[sentry] $varName is ${it?.path}")
-                        }
+            val sentryOrgParameter = runCatching {
+                extraProperties.get(SENTRY_ORG_PARAMETER).toString()
+            }.getOrNull()
+            val sentryProjectParameter = runCatching {
+                extraProperties.get(SENTRY_PROJECT_PARAMETER).toString()
+            }.getOrNull()
 
-                    val dexTask = withLogging("dexTask") { getDexTask(project, variant.name) }
-                    val preBundleTask = withLogging("preBundleTask") {
+            androidExtension.applicationVariants.configureEach { variant ->
+
+                val bundleTask = withLogging(project.logger, "bundleTask") {
+                    getBundleTask(project, variant.name)
+                }
+
+                val sentryProperties = getPropertiesFilePath(project, variant)
+
+                val isMinifyEnabled = variant.buildType.isMinifyEnabled
+
+                var preBundleTask: Task? = null
+                var transformerTask: Task? = null
+                var packageBundleTask: Task? = null
+
+                val sep = File.separator
+
+                if (isMinifyEnabled) {
+                    preBundleTask = withLogging(project.logger, "preBundleTask") {
                         getPreBundleTask(project, variant.name)
                     }
-                    val bundleTask = withLogging("bundleTask") {
-                        getBundleTask(project, variant.name)
-                    }
-                    val transformerTask = withLogging("transformerTask") {
+                    transformerTask = withLogging(project.logger, "transformerTask") {
                         getTransformerTask(project, variant.name)
                     }
-                    val packageTask = withLogging("packageTask") {
-                        getPackageTask(project, variant.name)
+                    packageBundleTask = withLogging(project.logger, "packageBundleTask") {
+                        getPackageBundleTask(project, variant.name)
                     }
-                    val assembleTask = withLogging("assembleTask") { getAssembleTask(variant) }
+                } else {
+                    project.logger.info(
+                        "[sentry] isMinifyEnabled is false for variant ${variant.name}."
+                    )
+                }
 
-                    val sentryProperties = getPropertiesFilePath(project, variant)
+                val taskSuffix = variant.name.capitalizeUS()
 
-                    val extraProperties = project.extensions.getByName("ext")
-                        as ExtraPropertiesExtension
-
-                    val sentryOrgParameter = runCatching {
-                        extraProperties.get(SENTRY_ORG_PARAMETER).toString()
-                    }.getOrNull()
-                    val sentryProjectParameter = runCatching {
-                        extraProperties.get(SENTRY_PROJECT_PARAMETER).toString()
-                    }.getOrNull()
-
-                    val mappingFile = getMappingFile(project, variant)
-                    val cliExecutable = getSentryCliPath(project)
-                    val sep = File.separator
-
+                if (isMinifyEnabled) {
                     // Setup the task to generate a UUID asset file
-                    val generateUuidTask = project.tasks.create(
+                    val uuidOutputDirectory = project.file(
+                        "build${sep}generated${sep}assets${sep}sentry${sep}${variant.name}"
+                    )
+                    val generateUuidTask = project.tasks.register(
                         "generateSentryProguardUuid$taskSuffix",
                         SentryGenerateProguardUuidTask::class.java
                     ) {
-                        it.outputDirectory.set(
-                            project.file(
-                                "build${sep}generated${sep}assets${sep}sentry${sep}${variant.name}"
-                            )
-                        )
+                        it.outputDirectory.set(uuidOutputDirectory)
                     }
-                    variant.mergeAssetsProvider.configure { it.dependsOn(generateUuidTask) }
+                    getMergeAssetsProvider(variant)?.configure {
+                        it.dependsOn(generateUuidTask)
+                    }
 
                     // Setup the task that uploads the proguard mapping and UUIDs
-                    val uploadSentryProguardMappingsTask = project.tasks.create(
+                    val uploadSentryProguardMappingsTask = project.tasks.register(
                         "uploadSentryProguardMappings$taskSuffix",
                         SentryUploadProguardMappingsTask::class.java
                     ) {
@@ -101,54 +103,58 @@ class SentryPlugin : Plugin<Project> {
                         it.sentryProperties.set(
                             sentryProperties?.let { file -> project.file(file) }
                         )
-                        it.mappingsUuid.set(generateUuidTask.outputUuid)
-                        it.mappingsFile.set(mappingFile)
+                        it.uuidDirectory.set(uuidOutputDirectory)
+                        it.mappingsFiles = getMappingFileProvider(variant)
                         it.autoUpload.set(extension.autoUpload.get())
                         it.sentryOrganization.set(sentryOrgParameter)
                         it.sentryProject.set(sentryProjectParameter)
                     }
-                    variant.register(uploadSentryProguardMappingsTask)
                     androidExtension.sourceSets.getByName(variant.name).assets.srcDir(
-                        generateUuidTask.outputDirectory
+                        uuidOutputDirectory
                     )
 
-                    // Setup the task to upload native symbols task after the assembling task
-                    val uploadNativeSymbolsTask = project.tasks.create(
-                        "uploadNativeSymbolsFor$taskSuffix",
-                        SentryUploadNativeSymbolsTask::class.java
-                    ) {
-                        it.workingDir(project.rootDir)
-                        it.cliExecutable.set(cliExecutable)
-                        it.sentryProperties.set(
-                            sentryProperties?.let { file -> project.file(file) }
-                        )
-                        it.includeNativeSources.set(extension.includeNativeSources.get())
-                        it.variantName.set(variant.name)
-                        it.sentryOrganization.set(sentryOrgParameter)
-                        it.sentryProject.set(sentryProjectParameter)
-                    }
-
-                    // and run before dex transformation. If we managed to find the dex task
-                    // we set ourselves as dependency, otherwise we just hack ourselves into
-                    // the proguard task's doLast.
-                    dexTask?.dependsOn(uploadSentryProguardMappingsTask)
+                    // we just hack ourselves into the proguard task's doLast.
                     transformerTask?.finalizedBy(uploadSentryProguardMappingsTask)
 
                     // To include proguard uuid file into aab, run before bundle task.
                     preBundleTask?.dependsOn(uploadSentryProguardMappingsTask)
 
                     // The package task will only be executed if the uploadSentryProguardMappingsTask has already been executed.
-                    packageTask?.dependsOn(uploadSentryProguardMappingsTask)
-
-                    // uploadNativeSymbolsTask will only be executed after the assemble task
-                    // and also only if `uploadNativeSymbols` is enabled, as this is an opt-in feature.
-                    if (extension.uploadNativeSymbols.get()) {
-                        assembleTask?.finalizedBy(uploadNativeSymbolsTask)
-                        // if its a bundle aab, assemble might not be executed, so we hook into bundle task
-                        bundleTask?.finalizedBy(uploadNativeSymbolsTask)
-                    } else {
-                        project.logger.info("[sentry] uploadNativeSymbolsTask won't be executed")
+                    getPackageProvider(variant)?.configure {
+                        it.dependsOn(uploadSentryProguardMappingsTask)
                     }
+                    // App bundle has different package task
+                    packageBundleTask?.dependsOn(uploadSentryProguardMappingsTask)
+                }
+
+                // Setup the task to upload native symbols task after the assembling task
+                val uploadNativeSymbolsTask = project.tasks.register(
+                    "uploadNativeSymbolsFor$taskSuffix",
+                    SentryUploadNativeSymbolsTask::class.java
+                ) {
+                    it.workingDir(project.rootDir)
+                    it.cliExecutable.set(cliExecutable)
+                    it.sentryProperties.set(
+                        sentryProperties?.let { file -> project.file(file) }
+                    )
+                    it.includeNativeSources.set(extension.includeNativeSources.get())
+                    it.variantName.set(variant.name)
+                    it.sentryOrganization.set(sentryOrgParameter)
+                    it.sentryProject.set(sentryProjectParameter)
+                }
+
+                // uploadNativeSymbolsTask will only be executed after the assemble task
+                // and also only if `uploadNativeSymbols` is enabled, as this is an opt-in feature.
+                if (extension.uploadNativeSymbols.get()) {
+                    getAssembleTaskProvider(variant)?.configure {
+                        it.finalizedBy(
+                            uploadNativeSymbolsTask
+                        )
+                    }
+                    // if its a bundle aab, assemble might not be executed, so we hook into bundle task
+                    bundleTask?.finalizedBy(uploadNativeSymbolsTask)
+                } else {
+                    project.logger.info("[sentry] uploadNativeSymbolsTask won't be executed")
                 }
             }
         }

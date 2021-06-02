@@ -3,7 +3,7 @@ name: Pre Merge Checks
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
       - '*'
@@ -29,6 +29,12 @@ jobs:
           restore-keys: |
             cache-gradle-
 
+      - name: Setup Java Version
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+
       - name: Run Gradle tasks
         run: ./gradlew preMerge --continue
 
@@ -39,5 +45,8 @@ jobs:
           path: plugin-build/build/reports/tests/
         if: always()
 
+      - name: Build the Debug variant
+        run: ./gradlew assembleDebug
+
       - name: Run the uploadSentryProguardMappings task
-        run: ./gradlew assembleRelease uploadSentryProguardMappingsReleaseRelease
+        run: ./gradlew assembleRelease uploadSentryProguardMappingsRelease

@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.utils
+package io.sentry.android.gradle.util
 
 import org.junit.rules.TestRule
 import org.junit.runner.Description

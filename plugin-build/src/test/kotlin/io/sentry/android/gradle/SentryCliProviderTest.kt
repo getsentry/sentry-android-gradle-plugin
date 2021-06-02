@@ -5,8 +5,8 @@ import io.sentry.android.gradle.SentryCliProvider.getSentryPropertiesPath
 import io.sentry.android.gradle.SentryCliProvider.loadCliFromResourcesToTemp
 import io.sentry.android.gradle.SentryCliProvider.searchCliInPropertiesFile
 import io.sentry.android.gradle.SentryCliProvider.searchCliInResources
-import io.sentry.android.gradle.utils.SystemPropertyRule
-import io.sentry.android.gradle.utils.WithSystemProperty
+import io.sentry.android.gradle.util.SystemPropertyRule
+import io.sentry.android.gradle.util.WithSystemProperty
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

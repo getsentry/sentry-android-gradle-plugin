@@ -10,11 +10,12 @@ compile:
 
 # do a dry release (like a local deploy)
 dryRelease:
-	./gradlew publishToMavenLocal
+	./gradlew publishToMavenLocal --no-parallel
 
 # clean, build and deploy to maven central
 doRelease:
-	./gradlew publishMavenPublicationToMavenCentralRepository
+	./gradlew publishMavenPublicationToMavenCentralRepository --no-parallel
+	./gradlew publishSentryPluginPluginMarkerMavenPublicationToMavenCentralRepository --no-parallel
 	./gradlew closeAndReleaseRepository
 
 all: clean compile dryRelease

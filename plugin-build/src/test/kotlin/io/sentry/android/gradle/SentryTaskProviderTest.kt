@@ -1,10 +1,11 @@
 package io.sentry.android.gradle
 
 import com.android.build.gradle.AppExtension
-import io.sentry.android.gradle.SentryTasksProvider.getAssembleTask
+import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
-import io.sentry.android.gradle.SentryTasksProvider.getDexTask
-import io.sentry.android.gradle.SentryTasksProvider.getPackageTask
+import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
+import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
+import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
 import kotlin.test.assertEquals
@@ -29,22 +30,6 @@ class SentryTaskProviderTest {
     }
 
     @Test
-    fun `getTransformerTask returns transform for R8`() {
-        val (project, task) = getTestProjectWithTask("transformClassesAndResourcesWithR8ForDebug")
-
-        assertEquals(task, getTransformerTask(project, "debug"))
-    }
-
-    @Test
-    fun `getTransformerTask returns transform for Proguard`() {
-        val (project, task) = getTestProjectWithTask(
-            "transformClassesAndResourcesWithProguardForDebug"
-        )
-
-        assertEquals(task, getTransformerTask(project, "debug"))
-    }
-
-    @Test
     fun `getTransformerTask returns minify for R8`() {
         val (project, task) = getTestProjectWithTask("minifyDebugWithR8")
 
@@ -56,34 +41,6 @@ class SentryTaskProviderTest {
         val (project, task) = getTestProjectWithTask("minifyDebugWithProguard")
 
         assertEquals(task, getTransformerTask(project, "debug"))
-    }
-
-    @Test
-    fun `getDexTask returns null for missing task`() {
-        val project = ProjectBuilder.builder().build()
-
-        assertNull(getDexTask(project, "debug"))
-    }
-
-    @Test
-    fun `getDexTask returns transform with Dex`() {
-        val (project, task) = getTestProjectWithTask("transformClassesWithDexForDebug")
-
-        assertEquals(task, getDexTask(project, "debug"))
-    }
-
-    @Test
-    fun `getDexTask returns transform with Dex builder`() {
-        val (project, task) = getTestProjectWithTask("transformClassesWithDexBuilderForDebug")
-
-        assertEquals(task, getDexTask(project, "debug"))
-    }
-
-    @Test
-    fun `getDexTask returns transform with Dex shrinker`() {
-        val (project, task) = getTestProjectWithTask("transformClassesAndDexWithShrinkResForDebug")
-
-        assertEquals(task, getDexTask(project, "debug"))
     }
 
     @Test
@@ -115,28 +72,59 @@ class SentryTaskProviderTest {
     }
 
     @Test
-    fun `getPackageTask returns null for missing task`() {
+    fun `getPackageBundleTask returns null for missing task`() {
         val project = ProjectBuilder.builder().build()
 
-        assertNull(getPackageTask(project, "debug"))
+        assertNull(getPackageBundleTask(project, "debug"))
     }
 
     @Test
-    fun `getPackageTask returns plain package task`() {
-        val (project, task) = getTestProjectWithTask("packageDebug")
-
-        assertEquals(task, getPackageTask(project, "debug"))
-    }
-
-    @Test
-    fun `getPackageTask returns package bundle task`() {
+    fun `getPackageBundleTask returns package bundle task`() {
         val (project, task) = getTestProjectWithTask("packageDebugBundle")
 
-        assertEquals(task, getPackageTask(project, "debug"))
+        assertEquals(task, getPackageBundleTask(project, "debug"))
     }
 
     @Test
-    fun `getAssembleTask works correctly for all the variants`() {
+    fun `getAssembleTaskProvider works correctly for all the variants`() {
+        val android = getAndroidExtFromProject()
+
+        android.applicationVariants.configureEach {
+            if (it.name == "debug") {
+                assertEquals("assembleDebug", getAssembleTaskProvider(it)?.name)
+            } else {
+                assertEquals("assembleRelease", getAssembleTaskProvider(it)?.name)
+            }
+        }
+    }
+
+    @Test
+    fun `getMergeAssetsProvider works correctly for all the variants`() {
+        val android = getAndroidExtFromProject()
+
+        android.applicationVariants.configureEach {
+            if (it.name == "debug") {
+                assertEquals("mergeDebugAssets", getMergeAssetsProvider(it)?.name)
+            } else {
+                assertEquals("mergeReleaseAssets", getMergeAssetsProvider(it)?.name)
+            }
+        }
+    }
+
+    @Test
+    fun `getPackageProvider works correctly for all the variants`() {
+        val android = getAndroidExtFromProject()
+
+        android.applicationVariants.configureEach {
+            if (it.name == "debug") {
+                assertEquals("packageDebug", getPackageProvider(it)?.name)
+            } else {
+                assertEquals("packageRelease", getPackageProvider(it)?.name)
+            }
+        }
+    }
+
+    private fun getAndroidExtFromProject(): AppExtension {
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("com.android.application")
         val android = project.extensions.getByType(AppExtension::class.java).apply {
@@ -145,14 +133,7 @@ class SentryTaskProviderTest {
 
         // This forces the project to be evaluated
         project.getTasksByName("assembleDebug", false)
-
-        android.applicationVariants.all {
-            if (it.name == "debug") {
-                assertEquals("assembleDebug", getAssembleTask(it).name)
-            } else {
-                assertEquals("assembleRelease", getAssembleTask(it).name)
-            }
-        }
+        return android
     }
 
     private fun getTestProjectWithTask(taskName: String): Pair<Project, Task> {

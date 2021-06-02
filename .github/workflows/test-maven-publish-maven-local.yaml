@@ -1,4 +1,4 @@
-name: Test Publishing UUID
+name: Test Maven Publish to Maven Local
 
 on:
   push:
@@ -9,13 +9,8 @@ on:
       - '*'
 
 jobs:
-  publish:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+  publish-maven-local:
     runs-on: ubuntu-latest
-
-    env:
-      AUTO_UPLOAD: true
-      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
     steps:
       - name: Checkout Repo
@@ -30,5 +25,7 @@ jobs:
           restore-keys: |
             cache-gradle-
 
-      - name: Run the uploadSentryProguardMappings task
-        run: ./gradlew assembleRelease uploadSentryProguardMappingsRelease
+      - name: Run publishToMavenLocal
+        run: |
+          cd plugin-build
+          make dryRelease

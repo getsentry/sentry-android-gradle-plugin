@@ -10,7 +10,6 @@ plugins {
 }
 
 repositories {
-    jcenter()
     mavenLocal()
     mavenCentral()
     google()
@@ -30,6 +29,7 @@ tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
         jvmTarget = "1.8"
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
+        languageVersion = "1.3"
     }
 }
 
@@ -65,9 +65,4 @@ if (gradle.gradleVersion >= "6.6.0") {
 
     val publish = extensions.getByType(MavenPublishPluginExtension::class.java)
     publish.releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
-
-    // https://github.com/vanniktech/gradle-maven-publish-plugin/issues/234
-    publish.nexus {
-        stagingProfile = group.toString()
-    }
 }
