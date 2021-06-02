@@ -1,15 +1,9 @@
-minVersion: "0.18.0"
-github:
-  owner: getsentry
-  repo: sentry-android-gradle-plugin
+minVersion: 0.23.1
 changelogPolicy: simple
-statusProvider:
-  name: github
 artifactProvider:
   name: none
 targets:
   - name: github
   - name: registry
-    type: sdk
-    config:
-      canonical: "maven:io.sentry:sentry-android-gradle-plugin"
+    sdks:
+      maven:io.sentry:sentry-android-gradle-plugin:
