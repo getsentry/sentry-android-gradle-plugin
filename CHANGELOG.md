@@ -1,5 +1,7 @@
 # Unreleased
 
+* Fix: Only upload debug symbols for non debuggable App.
+
 # 2.0.0
 
 This release comes with a full rewrite of the Sentry Gradle Plugin.
