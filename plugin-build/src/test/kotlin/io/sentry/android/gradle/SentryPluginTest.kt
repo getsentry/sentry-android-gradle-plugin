@@ -128,25 +128,25 @@ class SentryPluginTest(
     }
 
     @Test
-    fun `creates uploadNativeSymbolsForRelease task if uploadNativeSymbols is enabled`() {
+    fun `creates uploadSentryNativeSymbols task if uploadNativeSymbols is enabled`() {
         applyUploadNativeSymbols()
 
         val build = runner
             .appendArguments(":app:assembleRelease")
             .build()
 
-        assertNotNull(build.task("uploadNativeSymbolsForRelease"))
+        assertNotNull(build.task(":app:uploadSentryNativeSymbolsForRelease"))
     }
 
     @Test
-    fun `does not create uploadNativeSymbolsForRelease task if non debuggable app`() {
+    fun `does not create uploadSentryNativeSymbols task if non debuggable app`() {
         applyUploadNativeSymbols()
 
         val build = runner
             .appendArguments(":app:assembleDebug")
             .build()
 
-        assertNull(build.task("uploadNativeSymbolsForDebug"))
+        assertNull(build.task(":app:uploadSentryNativeSymbolsForDebug"))
     }
 
     private fun applyUploadNativeSymbols() {
