@@ -159,6 +159,7 @@ class SentryPluginTest(
                 }
 
                 sentry {
+                  autoUpload = false
                   uploadNativeSymbols = true
                 }
             """.trimIndent()
