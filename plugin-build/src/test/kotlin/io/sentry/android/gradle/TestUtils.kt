@@ -17,8 +17,13 @@ private val ASSET_PATTERN =
     )
 /* ktlint-enable max-line-length */
 
-internal fun verifyProguardUuid(rootFile: File, variant: String = "release"): UUID {
-    val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant-unsigned.apk")
+internal fun verifyProguardUuid(
+    rootFile: File,
+    variant: String = "release",
+    signed: Boolean = true
+): UUID {
+    val signedStr = if (signed) "-unsigned" else ""
+    val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant$signedStr.apk")
     val sentryProperties = extractZip(apk, "assets/sentry-debug-meta.properties")
     val matcher = ASSET_PATTERN.matchEntire(sentryProperties)
 

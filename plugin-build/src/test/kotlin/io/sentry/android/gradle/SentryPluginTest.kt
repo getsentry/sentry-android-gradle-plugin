@@ -2,8 +2,11 @@ package io.sentry.android.gradle
 
 import java.io.File
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -123,6 +126,57 @@ class SentryPluginTest(
             .build()
 
         verifyProguardUuid(testProjectDir.root)
+    }
+
+    @Test
+    fun `does not include a UUID in the APK`() {
+        // isMinifyEnabled is disabled by default in debug builds
+        runner
+            .appendArguments(":app:assembleDebug")
+            .build()
+
+        Assert.assertThrows(AssertionError::class.java) {
+            verifyProguardUuid(testProjectDir.root, variant = "debug", signed = false)
+        }
+    }
+
+    @Test
+    fun `creates uploadSentryNativeSymbols task if uploadNativeSymbols is enabled`() {
+        applyUploadNativeSymbols()
+
+        val build = runner
+            .appendArguments(":app:assembleRelease")
+            .build()
+
+        assertNotNull(build.task(":app:uploadSentryNativeSymbolsForRelease"))
+    }
+
+    @Test
+    fun `does not create uploadSentryNativeSymbols task if non debuggable app`() {
+        applyUploadNativeSymbols()
+
+        val build = runner
+            .appendArguments(":app:assembleDebug")
+            .build()
+
+        assertNull(build.task(":app:uploadSentryNativeSymbolsForDebug"))
+    }
+
+    private fun applyUploadNativeSymbols() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+                plugins {
+                  id "com.android.application"
+                  id "io.sentry.android.gradle"
+                }
+
+                sentry {
+                  autoUpload = false
+                  uploadNativeSymbols = true
+                }
+            """.trimIndent()
+        )
     }
 
     companion object {
