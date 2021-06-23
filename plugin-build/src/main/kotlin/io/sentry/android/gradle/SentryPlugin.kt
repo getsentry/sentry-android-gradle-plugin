@@ -130,12 +130,12 @@ class SentryPlugin : Plugin<Project> {
                 }
 
                 // only debug symbols of non debuggable code should be uploaded (aka release builds).
-                // uploadNativeSymbolsTask will only be executed after the assemble task
+                // uploadSentryNativeSymbols task will only be executed after the assemble task
                 // and also only if `uploadNativeSymbols` is enabled, as this is an opt-in feature.
                 if (!isDebuggable && extension.uploadNativeSymbols.get()) {
                     // Setup the task to upload native symbols task after the assembling task
-                    val uploadNativeSymbolsTask = project.tasks.register(
-                        "uploadNativeSymbolsFor$taskSuffix",
+                    val uploadSentryNativeSymbolsTask = project.tasks.register(
+                        "uploadSentryNativeSymbolsFor$taskSuffix",
                         SentryUploadNativeSymbolsTask::class.java
                     ) {
                         it.workingDir(project.rootDir)
@@ -151,13 +151,13 @@ class SentryPlugin : Plugin<Project> {
 
                     getAssembleTaskProvider(variant)?.configure {
                         it.finalizedBy(
-                            uploadNativeSymbolsTask
+                            uploadSentryNativeSymbolsTask
                         )
                     }
                     // if its a bundle aab, assemble might not be executed, so we hook into bundle task
-                    bundleTask?.finalizedBy(uploadNativeSymbolsTask)
+                    bundleTask?.finalizedBy(uploadSentryNativeSymbolsTask)
                 } else {
-                    project.logger.info("[sentry] uploadNativeSymbolsTask won't be executed")
+                    project.logger.info("[sentry] uploadSentryNativeSymbols won't be executed")
                 }
             }
         }
