@@ -6,6 +6,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -125,6 +126,18 @@ class SentryPluginTest(
             .build()
 
         verifyProguardUuid(testProjectDir.root)
+    }
+
+    @Test
+    fun `does not include a UUID in the APK`() {
+        // isMinifyEnabled is disabled by default in debug builds
+        runner
+            .appendArguments(":app:assembleDebug")
+            .build()
+
+        Assert.assertThrows(AssertionError::class.java) {
+            verifyProguardUuid(testProjectDir.root, variant = "debug", signed = false)
+        }
     }
 
     @Test
