@@ -7,7 +7,6 @@ import java.nio.charset.Charset
 import java.util.UUID
 import java.util.zip.ZipInputStream
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /* ktlint-disable max-line-length */
@@ -19,8 +18,9 @@ private val ASSET_PATTERN =
 /* ktlint-enable max-line-length */
 
 internal fun verifyProguardUuid(rootFile: File, variant: String = "release"): UUID {
-    val sentryProperties = getSentryProperties(rootFile, variant)
-    val matcher = ASSET_PATTERN.matchEntire(sentryProperties!!)
+    val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant-unsigned.apk")
+    val sentryProperties = extractZip(apk, "assets/sentry-debug-meta.properties")
+    val matcher = ASSET_PATTERN.matchEntire(sentryProperties)
 
     assertTrue("Properties file is missing from the APK") { sentryProperties.isNotBlank() }
     assertNotNull(matcher, "$sentryProperties does not match pattern $ASSET_PATTERN")
@@ -28,18 +28,7 @@ internal fun verifyProguardUuid(rootFile: File, variant: String = "release"): UU
     return UUID.fromString(matcher.groupValues[1])
 }
 
-internal fun verifyNoProguardUuid(rootFile: File, variant: String = "debug") {
-    val sentryProperties = getSentryProperties(rootFile, variant)
-
-    assertNull(sentryProperties)
-}
-
-internal fun getSentryProperties(rootFile: File, variant: String): String? {
-    val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant-unsigned.apk")
-    return extractZip(apk, "assets/sentry-debug-meta.properties")
-}
-
-private fun extractZip(zipFile: File, fileToExtract: String): String? {
+private fun extractZip(zipFile: File, fileToExtract: String): String {
     ZipInputStream(FileInputStream(zipFile)).use { zis ->
         var entry = zis.nextEntry
         while (entry != null) {
@@ -50,7 +39,7 @@ private fun extractZip(zipFile: File, fileToExtract: String): String? {
             entry = zis.nextEntry
         }
     }
-    return null
+    return ""
 }
 
 private fun readZippedContent(zipInputStream: ZipInputStream): String {
