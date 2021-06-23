@@ -1,4 +1,4 @@
-# Unreleased
+# 2.0.1
 
 * Fix: Only upload debug symbols for non debuggable App. (#139)
 
