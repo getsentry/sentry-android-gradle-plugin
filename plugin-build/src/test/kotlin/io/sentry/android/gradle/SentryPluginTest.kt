@@ -128,16 +128,6 @@ class SentryPluginTest(
     }
 
     @Test
-    fun `does not include a UUID in the APK`() {
-        // isMinifyEnabled is disabled by default in debug builds
-        runner
-            .appendArguments(":app:assembleDebug")
-            .build()
-
-        verifyNoProguardUuid(testProjectDir.root)
-    }
-
-    @Test
     fun `creates uploadNativeSymbolsForRelease task if uploadNativeSymbols is enabled`() {
         applyUploadNativeSymbols()
 
