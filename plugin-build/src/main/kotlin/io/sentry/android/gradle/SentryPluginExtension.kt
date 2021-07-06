@@ -2,6 +2,7 @@ package io.sentry.android.gradle
 
 import javax.inject.Inject
 import org.gradle.api.Project
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 
 abstract class SentryPluginExtension @Inject constructor(project: Project) {
@@ -34,4 +35,16 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     val includeNativeSources: Property<Boolean> = objects.property(Boolean::class.java).convention(
         false
     )
+
+    /** List of Android build variants that should be ignored by the Sentry plugin. */
+    val ignoredVariants: ListProperty<String> = objects.listProperty(String::class.java)
+        .convention(emptyList())
+
+    /** List of Android build types that should be ignored by the Sentry plugin. */
+    val ignoredBuildTypes: ListProperty<String> = objects.listProperty(String::class.java)
+        .convention(emptyList())
+
+    /** List of Android build flavors that should be ignored by the Sentry plugin. */
+    val ignoredFlavors: ListProperty<String> = objects.listProperty(String::class.java)
+        .convention(emptyList())
 }

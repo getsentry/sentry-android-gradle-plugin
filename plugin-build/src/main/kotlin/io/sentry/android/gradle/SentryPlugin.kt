@@ -46,7 +46,11 @@ class SentryPlugin : Plugin<Project> {
                 extraProperties.get(SENTRY_PROJECT_PARAMETER).toString()
             }.getOrNull()
 
-            androidExtension.applicationVariants.configureEach { variant ->
+            androidExtension.applicationVariants.matching {
+                it.name !in extension.ignoredVariants.get() &&
+                    it.flavorName !in extension.ignoredFlavors.get() &&
+                    it.buildType.name !in extension.ignoredBuildTypes.get()
+            }.configureEach { variant ->
 
                 val bundleTask = withLogging(project.logger, "bundleTask") {
                     getBundleTask(project, variant.name)

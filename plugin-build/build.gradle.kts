@@ -33,6 +33,10 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
+tasks.withType<Test>().configureEach {
+    maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+}
+
 gradlePlugin {
     plugins {
         register("sentryPlugin") {
