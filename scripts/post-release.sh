@@ -9,6 +9,8 @@ NEW_VERSION="${2}"
 
 GRADLE_FILEPATH="plugin-build/gradle.properties"
 
+git checkout main
+
 # Add a new unreleased entry in the changelog
 sed -i "" 's/# Changelog/# Changelog\n\n## Unreleased/' CHANGELOG.md
 
@@ -28,3 +30,7 @@ version_digit_to_bump="$( awk "/$VERSION_PATTERN/" $GRADLE_FILEPATH | egrep -o '
 # since the version to be bumped is extracted using `+`.
 new_version="$( echo $version | sed "s/[0-9]*$/$version_digit_to_bump/g" )"
 sed -i "" -e "s/$VERSION_PATTERN = .*$/$VERSION_PATTERN = $new_version-SNAPSHOT/g" $GRADLE_FILEPATH
+
+git add .
+git commit -m "Prepare $new_version"
+git push
