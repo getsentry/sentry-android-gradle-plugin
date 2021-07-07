@@ -11,3 +11,7 @@ echo $OLD_VERSION
 echo $NEW_VERSION
 
 GRADLE_FILEPATH="plugin-build/gradle.properties"
+
+# Replace `version` with the given version
+VERSION_NAME_PATTERN="version"
+sed -i "" -e "s/$VERSION_NAME_PATTERN = .*$/$VERSION_NAME_PATTERN = $NEW_VERSION/g" $GRADLE_FILEPATH
