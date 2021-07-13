@@ -1,12 +1,10 @@
 package io.sentry.android.gradle
 
 import java.io.File
-import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
-import kotlin.test.assertTrue
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
-import org.junit.Assert
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -16,7 +14,7 @@ import org.junit.runners.Parameterized
 
 @Suppress("FunctionName")
 @RunWith(Parameterized::class)
-class SentryPluginTest(
+class SentryPluginVariantTest(
     private val androidGradlePluginVersion: String,
     private val gradleVersion: String
 ) {
@@ -74,6 +72,15 @@ class SentryPluginTest(
                       proguardFiles("src/release/proguard-rules.pro")
                     }
                   }
+                  flavorDimensions "version"
+                  productFlavors {
+                    create("demo") {
+                        applicationIdSuffix = ".demo"
+                    }
+                    create("full") {
+                        applicationIdSuffix = ".full"
+                    }
+                  }
                 }
               }
             }
@@ -88,103 +95,86 @@ class SentryPluginTest(
     }
 
     @Test
-    fun `plugin can be applied`() {
-        appBuildFile.writeText(
-            // language=Groovy
-            """
-                plugins {
-                  id "com.android.application"
-                  id "io.sentry.android.gradle"
-                }
-
-                sentry {
-                  autoUpload = false
-                }
-            """.trimIndent()
-        )
-
-        runner.build()
-    }
-
-    @Test
-    fun `regenerates UUID every build`() {
-        runner.appendArguments(":app:assembleRelease")
-
-        runner.build()
-        val uuid1 = verifyProguardUuid(testProjectDir.root)
-
-        runner.build()
-        val uuid2 = verifyProguardUuid(testProjectDir.root)
-
-        assertNotEquals(uuid1, uuid2)
-    }
-
-    @Test
-    fun `includes a UUID in the APK`() {
-        runner
-            .appendArguments(":app:assembleRelease")
-            .build()
-
-        verifyProguardUuid(testProjectDir.root)
-    }
-
-    @Test
-    fun `does not include a UUID in the APK`() {
-        // isMinifyEnabled is disabled by default in debug builds
-        runner
-            .appendArguments(":app:assembleDebug")
-            .build()
-
-        Assert.assertThrows(AssertionError::class.java) {
-            verifyProguardUuid(testProjectDir.root, variant = "debug", signed = false)
-        }
-    }
-
-    @Test
-    fun `creates uploadSentryNativeSymbols task if uploadNativeSymbols is enabled`() {
-        applyUploadNativeSymbols()
-
-        val build = runner
-            .appendArguments(":app:assembleRelease", "--dry-run")
-            .build()
-
-        assertTrue(":app:uploadSentryNativeSymbolsForRelease" in build.output)
-    }
-
-    @Test
-    fun `does not create uploadSentryNativeSymbols task if non debuggable app`() {
-        applyUploadNativeSymbols()
-
-        val build = runner
-            .appendArguments(":app:assembleDebug", "--dry-run")
-            .build()
-
-        assertFalse(":app:uploadSentryNativeSymbolsForDebug" in build.output)
-    }
-
-    @Test
     fun `skips variant if set with ignoredVariants`() {
-        applyIgnores(ignoredVariant = "release")
+        applyIgnores(ignoredVariants = listOf("fullRelease"))
 
         val build = runner
-            .appendArguments(":app:assembleRelease", "--dry-run")
+            .appendArguments(":app:assembleFullRelease", "--dry-run")
             .build()
 
-        assertFalse(":app:uploadSentryProguardMappingsRelease" in build.output)
+        assertFalse(":app:uploadSentryProguardMappingsFullRelease" in build.output)
     }
 
     @Test
-    fun `does not skip variant if ignoredVariants specifies another value`() {
-        applyIgnores(ignoredVariant = "debug")
+    fun `does not skip variant if not included in ignoredVariants`() {
+        applyIgnores(ignoredVariants = listOf("demoRelease", "fullDebug", "demoDebug"))
 
         val build = runner
-            .appendArguments(":app:assembleRelease", "--dry-run")
+            .appendArguments(":app:assembleFullRelease", "--dry-run")
             .build()
 
-        assertTrue(":app:uploadSentryProguardMappingsRelease" in build.output)
+        assertTrue(":app:uploadSentryProguardMappingsFullRelease" in build.output)
     }
 
-    private fun applyUploadNativeSymbols() {
+    @Test
+    fun `skips buildType if set with ignoredBuildTypes`() {
+        applyIgnores(ignoredBuildTypes = listOf("debug"))
+
+        val build = runner
+            .appendArguments(":app:assembleFullDebug", "--dry-run")
+            .build()
+
+        assertFalse(":app:uploadSentryProguardMappingsFullDebug" in build.output)
+        assertFalse(":app:uploadSentryProguardMappingsDemoDebug" in build.output)
+    }
+
+    @Test
+    fun `does not skip buildType if not included in ignoredBuildTypes`() {
+        applyIgnores(ignoredBuildTypes = listOf("debug"))
+
+        val build = runner
+            .appendArguments(":app:assembleFullRelease", "--dry-run")
+            .build()
+
+        assertTrue(":app:uploadSentryProguardMappingsFullRelease" in build.output)
+    }
+
+    @Test
+    fun `skips flavor if set with ignoredFlavors`() {
+        applyIgnores(ignoredFlavors = listOf("full"))
+
+        var build = runner
+            .appendArguments(":app:assembleFullDebug", "--dry-run")
+            .build()
+
+        assertFalse(":app:uploadSentryProguardMappingsFullDebug" in build.output)
+
+        build = runner
+            .appendArguments(":app:assembleFullRelease", "--dry-run")
+            .build()
+
+        assertFalse(":app:uploadSentryProguardMappingsFullRelease" in build.output)
+    }
+
+    @Test
+    fun `does not skip flavor if not included in ignoredFlavors`() {
+        applyIgnores(ignoredFlavors = listOf("full"))
+
+        val build = runner
+            .appendArguments(":app:assembleDemoRelease", "--dry-run")
+            .build()
+
+        assertTrue(":app:uploadSentryProguardMappingsDemoRelease" in build.output)
+    }
+
+    private fun applyIgnores(
+        ignoredVariants: List<String> = listOf(),
+        ignoredBuildTypes: List<String> = listOf(),
+        ignoredFlavors: List<String> = listOf()
+    ) {
+        val variants = ignoredVariants.joinToString(",") { "\"$it\"" }
+        val buildTypes = ignoredBuildTypes.joinToString(",") { "\"$it\"" }
+        val flavors = ignoredFlavors.joinToString(",") { "\"$it\"" }
         appBuildFile.writeText(
             // language=Groovy
             """
@@ -193,25 +183,11 @@ class SentryPluginTest(
                   id "io.sentry.android.gradle"
                 }
 
-                sentry {
-                  autoUpload = false
-                  uploadNativeSymbols = true
-                }
-            """.trimIndent()
-        )
-    }
-
-    private fun applyIgnores(ignoredVariant: String) {
-        appBuildFile.writeText(
-            // language=Groovy
-            """
-                plugins {
-                  id "com.android.application"
-                  id "io.sentry.android.gradle"
-                }
                 sentry {
                   autoUpload = true
-                  ignoredVariants = ["$ignoredVariant"]
+                  ignoredVariants = [$variants]
+                  ignoredBuildTypes = [$buildTypes]
+                  ignoredFlavors = [$flavors]
                 }
             """.trimIndent()
         )
