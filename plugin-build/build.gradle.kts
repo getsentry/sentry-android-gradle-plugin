@@ -71,33 +71,31 @@ if (gradle.gradleVersion >= "6.6.0") {
     publish.releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
 }
 
-subprojects {
-    apply<DistributionPlugin>()
+apply<DistributionPlugin>()
 
-    val sep = File.separator
+val sep = File.separator
 
-    configure<DistributionContainer> {
-        this.getByName("main").contents {
-            from("build${sep}libs")
-            from("build${sep}publications${sep}maven")
-            from("build${sep}publications${sep}sentryPluginPluginMarkerMaven")
-        }
+configure<DistributionContainer> {
+    this.getByName("main").contents {
+        from("build${sep}libs")
+        from("build${sep}publications${sep}maven")
+        from("build${sep}publications${sep}sentryPluginPluginMarkerMaven")
     }
+}
 
-    tasks.named("distZip").configure {
-        this.dependsOn("publishToMavenLocal")
-        this.doLast {
-            val distributionFilePath = "${this.project.buildDir}${sep}distributions" +
-                "${sep}${this.project.name}-${this.project.version}.zip"
-            val file = File(distributionFilePath)
-            if (!file.exists()) {
-                throw IllegalStateException(
-                    "Distribution file: $distributionFilePath does not exist"
-                )
-            }
-            if (file.length() == 0L) {
-                throw IllegalStateException("Distribution file: $distributionFilePath is empty")
-            }
+tasks.named("distZip").configure {
+    this.dependsOn("publishToMavenLocal")
+    this.doLast {
+        val distributionFilePath = "${this.project.buildDir}${sep}distributions" +
+            "${sep}${this.project.name}-${this.project.version}.zip"
+        val file = File(distributionFilePath)
+        if (!file.exists()) {
+            throw IllegalStateException(
+                "Distribution file: $distributionFilePath does not exist"
+            )
+        }
+        if (file.length() == 0L) {
+            throw IllegalStateException("Distribution file: $distributionFilePath is empty")
         }
     }
 }
