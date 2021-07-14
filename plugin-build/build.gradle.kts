@@ -99,3 +99,11 @@ tasks.named("distZip").configure {
         }
     }
 }
+
+afterEvaluate {
+    configure<MavenPublishPluginExtension> {
+        // signing is done when uploading files to MC
+        // via gpg:sign-and-deploy-file (release.kts)
+        releaseSigningEnabled = false
+    }
+}
