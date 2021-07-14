@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 2.1.0
 
 * Feature: Add support for variant filtering. (#140)
