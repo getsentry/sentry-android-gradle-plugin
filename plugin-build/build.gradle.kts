@@ -80,6 +80,7 @@ configure<DistributionContainer> {
         from("build${sep}libs")
         from("build${sep}publications${sep}maven")
         from("build${sep}publications${sep}sentryPluginPluginMarkerMaven")
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
 }
 
