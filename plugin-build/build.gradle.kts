@@ -74,14 +74,12 @@ if (gradle.gradleVersion >= "6.6.0") {
 
 val sep = File.separator
 
-distributions {
-    main {
-      contents {
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+configure<DistributionContainer> {
+    this.getByName("main").contents {
         from("build${sep}libs")
         from("build${sep}publications${sep}maven")
         from("build${sep}publications${sep}sentryPluginPluginMarkerMaven")
-      }
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
 }
 
@@ -98,4 +96,3 @@ tasks.named("distZip").configure {
         }
     }
 }
-
