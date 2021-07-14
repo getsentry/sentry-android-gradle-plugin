@@ -60,18 +60,6 @@ ktlint {
     }
 }
 
-// We conditionally apply the maven.publish plugin only if we're on Gradle 6.6.0+
-// as such plugin is not compatible with lower versions of Gradle and will break
-// the CI matrix.
-if (gradle.gradleVersion >= "6.6.0") {
-    apply {
-        plugin("com.vanniktech.maven.publish")
-    }
-
-    val publish = extensions.getByType(MavenPublishPluginExtension::class.java)
-    publish.releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
-}
-
 val sep = File.separator
 
 distributions {
@@ -85,16 +73,31 @@ distributions {
     }
 }
 
-tasks.named("distZip").configure {
-    this.dependsOn("publishToMavenLocal")
-    this.doLast {
-        val distributionFilePath = "${this.project.buildDir}${sep}distributions" +
-            "${sep}${this.project.name}-${this.project.version}.zip"
-        val file = File(distributionFilePath)
-        if (!file.exists()) {
-            throw IllegalStateException(
-                "Distribution file: $distributionFilePath does not exist"
-            )
+// We conditionally apply the maven.publish plugin only if we're on Gradle 6.6.0+
+// as such plugin is not compatible with lower versions of Gradle and will break
+// the CI matrix.
+if (gradle.gradleVersion >= "6.6.0") {
+    apply {
+        plugin("com.vanniktech.maven.publish")
+    }
+
+    val publish = extensions.getByType(MavenPublishPluginExtension::class.java)
+    publish.releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
+
+    tasks.named("distZip") {
+        this.dependsOn("publishToMavenLocal")
+        doLast {
+            val distributionFilePath = "${this.project.buildDir}${sep}distributions" +
+                "${sep}${this.project.name}-${this.project.version}.zip"
+            val file = File(distributionFilePath)
+            if (!file.exists()) {
+                throw IllegalStateException(
+                    "Distribution file: $distributionFilePath does not exist"
+                )
+            }
+            if (file.length() == 0L) {
+                throw IllegalStateException("Distribution file: $distributionFilePath is empty")
+            }
         }
     }
 }
