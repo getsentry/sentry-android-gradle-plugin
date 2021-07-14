@@ -1,7 +1,10 @@
+import com.diffplug.spotless.LineEnding
 import com.vanniktech.maven.publish.MavenPublishPluginExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    `java-library`
+    id(Config.QualityPlugins.spotless) version Config.QualityPlugins.spotlessVersion apply true
     kotlin("jvm") version BuildPluginsVersion.KOTLIN
     id("org.jetbrains.dokka") version BuildPluginsVersion.DOKKA
     id("java-gradle-plugin")
@@ -69,4 +72,82 @@ if (gradle.gradleVersion >= "6.6.0") {
 
     val publish = extensions.getByType(MavenPublishPluginExtension::class.java)
     publish.releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
+}
+
+subprojects {
+    apply<DistributionPlugin>()
+
+    val sep = File.separator
+
+    configure<DistributionContainer> {
+        this.getByName("main").contents {
+            from("build${sep}libs")
+            from("build${sep}publications${sep}maven")
+            from("build${sep}publications${sep}sentryPluginPluginMarkerMaven")
+        }
+    }
+
+    val rootDir = "${this.project.rootProject.projectDir}${sep}plugin-build"
+    val distDir = File("${rootDir}${sep}plugin-build${sep}distributions")
+
+    // create dir if it does not exist
+    distDir.mkdirs()
+
+    tasks.named("distZip").configure {
+        this.dependsOn("publishToMavenLocal")
+        this.doLast {
+            val distributionFilePath = "${this.project.buildDir}${sep}distributions" +
+                "${sep}${this.project.name}-${this.project.version}.zip"
+            val file = File(distributionFilePath)
+            if (!file.exists()) {
+                throw IllegalStateException(
+                    "Distribution file: $distributionFilePath does not exist"
+                )
+            }
+            if (file.length() == 0L) {
+                throw IllegalStateException("Distribution file: $distributionFilePath is empty")
+            }
+            val newFile = File("${distDir}${sep}${file.name}")
+            file.copyTo(newFile, overwrite = true)
+
+            UnzipUtils.unzip(newFile, distDir.path)
+            newFile.delete()
+        }
+    }
+
+    afterEvaluate {
+        apply<MavenPublishPlugin>()
+
+        configure<MavenPublishPluginExtension> {
+            // signing is done when uploading files to MC
+            // via gpg:sign-and-deploy-file (release.kts)
+            releaseSigningEnabled = false
+        }
+
+        // maven central info go to:
+        // ~/.gradle/gradle.properties
+
+        // maven central info:
+        // mavenCentralUsername=user name
+        // mavenCentralPassword=password
+    }
+}
+
+spotless {
+    lineEndings = LineEnding.UNIX
+    java {
+        target("**/*.java")
+        removeUnusedImports()
+        googleJavaFormat()
+        targetExclude("**/generated/**")
+    }
+
+    kotlin {
+        target("**/*.kt")
+        ktlint()
+    }
+    kotlinGradle {
+        target("**/*.kts")
+        ktlint()
+    }
 }
