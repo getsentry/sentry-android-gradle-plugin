@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN
+    id("distribution")
     id("org.jetbrains.dokka") version BuildPluginsVersion.DOKKA
     id("java-gradle-plugin")
     id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
@@ -71,16 +72,16 @@ if (gradle.gradleVersion >= "6.6.0") {
     publish.releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
 }
 
-apply<DistributionPlugin>()
-
 val sep = File.separator
 
-configure<DistributionContainer> {
-    this.getByName("main").contents {
+distributions {
+    main {
+      contents {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
         from("build${sep}libs")
         from("build${sep}publications${sep}maven")
         from("build${sep}publications${sep}sentryPluginPluginMarkerMaven")
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+      }
     }
 }
 
@@ -95,16 +96,6 @@ tasks.named("distZip").configure {
                 "Distribution file: $distributionFilePath does not exist"
             )
         }
-        if (file.length() == 0L) {
-            throw IllegalStateException("Distribution file: $distributionFilePath is empty")
-        }
     }
 }
 
-afterEvaluate {
-    configure<MavenPublishPluginExtension> {
-        // signing is done when uploading files to MC
-        // via gpg:sign-and-deploy-file (release.kts)
-        releaseSigningEnabled = false
-    }
-}
