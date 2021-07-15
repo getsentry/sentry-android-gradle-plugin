@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN
+    id("distribution")
     id("org.jetbrains.dokka") version BuildPluginsVersion.DOKKA
     id("java-gradle-plugin")
     id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
@@ -59,6 +60,19 @@ ktlint {
     }
 }
 
+val sep = File.separator
+
+distributions {
+    main {
+        contents {
+            duplicatesStrategy = DuplicatesStrategy.INCLUDE
+            from("build${sep}libs")
+            from("build${sep}publications${sep}maven")
+            from("build${sep}publications${sep}sentryPluginPluginMarkerMaven")
+        }
+    }
+}
+
 // We conditionally apply the maven.publish plugin only if we're on Gradle 6.6.0+
 // as such plugin is not compatible with lower versions of Gradle and will break
 // the CI matrix.
@@ -69,4 +83,13 @@ if (gradle.gradleVersion >= "6.6.0") {
 
     val publish = extensions.getByType(MavenPublishPluginExtension::class.java)
     publish.releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
+
+    tasks.named("distZip") {
+        dependsOn("publishToMavenLocal")
+        onlyIf {
+            inputs.sourceFiles.isEmpty.not().also {
+                require(it) { "No distribution to zip." }
+            }
+        }
+    }
 }
