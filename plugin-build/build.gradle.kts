@@ -85,18 +85,10 @@ if (gradle.gradleVersion >= "6.6.0") {
     publish.releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
 
     tasks.named("distZip") {
-        this.dependsOn("publishToMavenLocal")
-        doLast {
-            val distributionFilePath = "${this.project.buildDir}${sep}distributions" +
-                "${sep}${this.project.name}-${this.project.version}.zip"
-            val file = File(distributionFilePath)
-            if (!file.exists()) {
-                throw IllegalStateException(
-                    "Distribution file: $distributionFilePath does not exist"
-                )
-            }
-            if (file.length() == 0L) {
-                throw IllegalStateException("Distribution file: $distributionFilePath is empty")
+        dependsOn("publishToMavenLocal")
+        onlyIf {
+            inputs.sourceFiles.isEmpty.not().also {
+                require(it) { "No distribution to zip." }
             }
         }
     }
