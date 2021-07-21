@@ -34,11 +34,10 @@ jobs:
           path: ${{ env.CACHED_BUILD_PATHS }}
           key: ${{ github.sha }}
 
-      - name: Build the plugin
+      - name: Build distribution artifacts
         run: |
           cd plugin-build
-          make clean
-          make compile
+          make dist
 
   job_upload_artifacts:
     name: Upload artifacts
