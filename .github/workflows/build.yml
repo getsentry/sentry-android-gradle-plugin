@@ -9,13 +9,9 @@ on:
     branches:
       - '*'
 
-env:
-  CACHED_BUILD_PATHS: |
-    ${{ github.workspace }}/plugin-build/build/distributions/*.zip
-
 jobs:
-  job_build:
-    name: Build the plugin
+  job_build_upload:
+    name: Build and upload distribution artifact
     runs-on: ubuntu-latest
     steps:
 
@@ -28,35 +24,13 @@ jobs:
           distribution: 'adopt'
           java-version: '8'
 
-      - name: Check cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.CACHED_BUILD_PATHS }}
-          key: ${{ github.sha }}
-
       - name: Build distribution artifacts
         run: |
           cd plugin-build
           make dist
 
-  job_upload_artifacts:
-    name: Upload artifacts
-    needs: job_build
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: Checkout current commit (${{ github.sha }})
-        uses: actions/checkout@v2
-
-      - name: Check cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.CACHED_BUILD_PATHS }}
-          key: ${{ github.sha }}
-          
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
           name: ${{ github.sha }}
-          path: |
-            ${{ github.workspace }}/plugin-build/build/distributions/*.zip
+          path: ${{ github.workspace }}/plugin-build/build/distributions/*.zip
