@@ -1,0 +1,36 @@
+name: Build and upload artifacts
+
+on:
+  push:
+    branches:
+      - main
+      - release/**
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  job_build_upload:
+    name: Build and upload distribution artifact
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout current commit (${{ github.sha }})
+        uses: actions/checkout@v2
+
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '8'
+
+      - name: Build distribution artifacts
+        run: |
+          cd plugin-build
+          make dist
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ github.sha }}
+          path: ${{ github.workspace }}/plugin-build/build/distributions/*.zip

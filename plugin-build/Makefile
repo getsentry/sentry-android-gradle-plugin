@@ -8,6 +8,10 @@ clean:
 compile:
 	./gradlew assemble
 
+# build distribution artifacts
+dist:
+	./gradlew distZip
+
 # do a dry release (like a local deploy)
 dryRelease:
 	./gradlew publishToMavenLocal --no-parallel
@@ -18,4 +22,4 @@ doRelease:
 	./gradlew publishSentryPluginPluginMarkerMavenPublicationToMavenCentralRepository --no-parallel
 	./gradlew closeAndReleaseRepository
 
-all: clean compile dryRelease
+all: clean compile dist dryRelease
