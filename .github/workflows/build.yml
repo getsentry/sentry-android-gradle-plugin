@@ -27,7 +27,7 @@ jobs:
       - name: Build distribution artifacts
         run: |
           cd plugin-build
-          make dist
+          make all
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
