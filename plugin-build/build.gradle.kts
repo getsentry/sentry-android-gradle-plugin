@@ -82,7 +82,9 @@ if (gradle.gradleVersion >= "6.6.0") {
     }
 
     val publish = extensions.getByType(MavenPublishPluginExtension::class.java)
-    publish.releaseSigningEnabled = BuildUtils.shouldSignArtifacts()
+    // signing is done when uploading files to MC
+    // via gpg:sign-and-deploy-file (release.kts)
+    publish.releaseSigningEnabled = false
 
     tasks.named("distZip") {
         dependsOn("publishToMavenLocal")
