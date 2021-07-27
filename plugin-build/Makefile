@@ -1,6 +1,4 @@
-.PHONY: release clean compile dryRelease doRelease all
-
-release: clean compile doRelease
+.PHONY: clean compile all dist
 
 clean:
 	./gradlew clean
@@ -12,14 +10,4 @@ compile:
 dist:
 	./gradlew distZip
 
-# do a dry release (like a local deploy)
-dryRelease:
-	./gradlew publishToMavenLocal --no-parallel
-
-# clean, build and deploy to maven central
-doRelease:
-	./gradlew publishMavenPublicationToMavenCentralRepository --no-parallel
-	./gradlew publishSentryPluginPluginMarkerMavenPublicationToMavenCentralRepository --no-parallel
-	./gradlew closeAndReleaseRepository
-
-all: clean compile dist dryRelease
+all: clean compile dist
