@@ -65,9 +65,12 @@ val sep = File.separator
 distributions {
     main {
         contents {
-            duplicatesStrategy = DuplicatesStrategy.INCLUDE
             from("build${sep}libs")
             from("build${sep}publications${sep}maven")
+        }
+    }
+    create("sentryPluginMarker") {
+        contents {
             from("build${sep}publications${sep}sentryPluginPluginMarkerMaven")
         }
     }
