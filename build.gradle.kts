@@ -42,3 +42,9 @@ tasks.register("preMerge") {
     dependsOn(":examples:android-gradle-kts:check")
     dependsOn(gradle.includedBuild("plugin-build").task(":check"))
 }
+
+tasks.register("closeAndReleaseRepository") {
+    description = "Runs closeAndReleaseRepository for plugin-build"
+
+    dependsOn(gradle.includedBuild("plugin-build").task(":closeAndReleaseRepository"))
+}
