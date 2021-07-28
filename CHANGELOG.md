@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 2.1.1-beta.2
 
 - No documented changes.
