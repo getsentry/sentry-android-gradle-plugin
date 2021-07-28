@@ -2,7 +2,7 @@ minVersion: 0.24.4
 changelogPolicy: auto
 targets:
   - name: maven
-    gradleCliPath: ./plugin-build/gradlew
+    gradleCliPath: ./gradlew
     mavenCliPath: scripts/mvnw
     mavenSettingsPath: scripts/settings.xml
     mavenRepoId: ossrh
