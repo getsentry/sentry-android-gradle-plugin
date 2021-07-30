@@ -1,6 +1,7 @@
 package io.sentry.android.gradle
 
 import java.io.File
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
@@ -8,6 +9,7 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -104,6 +106,30 @@ class SentryPluginTest(
         )
 
         runner.build()
+    }
+
+    @Test
+    @Ignore("Because the Sentry plugin currently eagerly configures some tasks of the Android Gradle Plugin")
+    fun `plugin does not configure tasks`() {
+        val prefix = "task-configured-for-test: "
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+                plugins {
+                  id "com.android.application"
+                  id "io.sentry.android.gradle"
+                }
+
+                project.tasks.configureEach { Task task -> println("$prefix" + task.path) }
+            """.trimIndent()
+        )
+
+        val result = runner.withArguments("help").build()
+        val configuredTasks = result.output.lines()
+            .filter { it.startsWith(prefix) }
+            .map { it.removePrefix(prefix) }
+            .sorted()
+        assertEquals(listOf(), configuredTasks)
     }
 
     @Test
