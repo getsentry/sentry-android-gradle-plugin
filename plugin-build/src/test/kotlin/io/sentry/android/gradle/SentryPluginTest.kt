@@ -9,7 +9,6 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -109,7 +108,6 @@ class SentryPluginTest(
     }
 
     @Test
-    @Ignore("Because the Sentry plugin currently eagerly configures some tasks of the Android Gradle Plugin")
     fun `plugin does not configure tasks`() {
         val prefix = "task-configured-for-test: "
         appBuildFile.writeText(

@@ -21,6 +21,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtraPropertiesExtension
+import org.gradle.api.tasks.TaskProvider
 
 class SentryPlugin : Plugin<Project> {
 
@@ -61,18 +62,18 @@ class SentryPlugin : Plugin<Project> {
                 val isMinifyEnabled = variant.buildType.isMinifyEnabled
                 val isDebuggable = variant.buildType.isDebuggable
 
-                var preBundleTask: Task? = null
-                var transformerTask: Task? = null
-                var packageBundleTask: Task? = null
+                var preBundleTaskProvider: TaskProvider<Task>? = null
+                var transformerTaskProvider: TaskProvider<Task>? = null
+                var packageBundleTaskProvider: TaskProvider<Task>? = null
 
                 if (isMinifyEnabled) {
-                    preBundleTask = withLogging(project.logger, "preBundleTask") {
+                    preBundleTaskProvider = withLogging(project.logger, "preBundleTask") {
                         getPreBundleTask(project, variant.name)
                     }
-                    transformerTask = withLogging(project.logger, "transformerTask") {
+                    transformerTaskProvider = withLogging(project.logger, "transformerTask") {
                         getTransformerTask(project, variant.name)
                     }
-                    packageBundleTask = withLogging(project.logger, "packageBundleTask") {
+                    packageBundleTaskProvider = withLogging(project.logger, "packageBundleTask") {
                         getPackageBundleTask(project, variant.name)
                     }
                 } else {
@@ -120,17 +121,17 @@ class SentryPlugin : Plugin<Project> {
                     )
 
                     // we just hack ourselves into the proguard task's doLast.
-                    transformerTask?.finalizedBy(uploadSentryProguardMappingsTask)
+                    transformerTaskProvider?.configure { it.finalizedBy(uploadSentryProguardMappingsTask) }
 
                     // To include proguard uuid file into aab, run before bundle task.
-                    preBundleTask?.dependsOn(uploadSentryProguardMappingsTask)
+                    preBundleTaskProvider?.configure { it.dependsOn(uploadSentryProguardMappingsTask) }
 
                     // The package task will only be executed if the uploadSentryProguardMappingsTask has already been executed.
                     getPackageProvider(variant)?.configure {
                         it.dependsOn(uploadSentryProguardMappingsTask)
                     }
                     // App bundle has different package task
-                    packageBundleTask?.dependsOn(uploadSentryProguardMappingsTask)
+                    packageBundleTaskProvider?.configure { it.dependsOn(uploadSentryProguardMappingsTask) }
                 }
 
                 // only debug symbols of non debuggable code should be uploaded (aka release builds).
@@ -159,7 +160,7 @@ class SentryPlugin : Plugin<Project> {
                         )
                     }
                     // if its a bundle aab, assemble might not be executed, so we hook into bundle task
-                    bundleTask?.finalizedBy(uploadSentryNativeSymbolsTask)
+                    bundleTask?.configure { it.finalizedBy(uploadSentryNativeSymbolsTask) }
                 } else {
                     project.logger.info("[sentry] uploadSentryNativeSymbols won't be executed")
                 }

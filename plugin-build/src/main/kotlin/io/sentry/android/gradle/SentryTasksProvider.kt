@@ -6,6 +6,7 @@ import com.android.build.gradle.tasks.PackageAndroidArtifact
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
@@ -19,7 +20,7 @@ internal object SentryTasksProvider {
      * @return the task or null otherwise
      */
     @JvmStatic
-    fun getTransformerTask(project: Project, variantName: String): Task? =
+    fun getTransformerTask(project: Project, variantName: String): TaskProvider<Task>? =
         project.findTask(
             // AGP 3.3 includes the R8 shrinker.
             "minify${variantName.capitalized}WithR8",
@@ -32,7 +33,7 @@ internal object SentryTasksProvider {
      * @return the task or null otherwise
      */
     @JvmStatic
-    fun getPreBundleTask(project: Project, variantName: String): Task? =
+    fun getPreBundleTask(project: Project, variantName: String): TaskProvider<Task>? =
         project.findTask("build${variantName.capitalized}PreBundle")
 
     /**
@@ -41,7 +42,7 @@ internal object SentryTasksProvider {
      * @return the task or null otherwise
      */
     @JvmStatic
-    fun getBundleTask(project: Project, variantName: String): Task? =
+    fun getBundleTask(project: Project, variantName: String): TaskProvider<Task>? =
         project.findTask("bundle${variantName.capitalized}")
 
     /**
@@ -50,7 +51,7 @@ internal object SentryTasksProvider {
      * @return the package task or null if not found
      */
     @JvmStatic
-    fun getPackageBundleTask(project: Project, variantName: String): Task? =
+    fun getPackageBundleTask(project: Project, variantName: String): TaskProvider<Task>? =
         // for APK it uses getPackageProvider
         project.findTask(
             "package${variantName.capitalized}Bundle"
@@ -93,8 +94,16 @@ internal object SentryTasksProvider {
         // for App Bundle it uses getPackageBundleTask
         variant.packageApplicationProvider
 
-    private fun Project.findTask(vararg taskName: String): Task? =
-        taskName.mapNotNull { project.tasks.findByName(it) }.firstOrNull()
+    private fun Project.findTask(vararg taskName: String): TaskProvider<Task>? =
+        taskName
+            .mapNotNull {
+                try {
+                    project.tasks.named(it)
+                } catch (e: UnknownTaskException) {
+                    null
+                }
+            }
+            .firstOrNull()
 
     private val String.capitalized: String get() = this.capitalizeUS()
 }
