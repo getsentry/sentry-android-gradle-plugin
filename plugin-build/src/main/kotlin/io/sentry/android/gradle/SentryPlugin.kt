@@ -121,17 +121,23 @@ class SentryPlugin : Plugin<Project> {
                     )
 
                     // we just hack ourselves into the proguard task's doLast.
-                    transformerTaskProvider?.configure { it.finalizedBy(uploadSentryProguardMappingsTask) }
+                    transformerTaskProvider?.configure {
+                        it.finalizedBy(uploadSentryProguardMappingsTask)
+                    }
 
                     // To include proguard uuid file into aab, run before bundle task.
-                    preBundleTaskProvider?.configure { it.dependsOn(uploadSentryProguardMappingsTask) }
+                    preBundleTaskProvider?.configure { task ->
+                        task.dependsOn(uploadSentryProguardMappingsTask)
+                    }
 
                     // The package task will only be executed if the uploadSentryProguardMappingsTask has already been executed.
-                    getPackageProvider(variant)?.configure {
-                        it.dependsOn(uploadSentryProguardMappingsTask)
+                    getPackageProvider(variant)?.configure { task ->
+                        task.dependsOn(uploadSentryProguardMappingsTask)
                     }
                     // App bundle has different package task
-                    packageBundleTaskProvider?.configure { it.dependsOn(uploadSentryProguardMappingsTask) }
+                    packageBundleTaskProvider?.configure { task ->
+                        task.dependsOn(uploadSentryProguardMappingsTask)
+                    }
                 }
 
                 // only debug symbols of non debuggable code should be uploaded (aka release builds).
