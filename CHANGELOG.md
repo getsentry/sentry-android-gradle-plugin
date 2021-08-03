@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Enhancement: Avoid Eager Task Configuration (#156)
+
 ## 2.1.1-beta.2
 
 - No documented changes.

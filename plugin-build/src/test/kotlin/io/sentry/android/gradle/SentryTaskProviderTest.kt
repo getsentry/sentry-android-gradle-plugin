@@ -26,63 +26,63 @@ class SentryTaskProviderTest {
     fun `getTransformerTask returns null for missing task`() {
         val project = ProjectBuilder.builder().build()
 
-        assertNull(getTransformerTask(project, "debug"))
+        assertNull(getTransformerTask(project, "debug")?.get())
     }
 
     @Test
     fun `getTransformerTask returns minify for R8`() {
         val (project, task) = getTestProjectWithTask("minifyDebugWithR8")
 
-        assertEquals(task, getTransformerTask(project, "debug"))
+        assertEquals(task, getTransformerTask(project, "debug")?.get())
     }
 
     @Test
     fun `getTransformerTask returns minify for Proguard`() {
         val (project, task) = getTestProjectWithTask("minifyDebugWithProguard")
 
-        assertEquals(task, getTransformerTask(project, "debug"))
+        assertEquals(task, getTransformerTask(project, "debug")?.get())
     }
 
     @Test
     fun `getPreBundleTask returns null for missing task`() {
         val project = ProjectBuilder.builder().build()
 
-        assertNull(getPreBundleTask(project, "debug"))
+        assertNull(getPreBundleTask(project, "debug")?.get())
     }
 
     @Test
     fun `getPreBundleTask returns correct task`() {
         val (project, task) = getTestProjectWithTask("buildDebugPreBundle")
 
-        assertEquals(task, getPreBundleTask(project, "debug"))
+        assertEquals(task, getPreBundleTask(project, "debug")?.get())
     }
 
     @Test
     fun `getBundleTask returns null for missing task`() {
         val project = ProjectBuilder.builder().build()
 
-        assertNull(getBundleTask(project, "debug"))
+        assertNull(getBundleTask(project, "debug")?.get())
     }
 
     @Test
     fun `getBundleTask returns correct task`() {
         val (project, task) = getTestProjectWithTask("bundleDebug")
 
-        assertEquals(task, getBundleTask(project, "debug"))
+        assertEquals(task, getBundleTask(project, "debug")?.get())
     }
 
     @Test
     fun `getPackageBundleTask returns null for missing task`() {
         val project = ProjectBuilder.builder().build()
 
-        assertNull(getPackageBundleTask(project, "debug"))
+        assertNull(getPackageBundleTask(project, "debug")?.get())
     }
 
     @Test
     fun `getPackageBundleTask returns package bundle task`() {
         val (project, task) = getTestProjectWithTask("packageDebugBundle")
 
-        assertEquals(task, getPackageBundleTask(project, "debug"))
+        assertEquals(task, getPackageBundleTask(project, "debug")?.get())
     }
 
     @Test
@@ -91,9 +91,9 @@ class SentryTaskProviderTest {
 
         android.applicationVariants.configureEach {
             if (it.name == "debug") {
-                assertEquals("assembleDebug", getAssembleTaskProvider(it)?.name)
+                assertEquals("assembleDebug", getAssembleTaskProvider(it)?.get()?.name)
             } else {
-                assertEquals("assembleRelease", getAssembleTaskProvider(it)?.name)
+                assertEquals("assembleRelease", getAssembleTaskProvider(it)?.get()?.name)
             }
         }
     }
@@ -104,9 +104,9 @@ class SentryTaskProviderTest {
 
         android.applicationVariants.configureEach {
             if (it.name == "debug") {
-                assertEquals("mergeDebugAssets", getMergeAssetsProvider(it)?.name)
+                assertEquals("mergeDebugAssets", getMergeAssetsProvider(it)?.get()?.name)
             } else {
-                assertEquals("mergeReleaseAssets", getMergeAssetsProvider(it)?.name)
+                assertEquals("mergeReleaseAssets", getMergeAssetsProvider(it)?.get()?.name)
             }
         }
     }
