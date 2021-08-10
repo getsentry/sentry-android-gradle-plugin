@@ -32,4 +32,7 @@ jobs:
             cache-gradle-
 
       - name: Run the uploadSentryProguardMappings task
-        run: ./gradlew assembleRelease uploadSentryProguardMappingsRelease
+        run: ./gradlew assembleRelease uploadSentryProguardMappingsRelease | tee gradle.log
+
+      - name: Verify that Native Symbols were uploaded
+        run: grep "Uploaded 4 missing debug information files" gradle.log
