@@ -87,7 +87,10 @@ class SentryPlugin : Plugin<Project> {
                 if (isMinifyEnabled) {
                     // Setup the task to generate a UUID asset file
                     val uuidOutputDirectory = project.file(
-                        "build${sep}generated${sep}assets${sep}sentry${sep}${variant.name}"
+                        File(
+                            project.buildDir,
+                            "generated${sep}assets${sep}sentry${sep}${variant.name}"
+                        )
                     )
                     val generateUuidTask = project.tasks.register(
                         "generateSentryProguardUuid$taskSuffix",
