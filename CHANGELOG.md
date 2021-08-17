@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 2.1.1
 
 - Enhancement: Avoid Eager Task Configuration (#156)
