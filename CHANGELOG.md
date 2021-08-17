@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.1.1
 
 - Enhancement: Avoid Eager Task Configuration (#156)
 - Fix: Do not hardcode the build/ folder (#158)
