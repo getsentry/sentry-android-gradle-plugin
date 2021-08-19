@@ -25,7 +25,6 @@ android {
             minifyEnabled false
         }
     }
-    ndkVersion "21.4.7075529"
     externalNativeBuild {
         ndkBuild {
             path "jni/Android.mk"
