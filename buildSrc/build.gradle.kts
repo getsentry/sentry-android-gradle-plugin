@@ -21,9 +21,9 @@ if(shouldDownloadSentryCli()) {
  * That's to retrigger a download of the cli upon a bump.
  */
 fun shouldDownloadSentryCli() : Boolean {
-    val cliDir: Array<File> = File("./plugin-build/src/main/resources/bin/").listFiles() ?: emptyArray()
-    val expectedChecksums = File("./buildSrc/expected-checksums.sha")
-    val actualChecksums = File("./plugin-build/src/main/resources/bin/checksums.sha")
+    val cliDir: Array<File> = File("$rootDir/../plugin-build/src/main/resources/bin/").listFiles() ?: emptyArray()
+    val expectedChecksums = File("$rootDir/expected-checksums.sha")
+    val actualChecksums = File("$rootDir/../plugin-build/src/main/resources/bin/checksums.sha")
     return when {
         cliDir.size <= 2 -> {
             logger.lifecycle("Sentry CLI is missing")
