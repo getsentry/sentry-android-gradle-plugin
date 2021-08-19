@@ -1,0 +1,42 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath Libs.AGP
+        classpath "io.sentry:sentry-android-gradle-plugin"
+    }
+}
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion = 30
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode = 1
+        versionName = "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+    externalNativeBuild {
+        ndkBuild {
+            path "jni/Android.mk"
+        }
+    }
+}
+
+if (System.getenv("AUTO_UPLOAD")) {
+    apply plugin: 'io.sentry.android.gradle'
+    sentry {
+        autoUpload = false
+        uploadNativeSymbols = true
+        includeNativeSources = true
+    }
+}

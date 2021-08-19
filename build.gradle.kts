@@ -40,6 +40,7 @@ tasks.register("preMerge") {
 
     dependsOn(":examples:android-gradle:check")
     dependsOn(":examples:android-gradle-kts:check")
+    dependsOn(":examples:android-ndk:check")
     dependsOn(gradle.includedBuild("plugin-build").task(":check"))
 }
 
