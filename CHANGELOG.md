@@ -3,7 +3,7 @@
 ## Unreleased
 
 * Bump: AGP to 4.2.2 (#106)
-* Fix: missing sentry-cli on embedded resources
+* Fix: missing sentry-cli on embedded resources (#162)
 
 ## 2.1.1
 
