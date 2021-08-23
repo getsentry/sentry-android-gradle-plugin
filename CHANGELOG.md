@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 2.1.2
 
 * Bump: AGP to 4.2.2 (#106)
