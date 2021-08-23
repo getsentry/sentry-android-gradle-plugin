@@ -35,6 +35,7 @@ jobs:
 
       - name: Build distribution artifacts
         run: |
+          ./gradlew tasks
           cd plugin-build
           make all
 
