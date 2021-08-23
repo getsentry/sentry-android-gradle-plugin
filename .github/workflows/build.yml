@@ -35,6 +35,8 @@ jobs:
 
       - name: Build distribution artifacts
         run: |
+#          trigger the download of sentry-cli if necessary
+          ./gradlew tasks
           cd plugin-build
           make all
 

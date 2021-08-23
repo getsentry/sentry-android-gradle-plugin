@@ -2,12 +2,13 @@
 
 ## Unreleased
 
-- Bump: AGP to 4.2.2 (#106)
+* Bump: AGP to 4.2.2 (#106)
+* Fix: missing sentry-cli on embedded resources
 
 ## 2.1.1
 
-- Enhancement: Avoid Eager Task Configuration (#156)
-- Fix: Do not hardcode the build/ folder (#158)
+* Enhancement: Avoid Eager Task Configuration (#156)
+* Fix: Do not hardcode the build/ folder (#158)
 
 ## 2.1.1-beta.2
 
