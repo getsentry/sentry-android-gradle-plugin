@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Fix: Use task logger instead of project logger (#165)
+
 ## 2.1.2
 
 * Bump: AGP to 4.2.2 (#106)
