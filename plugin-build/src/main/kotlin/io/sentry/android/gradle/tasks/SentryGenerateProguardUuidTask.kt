@@ -27,7 +27,7 @@ abstract class SentryGenerateProguardUuidTask : DefaultTask() {
 
     @TaskAction
     fun generateProperties() {
-        project.logger.info(
+        logger.info(
             "[sentry] SentryGenerateProguardUuidTask - outputFile: ${outputFile.get()}"
         )
 
