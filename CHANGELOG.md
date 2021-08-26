@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Fix: Pass buildDir as task input (#166)
+
 ## 2.1.3
 
 * Fix: Use task logger instead of project logger (#165)
