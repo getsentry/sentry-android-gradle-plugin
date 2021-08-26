@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.1.3
 
 * Fix: Use task logger instead of project logger (#165)
 
