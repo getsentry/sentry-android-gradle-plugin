@@ -201,14 +201,15 @@ class SentryPluginVariantTest(
             // The supported Gradle version can be found here:
             // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
             // The pair is [AGP Version, Gradle Version]
-            arrayOf("4.0.0", "6.1.1"),
+            arrayOf("4.0.2", "6.1.1"),
             arrayOf("4.1.3", "6.5"),
             arrayOf("4.1.3", "6.8.3"),
             arrayOf("4.1.3", "7.0.2"),
             arrayOf("4.2.2", "6.8.3"),
             arrayOf("4.2.2", "7.0.2"),
-            arrayOf("7.0.0", "7.0.2"),
-            arrayOf("7.0.0", "7.1.1")
+            arrayOf("7.0.1", "7.0.2"),
+            arrayOf("7.0.1", "7.1.1"),
+            arrayOf("7.0.1", "7.2")
         )
 
         private fun GradleRunner.appendArguments(vararg arguments: String) =
