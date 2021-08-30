@@ -45,6 +45,7 @@ jobs:
           path: ${{ github.workspace }}/plugin-build/build/distributions/*.zip
 
       - name: Verifies Sentry CLI is bundled
+        shell: bash
         run: |
           filename=${$(ls plugin-build/build/distributions)%.*}
           unzip plugin-build/build/distributions/$filename.zip -d /tmp
