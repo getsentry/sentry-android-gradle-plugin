@@ -47,7 +47,8 @@ jobs:
       - name: Verifies Sentry CLI is bundled
         shell: bash
         run: |
-          filename=${$(ls plugin-build/build/distributions)%.*}
+          artifact=$(ls plugin-build/build/distributions)
+          filename=${$artifact%.*}
           unzip plugin-build/build/distributions/$filename.zip -d /tmp
           unzip /tmp/$filename/$filename.jar -d /tmp/jar/
           find /tmp/jar | grep "bin/sentry-cli"
