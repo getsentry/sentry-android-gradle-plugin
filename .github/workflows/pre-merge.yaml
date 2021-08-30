@@ -52,5 +52,5 @@ jobs:
       - name: Build the Debug variant
         run: ./gradlew assembleDebug
 
-      - name: Run the uploadSentryProguardMappings task
-        run: ./gradlew assembleRelease uploadSentryProguardMappingsRelease
+      - name: Build the Release variant
+        run: ./gradlew assembleRelease
