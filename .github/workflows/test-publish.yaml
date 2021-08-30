@@ -11,7 +11,7 @@ on:
 
 jobs:
   publish:
-    if: ${{ github.repository == 'getsentry/sentry-android-gradle-plugin'}}
+    if: ${{ github.repository == 'getsentry/sentry-android-gradle-plugin' || github.event.pull_request.head.repo.full_name == 'getsentry/sentry-android-gradle-plugin'}}
     runs-on: ubuntu-latest
 
     env:
