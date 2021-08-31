@@ -47,4 +47,13 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     /** List of Android build flavors that should be ignored by the Sentry plugin. */
     val ignoredFlavors: ListProperty<String> = objects.listProperty(String::class.java)
         .convention(emptyList())
+
+    /**
+     * Forces dependencies instrumentation, even if they were already instrumented.
+     * Useful when there are issues with code instrumentation, e.g. the dependencies are
+     * partially instrumented.
+     * Defaults to false.
+     */
+    val forceInstrumentDependencies: Property<Boolean> = objects.property(Boolean::class.java)
+        .convention(false)
 }
