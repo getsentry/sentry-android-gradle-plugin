@@ -20,8 +20,11 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
+        if: env.SENTRY_AUTH_TOKEN != null
+        
       - name: Cache Gradle Files
         uses: actions/cache@v2
+        if: env.SENTRY_AUTH_TOKEN != null
         with:
           path: |
             ~/.gradle/caches/
