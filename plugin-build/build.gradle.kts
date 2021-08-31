@@ -107,3 +107,48 @@ if (gradle.gradleVersion >= "6.6.0") {
         }
     }
 }
+
+val downloadSentryCLI = tasks.register<Exec>("downloadSentryCLI") {
+    onlyIf {
+        shouldDownloadSentryCli()
+    }
+    doFirst {
+        logger.lifecycle("Downloading Sentry CLI...")
+    }
+    executable("sh")
+    workingDir("../plugin-build")
+    args("-c", "./download-sentry-cli.sh")
+}
+
+tasks.named("processResources").configure {
+    dependsOn(downloadSentryCLI)
+}
+
+/**
+ * When bumping the Sentry CLI, you should update the `expected-checksums.sha` file
+ * to match the `checksums.sha` file from `./src/main/resources/bin/`
+ *
+ * That's to retrigger a download of the cli upon a bump.
+ */
+fun shouldDownloadSentryCli(): Boolean {
+    val cliDir: Array<File> = File(
+        "$projectDir/src/main/resources/bin/"
+    ).listFiles() ?: emptyArray()
+    val expectedChecksums = File("$projectDir/expected-checksums.sha")
+    val actualChecksums = File("$projectDir/src/main/resources/bin/checksums.sha")
+    return when {
+        cliDir.size <= 2 -> {
+            logger.lifecycle("Sentry CLI is missing")
+            true
+        }
+        !actualChecksums.exists() -> {
+            logger.lifecycle("Sentry CLI Checksums is missing")
+            true
+        }
+        expectedChecksums.readText() != actualChecksums.readText() -> {
+            logger.lifecycle("Sentry CLI Checksums doesn't match")
+            true
+        }
+        else -> false
+    }
+}
