@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.sentry.android.roomsample">
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:name=".SampleApp">
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="io.sentry.dsn"
+            android:value="https://1053864c67cc410aa1ffc9701bd6f93d@o447951.ingest.sentry.io/5428559" />
+
+        <meta-data android:name="io.sentry.debug" android:value="true" />
+
+        <meta-data android:name="io.sentry.traces.sample-rate" android:value="1.0" />
+
+        <meta-data android:name="io.sentry.traces.activity.auto-finish.enable" android:value="false" />
+    </application>
+
+</manifest>
