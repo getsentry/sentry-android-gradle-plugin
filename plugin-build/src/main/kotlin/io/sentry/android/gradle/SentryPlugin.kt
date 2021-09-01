@@ -55,6 +55,7 @@ class SentryPlugin : Plugin<Project> {
                 extraProperties.get(SENTRY_PROJECT_PARAMETER).toString()
             }.getOrNull()
 
+            // TODO: this should depend on ignoredVariants/ignoredFlavours/ignoredBuildTypes
             androidComponentsExtension.onVariants { variant ->
                 variant.transformClassesWith(
                     SpanAddingClassVisitorFactory::class.java,
