@@ -36,11 +36,8 @@ class MainActivity : ComponentActivity() {
             val tracks: List<Track> =
                 SampleApp.database.tracksDao().allByArtist("Red Hot Chili Peppers")
             (list.adapter as TrackAdapter).populate(tracks)
-        }
 
-        lifecycleScope.launchWhenResumed {
             // this is to make sure that DB query spans are sent to Sentry, as they are attached to the Cold Start Transaction, otherwise they get dropped
-            delay(1000)
             Sentry.getSpan()?.finish()
         }
     }
