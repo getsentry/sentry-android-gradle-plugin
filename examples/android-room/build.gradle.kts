@@ -36,54 +36,20 @@ android {
     }
 }
 
-object Deps {
-
-    object Sentry {
-        private const val version = "5.1.2"
-        const val android = "io.sentry:sentry-android:$version"
-    }
-
-    object Kotlin {
-        private const val version = "1.5.21"
-        const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version"
-    }
-
-    object AndroidX {
-        const val recyclerView = "androidx.recyclerview:recyclerview:1.2.0"
-        const val lifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
-        const val appcompat = "androidx.appcompat:appcompat:1.2.0"
-    }
-
-    object Coroutines {
-        private const val version = "1.5.1"
-        const val core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version"
-        const val android = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version"
-    }
-
-    object Room {
-        private const val version = "2.3.0"
-        const val runtime = "androidx.room:room-runtime:${version}"
-        const val ktx = "androidx.room:room-ktx:${version}"
-        const val compiler = "androidx.room:room-compiler:${version}"
-    }
-}
-
 dependencies {
-    implementation(Deps.Sentry.android)
+    implementation(Samples.Sentry.android)
 
-    implementation(Deps.Kotlin.stdlib)
+    implementation(Samples.AndroidX.recyclerView)
+    implementation(Samples.AndroidX.lifecycle)
+    implementation(Samples.AndroidX.appcompat)
 
-    implementation(Deps.AndroidX.recyclerView)
-    implementation(Deps.AndroidX.lifecycle)
-    implementation(Deps.AndroidX.appcompat)
+    implementation(Samples.Coroutines.core)
+    implementation(Samples.Coroutines.android)
 
-    implementation(Deps.Coroutines.core)
-    implementation(Deps.Coroutines.android)
+    implementation(Samples.Room.runtime)
+    implementation(Samples.Room.ktx)
 
-    implementation(Deps.Room.runtime)
-    implementation(Deps.Room.ktx)
-
-    kapt(Deps.Room.compiler)
+    kapt(Samples.Room.compiler)
 }
 
 sentry {

@@ -3,7 +3,6 @@ package io.sentry.android.roomsample.ui
 import android.content.Context
 import android.os.Bundle
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -16,12 +15,6 @@ import io.sentry.Sentry
 import io.sentry.android.roomsample.R
 import io.sentry.android.roomsample.SampleApp
 import io.sentry.android.roomsample.data.Track
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlin.concurrent.timerTask
-import kotlin.system.measureTimeMillis
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
