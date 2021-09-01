@@ -20,17 +20,17 @@ class QueryMethodVisitor(
     private val label7 = Label()
     private val label8 = Label()
 
-    private var instrumenting: AtomicBoolean = AtomicBoolean(false)
+    private val instrumenting = AtomicBoolean(false)
 
     override fun visitMaxs(maxStack: Int, maxLocals: Int) {
-        // if instrumentation is in progress, we skip maxs visit -> will be done by our instrumentation code
+        // if instrumentation is in progress, we visit maxs (as we are responsible now for properly finishing method visit) -> otherwise we skip it
         if (instrumenting.get()) {
             super.visitMaxs(maxStack, maxLocals)
         }
     }
 
     override fun visitEnd() {
-        // if instrumentation is in progress, we skip end visit -> will be done by our instrumentation code
+        // if instrumentation is in progress, we visit end (as we are responsible now for properly finishing method visit) -> otherwise we skip it
         if (instrumenting.get()) {
             super.visitEnd()
         }
