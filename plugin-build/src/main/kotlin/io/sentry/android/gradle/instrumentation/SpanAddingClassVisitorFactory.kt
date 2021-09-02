@@ -3,6 +3,7 @@ package io.sentry.android.gradle.instrumentation
 import com.android.build.api.instrumentation.*
 import org.gradle.api.tasks.Input
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Optional
 import org.objectweb.asm.ClassVisitor
 
 @Suppress("UnstableApiUsage")
@@ -27,6 +28,7 @@ abstract class SpanAddingClassVisitorFactory :
          * that is used solely for that purpose.
          */
         @get:Input
+        @get:Optional
         val invalidate: Property<Long>
     }
 }
