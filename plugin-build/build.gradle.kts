@@ -34,13 +34,6 @@ dependencies {
     )
 }
 
-kotlin {
-    target {
-
-    }
-}
-
-
 tasks.withType<Test>().configureEach {
     maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
 }
