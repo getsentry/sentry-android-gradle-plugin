@@ -28,6 +28,25 @@ subprojects {
             include("**/kotlin/**")
         }
     }
+
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+        targetCompatibility = JavaVersion.VERSION_1_8.toString()
+
+        kotlinOptions {
+            jvmTarget = JavaVersion.VERSION_1_8.toString()
+            freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
+            languageVersion = "1.3"
+        }
+    }
+
+    plugins.withId("com.android.application") {
+        val ext = extensions.getByName("android") as com.android.build.gradle.AppExtension
+        ext.compileOptions {
+            sourceCompatibility = JavaVersion.VERSION_1_8
+            targetCompatibility = JavaVersion.VERSION_1_8
+        }
+    }
 }
 
 tasks.register("clean", Delete::class.java) {

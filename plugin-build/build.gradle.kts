@@ -1,7 +1,6 @@
 import com.vanniktech.maven.publish.MavenPublishPluginExtension
 import org.gradle.api.internal.classpath.ModuleRegistry
 import org.gradle.configurationcache.extensions.serviceOf
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN
@@ -35,13 +34,12 @@ dependencies {
     )
 }
 
-tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "1.8"
-        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
-        languageVersion = "1.3"
+kotlin {
+    target {
+
     }
 }
+
 
 tasks.withType<Test>().configureEach {
     maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
