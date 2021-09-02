@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Bump: AGP to 7.0.1 (#109)
+
 ## 2.1.4
 
 * Fix: Pass buildDir as task input (#166)
