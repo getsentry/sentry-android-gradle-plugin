@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-* Bump: AGP to 7.0.1 (#109)
+* Bump: AGP to 7.0.1 (#181)
 
 ## 2.1.4
 
