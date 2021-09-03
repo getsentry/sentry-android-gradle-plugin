@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.instrumentation.database.crud
+package io.sentry.android.gradle.instrumentation.database.sqlite.visitor
 
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor

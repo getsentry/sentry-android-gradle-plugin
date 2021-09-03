@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.instrumentation
 
 import com.android.build.api.instrumentation.*
+import io.sentry.android.gradle.instrumentation.database.sqlite.AndroidXSQLiteDatabase
 import org.gradle.api.tasks.Input
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Optional
@@ -10,15 +11,22 @@ import org.objectweb.asm.ClassVisitor
 abstract class SpanAddingClassVisitorFactory :
     AsmClassVisitorFactory<SpanAddingClassVisitorFactory.SpanAddingParameters> {
 
+    companion object {
+        private val instrumentables: List<Instrumentable<ClassVisitor>> = listOf(
+            AndroidXSQLiteDatabase()
+        )
+    }
+
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
     ): ClassVisitor =
-        Instrumentable[classContext.currentClassData.className]
-            .getClassVisitor(instrumentationContext.apiVersion.get(), nextClassVisitor)
+        instrumentables.find { it.fqName == classContext.currentClassData.className }
+            ?.getVisitor(instrumentationContext.apiVersion.get(), nextClassVisitor)
+            ?: error("${classContext.currentClassData.className} is not supported for instrumentation")
 
     override fun isInstrumentable(classData: ClassData): Boolean =
-        classData.className in Instrumentable.names()
+        classData.className in instrumentables.map { it.fqName }
 
     interface SpanAddingParameters : InstrumentationParameters {
 
