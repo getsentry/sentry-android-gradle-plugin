@@ -10,6 +10,7 @@ plugins {
     id("java-gradle-plugin")
     id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
+    id("com.stepango.aar2jar") version BuildPluginsVersion.AAR_2_JAR
 }
 
 repositories {
@@ -18,6 +19,8 @@ repositories {
     google()
 }
 
+
+val testImplementationAar by configurations.getting
 dependencies {
     compileOnly(gradleApi())
     compileOnly(Libs.AGP)
@@ -26,6 +29,13 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(Libs.AGP)
     testImplementation(Libs.JUNIT)
+
+    testImplementation(Libs.ASM)
+
+    // we need these dependencies for tests, because the bytecode verifier also analyzes superclasses
+    testImplementationAar(Libs.SQLITE)
+    testImplementationAar(Libs.SQLITE_FRAMEWORK)
+    testRuntimeOnly(files("libs/android.jar"))
 
     testRuntimeOnly(
         files(
