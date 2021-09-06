@@ -6,6 +6,7 @@ import org.objectweb.asm.Opcodes.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class QueryMethodVisitor(
+    private var initialVarCount: Int,
     api: Int,
     methodVisitor: MethodVisitor
 ) : MethodVisitor(api, methodVisitor) {
@@ -22,21 +23,8 @@ class QueryMethodVisitor(
 
     private val instrumenting = AtomicBoolean(false)
 
-    override fun visitMaxs(maxStack: Int, maxLocals: Int) {
-        // if instrumentation is in progress, we visit maxs (as we are responsible now for properly finishing method visit) -> otherwise we skip it
-        if (instrumenting.get()) {
-            super.visitMaxs(maxStack, maxLocals)
-        }
-    }
-
-    override fun visitEnd() {
-        // if instrumentation is in progress, we visit end (as we are responsible now for properly finishing method visit) -> otherwise we skip it
-        if (instrumenting.get()) {
-            super.visitEnd()
-        }
-    }
-
     override fun visitCode() {
+        super.visitCode()
         // start visiting our query method
         visitTryCatchBlocks()
 
@@ -46,14 +34,14 @@ class QueryMethodVisitor(
         // in theory, we could rewrite the original bytecode as well, but it would mean keeping track
         // of its changes and maintaining it
         visitLabel(label0)
-        super.visitCode()
     }
 
     override fun visitInsn(opcode: Int) {
         // if the original method wants to return, we prevent it from doing so
         // and inject our logic
         if (opcode == ARETURN && !instrumenting.getAndSet(true)) {
-            visitVarInsn(ASTORE, 4) // Cursor cursor = ...
+            val cursorIndex = initialVarCount + 2
+            visitVarInsn(ASTORE, cursorIndex) // Cursor cursor = ...
 
             // set status to OK after the successful query
             visitSetStatus(status = "OK", gotoIfNull = label5)
@@ -67,12 +55,9 @@ class QueryMethodVisitor(
 
             // visit finally block for the negative path in the control flow (throw from catch-block)
             visitFinallyBlock(label = label4, gotoIfNull = label8)
+            val exceptionIndex = initialVarCount + 4
             visitLabel(label8)
-            visitThrow(varToLoad = 6)
-
-            // finalize
-            visitMaxs(5, 7)
-            visitEnd()
+            visitThrow(varToLoad = exceptionIndex)
             instrumenting.set(false)
             return
         }
@@ -82,8 +67,10 @@ class QueryMethodVisitor(
     private fun visitStoreCursor() {
         visitLabel(label5)
 
-        visitVarInsn(ALOAD, 4)
-        visitVarInsn(ASTORE, 5)
+        val cursorIndex = initialVarCount + 2
+        val newCursorIndex = initialVarCount + 3
+        visitVarInsn(ALOAD, cursorIndex)
+        visitVarInsn(ASTORE, newCursorIndex)
     }
 
     // bytecode preparations for try-catch blocks
@@ -108,12 +95,14 @@ class QueryMethodVisitor(
             "()Lio/sentry/ISpan;",
             /* isInterface = */ false
         )
-        visitVarInsn(ASTORE, 2) // span
+        val spanIndex = initialVarCount
+        val childIndex = initialVarCount + 1
+        visitVarInsn(ASTORE, spanIndex) // span
         visitInsn(ACONST_NULL)
-        visitVarInsn(ASTORE, 3) // child
-        visitVarInsn(ALOAD, 2) // span
+        visitVarInsn(ASTORE, childIndex) // child
+        visitVarInsn(ALOAD, spanIndex) // span
         visitJumpInsn(IFNULL, label0)
-        visitVarInsn(ALOAD, 2) // span
+        visitVarInsn(ALOAD, spanIndex) // span
         visitLdcInsn("db")
         visitVarInsn(ALOAD, 1) // supportQuery
         visitMethodInsn(
@@ -130,7 +119,7 @@ class QueryMethodVisitor(
             "(Ljava/lang/String;Ljava/lang/String;)Lio/sentry/ISpan;",
             /* isInterface = */ true
         )
-        visitVarInsn(ASTORE, 3) // child = ...
+        visitVarInsn(ASTORE, childIndex) // child = ...
     }
 
     /*
@@ -139,9 +128,10 @@ class QueryMethodVisitor(
     }
      */
     private fun MethodVisitor.visitSetStatus(status: String, gotoIfNull: Label) {
-        visitVarInsn(ALOAD, 3) // child
+        val childIndex = initialVarCount + 1
+        visitVarInsn(ALOAD, childIndex) // child
         visitJumpInsn(IFNULL, gotoIfNull)
-        visitVarInsn(ALOAD, 3)
+        visitVarInsn(ALOAD, childIndex)
         visitFieldInsn(
             GETSTATIC,
             "io/sentry/SpanStatus",
@@ -166,15 +156,17 @@ class QueryMethodVisitor(
      }
      */
     private fun MethodVisitor.visitCatchBlock() {
+        val cursorIndex = initialVarCount + 2
         visitLabel(label2)
-        visitVarInsn(ASTORE, 4) // Cursor cursor = ...
+        visitVarInsn(ASTORE, cursorIndex) // Cursor cursor = ...
         visitSetStatus(status = "INTERNAL_ERROR", gotoIfNull = label7)
 
         visitLabel(label7)
-        visitThrow(varToLoad = 4)
+        visitThrow(varToLoad = cursorIndex)
 
+        val exceptionIndex = initialVarCount + 4
         visitLabel(label3)
-        visitVarInsn(ASTORE, 6) // Exception e;
+        visitVarInsn(ASTORE, exceptionIndex) // Exception e;
     }
 
     /*
@@ -185,11 +177,12 @@ class QueryMethodVisitor(
      }
      */
     private fun MethodVisitor.visitFinallyBlock(label: Label, gotoIfNull: Label) {
+        val childIndex = initialVarCount + 1
         visitLabel(label)
 
-        visitVarInsn(ALOAD, 3)
+        visitVarInsn(ALOAD, childIndex)
         visitJumpInsn(IFNULL, gotoIfNull)
-        visitVarInsn(ALOAD, 3)
+        visitVarInsn(ALOAD, childIndex)
         visitMethodInsn(
             INVOKEINTERFACE,
             "io/sentry/ISpan",
@@ -205,7 +198,8 @@ class QueryMethodVisitor(
     private fun MethodVisitor.visitReturn() {
         visitLabel(label6)
 
-        visitVarInsn(ALOAD, 5)
+        val cursorIndex = initialVarCount + 3
+        visitVarInsn(ALOAD, cursorIndex)
         visitInsn(ARETURN)
     }
 

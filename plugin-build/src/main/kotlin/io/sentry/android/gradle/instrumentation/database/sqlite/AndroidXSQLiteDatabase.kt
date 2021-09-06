@@ -22,10 +22,18 @@ class Query : Instrumentable<MethodVisitor> {
 
     override fun getVisitor(apiVersion: Int, originalVisitor: MethodVisitor, descriptor: String?) =
         when (descriptor) {
-            QUERY_METHOD_DESCRIPTOR -> QueryMethodVisitor(apiVersion, originalVisitor)
+            QUERY_METHOD_DESCRIPTOR -> QueryMethodVisitor(
+                initialVarCount = 2,
+                api = apiVersion,
+                methodVisitor = originalVisitor
+            )
+            // The logic in another query method overload does not change, except that the number
+            // of parameters changed (0:this, 1:supportQuery, 2:cancellationSignal), so we just provide
+            // a different var count and base our var astore/aload on that value
             QUERY_METHOD_WITH_CANCELLATION_DESCRIPTOR -> QueryMethodVisitor(
-                apiVersion,
-                originalVisitor
+                initialVarCount = 3,
+                api = apiVersion,
+                methodVisitor = originalVisitor
             )
             else -> originalVisitor
         }
