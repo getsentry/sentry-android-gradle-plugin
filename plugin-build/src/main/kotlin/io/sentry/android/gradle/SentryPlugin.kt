@@ -65,7 +65,7 @@ class SentryPlugin : Plugin<Project> {
                         params.invalidate.setDisallowChanges(System.currentTimeMillis())
                     }
                 }
-                variant.setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)
+                variant.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
             }
 
             androidExtension.applicationVariants.matching {
