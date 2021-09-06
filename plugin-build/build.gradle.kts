@@ -10,6 +10,7 @@ plugins {
     id("java-gradle-plugin")
     id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
+    // we need this plugin in order to include .aar dependencies into a pure java project, which the gradle plugin is
     id("com.stepango.aar2jar") version BuildPluginsVersion.AAR_2_JAR
 }
 
@@ -20,7 +21,8 @@ repositories {
 }
 
 
-val testImplementationAar by configurations.getting
+val testImplementationAar by configurations.getting // this converts .aar into .jar dependencies
+
 dependencies {
     compileOnly(gradleApi())
     compileOnly(Libs.AGP)
