@@ -29,6 +29,7 @@ subprojects {
         }
     }
 
+    // to be compatible with AGP <= 4.1.x https://developer.android.com/studio/releases/gradle-plugin#java-8-default
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         sourceCompatibility = JavaVersion.VERSION_1_8.toString()
         targetCompatibility = JavaVersion.VERSION_1_8.toString()
