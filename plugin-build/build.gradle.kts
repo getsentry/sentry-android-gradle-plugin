@@ -1,6 +1,7 @@
 import com.vanniktech.maven.publish.MavenPublishPluginExtension
 import org.gradle.api.internal.classpath.ModuleRegistry
 import org.gradle.configurationcache.extensions.serviceOf
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN
@@ -32,6 +33,16 @@ dependencies {
                 .classpath.asFiles.first()
         )
     )
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+    targetCompatibility = JavaVersion.VERSION_1_8.toString()
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        languageVersion = "1.3"
+    }
 }
 
 tasks.withType<Test>().configureEach {
