@@ -19,8 +19,9 @@ repositories {
     mavenCentral()
     google()
 }
+apply(from = "gradle/bootstrap-sdk.gradle.kts")
 
-
+val androidSdkPath: String? by extra
 val testImplementationAar by configurations.getting // this converts .aar into .jar dependencies
 
 dependencies {
@@ -37,7 +38,7 @@ dependencies {
     // we need these dependencies for tests, because the bytecode verifier also analyzes superclasses
     testImplementationAar(Libs.SQLITE)
     testImplementationAar(Libs.SQLITE_FRAMEWORK)
-    testRuntimeOnly(files("libs/android.jar"))
+    testRuntimeOnly(files(androidSdkPath))
 
     testRuntimeOnly(
         files(
