@@ -56,7 +56,7 @@ class SentryPlugin : Plugin<Project> {
             }.getOrNull()
 
             // temp folder for sentry-related stuff
-            val tempDir = File("${project.buildDir}${sep}tmp${sep}sentry")
+            val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
             tempDir.mkdirs()
 
             // TODO: this should depend on ignoredVariants/ignoredFlavours/ignoredBuildTypes
