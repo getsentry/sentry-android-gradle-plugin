@@ -63,4 +63,5 @@ dependencies {
 
 sentry {
     forceInstrumentDependencies.set(true)
+    debug.set(true)
 }

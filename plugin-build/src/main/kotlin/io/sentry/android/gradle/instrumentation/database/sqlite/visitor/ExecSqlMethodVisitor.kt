@@ -5,7 +5,7 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import java.util.concurrent.atomic.AtomicBoolean
 
-class QueryMethodVisitor(
+class ExecSqlMethodVisitor(
     initialVarCount: Int,
     api: Int,
     methodVisitor: MethodVisitor
@@ -14,24 +14,16 @@ class QueryMethodVisitor(
     private val label5 = Label()
     private val label6 = Label()
     private val label7 = Label()
-    private val label8 = Label()
 
     private val instrumenting = AtomicBoolean(false)
 
     override fun visitCode() {
         super.visitCode()
         // start visiting method
-        visitTryCatchBlocks(expectedException = "java/lang/Exception")
+        visitTryCatchBlocks(expectedException = "android/database/SQLException")
 
         visitStartSpan {
             visitVarInsn(ALOAD, 1)
-            visitMethodInsn(
-                INVOKEINTERFACE,
-                "androidx/sqlite/db/SupportSQLiteQuery",
-                "getSql",
-                "()Ljava/lang/String;",
-                /* isInterface = */true
-            )
         }
 
         // we delegate to the original method visitor to keep the original method's bytecode
@@ -43,52 +35,34 @@ class QueryMethodVisitor(
     override fun visitInsn(opcode: Int) {
         // if the original method wants to return, we prevent it from doing so
         // and inject our logic
-        if (opcode == ARETURN && !instrumenting.getAndSet(true)) {
-            val cursorIndex = initialVarCount + 2
-            visitVarInsn(ASTORE, cursorIndex) // Cursor cursor = ...
-
+        if (opcode == RETURN && !instrumenting.getAndSet(true)) {
             // set status to OK after the successful query
-            visitSetStatus(status = "OK", gotoIfNull = label5)
+            visitSetStatus(status = "OK", gotoIfNull = label1)
 
-            visitStoreCursor()
             // visit finally block for the positive path in the control flow (return from try-block)
-            visitFinallyBlock(label = label1, gotoIfNull = label6)
-            visitReturn()
+            visitFinallyBlock(label = label1, gotoIfNull = label5)
+            visitJumpInsn(GOTO, label5)
 
-            visitCatchBlock(catchLabel = label2, throwLabel = label7)
+            visitCatchBlock(catchLabel = label2, throwLabel = label6)
 
-            val exceptionIndex = initialVarCount + 4
+            val exceptionIndex = initialVarCount + 3
             // store exception
             visitLabel(label3)
             visitVarInsn(ASTORE, exceptionIndex) // Exception e;
 
             // visit finally block for the negative path in the control flow (throw from catch-block)
-            visitFinallyBlock(label = label4, gotoIfNull = label8)
-            visitLabel(label8)
+            visitFinallyBlock(label = label4, gotoIfNull = label7)
+
+            visitLabel(label7)
             visitThrow(varToLoad = exceptionIndex)
+
+            visitLabel(label5)
+            visitInsn(RETURN)
+
             instrumenting.set(false)
             return
         }
         super.visitInsn(opcode)
     }
 
-    private fun visitStoreCursor() {
-        visitLabel(label5)
-
-        val cursorIndex = initialVarCount + 2
-        val newCursorIndex = initialVarCount + 3
-        visitVarInsn(ALOAD, cursorIndex)
-        visitVarInsn(ASTORE, newCursorIndex)
-    }
-
-    /*
-    return cursor;
-     */
-    private fun MethodVisitor.visitReturn() {
-        visitLabel(label6)
-
-        val cursorIndex = initialVarCount + 3
-        visitVarInsn(ALOAD, cursorIndex)
-        visitInsn(ARETURN)
-    }
 }
