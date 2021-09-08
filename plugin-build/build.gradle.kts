@@ -1,6 +1,7 @@
 import com.vanniktech.maven.publish.MavenPublishPluginExtension
 import org.gradle.api.internal.classpath.ModuleRegistry
 import org.gradle.configurationcache.extensions.serviceOf
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -27,6 +28,8 @@ val testImplementationAar by configurations.getting // this converts .aar into .
 dependencies {
     compileOnly(gradleApi())
     compileOnly(Libs.AGP)
+
+    implementation(Libs.ASM)
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
@@ -118,5 +121,16 @@ if (gradle.gradleVersion >= "6.6.0") {
                 require(it) { "No distribution to zip." }
             }
         }
+    }
+}
+
+tasks.withType<Test> {
+    testLogging {
+        events = setOf(
+            TestLogEvent.SKIPPED,
+            TestLogEvent.PASSED,
+            TestLogEvent.FAILED
+        )
+        showStandardStreams = true
     }
 }

@@ -2,6 +2,8 @@ package io.sentry.android.gradle.instrumentation.database.sqlite
 
 import io.sentry.android.gradle.instrumentation.CommonClassVisitor
 import io.sentry.android.gradle.instrumentation.Instrumentable
+import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
+import io.sentry.android.gradle.instrumentation.database.sqlite.visitor.ExecSqlMethodVisitor
 import io.sentry.android.gradle.instrumentation.database.sqlite.visitor.QueryMethodVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
@@ -9,8 +11,18 @@ import org.objectweb.asm.MethodVisitor
 class AndroidXSQLiteDatabase : Instrumentable<ClassVisitor> {
     override val fqName: String get() = "androidx.sqlite.db.framework.FrameworkSQLiteDatabase"
 
-    override fun getVisitor(apiVersion: Int, originalVisitor: ClassVisitor, descriptor: String?) =
-        CommonClassVisitor(children, apiVersion, originalVisitor)
+    override fun getVisitor(
+        apiVersion: Int,
+        originalVisitor: ClassVisitor,
+        descriptor: String?,
+        parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
+    ) = CommonClassVisitor(
+        apiVersion = apiVersion,
+        classVisitor = originalVisitor,
+        className = fqName.substringAfterLast('.'),
+        methodInstrumentables = children,
+        parameters = parameters
+    )
 
     override val children: List<Instrumentable<MethodVisitor>> = listOf(
         Query()
@@ -20,7 +32,12 @@ class AndroidXSQLiteDatabase : Instrumentable<ClassVisitor> {
 class Query : Instrumentable<MethodVisitor> {
     override val fqName: String get() = "query"
 
-    override fun getVisitor(apiVersion: Int, originalVisitor: MethodVisitor, descriptor: String?) =
+    override fun getVisitor(
+        apiVersion: Int,
+        originalVisitor: MethodVisitor,
+        descriptor: String?,
+        parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
+    ): MethodVisitor =
         when (descriptor) {
             QUERY_METHOD_DESCRIPTOR -> QueryMethodVisitor(
                 initialVarCount = 2,
