@@ -10,6 +10,8 @@ plugins {
     id("java-gradle-plugin")
     id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
+    // we need this plugin in order to include .aar dependencies into a pure java project, which the gradle plugin is
+    id("com.stepango.aar2jar") version BuildPluginsVersion.AAR_2_JAR
 }
 
 repositories {
@@ -17,6 +19,10 @@ repositories {
     mavenCentral()
     google()
 }
+apply(from = "gradle/bootstrap-sdk.gradle.kts")
+
+val androidSdkPath: String? by extra
+val testImplementationAar by configurations.getting // this converts .aar into .jar dependencies
 
 dependencies {
     compileOnly(gradleApi())
@@ -26,6 +32,13 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(Libs.AGP)
     testImplementation(Libs.JUNIT)
+
+    testImplementation(Libs.ASM)
+
+    // we need these dependencies for tests, because the bytecode verifier also analyzes superclasses
+    testImplementationAar(Libs.SQLITE)
+    testImplementationAar(Libs.SQLITE_FRAMEWORK)
+    testRuntimeOnly(files(androidSdkPath))
 
     testRuntimeOnly(
         files(

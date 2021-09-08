@@ -1,21 +1,28 @@
 package io.sentry.android.gradle.instrumentation
 
-import io.sentry.android.gradle.instrumentation.database.AndroidXSQLiteClassVisitor
-import org.objectweb.asm.ClassVisitor
+interface Instrumentable<Visitor> {
 
-enum class Instrumentable(val fqName: String) {
-    ANDROIDX_SQLITE_DATABASE("androidx.sqlite.db.framework.FrameworkSQLiteDatabase");
+    /**
+     * Fully-qualified name of the instrumentable. Examples:
+     * Class: androidx.sqlite.db.framework.FrameworkSQLiteDatabase
+     * Method: query
+     */
+    val fqName: String
 
-    fun getClassVisitor(apiVersion: Int, classVisitor: ClassVisitor) =
-        when (this) {
-            ANDROIDX_SQLITE_DATABASE -> AndroidXSQLiteClassVisitor(apiVersion, classVisitor)
-        }
+    /**
+     * Provides a visitor for this instrumentable. A visitor can be one of the visitors defined
+     * in [ASM](https://asm.ow2.io/javadoc/org/objectweb/asm/package-summary.html)
+     *
+     * @param apiVersion Defines the ASM api version, usually provided from the parent
+     * @param originalVisitor The original visitor that ASM provides us with before visiting code
+     * @param descriptor A descriptor of a class/method/field/etc. Useful, e.g. when you need to return
+     * a different visitor for different method overloads.
+     */
+    fun getVisitor(apiVersion: Int, originalVisitor: Visitor, descriptor: String? = null): Visitor
 
-    companion object {
-        fun names(): List<String> = values().map { it.fqName }
-
-        operator fun get(fqName: String): Instrumentable =
-            values().find { it.fqName == fqName }
-                ?: error("$fqName is not supported for instrumentation")
-    }
+    /**
+     * Provides children instrumentables that are going to be used when visiting the current
+     * class/method/field/etc.
+     */
+    val children: List<Instrumentable<*>> get() = emptyList()
 }

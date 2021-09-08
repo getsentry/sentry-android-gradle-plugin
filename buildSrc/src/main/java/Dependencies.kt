@@ -4,15 +4,23 @@ object BuildPluginsVersion {
     const val KOTLIN = "1.4.32"
     const val KTLINT = "10.0.0"
     const val MAVEN_PUBLISH = "0.15.1"
+    const val AAR_2_JAR = "0.6"
 }
 
 object LibsVersion {
     const val JUNIT = "4.13.2"
+    const val ASM = "9.2"
+    const val SQLITE = "2.1.0"
 }
 
 object Libs {
     val AGP = "com.android.tools.build:gradle:${BuildPluginsVersion.AGP}"
     val JUNIT = "junit:junit:${LibsVersion.JUNIT}"
+
+    // bytecode instrumentation
+    val ASM = "org.ow2.asm:asm-util:${LibsVersion.ASM}"
+    val SQLITE = "androidx.sqlite:sqlite:${LibsVersion.SQLITE}"
+    val SQLITE_FRAMEWORK = "androidx.sqlite:sqlite-framework:${LibsVersion.SQLITE}"
 }
 
 object Samples {
