@@ -1,13 +1,17 @@
 // bootstrap the local android-sdk path, so we can use it as a dependency to run bytecode instrumentation tests
 fun locateAndroidSdk() {
-    val sdkPath: String? = System.getenv("ANDROID_SDK_ROOT") ?: kotlin.run {
-        val localProperties = File("$rootDir/..", "local.properties")
-        if (localProperties.exists()) {
-            val properties = java.util.Properties()
-            localProperties.inputStream().use { properties.load(it) }
-            properties["sdk.dir"] as String
-        } else {
-            null
+    val sdkPath: String? = when {
+        !System.getenv("ANDROID_SDK_ROOT").isNullOrBlank() -> System.getenv("ANDROID_SDK_ROOT")
+        !System.getenv("ANDROID_HOME").isNullOrBlank() -> System.getenv("ANDROID_HOME")
+        else -> {
+            val localProperties = File("$rootDir/..", "local.properties")
+            if (localProperties.exists()) {
+                val properties = java.util.Properties()
+                localProperties.inputStream().use { properties.load(it) }
+                properties["sdk.dir"] as String
+            } else {
+                null
+            }
         }
     }
 
