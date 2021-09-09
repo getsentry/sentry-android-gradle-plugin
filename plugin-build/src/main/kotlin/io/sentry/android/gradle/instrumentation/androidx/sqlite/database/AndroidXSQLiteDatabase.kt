@@ -1,10 +1,10 @@
-package io.sentry.android.gradle.instrumentation.database.sqlite
+package io.sentry.android.gradle.instrumentation.androidx.sqlite.database
 
 import io.sentry.android.gradle.instrumentation.CommonClassVisitor
 import io.sentry.android.gradle.instrumentation.Instrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
-import io.sentry.android.gradle.instrumentation.database.sqlite.visitor.ExecSqlMethodVisitor
-import io.sentry.android.gradle.instrumentation.database.sqlite.visitor.QueryMethodVisitor
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.visitor.ExecSqlMethodVisitor
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.visitor.QueryMethodVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 

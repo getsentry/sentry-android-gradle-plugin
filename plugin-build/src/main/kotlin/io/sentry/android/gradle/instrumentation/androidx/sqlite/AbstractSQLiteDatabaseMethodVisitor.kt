@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.instrumentation.database.sqlite.visitor
+package io.sentry.android.gradle.instrumentation.androidx.sqlite
 
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
