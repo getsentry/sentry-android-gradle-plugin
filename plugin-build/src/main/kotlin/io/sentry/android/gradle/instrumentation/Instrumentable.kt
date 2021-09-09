@@ -17,8 +17,15 @@ interface Instrumentable<Visitor> {
      * @param originalVisitor The original visitor that ASM provides us with before visiting code
      * @param descriptor A descriptor of a class/method/field/etc. Useful, e.g. when you need to return
      * a different visitor for different method overloads.
+     * @param debug Enables debug output. Defines whether the visitors should show the detailed report
+     * while visiting. Defaults to false
      */
-    fun getVisitor(apiVersion: Int, originalVisitor: Visitor, descriptor: String? = null): Visitor
+    fun getVisitor(
+        apiVersion: Int,
+        originalVisitor: Visitor,
+        descriptor: String? = null,
+        parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
+    ): Visitor
 
     /**
      * Provides children instrumentables that are going to be used when visiting the current

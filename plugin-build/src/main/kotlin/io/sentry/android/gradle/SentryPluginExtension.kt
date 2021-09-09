@@ -56,4 +56,11 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      */
     val forceInstrumentDependencies: Property<Boolean> = objects.property(Boolean::class.java)
         .convention(false)
+
+    /**
+     * Enabled debug output of the plugin. Useful when there are issues with code instrumentation,
+     * shows the modified bytecode.
+     * Defaults to false.
+     */
+    val debugInstrumentation: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
 }

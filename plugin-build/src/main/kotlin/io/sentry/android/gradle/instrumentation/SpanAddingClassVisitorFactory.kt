@@ -2,8 +2,10 @@ package io.sentry.android.gradle.instrumentation
 
 import com.android.build.api.instrumentation.*
 import io.sentry.android.gradle.instrumentation.database.sqlite.AndroidXSQLiteDatabase
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.objectweb.asm.ClassVisitor
 
@@ -22,7 +24,11 @@ abstract class SpanAddingClassVisitorFactory :
         nextClassVisitor: ClassVisitor
     ): ClassVisitor =
         instrumentables.find { it.fqName == classContext.currentClassData.className }
-            ?.getVisitor(instrumentationContext.apiVersion.get(), nextClassVisitor)
+            ?.getVisitor(
+                instrumentationContext.apiVersion.get(),
+                nextClassVisitor,
+                parameters = parameters.get()
+            )
             ?: error("${classContext.currentClassData.className} is not supported for instrumentation")
 
     override fun isInstrumentable(classData: ClassData): Boolean =
@@ -38,5 +44,11 @@ abstract class SpanAddingClassVisitorFactory :
         @get:Input
         @get:Optional
         val invalidate: Property<Long>
+
+        @get:Input
+        val debug: Property<Boolean>
+
+        @get:Internal
+        val tmpDir: RegularFileProperty
     }
 }
