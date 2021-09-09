@@ -57,7 +57,7 @@ class SentryPlugin : Plugin<Project> {
 
             // temp folder for sentry-related stuff
             val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
-            tempDir.mkdirs()
+            tmpDir.mkdirs()
 
             // TODO: this should depend on ignoredVariants/ignoredFlavours/ignoredBuildTypes
             androidComponentsExtension.onVariants { variant ->
@@ -68,8 +68,8 @@ class SentryPlugin : Plugin<Project> {
                     if (extension.forceInstrumentDependencies.get()) {
                         params.invalidate.setDisallowChanges(System.currentTimeMillis())
                     }
-                    params.debug.setDisallowChanges(extension.debug.get())
-                    params.tmpDir.set(tempDir)
+                    params.debug.setDisallowChanges(extension.debugInstrumentation.get())
+                    params.tmpDir.set(tmpDir)
                 }
                 variant.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
             }

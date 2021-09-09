@@ -62,5 +62,5 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      * shows the modified bytecode.
      * Defaults to false.
      */
-    val debug: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
+    val debugInstrumentation: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
 }
