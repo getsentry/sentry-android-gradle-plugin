@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 abstract class TracksDao {
 
-    @Query("SELECT * FROM track")
-    abstract suspend fun all(): List<Track>
+    @Query("SELECT * FROM track ORDER BY TrackId DESC")
+    abstract fun all(): Flow<List<Track>>
 
     @Query("SELECT * FROM Track WHERE AlbumId = (SELECT AlbumId FROM Album WHERE ArtistId = (SELECT ArtistId from Artist WHERE Name = :bandName))")
     abstract suspend fun allByArtist(bandName: String): List<Track>
