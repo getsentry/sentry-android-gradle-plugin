@@ -4,7 +4,7 @@ import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 
-abstract class AbstractSQLiteDatabaseMethodVisitor(
+abstract class AbstractAndroidXSQLiteMethodVisitor(
     protected var initialVarCount: Int,
     api: Int,
     methodVisitor: MethodVisitor
@@ -118,13 +118,13 @@ abstract class AbstractSQLiteDatabaseMethodVisitor(
         catchLabel: Label,
         throwLabel: Label
     ) {
-        val cursorIndex = initialVarCount + 2
+        val exceptionIndex = initialVarCount + 2
         visitLabel(catchLabel)
-        visitVarInsn(Opcodes.ASTORE, cursorIndex) // Exception e
+        visitVarInsn(Opcodes.ASTORE, exceptionIndex) // Exception e
         visitSetStatus(status = "INTERNAL_ERROR", gotoIfNull = throwLabel)
 
         visitLabel(throwLabel)
-        visitThrow(varToLoad = cursorIndex)
+        visitThrow(varToLoad = exceptionIndex)
     }
 
     /*

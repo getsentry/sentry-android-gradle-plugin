@@ -1,6 +1,6 @@
 package io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.visitor
 
-import io.sentry.android.gradle.instrumentation.androidx.sqlite.AbstractSQLiteDatabaseMethodVisitor
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.AbstractAndroidXSQLiteMethodVisitor
 import io.sentry.android.gradle.instrumentation.util.RETURN_CODES
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 class ExecuteInsertMethodVisitor(
     api: Int,
     methodVisitor: MethodVisitor
-) : AbstractSQLiteDatabaseMethodVisitor(
+) : AbstractAndroidXSQLiteMethodVisitor(
     initialVarCount = 3, // this method doesn't have any params, but we introduce 2 new variables (1: description, 2: index), before creating a span
     api = api,
     methodVisitor = methodVisitor
@@ -55,7 +55,7 @@ class ExecuteInsertMethodVisitor(
 
             visitCatchBlock(catchLabel = label2, throwLabel = label7)
 
-            val exceptionIndex = 9
+            val exceptionIndex = 7
             // store exception
             visitLabel(label3)
             visitVarInsn(ASTORE, exceptionIndex)
@@ -74,7 +74,7 @@ class ExecuteInsertMethodVisitor(
         visitLabel(label5)
 
         visitVarInsn(LLOAD, 5)
-        visitVarInsn(LSTORE, 7) // I have no clue, why is it 7 and not 6 here honestly..
+        visitVarInsn(LSTORE, 6)
     }
 
     /*
@@ -122,7 +122,7 @@ class ExecuteInsertMethodVisitor(
     private fun MethodVisitor.visitReturn() {
         visitLabel(label6)
 
-        visitVarInsn(LLOAD, 7)
+        visitVarInsn(LLOAD, 6)
         visitInsn(LRETURN)
     }
 }

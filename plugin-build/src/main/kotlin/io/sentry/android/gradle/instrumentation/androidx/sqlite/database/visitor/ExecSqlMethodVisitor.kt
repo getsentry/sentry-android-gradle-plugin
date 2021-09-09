@@ -1,6 +1,6 @@
 package io.sentry.android.gradle.instrumentation.androidx.sqlite.database.visitor
 
-import io.sentry.android.gradle.instrumentation.androidx.sqlite.AbstractSQLiteDatabaseMethodVisitor
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.AbstractAndroidXSQLiteMethodVisitor
 import io.sentry.android.gradle.instrumentation.util.RETURN_CODES
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
@@ -11,7 +11,7 @@ class ExecSqlMethodVisitor(
     initialVarCount: Int,
     api: Int,
     methodVisitor: MethodVisitor
-) : AbstractSQLiteDatabaseMethodVisitor(initialVarCount, api, methodVisitor) {
+) : AbstractAndroidXSQLiteMethodVisitor(initialVarCount, api, methodVisitor) {
 
     private val label5 = Label()
     private val label6 = Label()
