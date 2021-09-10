@@ -19,4 +19,10 @@ abstract class TracksDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insert(track: Track)
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun update(track: Track)
+
+    @Delete
+    abstract suspend fun delete(track: Track)
 }
