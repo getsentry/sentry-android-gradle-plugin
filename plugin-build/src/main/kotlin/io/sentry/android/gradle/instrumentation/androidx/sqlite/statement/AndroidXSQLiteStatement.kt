@@ -3,7 +3,8 @@ package io.sentry.android.gradle.instrumentation.androidx.sqlite.statement
 import io.sentry.android.gradle.instrumentation.CommonClassVisitor
 import io.sentry.android.gradle.instrumentation.Instrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
-import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.visitor.ExecuteInsertMethodVisitor
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.visitor.ExecuteStatementMethodVisitor
+import io.sentry.android.gradle.instrumentation.util.ReturnType
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 
@@ -25,7 +26,8 @@ class AndroidXSQLiteStatement : Instrumentable<ClassVisitor> {
     )
 
     override val children: List<Instrumentable<MethodVisitor>> = listOf(
-        ExecuteInsert()
+        ExecuteInsert(),
+        ExecuteUpdateDelete()
     )
 }
 
@@ -37,6 +39,16 @@ class ExecuteInsert : Instrumentable<MethodVisitor> {
         originalVisitor: MethodVisitor,
         descriptor: String?,
         parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
-    ): MethodVisitor = ExecuteInsertMethodVisitor(apiVersion, originalVisitor)
+    ): MethodVisitor = ExecuteStatementMethodVisitor(ReturnType.LONG, apiVersion, originalVisitor)
 }
 
+class ExecuteUpdateDelete : Instrumentable<MethodVisitor> {
+    override val fqName: String get() = "executeUpdateDelete"
+
+    override fun getVisitor(
+        apiVersion: Int,
+        originalVisitor: MethodVisitor,
+        descriptor: String?,
+        parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
+    ): MethodVisitor = ExecuteStatementMethodVisitor(ReturnType.INTEGER, apiVersion, originalVisitor)
+}
