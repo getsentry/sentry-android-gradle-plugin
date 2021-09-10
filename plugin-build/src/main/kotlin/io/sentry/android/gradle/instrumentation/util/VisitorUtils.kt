@@ -8,7 +8,7 @@ enum class ReturnType(val loadInsn: Int, val storeInsn: Int, val returnInsn: Int
     DOUBLE(Opcodes.DLOAD, Opcodes.DSTORE, Opcodes.DRETURN),
     LONG(Opcodes.LLOAD, Opcodes.LSTORE, Opcodes.LRETURN),
     OBJECT(Opcodes.ALOAD, Opcodes.ASTORE, Opcodes.ARETURN),
-    VOID(0, 0, Opcodes.RETURN);
+    VOID(Opcodes.NOP, Opcodes.NOP, Opcodes.RETURN);
 
     companion object {
         fun returnCodes(): List<Int> = values().map { it.returnInsn }
