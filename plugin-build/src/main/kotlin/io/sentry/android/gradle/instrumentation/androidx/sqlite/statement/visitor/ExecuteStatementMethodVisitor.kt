@@ -1,13 +1,14 @@
 package io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.visitor
 
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AbstractAndroidXSQLiteMethodVisitor
-import io.sentry.android.gradle.instrumentation.util.RETURN_CODES
+import io.sentry.android.gradle.instrumentation.util.ReturnType
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import java.util.concurrent.atomic.AtomicBoolean
 
-class ExecuteInsertMethodVisitor(
+class ExecuteStatementMethodVisitor(
+    private val returnType: ReturnType,
     api: Int,
     methodVisitor: MethodVisitor
 ) : AbstractAndroidXSQLiteMethodVisitor(
@@ -42,8 +43,8 @@ class ExecuteInsertMethodVisitor(
     override fun visitInsn(opcode: Int) {
         // if the original method wants to return, we prevent it from doing so
         // and inject our logic
-        if (opcode in RETURN_CODES && !instrumenting.getAndSet(true)) {
-            visitVarInsn(LSTORE, 5) // result of the original executeInsert, which is a long value
+        if (opcode in ReturnType.returnCodes() && !instrumenting.getAndSet(true)) {
+            visitVarInsn(returnType.storeInsn, 5) // result of the original executeInsert, which is a long value
 
             // set status to OK after the successful query
             visitSetStatus(status = "OK", gotoIfNull = label5)
@@ -73,8 +74,8 @@ class ExecuteInsertMethodVisitor(
     private fun MethodVisitor.visitStoreResult() {
         visitLabel(label5)
 
-        visitVarInsn(LLOAD, 5)
-        visitVarInsn(LSTORE, 6)
+        visitVarInsn(returnType.loadInsn, 5)
+        visitVarInsn(returnType.storeInsn, 6)
     }
 
     /*
@@ -122,7 +123,7 @@ class ExecuteInsertMethodVisitor(
     private fun MethodVisitor.visitReturn() {
         visitLabel(label6)
 
-        visitVarInsn(LLOAD, 6)
-        visitInsn(LRETURN)
+        visitVarInsn(returnType.loadInsn, 6)
+        visitInsn(returnType.returnInsn)
     }
 }

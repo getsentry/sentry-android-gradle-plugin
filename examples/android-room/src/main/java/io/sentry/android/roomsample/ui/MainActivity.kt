@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -15,10 +16,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.sentry.Sentry
+import io.sentry.SpanStatus
 import io.sentry.android.roomsample.R
 import io.sentry.android.roomsample.SampleApp
 import io.sentry.android.roomsample.data.Track
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,9 +36,13 @@ class MainActivity : ComponentActivity() {
             SampleApp.database.tracksDao()
                 .all()
                 .collect {
+                    val transaction = Sentry.startTransaction(
+                        "Track Interaction",
+                        "ui.action.load",
+                        true
+                    )
                     (list.adapter as TrackAdapter).populate(it)
-                    // this is to make sure that DB query spans are sent to Sentry, as they are attached to the Cold Start Transaction, otherwise they get dropped
-                    Sentry.getSpan()?.finish()
+                    transaction.finish(SpanStatus.OK)
                 }
         }
 
@@ -53,6 +60,9 @@ class TrackRow(
     context: Context,
     attrs: AttributeSet
 ) : LinearLayout(context, attrs) {
+
+    val deleteButton: View get() = findViewById(R.id.delete_track)
+    val editButton: View get() = findViewById(R.id.edit_track)
 
     @SuppressLint("SetTextI18n")
     fun populate(track: Track) {
@@ -88,6 +98,33 @@ class TrackAdapter : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.row.populate(data[position])
+        holder.row.deleteButton.setOnClickListener {
+            val transaction = Sentry.startTransaction(
+                "Track Interaction",
+                "ui.action.delete",
+                true
+            )
+            runBlocking {
+                SampleApp.database.tracksDao().delete(data[holder.bindingAdapterPosition])
+            }
+            transaction.finish(SpanStatus.OK)
+        }
+        holder.row.editButton.setOnClickListener {
+            val context = holder.row.context
+            val track = data[holder.bindingAdapterPosition]
+            context.startActivity(
+                Intent(
+                    context,
+                    EditActivity::class.java
+                ).putExtra(EditActivity.TRACK_EXTRA_KEY, track)
+            )
+        }
+    }
+
+    override fun onViewRecycled(holder: ViewHolder) {
+        super.onViewRecycled(holder)
+        holder.row.deleteButton.setOnClickListener(null)
+        holder.row.editButton.setOnClickListener(null)
     }
 
     inner class ViewHolder(val row: TrackRow) : RecyclerView.ViewHolder(row)

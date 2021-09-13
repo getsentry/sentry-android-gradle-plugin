@@ -23,11 +23,19 @@ class EditActivity : ComponentActivity() {
         val durationInput = findViewById<EditText>(R.id.track_duration)
         val unitPriceInput = findViewById<EditText>(R.id.track_unit_price)
 
+        val originalTrack: Track? = intent.getSerializableExtra(TRACK_EXTRA_KEY) as? Track
+        originalTrack?.run {
+            nameInput.setText(name)
+            composerInput.setText(composer)
+            durationInput.setText(millis.toString())
+            unitPriceInput.setText(price.toString())
+        }
+
         findViewById<Toolbar>(R.id.toolbar).setOnMenuItemClickListener {
             if (it.itemId == R.id.action_save) {
                 val transaction = Sentry.startTransaction(
-                    "Add/Edit Track",
-                    "ui.action.save",
+                    "Track Interaction",
+                    if (originalTrack == null) "ui.action.add" else "ui.action.edit",
                     true
                 )
 
@@ -45,20 +53,11 @@ class EditActivity : ComponentActivity() {
                         Toast.LENGTH_LONG
                     ).show()
                 } else {
-                    val newTrack = Track(
-                        name = name,
-                        albumId = null,
-                        composer = composer,
-                        mediaTypeId = null,
-                        genreId = null,
-                        millis = duration.toLong(),
-                        bytes = null,
-                        price = unitPrice.toFloat()
-                    )
-                    runBlocking {
-                        SampleApp.database.tracksDao().insert(newTrack)
+                    if (originalTrack == null) {
+                        addNewTrack(name, composer, duration.toLong(), unitPrice.toFloat())
+                    } else {
+                        originalTrack.update(name, composer, duration.toLong(), unitPrice.toFloat())
                     }
-
                     transaction.finish(SpanStatus.OK)
                     finish()
                 }
@@ -66,5 +65,37 @@ class EditActivity : ComponentActivity() {
             }
             return@setOnMenuItemClickListener false
         }
+    }
+
+    private fun addNewTrack(name: String, composer: String, duration: Long, unitPrice: Float) {
+        val newTrack = Track(
+            name = name,
+            albumId = null,
+            composer = composer,
+            mediaTypeId = null,
+            genreId = null,
+            millis = duration,
+            bytes = null,
+            price = unitPrice
+        )
+        runBlocking {
+            SampleApp.database.tracksDao().insert(newTrack)
+        }
+    }
+
+    private fun Track.update(name: String, composer: String, duration: Long, unitPrice: Float) {
+        val updatedTrack = copy(
+            name = name,
+            composer = composer,
+            millis = duration,
+            price = unitPrice
+        )
+        runBlocking {
+            SampleApp.database.tracksDao().update(updatedTrack)
+        }
+    }
+
+    companion object {
+        const val TRACK_EXTRA_KEY = "EditActivity.Track"
     }
 }
