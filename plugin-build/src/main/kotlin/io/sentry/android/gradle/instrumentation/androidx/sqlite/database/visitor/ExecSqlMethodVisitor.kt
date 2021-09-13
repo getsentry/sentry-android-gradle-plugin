@@ -1,5 +1,7 @@
-package io.sentry.android.gradle.instrumentation.database.sqlite.visitor
+package io.sentry.android.gradle.instrumentation.androidx.sqlite.database.visitor
 
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.AbstractAndroidXSQLiteMethodVisitor
+import io.sentry.android.gradle.instrumentation.util.ReturnType
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
@@ -9,7 +11,7 @@ class ExecSqlMethodVisitor(
     initialVarCount: Int,
     api: Int,
     methodVisitor: MethodVisitor
-) : AbstractSQLiteDatabaseMethodVisitor(initialVarCount, api, methodVisitor) {
+) : AbstractAndroidXSQLiteMethodVisitor(initialVarCount, api, methodVisitor) {
 
     private val label5 = Label()
     private val label6 = Label()
@@ -35,7 +37,7 @@ class ExecSqlMethodVisitor(
     override fun visitInsn(opcode: Int) {
         // if the original method wants to return, we prevent it from doing so
         // and inject our logic
-        if (opcode == RETURN && !instrumenting.getAndSet(true)) {
+        if (opcode in ReturnType.returnCodes() && !instrumenting.getAndSet(true)) {
             // set status to OK after the successful query
             visitSetStatus(status = "OK", gotoIfNull = label1)
 

@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import java.io.Serializable
 
 @Entity(tableName = "Artist")
 data class Artist(
@@ -43,4 +44,4 @@ data class Track(
     @ColumnInfo(name = "Milliseconds") val millis: Long,
     @ColumnInfo(name = "Bytes") val bytes: Long?,
     @ColumnInfo(name = "UnitPrice") val price: Float
-)
+) : Serializable

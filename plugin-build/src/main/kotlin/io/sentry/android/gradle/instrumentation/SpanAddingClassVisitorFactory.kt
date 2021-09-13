@@ -1,7 +1,8 @@
 package io.sentry.android.gradle.instrumentation
 
 import com.android.build.api.instrumentation.*
-import io.sentry.android.gradle.instrumentation.database.sqlite.AndroidXSQLiteDatabase
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.provider.Property
@@ -15,7 +16,8 @@ abstract class SpanAddingClassVisitorFactory :
 
     companion object {
         private val instrumentables: List<Instrumentable<ClassVisitor>> = listOf(
-            AndroidXSQLiteDatabase()
+            AndroidXSQLiteDatabase(),
+            AndroidXSQLiteStatement()
         )
     }
 

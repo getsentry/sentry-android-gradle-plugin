@@ -1,5 +1,7 @@
-package io.sentry.android.gradle.instrumentation.database.sqlite.visitor
+package io.sentry.android.gradle.instrumentation.androidx.sqlite.database.visitor
 
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.AbstractAndroidXSQLiteMethodVisitor
+import io.sentry.android.gradle.instrumentation.util.ReturnType
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
@@ -9,7 +11,7 @@ class QueryMethodVisitor(
     initialVarCount: Int,
     api: Int,
     methodVisitor: MethodVisitor
-) : AbstractSQLiteDatabaseMethodVisitor(initialVarCount, api, methodVisitor) {
+) : AbstractAndroidXSQLiteMethodVisitor(initialVarCount, api, methodVisitor) {
 
     private val label5 = Label()
     private val label6 = Label()
@@ -43,7 +45,7 @@ class QueryMethodVisitor(
     override fun visitInsn(opcode: Int) {
         // if the original method wants to return, we prevent it from doing so
         // and inject our logic
-        if (opcode == ARETURN && !instrumenting.getAndSet(true)) {
+        if (opcode in ReturnType.returnCodes() && !instrumenting.getAndSet(true)) {
             val cursorIndex = initialVarCount + 2
             visitVarInsn(ASTORE, cursorIndex) // Cursor cursor = ...
 
@@ -72,7 +74,7 @@ class QueryMethodVisitor(
         super.visitInsn(opcode)
     }
 
-    private fun visitStoreCursor() {
+    private fun MethodVisitor.visitStoreCursor() {
         visitLabel(label5)
 
         val cursorIndex = initialVarCount + 2
