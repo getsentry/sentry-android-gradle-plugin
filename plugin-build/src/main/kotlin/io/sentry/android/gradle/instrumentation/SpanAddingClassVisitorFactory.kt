@@ -6,40 +6,16 @@ import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.objectweb.asm.ClassVisitor
+import java.io.File
 
 @Suppress("UnstableApiUsage")
 abstract class SpanAddingClassVisitorFactory :
     AsmClassVisitorFactory<SpanAddingClassVisitorFactory.SpanAddingParameters> {
-
-    companion object {
-        private val instrumentables: List<Instrumentable<ClassVisitor>> = listOf(
-            AndroidXSQLiteDatabase(),
-            AndroidXSQLiteStatement()
-        )
-    }
-
-    override fun createClassVisitor(
-        classContext: ClassContext,
-        nextClassVisitor: ClassVisitor
-    ): ClassVisitor =
-        instrumentables.find { it.fqName == classContext.currentClassData.className }
-            ?.getVisitor(
-                instrumentationContext.apiVersion.get(),
-                nextClassVisitor,
-                parameters = parameters.get()
-            )
-            ?: error(
-                "${classContext.currentClassData.className} is not supported for instrumentation"
-            )
-
-    override fun isInstrumentable(classData: ClassData): Boolean =
-        classData.className in instrumentables.map { it.fqName }
 
     interface SpanAddingParameters : InstrumentationParameters {
 
@@ -56,6 +32,32 @@ abstract class SpanAddingClassVisitorFactory :
         val debug: Property<Boolean>
 
         @get:Internal
-        val tmpDir: RegularFileProperty
+        val tmpDir: Property<File>
     }
+
+    companion object {
+        private val instrumentables: MutableList<ClassInstrumentable> = mutableListOf(
+            AndroidXSQLiteDatabase(),
+            AndroidXSQLiteStatement()
+//            AndroidXRoomDao()
+        )
+    }
+
+    override fun createClassVisitor(
+        classContext: ClassContext,
+        nextClassVisitor: ClassVisitor
+    ): ClassVisitor =
+        instrumentables.find { it.isInstrumentable(classContext) }
+            ?.getVisitor(
+                classContext,
+                instrumentationContext.apiVersion.get(),
+                nextClassVisitor,
+                parameters = parameters.get()
+            )
+            ?: error(
+                "${classContext.currentClassData.className} is not supported for instrumentation"
+            )
+
+    override fun isInstrumentable(classData: ClassData): Boolean =
+        instrumentables.any { it.isInstrumentable(classData.toClassContext()) }
 }
