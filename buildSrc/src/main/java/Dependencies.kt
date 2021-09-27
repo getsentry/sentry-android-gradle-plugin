@@ -11,6 +11,7 @@ object LibsVersion {
     const val JUNIT = "4.13.2"
     const val ASM = "9.2"
     const val SQLITE = "2.1.0"
+    const val SENTRY = "5.1.2"
 }
 
 object Libs {
@@ -21,14 +22,10 @@ object Libs {
     val ASM = "org.ow2.asm:asm-util:${LibsVersion.ASM}"
     val SQLITE = "androidx.sqlite:sqlite:${LibsVersion.SQLITE}"
     val SQLITE_FRAMEWORK = "androidx.sqlite:sqlite-framework:${LibsVersion.SQLITE}"
+    val SENTRY_ANDROID = "io.sentry:sentry-android:${LibsVersion.SENTRY}"
 }
 
 object Samples {
-    object Sentry {
-        private const val version = "5.1.2"
-        const val android = "io.sentry:sentry-android:$version"
-    }
-
     object AndroidX {
         const val recyclerView = "androidx.recyclerview:recyclerview:1.2.0"
         const val lifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"

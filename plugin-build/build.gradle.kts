@@ -42,6 +42,7 @@ dependencies {
     testImplementationAar(Libs.SQLITE)
     testImplementationAar(Libs.SQLITE_FRAMEWORK)
     testRuntimeOnly(files(androidSdkPath))
+    testRuntimeOnly(Libs.SENTRY_ANDROID)
 
     testRuntimeOnly(
         files(
@@ -182,3 +183,5 @@ fun shouldDownloadSentryCli(): Boolean {
         else -> false
     }
 }
+
+tasks.register<io.sentry.android.gradle.internal.ASMifyTask>("asmify")

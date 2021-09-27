@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
@@ -18,14 +19,22 @@ abstract class TracksDao {
         "SELECT * FROM Track WHERE AlbumId = (SELECT AlbumId FROM Album WHERE ArtistId = " +
             "(SELECT ArtistId from Artist WHERE Name = :bandName))"
     )
-    abstract suspend fun allByArtist(bandName: String): List<Track>
+    abstract fun allByArtist(bandName: String): List<Track>
+
+    @Transaction
+    @Query("DELETE FROM Track")
+    abstract suspend fun count(): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun insert(track: Track)
+    abstract suspend fun insert(track: Track): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun insertAll(vararg tracks: Track)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun update(track: Track)
 
+    @Transaction
     @Delete
     abstract suspend fun delete(track: Track)
 }
