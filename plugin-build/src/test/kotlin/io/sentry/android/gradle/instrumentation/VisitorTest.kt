@@ -84,20 +84,7 @@ class VisitorTest(
         @JvmStatic
         fun parameters() = listOf(
             arrayOf("androidxSqlite", "FrameworkSQLiteDatabase", AndroidXSQLiteDatabase(), null),
-            arrayOf("androidxSqlite", "FrameworkSQLiteStatement", AndroidXSQLiteStatement(), null),
-            roomDaoTestParameters("DeleteAndReturnVoid"),
-            roomDaoTestParameters("InsertAndReturnLong"),
-            roomDaoTestParameters("InsertAndReturnVoid"),
-            roomDaoTestParameters("UpdateAndReturnVoid")
-        )
-
-        private fun roomDaoTestParameters(suffix: String = "") = arrayOf(
-            "androidxRoom",
-            "TracksDao_Impl_$suffix",
-            AndroidXRoomDao(),
-            TestClassContext("TracksDao_Impl_$suffix") { lookupName ->
-                TestClassData(lookupName, classAnnotations = listOf(AndroidXRoomDao().fqName))
-            }
+            arrayOf("androidxSqlite", "FrameworkSQLiteStatement", AndroidXSQLiteStatement(), null)
         )
     }
 }
