@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.1.5
 
 * Bump: AGP to 7.0.2 (#193)
 * Bump sentry-cli 1.69.1 which includes a fix for Dart debug symbols (#191)
