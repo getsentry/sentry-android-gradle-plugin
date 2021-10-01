@@ -7,6 +7,7 @@ targets:
     mavenSettingsPath: scripts/settings.xml
     mavenRepoId: ossrh
     mavenRepoUrl: https://oss.sonatype.org/service/local/staging/deploy/maven2/
+    android: false
   - name: github
   - name: registry
     sdks:
