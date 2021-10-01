@@ -5,7 +5,6 @@
 * Bump: AGP to 7.0.1 (#181)
 * Bump sentry-cli 1.69.1 which includes a fix for Dart debug symbols (#191)
 
-
 ## 2.1.4
 
 * Fix: Pass buildDir as task input (#166)
