@@ -85,17 +85,30 @@ class VisitorTest(
         fun parameters() = listOf(
             arrayOf("androidxSqlite", "FrameworkSQLiteDatabase", AndroidXSQLiteDatabase(), null),
             arrayOf("androidxSqlite", "FrameworkSQLiteStatement", AndroidXSQLiteStatement(), null),
-            roomDaoTestParameters("DeleteAndReturnVoid"),
+            roomDaoTestParameters("DeleteAndReturnUnit"),
             roomDaoTestParameters("InsertAndReturnLong"),
-            roomDaoTestParameters("InsertAndReturnVoid"),
-            roomDaoTestParameters("UpdateAndReturnVoid")
+            roomDaoTestParameters("InsertAndReturnUnit"),
+            roomDaoTestParameters("UpdateAndReturnUnit"),
+            deletionDaoTestParameters("DeleteAndReturnInteger"),
+            deletionDaoTestParameters("DeleteAndReturnVoid"),
+            deletionDaoTestParameters("DeleteQuery"),
+            deletionDaoTestParameters("DeleteQueryAndReturnInteger")
         )
 
         private fun roomDaoTestParameters(suffix: String = "") = arrayOf(
             "androidxRoom",
-            "TracksDao_Impl_$suffix",
+            "TracksDao_$suffix",
             AndroidXRoomDao(),
-            TestClassContext("TracksDao_Impl_$suffix") { lookupName ->
+            TestClassContext("TracksDao_$suffix") { lookupName ->
+                TestClassData(lookupName, classAnnotations = listOf(AndroidXRoomDao().fqName))
+            }
+        )
+
+        private fun deletionDaoTestParameters(suffix: String = "") = arrayOf(
+            "androidxRoom/delete",
+            "DeletionDao_$suffix",
+            AndroidXRoomDao(),
+            TestClassContext("DeletionDao_$suffix") { lookupName ->
                 TestClassData(lookupName, classAnnotations = listOf(AndroidXRoomDao().fqName))
             }
         )

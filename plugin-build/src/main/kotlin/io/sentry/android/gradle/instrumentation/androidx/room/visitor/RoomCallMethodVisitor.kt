@@ -62,19 +62,23 @@ class RoomCallMethodVisitor(
         when {
             (opcode == Opcodes.INVOKEVIRTUAL && name == SET_TRANSACTION_SUCCESSFUL) -> {
                 // the original method wants to return, but we intervene here to set status
+                instrumenting.set(true)
                 visitSetStatus(status = "OK", gotoIfNull = label6)
                 visitLabel(label6)
                 remappedLabel.set(label1)
+                instrumenting.set(false)
             }
             (opcode == Opcodes.INVOKEVIRTUAL && name == END_TRANSACTION) -> {
                 // room's finally block ends here, we add our code to finish the span
 
                 // we visit finally block 2 times - one for the positive path in control flow (try) one for negative (catch)
                 // hence we need to use different labels
+                instrumenting.set(true)
                 val visitCount = finallyVisitCount.incrementAndGet()
                 val label = if (visitCount == 1) label7 else label9
                 visitFinallyBlock(gotoIfNull = label)
                 visitLabel(label)
+                instrumenting.set(false)
             }
             (opcode == Opcodes.INVOKEVIRTUAL && name == BEGIN_TRANSACTION) -> {
                 remappedLabel.set(label0)

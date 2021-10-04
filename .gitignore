@@ -306,5 +306,6 @@ hs_err_pid*
 
 # Custom
 /sqlite-framework
+!**/instrumentation/**/*.class
 
 # End of https://www.gitignore.io/api/gradle,android,intellij,androidstudio
