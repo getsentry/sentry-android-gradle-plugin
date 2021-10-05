@@ -15,6 +15,7 @@ class SentryUploadNativeSymbolsTaskTest {
     fun `cli-executable is set correctly`() {
         val project = createProject()
         val task = createTestTask(project) {
+            it.buildDir.set(project.buildDir)
             it.cliExecutable.set("sentry-cli")
             it.includeNativeSources.set(false)
             it.variantName.set("debug")
@@ -25,7 +26,7 @@ class SentryUploadNativeSymbolsTaskTest {
 
         assertTrue("sentry-cli" in args)
         assertTrue("upload-dif" in args)
-        val path = "${project.projectDir}${sep}build${sep}intermediates" +
+        val path = "${project.buildDir}${sep}intermediates" +
             "${sep}merged_native_libs${sep}debug"
         assertTrue(path in args)
         assertFalse("--include-sources" in args)
@@ -35,6 +36,7 @@ class SentryUploadNativeSymbolsTaskTest {
     fun `--include-sources is set correctly`() {
         val project = createProject()
         val task = createTestTask(project) {
+            it.buildDir.set(project.buildDir)
             it.cliExecutable.set("sentry-cli")
             it.includeNativeSources.set(true)
             it.variantName.set("debug")
@@ -72,6 +74,7 @@ class SentryUploadNativeSymbolsTaskTest {
     fun `with sentryOrganization adds --org`() {
         val project = createProject()
         val task = createTestTask(project) {
+            it.buildDir.set(project.buildDir)
             it.cliExecutable.set("sentry-cli")
             it.sentryOrganization.set("dummy-org")
             it.includeNativeSources.set(true)
@@ -88,6 +91,7 @@ class SentryUploadNativeSymbolsTaskTest {
     fun `with sentryProject adds --project`() {
         val project = createProject()
         val task = createTestTask(project) {
+            it.buildDir.set(project.buildDir)
             it.cliExecutable.set("sentry-cli")
             it.sentryProject.set("dummy-proj")
             it.includeNativeSources.set(true)

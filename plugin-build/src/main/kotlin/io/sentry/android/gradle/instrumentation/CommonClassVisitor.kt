@@ -1,10 +1,10 @@
 package io.sentry.android.gradle.instrumentation
 
 import io.sentry.android.gradle.instrumentation.util.FileLogTextifier
+import java.io.File
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.util.TraceMethodVisitor
-import java.io.File
 
 class CommonClassVisitor(
     apiVersion: Int,

@@ -2,10 +2,19 @@ package io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.visit
 
 import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
 import io.sentry.android.gradle.instrumentation.util.ReturnType
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.properties.Delegates
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
-import org.objectweb.asm.Opcodes.*
-import kotlin.properties.Delegates
+import org.objectweb.asm.Opcodes.ALOAD
+import org.objectweb.asm.Opcodes.ASTORE
+import org.objectweb.asm.Opcodes.BIPUSH
+import org.objectweb.asm.Opcodes.GETFIELD
+import org.objectweb.asm.Opcodes.IADD
+import org.objectweb.asm.Opcodes.ICONST_2
+import org.objectweb.asm.Opcodes.ILOAD
+import org.objectweb.asm.Opcodes.INVOKEVIRTUAL
+import org.objectweb.asm.Opcodes.ISTORE
 
 class ExecuteStatementMethodVisitor(
     private val returnType: ReturnType,

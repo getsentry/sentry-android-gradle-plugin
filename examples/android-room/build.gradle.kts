@@ -7,11 +7,11 @@ plugins {
 
 // useful for local debugging of the androidx.sqlite lib
 // make sure to checkout the lib from https://github.com/androidx/androidx/tree/androidx-main/sqlite/sqlite-framework
-//configurations.all {
+// configurations.all {
 //    resolutionStrategy.dependencySubstitution {
 //        substitute(module("androidx.sqlite:sqlite-framework")).using(project(":sqlite-framework"))
 //    }
-//}
+// }
 
 android {
     compileSdk = 30

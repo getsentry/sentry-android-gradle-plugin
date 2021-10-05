@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 2.1.5
+
+* Bump: AGP to 7.0.2 (#193)
+* Bump sentry-cli 1.69.1 which includes a fix for Dart debug symbols (#191)
+
+## 2.1.4
+
+* Fix: Pass buildDir as task input (#166)
+
+## 2.1.3
+
+* Fix: Use task logger instead of project logger (#165)
+
 ## 2.1.2
 
 * Bump: AGP to 4.2.2 (#106)

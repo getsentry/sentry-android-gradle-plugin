@@ -2,6 +2,9 @@ package io.sentry.android.gradle.instrumentation
 
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
+import java.io.FileInputStream
+import java.io.PrintWriter
+import java.io.StringWriter
 import junit.framework.TestCase.assertEquals
 import org.junit.After
 import org.junit.Rule
@@ -14,9 +17,6 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.util.CheckClassAdapter
-import java.io.FileInputStream
-import java.io.PrintWriter
-import java.io.StringWriter
 
 @RunWith(Parameterized::class)
 class VisitorTest(
@@ -32,7 +32,9 @@ class VisitorTest(
         // first we read the original bytecode and pass it through the ClassWriter, so it computes
         // MAXS for us automatically (that's what AGP will do as well)
         val inputStream =
-            FileInputStream("src/test/resources/testFixtures/instrumentation/androidxSqlite/$className.class")
+            FileInputStream(
+                "src/test/resources/testFixtures/instrumentation/androidxSqlite/$className.class"
+            )
         val classReader = ClassReader(inputStream)
         val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
         val classVisitor = instrumentable.getVisitor(

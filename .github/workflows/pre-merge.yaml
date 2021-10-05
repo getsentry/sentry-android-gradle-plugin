@@ -17,9 +17,6 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
 
-    env:
-      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
@@ -52,5 +49,5 @@ jobs:
       - name: Build the Debug variant
         run: ./gradlew assembleDebug
 
-      - name: Run the uploadSentryProguardMappings task
-        run: ./gradlew assembleRelease uploadSentryProguardMappingsRelease
+      - name: Build the Release variant
+        run: ./gradlew assembleRelease

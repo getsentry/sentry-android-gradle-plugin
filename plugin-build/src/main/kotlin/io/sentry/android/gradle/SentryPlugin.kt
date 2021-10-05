@@ -71,7 +71,9 @@ class SentryPlugin : Plugin<Project> {
                     params.debug.setDisallowChanges(extension.debugInstrumentation.get())
                     params.tmpDir.set(tmpDir)
                 }
-                variant.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
+                variant.setAsmFramesComputationMode(
+                    FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
+                )
             }
 
             androidExtension.applicationVariants.matching {
@@ -179,6 +181,7 @@ class SentryPlugin : Plugin<Project> {
                         SentryUploadNativeSymbolsTask::class.java
                     ) {
                         it.workingDir(project.rootDir)
+                        it.buildDir.set(project.buildDir)
                         it.cliExecutable.set(cliExecutable)
                         it.sentryProperties.set(
                             sentryProperties?.let { file -> project.file(file) }
