@@ -6,11 +6,12 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.util.TraceMethodVisitor
 
+@Suppress("UnstableApiUsage")
 class CommonClassVisitor(
     apiVersion: Int,
     classVisitor: ClassVisitor,
     className: String,
-    private val methodInstrumentables: List<Instrumentable<MethodVisitor>>,
+    private val methodInstrumentables: List<MethodInstrumentable>,
     private val parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
 ) : ClassVisitor(apiVersion, classVisitor) {
 
@@ -19,7 +20,7 @@ class CommonClassVisitor(
     init {
         // to avoid file creation in case the debug mode is not set
         if (parameters.debug.get()) {
-            log = File(parameters.tmpDir.get().asFile, "$className-instrumentation.log")
+            log = File(parameters.tmpDir.get(), "$className-instrumentation.log")
             if (log.exists()) {
                 log.delete()
             }
@@ -35,12 +36,13 @@ class CommonClassVisitor(
         exceptions: Array<out String>?
     ): MethodVisitor {
         var mv = super.visitMethod(access, name, descriptor, signature, exceptions)
-        val instrumentable = methodInstrumentables.find { it.fqName == name }
+        val methodContext = MethodContext(access, name, descriptor, signature, exceptions?.toList())
+        val instrumentable = methodInstrumentables.find { it.isInstrumentable(methodContext)}
 
         if (parameters.debug.get() && instrumentable != null) {
             mv = TraceMethodVisitor(mv, FileLogTextifier(log, name, descriptor))
         }
 
-        return instrumentable?.getVisitor(api, mv, descriptor, parameters) ?: mv
+        return instrumentable?.getVisitor(methodContext, api, mv, parameters) ?: mv
     }
 }

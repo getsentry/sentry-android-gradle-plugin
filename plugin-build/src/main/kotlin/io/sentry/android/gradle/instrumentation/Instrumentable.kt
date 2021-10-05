@@ -1,6 +1,12 @@
+@file:Suppress("UnstableApiUsage")
+
 package io.sentry.android.gradle.instrumentation
 
-interface Instrumentable<Visitor> {
+import com.android.build.api.instrumentation.ClassContext
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.MethodVisitor
+
+interface Instrumentable<Visitor, InstrumentableContext> {
 
     /**
      * Fully-qualified name of the instrumentable. Examples:
@@ -13,17 +19,15 @@ interface Instrumentable<Visitor> {
      * Provides a visitor for this instrumentable. A visitor can be one of the visitors defined
      * in [ASM](https://asm.ow2.io/javadoc/org/objectweb/asm/package-summary.html)
      *
+     * @param instrumentableContext A context of the instrumentable.
      * @param apiVersion Defines the ASM api version, usually provided from the parent
      * @param originalVisitor The original visitor that ASM provides us with before visiting code
-     * @param descriptor A descriptor of a class/method/field/etc. Useful, e.g. when you need to return
-     * a different visitor for different method overloads.
-     * @param debug Enables debug output. Defines whether the visitors should show the detailed report
-     * while visiting. Defaults to false
+     * @param parameters Parameters that are configured by users and passed via the Sentry gradle plugin
      */
     fun getVisitor(
+        instrumentableContext: InstrumentableContext,
         apiVersion: Int,
         originalVisitor: Visitor,
-        descriptor: String? = null,
         parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
     ): Visitor
 
@@ -31,5 +35,21 @@ interface Instrumentable<Visitor> {
      * Provides children instrumentables that are going to be used when visiting the current
      * class/method/field/etc.
      */
-    val children: List<Instrumentable<*>> get() = emptyList()
+    val children: List<Instrumentable<*, *>> get() = emptyList()
+
+    /**
+     * Defines whether this object is instrumentable or not based on [data]
+     */
+    fun isInstrumentable(data: InstrumentableContext): Boolean
+}
+
+interface ClassInstrumentable : Instrumentable<ClassVisitor, ClassContext> {
+
+    override fun isInstrumentable(data: ClassContext): Boolean =
+        fqName == data.currentClassData.className
+}
+
+interface MethodInstrumentable : Instrumentable<MethodVisitor, MethodContext> {
+
+    override fun isInstrumentable(data: MethodContext): Boolean = fqName == data.name
 }
