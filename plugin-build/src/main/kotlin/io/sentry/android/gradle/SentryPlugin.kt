@@ -179,6 +179,7 @@ class SentryPlugin : Plugin<Project> {
                         SentryUploadNativeSymbolsTask::class.java
                     ) {
                         it.workingDir(project.rootDir)
+                        it.buildDir.set(project.buildDir)
                         it.cliExecutable.set(cliExecutable)
                         it.sentryProperties.set(
                             sentryProperties?.let { file -> project.file(file) }
