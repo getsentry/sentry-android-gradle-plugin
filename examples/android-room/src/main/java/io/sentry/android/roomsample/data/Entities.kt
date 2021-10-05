@@ -8,34 +8,41 @@ import java.io.Serializable
 
 @Entity(tableName = "Artist")
 data class Artist(
-    @PrimaryKey @ColumnInfo(name = "ArtistId") val id: Long,
+    @PrimaryKey @ColumnInfo(name = "ArtistId")
+    val id: Long,
     @ColumnInfo(name = "Name") val name: String?,
 )
 
 @Entity(
     tableName = "Album",
-    foreignKeys = [ForeignKey(
-        entity = Artist::class,
-        parentColumns = arrayOf("ArtistId"),
-        childColumns = arrayOf("ArtistId")
-    )]
+    foreignKeys = [
+        ForeignKey(
+            entity = Artist::class,
+            parentColumns = arrayOf("ArtistId"),
+            childColumns = arrayOf("ArtistId")
+        )
+    ]
 )
 data class Album(
-    @PrimaryKey @ColumnInfo(name = "AlbumId") val id: Long,
+    @PrimaryKey @ColumnInfo(name = "AlbumId")
+    val id: Long,
     @ColumnInfo(name = "Title") val title: String,
     @ColumnInfo(name = "ArtistId") val artistId: Long
 )
 
 @Entity(
     tableName = "Track",
-    foreignKeys = [ForeignKey(
-        entity = Album::class,
-        parentColumns = ["AlbumId"],
-        childColumns = ["AlbumId"]
-    )]
+    foreignKeys = [
+        ForeignKey(
+            entity = Album::class,
+            parentColumns = ["AlbumId"],
+            childColumns = ["AlbumId"]
+        )
+    ]
 )
 data class Track(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "TrackId") val id: Long = 0,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "TrackId")
+    val id: Long = 0,
     @ColumnInfo(name = "Name") val name: String,
     @ColumnInfo(name = "AlbumId") val albumId: Long?,
     @ColumnInfo(name = "Composer") val composer: String?,

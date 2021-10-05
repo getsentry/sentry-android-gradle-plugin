@@ -49,7 +49,8 @@ class EditActivity : ComponentActivity() {
                 ) {
                     Toast.makeText(
                         this,
-                        "Some of the inputs are empty or have wrong format (duration/unitprice not a number)",
+                        "Some of the inputs are empty or have wrong format " +
+                            "(duration/unitprice not a number)",
                         Toast.LENGTH_LONG
                     ).show()
                 } else {
