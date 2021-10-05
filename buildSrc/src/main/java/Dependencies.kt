@@ -2,9 +2,9 @@ object BuildPluginsVersion {
     val AGP = System.getenv("VERSION_AGP") ?: "7.0.2"
     const val DOKKA = "1.4.32"
     const val KOTLIN = "1.4.32"
-    const val KTLINT = "10.0.0"
-    const val MAVEN_PUBLISH = "0.15.1"
     const val AAR_2_JAR = "0.6"
+    const val KTLINT = "10.2.0"
+    const val MAVEN_PUBLISH = "0.18.0"
 }
 
 object LibsVersion {
