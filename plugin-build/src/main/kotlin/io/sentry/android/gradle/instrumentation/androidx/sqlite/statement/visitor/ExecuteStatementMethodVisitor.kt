@@ -2,17 +2,27 @@ package io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.visit
 
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AbstractAndroidXSQLiteMethodVisitor
 import io.sentry.android.gradle.instrumentation.util.ReturnType
+import java.util.concurrent.atomic.AtomicBoolean
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
-import org.objectweb.asm.Opcodes.*
-import java.util.concurrent.atomic.AtomicBoolean
+import org.objectweb.asm.Opcodes.ALOAD
+import org.objectweb.asm.Opcodes.ASTORE
+import org.objectweb.asm.Opcodes.BIPUSH
+import org.objectweb.asm.Opcodes.GETFIELD
+import org.objectweb.asm.Opcodes.IADD
+import org.objectweb.asm.Opcodes.ICONST_2
+import org.objectweb.asm.Opcodes.ILOAD
+import org.objectweb.asm.Opcodes.INVOKEVIRTUAL
+import org.objectweb.asm.Opcodes.ISTORE
 
 class ExecuteStatementMethodVisitor(
     private val returnType: ReturnType,
     api: Int,
     methodVisitor: MethodVisitor
 ) : AbstractAndroidXSQLiteMethodVisitor(
-    initialVarCount = 3, // this method doesn't have any params, but we introduce 2 new variables (1: description, 2: index), before creating a span
+    // this method doesn't have any params, but we introduce 2 new variables
+    // (1: description, 2: index), before creating a span
+    initialVarCount = 3,
     api = api,
     methodVisitor = methodVisitor
 ) {
@@ -44,7 +54,8 @@ class ExecuteStatementMethodVisitor(
         // if the original method wants to return, we prevent it from doing so
         // and inject our logic
         if (opcode in ReturnType.returnCodes() && !instrumenting.getAndSet(true)) {
-            visitVarInsn(returnType.storeInsn, 5) // result of the original executeInsert, which is a long value
+            // result of the original executeInsert, which is a long value
+            visitVarInsn(returnType.storeInsn, 5)
 
             // set status to OK after the successful query
             visitSetStatus(status = "OK", gotoIfNull = label5)

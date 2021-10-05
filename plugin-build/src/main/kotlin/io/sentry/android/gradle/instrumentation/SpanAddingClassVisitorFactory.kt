@@ -1,11 +1,14 @@
 package io.sentry.android.gradle.instrumentation
 
-import com.android.build.api.instrumentation.*
+import com.android.build.api.instrumentation.AsmClassVisitorFactory
+import com.android.build.api.instrumentation.ClassContext
+import com.android.build.api.instrumentation.ClassData
+import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.Input
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.objectweb.asm.ClassVisitor
@@ -31,7 +34,9 @@ abstract class SpanAddingClassVisitorFactory :
                 nextClassVisitor,
                 parameters = parameters.get()
             )
-            ?: error("${classContext.currentClassData.className} is not supported for instrumentation")
+            ?: error(
+                "${classContext.currentClassData.className} is not supported for instrumentation"
+            )
 
     override fun isInstrumentable(classData: ClassData): Boolean =
         classData.className in instrumentables.map { it.fqName }

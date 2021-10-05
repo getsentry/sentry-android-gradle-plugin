@@ -50,5 +50,9 @@ class ExecuteUpdateDelete : Instrumentable<MethodVisitor> {
         originalVisitor: MethodVisitor,
         descriptor: String?,
         parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
-    ): MethodVisitor = ExecuteStatementMethodVisitor(ReturnType.INTEGER, apiVersion, originalVisitor)
+    ): MethodVisitor = ExecuteStatementMethodVisitor(
+        ReturnType.INTEGER,
+        apiVersion,
+        originalVisitor
+    )
 }

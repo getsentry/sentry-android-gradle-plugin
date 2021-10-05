@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.instrumentation
 
+import java.io.File
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.file.DefaultFileCollectionFactory
 import org.gradle.api.internal.file.DefaultFileLookup
@@ -13,14 +14,15 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.util.internal.PatternSets
 import org.gradle.internal.nativeintegration.services.FileSystems
 import org.gradle.internal.nativeintegration.services.NativeServices
-import java.io.File
 
 class TestSpanAddingParameters(
     private val inMemoryDir: File
 ) : SpanAddingClassVisitorFactory.SpanAddingParameters {
 
     init {
-        NativeServices.initialize(inMemoryDir)
+        // TODO: Unresolved reference: initialize
+//        NativeServices.initialize(inMemoryDir)
+        NativeServices.initializeOnClient(inMemoryDir)
     }
 
     override val invalidate: Property<Long>

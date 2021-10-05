@@ -71,7 +71,9 @@ class SentryPlugin : Plugin<Project> {
                     params.debug.setDisallowChanges(extension.debugInstrumentation.get())
                     params.tmpDir.set(tmpDir)
                 }
-                variant.setAsmFramesComputationMode(FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
+                variant.setAsmFramesComputationMode(
+                    FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
+                )
             }
 
             androidExtension.applicationVariants.matching {

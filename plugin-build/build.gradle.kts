@@ -1,7 +1,7 @@
 import com.vanniktech.maven.publish.MavenPublishPluginExtension
 import org.gradle.api.internal.classpath.ModuleRegistry
-import org.gradle.configurationcache.extensions.serviceOf
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.configurationcache.extensions.serviceOf
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -130,9 +130,9 @@ if (gradle.gradleVersion >= "6.6.0") {
 tasks.withType<Test> {
     testLogging {
         events = setOf(
-                TestLogEvent.SKIPPED,
-                TestLogEvent.PASSED,
-                TestLogEvent.FAILED
+            TestLogEvent.SKIPPED,
+            TestLogEvent.PASSED,
+            TestLogEvent.FAILED
         )
         showStandardStreams = true
     }

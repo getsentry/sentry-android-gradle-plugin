@@ -1,10 +1,10 @@
 package io.sentry.android.gradle.instrumentation.util
 
-import org.objectweb.asm.Opcodes
-import org.objectweb.asm.util.Textifier
 import java.io.File
 import java.io.FileOutputStream
 import java.io.PrintWriter
+import org.objectweb.asm.Opcodes
+import org.objectweb.asm.util.Textifier
 
 class FileLogTextifier(
     log: File,

@@ -60,7 +60,8 @@ class Query : Instrumentable<MethodVisitor> {
         private const val QUERY_METHOD_DESCRIPTOR =
             "(Landroidx/sqlite/db/SupportSQLiteQuery;)Landroid/database/Cursor;"
         private const val QUERY_METHOD_WITH_CANCELLATION_DESCRIPTOR =
-            "(Landroidx/sqlite/db/SupportSQLiteQuery;Landroid/os/CancellationSignal;)Landroid/database/Cursor;"
+            "(Landroidx/sqlite/db/SupportSQLiteQuery;Landroid/os/CancellationSignal;)" +
+                "Landroid/database/Cursor;"
     }
 }
 
