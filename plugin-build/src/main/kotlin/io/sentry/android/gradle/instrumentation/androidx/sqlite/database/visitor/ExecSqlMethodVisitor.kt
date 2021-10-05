@@ -1,6 +1,6 @@
 package io.sentry.android.gradle.instrumentation.androidx.sqlite.database.visitor
 
-import io.sentry.android.gradle.instrumentation.androidx.sqlite.AbstractAndroidXSQLiteMethodVisitor
+import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
 import io.sentry.android.gradle.instrumentation.util.ReturnType
 import java.util.concurrent.atomic.AtomicBoolean
 import org.objectweb.asm.Label
@@ -8,23 +8,21 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 
 class ExecSqlMethodVisitor(
-    initialVarCount: Int,
     api: Int,
-    methodVisitor: MethodVisitor
-) : AbstractAndroidXSQLiteMethodVisitor(initialVarCount, api, methodVisitor) {
+    methodVisitor: MethodVisitor,
+    descriptor: String?
+) : AbstractSpanAddingMethodVisitor(api, methodVisitor, descriptor) {
 
     private val label5 = Label()
     private val label6 = Label()
     private val label7 = Label()
-
-    private val instrumenting = AtomicBoolean(false)
 
     override fun visitCode() {
         super.visitCode()
         // start visiting method
         visitTryCatchBlocks(expectedException = "android/database/SQLException")
 
-        visitStartSpan {
+        visitStartSpan(gotoIfNull = label0) {
             visitVarInsn(ALOAD, 1)
         }
 
@@ -42,18 +40,20 @@ class ExecSqlMethodVisitor(
             visitSetStatus(status = "OK", gotoIfNull = label1)
 
             // visit finally block for the positive path in the control flow (return from try-block)
-            visitFinallyBlock(label = label1, gotoIfNull = label5)
+            visitLabel(label1)
+            visitFinallyBlock(gotoIfNull = label5)
             visitJumpInsn(GOTO, label5)
 
             visitCatchBlock(catchLabel = label2, throwLabel = label6)
 
-            val exceptionIndex = initialVarCount + 3
+            val exceptionIndex = varCount.get()
             // store exception
             visitLabel(label3)
             visitVarInsn(ASTORE, exceptionIndex) // Exception e;
 
             // visit finally block for the negative path in the control flow (throw from catch-block)
-            visitFinallyBlock(label = label4, gotoIfNull = label7)
+            visitLabel(label4)
+            visitFinallyBlock(gotoIfNull = label7)
 
             visitLabel(label7)
             visitThrow(varToLoad = exceptionIndex)

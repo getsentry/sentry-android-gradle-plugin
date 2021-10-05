@@ -1,8 +1,9 @@
 package io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.visitor
 
-import io.sentry.android.gradle.instrumentation.androidx.sqlite.AbstractAndroidXSQLiteMethodVisitor
+import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
 import io.sentry.android.gradle.instrumentation.util.ReturnType
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.properties.Delegates
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.ALOAD
@@ -18,13 +19,12 @@ import org.objectweb.asm.Opcodes.ISTORE
 class ExecuteStatementMethodVisitor(
     private val returnType: ReturnType,
     api: Int,
-    methodVisitor: MethodVisitor
-) : AbstractAndroidXSQLiteMethodVisitor(
-    // this method doesn't have any params, but we introduce 2 new variables
-    // (1: description, 2: index), before creating a span
-    initialVarCount = 3,
+    methodVisitor: MethodVisitor,
+    descriptor: String?
+) : AbstractSpanAddingMethodVisitor(
     api = api,
-    methodVisitor = methodVisitor
+    methodVisitor = methodVisitor,
+    descriptor = descriptor
 ) {
 
     private val label5 = Label()
@@ -32,7 +32,7 @@ class ExecuteStatementMethodVisitor(
     private val label7 = Label()
     private val label8 = Label()
 
-    private val instrumenting = AtomicBoolean(false)
+    private var descriptionIndex by Delegates.notNull<Int>()
 
     override fun visitCode() {
         super.visitCode()
@@ -42,8 +42,8 @@ class ExecuteStatementMethodVisitor(
         // extract query description from the toString() method
         visitExtractDescription()
 
-        visitStartSpan {
-            visitVarInsn(ALOAD, 1) // description
+        visitStartSpan(gotoIfNull = label0) {
+            visitVarInsn(ALOAD, descriptionIndex) // description
         }
 
         // delegate to the original method visitor to keep the original method's bytecode
@@ -54,26 +54,28 @@ class ExecuteStatementMethodVisitor(
         // if the original method wants to return, we prevent it from doing so
         // and inject our logic
         if (opcode in ReturnType.returnCodes() && !instrumenting.getAndSet(true)) {
-            // result of the original executeInsert, which is a long value
-            visitVarInsn(returnType.storeInsn, 5)
+            val resultIndex = varCount.get()
+            visitVarInsn(returnType.storeInsn, resultIndex) // result of the original query
 
             // set status to OK after the successful query
             visitSetStatus(status = "OK", gotoIfNull = label5)
 
             visitStoreResult()
             // visit finally block for the positive path in the control flow (return from try-block)
-            visitFinallyBlock(label = label1, gotoIfNull = label6)
+            visitLabel(label1)
+            visitFinallyBlock(gotoIfNull = label6)
             visitReturn()
 
             visitCatchBlock(catchLabel = label2, throwLabel = label7)
 
-            val exceptionIndex = 7
+            val exceptionIndex = varCount.get()
             // store exception
             visitLabel(label3)
             visitVarInsn(ASTORE, exceptionIndex)
 
             // visit finally block for the negative path in the control flow (throw from catch-block)
-            visitFinallyBlock(label = label4, gotoIfNull = label8)
+            visitLabel(label4)
+            visitFinallyBlock(gotoIfNull = label8)
             visitLabel(label8)
             visitThrow(varToLoad = exceptionIndex)
             instrumenting.set(false)
@@ -85,8 +87,10 @@ class ExecuteStatementMethodVisitor(
     private fun MethodVisitor.visitStoreResult() {
         visitLabel(label5)
 
-        visitVarInsn(returnType.loadInsn, 5)
-        visitVarInsn(returnType.storeInsn, 6)
+        val resultIndex = varCount.get() - if (returnType == ReturnType.LONG) 2 else 1 // long and double types take 2 slots on stack
+        val newResultIndex = varCount.get()
+        visitVarInsn(returnType.loadInsn, resultIndex)
+        visitVarInsn(returnType.storeInsn, newResultIndex)
     }
 
     /*
@@ -109,13 +113,15 @@ class ExecuteStatementMethodVisitor(
             "()Ljava/lang/String;",
             false
         )
-        visitVarInsn(ASTORE, 1) // description
-        visitVarInsn(ALOAD, 1)
+        descriptionIndex = varCount.get()
+        val indexIndex = varCount.get() + 1
+        visitVarInsn(ASTORE, descriptionIndex) // description
+        visitVarInsn(ALOAD, descriptionIndex)
         visitIntInsn(BIPUSH, 58) // ':'
         visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "indexOf", "(I)I", false)
-        visitVarInsn(ISTORE, 2) // index
-        visitVarInsn(ALOAD, 1) // description
-        visitVarInsn(ILOAD, 2) // index
+        visitVarInsn(ISTORE, indexIndex) // index
+        visitVarInsn(ALOAD, descriptionIndex) // description
+        visitVarInsn(ILOAD, indexIndex) // index
         visitInsn(ICONST_2) // 2
         visitInsn(IADD) // index + 2
         visitMethodInsn(
@@ -125,7 +131,7 @@ class ExecuteStatementMethodVisitor(
             "(I)Ljava/lang/String;",
             false
         )
-        visitVarInsn(ASTORE, 1) // description
+        visitVarInsn(ASTORE, descriptionIndex) // description
     }
 
     /*
@@ -134,7 +140,8 @@ class ExecuteStatementMethodVisitor(
     private fun MethodVisitor.visitReturn() {
         visitLabel(label6)
 
-        visitVarInsn(returnType.loadInsn, 6)
+        val resultIndex = varCount.get() - if (returnType == ReturnType.LONG) 2 else 1
+        visitVarInsn(returnType.loadInsn, resultIndex)
         visitInsn(returnType.returnInsn)
     }
 }

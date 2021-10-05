@@ -1,6 +1,6 @@
 package io.sentry.android.gradle.instrumentation.androidx.sqlite.database.visitor
 
-import io.sentry.android.gradle.instrumentation.androidx.sqlite.AbstractAndroidXSQLiteMethodVisitor
+import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
 import io.sentry.android.gradle.instrumentation.util.ReturnType
 import java.util.concurrent.atomic.AtomicBoolean
 import org.objectweb.asm.Label
@@ -8,24 +8,22 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 
 class QueryMethodVisitor(
-    initialVarCount: Int,
     api: Int,
-    methodVisitor: MethodVisitor
-) : AbstractAndroidXSQLiteMethodVisitor(initialVarCount, api, methodVisitor) {
+    methodVisitor: MethodVisitor,
+    descriptor: String?
+) : AbstractSpanAddingMethodVisitor(api, methodVisitor, descriptor) {
 
     private val label5 = Label()
     private val label6 = Label()
     private val label7 = Label()
     private val label8 = Label()
 
-    private val instrumenting = AtomicBoolean(false)
-
     override fun visitCode() {
         super.visitCode()
         // start visiting method
         visitTryCatchBlocks(expectedException = "java/lang/Exception")
 
-        visitStartSpan {
+        visitStartSpan(gotoIfNull = label0) {
             visitVarInsn(ALOAD, 1)
             visitMethodInsn(
                 INVOKEINTERFACE,
@@ -46,7 +44,7 @@ class QueryMethodVisitor(
         // if the original method wants to return, we prevent it from doing so
         // and inject our logic
         if (opcode in ReturnType.returnCodes() && !instrumenting.getAndSet(true)) {
-            val cursorIndex = initialVarCount + 2
+            val cursorIndex = varCount.get()
             visitVarInsn(ASTORE, cursorIndex) // Cursor cursor = ...
 
             // set status to OK after the successful query
@@ -54,18 +52,20 @@ class QueryMethodVisitor(
 
             visitStoreCursor()
             // visit finally block for the positive path in the control flow (return from try-block)
-            visitFinallyBlock(label = label1, gotoIfNull = label6)
+            visitLabel(label1)
+            visitFinallyBlock(gotoIfNull = label6)
             visitReturn()
 
             visitCatchBlock(catchLabel = label2, throwLabel = label7)
 
-            val exceptionIndex = initialVarCount + 4
+            val exceptionIndex = varCount.get()
             // store exception
             visitLabel(label3)
             visitVarInsn(ASTORE, exceptionIndex) // Exception e;
 
             // visit finally block for the negative path in the control flow (throw from catch-block)
-            visitFinallyBlock(label = label4, gotoIfNull = label8)
+            visitLabel(label4)
+            visitFinallyBlock(gotoIfNull = label8)
             visitLabel(label8)
             visitThrow(varToLoad = exceptionIndex)
             instrumenting.set(false)
@@ -77,8 +77,8 @@ class QueryMethodVisitor(
     private fun MethodVisitor.visitStoreCursor() {
         visitLabel(label5)
 
-        val cursorIndex = initialVarCount + 2
-        val newCursorIndex = initialVarCount + 3
+        val cursorIndex = varCount.get() - 1
+        val newCursorIndex = varCount.get()
         visitVarInsn(ALOAD, cursorIndex)
         visitVarInsn(ASTORE, newCursorIndex)
     }
@@ -89,7 +89,7 @@ class QueryMethodVisitor(
     private fun MethodVisitor.visitReturn() {
         visitLabel(label6)
 
-        val cursorIndex = initialVarCount + 3
+        val cursorIndex = varCount.get() - 1
         visitVarInsn(ALOAD, cursorIndex)
         visitInsn(ARETURN)
     }
