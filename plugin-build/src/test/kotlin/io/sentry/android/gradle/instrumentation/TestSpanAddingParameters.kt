@@ -1,9 +1,9 @@
 package io.sentry.android.gradle.instrumentation
 
+import java.io.File
 import org.gradle.api.internal.provider.DefaultProperty
 import org.gradle.api.internal.provider.PropertyHost
 import org.gradle.api.provider.Property
-import java.io.File
 
 class TestSpanAddingParameters(
     private val inMemoryDir: File

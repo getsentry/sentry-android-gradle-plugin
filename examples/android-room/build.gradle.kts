@@ -47,9 +47,9 @@ android {
 
 // useful, when we want to modify room-generated classes, and then compile them into .class files
 // so room does not re-generate and overwrite our changes
-//afterEvaluate {
+// afterEvaluate {
 //    tasks.getByName("kaptDebugKotlin").enabled = false
-//}
+// }
 
 dependencies {
     implementation(Libs.SENTRY_ANDROID)

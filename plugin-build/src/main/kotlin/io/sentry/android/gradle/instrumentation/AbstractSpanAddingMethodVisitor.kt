@@ -1,13 +1,13 @@
 package io.sentry.android.gradle.instrumentation
 
 import io.sentry.android.gradle.instrumentation.util.ReturnType
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.properties.Delegates
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.properties.Delegates
 
 abstract class AbstractSpanAddingMethodVisitor(
     api: Int,
@@ -32,7 +32,9 @@ abstract class AbstractSpanAddingMethodVisitor(
             if (opcode in ReturnType.storeCodes() && `var` !in remapTable) {
                 remapTable[`var`] = varCount.get()
                 remapped = remapTable[`var`]!!
-            } else if ((opcode in ReturnType.loadCodes() || opcode in ReturnType.storeCodes()) && `var` in remapTable) {
+            } else if ((opcode in ReturnType.loadCodes() || opcode in ReturnType.storeCodes()) &&
+                `var` in remapTable
+            ) {
                 remapped = remapTable[`var`]!!
             }
         }

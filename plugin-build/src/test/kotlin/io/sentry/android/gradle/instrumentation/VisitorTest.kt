@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.instrumentation
 
 import com.android.build.api.instrumentation.ClassContext
+import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import java.io.FileInputStream
@@ -35,10 +36,12 @@ class VisitorTest(
     fun `instrumented class passes Java verifier`() {
         // first we read the original bytecode and pass it through the ClassWriter, so it computes
         // MAXS for us automatically (that's what AGP will do as well)
+        /* ktlint-disable max-line-length */
         val inputStream =
             FileInputStream(
                 "src/test/resources/testFixtures/instrumentation/$instrumentedProject/$className.class"
             )
+        /* ktlint-enable max-line-length */
         val classReader = ClassReader(inputStream)
         val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
         val classContext = this.classContext ?: TestClassContext(instrumentable.fqName)
