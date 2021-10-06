@@ -2,12 +2,11 @@ package io.sentry.android.gradle.instrumentation.androidx.room.visitor
 
 import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
 import io.sentry.android.gradle.instrumentation.util.ReturnType
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicReference
 
 class RoomCallMethodVisitor(
     private val returnType: ReturnType,
@@ -97,7 +96,8 @@ class RoomCallMethodVisitor(
         // since we are rewriting try-catch blocks, we need to also remap the original labels with ours
         val remapped = remappedLabel.getAndSet(null) ?: label
 
-        if (remapped == label2 && !instrumenting.getAndSet(true)) { // the original method does not have a catch block, but we add ours here
+        // the original method does not have a catch block, but we add ours here
+        if (remapped == label2 && !instrumenting.getAndSet(true)) {
             visitCatchBlock(catchLabel = label2, throwLabel = label8)
             instrumenting.set(false)
         } else {

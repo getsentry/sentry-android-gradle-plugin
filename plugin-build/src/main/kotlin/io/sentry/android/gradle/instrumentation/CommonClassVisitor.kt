@@ -37,7 +37,7 @@ class CommonClassVisitor(
     ): MethodVisitor {
         var mv = super.visitMethod(access, name, descriptor, signature, exceptions)
         val methodContext = MethodContext(access, name, descriptor, signature, exceptions?.toList())
-        val instrumentable = methodInstrumentables.find { it.isInstrumentable(methodContext)}
+        val instrumentable = methodInstrumentables.find { it.isInstrumentable(methodContext) }
 
         if (parameters.debug.get() && instrumentable != null) {
             mv = TraceMethodVisitor(mv, FileLogTextifier(log, name, descriptor))

@@ -2,7 +2,6 @@ package io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.visit
 
 import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
 import io.sentry.android.gradle.instrumentation.util.ReturnType
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.properties.Delegates
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
@@ -87,7 +86,8 @@ class ExecuteStatementMethodVisitor(
     private fun MethodVisitor.visitStoreResult() {
         visitLabel(label5)
 
-        val resultIndex = varCount.get() - if (returnType == ReturnType.LONG) 2 else 1 // long and double types take 2 slots on stack
+        // long and double types take 2 slots on stack
+        val resultIndex = varCount.get() - if (returnType == ReturnType.LONG) 2 else 1
         val newResultIndex = varCount.get()
         visitVarInsn(returnType.loadInsn, resultIndex)
         visitVarInsn(returnType.storeInsn, newResultIndex)

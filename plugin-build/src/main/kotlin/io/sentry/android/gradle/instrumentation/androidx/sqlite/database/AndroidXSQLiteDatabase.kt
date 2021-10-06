@@ -5,7 +5,6 @@ package io.sentry.android.gradle.instrumentation.androidx.sqlite.database
 import com.android.build.api.instrumentation.ClassContext
 import io.sentry.android.gradle.instrumentation.ClassInstrumentable
 import io.sentry.android.gradle.instrumentation.CommonClassVisitor
-import io.sentry.android.gradle.instrumentation.Instrumentable
 import io.sentry.android.gradle.instrumentation.MethodContext
 import io.sentry.android.gradle.instrumentation.MethodInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory

@@ -3,10 +3,8 @@
 package io.sentry.android.gradle.instrumentation.androidx.room
 
 import com.android.build.api.instrumentation.ClassContext
-import com.android.build.api.instrumentation.ClassData
 import io.sentry.android.gradle.instrumentation.ClassInstrumentable
 import io.sentry.android.gradle.instrumentation.CommonClassVisitor
-import io.sentry.android.gradle.instrumentation.Instrumentable
 import io.sentry.android.gradle.instrumentation.MethodContext
 import io.sentry.android.gradle.instrumentation.MethodInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
@@ -48,7 +46,10 @@ class AndroidXRoomDao : ClassInstrumentable {
     )
 
     override fun isInstrumentable(data: ClassContext): Boolean =
-        IMPL_SUFFIX in data.currentClassData.className && CALLABLE_INTERFACE in data.currentClassData.interfaces
+        IMPL_SUFFIX in
+            data.currentClassData.className &&
+            CALLABLE_INTERFACE in
+            data.currentClassData.interfaces
 
     companion object {
         private const val CALLABLE_INTERFACE = "java.util.concurrent.Callable"

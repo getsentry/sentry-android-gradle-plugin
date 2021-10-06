@@ -2,10 +2,12 @@ package io.sentry.android.gradle.instrumentation.androidx.sqlite.database.visito
 
 import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
 import io.sentry.android.gradle.instrumentation.util.ReturnType
-import java.util.concurrent.atomic.AtomicBoolean
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
-import org.objectweb.asm.Opcodes.*
+import org.objectweb.asm.Opcodes.ALOAD
+import org.objectweb.asm.Opcodes.ASTORE
+import org.objectweb.asm.Opcodes.GOTO
+import org.objectweb.asm.Opcodes.RETURN
 
 class ExecSqlMethodVisitor(
     api: Int,
