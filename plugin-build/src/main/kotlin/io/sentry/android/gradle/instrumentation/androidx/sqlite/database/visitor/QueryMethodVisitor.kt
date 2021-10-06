@@ -2,30 +2,36 @@ package io.sentry.android.gradle.instrumentation.androidx.sqlite.database.visito
 
 import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
 import io.sentry.android.gradle.instrumentation.ReturnType
+import io.sentry.android.gradle.instrumentation.util.Types
+import kotlin.properties.Delegates
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.ALOAD
 import org.objectweb.asm.Opcodes.ARETURN
 import org.objectweb.asm.Opcodes.ASTORE
 import org.objectweb.asm.Opcodes.INVOKEINTERFACE
+import org.objectweb.asm.Type
 
 class QueryMethodVisitor(
     api: Int,
-    methodVisitor: MethodVisitor,
+    private val originalVisitor: MethodVisitor,
+    access: Int,
     descriptor: String?
-) : AbstractSpanAddingMethodVisitor(api, methodVisitor, descriptor) {
+) : AbstractSpanAddingMethodVisitor(api, originalVisitor, access, descriptor) {
 
     private val label5 = Label()
     private val label6 = Label()
     private val label7 = Label()
     private val label8 = Label()
 
+    private var cursorIndex by Delegates.notNull<Int>()
+
     override fun visitCode() {
         super.visitCode()
         // start visiting method
-        visitTryCatchBlocks(expectedException = "java/lang/Exception")
+        originalVisitor.visitTryCatchBlocks(expectedException = "java/lang/Exception")
 
-        visitStartSpan(gotoIfNull = label0) {
+        originalVisitor.visitStartSpan(gotoIfNull = label0) {
             visitVarInsn(ALOAD, 1)
             visitMethodInsn(
                 INVOKEINTERFACE,
@@ -39,50 +45,53 @@ class QueryMethodVisitor(
         // we delegate to the original method visitor to keep the original method's bytecode
         // in theory, we could rewrite the original bytecode as well, but it would mean keeping track
         // of its changes and maintaining it
-        visitLabel(label0)
+        originalVisitor.visitLabel(label0)
     }
 
     override fun visitInsn(opcode: Int) {
         // if the original method wants to return, we prevent it from doing so
         // and inject our logic
         if (opcode in ReturnType.returnCodes() && !instrumenting.getAndSet(true)) {
-            val cursorIndex = varCount.get()
-            visitVarInsn(ASTORE, cursorIndex) // Cursor cursor = ...
-
-            // set status to OK after the successful query
-            visitSetStatus(status = "OK", gotoIfNull = label5)
-
-            visitStoreCursor()
-            // visit finally block for the positive path in the control flow (return from try-block)
-            visitLabel(label1)
-            visitFinallyBlock(gotoIfNull = label6)
-            visitReturn()
-
-            visitCatchBlock(catchLabel = label2, throwLabel = label7)
-
-            val exceptionIndex = varCount.get()
-            // store exception
-            visitLabel(label3)
-            visitVarInsn(ASTORE, exceptionIndex) // Exception e;
-
-            // visit finally block for the negative path in the control flow (throw from catch-block)
-            visitLabel(label4)
-            visitFinallyBlock(gotoIfNull = label8)
-            visitLabel(label8)
-            visitThrow(varToLoad = exceptionIndex)
+            originalVisitor.visitFinalizeSpan()
             instrumenting.set(false)
             return
         }
         super.visitInsn(opcode)
     }
 
+    private fun MethodVisitor.visitFinalizeSpan() {
+        cursorIndex = newLocal(Types.CURSOR)
+        visitVarInsn(ASTORE, cursorIndex) // Cursor cursor = ...
+
+        // set status to OK after the successful query
+        visitSetStatus(status = "OK", gotoIfNull = label5)
+
+        visitStoreCursor()
+        // visit finally block for the positive path in the control flow (return from try-block)
+        visitLabel(label1)
+        visitFinallyBlock(gotoIfNull = label6)
+        visitReturn()
+
+        visitCatchBlock(catchLabel = label2, throwLabel = label7)
+
+        val exceptionIndex = newLocal(Types.EXCEPTION)
+        // store exception
+        visitLabel(label3)
+        visitVarInsn(ASTORE, exceptionIndex) // Exception e;
+
+        // visit finally block for the negative path in the control flow (throw from catch-block)
+        visitLabel(label4)
+        visitFinallyBlock(gotoIfNull = label8)
+        visitLabel(label8)
+        visitThrow(varToLoad = exceptionIndex)
+    }
+
     private fun MethodVisitor.visitStoreCursor() {
         visitLabel(label5)
 
-        val cursorIndex = varCount.get() - 1
-        val newCursorIndex = varCount.get()
         visitVarInsn(ALOAD, cursorIndex)
-        visitVarInsn(ASTORE, newCursorIndex)
+        cursorIndex = newLocal(Types.CURSOR)
+        visitVarInsn(ASTORE, cursorIndex)
     }
 
     /*
@@ -91,7 +100,6 @@ class QueryMethodVisitor(
     private fun MethodVisitor.visitReturn() {
         visitLabel(label6)
 
-        val cursorIndex = varCount.get() - 1
         visitVarInsn(ALOAD, cursorIndex)
         visitInsn(ARETURN)
     }

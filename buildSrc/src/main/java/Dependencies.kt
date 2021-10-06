@@ -20,6 +20,7 @@ object Libs {
 
     // bytecode instrumentation
     val ASM = "org.ow2.asm:asm-util:${LibsVersion.ASM}"
+    val ASM_COMMONS = "org.ow2.asm:asm-commons:${LibsVersion.ASM}"
     val SQLITE = "androidx.sqlite:sqlite:${LibsVersion.SQLITE}"
     val SQLITE_FRAMEWORK = "androidx.sqlite:sqlite-framework:${LibsVersion.SQLITE}"
     val SENTRY_ANDROID = "io.sentry:sentry-android:${LibsVersion.SENTRY}"
@@ -43,5 +44,6 @@ object Samples {
         const val runtime = "androidx.room:room-runtime:${version}"
         const val ktx = "androidx.room:room-ktx:${version}"
         const val compiler = "androidx.room:room-compiler:${version}"
+        const val rxjava = "androidx.room:room-rxjava2:${version}"
     }
 }

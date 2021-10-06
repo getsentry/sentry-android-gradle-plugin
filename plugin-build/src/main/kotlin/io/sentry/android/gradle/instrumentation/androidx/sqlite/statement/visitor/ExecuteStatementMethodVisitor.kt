@@ -2,6 +2,7 @@ package io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.visit
 
 import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
 import io.sentry.android.gradle.instrumentation.ReturnType
+import io.sentry.android.gradle.instrumentation.util.Types
 import kotlin.properties.Delegates
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
@@ -18,11 +19,13 @@ import org.objectweb.asm.Opcodes.ISTORE
 class ExecuteStatementMethodVisitor(
     private val returnType: ReturnType,
     api: Int,
-    methodVisitor: MethodVisitor,
+    private val originalVisitor: MethodVisitor,
+    access: Int,
     descriptor: String?
 ) : AbstractSpanAddingMethodVisitor(
     api = api,
-    methodVisitor = methodVisitor,
+    originalVisitor = originalVisitor,
+    access = access,
     descriptor = descriptor
 ) {
 
@@ -32,65 +35,71 @@ class ExecuteStatementMethodVisitor(
     private val label8 = Label()
 
     private var descriptionIndex by Delegates.notNull<Int>()
+    private var resultIndex by Delegates.notNull<Int>()
 
     override fun visitCode() {
         super.visitCode()
         // start visiting method
-        visitTryCatchBlocks("java/lang/Exception")
+        originalVisitor.visitTryCatchBlocks("java/lang/Exception")
 
         // extract query description from the toString() method
-        visitExtractDescription()
+        originalVisitor.visitExtractDescription()
 
-        visitStartSpan(gotoIfNull = label0) {
+        originalVisitor.visitStartSpan(gotoIfNull = label0) {
             visitVarInsn(ALOAD, descriptionIndex) // description
         }
 
         // delegate to the original method visitor to keep the original method's bytecode
-        visitLabel(label0)
+        originalVisitor.visitLabel(label0)
     }
 
     override fun visitInsn(opcode: Int) {
         // if the original method wants to return, we prevent it from doing so
         // and inject our logic
         if (opcode in ReturnType.returnCodes() && !instrumenting.getAndSet(true)) {
-            val resultIndex = varCount.get()
-            visitVarInsn(returnType.storeInsn, resultIndex) // result of the original query
-
-            // set status to OK after the successful query
-            visitSetStatus(status = "OK", gotoIfNull = label5)
-
-            visitStoreResult()
-            // visit finally block for the positive path in the control flow (return from try-block)
-            visitLabel(label1)
-            visitFinallyBlock(gotoIfNull = label6)
-            visitReturn()
-
-            visitCatchBlock(catchLabel = label2, throwLabel = label7)
-
-            val exceptionIndex = varCount.get()
-            // store exception
-            visitLabel(label3)
-            visitVarInsn(ASTORE, exceptionIndex)
-
-            // visit finally block for the negative path in the control flow (throw from catch-block)
-            visitLabel(label4)
-            visitFinallyBlock(gotoIfNull = label8)
-            visitLabel(label8)
-            visitThrow(varToLoad = exceptionIndex)
+            originalVisitor.finalizeSpan()
             instrumenting.set(false)
             return
         }
         super.visitInsn(opcode)
     }
 
+    private fun MethodVisitor.finalizeSpan() {
+        resultIndex = newLocal(returnType.toType())
+        visitVarInsn(
+            returnType.storeInsn,
+            resultIndex
+        ) // result of the original query
+
+        // set status to OK after the successful query
+        visitSetStatus(status = "OK", gotoIfNull = label5)
+
+        visitStoreResult()
+        // visit finally block for the positive path in the control flow (return from try-block)
+        visitLabel(label1)
+        visitFinallyBlock(gotoIfNull = label6)
+        visitReturn()
+
+        visitCatchBlock(catchLabel = label2, throwLabel = label7)
+
+        val exceptionIndex = newLocal(Types.EXCEPTION)
+        // store exception
+        visitLabel(label3)
+        visitVarInsn(ASTORE, exceptionIndex)
+
+        // visit finally block for the negative path in the control flow (throw from catch-block)
+        visitLabel(label4)
+        visitFinallyBlock(gotoIfNull = label8)
+        visitLabel(label8)
+        visitThrow(varToLoad = exceptionIndex)
+    }
+
     private fun MethodVisitor.visitStoreResult() {
         visitLabel(label5)
 
-        // long and double types take 2 slots on stack
-        val resultIndex = varCount.get() - if (returnType == ReturnType.LONG) 2 else 1
-        val newResultIndex = varCount.get()
         visitVarInsn(returnType.loadInsn, resultIndex)
-        visitVarInsn(returnType.storeInsn, newResultIndex)
+        resultIndex = newLocal(returnType.toType())
+        visitVarInsn(returnType.storeInsn, resultIndex)
     }
 
     /*
@@ -113,8 +122,8 @@ class ExecuteStatementMethodVisitor(
             "()Ljava/lang/String;",
             false
         )
-        descriptionIndex = varCount.get()
-        val indexIndex = varCount.get() + 1
+        descriptionIndex = newLocal(Types.STRING)
+        val indexIndex = newLocal(Types.INT)
         visitVarInsn(ASTORE, descriptionIndex) // description
         visitVarInsn(ALOAD, descriptionIndex)
         visitIntInsn(BIPUSH, 58) // ':'
@@ -140,7 +149,6 @@ class ExecuteStatementMethodVisitor(
     private fun MethodVisitor.visitReturn() {
         visitLabel(label6)
 
-        val resultIndex = varCount.get() - if (returnType == ReturnType.LONG) 2 else 1
         visitVarInsn(returnType.loadInsn, resultIndex)
         visitInsn(returnType.returnInsn)
     }
