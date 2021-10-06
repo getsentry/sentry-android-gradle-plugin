@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.instrumentation.util
+package io.sentry.android.gradle.instrumentation
 
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type

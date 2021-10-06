@@ -61,19 +61,24 @@ class SentryPlugin : Plugin<Project> {
 
             // TODO: this should depend on ignoredVariants/ignoredFlavours/ignoredBuildTypes
             androidComponentsExtension.onVariants { variant ->
-                variant.transformClassesWith(
-                    SpanAddingClassVisitorFactory::class.java,
-                    InstrumentationScope.ALL
-                ) { params ->
-                    if (extension.forceInstrumentDependencies.get()) {
-                        params.invalidate.setDisallowChanges(System.currentTimeMillis())
+                if (variant.name !in extension.ignoredVariants.get() &&
+                    variant.flavorName !in extension.ignoredFlavors.get() &&
+                    variant.buildType !in extension.ignoredBuildTypes.get()
+                ) {
+                    variant.transformClassesWith(
+                        SpanAddingClassVisitorFactory::class.java,
+                        InstrumentationScope.ALL
+                    ) { params ->
+                        if (extension.forceInstrumentDependencies.get()) {
+                            params.invalidate.setDisallowChanges(System.currentTimeMillis())
+                        }
+                        params.debug.setDisallowChanges(extension.debugInstrumentation.get())
+                        params.tmpDir.set(tmpDir)
                     }
-                    params.debug.setDisallowChanges(extension.debugInstrumentation.get())
-                    params.tmpDir.set(tmpDir)
+                    variant.setAsmFramesComputationMode(
+                        FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
+                    )
                 }
-                variant.setAsmFramesComputationMode(
-                    FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
-                )
             }
 
             androidExtension.applicationVariants.matching {

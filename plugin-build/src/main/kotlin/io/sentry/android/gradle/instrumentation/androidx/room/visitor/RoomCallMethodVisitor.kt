@@ -1,7 +1,7 @@
 package io.sentry.android.gradle.instrumentation.androidx.room.visitor
 
 import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
-import io.sentry.android.gradle.instrumentation.util.ReturnType
+import io.sentry.android.gradle.instrumentation.ReturnType
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import org.objectweb.asm.Label

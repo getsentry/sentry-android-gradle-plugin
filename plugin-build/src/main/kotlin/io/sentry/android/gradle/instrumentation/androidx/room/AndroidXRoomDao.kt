@@ -7,9 +7,9 @@ import io.sentry.android.gradle.instrumentation.ClassInstrumentable
 import io.sentry.android.gradle.instrumentation.CommonClassVisitor
 import io.sentry.android.gradle.instrumentation.MethodContext
 import io.sentry.android.gradle.instrumentation.MethodInstrumentable
+import io.sentry.android.gradle.instrumentation.ReturnType
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.androidx.room.visitor.RoomCallMethodVisitor
-import io.sentry.android.gradle.instrumentation.util.ReturnType
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes

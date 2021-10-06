@@ -1,7 +1,7 @@
 package io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.visitor
 
 import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
-import io.sentry.android.gradle.instrumentation.util.ReturnType
+import io.sentry.android.gradle.instrumentation.ReturnType
 import kotlin.properties.Delegates
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor

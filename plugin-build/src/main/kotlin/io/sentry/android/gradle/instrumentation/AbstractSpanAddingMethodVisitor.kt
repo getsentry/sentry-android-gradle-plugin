@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.instrumentation
 
-import io.sentry.android.gradle.instrumentation.util.ReturnType
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.properties.Delegates
