@@ -9,6 +9,7 @@ import io.sentry.android.gradle.instrumentation.MethodContext
 import io.sentry.android.gradle.instrumentation.MethodInstrumentable
 import io.sentry.android.gradle.instrumentation.ReturnType
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
+import io.sentry.android.gradle.instrumentation.androidx.room.visitor.InstrumentableMethodsCollectingVisitor
 import io.sentry.android.gradle.instrumentation.androidx.room.visitor.RoomCallMethodVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
@@ -29,6 +30,7 @@ class AndroidXRoomDao : ClassInstrumentable {
         val originalClass = instrumentableContext.loadClassData(originalClassName)
             ?: error("Expected $originalClassName in the classpath, but failed to discover")
         return if (fqName in originalClass.classAnnotations) {
+            val methodsCollectingVisitor = InstrumentableMethodsCollectingVisitor(apiVersion, originalVisitor)
             CommonClassVisitor(
                 apiVersion = apiVersion,
                 classVisitor = originalVisitor,
