@@ -59,11 +59,13 @@ class SentryPlugin : Plugin<Project> {
             val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
             tmpDir.mkdirs()
 
-            // TODO: this should depend on ignoredVariants/ignoredFlavours/ignoredBuildTypes
             androidComponentsExtension.onVariants { variant ->
-                if (variant.name !in extension.ignoredVariants.get() &&
-                    variant.flavorName !in extension.ignoredFlavors.get() &&
-                    variant.buildType !in extension.ignoredBuildTypes.get()
+                if (isVariantAllowed(
+                        extension,
+                        variant.name,
+                        variant.flavorName,
+                        variant.buildType
+                    )
                 ) {
                     variant.transformClassesWith(
                         SpanAddingClassVisitorFactory::class.java,
@@ -82,9 +84,7 @@ class SentryPlugin : Plugin<Project> {
             }
 
             androidExtension.applicationVariants.matching {
-                it.name !in extension.ignoredVariants.get() &&
-                    it.flavorName !in extension.ignoredFlavors.get() &&
-                    it.buildType.name !in extension.ignoredBuildTypes.get()
+                isVariantAllowed(extension, it.name, it.flavorName, it.buildType.name)
             }.configureEach { variant ->
                 val bundleTask = withLogging(project.logger, "bundleTask") {
                     getBundleTask(project, variant.name)
@@ -209,6 +209,17 @@ class SentryPlugin : Plugin<Project> {
                 }
             }
         }
+    }
+
+    private fun isVariantAllowed(
+        extension: SentryPluginExtension,
+        variantName: String,
+        flavorName: String?,
+        buildType: String?
+    ): Boolean {
+        return variantName !in extension.ignoredVariants.get() &&
+            flavorName !in extension.ignoredFlavors.get() &&
+            buildType !in extension.ignoredBuildTypes.get()
     }
 
     companion object {
