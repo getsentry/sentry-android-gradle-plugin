@@ -221,7 +221,7 @@ class SentryPluginTest(
 
     @Test
     fun `register tracing instrumentation if tracingInstrumentation is enabled`() {
-        applyTracingInstrumentation(false)
+        applyTracingInstrumentation()
 
         val build = runner
             .appendArguments(":app:assembleRelease", "--dry-run")
