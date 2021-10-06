@@ -1,4 +1,6 @@
 import com.vanniktech.maven.publish.MavenPublishPluginExtension
+import io.sentry.android.gradle.internal.ASMifyTask
+import io.sentry.android.gradle.internal.BootstrapAndroidSdk
 import org.gradle.api.internal.classpath.ModuleRegistry
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.configurationcache.extensions.serviceOf
@@ -20,7 +22,8 @@ repositories {
     mavenCentral()
     google()
 }
-apply(from = "gradle/bootstrap-sdk.gradle.kts")
+
+BootstrapAndroidSdk.locateAndroidSdk(project, extra)
 
 val androidSdkPath: String? by extra
 val testImplementationAar by configurations.getting // this converts .aar into .jar dependencies
@@ -105,25 +108,20 @@ distributions {
     }
 }
 
-// We conditionally apply the maven.publish plugin only if we're on Gradle 6.6.0+
-// as such plugin is not compatible with lower versions of Gradle and will break
-// the CI matrix.
-if (gradle.gradleVersion >= "6.6.0") {
-    apply {
-        plugin("com.vanniktech.maven.publish")
-    }
+apply {
+    plugin("com.vanniktech.maven.publish")
+}
 
-    val publish = extensions.getByType(MavenPublishPluginExtension::class.java)
-    // signing is done when uploading files to MC
-    // via gpg:sign-and-deploy-file (release.kts)
-    publish.releaseSigningEnabled = false
+val publish = extensions.getByType(MavenPublishPluginExtension::class.java)
+// signing is done when uploading files to MC
+// via gpg:sign-and-deploy-file (release.kts)
+publish.releaseSigningEnabled = false
 
-    tasks.named("distZip") {
-        dependsOn("publishToMavenLocal")
-        onlyIf {
-            inputs.sourceFiles.isEmpty.not().also {
-                require(it) { "No distribution to zip." }
-            }
+tasks.named("distZip") {
+    dependsOn("publishToMavenLocal")
+    onlyIf {
+        inputs.sourceFiles.isEmpty.not().also {
+            require(it) { "No distribution to zip." }
         }
     }
 }
@@ -184,4 +182,4 @@ fun shouldDownloadSentryCli(): Boolean {
     }
 }
 
-tasks.register<io.sentry.android.gradle.internal.ASMifyTask>("asmify")
+tasks.register<ASMifyTask>("asmify")
