@@ -65,4 +65,12 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     val debugInstrumentation: Property<Boolean> = objects.property(Boolean::class.java).convention(
         false
     )
+
+    /**
+     * Enable the tracing instrumentation.
+     * Does bytecode manipulation for 'androidx.sqlite' and 'androidx.room' libraries.
+     * It starts and finishes a Span within any CRUD operation performed by sqlite or room.
+     */
+    val tracingInstrumentation: Property<Boolean> = objects.property(Boolean::class.java)
+        .convention(true)
 }

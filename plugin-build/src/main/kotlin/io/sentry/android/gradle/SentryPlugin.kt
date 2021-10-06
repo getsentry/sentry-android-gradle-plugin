@@ -65,7 +65,7 @@ class SentryPlugin : Plugin<Project> {
                         variant.name,
                         variant.flavorName,
                         variant.buildType
-                    )
+                    ) && extension.tracingInstrumentation.get()
                 ) {
                     variant.transformClassesWith(
                         SpanAddingClassVisitorFactory::class.java,
