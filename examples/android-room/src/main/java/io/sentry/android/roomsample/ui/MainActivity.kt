@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                 .all()
                 .collect {
                     val transaction = Sentry.startTransaction(
-                        "Track Interaction",
+                        "my populate transaction with ksp",
                         "ui.action.load",
                         true
                     )
@@ -100,7 +100,7 @@ class TrackAdapter : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
         holder.row.populate(data[position])
         holder.row.deleteButton.setOnClickListener {
             val transaction = Sentry.startTransaction(
-                "Track Interaction",
+                "my delete transaction with ksp",
                 "ui.action.delete",
                 true
             )

@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN
     id("distribution")
-    id("org.jetbrains.dokka") version BuildPluginsVersion.DOKKA
+    id("org.jetbrains.dokka") version BuildPluginsVersion.KOTLIN
     id("java-gradle-plugin")
     id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT

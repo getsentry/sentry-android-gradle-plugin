@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     kotlin("android")
-    kotlin("kapt")
+    id("com.google.devtools.ksp") version "1.5.31-1.0.0"
     id("io.sentry.android.gradle")
 }
 
@@ -14,10 +14,10 @@ plugins {
 // }
 
 android {
-    compileSdk = 30
+    compileSdk = 31
     defaultConfig {
         minSdk = 21
-        targetSdk = 30
+        targetSdk = 31
         versionCode = 1
         versionName = "1.0"
     }
@@ -64,7 +64,7 @@ dependencies {
     implementation(Samples.Room.runtime)
     implementation(Samples.Room.ktx)
 
-    kapt(Samples.Room.compiler)
+    ksp(Samples.Room.compiler)
 }
 
 sentry {

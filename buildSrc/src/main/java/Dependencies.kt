@@ -1,7 +1,6 @@
 object BuildPluginsVersion {
     val AGP = System.getenv("VERSION_AGP") ?: "7.0.2"
-    const val DOKKA = "1.4.32"
-    const val KOTLIN = "1.4.32"
+    const val KOTLIN = "1.5.31"
     const val AAR_2_JAR = "0.6"
     const val KTLINT = "10.2.0"
     const val MAVEN_PUBLISH = "0.18.0"
@@ -39,7 +38,7 @@ object Samples {
     }
 
     object Room {
-        private const val version = "2.3.0"
+        private const val version = "2.4.0-alpha05"
         const val runtime = "androidx.room:room-runtime:${version}"
         const val ktx = "androidx.room:room-ktx:${version}"
         const val compiler = "androidx.room:room-compiler:${version}"
