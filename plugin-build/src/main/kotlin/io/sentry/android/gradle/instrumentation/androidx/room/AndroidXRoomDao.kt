@@ -69,6 +69,7 @@ class Call : MethodInstrumentable {
         ReturnType.fromDescriptor(instrumentableContext.descriptor),
         apiVersion,
         originalVisitor,
+        instrumentableContext.access,
         instrumentableContext.descriptor
     )
 

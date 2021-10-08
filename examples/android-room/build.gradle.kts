@@ -63,6 +63,7 @@ dependencies {
 
     implementation(Samples.Room.runtime)
     implementation(Samples.Room.ktx)
+    implementation(Samples.Room.rxjava)
 
     kapt(Samples.Room.compiler)
 }

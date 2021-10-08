@@ -33,6 +33,7 @@ dependencies {
     compileOnly(Libs.AGP)
 
     implementation(Libs.ASM)
+    implementation(Libs.ASM_COMMONS)
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))

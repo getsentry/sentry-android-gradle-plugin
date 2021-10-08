@@ -11,11 +11,13 @@ import org.objectweb.asm.Opcodes
 class RoomCallMethodVisitor(
     private val returnType: ReturnType,
     api: Int,
-    methodVisitor: MethodVisitor,
+    private val originalVisitor: MethodVisitor,
+    access: Int,
     descriptor: String?
 ) : AbstractSpanAddingMethodVisitor(
     api = api,
-    methodVisitor = methodVisitor,
+    originalVisitor = originalVisitor,
+    access = access,
     descriptor = descriptor
 ) {
 
@@ -40,13 +42,13 @@ class RoomCallMethodVisitor(
         super.visitCode()
         instrumenting.set(true)
         // start visiting method
-        visitTryCatchBlocks("java/lang/Exception")
+        originalVisitor.visitTryCatchBlocks("java/lang/Exception")
 
-        visitStartSpan(label5) {
+        originalVisitor.visitStartSpan(label5) {
             visitLdcInsn(DESCRIPTION)
         }
 
-        visitLabel(label5)
+        originalVisitor.visitLabel(label5)
         instrumenting.set(false)
     }
 
@@ -61,23 +63,19 @@ class RoomCallMethodVisitor(
         when {
             (opcode == Opcodes.INVOKEVIRTUAL && name == SET_TRANSACTION_SUCCESSFUL) -> {
                 // the original method wants to return, but we intervene here to set status
-                instrumenting.set(true)
-                visitSetStatus(status = "OK", gotoIfNull = label6)
-                visitLabel(label6)
+                originalVisitor.visitSetStatus(status = "OK", gotoIfNull = label6)
+                originalVisitor.visitLabel(label6)
                 remappedLabel.set(label1)
-                instrumenting.set(false)
             }
             (opcode == Opcodes.INVOKEVIRTUAL && name == END_TRANSACTION) -> {
                 // room's finally block ends here, we add our code to finish the span
 
                 // we visit finally block 2 times - one for the positive path in control flow (try) one for negative (catch)
                 // hence we need to use different labels
-                instrumenting.set(true)
                 val visitCount = finallyVisitCount.incrementAndGet()
                 val label = if (visitCount == 1) label7 else label9
-                visitFinallyBlock(gotoIfNull = label)
-                visitLabel(label)
-                instrumenting.set(false)
+                originalVisitor.visitFinallyBlock(gotoIfNull = label)
+                originalVisitor.visitLabel(label)
             }
             (opcode == Opcodes.INVOKEVIRTUAL && name == BEGIN_TRANSACTION) -> {
                 remappedLabel.set(label0)
@@ -98,7 +96,7 @@ class RoomCallMethodVisitor(
 
         // the original method does not have a catch block, but we add ours here
         if (remapped == label2 && !instrumenting.getAndSet(true)) {
-            visitCatchBlock(catchLabel = label2, throwLabel = label8)
+            originalVisitor.visitCatchBlock(catchLabel = label2, throwLabel = label8)
             instrumenting.set(false)
         } else {
             super.visitLabel(remapped)
@@ -115,9 +113,9 @@ class RoomCallMethodVisitor(
         if (type == Opcodes.F_FULL || type == Opcodes.F_NEW) {
             val descriptor = stack?.get(0)
             if (descriptor is String && descriptor == "java/lang/Throwable") {
-                visitLabel(label3)
+                originalVisitor.visitLabel(label3)
                 super.visitFrame(type, numLocal, local, numStack, stack)
-                visitLabel(label4)
+                originalVisitor.visitLabel(label4)
                 return
             }
         }
