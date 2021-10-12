@@ -100,6 +100,9 @@ class SentryPluginTest(
 
                 sentry {
                   autoUpload = false
+                  tracingInstrumentation {
+                    enabled = false
+                  }
                 }
             """.trimIndent()
         )
@@ -242,6 +245,9 @@ class SentryPluginTest(
                 sentry {
                   autoUpload = false
                   uploadNativeSymbols = true
+                  tracingInstrumentation {
+                    enabled = false
+                  }
                 }
             """.trimIndent()
         )
@@ -258,6 +264,9 @@ class SentryPluginTest(
                 sentry {
                   autoUpload = true
                   ignoredVariants = ["$ignoredVariant"]
+                  tracingInstrumentation {
+                    enabled = false
+                  }
                 }
             """.trimIndent()
         )
@@ -274,7 +283,9 @@ class SentryPluginTest(
 
                 sentry {
                   autoUpload = false
-                  tracingInstrumentation = $tracingInstrumentation
+                  tracingInstrumentation {
+                    enabled = $tracingInstrumentation
+                  }
                 }
             """.trimIndent()
         )

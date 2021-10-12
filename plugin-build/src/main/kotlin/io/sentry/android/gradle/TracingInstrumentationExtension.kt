@@ -9,6 +9,7 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
      * Enable the tracing instrumentation.
      * Does bytecode manipulation for 'androidx.sqlite' and 'androidx.room' libraries.
      * It starts and finishes a Span within any CRUD operation performed by sqlite or room.
+     * Defaults to true.
      */
     val enabled: Property<Boolean> = objects.property(Boolean::class.java)
         .convention(true)

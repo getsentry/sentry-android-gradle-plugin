@@ -53,6 +53,10 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
         TracingInstrumentationExtension::class.java
     )
 
+    /**
+     * Configure the tracing instrumentation.
+     * Default configuration is enabled.
+     */
     fun tracingInstrumentation(
         tracingInstrumentationAction: Action<TracingInstrumentationExtension>
     ) {
