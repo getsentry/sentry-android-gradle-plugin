@@ -65,16 +65,16 @@ class SentryPlugin : Plugin<Project> {
                         variant.name,
                         variant.flavorName,
                         variant.buildType
-                    ) && extension.tracingInstrumentation.get()
+                    ) && extension.tracingInstrumentation.enabled.get()
                 ) {
                     variant.transformClassesWith(
                         SpanAddingClassVisitorFactory::class.java,
                         InstrumentationScope.ALL
                     ) { params ->
-                        if (extension.forceInstrumentDependencies.get()) {
+                        if (extension.tracingInstrumentation.forceInstrumentDependencies.get()) {
                             params.invalidate.setDisallowChanges(System.currentTimeMillis())
                         }
-                        params.debug.setDisallowChanges(extension.debugInstrumentation.get())
+                        params.debug.setDisallowChanges(extension.tracingInstrumentation.debug.get())
                         params.tmpDir.set(tmpDir)
                     }
                     variant.setAsmFramesComputationMode(

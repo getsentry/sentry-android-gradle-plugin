@@ -1,5 +1,6 @@
 package io.sentry.android.gradle
 
+import org.gradle.api.Action
 import javax.inject.Inject
 import org.gradle.api.Project
 import org.gradle.api.provider.ListProperty
@@ -48,29 +49,9 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     val ignoredFlavors: ListProperty<String> = objects.listProperty(String::class.java)
         .convention(emptyList())
 
-    /**
-     * Forces dependencies instrumentation, even if they were already instrumented.
-     * Useful when there are issues with code instrumentation, e.g. the dependencies are
-     * partially instrumented.
-     * Defaults to false.
-     */
-    val forceInstrumentDependencies: Property<Boolean> = objects.property(Boolean::class.java)
-        .convention(false)
+    internal val tracingInstrumentation: TracingInstrumentationExtension = objects.newInstance(TracingInstrumentationExtension::class.java)
 
-    /**
-     * Enabled debug output of the plugin. Useful when there are issues with code instrumentation,
-     * shows the modified bytecode.
-     * Defaults to false.
-     */
-    val debugInstrumentation: Property<Boolean> = objects.property(Boolean::class.java).convention(
-        false
-    )
-
-    /**
-     * Enable the tracing instrumentation.
-     * Does bytecode manipulation for 'androidx.sqlite' and 'androidx.room' libraries.
-     * It starts and finishes a Span within any CRUD operation performed by sqlite or room.
-     */
-    val tracingInstrumentation: Property<Boolean> = objects.property(Boolean::class.java)
-        .convention(true)
+    fun tracingInstrumentation(tracingInstrumentationAction: Action<TracingInstrumentationExtension>) {
+        tracingInstrumentationAction.execute(tracingInstrumentation)
+    }
 }
