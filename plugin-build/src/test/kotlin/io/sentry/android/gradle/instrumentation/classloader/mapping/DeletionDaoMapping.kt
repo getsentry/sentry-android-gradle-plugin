@@ -1,4 +1,9 @@
-package io.sentry.android.gradle.instrumentation.classloader
+package io.sentry.android.gradle.instrumentation.classloader.mapping
+
+import io.sentry.android.gradle.instrumentation.classloader.Callable
+import io.sentry.android.gradle.instrumentation.classloader.EntityDeletionOrUpdateAdapter
+import io.sentry.android.gradle.instrumentation.classloader.SharedSQLiteStatement
+import io.sentry.android.gradle.instrumentation.classloader.standardClassSource
 
 val deletionDaoMissingClasses = arrayOf<Pair<String, (String) -> String>>(
     "io.sentry.android.roomsample.data.DeletionDao_Impl$1" to { name ->
