@@ -99,7 +99,8 @@ class VisitorTest(
             deletionDaoTestParameters("DeleteAndReturnVoid"),
             deletionDaoTestParameters("DeleteQuery"),
             deletionDaoTestParameters("DeleteQueryAndReturnInteger"),
-            deletionDaoTestParameters("Impl")
+            deletionDaoTestParameters("Impl"),
+            insertionDaoTestParameters("Impl")
         )
 
         private fun roomDaoTestParameters(suffix: String = "") = arrayOf(
@@ -116,6 +117,15 @@ class VisitorTest(
             "DeletionDao_$suffix",
             AndroidXRoomDao(),
             TestClassContext("DeletionDao_$suffix") { lookupName ->
+                TestClassData(lookupName, classAnnotations = listOf(AndroidXRoomDao().fqName))
+            }
+        )
+
+        private fun insertionDaoTestParameters(suffix: String = "") = arrayOf(
+            "androidxRoom/insert",
+            "InsertionDao_$suffix",
+            AndroidXRoomDao(),
+            TestClassContext("InsertionDao_$suffix") { lookupName ->
                 TestClassData(lookupName, classAnnotations = listOf(AndroidXRoomDao().fqName))
             }
         )

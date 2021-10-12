@@ -1,10 +1,14 @@
 package io.sentry.android.gradle.instrumentation.classloader
 
+import io.sentry.android.gradle.instrumentation.classloader.mapping.deletionDaoMissingClasses
+import io.sentry.android.gradle.instrumentation.classloader.mapping.insertionDaoMissingClasses
+
 class GeneratingMissingClassesClassLoader : ClassLoader(getSystemClassLoader()) {
 
     companion object {
         private val missingClasses = mapOf(
-            *deletionDaoMissingClasses
+            *deletionDaoMissingClasses,
+            *insertionDaoMissingClasses
         )
     }
 

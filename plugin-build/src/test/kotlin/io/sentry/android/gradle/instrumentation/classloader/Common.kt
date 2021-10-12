@@ -2,6 +2,9 @@
 
 package io.sentry.android.gradle.instrumentation.classloader
 
+fun EntityInsertionAdapter(ofType: String) =
+    "androidx.room.EntityInsertionAdapter<$ofType>"
+
 fun EntityDeletionOrUpdateAdapter(ofType: String) =
     "androidx.room.EntityDeletionOrUpdateAdapter<$ofType>"
 
