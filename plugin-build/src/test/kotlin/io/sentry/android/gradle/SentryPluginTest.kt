@@ -7,7 +7,7 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
-import org.junit.Assert
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -100,6 +100,9 @@ class SentryPluginTest(
 
                 sentry {
                   autoUpload = false
+                  tracingInstrumentation {
+                    enabled = false
+                  }
                 }
             """.trimIndent()
         )
@@ -159,7 +162,7 @@ class SentryPluginTest(
             .appendArguments(":app:assembleDebug")
             .build()
 
-        Assert.assertThrows(AssertionError::class.java) {
+        assertThrows(AssertionError::class.java) {
             verifyProguardUuid(testProjectDir.root, variant = "debug", signed = false)
         }
     }
@@ -208,6 +211,28 @@ class SentryPluginTest(
         assertTrue(":app:uploadSentryProguardMappingsRelease" in build.output)
     }
 
+    @Test
+    fun `skips tracing instrumentation if tracingInstrumentation is disabled`() {
+        applyTracingInstrumentation(false)
+
+        val build = runner
+            .appendArguments(":app:assembleRelease", "--dry-run")
+            .build()
+
+        assertFalse(":app:transformReleaseClassesWithAsm" in build.output)
+    }
+
+    @Test
+    fun `register tracing instrumentation if tracingInstrumentation is enabled`() {
+        applyTracingInstrumentation()
+
+        val build = runner
+            .appendArguments(":app:assembleRelease", "--dry-run")
+            .build()
+
+        assertTrue(":app:transformReleaseClassesWithAsm" in build.output)
+    }
+
     private fun applyUploadNativeSymbols() {
         appBuildFile.writeText(
             // language=Groovy
@@ -220,6 +245,9 @@ class SentryPluginTest(
                 sentry {
                   autoUpload = false
                   uploadNativeSymbols = true
+                  tracingInstrumentation {
+                    enabled = false
+                  }
                 }
             """.trimIndent()
         )
@@ -236,6 +264,28 @@ class SentryPluginTest(
                 sentry {
                   autoUpload = true
                   ignoredVariants = ["$ignoredVariant"]
+                  tracingInstrumentation {
+                    enabled = false
+                  }
+                }
+            """.trimIndent()
+        )
+    }
+
+    private fun applyTracingInstrumentation(tracingInstrumentation: Boolean = true) {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+                plugins {
+                  id "com.android.application"
+                  id "io.sentry.android.gradle"
+                }
+
+                sentry {
+                  autoUpload = false
+                  tracingInstrumentation {
+                    enabled = $tracingInstrumentation
+                  }
                 }
             """.trimIndent()
         )
