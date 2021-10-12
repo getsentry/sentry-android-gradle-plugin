@@ -40,7 +40,7 @@ class CommonClassVisitor(
         val instrumentable = methodInstrumentables.find { it.isInstrumentable(methodContext) }
 
         if (parameters.debug.get() && instrumentable != null) {
-            mv = TraceMethodVisitor(mv, FileLogTextifier(log, name, descriptor))
+            mv = TraceMethodVisitor(mv, FileLogTextifier(api, log, name, descriptor))
         }
 
         return instrumentable?.getVisitor(methodContext, api, mv, parameters) ?: mv
