@@ -1,6 +1,6 @@
 package io.sentry.android.roomsample.data
 
-// this needs to be on the classpath, so the ASN verifier can resolve superclasses properly
+// these need to be on the classpath, so the ASM verifier can resolve superclasses and control flows properly
 data class Track(
     val id: Long = 0,
     val name: String,
@@ -11,4 +11,15 @@ data class Track(
     val millis: Long,
     val bytes: Long?,
     val price: Float
+)
+
+data class Album(
+    val id: Long,
+    val title: String,
+    val artistId: Long
+)
+
+data class MultiPKeyEntity(
+    val id: Long,
+    val name: String
 )

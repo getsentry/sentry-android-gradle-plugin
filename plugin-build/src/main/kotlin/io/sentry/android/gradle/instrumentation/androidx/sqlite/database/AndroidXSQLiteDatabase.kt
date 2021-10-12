@@ -50,7 +50,8 @@ class Query : MethodInstrumentable {
             // only instrument certain method overloads, as the other ones are calling these 2, otherwise we'd be creating 2 spans for one method
             QueryMethodVisitor(
                 api = apiVersion,
-                methodVisitor = originalVisitor,
+                originalVisitor = originalVisitor,
+                access = instrumentableContext.access,
                 descriptor = instrumentableContext.descriptor
             )
         } else {
@@ -76,7 +77,8 @@ class ExecSql : MethodInstrumentable {
         parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
     ): MethodVisitor = ExecSqlMethodVisitor(
         api = apiVersion,
-        methodVisitor = originalVisitor,
+        originalVisitor = originalVisitor,
+        access = instrumentableContext.access,
         descriptor = instrumentableContext.descriptor
     )
 }

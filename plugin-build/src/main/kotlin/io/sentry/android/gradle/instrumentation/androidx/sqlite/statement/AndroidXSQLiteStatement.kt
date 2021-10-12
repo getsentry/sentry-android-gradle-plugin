@@ -48,6 +48,7 @@ class ExecuteInsert : MethodInstrumentable {
         ReturnType.LONG,
         apiVersion,
         originalVisitor,
+        instrumentableContext.access,
         instrumentableContext.descriptor
     )
 }
@@ -64,6 +65,7 @@ class ExecuteUpdateDelete : MethodInstrumentable {
         ReturnType.INTEGER,
         apiVersion,
         originalVisitor,
+        instrumentableContext.access,
         instrumentableContext.descriptor
     )
 }

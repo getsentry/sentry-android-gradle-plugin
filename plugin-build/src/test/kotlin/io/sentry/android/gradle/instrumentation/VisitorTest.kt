@@ -4,6 +4,7 @@ import com.android.build.api.instrumentation.ClassContext
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
+import io.sentry.android.gradle.instrumentation.classloader.GeneratingMissingClassesClassLoader
 import java.io.FileInputStream
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -48,16 +49,18 @@ class VisitorTest(
             classContext,
             Opcodes.ASM7,
             classWriter,
-            parameters = TestSpanAddingParameters(tmpDir.root)
+            parameters = TestSpanAddingParameters(inMemoryDir = tmpDir.root)
         )
         // here we visit the bytecode, so it gets modified by our instrumentation visitor
-        classReader.accept(classVisitor, ClassReader.SKIP_DEBUG or ClassReader.EXPAND_FRAMES)
+        // the ClassReader flags here are identical to those that are set by AGP and R8
+        classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES)
 
         // after that we convert the modified bytecode with computed MAXS back to byte array
         // and pass it through CheckClassAdapter to verify that the bytecode is correct and can be accepted by JVM
         val bytes = classWriter.toByteArray()
         val verifyReader = ClassReader(bytes)
         val checkAdapter = CheckClassAdapter(ClassWriter(0), true)
+//        val methodNamePrintingVisitor = MethodNamePrintingVisitor(Opcodes.ASM7, checkAdapter)
         verifyReader.accept(checkAdapter, 0)
 
         // this will verify that the output of the above verifyReader is empty
@@ -65,6 +68,7 @@ class VisitorTest(
         val printWriter = PrintWriter(stringWriter)
         CheckClassAdapter.verify(
             verifyReader,
+            GeneratingMissingClassesClassLoader(),
             false,
             printWriter
         )
@@ -94,7 +98,8 @@ class VisitorTest(
             deletionDaoTestParameters("DeleteAndReturnInteger"),
             deletionDaoTestParameters("DeleteAndReturnVoid"),
             deletionDaoTestParameters("DeleteQuery"),
-            deletionDaoTestParameters("DeleteQueryAndReturnInteger")
+            deletionDaoTestParameters("DeleteQueryAndReturnInteger"),
+            deletionDaoTestParameters("Impl")
         )
 
         private fun roomDaoTestParameters(suffix: String = "") = arrayOf(
