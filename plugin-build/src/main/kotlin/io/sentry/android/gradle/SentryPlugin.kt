@@ -74,7 +74,9 @@ class SentryPlugin : Plugin<Project> {
                         if (extension.tracingInstrumentation.forceInstrumentDependencies.get()) {
                             params.invalidate.setDisallowChanges(System.currentTimeMillis())
                         }
-                        params.debug.setDisallowChanges(extension.tracingInstrumentation.debug.get())
+                        params.debug.setDisallowChanges(
+                            extension.tracingInstrumentation.debug.get()
+                        )
                         params.tmpDir.set(tmpDir)
                     }
                     variant.setAsmFramesComputationMode(

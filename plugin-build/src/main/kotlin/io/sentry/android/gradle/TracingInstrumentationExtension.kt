@@ -1,8 +1,8 @@
 package io.sentry.android.gradle
 
+import javax.inject.Inject
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
-import javax.inject.Inject
 
 open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFactory) {
     /**

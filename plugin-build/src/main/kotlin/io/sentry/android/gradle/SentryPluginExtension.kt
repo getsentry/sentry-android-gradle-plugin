@@ -1,7 +1,7 @@
 package io.sentry.android.gradle
 
-import org.gradle.api.Action
 import javax.inject.Inject
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -49,9 +49,13 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     val ignoredFlavors: ListProperty<String> = objects.listProperty(String::class.java)
         .convention(emptyList())
 
-    internal val tracingInstrumentation: TracingInstrumentationExtension = objects.newInstance(TracingInstrumentationExtension::class.java)
+    internal val tracingInstrumentation: TracingInstrumentationExtension = objects.newInstance(
+        TracingInstrumentationExtension::class.java
+    )
 
-    fun tracingInstrumentation(tracingInstrumentationAction: Action<TracingInstrumentationExtension>) {
+    fun tracingInstrumentation(
+        tracingInstrumentationAction: Action<TracingInstrumentationExtension>
+    ) {
         tracingInstrumentationAction.execute(tracingInstrumentation)
     }
 }
