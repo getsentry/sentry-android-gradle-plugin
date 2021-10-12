@@ -188,6 +188,9 @@ class SentryPluginVariantTest(
                   ignoredVariants = [$variants]
                   ignoredBuildTypes = [$buildTypes]
                   ignoredFlavors = [$flavors]
+                  tracingInstrumentation {
+                    enabled = false
+                  }
                 }
             """.trimIndent()
         )

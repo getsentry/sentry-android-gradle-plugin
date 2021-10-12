@@ -38,5 +38,9 @@ if (System.getenv("AUTO_UPLOAD")) {
         autoUpload = false
         uploadNativeSymbols = true
         includeNativeSources = true
+
+        tracingInstrumentation {
+            enabled = false
+        }
     }
 }

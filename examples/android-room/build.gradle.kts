@@ -70,6 +70,9 @@ dependencies {
 
 sentry {
     autoUpload.set(false)
-    forceInstrumentDependencies.set(true)
-    debugInstrumentation.set(true)
+
+    tracingInstrumentation {
+        forceInstrumentDependencies.set(true)
+        debug.set(true)
+    }
 }
