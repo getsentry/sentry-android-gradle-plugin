@@ -7,10 +7,11 @@ import org.objectweb.asm.Opcodes
 import org.objectweb.asm.util.Textifier
 
 class FileLogTextifier(
+    apiVersion: Int,
     log: File,
     methodName: String?,
     methodDescriptor: String?
-) : Textifier(Opcodes.ASM7) {
+) : Textifier(apiVersion) {
 
     private val fileOutputStream = FileOutputStream(log, true).apply {
         write("function $methodName $methodDescriptor".toByteArray())
