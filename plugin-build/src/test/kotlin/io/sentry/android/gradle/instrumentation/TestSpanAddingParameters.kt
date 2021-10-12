@@ -14,7 +14,8 @@ class TestSpanAddingParameters(
         get() = DefaultProperty(PropertyHost.NO_OP, Long::class.java).convention(0L)
 
     override val debug: Property<Boolean>
-        get() = DefaultProperty(PropertyHost.NO_OP, Boolean::class.javaObjectType).convention(debugOutput)
+        get() = DefaultProperty(PropertyHost.NO_OP, Boolean::class.javaObjectType)
+            .convention(debugOutput)
 
     override val tmpDir: Property<File>
         get() = DefaultProperty<File>(PropertyHost.NO_OP, File::class.java).convention(inMemoryDir)
