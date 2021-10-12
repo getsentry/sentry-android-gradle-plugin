@@ -19,7 +19,10 @@ class InstrumentableMethodsCollectingVisitor(
         signature: String?,
         exceptions: Array<out String>?
     ): MethodVisitor {
-        val methodNode = super.visitMethod(access, name, descriptor, signature, exceptions) as MethodNode
+        val methodNode = super.visitMethod(
+            access, name, descriptor, signature, exceptions
+        ) as MethodNode
+        
         return object : MethodVisitor(apiVersion, methodNode) {
 
             override fun visitMethodInsn(

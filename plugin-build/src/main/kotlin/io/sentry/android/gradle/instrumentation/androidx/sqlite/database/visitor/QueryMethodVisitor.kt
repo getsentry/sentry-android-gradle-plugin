@@ -10,7 +10,6 @@ import org.objectweb.asm.Opcodes.ALOAD
 import org.objectweb.asm.Opcodes.ARETURN
 import org.objectweb.asm.Opcodes.ASTORE
 import org.objectweb.asm.Opcodes.INVOKEINTERFACE
-import org.objectweb.asm.Type
 
 class QueryMethodVisitor(
     api: Int,
