@@ -37,6 +37,10 @@ android {
             keyPassword = "android"
         }
     }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
 }
 
 // useful, when we want to modify room-generated classes, and then compile them into .class files
