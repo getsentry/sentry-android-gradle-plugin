@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN apply false
     id("com.android.application") version BuildPluginsVersion.AGP apply false
@@ -30,7 +32,7 @@ subprojects {
     }
 
     // to be compatible with AGP <= 4.1.x https://developer.android.com/studio/releases/gradle-plugin#java-8-default
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    tasks.withType<KotlinCompile>().configureEach {
         sourceCompatibility = JavaVersion.VERSION_1_8.toString()
         targetCompatibility = JavaVersion.VERSION_1_8.toString()
 

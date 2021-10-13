@@ -67,6 +67,11 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
+configure<JavaPluginExtension> {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 tasks.withType<Test>().configureEach {
     maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
 }
