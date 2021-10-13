@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Add support for M1 Macs (#204)
+
 ## 2.1.5
 
 * Bump: AGP to 7.0.2 (#193)
