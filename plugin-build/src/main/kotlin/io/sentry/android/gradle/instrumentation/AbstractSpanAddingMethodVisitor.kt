@@ -1,70 +1,31 @@
 package io.sentry.android.gradle.instrumentation
 
+import io.sentry.android.gradle.instrumentation.util.Types
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.properties.Delegates
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
+import org.objectweb.asm.commons.LocalVariablesSorter
 
+/**
+ * Base class for all [MethodVisitor] that inject spans bytecode into existing methods. Abstracts
+ * away most of the logic like creating a span, setting span status, finishing a span, etc.
+ *
+ * Since it inherits from [LocalVariablesSorter] for introducing new local variables, all child classes
+ * **must** use [originalVisitor] for all visiting operations, otherwise all variables visits will be always remapped,
+ * even those that we don't want to.
+ */
 abstract class AbstractSpanAddingMethodVisitor(
     api: Int,
-    methodVisitor: MethodVisitor,
+    originalVisitor: MethodVisitor,
+    access: Int,
     descriptor: String?
-) : MethodVisitor(api, methodVisitor) {
+) : LocalVariablesSorter(api, access, descriptor, originalVisitor) {
 
     protected val instrumenting = AtomicBoolean(false)
-    protected val varCount = AtomicInteger(0)
     protected var childIndex by Delegates.notNull<Int>()
-    private val remapTable = mutableMapOf<Int, Int>()
-
-    init {
-        descriptor?.let {
-            varCount.set(Type.getArgumentsAndReturnSizes(it) shr 2)
-        }
-    }
-
-    override fun visitVarInsn(opcode: Int, `var`: Int) {
-        var remapped: Int = `var`
-        if (!instrumenting.get()) {
-            if (opcode in ReturnType.storeCodes() && `var` !in remapTable) {
-                remapTable[`var`] = varCount.get()
-                remapped = remapTable[`var`]!!
-            } else if ((opcode in ReturnType.loadCodes() || opcode in ReturnType.storeCodes()) &&
-                `var` in remapTable
-            ) {
-                remapped = remapTable[`var`]!!
-            }
-        }
-        super.visitVarInsn(opcode, remapped)
-        if (opcode in ReturnType.storeCodes()) {
-            val newCount =
-                remapped + if (opcode == Opcodes.LSTORE || opcode == Opcodes.DSTORE) 2 else 1
-            varCount.set(maxOf(newCount, varCount.get()))
-        }
-    }
-
-    override fun visitFrame(
-        type: Int,
-        numLocal: Int,
-        local: Array<out Any>?,
-        numStack: Int,
-        stack: Array<out Any>?
-    ) {
-        if (type != Opcodes.F_NEW) {
-            return
-        }
-
-        var localCount = numLocal
-        if (local != null) {
-            for (i in 0 until numLocal) {
-                if (local[i] == Opcodes.LONG || local[i] == Opcodes.DOUBLE) localCount++
-            }
-        }
-        varCount.set(maxOf(localCount, varCount.get()))
-        super.visitFrame(type, numLocal, local, numStack, stack)
-    }
 
     protected val label0 = Label()
     protected val label1 = Label()
@@ -97,8 +58,8 @@ abstract class AbstractSpanAddingMethodVisitor(
             "()Lio/sentry/ISpan;",
             /* isInterface = */ false
         )
-        val spanIndex = varCount.get()
-        childIndex = varCount.get() + 1
+        val spanIndex = newLocal(Types.SPAN)
+        childIndex = newLocal(Types.SPAN)
         visitVarInsn(Opcodes.ASTORE, spanIndex) // span
         visitInsn(Opcodes.ACONST_NULL)
         visitVarInsn(Opcodes.ASTORE, childIndex) // child
@@ -171,9 +132,10 @@ abstract class AbstractSpanAddingMethodVisitor(
      */
     protected fun MethodVisitor.visitCatchBlock(
         catchLabel: Label,
-        throwLabel: Label
+        throwLabel: Label,
+        exceptionType: Type = Types.EXCEPTION
     ) {
-        val exceptionIndex = varCount.get()
+        val exceptionIndex = newLocal(exceptionType)
         visitLabel(catchLabel)
         visitVarInsn(Opcodes.ASTORE, exceptionIndex) // Exception e
         visitSetStatus(status = "INTERNAL_ERROR", gotoIfNull = throwLabel)

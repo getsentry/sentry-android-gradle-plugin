@@ -7,8 +7,6 @@ on:
       - release/**
       - feat/bytecode-instrumentation
   pull_request:
-    branches:
-      - '*'
 
 jobs:
   pre-merge-checks:

@@ -63,12 +63,16 @@ dependencies {
 
     implementation(Samples.Room.runtime)
     implementation(Samples.Room.ktx)
+    implementation(Samples.Room.rxjava)
 
     ksp(Samples.Room.compiler)
 }
 
 sentry {
     autoUpload.set(false)
-    forceInstrumentDependencies.set(true)
-    debugInstrumentation.set(true)
+
+    tracingInstrumentation {
+        forceInstrumentDependencies.set(true)
+        debug.set(true)
+    }
 }

@@ -21,4 +21,8 @@ android {
 
 sentry {
     autoUpload.set(System.getenv("AUTO_UPLOAD")?.toBoolean() ?: false)
+
+    tracingInstrumentation {
+        enabled.set(false)
+    }
 }
