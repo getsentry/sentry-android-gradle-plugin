@@ -1,4 +1,4 @@
-.PHONY: format clean preMerge all
+.PHONY: format clean preMerge stop all
 
 format:
 	./gradlew ktlintFormat
