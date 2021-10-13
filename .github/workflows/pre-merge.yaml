@@ -36,7 +36,7 @@ jobs:
           java-version: '11'
 
       - name: Run Gradle tasks
-        run: make preMerge
+        run: ./gradlew preMerge --continue
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v2
