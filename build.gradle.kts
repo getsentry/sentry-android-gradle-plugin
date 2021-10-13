@@ -1,6 +1,3 @@
-// import com.android.build.gradle.AppExtension
-// import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN apply false
     id("com.android.application") version BuildPluginsVersion.AGP apply false
@@ -31,23 +28,6 @@ subprojects {
             include("**/kotlin/**")
         }
     }
-
-//    tasks.withType<KotlinCompile>().configureEach {
-//        sourceCompatibility = JavaVersion.VERSION_1_8.toString()
-//        targetCompatibility = JavaVersion.VERSION_1_8.toString()
-//
-//        kotlinOptions {
-//            jvmTarget = JavaVersion.VERSION_1_8.toString()
-//        }
-//    }
-//
-//    plugins.withId("com.android.application") {
-//        val ext = extensions.getByName("android") as AppExtension
-//        ext.compileOptions {
-//            sourceCompatibility = JavaVersion.VERSION_1_8
-//            targetCompatibility = JavaVersion.VERSION_1_8
-//        }
-//    }
 }
 
 tasks.register("clean", Delete::class.java) {
