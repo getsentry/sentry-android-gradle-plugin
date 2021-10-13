@@ -28,13 +28,7 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
-//    compileOptions {
-//        sourceCompatibility = JavaVersion.VERSION_11
-//        targetCompatibility = JavaVersion.VERSION_11
-//    }
-//    kotlinOptions {
-//        jvmTarget = JavaVersion.VERSION_11.toString()
-//    }
+
     signingConfigs {
         getByName("debug") {
             storeFile = file("debug.keystore")
@@ -42,6 +36,10 @@ android {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 }
 
