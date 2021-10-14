@@ -20,6 +20,14 @@ class CommonClassVisitor(
     init {
         // to avoid file creation in case the debug mode is not set
         if (parameters.debug.get()) {
+
+            // create log dir.
+            val logDir = parameters.tmpDir.get()
+            if (!logDir.exists()) {
+                logDir.mkdirs()
+            }
+
+            // delete and recreate file
             log = File(parameters.tmpDir.get(), "$className-instrumentation.log")
             if (log.exists()) {
                 log.delete()
