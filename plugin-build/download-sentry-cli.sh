@@ -2,7 +2,7 @@
 cd $(dirname "$0")
 REPO=getsentry/sentry-cli
 VERSION=1.69.1
-PLATFORMS="Darwin-universal Darwin-x86_64 Linux-i686 Linux-x86_64 Windows-i686"
+PLATFORMS="Darwin-universal Linux-i686 Linux-x86_64 Windows-i686"
 
 rm -f src/main/resources/bin/sentry-cli-*
 for plat in $PLATFORMS; do
