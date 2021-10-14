@@ -100,7 +100,12 @@ class VisitorTest(
             deletionDaoTestParameters("DeleteQuery"),
             deletionDaoTestParameters("DeleteQueryAndReturnInteger"),
             deletionDaoTestParameters("Impl"),
-            insertionDaoTestParameters("Impl")
+            insertionDaoTestParameters("Impl"),
+            updateDaoTestParameters("UpdateAndReturnInteger"),
+            updateDaoTestParameters("UpdateAndReturnVoid"),
+            updateDaoTestParameters("UpdateQuery"),
+            updateDaoTestParameters("UpdateQueryAndReturnInteger"),
+            updateDaoTestParameters("Impl")
         )
 
         private fun roomDaoTestParameters(suffix: String = "") = arrayOf(
@@ -126,6 +131,15 @@ class VisitorTest(
             "InsertionDao_$suffix",
             AndroidXRoomDao(),
             TestClassContext("InsertionDao_$suffix") { lookupName ->
+                TestClassData(lookupName, classAnnotations = listOf(AndroidXRoomDao().fqName))
+            }
+        )
+
+        private fun updateDaoTestParameters(suffix: String = "") = arrayOf(
+            "androidxRoom/update",
+            "UpdateDao_$suffix",
+            AndroidXRoomDao(),
+            TestClassContext("UpdateDao_$suffix") { lookupName ->
                 TestClassData(lookupName, classAnnotations = listOf(AndroidXRoomDao().fqName))
             }
         )
