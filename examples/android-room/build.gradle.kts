@@ -63,6 +63,8 @@ dependencies {
     implementation(Samples.Room.ktx)
     implementation(Samples.Room.rxjava)
 
+    implementation(project(":examples:android-room-lib"))
+
     kapt(Samples.Room.compiler)
 }
 
