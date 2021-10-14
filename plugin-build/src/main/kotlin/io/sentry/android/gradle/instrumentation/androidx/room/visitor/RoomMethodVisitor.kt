@@ -8,7 +8,7 @@ import org.objectweb.asm.tree.MethodNode
 
 class RoomMethodVisitor(
     api: Int,
-    firstPassVisitor: MethodNode,
+    private val firstPassVisitor: MethodNode,
     private val originalVisitor: MethodVisitor,
     access: Int,
     descriptor: String?
@@ -28,6 +28,7 @@ class RoomMethodVisitor(
     private val labelsRemapTable = mutableMapOf<Label, Label>()
     private var skipVarVisit = false
     private var finallyVisitCount = 0
+    private var tryCatchVisitCount = 0
 
     init {
         val tryCatchBlock = firstPassVisitor.tryCatchBlocks.firstOrNull()
@@ -39,25 +40,43 @@ class RoomMethodVisitor(
     }
 
     override fun visitTryCatchBlock(start: Label?, end: Label?, handler: Label?, type: String?) {
-        if (!instrumenting.get()) {
-            // we will rewrite try-catch blocks completely by ourselves
+        tryCatchVisitCount++
+        if (tryCatchVisitCount == 1) {
+            // on first try-catch visit we inject our try-catch blocks
+            originalVisitor.visitTryCatchBlocks("java/lang/Exception")
+
+            if (firstPassVisitor.tryCatchBlocks.size <= 2) {
+                // if the overall number of try-catch blocks is just 1 or 2, we need to startSpan here
+                // cause we never hit the lines below
+                startSpan()
+            }
+        }
+        if (tryCatchVisitCount <= 2) {
+            // if there are nested try-catch blocks (e.g. if a method is marked both with @Transaction and @Query)
+            // we only care about rewriting the outer try-catch = first two tryCatchBlock visits (1:try, 2:finally)
+            // the rest we delegate to the original visitor
             return
         }
-        super.visitTryCatchBlock(start, end, handler, type)
+
+        // as the nested try-catch blocks can also reference some of the labels defined by us,
+        // we also need to make sure they are remapped
+        val startRemapped = labelsRemapTable.getOrDefault(start, start)
+        val endRemapped = labelsRemapTable.getOrDefault(end, end)
+        val handlerRemapped = labelsRemapTable.getOrDefault(handler, handler)
+        super.visitTryCatchBlock(startRemapped, endRemapped, handlerRemapped, type)
+
+        // inject our logic after all try-catch blocks have been visited
+        if (tryCatchVisitCount == firstPassVisitor.tryCatchBlocks.size) {
+            startSpan()
+        }
     }
 
-    override fun visitCode() {
-        super.visitCode()
-        instrumenting.set(true)
-        // start visiting method
-        originalVisitor.visitTryCatchBlocks("java/lang/Exception")
-
+    private fun startSpan() {
         originalVisitor.visitStartSpan(label5) {
             visitLdcInsn(DESCRIPTION)
         }
 
         originalVisitor.visitLabel(label5)
-        instrumenting.set(false)
     }
 
     override fun visitMethodInsn(
@@ -118,8 +137,12 @@ class RoomMethodVisitor(
         stack: Array<out Any>?
     ) {
         if (type == Opcodes.F_FULL || type == Opcodes.F_NEW) {
-            val descriptor = stack?.getOrNull(0)
-            if (descriptor is String && descriptor == "java/lang/Throwable") {
+            // we only care about an outer try-catch block in case of nested blocks, hence, if the cursor
+            // is in locals, it's the inner finally-block to close the cursor -> skip it
+            val hasThrowableOnStack = (stack?.getOrNull(0) as? String) == "java/lang/Throwable"
+            val hasCursorInLocals =
+                local?.any { (it as? String) == "android/database/Cursor" } ?: false
+            if (hasThrowableOnStack && !hasCursorInLocals) {
                 originalVisitor.visitLabel(label3)
                 super.visitFrame(type, numLocal, local, numStack, stack)
                 val exceptionIndex = nextLocal

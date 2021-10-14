@@ -7,10 +7,10 @@ import org.objectweb.asm.tree.MethodNode
 
 class InstrumentableMethodsCollectingVisitor(
     private val apiVersion: Int,
-    private val nextVisitorInitializer: (List<MethodNode>) -> ClassVisitor
+    private val nextVisitorInitializer: (Set<MethodNode>) -> ClassVisitor
 ) : ClassNode(apiVersion) {
 
-    private val methodsToInstrument = mutableListOf<MethodNode>()
+    private val methodsToInstrument = mutableSetOf<MethodNode>()
 
     override fun visitMethod(
         access: Int,
@@ -52,7 +52,8 @@ class InstrumentableMethodsCollectingVisitor(
 
     companion object {
         private val lookup = listOf(
-            "androidx/room/RoomDatabase" to "beginTransaction"
+            "androidx/room/RoomDatabase" to "beginTransaction",
+            "androidx/room/util/DBUtil" to "query"
         )
     }
 }

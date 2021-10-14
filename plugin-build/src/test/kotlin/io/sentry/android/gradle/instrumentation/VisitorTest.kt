@@ -95,6 +95,7 @@ class VisitorTest(
             roomDaoTestParameters("InsertAndReturnLong"),
             roomDaoTestParameters("InsertAndReturnUnit"),
             roomDaoTestParameters("UpdateAndReturnUnit"),
+            roomDaoTestParameters("SelectInTransaction"),
             deletionDaoTestParameters("DeleteAndReturnInteger"),
             deletionDaoTestParameters("DeleteAndReturnVoid"),
             deletionDaoTestParameters("DeleteQuery"),
