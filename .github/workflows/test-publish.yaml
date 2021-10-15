@@ -20,11 +20,9 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
-        if: env.SENTRY_AUTH_TOKEN != null
-        
+
       - name: Cache Gradle Files
         uses: actions/cache@v2
-        if: env.SENTRY_AUTH_TOKEN != null
         with:
           path: |
             ~/.gradle/caches/
@@ -35,8 +33,6 @@ jobs:
 
       - name: Build the Release variant
         run: ./gradlew assembleRelease | tee gradle.log
-        if: env.SENTRY_AUTH_TOKEN != null
 
       - name: Verify that Native Symbols were uploaded
         run: grep "Uploaded 4 missing debug information files" gradle.log
-        if: env.SENTRY_AUTH_TOKEN != null
