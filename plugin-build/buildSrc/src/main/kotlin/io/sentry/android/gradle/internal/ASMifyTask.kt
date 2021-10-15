@@ -63,9 +63,7 @@ abstract class ASMifyTask : Exec() {
 
         if (output == Output.FILE) {
             val dir = File(tmpDir)
-            if (!dir.exists()) {
-                dir.mkdirs()
-            }
+            dir.mkdirs()
 
             val filename =
                 clazz.substringAfterLast(File.separator).substringBefore(".") + "_asmified.java"

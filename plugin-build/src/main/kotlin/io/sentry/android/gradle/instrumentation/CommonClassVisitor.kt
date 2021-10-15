@@ -23,9 +23,7 @@ class CommonClassVisitor(
 
             // create log dir.
             val logDir = parameters.tmpDir.get()
-            if (!logDir.exists()) {
-                logDir.mkdirs()
-            }
+            logDir.mkdirs()
 
             // delete and recreate file
             log = File(parameters.tmpDir.get(), "$className-instrumentation.log")
