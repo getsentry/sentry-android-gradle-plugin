@@ -1,14 +1,16 @@
 package io.sentry.android.gradle.instrumentation.androidx.room.visitor
 
 import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
+import io.sentry.android.gradle.instrumentation.ReturnType
+import io.sentry.android.gradle.instrumentation.androidx.room.RoomMethodType
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.MethodNode
 
-class RoomMethodVisitor(
+class RoomTransactionVisitor(
     api: Int,
-    private val firstPassVisitor: MethodNode,
+    firstPassVisitor: MethodNode,
     private val originalVisitor: MethodVisitor,
     access: Int,
     descriptor: String?
@@ -28,7 +30,6 @@ class RoomMethodVisitor(
     private val labelsRemapTable = mutableMapOf<Label, Label>()
     private var skipVarVisit = false
     private var finallyVisitCount = 0
-    private var tryCatchVisitCount = 0
 
     init {
         val tryCatchBlock = firstPassVisitor.tryCatchBlocks.firstOrNull()
@@ -40,43 +41,24 @@ class RoomMethodVisitor(
     }
 
     override fun visitTryCatchBlock(start: Label?, end: Label?, handler: Label?, type: String?) {
-        tryCatchVisitCount++
-        if (tryCatchVisitCount == 1) {
-            // on first try-catch visit we inject our try-catch blocks
-            originalVisitor.visitTryCatchBlocks("java/lang/Exception")
-
-            if (firstPassVisitor.tryCatchBlocks.size <= 2) {
-                // if the overall number of try-catch blocks is just 1 or 2, we need to startSpan here
-                // cause we never hit the lines below
-                startSpan()
-            }
-        }
-        if (tryCatchVisitCount <= 2) {
-            // if there are nested try-catch blocks (e.g. if a method is marked both with @Transaction and @Query)
-            // we only care about rewriting the outer try-catch = first two tryCatchBlock visits (1:try, 2:finally)
-            // the rest we delegate to the original visitor
+        if (!instrumenting.get()) {
+            // we will rewrite try-catch blocks completely by ourselves
             return
         }
-
-        // as the nested try-catch blocks can also reference some of the labels defined by us,
-        // we also need to make sure they are remapped
-        val startRemapped = labelsRemapTable.getOrDefault(start, start)
-        val endRemapped = labelsRemapTable.getOrDefault(end, end)
-        val handlerRemapped = labelsRemapTable.getOrDefault(handler, handler)
-        super.visitTryCatchBlock(startRemapped, endRemapped, handlerRemapped, type)
-
-        // inject our logic after all try-catch blocks have been visited
-        if (tryCatchVisitCount == firstPassVisitor.tryCatchBlocks.size) {
-            startSpan()
-        }
+        super.visitTryCatchBlock(start, end, handler, type)
     }
 
-    private fun startSpan() {
+    override fun visitCode() {
+        super.visitCode()
+        instrumenting.set(true)
+        originalVisitor.visitTryCatchBlocks("java/lang/Exception")
+
         originalVisitor.visitStartSpan(label5) {
             visitLdcInsn(DESCRIPTION)
         }
 
         originalVisitor.visitLabel(label5)
+        instrumenting.set(false)
     }
 
     override fun visitMethodInsn(
@@ -142,6 +124,11 @@ class RoomMethodVisitor(
             val hasThrowableOnStack = (stack?.getOrNull(0) as? String) == "java/lang/Throwable"
             val hasCursorInLocals =
                 local?.any { (it as? String) == "android/database/Cursor" } ?: false
+
+            /**
+             * We visit the labels in case there's a Throwable on stack AND no cursor in locals:
+             *     - It's a transaction and it's a finally block
+             */
             if (hasThrowableOnStack && !hasCursorInLocals) {
                 originalVisitor.visitLabel(label3)
                 super.visitFrame(type, numLocal, local, numStack, stack)
@@ -170,7 +157,6 @@ class RoomMethodVisitor(
 
     companion object {
         private const val END_TRANSACTION = "endTransaction"
-        private const val BEGIN_TRANSACTION = "beginTransaction"
         private const val SET_TRANSACTION_SUCCESSFUL = "setTransactionSuccessful"
 
         private const val DESCRIPTION = "room transaction with mapping"

@@ -109,15 +109,23 @@ abstract class AbstractSpanAddingMethodVisitor(
        }
      }
      */
-    protected fun MethodVisitor.visitFinallyBlock(gotoIfNull: Label) {
+    protected fun MethodVisitor.visitFinallyBlock(gotoIfNull: Label, status: String? = null) {
         visitVarInsn(Opcodes.ALOAD, childIndex)
         visitJumpInsn(Opcodes.IFNULL, gotoIfNull)
         visitVarInsn(Opcodes.ALOAD, childIndex)
+        if (status != null) {
+            visitFieldInsn(
+                Opcodes.GETSTATIC,
+                "io/sentry/SpanStatus",
+                status,
+                "Lio/sentry/SpanStatus;"
+            )
+        }
         visitMethodInsn(
             Opcodes.INVOKEINTERFACE,
             "io/sentry/ISpan",
             "finish",
-            "()V",
+            if (status == null) "()V" else "(Lio/sentry/SpanStatus;)V",
             /* isInterface = */true
         )
     }

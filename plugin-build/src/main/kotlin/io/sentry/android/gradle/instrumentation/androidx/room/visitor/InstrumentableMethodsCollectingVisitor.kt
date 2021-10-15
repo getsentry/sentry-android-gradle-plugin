@@ -1,16 +1,19 @@
 package io.sentry.android.gradle.instrumentation.androidx.room.visitor
 
+import io.sentry.android.gradle.instrumentation.androidx.room.RoomMethodType
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
+import org.slf4j.LoggerFactory
 
 class InstrumentableMethodsCollectingVisitor(
     private val apiVersion: Int,
-    private val nextVisitorInitializer: (Set<MethodNode>) -> ClassVisitor
+    private val nextVisitorInitializer: (List<Pair<MethodNode, RoomMethodType>>) -> ClassVisitor
 ) : ClassNode(apiVersion) {
 
-    private val methodsToInstrument = mutableSetOf<MethodNode>()
+    private val methodsToInstrument = mutableMapOf<MethodNode, RoomMethodType>()
+    private val logger by lazy { LoggerFactory.getLogger(this::class.java) }
 
     override fun visitMethod(
         access: Int,
@@ -37,8 +40,35 @@ class InstrumentableMethodsCollectingVisitor(
                 isInterface: Boolean
             ) {
                 super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
-                if (owner to name in lookup) {
-                    methodsToInstrument.add(methodNode)
+                val pair = owner to name
+                if (pair in lookup) {
+                    var type: RoomMethodType? = if (pair == lookup.first()) {
+                        RoomMethodType.TRANSACTION
+                    } else {
+                        RoomMethodType.QUERY
+                    }
+
+                    // if this methodNode has already been added to the instrumentable list
+                    // this means that either it's a SELECT query wrapped into a transaction
+                    // or some unknown to us usecase for instrumentation and we rather skip it
+                    if (methodNode in methodsToInstrument) {
+                        val prevType = methodsToInstrument[methodNode]
+                        type = when {
+                            prevType == RoomMethodType.QUERY && type == RoomMethodType.TRANSACTION -> RoomMethodType.QUERY_WITH_TRANSACTION
+                            prevType == RoomMethodType.TRANSACTION && type == RoomMethodType.QUERY -> RoomMethodType.QUERY_WITH_TRANSACTION
+                            prevType == RoomMethodType.QUERY_WITH_TRANSACTION -> RoomMethodType.QUERY_WITH_TRANSACTION
+                            else -> {
+                                logger.warn("Unable to identify RoomMethodType, skipping $name from instrumentation")
+                                null
+                            }
+                        }
+                    }
+
+                    if (type != null) {
+                        methodsToInstrument[methodNode] = type
+                    } else {
+                        methodsToInstrument.remove(methodNode)
+                    }
                 }
             }
         }
@@ -46,7 +76,7 @@ class InstrumentableMethodsCollectingVisitor(
 
     override fun visitEnd() {
         super.visitEnd()
-        val nextVisitor = nextVisitorInitializer(methodsToInstrument)
+        val nextVisitor = nextVisitorInitializer(methodsToInstrument.toList())
         accept(nextVisitor)
     }
 

@@ -9,7 +9,8 @@ import io.sentry.android.gradle.instrumentation.MethodContext
 import io.sentry.android.gradle.instrumentation.MethodInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.androidx.room.visitor.InstrumentableMethodsCollectingVisitor
-import io.sentry.android.gradle.instrumentation.androidx.room.visitor.RoomMethodVisitor
+import io.sentry.android.gradle.instrumentation.androidx.room.visitor.RoomQueryVisitor
+import io.sentry.android.gradle.instrumentation.androidx.room.visitor.RoomTransactionVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -42,7 +43,9 @@ class AndroidXRoomDao : ClassInstrumentable {
                             apiVersion = apiVersion,
                             classVisitor = originalVisitor,
                             className = currentClassName.substringAfterLast('.'),
-                            methodInstrumentables = methodsToInstrument.map { RoomMethod(it) },
+                            methodInstrumentables = methodsToInstrument.map { (methodNode, type) ->
+                                RoomMethod(methodNode, type)
+                            },
                             parameters = parameters
                         )
                     }
@@ -64,7 +67,8 @@ class AndroidXRoomDao : ClassInstrumentable {
 }
 
 class RoomMethod(
-    private val methodNode: MethodNode
+    private val methodNode: MethodNode,
+    private val type: RoomMethodType
 ) : MethodInstrumentable {
 
     override val fqName: String = methodNode.name
@@ -74,14 +78,23 @@ class RoomMethod(
         apiVersion: Int,
         originalVisitor: MethodVisitor,
         parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
-    ): MethodVisitor =
-        RoomMethodVisitor(
+    ): MethodVisitor = when (type) {
+        RoomMethodType.TRANSACTION -> RoomTransactionVisitor(
             apiVersion,
             methodNode,
             originalVisitor,
             instrumentableContext.access,
             instrumentableContext.descriptor
         )
+        RoomMethodType.QUERY -> RoomQueryVisitor(
+            apiVersion,
+            methodNode,
+            originalVisitor,
+            instrumentableContext.access,
+            instrumentableContext.descriptor
+        )
+        RoomMethodType.QUERY_WITH_TRANSACTION -> originalVisitor
+    }
 
     override fun isInstrumentable(data: MethodContext): Boolean {
         return data.name == fqName && data.descriptor == methodNode.desc &&
