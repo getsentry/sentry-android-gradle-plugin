@@ -55,9 +55,14 @@ class InstrumentableMethodsCollectingVisitor(
                         /* ktlint-disable max-line-length */
                         val prevType = methodsToInstrument[methodNode]
                         type = when {
-                            prevType == RoomMethodType.QUERY && type == RoomMethodType.TRANSACTION -> RoomMethodType.QUERY_WITH_TRANSACTION
-                            prevType == RoomMethodType.TRANSACTION && type == RoomMethodType.QUERY -> RoomMethodType.QUERY_WITH_TRANSACTION
-                            prevType == RoomMethodType.QUERY_WITH_TRANSACTION -> RoomMethodType.QUERY_WITH_TRANSACTION
+                            prevType == RoomMethodType.QUERY &&
+                                type == RoomMethodType.TRANSACTION ->
+                                RoomMethodType.QUERY_WITH_TRANSACTION
+                            prevType == RoomMethodType.TRANSACTION &&
+                                type == RoomMethodType.QUERY ->
+                                RoomMethodType.QUERY_WITH_TRANSACTION
+                            prevType == RoomMethodType.QUERY_WITH_TRANSACTION ->
+                                RoomMethodType.QUERY_WITH_TRANSACTION
                             else -> {
                                 logger.warn(
                                     "Unable to identify RoomMethodType, skipping $name from instrumentation"

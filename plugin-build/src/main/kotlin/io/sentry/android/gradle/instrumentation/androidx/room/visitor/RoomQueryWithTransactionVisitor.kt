@@ -35,7 +35,7 @@ class RoomQueryWithTransactionVisitor(
 
     init {
         // remap labels of the all original try-catch blocks, except the last one, as we will overwrite
-        // it with out newly injected catch block
+        // it with our newly injected catch block
         for (i in 0 until firstPassVisitor.tryCatchBlocks.size - 1) {
             val tryCatchBlock = firstPassVisitor.tryCatchBlocks[i]
             when (i) {

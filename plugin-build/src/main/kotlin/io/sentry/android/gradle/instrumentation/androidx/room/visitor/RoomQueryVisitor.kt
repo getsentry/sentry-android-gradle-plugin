@@ -112,8 +112,6 @@ class RoomQueryVisitor(
         stack: Array<out Any>?
     ) {
         if (type == Opcodes.F_FULL || type == Opcodes.F_NEW) {
-            // we only care about an outer try-catch block in case of nested blocks, hence, if the cursor
-            // is in locals, it's the inner finally-block to close the cursor -> skip it
             val hasThrowableOnStack = (stack?.getOrNull(0) as? String) == "java/lang/Throwable"
 
             /**
