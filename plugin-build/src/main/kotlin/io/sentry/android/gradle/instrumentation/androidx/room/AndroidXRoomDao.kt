@@ -10,6 +10,7 @@ import io.sentry.android.gradle.instrumentation.MethodInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.androidx.room.visitor.InstrumentableMethodsCollectingVisitor
 import io.sentry.android.gradle.instrumentation.androidx.room.visitor.RoomQueryVisitor
+import io.sentry.android.gradle.instrumentation.androidx.room.visitor.RoomQueryWithTransactionVisitor
 import io.sentry.android.gradle.instrumentation.androidx.room.visitor.RoomTransactionVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
@@ -93,7 +94,13 @@ class RoomMethod(
             instrumentableContext.access,
             instrumentableContext.descriptor
         )
-        RoomMethodType.QUERY_WITH_TRANSACTION -> originalVisitor
+        RoomMethodType.QUERY_WITH_TRANSACTION -> RoomQueryWithTransactionVisitor(
+            apiVersion,
+            methodNode,
+            originalVisitor,
+            instrumentableContext.access,
+            instrumentableContext.descriptor
+        )
     }
 
     override fun isInstrumentable(data: MethodContext): Boolean {

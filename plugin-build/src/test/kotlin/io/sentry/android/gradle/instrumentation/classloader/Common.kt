@@ -2,6 +2,9 @@
 
 package io.sentry.android.gradle.instrumentation.classloader
 
+fun LimitOffsetPagingSource(ofType: String) =
+    "androidx.room.paging.LimitOffsetPagingSource<$ofType>"
+
 fun EntityInsertionAdapter(ofType: String) =
     "androidx.room.EntityInsertionAdapter<$ofType>"
 

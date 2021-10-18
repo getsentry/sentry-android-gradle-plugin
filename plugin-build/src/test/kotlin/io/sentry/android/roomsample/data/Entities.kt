@@ -13,7 +13,7 @@ data class Track(
     val price: Float
 )
 
-data class Album(
+open class Album(
     val id: Long,
     val title: String,
     val artistId: Long
@@ -23,3 +23,11 @@ data class MultiPKeyEntity(
     val id: Long,
     val name: String
 )
+
+class SubAlbum(
+    id: Long,
+    title: String,
+    artistId: Long
+) : Album(id, title, artistId)
+
+data class NameWithComposer(val id: Int, val nameWithComposer: String)

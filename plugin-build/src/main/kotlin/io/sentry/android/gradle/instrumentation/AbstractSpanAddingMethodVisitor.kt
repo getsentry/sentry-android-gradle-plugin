@@ -34,7 +34,7 @@ abstract class AbstractSpanAddingMethodVisitor(
     protected val label4 = Label()
 
     // bytecode preparations for try-catch blocks
-    protected fun MethodVisitor.visitTryCatchBlocks(expectedException: String) {
+    protected open fun MethodVisitor.visitTryCatchBlocks(expectedException: String) {
         visitTryCatchBlock(label0, label1, label2, expectedException)
         visitTryCatchBlock(label0, label1, label3, null)
         visitTryCatchBlock(label2, label4, label3, null)
