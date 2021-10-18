@@ -189,7 +189,5 @@ class RoomQueryWithTransactionVisitor(
     companion object {
         private const val END_TRANSACTION = "endTransaction"
         private const val SET_TRANSACTION_SUCCESSFUL = "setTransactionSuccessful"
-
-        private const val DESCRIPTION = "room transaction with mapping"
     }
 }

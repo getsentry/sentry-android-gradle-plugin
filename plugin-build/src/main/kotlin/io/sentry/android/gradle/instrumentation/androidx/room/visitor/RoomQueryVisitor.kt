@@ -146,7 +146,5 @@ class RoomQueryVisitor(
 
     companion object {
         private const val CLOSE = "close"
-
-        private const val DESCRIPTION = "room transaction with mapping"
     }
 }
