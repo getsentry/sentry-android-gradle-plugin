@@ -133,7 +133,6 @@ class RoomQueryVisitor(
         super.visitFrame(type, numLocal, local, numStack, stack)
     }
 
-
     override fun visitLocalVariable(
         name: String?,
         descriptor: String?,

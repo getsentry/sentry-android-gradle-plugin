@@ -58,7 +58,7 @@ class AndroidXRoomDao : ClassInstrumentable {
     }
 
     override fun isInstrumentable(data: ClassContext): Boolean =
-    // this is not very deterministic, but we filter out false positives in [getVisitor]
+        // this is not very deterministic, but we filter out false positives in [getVisitor]
         // based on the androidx.room.Dao annotation
         IMPL_SUFFIX in data.currentClassData.className
 

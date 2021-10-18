@@ -1,8 +1,6 @@
 package io.sentry.android.gradle.instrumentation.androidx.room.visitor
 
 import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
-import io.sentry.android.gradle.instrumentation.ReturnType
-import io.sentry.android.gradle.instrumentation.androidx.room.RoomMethodType
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
