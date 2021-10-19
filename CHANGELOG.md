@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* Feat: Add support for M1 Macs (#204)
 * Feat: Auto-instrumentation for `androidx.sqlite` and `androidx.room` (#180)
 
 **Breaking changes**
