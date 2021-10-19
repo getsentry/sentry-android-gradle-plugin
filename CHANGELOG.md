@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.0.0-alpha.1
 
 * Feat: Add support for M1 Macs (#204)
 * Feat: Auto-instrumentation for `androidx.sqlite` and `androidx.room` (#180)
