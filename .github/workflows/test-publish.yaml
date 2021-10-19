@@ -6,8 +6,6 @@ on:
       - main
       - release/**
   pull_request:
-    branches:
-      - '*'
 
 jobs:
   publish:
@@ -21,7 +19,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v2
         if: env.SENTRY_AUTH_TOKEN != null
-        
+
       - name: Cache Gradle Files
         uses: actions/cache@v2
         if: env.SENTRY_AUTH_TOKEN != null
