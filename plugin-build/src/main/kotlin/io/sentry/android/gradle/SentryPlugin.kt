@@ -159,7 +159,7 @@ class SentryPlugin : Plugin<Project> {
                         it.sentryProperties.set(
                             sentryProperties?.let { file -> project.file(file) }
                         )
-                        it.includeNativeSources.set(extension.includeNativeSources.get())
+                        it.includeNativeSources.set(extension.includeNativeSources)
                         it.variantName.set(variant.name)
                         it.sentryOrganization.set(sentryOrgParameter)
                         it.sentryProject.set(sentryProjectParameter)
