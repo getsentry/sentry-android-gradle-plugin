@@ -25,7 +25,7 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
     abstract val cliExecutable: Property<String>
 
     @get:Input
-    abstract val autoUpload: Property<Boolean>
+    abstract val autoUploadNativeSymbol: Property<Boolean>
 
     @get:InputFile
     @get:Optional
@@ -69,7 +69,7 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
             "upload-dif"
         )
 
-        if (!autoUpload.get()) {
+        if (!autoUploadNativeSymbol.get()) {
             args.add("--no-upload")
         }
 
