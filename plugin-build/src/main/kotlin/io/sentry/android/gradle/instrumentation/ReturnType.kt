@@ -23,13 +23,5 @@ enum class ReturnType(val loadInsn: Int, val storeInsn: Int, val returnInsn: Int
 
     companion object {
         fun returnCodes(): List<Int> = values().map { it.returnInsn }
-
-        fun fromDescriptor(descriptor: String?): ReturnType {
-            descriptor ?: error("Unable to convert $descriptor to ReturnType")
-
-            val type = Type.getReturnType(descriptor).getOpcode(Opcodes.IRETURN)
-            return values().find { it.returnInsn == type }
-                ?: error("Unable to convert $descriptor to ReturnType")
-        }
     }
 }

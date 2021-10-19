@@ -13,6 +13,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.objectweb.asm.ClassVisitor
+import org.slf4j.LoggerFactory
 
 @Suppress("UnstableApiUsage")
 abstract class SpanAddingClassVisitorFactory :
@@ -44,6 +45,8 @@ abstract class SpanAddingClassVisitorFactory :
         )
     }
 
+    private val logger by lazy { LoggerFactory.getLogger(this::class.java) }
+
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
@@ -55,9 +58,14 @@ abstract class SpanAddingClassVisitorFactory :
                 nextClassVisitor,
                 parameters = parameters.get()
             )
-            ?: error(
-                "${classContext.currentClassData.className} is not supported for instrumentation"
-            )
+            ?: nextClassVisitor.also {
+                logger.warn(
+                    """
+                    ${classContext.currentClassData.className} is not supported for instrumentation.
+                    This is likely a bug, please file an issue at https://github.com/getsentry/sentry-android-gradle-plugin/issues
+                    """.trimIndent()
+                )
+            }
 
     override fun isInstrumentable(classData: ClassData): Boolean =
         instrumentables.any { it.isInstrumentable(classData.toClassContext()) }
