@@ -34,7 +34,7 @@ abstract class AbstractSpanAddingMethodVisitor(
     protected val label4 = Label()
 
     // bytecode preparations for try-catch blocks
-    protected fun MethodVisitor.visitTryCatchBlocks(expectedException: String) {
+    protected open fun MethodVisitor.visitTryCatchBlocks(expectedException: String) {
         visitTryCatchBlock(label0, label1, label2, expectedException)
         visitTryCatchBlock(label0, label1, label3, null)
         visitTryCatchBlock(label2, label4, label3, null)
@@ -109,15 +109,23 @@ abstract class AbstractSpanAddingMethodVisitor(
        }
      }
      */
-    protected fun MethodVisitor.visitFinallyBlock(gotoIfNull: Label) {
+    protected fun MethodVisitor.visitFinallyBlock(gotoIfNull: Label, status: String? = null) {
         visitVarInsn(Opcodes.ALOAD, childIndex)
         visitJumpInsn(Opcodes.IFNULL, gotoIfNull)
         visitVarInsn(Opcodes.ALOAD, childIndex)
+        if (status != null) {
+            visitFieldInsn(
+                Opcodes.GETSTATIC,
+                "io/sentry/SpanStatus",
+                status,
+                "Lio/sentry/SpanStatus;"
+            )
+        }
         visitMethodInsn(
             Opcodes.INVOKEINTERFACE,
             "io/sentry/ISpan",
             "finish",
-            "()V",
+            if (status == null) "()V" else "(Lio/sentry/SpanStatus;)V",
             /* isInterface = */true
         )
     }

@@ -6,7 +6,7 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.MethodNode
 
-class RoomMethodVisitor(
+class RoomTransactionVisitor(
     api: Int,
     firstPassVisitor: MethodNode,
     private val originalVisitor: MethodVisitor,
@@ -49,7 +49,6 @@ class RoomMethodVisitor(
     override fun visitCode() {
         super.visitCode()
         instrumenting.set(true)
-        // start visiting method
         originalVisitor.visitTryCatchBlocks("java/lang/Exception")
 
         originalVisitor.visitStartSpan(label5) {
@@ -118,8 +117,13 @@ class RoomMethodVisitor(
         stack: Array<out Any>?
     ) {
         if (type == Opcodes.F_FULL || type == Opcodes.F_NEW) {
-            val descriptor = stack?.getOrNull(0)
-            if (descriptor is String && descriptor == "java/lang/Throwable") {
+            val hasThrowableOnStack = (stack?.getOrNull(0) as? String) == "java/lang/Throwable"
+
+            /**
+             * We visit the labels in case there's a Throwable on stack:
+             *     - It's a transaction and it's a finally block
+             */
+            if (hasThrowableOnStack) {
                 originalVisitor.visitLabel(label3)
                 super.visitFrame(type, numLocal, local, numStack, stack)
                 val exceptionIndex = nextLocal
@@ -147,9 +151,6 @@ class RoomMethodVisitor(
 
     companion object {
         private const val END_TRANSACTION = "endTransaction"
-        private const val BEGIN_TRANSACTION = "beginTransaction"
         private const val SET_TRANSACTION_SUCCESSFUL = "setTransactionSuccessful"
-
-        private const val DESCRIPTION = "room transaction with mapping"
     }
 }

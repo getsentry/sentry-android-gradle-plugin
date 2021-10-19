@@ -95,6 +95,7 @@ class VisitorTest(
             roomDaoTestParameters("InsertAndReturnLong"),
             roomDaoTestParameters("InsertAndReturnUnit"),
             roomDaoTestParameters("UpdateAndReturnUnit"),
+            roomDaoTestParameters("SelectInTransaction"),
             deletionDaoTestParameters("DeleteAndReturnInteger"),
             deletionDaoTestParameters("DeleteAndReturnVoid"),
             deletionDaoTestParameters("DeleteQuery"),
@@ -105,7 +106,13 @@ class VisitorTest(
             updateDaoTestParameters("UpdateAndReturnVoid"),
             updateDaoTestParameters("UpdateQuery"),
             updateDaoTestParameters("UpdateQueryAndReturnInteger"),
-            updateDaoTestParameters("Impl")
+            updateDaoTestParameters("Impl"),
+            selectDaoTestParameters("FlowSingle"),
+            selectDaoTestParameters("FlowList"),
+            selectDaoTestParameters("LiveDataSingle"),
+            selectDaoTestParameters("LiveDataList"),
+            selectDaoTestParameters("Paging"),
+            selectDaoTestParameters("Impl")
         )
 
         private fun roomDaoTestParameters(suffix: String = "") = arrayOf(
@@ -140,6 +147,15 @@ class VisitorTest(
             "UpdateDao_$suffix",
             AndroidXRoomDao(),
             TestClassContext("UpdateDao_$suffix") { lookupName ->
+                TestClassData(lookupName, classAnnotations = listOf(AndroidXRoomDao().fqName))
+            }
+        )
+
+        private fun selectDaoTestParameters(suffix: String = "") = arrayOf(
+            "androidxRoom/select",
+            "SelectDao_$suffix",
+            AndroidXRoomDao(),
+            TestClassContext("SelectDao_$suffix") { lookupName ->
                 TestClassData(lookupName, classAnnotations = listOf(AndroidXRoomDao().fqName))
             }
         )
