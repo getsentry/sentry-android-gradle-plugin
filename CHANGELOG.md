@@ -7,9 +7,8 @@
 
 **Breaking changes**
 
-The min AGP version required is `7.0.0`
-
-The min Sentry's Android SDK is `4.0.0`
+* The min AGP version required is `7.0.0`
+* The min Sentry's Android SDK is `4.0.0`
 
 See the migration guide on our [documentation](https://github.com/getsentry/sentry-docs/pull/4281).
 
