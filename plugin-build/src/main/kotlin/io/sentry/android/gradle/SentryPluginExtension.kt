@@ -22,10 +22,20 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      * for Sentry. This executes sentry-cli automatically so
      * you don't need to do it manually.
      * Default is disabled.
+     *
+     * @see [autoUploadNativeSymbols]
      */
     val uploadNativeSymbols: Property<Boolean> = objects.property(Boolean::class.java).convention(
         false
     )
+
+    /**
+     * Whether the plugin should attempt to auto-upload the native debug symbols to Sentry or not.
+     * If disabled the plugin will run a dry-run.
+     * Default is enabled.
+     */
+    val autoUploadNativeSymbols: Property<Boolean> =
+        objects.property(Boolean::class.java).convention(true)
 
     /**
      * Includes or not the source code of native code for Sentry.

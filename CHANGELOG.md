@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* Add support for M1 Macs (#204)
+* Add support for dry-run on upload native symbols (#209)
+
 ## 3.0.0-alpha.1
 
 * Feat: Add support for M1 Macs (#204)

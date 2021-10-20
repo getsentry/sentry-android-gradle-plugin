@@ -19,6 +19,7 @@ class SentryUploadNativeSymbolsTaskTest {
             it.cliExecutable.set("sentry-cli")
             it.includeNativeSources.set(false)
             it.variantName.set("debug")
+            it.autoUploadNativeSymbol.set(true)
         }
 
         val args = task.computeCommandLineArgs()
@@ -33,6 +34,22 @@ class SentryUploadNativeSymbolsTaskTest {
     }
 
     @Test
+    fun `--auto-upload is set correctly`() {
+        val project = createProject()
+        val task = createTestTask(project) {
+            it.buildDir.set(project.buildDir)
+            it.cliExecutable.set("sentry-cli")
+            it.includeNativeSources.set(false)
+            it.variantName.set("debug")
+            it.autoUploadNativeSymbol.set(false)
+        }
+
+        val args = task.computeCommandLineArgs()
+
+        assertTrue("--no-upload" in args)
+    }
+
+    @Test
     fun `--include-sources is set correctly`() {
         val project = createProject()
         val task = createTestTask(project) {
@@ -40,6 +57,7 @@ class SentryUploadNativeSymbolsTaskTest {
             it.cliExecutable.set("sentry-cli")
             it.includeNativeSources.set(true)
             it.variantName.set("debug")
+            it.autoUploadNativeSymbol.set(true)
         }
 
         val args = task.computeCommandLineArgs()
@@ -79,6 +97,7 @@ class SentryUploadNativeSymbolsTaskTest {
             it.sentryOrganization.set("dummy-org")
             it.includeNativeSources.set(true)
             it.variantName.set("debug")
+            it.autoUploadNativeSymbol.set(true)
         }
 
         val args = task.computeCommandLineArgs()
@@ -96,6 +115,7 @@ class SentryUploadNativeSymbolsTaskTest {
             it.sentryProject.set("dummy-proj")
             it.includeNativeSources.set(true)
             it.variantName.set("debug")
+            it.autoUploadNativeSymbol.set(true)
         }
 
         val args = task.computeCommandLineArgs()
