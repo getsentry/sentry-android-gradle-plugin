@@ -150,7 +150,7 @@ class SentryPlugin : Plugin<Project> {
                         )
                         it.uuidDirectory.set(uuidOutputDirectory)
                         it.mappingsFiles = getMappingFileProvider(variant)
-                        it.autoUpload.set(extension.autoUpload.get())
+                        it.autoUpload.set(extension.autoUpload)
                         it.sentryOrganization.set(sentryOrgParameter)
                         it.sentryProject.set(sentryProjectParameter)
                     }
@@ -189,11 +189,12 @@ class SentryPlugin : Plugin<Project> {
                     ) {
                         it.workingDir(project.rootDir)
                         it.buildDir.set(project.buildDir)
+                        it.autoUploadNativeSymbol.set(extension.autoUploadNativeSymbols)
                         it.cliExecutable.set(cliExecutable)
                         it.sentryProperties.set(
                             sentryProperties?.let { file -> project.file(file) }
                         )
-                        it.includeNativeSources.set(extension.includeNativeSources.get())
+                        it.includeNativeSources.set(extension.includeNativeSources)
                         it.variantName.set(variant.name)
                         it.sentryOrganization.set(sentryOrgParameter)
                         it.sentryProject.set(sentryProjectParameter)
