@@ -32,7 +32,6 @@ android {
 
 sentry {
     autoUpload = System.getenv("AUTO_UPLOAD")?.toBoolean() ?: false
-    autoUploadNativeSymbols = false
 
     tracingInstrumentation {
         enabled = false
