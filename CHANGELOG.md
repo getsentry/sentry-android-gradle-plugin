@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Fix: Do not throw exceptions in case something goes wrong with instrumentation (#217)
+
 ## 3.0.0-alpha.1
 
 * Feat: Add support for M1 Macs (#204)
