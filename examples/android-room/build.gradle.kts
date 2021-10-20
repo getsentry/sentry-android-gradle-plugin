@@ -70,6 +70,7 @@ dependencies {
 
 sentry {
     autoUpload.set(false)
+    autoUploadNativeSymbols.set(false)
 
     tracingInstrumentation {
         forceInstrumentDependencies.set(true)

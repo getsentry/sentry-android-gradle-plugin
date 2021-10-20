@@ -184,7 +184,8 @@ class SentryPluginVariantTest(
                 }
 
                 sentry {
-                  autoUpload = true
+                  autoUpload = false
+                  autoUploadNativeSymbols = false
                   ignoredVariants = [$variants]
                   ignoredBuildTypes = [$buildTypes]
                   ignoredFlavors = [$flavors]

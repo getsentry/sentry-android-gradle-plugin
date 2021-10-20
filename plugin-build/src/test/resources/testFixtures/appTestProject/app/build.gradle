@@ -5,4 +5,5 @@ plugins {
 
 sentry {
     autoUpload = false
+    uploadNativeSymbols = false
 }
