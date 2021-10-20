@@ -43,10 +43,11 @@ abstract class SpanAddingClassVisitorFactory :
             AndroidXSQLiteStatement(),
             AndroidXRoomDao()
         )
-    }
 
-    @delegate:Transient
-    private val logger by lazy { LoggerFactory.getLogger(this::class.java) }
+        private val logger by lazy {
+            LoggerFactory.getLogger(SpanAddingClassVisitorFactory::class.java)
+        }
+    }
 
     override fun createClassVisitor(
         classContext: ClassContext,
