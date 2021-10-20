@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* Fix: Do not throw exceptions in case something goes wrong with instrumentation (#217)
 * Add support for dry-run on upload native symbols (#209)
 
 ## 3.0.0-alpha.1

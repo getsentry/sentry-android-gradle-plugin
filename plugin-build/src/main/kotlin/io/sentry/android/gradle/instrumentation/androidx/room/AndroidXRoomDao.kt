@@ -16,10 +16,12 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.MethodNode
+import org.slf4j.LoggerFactory
 
 class AndroidXRoomDao : ClassInstrumentable {
 
     override val fqName: String get() = "androidx.room.Dao"
+    private val logger by lazy { LoggerFactory.getLogger(this::class.java) }
 
     override fun getVisitor(
         instrumentableContext: ClassContext,
@@ -32,8 +34,7 @@ class AndroidXRoomDao : ClassInstrumentable {
         val currentClassName = instrumentableContext.currentClassData.className
         val originalClassName = currentClassName.substringBefore(IMPL_SUFFIX)
         val originalClass = instrumentableContext.loadClassData(originalClassName)
-            ?: error("Expected $originalClassName in the classpath, but failed to discover")
-        return if (fqName in originalClass.classAnnotations) {
+        return if (originalClass != null && fqName in originalClass.classAnnotations) {
             InstrumentableMethodsCollectingVisitor(
                 apiVersion,
                 nextVisitorInitializer = { methodsToInstrument ->
@@ -53,6 +54,9 @@ class AndroidXRoomDao : ClassInstrumentable {
                 }
             )
         } else {
+            if (parameters.debug.get() && originalClass == null) {
+                logger.info("Expected $originalClassName in the classpath, but failed to discover")
+            }
             originalVisitor
         }
     }
