@@ -5,6 +5,18 @@
 * Add support for M1 Macs (#204)
 * Add support for dry-run on upload native symbols (#209)
 
+## 3.0.0-alpha.1
+
+* Feat: Add support for M1 Macs (#204)
+* Feat: Auto-instrumentation for `androidx.sqlite` and `androidx.room` (#180)
+
+**Breaking changes**
+
+* The min AGP version required is `7.0.0`
+* The min Sentry's Android SDK is `4.0.0`
+
+See the migration guide on our [documentation](https://github.com/getsentry/sentry-docs/pull/4281).
+
 ## 2.1.5
 
 * Bump: AGP to 7.0.2 (#193)

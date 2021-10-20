@@ -1,6 +1,7 @@
 package io.sentry.android.gradle
 
 import javax.inject.Inject
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -57,4 +58,18 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     /** List of Android build flavors that should be ignored by the Sentry plugin. */
     val ignoredFlavors: ListProperty<String> = objects.listProperty(String::class.java)
         .convention(emptyList())
+
+    internal val tracingInstrumentation: TracingInstrumentationExtension = objects.newInstance(
+        TracingInstrumentationExtension::class.java
+    )
+
+    /**
+     * Configure the tracing instrumentation.
+     * Default configuration is enabled.
+     */
+    fun tracingInstrumentation(
+        tracingInstrumentationAction: Action<TracingInstrumentationExtension>
+    ) {
+        tracingInstrumentationAction.execute(tracingInstrumentation)
+    }
 }

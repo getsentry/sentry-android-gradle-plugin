@@ -21,8 +21,10 @@ rootProject.name = ("sentry-android-gradle-plugin-composite-build")
 include(":examples:android-gradle")
 include(":examples:android-gradle-kts")
 include(":examples:android-ndk")
+include(":examples:android-room")
+include(":examples:android-room-lib")
 includeBuild("plugin-build") {
     dependencySubstitution {
-        substitute(module("io.sentry:sentry-android-gradle-plugin")).with(project(":"))
+        substitute(module("io.sentry:sentry-android-gradle-plugin")).using(project(":"))
     }
 }

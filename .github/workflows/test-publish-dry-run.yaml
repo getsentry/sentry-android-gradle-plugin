@@ -6,8 +6,6 @@ on:
       - main
       - release/**
   pull_request:
-    branches:
-      - '*'
 
 jobs:
   publish-dry-run:
@@ -15,29 +13,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        agp: ["7.0.2"]
+        agp: ["7.0.3"]
         gradle: ["7.2"]
         java: ["11"]
         include:
-          - agp: "4.1.3"
-            gradle: "6.8.3"
-            java: "8"
-          - agp: "4.1.3"
-            gradle: "6.8.3"
-            java: "8"
-          - agp: "4.1.3"
-            gradle: "7.0.2"
-            java: "8"
-          - agp: "4.2.2"
-            gradle: "6.8.3"
-            java: "8"
-          - agp: "4.2.2"
-            gradle: "7.0.2"
-            java: "8"
-          - agp: "7.0.2"
+          - agp: "7.0.3"
             gradle: "7.1.1"
             java: "11"
-          - agp: "7.0.2"
+          - agp: "7.0.3"
+            gradle: "7.2"
+            java: "11"
+          - agp: "7.1.0-beta01"
+            gradle: "7.2"
+            java: "11"
+          - agp: "7.2.0-alpha01"
             gradle: "7.2"
             java: "11"
 

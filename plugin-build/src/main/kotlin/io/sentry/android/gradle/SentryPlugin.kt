@@ -1,6 +1,10 @@
 package io.sentry.android.gradle
 
+import com.android.build.api.instrumentation.FramesComputationMode
+import com.android.build.api.instrumentation.InstrumentationScope
+import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AppExtension
+import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
@@ -11,6 +15,7 @@ import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
+import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
@@ -23,6 +28,7 @@ import org.gradle.api.Task
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.TaskProvider
 
+@Suppress("UnstableApiUsage")
 class SentryPlugin : Plugin<Project> {
 
     private val sep = File.separator
@@ -35,6 +41,8 @@ class SentryPlugin : Plugin<Project> {
         )
         project.pluginManager.withPlugin("com.android.application") {
             val androidExtension = project.extensions.getByType(AppExtension::class.java)
+            val androidComponentsExtension =
+                project.extensions.getByType(AndroidComponentsExtension::class.java)
             val cliExecutable = getSentryCliPath(project)
 
             val extraProperties = project.extensions.getByName("ext")
@@ -47,12 +55,39 @@ class SentryPlugin : Plugin<Project> {
                 extraProperties.get(SENTRY_PROJECT_PARAMETER).toString()
             }.getOrNull()
 
-            androidExtension.applicationVariants.matching {
-                it.name !in extension.ignoredVariants.get() &&
-                    it.flavorName !in extension.ignoredFlavors.get() &&
-                    it.buildType.name !in extension.ignoredBuildTypes.get()
-            }.configureEach { variant ->
+            // temp folder for sentry-related stuff
+            val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
+            tmpDir.mkdirs()
 
+            androidComponentsExtension.onVariants { variant ->
+                if (isVariantAllowed(
+                        extension,
+                        variant.name,
+                        variant.flavorName,
+                        variant.buildType
+                    ) && extension.tracingInstrumentation.enabled.get()
+                ) {
+                    variant.transformClassesWith(
+                        SpanAddingClassVisitorFactory::class.java,
+                        InstrumentationScope.ALL
+                    ) { params ->
+                        if (extension.tracingInstrumentation.forceInstrumentDependencies.get()) {
+                            params.invalidate.setDisallowChanges(System.currentTimeMillis())
+                        }
+                        params.debug.setDisallowChanges(
+                            extension.tracingInstrumentation.debug.get()
+                        )
+                        params.tmpDir.set(tmpDir)
+                    }
+                    variant.setAsmFramesComputationMode(
+                        FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
+                    )
+                }
+            }
+
+            androidExtension.applicationVariants.matching {
+                isVariantAllowed(extension, it.name, it.flavorName, it.buildType.name)
+            }.configureEach { variant ->
                 val bundleTask = withLogging(project.logger, "bundleTask") {
                     getBundleTask(project, variant.name)
                 }
@@ -177,6 +212,17 @@ class SentryPlugin : Plugin<Project> {
                 }
             }
         }
+    }
+
+    private fun isVariantAllowed(
+        extension: SentryPluginExtension,
+        variantName: String,
+        flavorName: String?,
+        buildType: String?
+    ): Boolean {
+        return variantName !in extension.ignoredVariants.get() &&
+            flavorName !in extension.ignoredFlavors.get() &&
+            buildType !in extension.ignoredBuildTypes.get()
     }
 
     companion object {

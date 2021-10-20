@@ -1,5 +1,8 @@
 import com.vanniktech.maven.publish.MavenPublishPluginExtension
+import io.sentry.android.gradle.internal.ASMifyTask
+import io.sentry.android.gradle.internal.BootstrapAndroidSdk
 import org.gradle.api.internal.classpath.ModuleRegistry
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.configurationcache.extensions.serviceOf
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -10,6 +13,8 @@ plugins {
     id("java-gradle-plugin")
     id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
+    // we need this plugin in order to include .aar dependencies into a pure java project, which the gradle plugin is
+    id("com.stepango.aar2jar") version BuildPluginsVersion.AAR_2_JAR
 }
 
 repositories {
@@ -18,14 +23,30 @@ repositories {
     google()
 }
 
+BootstrapAndroidSdk.locateAndroidSdk(project, extra)
+
+val androidSdkPath: String? by extra
+val testImplementationAar by configurations.getting // this converts .aar into .jar dependencies
+
 dependencies {
     compileOnly(gradleApi())
     compileOnly(Libs.AGP)
+
+    implementation(Libs.ASM)
+    implementation(Libs.ASM_COMMONS)
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(Libs.AGP)
     testImplementation(Libs.JUNIT)
+
+    testImplementation(Libs.ASM)
+
+    // we need these dependencies for tests, because the bytecode verifier also analyzes superclasses
+    testImplementationAar(Libs.SQLITE)
+    testImplementationAar(Libs.SQLITE_FRAMEWORK)
+    testRuntimeOnly(files(androidSdkPath))
+    testRuntimeOnly(Libs.SENTRY_ANDROID)
 
     testRuntimeOnly(
         files(
@@ -33,6 +54,11 @@ dependencies {
                 .classpath.asFiles.first()
         )
     )
+}
+
+configure<JavaPluginExtension> {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -88,26 +114,32 @@ distributions {
     }
 }
 
-// We conditionally apply the maven.publish plugin only if we're on Gradle 6.6.0+
-// as such plugin is not compatible with lower versions of Gradle and will break
-// the CI matrix.
-if (gradle.gradleVersion >= "6.6.0") {
-    apply {
-        plugin("com.vanniktech.maven.publish")
-    }
+apply {
+    plugin("com.vanniktech.maven.publish")
+}
 
-    val publish = extensions.getByType(MavenPublishPluginExtension::class.java)
-    // signing is done when uploading files to MC
-    // via gpg:sign-and-deploy-file (release.kts)
-    publish.releaseSigningEnabled = false
+val publish = extensions.getByType(MavenPublishPluginExtension::class.java)
+// signing is done when uploading files to MC
+// via gpg:sign-and-deploy-file (release.kts)
+publish.releaseSigningEnabled = false
 
-    tasks.named("distZip") {
-        dependsOn("publishToMavenLocal")
-        onlyIf {
-            inputs.sourceFiles.isEmpty.not().also {
-                require(it) { "No distribution to zip." }
-            }
+tasks.named("distZip") {
+    dependsOn("publishToMavenLocal")
+    onlyIf {
+        inputs.sourceFiles.isEmpty.not().also {
+            require(it) { "No distribution to zip." }
         }
+    }
+}
+
+tasks.withType<Test> {
+    testLogging {
+        events = setOf(
+            TestLogEvent.SKIPPED,
+            TestLogEvent.PASSED,
+            TestLogEvent.FAILED
+        )
+        showStandardStreams = true
     }
 }
 
@@ -155,3 +187,5 @@ fun shouldDownloadSentryCli(): Boolean {
         else -> false
     }
 }
+
+tasks.register<ASMifyTask>("asmify")
