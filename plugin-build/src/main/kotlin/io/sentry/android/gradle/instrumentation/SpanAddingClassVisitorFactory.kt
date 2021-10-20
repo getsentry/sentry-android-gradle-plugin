@@ -45,6 +45,7 @@ abstract class SpanAddingClassVisitorFactory :
         )
     }
 
+    @delegate:Transient
     private val logger by lazy { LoggerFactory.getLogger(this::class.java) }
 
     override fun createClassVisitor(
