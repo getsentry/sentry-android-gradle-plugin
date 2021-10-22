@@ -103,6 +103,22 @@ abstract class AbstractSpanAddingMethodVisitor(
     }
 
     /*
+    child.setThrowable(e);
+     */
+    private fun MethodVisitor.visitSetThrowable(varToLoad: Int) {
+        visitVarInsn(Opcodes.ALOAD, childIndex) // child
+
+        visitVarInsn(Opcodes.ALOAD, varToLoad) // Exception e
+        visitMethodInsn(
+            Opcodes.INVOKEINTERFACE,
+            "io/sentry/ISpan",
+            "setThrowable",
+            "(Ljava/lang/Throwable;)V",
+            /* isInterface = */true
+        )
+    }
+
+    /*
     finally {
        if (child != null) {
          child.finish();
@@ -134,6 +150,7 @@ abstract class AbstractSpanAddingMethodVisitor(
     catch (Exception e) {
       if (child != null) {
         child.setStatus(SpanStatus.INTERNAL_ERROR);
+        child.setThrowable(e);
       }
       throw e;
      }
@@ -147,6 +164,7 @@ abstract class AbstractSpanAddingMethodVisitor(
         visitLabel(catchLabel)
         visitVarInsn(Opcodes.ASTORE, exceptionIndex) // Exception e
         visitSetStatus(status = "INTERNAL_ERROR", gotoIfNull = throwLabel)
+        visitSetThrowable(varToLoad = exceptionIndex)
 
         visitLabel(throwLabel)
         visitThrow(varToLoad = exceptionIndex)
