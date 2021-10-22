@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-* Fix: Associate spans and events when it throws (#)
+* Fix: Associate spans and events when it throws (#219)
 
 ## 3.0.0-alpha.2
 
