@@ -38,7 +38,7 @@ abstract class SpanAddingClassVisitorFactory :
     }
 
     companion object {
-        private val instrumentables: MutableList<ClassInstrumentable> = mutableListOf(
+        private val instrumentables: List<ClassInstrumentable> = listOf(
             AndroidXSQLiteDatabase(),
             AndroidXSQLiteStatement(),
             AndroidXRoomDao()

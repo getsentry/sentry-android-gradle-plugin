@@ -29,8 +29,6 @@ class AndroidXRoomDao : ClassInstrumentable {
         originalVisitor: ClassVisitor,
         parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
     ): ClassVisitor {
-        // TODO: change this, if AGP changes their API according to our request, https://issuetracker.google.com/issues/201968956
-        // TODO: all of this can go inside `isInstrumentable` method
         val currentClassName = instrumentableContext.currentClassData.className
         val originalClassName = currentClassName.substringBefore(IMPL_SUFFIX)
         val originalClass = instrumentableContext.loadClassData(originalClassName)
