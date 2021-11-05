@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.0.0-beta.1
 
 * Fix: Associate spans and events when it throws (#219)
 
