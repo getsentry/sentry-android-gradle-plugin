@@ -121,17 +121,18 @@ class SentryPlugin : Plugin<Project> {
 
                 if (isMinifyEnabled) {
                     // Setup the task to generate a UUID asset file
-                    val uuidOutputDirectory = project.file(
-                        File(
-                            project.buildDir,
-                            "generated${sep}assets${sep}sentry${sep}${variant.name}"
-                        )
-                    )
                     val generateUuidTask = project.tasks.register(
                         "generateSentryProguardUuid$taskSuffix",
                         SentryGenerateProguardUuidTask::class.java
                     ) {
-                        it.outputDirectory.set(uuidOutputDirectory)
+                        it.outputDirectory.set(
+                            project.file(
+                                File(
+                                    project.buildDir,
+                                    "generated${sep}assets${sep}sentry${sep}${variant.name}"
+                                )
+                            )
+                        )
                     }
                     getMergeAssetsProvider(variant)?.configure {
                         it.dependsOn(generateUuidTask)
@@ -141,21 +142,21 @@ class SentryPlugin : Plugin<Project> {
                     val uploadSentryProguardMappingsTask = project.tasks.register(
                         "uploadSentryProguardMappings$taskSuffix",
                         SentryUploadProguardMappingsTask::class.java
-                    ) {
-                        it.dependsOn(generateUuidTask)
-                        it.workingDir(project.rootDir)
-                        it.cliExecutable.set(cliExecutable)
-                        it.sentryProperties.set(
+                    ) { task ->
+                        task.dependsOn(generateUuidTask)
+                        task.workingDir(project.rootDir)
+                        task.cliExecutable.set(cliExecutable)
+                        task.sentryProperties.set(
                             sentryProperties?.let { file -> project.file(file) }
                         )
-                        it.uuidDirectory.set(uuidOutputDirectory)
-                        it.mappingsFiles = getMappingFileProvider(variant)
-                        it.autoUpload.set(extension.autoUpload)
-                        it.sentryOrganization.set(sentryOrgParameter)
-                        it.sentryProject.set(sentryProjectParameter)
+                        task.uuidDirectory.set(generateUuidTask.flatMap { it.outputDirectory })
+                        task.mappingsFiles = getMappingFileProvider(variant)
+                        task.autoUpload.set(extension.autoUpload)
+                        task.sentryOrganization.set(sentryOrgParameter)
+                        task.sentryProject.set(sentryProjectParameter)
                     }
                     androidExtension.sourceSets.getByName(variant.name).assets.srcDir(
-                        uuidOutputDirectory
+                        generateUuidTask.flatMap { it.outputDirectory }
                     )
 
                     // we just hack ourselves into the proguard task's doLast.

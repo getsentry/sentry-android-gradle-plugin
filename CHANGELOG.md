@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Fix: Correctly add the proguard UUID output directory to the source set (#226) 
+
 ## 3.0.0-beta.1
 
 * Fix: Associate spans and events when it throws (#219)
