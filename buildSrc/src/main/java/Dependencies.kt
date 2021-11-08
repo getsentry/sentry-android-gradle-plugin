@@ -30,8 +30,8 @@ object Libs {
 
 object CI {
     fun canAutoUpload(): Boolean {
-        return System.getenv("AUTO_UPLOAD")?.toBoolean() == true &&
-                System.getenv("SENTRY_AUTH_TOKEN") != null
+        return System.getenv("AUTO_UPLOAD").toBoolean() &&
+                !System.getenv("SENTRY_AUTH_TOKEN").isNullOrEmpty()
     }
 }
 
