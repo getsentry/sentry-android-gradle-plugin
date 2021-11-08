@@ -3,8 +3,8 @@ package io.sentry.android.gradle
 import javax.inject.Inject
 import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 
 abstract class SentryPluginExtension @Inject constructor(project: Project) {
 
@@ -48,16 +48,16 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     )
 
     /** List of Android build variants that should be ignored by the Sentry plugin. */
-    val ignoredVariants: ListProperty<String> = objects.listProperty(String::class.java)
-        .convention(emptyList())
+    val ignoredVariants: SetProperty<String> = objects.setProperty(String::class.java)
+        .convention(emptySet())
 
     /** List of Android build types that should be ignored by the Sentry plugin. */
-    val ignoredBuildTypes: ListProperty<String> = objects.listProperty(String::class.java)
-        .convention(emptyList())
+    val ignoredBuildTypes: SetProperty<String> = objects.setProperty(String::class.java)
+        .convention(emptySet())
 
     /** List of Android build flavors that should be ignored by the Sentry plugin. */
-    val ignoredFlavors: ListProperty<String> = objects.listProperty(String::class.java)
-        .convention(emptyList())
+    val ignoredFlavors: SetProperty<String> = objects.setProperty(String::class.java)
+        .convention(emptySet())
 
     val tracingInstrumentation: TracingInstrumentationExtension = objects.newInstance(
         TracingInstrumentationExtension::class.java
