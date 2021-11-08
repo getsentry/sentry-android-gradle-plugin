@@ -32,14 +32,16 @@ android {
     }
 }
 
-apply plugin: 'io.sentry.android.gradle'
-sentry {
-    autoUpload = false
-    uploadNativeSymbols = true
-    includeNativeSources = true
-    autoUploadNativeSymbols = CI.INSTANCE.canAutoUpload()
+if (System.getenv("AUTO_UPLOAD")) {
+    apply plugin: 'io.sentry.android.gradle'
+    sentry {
+        autoUpload = false
+        uploadNativeSymbols = true
+        includeNativeSources = true
+        autoUploadNativeSymbols = CI.INSTANCE.canAutoUpload()
 
-    tracingInstrumentation {
-        enabled = false
+        tracingInstrumentation {
+            enabled = false
+        }
     }
 }
