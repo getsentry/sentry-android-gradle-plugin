@@ -38,7 +38,7 @@ if (System.getenv("AUTO_UPLOAD")) {
         autoUpload = false
         uploadNativeSymbols = true
         includeNativeSources = true
-        autoUploadNativeSymbols = (System.getenv("SENTRY_AUTH_TOKEN") != null)
+        autoUploadNativeSymbols = CI.INSTANCE.canAutoUpload()
 
         tracingInstrumentation {
             enabled = false
