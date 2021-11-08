@@ -28,6 +28,13 @@ object Libs {
     const val SENTRY_ANDROID = "io.sentry:sentry-android:${LibsVersion.SENTRY}"
 }
 
+object CI {
+    fun canAutoUpload(): Boolean {
+        return System.getenv("AUTO_UPLOAD")?.toBoolean() == true &&
+                System.getenv("SENTRY_AUTH_TOKEN") != null
+    }
+}
+
 object Samples {
     object AndroidX {
         const val recyclerView = "androidx.recyclerview:recyclerview:1.2.0"
