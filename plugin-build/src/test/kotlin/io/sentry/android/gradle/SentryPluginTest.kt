@@ -302,8 +302,8 @@ class SentryPluginTest(
             arrayOf("7.0.3", "7.0.2"),
             arrayOf("7.0.3", "7.1.1"),
             arrayOf("7.0.3", "7.2"),
-            arrayOf("7.1.0-beta01", "7.2"),
-            arrayOf("7.2.0-alpha01", "7.2")
+            arrayOf("7.1.0-beta02", "7.2"),
+            arrayOf("7.2.0-alpha03", "7.2")
         )
 
         private fun GradleRunner.appendArguments(vararg arguments: String) =
