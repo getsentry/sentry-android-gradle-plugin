@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-* Fix: Correctly add the proguard UUID output directory to the source set (#226) 
+* Fix: Correctly add the proguard UUID output directory to the source set (#226)
+* Expose SentryPluginExtension.tracingInstrumentation (#229)
 
 ## 3.0.0-beta.1
 
