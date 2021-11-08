@@ -59,7 +59,7 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     val ignoredFlavors: SetProperty<String> = objects.setProperty(String::class.java)
         .convention(emptySet())
 
-    internal val tracingInstrumentation: TracingInstrumentationExtension = objects.newInstance(
+    val tracingInstrumentation: TracingInstrumentationExtension = objects.newInstance(
         TracingInstrumentationExtension::class.java
     )
 

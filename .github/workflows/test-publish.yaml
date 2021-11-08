@@ -34,3 +34,4 @@ jobs:
 
       - name: Verify that Native Symbols were uploaded
         run: grep "Uploaded 4 missing debug information files" gradle.log
+        if: env.SENTRY_AUTH_TOKEN != null
