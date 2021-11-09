@@ -125,13 +125,13 @@ class SentryPluginTest(
         )
 
         val result = runner.withArguments("help").build()
-        var configuredTasks = result.output.lines()
+        val configuredTasks = result.output.lines()
             .filter { it.startsWith(prefix) }
             .map { it.removePrefix(prefix) }
             .sorted()
+            .toMutableList()
 
         // AGP 7.2.x configures the 'clean' task, so ignore it
-        configuredTasks = configuredTasks.toMutableList()
         configuredTasks.remove(":app:clean")
 
         assertTrue(configuredTasks.isEmpty())
