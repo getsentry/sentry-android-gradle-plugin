@@ -14,4 +14,4 @@ preMerge:
 stop:
 	./gradlew --stop
 
-all: stop clean ktlintFormat preMerge
+all: stop clean format preMerge
