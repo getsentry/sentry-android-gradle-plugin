@@ -44,7 +44,7 @@ class AndroidXRoomDao : ClassInstrumentable {
                             classVisitor = originalVisitor,
                             className = currentClassName.substringAfterLast('.'),
                             methodInstrumentables = methodsToInstrument.map { (methodNode, type) ->
-                                RoomMethod(methodNode, type)
+                                RoomMethod(originalClassName, methodNode, type)
                             },
                             parameters = parameters
                         )
@@ -70,6 +70,7 @@ class AndroidXRoomDao : ClassInstrumentable {
 }
 
 class RoomMethod(
+    private val className: String,
     private val methodNode: MethodNode,
     private val type: RoomMethodType
 ) : MethodInstrumentable {
@@ -83,6 +84,7 @@ class RoomMethod(
         parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
     ): MethodVisitor = when (type) {
         RoomMethodType.TRANSACTION -> RoomTransactionVisitor(
+            className,
             apiVersion,
             methodNode,
             originalVisitor,
@@ -90,6 +92,7 @@ class RoomMethod(
             instrumentableContext.descriptor
         )
         RoomMethodType.QUERY -> RoomQueryVisitor(
+            className,
             apiVersion,
             methodNode,
             originalVisitor,
@@ -97,6 +100,7 @@ class RoomMethod(
             instrumentableContext.descriptor
         )
         RoomMethodType.QUERY_WITH_TRANSACTION -> RoomQueryWithTransactionVisitor(
+            className,
             apiVersion,
             methodNode,
             originalVisitor,

@@ -1,25 +1,25 @@
 package io.sentry.android.gradle.instrumentation.androidx.room.visitor
 
-import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.MethodNode
 
 class RoomQueryVisitor(
+    className: String,
     api: Int,
     firstPassVisitor: MethodNode,
     private val originalVisitor: MethodVisitor,
     access: Int,
     descriptor: String?
-) : AbstractSpanAddingMethodVisitor(
+) : AbstractRoomVisitor(
+    className = className,
     api = api,
     originalVisitor = originalVisitor,
     access = access,
     descriptor = descriptor
 ) {
 
-    private val label5 = Label()
     private val label7 = Label()
     private val label8 = Label()
     private val label9 = Label()
@@ -35,27 +35,6 @@ class RoomQueryVisitor(
             labelsRemapTable[tryCatchBlock.end.label] = label1
             labelsRemapTable[tryCatchBlock.handler.label] = label2
         }
-    }
-
-    override fun visitTryCatchBlock(start: Label?, end: Label?, handler: Label?, type: String?) {
-        if (!instrumenting.get()) {
-            // we will rewrite try-catch blocks completely by ourselves
-            return
-        }
-        super.visitTryCatchBlock(start, end, handler, type)
-    }
-
-    override fun visitCode() {
-        super.visitCode()
-        instrumenting.set(true)
-        originalVisitor.visitTryCatchBlocks("java/lang/Exception")
-
-        originalVisitor.visitStartSpan(label5) {
-            visitLdcInsn(DESCRIPTION)
-        }
-
-        originalVisitor.visitLabel(label5)
-        instrumenting.set(false)
     }
 
     override fun visitMethodInsn(
