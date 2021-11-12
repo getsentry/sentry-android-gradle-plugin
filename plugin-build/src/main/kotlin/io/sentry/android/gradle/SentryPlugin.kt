@@ -27,6 +27,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.TaskProvider
+import org.slf4j.LoggerFactory
 
 @Suppress("UnstableApiUsage")
 class SentryPlugin : Plugin<Project> {
@@ -229,5 +230,10 @@ class SentryPlugin : Plugin<Project> {
     companion object {
         const val SENTRY_ORG_PARAMETER = "sentryOrg"
         const val SENTRY_PROJECT_PARAMETER = "sentryProject"
+
+        // a single unified logger used by instrumentation
+        internal val logger by lazy {
+            LoggerFactory.getLogger(SentryPlugin::class.java)
+        }
     }
 }

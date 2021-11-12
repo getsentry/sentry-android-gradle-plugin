@@ -10,7 +10,9 @@ class FileLogTextifier(
     log: File,
     methodName: String?,
     methodDescriptor: String?
-) : Textifier(apiVersion) {
+) : Textifier(apiVersion), ExceptionHandler {
+
+    private var hasThrown = false
 
     private val fileOutputStream = FileOutputStream(log, true).apply {
         write("function $methodName $methodDescriptor".toByteArray())
@@ -18,6 +20,17 @@ class FileLogTextifier(
     }
 
     override fun visitMethodEnd() {
+        if (!hasThrown) {
+            flushPrinter()
+        }
+    }
+
+    override fun handle(exception: Exception) {
+        hasThrown = true
+        flushPrinter()
+    }
+
+    private fun flushPrinter() {
         val printWriter = PrintWriter(fileOutputStream)
         print(printWriter)
         printWriter.flush()

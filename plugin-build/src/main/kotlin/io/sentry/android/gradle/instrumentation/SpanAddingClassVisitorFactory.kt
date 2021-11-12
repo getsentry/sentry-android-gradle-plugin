@@ -4,16 +4,17 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
+import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
+import io.sentry.android.gradle.util.warn
 import java.io.File
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.objectweb.asm.ClassVisitor
-import org.slf4j.LoggerFactory
 
 @Suppress("UnstableApiUsage")
 abstract class SpanAddingClassVisitorFactory :
@@ -43,10 +44,6 @@ abstract class SpanAddingClassVisitorFactory :
             AndroidXSQLiteStatement(),
             AndroidXRoomDao()
         )
-
-        private val logger by lazy {
-            LoggerFactory.getLogger(SpanAddingClassVisitorFactory::class.java)
-        }
     }
 
     override fun createClassVisitor(
@@ -61,12 +58,12 @@ abstract class SpanAddingClassVisitorFactory :
                 parameters = parameters.get()
             )
             ?: nextClassVisitor.also {
-                logger.warn(
+                SentryPlugin.logger.warn {
                     """
                     ${classContext.currentClassData.className} is not supported for instrumentation.
                     This is likely a bug, please file an issue at https://github.com/getsentry/sentry-android-gradle-plugin/issues
                     """.trimIndent()
-                )
+                }
             }
 
     override fun isInstrumentable(classData: ClassData): Boolean =

@@ -1,5 +1,7 @@
 package io.sentry.android.gradle.instrumentation
 
+import io.sentry.android.gradle.instrumentation.util.CatchingMethodVisitor
+import io.sentry.android.gradle.instrumentation.util.ExceptionHandler
 import io.sentry.android.gradle.instrumentation.util.FileLogTextifier
 import java.io.File
 import org.objectweb.asm.ClassVisitor
@@ -10,7 +12,7 @@ import org.objectweb.asm.util.TraceMethodVisitor
 class CommonClassVisitor(
     apiVersion: Int,
     classVisitor: ClassVisitor,
-    className: String,
+    private val className: String,
     private val methodInstrumentables: List<MethodInstrumentable>,
     private val parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
 ) : ClassVisitor(apiVersion, classVisitor) {
@@ -45,10 +47,23 @@ class CommonClassVisitor(
         val methodContext = MethodContext(access, name, descriptor, signature, exceptions?.toList())
         val instrumentable = methodInstrumentables.find { it.isInstrumentable(methodContext) }
 
+        var textifier: ExceptionHandler? = null
         if (parameters.debug.get() && instrumentable != null) {
-            mv = TraceMethodVisitor(mv, FileLogTextifier(api, log, name, descriptor))
+            textifier = FileLogTextifier(api, log, name, descriptor)
+            mv = TraceMethodVisitor(mv, textifier)
         }
 
-        return instrumentable?.getVisitor(methodContext, api, mv, parameters) ?: mv
+        val instrumentableVisitor = instrumentable?.getVisitor(methodContext, api, mv, parameters)
+        return if (instrumentableVisitor != null) {
+            CatchingMethodVisitor(
+                api,
+                instrumentableVisitor,
+                className,
+                methodContext,
+                textifier
+            )
+        } else {
+            mv
+        }
     }
 }
