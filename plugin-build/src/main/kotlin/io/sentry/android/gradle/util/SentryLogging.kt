@@ -17,5 +17,3 @@ fun Logger.debug(throwable: Throwable? = null, message: () -> String) {
 fun Logger.info(throwable: Throwable? = null, message: () -> String) {
     info("[sentry] ${message()}", throwable)
 }
-
-
