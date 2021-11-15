@@ -2,11 +2,8 @@ package io.sentry.android.gradle.instrumentation.util
 
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.instrumentation.MethodContext
-import org.objectweb.asm.Attribute
-import org.objectweb.asm.Handle
-import org.objectweb.asm.Label
-import org.objectweb.asm.MethodVisitor
 import io.sentry.android.gradle.util.error
+import org.objectweb.asm.MethodVisitor
 
 interface ExceptionHandler {
     fun handle(exception: Exception)
