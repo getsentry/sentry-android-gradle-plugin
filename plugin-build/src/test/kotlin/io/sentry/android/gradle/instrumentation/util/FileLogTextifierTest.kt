@@ -45,7 +45,7 @@ class FileLogTextifierTest {
         val file = File(tmpDir.root, "instrumentation.log")
         assertEquals(
             file.readText(),
-            "function SomeMethod (Ljava/lang/Throwable;)V${System.lineSeparator()}"
+            "function SomeMethod (Ljava/lang/Throwable;)V$SEP"
         )
     }
 
@@ -62,9 +62,7 @@ class FileLogTextifierTest {
             |function SomeMethod (Ljava/lang/Throwable;)V
             |    ASTORE 0
             |   L0
-            |    LDC "db"
-            |
-            |
+            |    LDC "db"$SEP$SEP
             """.trimMargin()
         )
     }
@@ -82,9 +80,7 @@ class FileLogTextifierTest {
         assertEquals(
             file.readText(),
             """
-            |function SomeMethod (Ljava/lang/Throwable;)V
-            |
-            |
+            |function SomeMethod (Ljava/lang/Throwable;)V$SEP$SEP
             """.trimMargin()
         )
     }
@@ -102,10 +98,12 @@ class FileLogTextifierTest {
             |function SomeMethod (Ljava/lang/Throwable;)V
             |    ASTORE 0
             |   L0
-            |    LDC "db"
-            |
-            |
+            |    LDC "db"$SEP$SEP
             """.trimMargin()
         )
+    }
+
+    companion object {
+        val SEP = System.lineSeparator()
     }
 }
