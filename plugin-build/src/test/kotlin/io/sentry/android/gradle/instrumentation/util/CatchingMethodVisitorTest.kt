@@ -39,7 +39,6 @@ class CatchingMethodVisitorTest {
         }
     }
 
-
     @Test(expected = CustomException::class)
     fun `rethrows exception`() {
         fixture.sut.visitMaxs(0, 0)

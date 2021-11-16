@@ -49,7 +49,7 @@ class CommonClassVisitorTest {
     }
 
     @Test
-    fun `when debug and is instrumentable - prepends instrumentable visitor with TraceMethodVisitor`() {
+    fun `when debug and is instrumentable - prepends with TraceMethodVisitor`() {
         fixture.debug = true
         val mv = fixture.sut.visitMethod(Opcodes.ACC_PUBLIC, "test", null, null, null)
 

@@ -111,7 +111,8 @@ class InstrumentableMethodsCollectingVisitorTest {
         assertTrue { methodsToInstrument.isEmpty() }
         assertEquals(
             fixture.logger.capturedMessage,
-            "[sentry] Unable to identify RoomMethodType, skipping unknownFunctionType from instrumentation"
+            "[sentry] Unable to identify RoomMethodType, " +
+                "skipping unknownFunctionType from instrumentation"
         )
     }
 }
