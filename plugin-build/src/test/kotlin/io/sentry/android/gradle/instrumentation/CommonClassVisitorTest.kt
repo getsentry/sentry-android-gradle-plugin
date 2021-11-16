@@ -66,7 +66,7 @@ class CommonClassVisitorTest {
             |    ASTORE 0
             |
             |
-            """.trimMargin()
+            """.trimMargin().replace("\n", System.lineSeparator())
         )
     }
 

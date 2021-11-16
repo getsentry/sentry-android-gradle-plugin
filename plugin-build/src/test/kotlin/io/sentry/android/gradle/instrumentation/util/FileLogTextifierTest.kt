@@ -62,8 +62,10 @@ class FileLogTextifierTest {
             |function SomeMethod (Ljava/lang/Throwable;)V
             |    ASTORE 0
             |   L0
-            |    LDC "db"$SEP$SEP
-            """.trimMargin()
+            |    LDC "db"
+            |
+            |
+            """.trimMargin().replace("\n", SEP)
         )
     }
 
@@ -80,8 +82,10 @@ class FileLogTextifierTest {
         assertEquals(
             file.readText(),
             """
-            |function SomeMethod (Ljava/lang/Throwable;)V$SEP$SEP
-            """.trimMargin()
+            |function SomeMethod (Ljava/lang/Throwable;)V
+            |
+            |
+            """.trimMargin().replace("\n", SEP)
         )
     }
 
@@ -98,8 +102,10 @@ class FileLogTextifierTest {
             |function SomeMethod (Ljava/lang/Throwable;)V
             |    ASTORE 0
             |   L0
-            |    LDC "db"$SEP$SEP
-            """.trimMargin()
+            |    LDC "db"
+            |
+            |
+            """.trimMargin().replace("\n", SEP)
         )
     }
 
