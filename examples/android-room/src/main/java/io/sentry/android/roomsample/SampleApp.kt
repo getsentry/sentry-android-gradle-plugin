@@ -17,5 +17,7 @@ class SampleApp : Application() {
             .createFromAsset("tracks.db")
             .fallbackToDestructiveMigration()
             .build()
+
+        val classLoader = javaClass.classLoader.getResourceAsStream()
     }
 }

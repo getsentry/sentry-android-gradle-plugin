@@ -1,6 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
-package io.sentry.android.gradle.instrumentation
+package io.sentry.android.gradle.instrumentation.fakes
 
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData

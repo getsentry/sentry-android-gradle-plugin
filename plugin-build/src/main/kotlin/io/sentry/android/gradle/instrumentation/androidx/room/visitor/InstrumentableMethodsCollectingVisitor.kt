@@ -7,10 +7,14 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
+import org.slf4j.Logger
+
+typealias NextVisitorInitializer = (List<Pair<MethodNode, RoomMethodType>>) -> ClassVisitor
 
 class InstrumentableMethodsCollectingVisitor(
     private val apiVersion: Int,
-    private val nextVisitorInitializer: (List<Pair<MethodNode, RoomMethodType>>) -> ClassVisitor
+    private val nextVisitorInitializer: NextVisitorInitializer,
+    private val logger: Logger = SentryPlugin.logger
 ) : ClassNode(apiVersion) {
 
     private val methodsToInstrument = mutableMapOf<MethodNode, RoomMethodType>()
@@ -64,8 +68,8 @@ class InstrumentableMethodsCollectingVisitor(
                             prevType == RoomMethodType.QUERY_WITH_TRANSACTION ->
                                 RoomMethodType.QUERY_WITH_TRANSACTION
                             else -> {
-                                SentryPlugin.logger.warn {
-                                    "Unable to identify RoomMethodType, skipping $name from instrumentation"
+                                logger.warn {
+                                    "Unable to identify RoomMethodType, skipping ${methodNode.name} from instrumentation"
                                 }
                                 null
                             }
