@@ -63,7 +63,9 @@ class CommonClassVisitorTest {
             file.readText(),
             """
             |function test null
-            |    ASTORE 0${System.lineSeparator()}${System.lineSeparator()}
+            |    ASTORE 0
+            |
+            |
             """.trimMargin().replace("\n", System.lineSeparator())
         )
     }
