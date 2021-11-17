@@ -63,7 +63,7 @@ class FileLogTextifierTest {
             |    ASTORE 0
             |   L0
             |    LDC "db"$SEP$SEP
-            """.trimIndent().replace("\n", SEP)
+            """.trimMargin().replace("\n", SEP)
         )
     }
 
