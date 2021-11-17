@@ -62,10 +62,8 @@ class FileLogTextifierTest {
             |function SomeMethod (Ljava/lang/Throwable;)V
             |    ASTORE 0
             |   L0
-            |    LDC "db"
-            |
-            |
-            """.trimMargin().replace("\n", SEP)
+            |    LDC "db"$SEP$SEP
+            """.trimIndent().replace("\n", SEP)
         )
     }
 
@@ -102,9 +100,7 @@ class FileLogTextifierTest {
             |function SomeMethod (Ljava/lang/Throwable;)V
             |    ASTORE 0
             |   L0
-            |    LDC "db"
-            |
-            |
+            |    LDC "db"$SEP$SEP
             """.trimMargin().replace("\n", SEP)
         )
     }
