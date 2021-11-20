@@ -39,13 +39,13 @@ class FileLogTextifierTest {
     }
 
     @Test
-    fun `prints methodName on creation`() {
+    fun `prints methodName on ccreation`() {
         fixture.sut
 
         val file = File(tmpDir.root, "instrumentation.log")
         assertEquals(
             file.readText(),
-            "function SomeMethod (Ljava/lang/Throwable;)V$SEP"
+            "function SomeMethod (Ljava/lang/Throwable;)V\n"
         )
     }
 
@@ -62,8 +62,10 @@ class FileLogTextifierTest {
             |function SomeMethod (Ljava/lang/Throwable;)V
             |    ASTORE 0
             |   L0
-            |    LDC "db"$SEP$SEP
-            """.trimMargin().replace("\n", SEP)
+            |    LDC "db"
+            |
+            |
+            """.trimMargin()
         )
     }
 
@@ -83,7 +85,7 @@ class FileLogTextifierTest {
             |function SomeMethod (Ljava/lang/Throwable;)V
             |
             |
-            """.trimMargin().replace("\n", SEP)
+            """.trimMargin()
         )
     }
 
@@ -100,12 +102,10 @@ class FileLogTextifierTest {
             |function SomeMethod (Ljava/lang/Throwable;)V
             |    ASTORE 0
             |   L0
-            |    LDC "db"$SEP$SEP
-            """.trimMargin().replace("\n", SEP)
+            |    LDC "db"
+            |
+            |
+            """.trimMargin()
         )
-    }
-
-    companion object {
-        val SEP = System.lineSeparator()
     }
 }

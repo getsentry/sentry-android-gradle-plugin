@@ -16,7 +16,7 @@ class FileLogTextifier(
 
     private val fileOutputStream = FileOutputStream(log, true).apply {
         write("function $methodName $methodDescriptor".toByteArray())
-        write(System.lineSeparator().toByteArray())
+        write("\n".toByteArray())
     }
 
     override fun visitMethodEnd() {
@@ -34,7 +34,9 @@ class FileLogTextifier(
         val printWriter = PrintWriter(fileOutputStream)
         print(printWriter)
         printWriter.flush()
-        fileOutputStream.write(System.lineSeparator().toByteArray())
+        // ASM textifier uses plain "\n" chars, so do we. As it's only for debug and dev purpose
+        // it doesn't matter to the end user
+        fileOutputStream.write("\n".toByteArray())
         fileOutputStream.close()
     }
 }
