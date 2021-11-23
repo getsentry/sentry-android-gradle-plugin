@@ -63,6 +63,7 @@ class TrackRow(
 
     val deleteButton: View get() = findViewById(R.id.delete_track)
     val editButton: View get() = findViewById(R.id.edit_track)
+    val infoButton: View get() = findViewById(R.id.track_info)
 
     @SuppressLint("SetTextI18n")
     fun populate(track: Track) {
@@ -106,6 +107,8 @@ class TrackAdapter : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
             )
             runBlocking {
                 SampleApp.database.tracksDao().delete(data[holder.bindingAdapterPosition])
+                val deleteCount = SampleApp.analytics.getInt("delete_count", 0) + 1
+                SampleApp.analytics.edit().putInt("delete_count", deleteCount).apply()
             }
             transaction.finish(SpanStatus.OK)
         }
@@ -117,6 +120,16 @@ class TrackAdapter : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
                     context,
                     EditActivity::class.java
                 ).putExtra(EditActivity.TRACK_EXTRA_KEY, track)
+            )
+        }
+        holder.row.infoButton.setOnClickListener {
+            val context = holder.row.context
+            val track = data[holder.bindingAdapterPosition]
+            context.startActivity(
+                Intent(
+                    context,
+                    LyricsActivity::class.java
+                ).putExtra(LyricsActivity.TRACK_EXTRA_KEY, track)
             )
         }
     }

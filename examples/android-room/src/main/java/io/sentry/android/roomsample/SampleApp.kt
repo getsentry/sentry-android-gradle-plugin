@@ -1,13 +1,25 @@
 package io.sentry.android.roomsample
 
 import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
 import io.sentry.android.roomsample.data.TracksDatabase
+import io.sentry.android.roomsample.util.DEFAULT_LYRICS
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 class SampleApp : Application() {
 
     companion object {
         lateinit var database: TracksDatabase
+            private set
+
+        lateinit var analytics: SharedPreferences
             private set
     }
 
@@ -17,5 +29,23 @@ class SampleApp : Application() {
             .createFromAsset("tracks.db")
             .fallbackToDestructiveMigration()
             .build()
+
+        analytics = getSharedPreferences("analytics", Context.MODE_PRIVATE)
+
+        GlobalScope.launch(Dispatchers.IO) {
+            database.tracksDao().all()
+                .collect {  tracks ->
+                    tracks.forEachIndexed { index, track ->
+                        // add lyrics for every 2nd track
+                        if (index % 2 == 0) {
+                            val dir = File("$filesDir${File.separatorChar}lyrics")
+                            dir.mkdirs()
+
+                            val file = File(dir, "${track.id}.txt")
+                            file.writeText(DEFAULT_LYRICS)
+                        }
+                    }
+                }
+        }
     }
 }
