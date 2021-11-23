@@ -1,5 +1,6 @@
-package io.sentry.android.gradle.instrumentation
+package io.sentry.android.gradle.instrumentation.fakes
 
+import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import java.io.File
 import org.gradle.api.internal.provider.DefaultProperty
 import org.gradle.api.internal.provider.PropertyHost

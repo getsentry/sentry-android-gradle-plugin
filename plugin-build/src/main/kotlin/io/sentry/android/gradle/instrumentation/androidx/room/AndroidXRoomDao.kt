@@ -3,6 +3,7 @@
 package io.sentry.android.gradle.instrumentation.androidx.room
 
 import com.android.build.api.instrumentation.ClassContext
+import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.instrumentation.ClassInstrumentable
 import io.sentry.android.gradle.instrumentation.CommonClassVisitor
 import io.sentry.android.gradle.instrumentation.MethodContext
@@ -12,16 +13,15 @@ import io.sentry.android.gradle.instrumentation.androidx.room.visitor.Instrument
 import io.sentry.android.gradle.instrumentation.androidx.room.visitor.RoomQueryVisitor
 import io.sentry.android.gradle.instrumentation.androidx.room.visitor.RoomQueryWithTransactionVisitor
 import io.sentry.android.gradle.instrumentation.androidx.room.visitor.RoomTransactionVisitor
+import io.sentry.android.gradle.util.info
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.MethodNode
-import org.slf4j.LoggerFactory
 
 class AndroidXRoomDao : ClassInstrumentable {
 
     override val fqName: String get() = "androidx.room.Dao"
-    private val logger by lazy { LoggerFactory.getLogger(this::class.java) }
 
     override fun getVisitor(
         instrumentableContext: ClassContext,
@@ -53,7 +53,9 @@ class AndroidXRoomDao : ClassInstrumentable {
             )
         } else {
             if (parameters.debug.get() && originalClass == null) {
-                logger.info("Expected $originalClassName in the classpath, but failed to discover")
+                SentryPlugin.logger.info {
+                    "Expected $originalClassName in the classpath, but failed to discover"
+                }
             }
             originalVisitor
         }
