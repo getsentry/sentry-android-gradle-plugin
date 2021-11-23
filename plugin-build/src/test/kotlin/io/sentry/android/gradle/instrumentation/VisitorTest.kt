@@ -5,6 +5,9 @@ import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import io.sentry.android.gradle.instrumentation.classloader.GeneratingMissingClassesClassLoader
+import io.sentry.android.gradle.instrumentation.fakes.TestClassContext
+import io.sentry.android.gradle.instrumentation.fakes.TestClassData
+import io.sentry.android.gradle.instrumentation.fakes.TestSpanAddingParameters
 import java.io.FileInputStream
 import java.io.PrintWriter
 import java.io.StringWriter
