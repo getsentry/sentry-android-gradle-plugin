@@ -66,7 +66,7 @@ abstract class AbstractSpanAddingMethodVisitor(
         visitVarInsn(Opcodes.ALOAD, spanIndex) // span
         visitJumpInsn(Opcodes.IFNULL, gotoIfNull)
         visitVarInsn(Opcodes.ALOAD, spanIndex) // span
-        visitLdcInsn("db")
+        visitLdcInsn("db.query")
         descriptionVisitor()
         visitMethodInsn(
             Opcodes.INVOKEINTERFACE,
