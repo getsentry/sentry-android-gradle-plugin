@@ -6,6 +6,7 @@
 * Feature: Make the ignoreXXX properties in SentryPluginExtension sets (#225)
 * Expose SentryPluginExtension.tracingInstrumentation (#229)
 * Ref: Change Room queries description to Dao class name (#232)
+* Ref: Change db operation name to `db.query` (#237)
 
 ## 3.0.0-beta.1
 
