@@ -7,7 +7,7 @@ import org.objectweb.asm.MethodVisitor
 import org.slf4j.Logger
 
 interface ExceptionHandler {
-    fun handle(exception: Exception)
+    fun handle(exception: Throwable)
 }
 
 class CatchingMethodVisitor(
@@ -22,7 +22,7 @@ class CatchingMethodVisitor(
     override fun visitMaxs(maxStack: Int, maxLocals: Int) {
         try {
             super.visitMaxs(maxStack, maxLocals)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             exceptionHandler?.handle(e)
             logger.error(e) {
                 """

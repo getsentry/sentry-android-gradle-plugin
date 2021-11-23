@@ -33,7 +33,7 @@ class CatchingMethodVisitorTest {
     fun `forwards exception to ExceptionHandler`() {
         try {
             fixture.sut.visitMaxs(0, 0)
-        } catch (ignored: Exception) {
+        } catch (ignored: Throwable) {
         } finally {
             assertEquals(fixture.handler.capturedException!!.message, "This method throws!")
         }
@@ -48,7 +48,7 @@ class CatchingMethodVisitorTest {
     fun `prints message to log`() {
         try {
             fixture.sut.visitMaxs(0, 0)
-        } catch (ignored: Exception) {
+        } catch (ignored: Throwable) {
         } finally {
             assertEquals(fixture.logger.capturedThrowable!!.message, "This method throws!")
             assertEquals(
@@ -73,9 +73,9 @@ class ThrowingMethodVisitor : MethodVisitor(Opcodes.ASM9) {
 
 class CapturingExceptionHandler : ExceptionHandler {
 
-    var capturedException: Exception? = null
+    var capturedException: Throwable? = null
 
-    override fun handle(exception: Exception) {
+    override fun handle(exception: Throwable) {
         capturedException = exception
     }
 }

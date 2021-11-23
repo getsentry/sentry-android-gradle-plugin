@@ -2,7 +2,6 @@ package io.sentry.android.gradle.instrumentation.util
 
 import java.io.File
 import kotlin.test.assertEquals
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -11,10 +10,10 @@ import org.objectweb.asm.Opcodes
 
 class FileLogTextifierTest {
 
-    class Fixture(private val tmpFile: File) {
+    class Fixture {
 
-        val sut
-            get() = FileLogTextifier(
+        fun getSut(tmpFile: File) =
+            FileLogTextifier(
                 Opcodes.ASM9,
                 tmpFile,
                 "SomeMethod",
@@ -31,16 +30,11 @@ class FileLogTextifierTest {
     @get:Rule
     val tmpDir = TemporaryFolder()
 
-    private lateinit var fixture: Fixture
-
-    @Before
-    fun setUp() {
-        fixture = Fixture(tmpDir.newFile("instrumentation.log"))
-    }
+    private val fixture = Fixture()
 
     @Test
     fun `prints methodName on ccreation`() {
-        fixture.sut
+        fixture.getSut(tmpDir.newFile("instrumentation.log"))
 
         val file = File(tmpDir.root, "instrumentation.log")
         assertEquals(
@@ -51,7 +45,7 @@ class FileLogTextifierTest {
 
     @Test
     fun `visitMethodEnd flushes output to file if hasn't thrown`() {
-        val sut = fixture.sut
+        val sut = fixture.getSut(tmpDir.newFile("instrumentation.log"))
         fixture.visitMethodInstructions(sut)
         sut.visitMethodEnd()
 
@@ -71,7 +65,7 @@ class FileLogTextifierTest {
 
     @Test
     fun `visitMethodEnd does nothing if has thrown`() {
-        val sut = fixture.sut
+        val sut = fixture.getSut(tmpDir.newFile("instrumentation.log"))
         sut.handle(RuntimeException())
         fixture.visitMethodInstructions(sut)
         sut.visitMethodEnd()
@@ -91,7 +85,7 @@ class FileLogTextifierTest {
 
     @Test
     fun `handle exception flushes output to file`() {
-        val sut = fixture.sut
+        val sut = fixture.getSut(tmpDir.newFile("instrumentation.log"))
         fixture.visitMethodInstructions(sut)
         sut.handle(RuntimeException())
 

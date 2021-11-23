@@ -25,7 +25,7 @@ class FileLogTextifier(
         }
     }
 
-    override fun handle(exception: Exception) {
+    override fun handle(exception: Throwable) {
         hasThrown = true
         flushPrinter()
     }

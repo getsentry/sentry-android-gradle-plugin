@@ -5,7 +5,6 @@ import io.sentry.android.gradle.instrumentation.util.CatchingMethodVisitor
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -15,12 +14,10 @@ import org.objectweb.asm.Opcodes
 
 class CommonClassVisitorTest {
 
-    class Fixture(private val tmpDir: File) {
+    class Fixture {
 
-        var debug = false
-
-        val sut
-            get() = CommonClassVisitor(
+        fun getSut(tmpDir: File, debug: Boolean = false) =
+            CommonClassVisitor(
                 Opcodes.ASM9,
                 ParentClassVisitor(),
                 "SomeClass",
@@ -32,17 +29,11 @@ class CommonClassVisitorTest {
     @get:Rule
     val tmpDir = TemporaryFolder()
 
-    private lateinit var fixture: Fixture
-
-    @Before
-    fun setUp() {
-        fixture = Fixture(tmpDir.root)
-    }
+    private val fixture = Fixture()
 
     @Test
     fun `when debug - creates a file with class name on init`() {
-        fixture.debug = true
-        fixture.sut
+        fixture.getSut(tmpDir.root, true)
 
         val file = File(tmpDir.root, "SomeClass-instrumentation.log")
         assertTrue { file.exists() }
@@ -50,8 +41,8 @@ class CommonClassVisitorTest {
 
     @Test
     fun `when debug and is instrumentable - prepends with TraceMethodVisitor`() {
-        fixture.debug = true
-        val mv = fixture.sut.visitMethod(Opcodes.ACC_PUBLIC, "test", null, null, null)
+        val mv = fixture.getSut(tmpDir.root, true)
+            .visitMethod(Opcodes.ACC_PUBLIC, "test", null, null, null)
 
         mv.visitVarInsn(Opcodes.ASTORE, 0)
         mv.visitEnd()
@@ -72,8 +63,8 @@ class CommonClassVisitorTest {
 
     @Test
     fun `when no debug and is instrumentable - skips TraceMethodVisitor`() {
-        fixture.debug = true
-        val mv = fixture.sut.visitMethod(Opcodes.ACC_PUBLIC, "other", null, null, null)
+        val mv = fixture.getSut(tmpDir.root, true)
+            .visitMethod(Opcodes.ACC_PUBLIC, "other", null, null, null)
 
         mv.visitVarInsn(Opcodes.ASTORE, 0)
         mv.visitEnd()
@@ -85,14 +76,16 @@ class CommonClassVisitorTest {
 
     @Test
     fun `when matches method name returns instrumentable visitor wrapped into catching visitor`() {
-        val mv = fixture.sut.visitMethod(Opcodes.ACC_PUBLIC, "test", null, null, null)
+        val mv =
+            fixture.getSut(tmpDir.root).visitMethod(Opcodes.ACC_PUBLIC, "test", null, null, null)
 
         assertTrue { mv is CatchingMethodVisitor }
     }
 
     @Test
     fun `when doesn't match method name return original visitor`() {
-        val mv = fixture.sut.visitMethod(Opcodes.ACC_PUBLIC, "other", null, null, null)
+        val mv =
+            fixture.getSut(tmpDir.root).visitMethod(Opcodes.ACC_PUBLIC, "other", null, null, null)
 
         assertTrue { mv is ParentClassVisitor.ParentMethodVisitor }
     }
