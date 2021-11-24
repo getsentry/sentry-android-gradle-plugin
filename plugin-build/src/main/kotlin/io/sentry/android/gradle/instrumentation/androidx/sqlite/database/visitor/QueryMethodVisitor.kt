@@ -2,6 +2,7 @@ package io.sentry.android.gradle.instrumentation.androidx.sqlite.database.visito
 
 import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
 import io.sentry.android.gradle.instrumentation.ReturnType
+import io.sentry.android.gradle.instrumentation.SpanOperations
 import io.sentry.android.gradle.instrumentation.util.Types
 import kotlin.properties.Delegates
 import org.objectweb.asm.Label
@@ -31,6 +32,7 @@ class QueryMethodVisitor(
         originalVisitor.visitTryCatchBlocks(expectedException = "java/lang/Exception")
 
         originalVisitor.visitStartSpan(gotoIfNull = label0) {
+            visitLdcInsn(SpanOperations.DB_SQL_QUERY)
             visitVarInsn(ALOAD, 1)
             visitMethodInsn(
                 INVOKEINTERFACE,

@@ -7,6 +7,7 @@
 * Expose SentryPluginExtension.tracingInstrumentation (#229)
 * Ref: Change Room queries description to Dao class name (#232)
 * Fix: Log broken bytecode when build fails (#233)
+* Ref: Change db operation names (#237)
 
 ## 3.0.0-beta.1
 

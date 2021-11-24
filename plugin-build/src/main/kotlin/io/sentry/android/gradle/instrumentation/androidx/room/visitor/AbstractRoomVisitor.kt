@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.instrumentation.androidx.room.visitor
 
 import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
+import io.sentry.android.gradle.instrumentation.SpanOperations
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 
@@ -33,6 +34,7 @@ abstract class AbstractRoomVisitor(
         originalVisitor.visitTryCatchBlocks("java/lang/Exception")
 
         originalVisitor.visitStartSpan(startSpanIfNull) {
+            visitLdcInsn(SpanOperations.DB)
             visitLdcInsn(className)
         }
 
