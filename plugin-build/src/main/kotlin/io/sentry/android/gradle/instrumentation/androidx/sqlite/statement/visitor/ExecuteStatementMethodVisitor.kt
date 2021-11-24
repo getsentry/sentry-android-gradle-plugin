@@ -46,6 +46,7 @@ class ExecuteStatementMethodVisitor(
         originalVisitor.visitExtractDescription()
 
         originalVisitor.visitStartSpan(gotoIfNull = label0) {
+            visitLdcInsn("db.sql.query")
             visitVarInsn(ALOAD, descriptionIndex) // description
         }
 

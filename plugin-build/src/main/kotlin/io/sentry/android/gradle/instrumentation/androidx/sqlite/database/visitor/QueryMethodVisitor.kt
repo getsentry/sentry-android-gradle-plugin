@@ -31,6 +31,7 @@ class QueryMethodVisitor(
         originalVisitor.visitTryCatchBlocks(expectedException = "java/lang/Exception")
 
         originalVisitor.visitStartSpan(gotoIfNull = label0) {
+            visitLdcInsn("db.sql.query")
             visitVarInsn(ALOAD, 1)
             visitMethodInsn(
                 INVOKEINTERFACE,

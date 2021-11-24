@@ -33,6 +33,7 @@ abstract class AbstractRoomVisitor(
         originalVisitor.visitTryCatchBlocks("java/lang/Exception")
 
         originalVisitor.visitStartSpan(startSpanIfNull) {
+            visitLdcInsn("db")
             visitLdcInsn(className)
         }
 

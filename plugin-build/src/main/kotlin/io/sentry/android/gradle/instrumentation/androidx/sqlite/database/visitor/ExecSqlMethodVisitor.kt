@@ -27,6 +27,7 @@ class ExecSqlMethodVisitor(
         originalVisitor.visitTryCatchBlocks(expectedException = "android/database/SQLException")
 
         originalVisitor.visitStartSpan(gotoIfNull = label0) {
+            visitLdcInsn("db.sql.query")
             visitVarInsn(ALOAD, 1)
         }
 
