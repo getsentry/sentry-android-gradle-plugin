@@ -18,13 +18,12 @@ import java.io.FileInputStream
 class LyricsActivity : ComponentActivity() {
     private lateinit var file: File
     private lateinit var lyricsInput: EditText
-    private lateinit var transaction: ITransaction
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lyrics)
 
-        transaction = Sentry.startTransaction(
+        val transaction = Sentry.startTransaction(
             "Track Interaction",
             "ui.action.lyrics",
             true
@@ -43,9 +42,15 @@ class LyricsActivity : ComponentActivity() {
         if (file.exists()) {
             lyricsInput.setText(file.readText())
         }
+        transaction.finish(SpanStatus.OK)
     }
 
     override fun onBackPressed() {
+        val transaction = Sentry.getSpan() ?: Sentry.startTransaction(
+            "Track Interaction",
+            "ui.action.lyrics_finish",
+            true
+        )
         if (!file.exists()) {
             file.createNewFile()
         }
