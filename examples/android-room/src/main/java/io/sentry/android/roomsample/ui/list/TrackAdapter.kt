@@ -11,7 +11,6 @@ import io.sentry.android.roomsample.SampleApp
 import io.sentry.android.roomsample.data.Track
 import io.sentry.android.roomsample.ui.EditActivity
 import io.sentry.android.roomsample.ui.LyricsActivity
-import io.sentry.android.roomsample.ui.TrackRow
 import kotlinx.coroutines.runBlocking
 
 class TrackAdapter : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
