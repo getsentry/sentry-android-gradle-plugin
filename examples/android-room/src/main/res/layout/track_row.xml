@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<io.sentry.android.roomsample.ui.TrackRow xmlns:android="http://schemas.android.com/apk/res/android"
+<io.sentry.android.roomsample.ui.list.TrackRow xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -54,4 +54,4 @@
         android:layout_height="24dp"
         android:src="@android:drawable/ic_menu_delete"
         tools:ignore="ContentDescription" />
-</io.sentry.android.roomsample.ui.TrackRow>
+</io.sentry.android.roomsample.ui.list.TrackRow>
