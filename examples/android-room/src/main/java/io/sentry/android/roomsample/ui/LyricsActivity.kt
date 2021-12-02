@@ -1,18 +1,15 @@
 package io.sentry.android.roomsample.ui
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import android.os.Bundle
 import android.widget.EditText
 import androidx.activity.ComponentActivity
 import androidx.appcompat.widget.Toolbar
-import io.sentry.ITransaction
 import io.sentry.Sentry
 import io.sentry.SpanStatus
 import io.sentry.android.roomsample.R
 import io.sentry.android.roomsample.data.Track
 import java.io.File
-import java.io.FileInputStream
 
 @SuppressLint("SetTextI18n")
 class LyricsActivity : ComponentActivity() {

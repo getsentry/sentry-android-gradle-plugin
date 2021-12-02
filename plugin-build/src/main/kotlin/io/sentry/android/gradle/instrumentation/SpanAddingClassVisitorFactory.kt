@@ -8,14 +8,14 @@ import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
-import io.sentry.android.gradle.util.warn
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
+import io.sentry.android.gradle.util.warn
+import java.io.File
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.objectweb.asm.ClassVisitor
-import java.io.File
 
 @Suppress("UnstableApiUsage")
 abstract class SpanAddingClassVisitorFactory :

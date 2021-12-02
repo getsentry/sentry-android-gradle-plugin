@@ -6,12 +6,11 @@ import android.content.SharedPreferences
 import androidx.room.Room
 import io.sentry.android.roomsample.data.TracksDatabase
 import io.sentry.android.roomsample.util.DEFAULT_LYRICS
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
 
 class SampleApp : Application() {
 
@@ -34,7 +33,7 @@ class SampleApp : Application() {
 
         GlobalScope.launch(Dispatchers.IO) {
             database.tracksDao().all()
-                .collect {  tracks ->
+                .collect { tracks ->
                     tracks.forEachIndexed { index, track ->
                         // add lyrics for every 2nd track
                         if (index % 2 == 0) {

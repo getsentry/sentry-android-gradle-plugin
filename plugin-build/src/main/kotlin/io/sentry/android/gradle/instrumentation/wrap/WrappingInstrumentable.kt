@@ -32,8 +32,8 @@ class WrappingInstrumentable : ClassInstrumentable {
 
     override fun isInstrumentable(data: ClassContext): Boolean {
         return when {
-            data.currentClassData.className.startsWith("io.sentry")
-                && !data.currentClassData.className.startsWith("io.sentry.android.roomsample") -> false
+            data.currentClassData.className.startsWith("io.sentry") &&
+                !data.currentClassData.className.startsWith("io.sentry.android.roomsample") -> false
             else -> true
         }
     }

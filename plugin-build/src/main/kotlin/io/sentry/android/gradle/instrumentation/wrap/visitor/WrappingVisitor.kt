@@ -37,7 +37,9 @@ class WrappingVisitor(
             opcode == Opcodes.INVOKEDYNAMIC -> {
                 // we don't instrument invokedynamic, because it's just forwarding to a synthetic method
                 // which will be instrumented thanks to condition below
-                SentryPlugin.logger.warn { "INVOKEDYNAMIC skipped from instrumentation for $className.${context.name}" }
+                SentryPlugin.logger.warn {
+                    "INVOKEDYNAMIC skipped from instrumentation for $className.${context.name}"
+                }
                 super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
             }
             replacement != null -> {
@@ -48,12 +50,14 @@ class WrappingVisitor(
 
                 if (isSuperCallInOverride) {
                     SentryPlugin.logger.info {
-                        "$className skipped from instrumentation in overridden method $name.$descriptor"
+                        "$className skipped from instrumentation " +
+                            "in overridden method $name.$descriptor"
                     }
                     super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
                 } else {
                     SentryPlugin.logger.info {
-                        "Wrapping $owner.$name with ${replacement.owner}.${replacement.name} in $className.${context.name}"
+                        "Wrapping $owner.$name with ${replacement.owner}.${replacement.name} " +
+                            "in $className.${context.name}"
                     }
                     visitWrapping(replacement, opcode, owner, name, descriptor, isInterface)
                 }
