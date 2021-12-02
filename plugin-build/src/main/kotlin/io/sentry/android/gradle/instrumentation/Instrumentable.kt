@@ -13,7 +13,7 @@ interface Instrumentable<Visitor, InstrumentableContext> {
      * Class: androidx.sqlite.db.framework.FrameworkSQLiteDatabase
      * Method: query
      */
-    val fqName: String
+    val fqName: String get() = ""
 
     /**
      * Provides a visitor for this instrumentable. A visitor can be one of the visitors defined
@@ -30,12 +30,6 @@ interface Instrumentable<Visitor, InstrumentableContext> {
         originalVisitor: Visitor,
         parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
     ): Visitor
-
-    /**
-     * Provides children instrumentables that are going to be used when visiting the current
-     * class/method/field/etc.
-     */
-    val children: List<Instrumentable<*, *>> get() = emptyList()
 
     /**
      * Defines whether this object is instrumentable or not based on [data]

@@ -25,13 +25,8 @@ class AndroidXSQLiteDatabase : ClassInstrumentable {
         apiVersion = apiVersion,
         classVisitor = originalVisitor,
         className = fqName.substringAfterLast('.'),
-        methodInstrumentables = children,
+        methodInstrumentables = listOf(Query(), ExecSql()),
         parameters = parameters
-    )
-
-    override val children: List<MethodInstrumentable> = listOf(
-        Query(),
-        ExecSql()
     )
 }
 
