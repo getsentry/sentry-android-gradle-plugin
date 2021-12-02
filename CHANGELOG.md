@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Introduce the `includeProguardMapping` option to exclude the proguard logic, and deprecate `autoUpload` in favor of `autoUploadProguardMapping` (#240)
+
 ## 3.0.0-beta.2
 
 * Fix: Correctly add the proguard UUID output directory to the source set (#226)

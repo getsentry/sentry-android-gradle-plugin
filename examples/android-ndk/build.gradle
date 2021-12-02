@@ -35,7 +35,8 @@ android {
 if (System.getenv("AUTO_UPLOAD")) {
     apply plugin: 'io.sentry.android.gradle'
     sentry {
-        autoUpload = false
+        includeProguardMapping = true
+        autoUploadProguardMapping = false
         uploadNativeSymbols = true
         includeNativeSources = true
         autoUploadNativeSymbols = CI.INSTANCE.canAutoUpload()

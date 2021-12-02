@@ -20,7 +20,7 @@ android {
 }
 
 sentry {
-    autoUpload.set(CI.canAutoUpload())
+    autoUploadProguardMapping.set(CI.canAutoUpload())
 
     tracingInstrumentation {
         enabled.set(false)
