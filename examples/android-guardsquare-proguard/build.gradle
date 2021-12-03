@@ -1,0 +1,49 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath Libs.AGP
+        classpath Libs.PROGUARD
+        classpath "io.sentry:sentry-android-gradle-plugin"
+    }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'io.sentry.android.gradle'
+apply plugin: 'com.guardsquare.proguard'
+
+android {
+    compileSdkVersion = 30
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode = 1
+        versionName = "1.0"
+    }
+    buildTypes {
+        release {
+            // AGP's R8 needs to be disabled.
+            minifyEnabled false
+        }
+    }
+}
+
+proguard {
+   configurations {
+      release {
+         defaultConfiguration "proguard-android-optimize.txt"
+         configuration "proguard-project.txt"
+      }
+   }
+}
+
+sentry {
+    autoUploadProguardMapping = true
+
+    tracingInstrumentation {
+        enabled = false
+    }
+}

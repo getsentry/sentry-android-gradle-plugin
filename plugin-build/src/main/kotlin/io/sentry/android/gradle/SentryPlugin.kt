@@ -24,6 +24,7 @@ import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.transforms.MetaInfStripTransform.Companion.metaInfStripped
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
+import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
 import io.sentry.android.gradle.util.getSentryAndroidSdkState
 import io.sentry.android.gradle.util.info
@@ -107,14 +108,14 @@ class SentryPlugin : Plugin<Project> {
 
                 val sentryProperties = getPropertiesFilePath(project, variant)
 
-                val isMinifyEnabled = variant.buildType.isMinifyEnabled
+                val isMinificationEnabled = isMinificationEnabled(project, variant)
                 val isDebuggable = variant.buildType.isDebuggable
 
                 var preBundleTaskProvider: TaskProvider<Task>? = null
                 var transformerTaskProvider: TaskProvider<Task>? = null
                 var packageBundleTaskProvider: TaskProvider<Task>? = null
 
-                if (isMinifyEnabled) {
+                if (isMinificationEnabled) {
                     preBundleTaskProvider = withLogging(project.logger, "preBundleTask") {
                         getPreBundleTask(project, variant.name)
                     }
@@ -125,12 +126,14 @@ class SentryPlugin : Plugin<Project> {
                         getPackageBundleTask(project, variant.name)
                     }
                 } else {
-                    project.logger.info { "isMinifyEnabled is false for variant ${variant.name}." }
+                    project.logger.info {
+                        "Minification is not enabled for variant ${variant.name}."
+                    }
                 }
 
                 val taskSuffix = variant.name.capitalizeUS()
 
-                if (isMinifyEnabled && extension.includeProguardMapping.get()) {
+                if (isMinificationEnabled && extension.includeProguardMapping.get()) {
                     // Setup the task to generate a UUID asset file
                     val generateUuidTask = project.tasks.register(
                         "generateSentryProguardUuid$taskSuffix",
@@ -161,7 +164,7 @@ class SentryPlugin : Plugin<Project> {
                             sentryProperties?.let { file -> project.file(file) }
                         )
                         task.uuidDirectory.set(generateUuidTask.flatMap { it.outputDirectory })
-                        task.mappingsFiles = getMappingFileProvider(variant)
+                        task.mappingsFiles = getMappingFileProvider(project, variant)
                         task.autoUploadProguardMapping.set(extension.autoUploadProguardMapping)
                         task.sentryOrganization.set(sentryOrgParameter)
                         task.sentryProject.set(sentryProjectParameter)

@@ -7,6 +7,7 @@ object BuildPluginsVersion {
     // do not upgrade to 0.18.0, it does not generate the pom-default.xml and module.json under
     // build/publications/maven
     const val MAVEN_PUBLISH = "0.17.0"
+    const val PROGUARD = "7.1.0"
 }
 
 object LibsVersion {
@@ -19,6 +20,7 @@ object LibsVersion {
 object Libs {
     val AGP = "com.android.tools.build:gradle:${BuildPluginsVersion.AGP}"
     const val JUNIT = "junit:junit:${LibsVersion.JUNIT}"
+    const val PROGUARD = "com.guardsquare:proguard-gradle:${BuildPluginsVersion.PROGUARD}"
 
     // bytecode instrumentation
     const val ASM = "org.ow2.asm:asm-util:${LibsVersion.ASM}"
