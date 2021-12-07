@@ -99,7 +99,7 @@ class SentryPluginTest(
                 }
 
                 sentry {
-                  autoUpload = false
+                  autoUploadProguardMapping = false
                   tracingInstrumentation {
                     enabled = false
                   }
@@ -164,6 +164,31 @@ class SentryPluginTest(
 
         assertThrows(AssertionError::class.java) {
             verifyProguardUuid(testProjectDir.root, variant = "debug", signed = false)
+        }
+    }
+
+    @Test
+    fun `does not include a UUID in the APK if includeProguardMapping is off`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+                plugins {
+                  id "com.android.application"
+                  id "io.sentry.android.gradle"
+                }
+
+                sentry {
+                  includeProguardMapping = false
+                }
+            """.trimIndent()
+        )
+
+        runner
+            .appendArguments(":app:assembleRelease")
+            .build()
+
+        assertThrows(AssertionError::class.java) {
+            verifyProguardUuid(testProjectDir.root)
         }
     }
 
@@ -243,7 +268,7 @@ class SentryPluginTest(
                 }
 
                 sentry {
-                  autoUpload = false
+                  autoUploadProguardMapping = false
                   uploadNativeSymbols = true
                   tracingInstrumentation {
                     enabled = false
@@ -262,7 +287,7 @@ class SentryPluginTest(
                   id "io.sentry.android.gradle"
                 }
                 sentry {
-                  autoUpload = true
+                  autoUploadProguardMapping = true
                   ignoredVariants = ["$ignoredVariant"]
                   tracingInstrumentation {
                     enabled = false
@@ -282,7 +307,7 @@ class SentryPluginTest(
                 }
 
                 sentry {
-                  autoUpload = false
+                  autoUploadProguardMapping = false
                   tracingInstrumentation {
                     enabled = $tracingInstrumentation
                   }

@@ -37,7 +37,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.cliExecutable.set("sentry-cli")
                 it.uuidDirectory.set(tempDir.root)
                 it.mappingsFiles = mappingFile
-                it.autoUpload.set(true)
+                it.autoUploadProguardMapping.set(true)
             }
 
         val args = task.get().computeCommandLineArgs()
@@ -63,7 +63,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.cliExecutable.set("sentry-cli")
                 it.uuidDirectory.set(tempDir.root)
                 it.mappingsFiles = mappingFile
-                it.autoUpload.set(false)
+                it.autoUploadProguardMapping.set(false)
             }
 
         val args = task.get().computeCommandLineArgs()
@@ -118,7 +118,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.cliExecutable.set("sentry-cli")
                 it.uuidDirectory.set(tempDir.root)
                 it.mappingsFiles = mappingFile
-                it.autoUpload.set(false)
+                it.autoUploadProguardMapping.set(false)
                 it.sentryOrganization.set("dummy-org")
             }
 
@@ -141,7 +141,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.cliExecutable.set("sentry-cli")
                 it.uuidDirectory.set(tempDir.root)
                 it.mappingsFiles = mappingFile
-                it.autoUpload.set(false)
+                it.autoUploadProguardMapping.set(false)
                 it.sentryProject.set("dummy-proj")
             }
 

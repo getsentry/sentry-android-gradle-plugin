@@ -120,7 +120,7 @@ class SentryPlugin : Plugin<Project> {
 
                 val taskSuffix = variant.name.capitalizeUS()
 
-                if (isMinifyEnabled) {
+                if (isMinifyEnabled && extension.includeProguardMapping.get()) {
                     // Setup the task to generate a UUID asset file
                     val generateUuidTask = project.tasks.register(
                         "generateSentryProguardUuid$taskSuffix",
@@ -152,7 +152,7 @@ class SentryPlugin : Plugin<Project> {
                         )
                         task.uuidDirectory.set(generateUuidTask.flatMap { it.outputDirectory })
                         task.mappingsFiles = getMappingFileProvider(variant)
-                        task.autoUpload.set(extension.autoUpload)
+                        task.autoUploadProguardMapping.set(extension.autoUploadProguardMapping)
                         task.sentryOrganization.set(sentryOrgParameter)
                         task.sentryProject.set(sentryProjectParameter)
                     }

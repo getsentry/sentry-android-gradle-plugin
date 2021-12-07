@@ -11,11 +11,36 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     private val objects = project.objects
 
     /**
+     * Disables or enables the handling of Proguard mapping for Sentry.
+     * If enabled the plugin will generate a UUID and will take care of
+     * uploading the mapping to Sentry. If disabled, all the logic
+     * related to proguard mapping will be excluded.
+     * Default is enabled.
+     *
+     * @see [autoUpload]
+     * @see [autoUploadProguardMapping]
+     */
+    val includeProguardMapping: Property<Boolean> = objects
+        .property(Boolean::class.java).convention(true)
+
+    /**
      * Whether the plugin should attempt to auto-upload the mapping file to Sentry or not.
      * If disabled the plugin will run a dry-run.
      * Default is enabled.
      */
-    val autoUpload: Property<Boolean> = objects.property(Boolean::class.java).convention(true)
+    val autoUploadProguardMapping: Property<Boolean> = objects
+        .property(Boolean::class.java).convention(true)
+
+    /**
+     * Whether the plugin should attempt to auto-upload the mapping file to Sentry or not.
+     * If disabled the plugin will run a dry-run.
+     * Default is enabled.
+     */
+    @Deprecated(
+        "Use autoUploadProguardMapping instead",
+        replaceWith = ReplaceWith("autoUploadProguardMapping")
+    )
+    val autoUpload: Property<Boolean> = autoUploadProguardMapping
 
     /**
      * Disables or enables the automatic configuration of Native Symbols

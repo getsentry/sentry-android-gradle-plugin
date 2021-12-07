@@ -48,7 +48,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     abstract val sentryProject: Property<String>
 
     @get:Input
-    abstract val autoUpload: Property<Boolean>
+    abstract val autoUploadProguardMapping: Property<Boolean>
 
     override fun exec() {
         if (!mappingsFiles.isPresent || mappingsFiles.get().isEmpty) {
@@ -81,7 +81,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             mappingsFiles.get().files.first().toString()
         )
 
-        if (!autoUpload.get()) {
+        if (!autoUploadProguardMapping.get()) {
             args.add("--no-upload")
         }
 
