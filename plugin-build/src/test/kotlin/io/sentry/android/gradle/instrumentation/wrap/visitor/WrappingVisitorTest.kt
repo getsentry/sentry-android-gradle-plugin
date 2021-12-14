@@ -1,4 +1,3 @@
-// ktlint-disable experimental:argument-list-wrapping
 package io.sentry.android.gradle.instrumentation.wrap.visitor
 
 import com.android.build.api.instrumentation.ClassData
@@ -43,14 +42,13 @@ class WrappingVisitorTest {
             descriptor = "(Ljava/lang/String;)V",
             isInterface = false
         )
-        fixture.getSut(context)
-            .visitMethodInsn(
-                opcode = methodVisit.opcode,
-                owner = methodVisit.owner,
-                name = methodVisit.name,
-                descriptor = methodVisit.descriptor,
-                isInterface = methodVisit.isInterface
-            )
+        fixture.getSut(context).visitMethodInsn(
+            opcode = methodVisit.opcode,
+            owner = methodVisit.owner,
+            name = methodVisit.name,
+            descriptor = methodVisit.descriptor,
+            isInterface = methodVisit.isInterface
+        )
 
         assertEquals(
             fixture.logger.capturedMessage,
@@ -71,14 +69,13 @@ class WrappingVisitorTest {
             descriptor = "(Ljava/lang/String;)V",
             isInterface = false
         )
-        fixture.getSut(context)
-            .visitMethodInsn(
-                opcode = methodVisit.opcode,
-                owner = methodVisit.owner,
-                name = methodVisit.name,
-                descriptor = methodVisit.descriptor,
-                isInterface = methodVisit.isInterface
-            )
+        fixture.getSut(context).visitMethodInsn(
+            opcode = methodVisit.opcode,
+            owner = methodVisit.owner,
+            name = methodVisit.name,
+            descriptor = methodVisit.descriptor,
+            isInterface = methodVisit.isInterface
+        )
 
         // method visit should remain unchanged
         assertEquals(fixture.visitor.methodVisits.size, 1)
@@ -180,6 +177,7 @@ class WrappingVisitorTest {
             descriptor = "(Ljava/lang/String;)V",
             isInterface = false
         )
+        /* ktlint-disable experimental:argument-list-wrapping */
         fixture.getSut(context, replacements = mapOf(Replacement.FileInputStream.STRING))
             .visitMethodInsn(
                 methodVisit.opcode,
@@ -188,6 +186,7 @@ class WrappingVisitorTest {
                 methodVisit.descriptor,
                 methodVisit.isInterface
             )
+        /* ktlint-enable experimental:argument-list-wrapping */
 
         assertEquals(fixture.visitor.methodVisits.size, 2)
         // store original arguments
