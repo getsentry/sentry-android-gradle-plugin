@@ -223,7 +223,7 @@ data class MethodVisit(
 
 data class VarVisit(
     val opcode: Int,
-    val `var`: Int
+    val variable: Int
 )
 
 class CapturingMethodVisitor : MethodVisitor(Opcodes.ASM9) {
@@ -231,9 +231,9 @@ class CapturingMethodVisitor : MethodVisitor(Opcodes.ASM9) {
     val methodVisits = mutableListOf<MethodVisit>()
     val varVisits = mutableListOf<VarVisit>()
 
-    override fun visitVarInsn(opcode: Int, `var`: Int) {
-        super.visitVarInsn(opcode, `var`)
-        varVisits += VarVisit(opcode, `var`)
+    override fun visitVarInsn(opcode: Int, variable: Int) {
+        super.visitVarInsn(opcode, variable)
+        varVisits += VarVisit(opcode, variable)
     }
 
     override fun visitMethodInsn(
