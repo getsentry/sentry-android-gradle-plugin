@@ -8,6 +8,7 @@ import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
+import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.util.warn
 import java.io.File
 import org.gradle.api.provider.Property
@@ -42,7 +43,8 @@ abstract class SpanAddingClassVisitorFactory :
         private val instrumentables: List<ClassInstrumentable> = listOf(
             AndroidXSQLiteDatabase(),
             AndroidXSQLiteStatement(),
-            AndroidXRoomDao()
+            AndroidXRoomDao(),
+            WrappingInstrumentable()
         )
     }
 

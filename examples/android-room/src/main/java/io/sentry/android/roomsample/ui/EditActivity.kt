@@ -56,8 +56,14 @@ class EditActivity : ComponentActivity() {
                 } else {
                     if (originalTrack == null) {
                         addNewTrack(name, composer, duration.toLong(), unitPrice.toFloat())
+
+                        val createCount = SampleApp.analytics.getInt("create_count", 0) + 1
+                        SampleApp.analytics.edit().putInt("create_count", createCount).apply()
                     } else {
                         originalTrack.update(name, composer, duration.toLong(), unitPrice.toFloat())
+
+                        val editCount = SampleApp.analytics.getInt("edit_count", 0) + 1
+                        SampleApp.analytics.edit().putInt("edit_count", editCount).apply()
                     }
                     transaction.finish(SpanStatus.OK)
                     finish()
