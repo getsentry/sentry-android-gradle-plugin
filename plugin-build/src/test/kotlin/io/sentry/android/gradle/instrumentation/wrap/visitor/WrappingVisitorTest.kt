@@ -1,3 +1,4 @@
+// ktlint-disable experimental:argument-list-wrapping
 package io.sentry.android.gradle.instrumentation.wrap.visitor
 
 import com.android.build.api.instrumentation.ClassData
@@ -201,11 +202,12 @@ class WrappingVisitorTest {
         assertEquals(fixture.visitor.varVisits[2], VarVisit(Opcodes.ALOAD, 1))
         // replacement/wrapping method visited
         assertEquals(
-            fixture.visitor.methodVisits[1], MethodVisit(
-                opcode = Opcodes.INVOKESTATIC,
-                owner = "io/sentry/instrumentation/file/SentryFileInputStream${'$'}Factory",
-                name = "create",
-                descriptor = "(Ljava/io/FileInputStream;Ljava/lang/String;)Ljava/io/FileInputStream;",
+            fixture.visitor.methodVisits[1],
+            MethodVisit(
+                Opcodes.INVOKESTATIC,
+                "io/sentry/instrumentation/file/SentryFileInputStream${'$'}Factory",
+                "create",
+                "(Ljava/io/FileInputStream;Ljava/lang/String;)Ljava/io/FileInputStream;",
                 isInterface = false
             )
         )
