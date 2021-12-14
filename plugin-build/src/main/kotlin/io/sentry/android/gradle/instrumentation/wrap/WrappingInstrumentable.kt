@@ -3,6 +3,7 @@
 package io.sentry.android.gradle.instrumentation.wrap
 
 import com.android.build.api.instrumentation.ClassContext
+import com.android.build.api.instrumentation.ClassData
 import io.sentry.android.gradle.instrumentation.ClassInstrumentable
 import io.sentry.android.gradle.instrumentation.CommonClassVisitor
 import io.sentry.android.gradle.instrumentation.MethodContext
@@ -20,12 +21,13 @@ class WrappingInstrumentable : ClassInstrumentable {
         originalVisitor: ClassVisitor,
         parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
     ): ClassVisitor {
-        val className = instrumentableContext.currentClassData.className.substringAfterLast('.')
+        val simpleClassName =
+            instrumentableContext.currentClassData.className.substringAfterLast('.')
         return CommonClassVisitor(
             apiVersion = apiVersion,
             classVisitor = originalVisitor,
-            className = className,
-            methodInstrumentables = listOf(Wrap(className)),
+            className = simpleClassName,
+            methodInstrumentables = listOf(Wrap(instrumentableContext.currentClassData)),
             parameters = parameters
         )
     }
@@ -39,7 +41,7 @@ class WrappingInstrumentable : ClassInstrumentable {
     }
 }
 
-class Wrap(private val className: String) : MethodInstrumentable {
+class Wrap(private val classContext: ClassData) : MethodInstrumentable {
 
     companion object {
         private val replacements = mapOf(
@@ -53,6 +55,11 @@ class Wrap(private val className: String) : MethodInstrumentable {
             Replacement.FileOutputStream.FILE,
             Replacement.FileOutputStream.FILE_BOOLEAN,
             Replacement.FileOutputStream.FILE_DESCRIPTOR
+            // TODO: enable, once https://github.com/getsentry/sentry-java/issues/1842 is resolved
+            // Context.openFileInput to SentryFileInputStream
+//            Replacement.Context.OPEN_FILE_INPUT,
+            // Context.openFileOutput to SentryFileOutputStream
+//            Replacement.Context.OPEN_FILE_OUTPUT
         )
     }
 
@@ -65,7 +72,7 @@ class Wrap(private val className: String) : MethodInstrumentable {
         WrappingVisitor(
             api = apiVersion,
             originalVisitor = originalVisitor,
-            className = className,
+            classContext = classContext,
             context = instrumentableContext,
             replacements = replacements
         )

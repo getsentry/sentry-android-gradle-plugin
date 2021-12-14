@@ -88,4 +88,28 @@ data class Replacement(
                 "(Ljava/io/FileOutputStream;Ljava/io/FileDescriptor;)Ljava/io/FileOutputStream;"
             )
     }
+
+    object Context {
+        val OPEN_FILE_INPUT =
+            Replacement(
+                "",
+                "openFileInput",
+                "(Ljava/lang/String;)Ljava/io/FileInputStream;"
+            ) to Replacement(
+                "io/sentry/instrumentation/file/SentryFileInputStream${'$'}Factory",
+                "create",
+                "(Ljava/io/FileInputStream;Ljava/lang/String;)Ljava/io/FileInputStream;"
+            )
+
+        val OPEN_FILE_OUTPUT =
+            Replacement(
+                "",
+                "openFileOutput",
+                "(Ljava/lang/String;I)Ljava/io/FileOutputStream;"
+            ) to Replacement(
+                "io/sentry/instrumentation/file/SentryFileOutputStream${'$'}Factory",
+                "create",
+                "(Ljava/io/FileOutputStream;Ljava/lang/String;)Ljava/io/FileOutputStream;"
+            )
+    }
 }
