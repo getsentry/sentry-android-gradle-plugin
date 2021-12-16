@@ -73,6 +73,6 @@ sentry {
 
     tracingInstrumentation {
         forceInstrumentDependencies.set(true)
-        debug.set(true)
+//        debug.set(true)
     }
 }

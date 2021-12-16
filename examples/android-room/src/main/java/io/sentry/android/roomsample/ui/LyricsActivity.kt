@@ -10,11 +10,13 @@ import io.sentry.SpanStatus
 import io.sentry.android.roomsample.R
 import io.sentry.android.roomsample.data.Track
 import java.io.File
+import io.sentry.android.roomsample.util.Filesystem
 
 @SuppressLint("SetTextI18n")
 class LyricsActivity : ComponentActivity() {
-    private lateinit var file: File
     private lateinit var lyricsInput: EditText
+    private lateinit var filesystem: Filesystem
+    private lateinit var track: Track
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,16 +31,14 @@ class LyricsActivity : ComponentActivity() {
         lyricsInput = findViewById(R.id.lyrics)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
 
-        val track: Track = intent.getSerializableExtra(TRACK_EXTRA_KEY) as Track
+        track = intent.getSerializableExtra(TRACK_EXTRA_KEY) as Track
+        filesystem = intent.getSerializableExtra(FILESYSTEM_EXTRA_KEY) as Filesystem
         toolbar.title = "Lyrics for ${track.name}"
 
         val dir = File("$filesDir${File.separatorChar}lyrics")
         dir.mkdirs()
 
-        file = File(dir, "${track.id}.txt")
-        if (file.exists()) {
-            lyricsInput.setText(file.readText())
-        }
+        lyricsInput.setText(filesystem.read(this, "${track.id}.txt"))
         transaction.finish(SpanStatus.OK)
     }
 
@@ -48,15 +48,13 @@ class LyricsActivity : ComponentActivity() {
             "ui.action.lyrics_finish",
             true
         )
-        if (!file.exists()) {
-            file.createNewFile()
-        }
-        file.writeText(lyricsInput.text.toString())
+        filesystem.write(this, "${track.id}.txt", lyricsInput.text.toString())
         transaction.finish(SpanStatus.OK)
         super.onBackPressed()
     }
 
     companion object {
         const val TRACK_EXTRA_KEY = "LyricsActivity.Track"
+        const val FILESYSTEM_EXTRA_KEY = "LyricsActivity.Filesystem"
     }
 }
