@@ -2,11 +2,14 @@
 
 ## Unreleased
 
+## 3.0.0-beta.2
+
 * Fix: Correctly add the proguard UUID output directory to the source set (#226)
 * Feature: Make the ignoreXXX properties in SentryPluginExtension sets (#225)
 * Expose SentryPluginExtension.tracingInstrumentation (#229)
 * Ref: Change Room queries description to Dao class name (#232)
 * Fix: Log broken bytecode when build fails (#233)
+* Ref: Change db operation names (#237)
 
 ## 3.0.0-beta.1
 
