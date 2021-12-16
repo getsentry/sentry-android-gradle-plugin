@@ -9,8 +9,8 @@ import io.sentry.Sentry
 import io.sentry.SpanStatus
 import io.sentry.android.roomsample.R
 import io.sentry.android.roomsample.data.Track
-import java.io.File
 import io.sentry.android.roomsample.util.Filesystem
+import java.io.File
 
 @SuppressLint("SetTextI18n")
 class LyricsActivity : ComponentActivity() {

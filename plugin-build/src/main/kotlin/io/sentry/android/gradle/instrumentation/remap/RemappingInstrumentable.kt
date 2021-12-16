@@ -5,7 +5,6 @@ package io.sentry.android.gradle.instrumentation.remap
 import com.android.build.api.instrumentation.ClassContext
 import io.sentry.android.gradle.instrumentation.ClassInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
-import java.util.*
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.commons.ClassRemapper
 import org.objectweb.asm.commons.SimpleRemapper

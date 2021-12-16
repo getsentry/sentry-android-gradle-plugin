@@ -16,13 +16,12 @@ class ChainedInstrumentableTest {
             originalVisitor: ClassVisitor,
             instrumentables: List<ClassInstrumentable> = emptyList()
         ): ClassVisitor {
-            return ChainedInstrumentable(instrumentables)
-                .getVisitor(
-                    TestClassContext(TestClassData("RandomClass")),
-                    Opcodes.ASM9,
-                    originalVisitor,
-                    TestSpanAddingParameters(inMemoryDir = File(""))
-                )
+            return ChainedInstrumentable(instrumentables).getVisitor(
+                TestClassContext(TestClassData("RandomClass")),
+                Opcodes.ASM9,
+                originalVisitor,
+                TestSpanAddingParameters(inMemoryDir = File(""))
+            )
         }
     }
 
