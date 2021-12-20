@@ -9,6 +9,7 @@ import io.sentry.android.gradle.instrumentation.CommonClassVisitor
 import io.sentry.android.gradle.instrumentation.MethodContext
 import io.sentry.android.gradle.instrumentation.MethodInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
+import io.sentry.android.gradle.instrumentation.util.isSentryClass
 import io.sentry.android.gradle.instrumentation.wrap.visitor.WrappingVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
@@ -32,13 +33,7 @@ class WrappingInstrumentable : ClassInstrumentable {
         )
     }
 
-    override fun isInstrumentable(data: ClassContext): Boolean {
-        return when {
-            data.currentClassData.className.startsWith("io.sentry") &&
-                !data.currentClassData.className.startsWith("io.sentry.android.roomsample") -> false
-            else -> true
-        }
-    }
+    override fun isInstrumentable(data: ClassContext): Boolean = !data.isSentryClass()
 }
 
 class Wrap(private val classContext: ClassData) : MethodInstrumentable {

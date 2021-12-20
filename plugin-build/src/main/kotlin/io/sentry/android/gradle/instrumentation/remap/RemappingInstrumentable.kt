@@ -5,6 +5,7 @@ package io.sentry.android.gradle.instrumentation.remap
 import com.android.build.api.instrumentation.ClassContext
 import io.sentry.android.gradle.instrumentation.ClassInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
+import io.sentry.android.gradle.instrumentation.util.isSentryClass
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.commons.ClassRemapper
 import org.objectweb.asm.commons.SimpleRemapper
@@ -25,11 +26,5 @@ class RemappingInstrumentable : ClassInstrumentable {
     ): ClassVisitor =
         ClassRemapper(originalVisitor, SimpleRemapper(mapping))
 
-    override fun isInstrumentable(data: ClassContext): Boolean {
-        return when {
-            data.currentClassData.className.startsWith("io.sentry") &&
-                !data.currentClassData.className.startsWith("io.sentry.android.roomsample") -> false
-            else -> true
-        }
-    }
+    override fun isInstrumentable(data: ClassContext): Boolean = !data.isSentryClass()
 }
