@@ -1,8 +1,10 @@
 package io.sentry.android.roomsample.ui.list
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import androidx.recyclerview.widget.RecyclerView
 import io.sentry.Sentry
 import io.sentry.SpanStatus
@@ -11,6 +13,7 @@ import io.sentry.android.roomsample.SampleApp
 import io.sentry.android.roomsample.data.Track
 import io.sentry.android.roomsample.ui.EditActivity
 import io.sentry.android.roomsample.ui.LyricsActivity
+import io.sentry.android.roomsample.util.Filesystem
 import kotlinx.coroutines.runBlocking
 
 class TrackAdapter : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
@@ -62,12 +65,32 @@ class TrackAdapter : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
         holder.row.infoButton.setOnClickListener {
             val context = holder.row.context
             val track = data[holder.bindingAdapterPosition]
-            context.startActivity(
-                Intent(
-                    context,
-                    LyricsActivity::class.java
-                ).putExtra(LyricsActivity.TRACK_EXTRA_KEY, track)
-            )
+
+            /* ktlint-disable experimental:argument-list-wrapping */
+            AlertDialog.Builder(context)
+                .setTitle("Choose File API")
+                .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+                .setAdapter(
+                    ArrayAdapter(
+                        context,
+                        android.R.layout.select_dialog_item,
+                        listOf(
+                            "FileIOStream",
+                            "FileReader/FileWriter",
+                            "Context.openFileInput/Output"
+                        )
+                    )
+                ) { dialog, which ->
+                    context.startActivity(
+                        Intent(
+                            context,
+                            LyricsActivity::class.java
+                        ).putExtra(LyricsActivity.TRACK_EXTRA_KEY, track)
+                            .putExtra(LyricsActivity.FILESYSTEM_EXTRA_KEY, Filesystem.from(which))
+                    )
+                    dialog.dismiss()
+                }.show()
+            /* ktlint-enable experimental:argument-list-wrapping */
         }
     }
 
@@ -75,6 +98,7 @@ class TrackAdapter : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
         super.onViewRecycled(holder)
         holder.row.deleteButton.setOnClickListener(null)
         holder.row.editButton.setOnClickListener(null)
+        holder.row.infoButton.setOnClickListener(null)
     }
 
     inner class ViewHolder(val row: TrackRow) : RecyclerView.ViewHolder(row)

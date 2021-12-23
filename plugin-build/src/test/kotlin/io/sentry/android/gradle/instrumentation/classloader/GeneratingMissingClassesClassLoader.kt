@@ -3,6 +3,7 @@ package io.sentry.android.gradle.instrumentation.classloader
 import io.sentry.android.gradle.instrumentation.classloader.mapping.deletionDaoMissingClasses
 import io.sentry.android.gradle.instrumentation.classloader.mapping.insertionDaoMissingClasses
 import io.sentry.android.gradle.instrumentation.classloader.mapping.selectDaoMissingClasses
+import io.sentry.android.gradle.instrumentation.classloader.mapping.sqliteCopyOpenHelperMissingClasses
 import io.sentry.android.gradle.instrumentation.classloader.mapping.updateDaoMissingClasses
 
 class GeneratingMissingClassesClassLoader : ClassLoader(getSystemClassLoader()) {
@@ -12,7 +13,8 @@ class GeneratingMissingClassesClassLoader : ClassLoader(getSystemClassLoader()) 
             *deletionDaoMissingClasses,
             *insertionDaoMissingClasses,
             *updateDaoMissingClasses,
-            *selectDaoMissingClasses
+            *selectDaoMissingClasses,
+            *sqliteCopyOpenHelperMissingClasses
         )
     }
 

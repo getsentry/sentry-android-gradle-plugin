@@ -37,10 +37,7 @@ class SampleApp : Application() {
                     tracks.forEachIndexed { index, track ->
                         // add lyrics for every 2nd track
                         if (index % 2 == 0) {
-                            val dir = File("$filesDir${File.separatorChar}lyrics")
-                            dir.mkdirs()
-
-                            val file = File(dir, "${track.id}.txt")
+                            val file = File(filesDir, "${track.id}.txt")
                             file.writeText(DEFAULT_LYRICS)
                         }
                     }
