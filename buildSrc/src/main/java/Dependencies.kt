@@ -26,6 +26,9 @@ object Libs {
     const val SQLITE = "androidx.sqlite:sqlite:${LibsVersion.SQLITE}"
     const val SQLITE_FRAMEWORK = "androidx.sqlite:sqlite-framework:${LibsVersion.SQLITE}"
     const val SENTRY_ANDROID = "io.sentry:sentry-android:${LibsVersion.SENTRY}"
+
+    // test
+    val MOCKITO_KOTLIN = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
 }
 
 object CI {

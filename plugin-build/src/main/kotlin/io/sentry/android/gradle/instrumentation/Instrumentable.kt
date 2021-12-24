@@ -5,8 +5,9 @@ package io.sentry.android.gradle.instrumentation
 import com.android.build.api.instrumentation.ClassContext
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
+import java.io.Serializable
 
-interface Instrumentable<Visitor, InstrumentableContext> {
+interface Instrumentable<Visitor, InstrumentableContext> : Serializable {
 
     /**
      * Fully-qualified name of the instrumentable. Examples:

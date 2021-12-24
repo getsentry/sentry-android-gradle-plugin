@@ -54,7 +54,7 @@ abstract class SpanAddingClassVisitorFactory :
         val tmpDir: Property<File>
 
         @get:Internal
-        var _instrumentables: List<ClassInstrumentable>?
+        var _instrumentables: ArrayList<ClassInstrumentable>?
     }
 
     private val instrumentables: List<ClassInstrumentable>
@@ -69,7 +69,7 @@ abstract class SpanAddingClassVisitorFactory :
                 parameters.get().sdkStateFile.get().asFile,
                 SentryAndroidSdkState::class.java
             )
-            SentryPlugin.logger.error { "Read sentry-android sdk state: $sdkState" }
+            SentryPlugin.logger.info { "Read sentry-android sdk state: $sdkState" }
             val instrumentables = listOfNotNull(
                 AndroidXSQLiteDatabase().takeIf { sdkState.isAtLeast(PERFORMANCE) },
                 AndroidXSQLiteStatement().takeIf { sdkState.isAtLeast(PERFORMANCE) },

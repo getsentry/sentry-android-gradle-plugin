@@ -1,8 +1,8 @@
 package io.sentry.android.gradle.util
 
-import java.util.LinkedList
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ResolvedDependency
+import java.util.LinkedList
 
 fun Project.getSentryAndroidSdkState(
     configurationName: String,
@@ -27,17 +27,17 @@ fun Project.getSentryAndroidSdkState(
     val deps = resolvedConfiguration.firstLevelModuleDependencies
     val version = deps.findSentryAndroidSdk()
     if (version != null) {
-        val sdkState = try {
-            SentryAndroidSdkState.from(version)
+        return try {
+            val sdkState = SentryAndroidSdkState.from(version)
+            logger.info {
+                "Detected sentry-android $sdkState for version: $version, " +
+                    "variant: $variantName, config: $configurationName"
+            }
+            sdkState
         } catch (e: IllegalStateException) {
             logger.warn { e.localizedMessage }
             SentryAndroidSdkState.MISSING
         }
-        logger.error {
-            "Detected sentry-android $sdkState for version: $version, " +
-                "variant: $variantName, config: $configurationName"
-        }
-        return sdkState
     }
     logger.warn { "Unable to detect sentry-android dependency" }
     return SentryAndroidSdkState.MISSING

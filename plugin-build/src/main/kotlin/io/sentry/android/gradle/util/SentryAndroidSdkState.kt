@@ -12,8 +12,13 @@ enum class SentryAndroidSdkState(val minVersion: String) : Serializable {
     fun isAtLeast(state: SentryAndroidSdkState): Boolean = this.ordinal >= state.ordinal
 
     companion object {
+        val semverRegex =
+            Regex("((([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)")
+
         fun from(semVer: String): SentryAndroidSdkState =
             when {
+                semVer == "unspecified" -> MISSING
+                !semverRegex.matches(semVer) -> error("Unknown version $semVer of sentry-android")
                 semVer < PERFORMANCE.minVersion -> MISSING
                 semVer >= PERFORMANCE.minVersion && semVer < FILE_IO.minVersion -> PERFORMANCE
                 semVer >= FILE_IO.minVersion -> FILE_IO
