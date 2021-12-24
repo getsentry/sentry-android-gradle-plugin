@@ -24,13 +24,13 @@ import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
 import io.sentry.android.gradle.util.getSentryAndroidSdkState
 import io.sentry.android.gradle.util.info
+import java.io.File
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.TaskProvider
 import org.slf4j.LoggerFactory
-import java.io.File
 
 @Suppress("UnstableApiUsage")
 class SentryPlugin : Plugin<Project> {

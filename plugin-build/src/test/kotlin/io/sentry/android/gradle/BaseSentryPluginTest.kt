@@ -1,12 +1,12 @@
 package io.sentry.android.gradle
 
+import java.io.File
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.junit.runners.Parameterized
-import java.io.File
 
 @Suppress("FunctionName")
 abstract class BaseSentryPluginTest(

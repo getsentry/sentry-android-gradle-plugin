@@ -14,7 +14,6 @@ import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.util.SentryAndroidSdkState
 import io.sentry.android.gradle.util.SentryAndroidSdkState.FILE_IO
 import io.sentry.android.gradle.util.SentryAndroidSdkState.PERFORMANCE
-import io.sentry.android.gradle.util.error
 import io.sentry.android.gradle.util.info
 import io.sentry.android.gradle.util.warn
 import java.io.File

@@ -12,8 +12,12 @@ enum class SentryAndroidSdkState(val minVersion: String) : Serializable {
     fun isAtLeast(state: SentryAndroidSdkState): Boolean = this.ordinal >= state.ordinal
 
     companion object {
+        /* ktlint-disable max-line-length */
         val semverRegex =
-            Regex("((([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)")
+            Regex(
+                "((([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)"
+            )
+        /* ktlint-enable max-line-length */
 
         fun from(semVer: String): SentryAndroidSdkState =
             when {

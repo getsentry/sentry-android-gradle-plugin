@@ -1,20 +1,20 @@
 package io.sentry.android.gradle
 
-import org.junit.Assert.assertThrows
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.junit.Assert.assertThrows
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
 @Suppress("FunctionName")
 @RunWith(Parameterized::class)
 class SentryPluginTest(
     androidGradlePluginVersion: String,
     gradleVersion: String
-): BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
+) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
 
     @Test
     fun `plugin can be applied`() {

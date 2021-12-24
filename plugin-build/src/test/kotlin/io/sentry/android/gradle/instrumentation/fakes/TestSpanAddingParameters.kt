@@ -2,6 +2,7 @@ package io.sentry.android.gradle.instrumentation.fakes
 
 import io.sentry.android.gradle.instrumentation.ClassInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
+import java.io.File
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.file.DefaultFileCollectionFactory
 import org.gradle.api.internal.file.DefaultFileLookup
@@ -15,7 +16,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.util.internal.PatternSets
 import org.gradle.internal.nativeintegration.services.FileSystems
 import org.gradle.internal.nativeintegration.services.NativeServices
-import java.io.File
 
 class TestSpanAddingParameters(
     private val debugOutput: Boolean = true,

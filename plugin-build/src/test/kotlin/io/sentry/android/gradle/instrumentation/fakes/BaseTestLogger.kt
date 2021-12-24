@@ -4,7 +4,6 @@ import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logger
 import org.slf4j.Marker
 
-
 abstract class BaseTestLogger : Logger {
 
     override fun isTraceEnabled(): Boolean = true

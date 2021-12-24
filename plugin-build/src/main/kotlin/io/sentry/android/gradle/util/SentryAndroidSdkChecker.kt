@@ -1,8 +1,8 @@
 package io.sentry.android.gradle.util
 
+import java.util.LinkedList
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ResolvedDependency
-import java.util.LinkedList
 
 fun Project.getSentryAndroidSdkState(
     configurationName: String,

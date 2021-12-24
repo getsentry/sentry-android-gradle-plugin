@@ -2,11 +2,11 @@ package io.sentry.android.gradle
 
 import com.android.build.gradle.internal.cxx.json.readJsonFile
 import io.sentry.android.gradle.util.SentryAndroidSdkState
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 @Suppress("FunctionName")
 @RunWith(Parameterized::class)

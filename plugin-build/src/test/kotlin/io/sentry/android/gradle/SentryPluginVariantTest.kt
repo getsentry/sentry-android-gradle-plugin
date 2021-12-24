@@ -1,5 +1,6 @@
 package io.sentry.android.gradle
 
+import java.io.File
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -7,7 +8,6 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import java.io.File
 
 @Suppress("FunctionName")
 @RunWith(Parameterized::class)

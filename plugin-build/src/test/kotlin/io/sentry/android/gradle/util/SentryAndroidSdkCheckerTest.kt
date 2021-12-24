@@ -5,6 +5,8 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.whenever
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
+import java.io.File
+import kotlin.test.assertTrue
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedConfiguration
@@ -13,8 +15,6 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import java.io.File
-import kotlin.test.assertTrue
 
 class SentryAndroidSdkCheckerTest {
 
@@ -81,7 +81,7 @@ class SentryAndroidSdkCheckerTest {
     }
 
     @Test
-    fun `sentry-android is not in the dependencies list - logs a warning and returns MISSING state`() {
+    fun `sentry-android is not in the dependencies - logs a warning and returns MISSING state`() {
         val sqliteDep = mock<ResolvedDependency>()
         whenever(sqliteDep.moduleGroup).doReturn("androidx.sqlite")
         whenever(sqliteDep.moduleName).doReturn("sqlite")
@@ -101,7 +101,8 @@ class SentryAndroidSdkCheckerTest {
         val sentryAndroidDep = mock<ResolvedDependency>()
         whenever(sentryAndroidDep.moduleGroup).doReturn("io.sentry")
         whenever(sentryAndroidDep.moduleName).doReturn("sentry-android")
-        whenever(sentryAndroidDep.moduleVersion).doReturn("unspecified") // this is the case when sentry-android is a local dependency
+        // this is the case when sentry-android is a local dependency
+        whenever(sentryAndroidDep.moduleVersion).doReturn("unspecified")
 
         val state = fixture.getSut(testProjectDir.root, dependencies = setOf(sentryAndroidDep))
             .getSentryAndroidSdkState(fixture.configurationName, fixture.variantName)
