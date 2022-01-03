@@ -40,7 +40,7 @@ class TestSpanAddingParameters(
     override val tmpDir: Property<File>
         get() = DefaultProperty<File>(PropertyHost.NO_OP, File::class.java).convention(inMemoryDir)
 
-    override var _instrumentables: ArrayList<ClassInstrumentable>? = ArrayList()
+    override var _instrumentables: List<ClassInstrumentable>? = listOf()
 
     private val fileLookup: DefaultFileLookup = DefaultFileLookup()
 
