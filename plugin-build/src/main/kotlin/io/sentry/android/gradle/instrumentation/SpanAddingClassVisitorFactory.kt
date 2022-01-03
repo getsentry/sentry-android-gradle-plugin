@@ -53,7 +53,7 @@ abstract class SpanAddingClassVisitorFactory :
         val tmpDir: Property<File>
 
         @get:Internal
-        var _instrumentables: ArrayList<ClassInstrumentable>?
+        var _instrumentables: List<ClassInstrumentable>?
     }
 
     private val instrumentables: List<ClassInstrumentable>
