@@ -68,6 +68,11 @@ abstract class SpanAddingClassVisitorFactory :
                 SentryAndroidSdkState::class.java
             )
             SentryPlugin.logger.info { "Read sentry-android sdk state: $sdkState" }
+            /**
+             * When adding a new instrumentable to the list below, do not forget to add a new
+             * version range to [SentryAndroidSdkState.from], if it involves runtime classes
+             * from the sentry-android SDK.
+             */
             val instrumentables = listOfNotNull(
                 AndroidXSQLiteDatabase().takeIf { sdkState.isAtLeast(PERFORMANCE) },
                 AndroidXSQLiteStatement().takeIf { sdkState.isAtLeast(PERFORMANCE) },

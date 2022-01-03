@@ -26,21 +26,22 @@ fun Project.getSentryAndroidSdkState(
 
     val deps = resolvedConfiguration.firstLevelModuleDependencies
     val version = deps.findSentryAndroidSdk()
-    if (version != null) {
-        return try {
-            val sdkState = SentryAndroidSdkState.from(version)
-            logger.info {
-                "Detected sentry-android $sdkState for version: $version, " +
-                    "variant: $variantName, config: $configurationName"
-            }
-            sdkState
-        } catch (e: IllegalStateException) {
-            logger.warn { e.localizedMessage }
-            SentryAndroidSdkState.MISSING
-        }
+    if (version == null) {
+        logger.warn { "sentry-android dependency was not found." }
+        return SentryAndroidSdkState.MISSING
     }
-    logger.warn { "Unable to detect sentry-android dependency" }
-    return SentryAndroidSdkState.MISSING
+
+    return try {
+        val sdkState = SentryAndroidSdkState.from(version)
+        logger.info {
+            "Detected sentry-android $sdkState for version: $version, " +
+                "variant: $variantName, config: $configurationName"
+        }
+        sdkState
+    } catch (e: IllegalStateException) {
+        logger.warn { e.localizedMessage }
+        SentryAndroidSdkState.MISSING
+    }
 }
 
 private fun Set<ResolvedDependency>.findSentryAndroidSdk(): String? {
