@@ -186,6 +186,36 @@ class SentryPluginTest(
         assertTrue(":app:transformReleaseClassesWithAsm" in build.output)
     }
 
+    @Test
+    fun `applies only DB instrumentables when only DATABASE feature enabled`() {
+        applyTracingInstrumentation(features = setOf(InstrumentationFeature.DATABASE))
+
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--debug")
+            .build()
+
+        assertTrue {
+            "[sentry] Instrumentables: AndroidXSQLiteDatabase, AndroidXSQLiteStatement," +
+                " AndroidXRoomDao" in build.output
+        }
+    }
+
+    @Test
+    fun `applies all instrumentables when all features enabled`() {
+        applyTracingInstrumentation(
+            features = setOf(InstrumentationFeature.DATABASE, InstrumentationFeature.FILE_IO)
+        )
+
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--debug")
+            .build()
+
+        assertTrue {
+            "[sentry] Instrumentables: AndroidXSQLiteDatabase, AndroidXSQLiteStatement," +
+                " AndroidXRoomDao, ChainedInstrumentable" in build.output
+        }
+    }
+
     private fun applyUploadNativeSymbols() {
         appBuildFile.writeText(
             // language=Groovy
@@ -225,7 +255,10 @@ class SentryPluginTest(
         )
     }
 
-    private fun applyTracingInstrumentation(tracingInstrumentation: Boolean = true) {
+    private fun applyTracingInstrumentation(
+        tracingInstrumentation: Boolean = true,
+        features: Set<InstrumentationFeature> = setOf()
+    ) {
         appBuildFile.writeText(
             // language=Groovy
             """
@@ -234,10 +267,20 @@ class SentryPluginTest(
                   id "io.sentry.android.gradle"
                 }
 
+                dependencies {
+                  implementation 'io.sentry:sentry-android:5.5.0'
+                }
+
                 sentry {
                   autoUploadProguardMapping = false
                   tracingInstrumentation {
                     enabled = $tracingInstrumentation
+                    features = ${
+            features.joinToString(
+                prefix = "[",
+                postfix = "]"
+            ) { "${it::class.java.canonicalName}.${it.name}" }
+            }
                   }
                 }
             """.trimIndent()

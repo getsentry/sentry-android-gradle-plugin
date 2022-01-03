@@ -5,6 +5,7 @@ import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.build.gradle.internal.cxx.json.readJsonFile
+import io.sentry.android.gradle.InstrumentationFeature
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
@@ -14,11 +15,13 @@ import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.util.SentryAndroidSdkState
 import io.sentry.android.gradle.util.SentryAndroidSdkState.FILE_IO
 import io.sentry.android.gradle.util.SentryAndroidSdkState.PERFORMANCE
+import io.sentry.android.gradle.util.debug
 import io.sentry.android.gradle.util.info
 import io.sentry.android.gradle.util.warn
 import java.io.File
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
@@ -45,6 +48,9 @@ abstract class SpanAddingClassVisitorFactory :
         @get:Input
         val debug: Property<Boolean>
 
+        @get:Input
+        val features: SetProperty<InstrumentationFeature>
+
         @get:PathSensitive(value = PathSensitivity.NONE)
         @get:InputFile
         val sdkStateFile: RegularFileProperty
@@ -60,6 +66,9 @@ abstract class SpanAddingClassVisitorFactory :
         get() {
             val memoized = parameters.get()._instrumentables
             if (memoized != null) {
+                SentryPlugin.logger.debug {
+                    "Memoized: ${memoized.joinToString { it::class.java.simpleName }}"
+                }
                 return memoized
             }
 
@@ -69,16 +78,37 @@ abstract class SpanAddingClassVisitorFactory :
             )
             SentryPlugin.logger.info { "Read sentry-android sdk state: $sdkState" }
             val instrumentables = listOfNotNull(
-                AndroidXSQLiteDatabase().takeIf { sdkState.isAtLeast(PERFORMANCE) },
-                AndroidXSQLiteStatement().takeIf { sdkState.isAtLeast(PERFORMANCE) },
-                AndroidXRoomDao().takeIf { sdkState.isAtLeast(PERFORMANCE) },
+                AndroidXSQLiteDatabase().takeIf {
+                    isDatabaseInstrEnabled(sdkState, parameters.get())
+                },
+                AndroidXSQLiteStatement().takeIf {
+                    isDatabaseInstrEnabled(sdkState, parameters.get())
+                },
+                AndroidXRoomDao().takeIf { isDatabaseInstrEnabled(sdkState, parameters.get()) },
                 ChainedInstrumentable(
                     listOf(WrappingInstrumentable(), RemappingInstrumentable())
-                ).takeIf { sdkState.isAtLeast(FILE_IO) }
+                ).takeIf { isFileIOInstrEnabled(sdkState, parameters.get()) }
             )
+            SentryPlugin.logger.debug {
+                "Instrumentables: ${instrumentables.joinToString { it::class.java.simpleName }}"
+            }
             parameters.get()._instrumentables = ArrayList(instrumentables)
             return instrumentables
         }
+
+    private fun isDatabaseInstrEnabled(
+        sdkState: SentryAndroidSdkState,
+        parameters: SpanAddingParameters
+    ): Boolean =
+        sdkState.isAtLeast(PERFORMANCE) &&
+            parameters.features.get().contains(InstrumentationFeature.DATABASE)
+
+    private fun isFileIOInstrEnabled(
+        sdkState: SentryAndroidSdkState,
+        parameters: SpanAddingParameters
+    ): Boolean =
+        sdkState.isAtLeast(FILE_IO) &&
+            parameters.features.get().contains(InstrumentationFeature.FILE_IO)
 
     override fun createClassVisitor(
         classContext: ClassContext,

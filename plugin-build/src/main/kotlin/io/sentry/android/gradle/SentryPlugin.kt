@@ -79,6 +79,9 @@ class SentryPlugin : Plugin<Project> {
                         params.debug.setDisallowChanges(
                             extension.tracingInstrumentation.debug.get()
                         )
+                        params.features.setDisallowChanges(
+                            extension.tracingInstrumentation.features.get()
+                        )
                         params.sdkStateFile.set(
                             project.file(
                                 File(project.buildDir, buildSdkStateFilePath(variant.name))
