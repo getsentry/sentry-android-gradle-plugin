@@ -92,7 +92,7 @@ class SentryAndroidSdkCheckerTest {
         assertTrue { state == SentryAndroidSdkState.MISSING }
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] Unable to detect sentry-android dependency"
+                "[sentry] sentry-android dependency was not found."
         }
     }
 
