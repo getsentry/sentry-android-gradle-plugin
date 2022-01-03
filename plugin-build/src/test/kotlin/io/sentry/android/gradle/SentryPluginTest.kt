@@ -276,11 +276,11 @@ class SentryPluginTest(
                   tracingInstrumentation {
                     enabled = $tracingInstrumentation
                     features = ${
-                        features.joinToString(
-                            prefix = "[",
-                            postfix = "]"
-                        ) { "${it::class.java.canonicalName}.${it.name}" }
-                    }
+                features.joinToString(
+                    prefix = "[",
+                    postfix = "]"
+                ) { "${it::class.java.canonicalName}.${it.name}" }
+            }
                   }
                 }
             """.trimIndent()
