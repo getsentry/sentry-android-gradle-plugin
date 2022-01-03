@@ -60,7 +60,6 @@ abstract class SpanAddingClassVisitorFactory :
         get() {
             val memoized = parameters.get()._instrumentables
             if (memoized != null) {
-                SentryPlugin.logger.info { "Memoized: ${memoized.joinToString()}" }
                 return memoized
             }
 
@@ -77,7 +76,6 @@ abstract class SpanAddingClassVisitorFactory :
                     listOf(WrappingInstrumentable(), RemappingInstrumentable())
                 ).takeIf { sdkState.isAtLeast(FILE_IO) }
             )
-            SentryPlugin.logger.info { "Instrumentables: ${instrumentables.joinToString()}" }
             parameters.get()._instrumentables = ArrayList(instrumentables)
             return instrumentables
         }
