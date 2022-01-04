@@ -201,6 +201,19 @@ class SentryPluginTest(
     }
 
     @Test
+    fun `applies only FILE_IO instrumentables when only FILE_IO feature enabled`() {
+        applyTracingInstrumentation(features = setOf(InstrumentationFeature.FILE_IO))
+
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--debug")
+            .build()
+
+        assertTrue {
+            "[sentry] Instrumentables: ChainedInstrumentable" in build.output
+        }
+    }
+
+    @Test
     fun `applies all instrumentables when all features enabled`() {
         applyTracingInstrumentation(
             features = setOf(InstrumentationFeature.DATABASE, InstrumentationFeature.FILE_IO)

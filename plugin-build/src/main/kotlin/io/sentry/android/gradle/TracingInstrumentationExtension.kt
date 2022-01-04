@@ -48,15 +48,16 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
 
 enum class InstrumentationFeature {
     /**
-     * Does bytecode manipulation for 'androidx.sqlite' and 'androidx.room' libraries.
-     * It starts and finishes a Span within any CRUD operation performed by sqlite or room.
+     * When enabled the SDK will create spans for any CRUD operation performed by 'androidx.sqlite'
+     * and 'androidx.room'. This feature uses bytecode manipulation.
      */
     DATABASE,
 
     /**
-     * Does bytecode manipulation, replacing [java.io.FileInputStream], [java.io.FileOutputStream],
+     * When enabled the SDK will replace [java.io.FileInputStream], [java.io.FileOutputStream],
      * [java.io.FileReader], [java.io.FileWriter] with Sentry-specific implementations of those.
      * It starts and finishes a Span within a File I/O operation performed in a target app.
+     * This feature uses bytecode manipulation.
      */
     FILE_IO
 }
