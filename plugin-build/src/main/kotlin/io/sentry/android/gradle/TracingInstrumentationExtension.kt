@@ -54,10 +54,10 @@ enum class InstrumentationFeature {
     DATABASE,
 
     /**
-     * When enabled the SDK will replace [java.io.FileInputStream], [java.io.FileOutputStream],
-     * [java.io.FileReader], [java.io.FileWriter] with Sentry-specific implementations of those.
-     * It starts and finishes a Span within a File I/O operation performed in a target app.
-     * This feature uses bytecode manipulation.
+     * When enabled the SDK will create spans for [java.io.FileInputStream],
+     * [java.io.FileOutputStream], [java.io.FileReader], [java.io.FileWriter].
+     * This feature uses bytecode manipulation and replaces the above
+     * mentioned classes with Sentry-specific implementations.
      */
     FILE_IO
 }
