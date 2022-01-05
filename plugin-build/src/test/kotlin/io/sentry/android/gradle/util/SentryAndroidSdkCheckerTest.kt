@@ -100,7 +100,7 @@ class SentryAndroidSdkCheckerTest {
     fun `sentry-android as a local dependency - logs a info and returns MISSING state`() {
         val sentryAndroidDep = mock<ResolvedDependency>()
         whenever(sentryAndroidDep.moduleGroup).doReturn("io.sentry")
-        whenever(sentryAndroidDep.moduleName).doReturn("sentry-android")
+        whenever(sentryAndroidDep.moduleName).doReturn("sentry-android-core")
         // this is the case when sentry-android is a local dependency
         whenever(sentryAndroidDep.moduleVersion).doReturn("unspecified")
 
@@ -119,7 +119,7 @@ class SentryAndroidSdkCheckerTest {
     fun `sentry-android performance version - logs a info and returns PERFORMANCE state`() {
         val sentryAndroidDep = mock<ResolvedDependency>()
         whenever(sentryAndroidDep.moduleGroup).doReturn("io.sentry")
-        whenever(sentryAndroidDep.moduleName).doReturn("sentry-android")
+        whenever(sentryAndroidDep.moduleName).doReturn("sentry-android-core")
         whenever(sentryAndroidDep.moduleVersion).doReturn("4.1.0")
 
         val state = fixture.getSut(testProjectDir.root, dependencies = setOf(sentryAndroidDep))
@@ -136,12 +136,12 @@ class SentryAndroidSdkCheckerTest {
     @Test
     fun `sentry-android transitive - logs a info and returns FILE_IO state`() {
         val firstLevelDep = mock<ResolvedDependency>()
-        whenever(firstLevelDep.moduleGroup).doReturn("dev.random")
-        whenever(firstLevelDep.moduleName).doReturn("random-module")
+        whenever(firstLevelDep.moduleGroup).doReturn("io.sentry")
+        whenever(firstLevelDep.moduleName).doReturn("sentry-android")
 
         val transitiveSentryDep = mock<ResolvedDependency>()
         whenever(transitiveSentryDep.moduleGroup).doReturn("io.sentry")
-        whenever(transitiveSentryDep.moduleName).doReturn("sentry-android")
+        whenever(transitiveSentryDep.moduleName).doReturn("sentry-android-core")
         whenever(transitiveSentryDep.moduleVersion).doReturn("5.5.0")
         whenever(firstLevelDep.children).thenReturn(setOf(transitiveSentryDep))
 

@@ -48,7 +48,7 @@ private fun Set<ResolvedDependency>.findSentryAndroidSdk(): String? {
     val queue = LinkedList(this)
     while (queue.isNotEmpty()) {
         val dep = queue.remove()
-        if (dep.moduleGroup == "io.sentry" && dep.moduleName == "sentry-android") {
+        if (dep.moduleGroup == "io.sentry" && dep.moduleName == "sentry-android-core") {
             return dep.moduleVersion
         }
         queue.addAll(dep.children)
