@@ -220,6 +220,11 @@ class SentryPlugin : Plugin<Project> {
                     project.logger.info { "uploadSentryNativeSymbols won't be executed" }
                 }
 
+                // dependency configuration can only be resolved after the configuration/evaluation
+                // phase is done. Ideally this would've been a task, but it was hard finding out
+                // which task we should depend on - seems like AGP starts its transforms without
+                // binding to a specific task.
+                // (and we need to know the SDK version before the transforms are executed)
                 project.afterEvaluate {
                     if (extension.tracingInstrumentation.enabled.get()) {
                         val sdkState = project.getSentryAndroidSdkState(
