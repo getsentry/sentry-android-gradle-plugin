@@ -3,6 +3,9 @@
 ## Unreleased
 
 * Introduce the `includeProguardMapping` option to exclude the proguard logic, and deprecate `autoUpload` in favor of `autoUploadProguardMapping` (#240)
+* Feature: New File I/O auto-instrumentation (#249)
+* Feature: Add compile-time check for sentry-android SDK presence (#243)
+* Feature: New configuration option `tracingInstrumentation.features` to allow enabling/disabling certain features for auto-instrumentation (#245)
 
 ## 3.0.0-beta.2
 
