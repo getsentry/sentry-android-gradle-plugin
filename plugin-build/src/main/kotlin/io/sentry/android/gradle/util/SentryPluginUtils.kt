@@ -12,7 +12,7 @@ internal object SentryPluginUtils {
         varName: String,
         initializer: () -> TaskProvider<Task>?
     ) = initializer().also {
-        logger.info("[sentry] $varName is ${it?.name}")
+        logger.info { "$varName is ${it?.name}" }
     }
 
     fun String.capitalizeUS() = if (isEmpty()) {
