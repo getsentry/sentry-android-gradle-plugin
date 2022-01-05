@@ -39,6 +39,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(Libs.AGP)
     testImplementation(Libs.JUNIT)
+    testImplementation(Libs.MOCKITO_KOTLIN)
 
     testImplementation(Libs.ASM)
 

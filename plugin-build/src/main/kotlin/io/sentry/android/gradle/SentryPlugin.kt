@@ -4,6 +4,7 @@ import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AppExtension
+import com.android.build.gradle.internal.cxx.json.writeJsonFile
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
@@ -21,6 +22,8 @@ import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
+import io.sentry.android.gradle.util.getSentryAndroidSdkState
+import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -31,8 +34,6 @@ import org.slf4j.LoggerFactory
 
 @Suppress("UnstableApiUsage")
 class SentryPlugin : Plugin<Project> {
-
-    private val sep = File.separator
 
     override fun apply(project: Project) {
         val extension = project.extensions.create(
@@ -78,6 +79,14 @@ class SentryPlugin : Plugin<Project> {
                         params.debug.setDisallowChanges(
                             extension.tracingInstrumentation.debug.get()
                         )
+                        params.features.setDisallowChanges(
+                            extension.tracingInstrumentation.features.get()
+                        )
+                        params.sdkStateFile.set(
+                            project.file(
+                                File(project.buildDir, buildSdkStateFilePath(variant.name))
+                            )
+                        )
                         params.tmpDir.set(tmpDir)
                     }
                     variant.setAsmFramesComputationMode(
@@ -113,9 +122,7 @@ class SentryPlugin : Plugin<Project> {
                         getPackageBundleTask(project, variant.name)
                     }
                 } else {
-                    project.logger.info(
-                        "[sentry] isMinifyEnabled is false for variant ${variant.name}."
-                    )
+                    project.logger.info { "isMinifyEnabled is false for variant ${variant.name}." }
                 }
 
                 val taskSuffix = variant.name.capitalizeUS()
@@ -210,7 +217,22 @@ class SentryPlugin : Plugin<Project> {
                     // if its a bundle aab, assemble might not be executed, so we hook into bundle task
                     bundleTask?.configure { it.finalizedBy(uploadSentryNativeSymbolsTask) }
                 } else {
-                    project.logger.info("[sentry] uploadSentryNativeSymbols won't be executed")
+                    project.logger.info { "uploadSentryNativeSymbols won't be executed" }
+                }
+
+                project.afterEvaluate {
+                    if (extension.tracingInstrumentation.enabled.get()) {
+                        val sdkState = project.getSentryAndroidSdkState(
+                            variant.runtimeConfiguration.name,
+                            variant.name
+                        )
+                        writeJsonFile(
+                            project.file(
+                                File(project.buildDir, buildSdkStateFilePath(variant.name))
+                            ),
+                            sdkState
+                        )
+                    }
                 }
             }
         }
@@ -230,6 +252,10 @@ class SentryPlugin : Plugin<Project> {
     companion object {
         const val SENTRY_ORG_PARAMETER = "sentryOrg"
         const val SENTRY_PROJECT_PARAMETER = "sentryProject"
+
+        internal val sep = File.separator
+        internal fun buildSdkStateFilePath(variantName: String) =
+            "intermediates${sep}sentry${sep}sdk-state-$variantName.json"
 
         // a single unified logger used by instrumentation
         internal val logger by lazy {

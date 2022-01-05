@@ -2,11 +2,8 @@ package io.sentry.android.gradle
 
 import java.io.File
 import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
@@ -15,84 +12,23 @@ import org.junit.runners.Parameterized
 @Suppress("FunctionName")
 @RunWith(Parameterized::class)
 class SentryPluginVariantTest(
-    private val androidGradlePluginVersion: String,
-    private val gradleVersion: String
-) {
-    @get:Rule
-    val testProjectDir = TemporaryFolder()
+    androidGradlePluginVersion: String,
+    gradleVersion: String
+) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
 
-    private val projectTemplateFolder = File("src/test/resources/testFixtures/appTestProject")
-
-    private lateinit var rootBuildFile: File
-    private lateinit var appBuildFile: File
-    private lateinit var runner: GradleRunner
-
-    @Before
-    fun setup() {
-        projectTemplateFolder.copyRecursively(testProjectDir.root)
-
-        val pluginClasspath = PluginUnderTestMetadataReading.readImplementationClasspath()
-            .joinToString(separator = ", ") { "\"$it\"" }
-            .replace(File.separator, "/")
-
-        appBuildFile = File(testProjectDir.root, "app/build.gradle")
-        rootBuildFile = testProjectDir.writeFile("build.gradle") {
-            // language=Groovy
-            """
-            buildscript {
-              repositories {
-                google()
-                gradlePluginPortal()
-              }
-              dependencies {
-                classpath 'com.android.tools.build:gradle:$androidGradlePluginVersion'
-                // This is needed to populate the plugin classpath instead of using
-                // withPluginClasspath on the Gradle Runner.
-                classpath files($pluginClasspath)
-              }
+    override val additionalRootProjectConfig: String =
+        // language=Groovy
+        """
+          flavorDimensions "version"
+          productFlavors {
+            create("demo") {
+                applicationIdSuffix = ".demo"
             }
-
-            allprojects {
-              repositories {
-                google()
-                mavenCentral()
-              }
+            create("full") {
+                applicationIdSuffix = ".full"
             }
-            subprojects {
-              pluginManager.withPlugin('com.android.application') {
-                android {
-                  compileSdkVersion 30
-                  defaultConfig {
-                    applicationId "com.example"
-                    minSdkVersion 21
-                  }
-                  buildTypes {
-                    release {
-                      minifyEnabled true
-                      proguardFiles("src/release/proguard-rules.pro")
-                    }
-                  }
-                  flavorDimensions "version"
-                  productFlavors {
-                    create("demo") {
-                        applicationIdSuffix = ".demo"
-                    }
-                    create("full") {
-                        applicationIdSuffix = ".full"
-                    }
-                  }
-                }
-              }
-            }
-            """.trimIndent()
-        }
-
-        runner = GradleRunner.create()
-            .withProjectDir(testProjectDir.root)
-            .withArguments("--stacktrace")
-            .withPluginClasspath()
-            .withGradleVersion(gradleVersion)
-    }
+          }
+        """.trimIndent()
 
     @Test
     fun `skips variant if set with ignoredVariants`() {
