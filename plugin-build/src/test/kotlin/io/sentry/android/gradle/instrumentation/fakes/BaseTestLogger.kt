@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.instrumentation.fakes
 
-import org.slf4j.Logger
+import org.gradle.api.logging.LogLevel
+import org.gradle.api.logging.Logger
 import org.slf4j.Marker
 
 abstract class BaseTestLogger : Logger {
@@ -124,4 +125,28 @@ abstract class BaseTestLogger : Logger {
     override fun error(marker: Marker, msg: String, vararg args: Any) = Unit
 
     override fun error(marker: Marker, msg: String, throwable: Throwable?) = Unit
+
+    override fun isLifecycleEnabled(): Boolean = true
+
+    override fun lifecycle(message: String?) = Unit
+
+    override fun lifecycle(message: String?, vararg objects: Any?) = Unit
+
+    override fun lifecycle(message: String?, throwable: Throwable?) = Unit
+
+    override fun isQuietEnabled(): Boolean = true
+
+    override fun quiet(message: String?) = Unit
+
+    override fun quiet(message: String?, vararg objects: Any?) = Unit
+
+    override fun quiet(message: String?, throwable: Throwable?) = Unit
+
+    override fun isEnabled(level: LogLevel?): Boolean = true
+
+    override fun log(level: LogLevel?, message: String?) = Unit
+
+    override fun log(level: LogLevel?, message: String?, vararg objects: Any?) = Unit
+
+    override fun log(level: LogLevel?, message: String?, throwable: Throwable?) = Unit
 }

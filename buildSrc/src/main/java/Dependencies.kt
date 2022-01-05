@@ -13,7 +13,7 @@ object LibsVersion {
     const val JUNIT = "4.13.2"
     const val ASM = "9.2"
     const val SQLITE = "2.1.0"
-    const val SENTRY = "5.1.2"
+    const val SENTRY = "5.5.0"
 }
 
 object Libs {
@@ -26,6 +26,9 @@ object Libs {
     const val SQLITE = "androidx.sqlite:sqlite:${LibsVersion.SQLITE}"
     const val SQLITE_FRAMEWORK = "androidx.sqlite:sqlite-framework:${LibsVersion.SQLITE}"
     const val SENTRY_ANDROID = "io.sentry:sentry-android:${LibsVersion.SENTRY}"
+
+    // test
+    val MOCKITO_KOTLIN = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
 }
 
 object CI {
