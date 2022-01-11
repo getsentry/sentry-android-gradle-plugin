@@ -7,15 +7,20 @@ import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.instrumentation.MethodContext
 import io.sentry.android.gradle.instrumentation.wrap.Replacement
 import io.sentry.android.gradle.util.info
+import java.util.LinkedList
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.commons.GeneratorAdapter
 import org.objectweb.asm.commons.Method
+import org.objectweb.asm.tree.InsnNode
+import org.objectweb.asm.tree.MethodNode
+import org.objectweb.asm.tree.TypeInsnNode
 import org.slf4j.Logger
 
 class WrappingVisitor(
     api: Int,
     originalVisitor: MethodVisitor,
+    private val firstPassVisitor: MethodNode,
     private val classContext: ClassData,
     private val context: MethodContext,
     private val replacements: Map<Replacement, Replacement>,
@@ -28,7 +33,33 @@ class WrappingVisitor(
     context.descriptor
 ) {
 
+    private val targetTypes = replacements.keys
+        .toSet()
+        .map { it.owner }
+
+    private val newInsnsForTargets by lazy {
+        // filter all NEW insns for the target types that we are going to wrap
+        val insns = firstPassVisitor.instructions
+            .toArray()
+            .filter { it is TypeInsnNode && it.opcode == Opcodes.NEW && it.desc in targetTypes }
+        LinkedList(insns)
+    }
     private val className = classContext.className.replace('.', '/')
+
+    private var newWithoutDupInsn = false
+
+    override fun visitTypeInsn(opcode: Int, type: String?) {
+        super.visitTypeInsn(opcode, type)
+        if (opcode == Opcodes.NEW && type in targetTypes) {
+            val nextInsn = newInsnsForTargets.poll()?.next
+            // in case the next insn after NEW is not a DUP, we inject our own DUP and flip a flag
+            // to later store our wrapping instance with the same index as the original instance
+            if (nextInsn != null && (nextInsn as? InsnNode)?.opcode != Opcodes.DUP) {
+                dup()
+                newWithoutDupInsn = true
+            }
+        }
+    }
 
     override fun visitMethodInsn(
         opcode: Int,
@@ -106,6 +137,7 @@ class WrappingVisitor(
         descriptor: String,
         isInterface: Boolean
     ) {
+        val currentLocal = nextLocal - 1
         // create a new method to figure out the number of arguments
         val originalMethod = Method(name, descriptor)
 
@@ -136,5 +168,9 @@ class WrappingVisitor(
             replacement.descriptor,
             false
         )
+        if (newWithoutDupInsn && currentLocal > 0) { // 0 is reserved for "this"
+            storeLocal(currentLocal)
+            newWithoutDupInsn = false
+        }
     }
 }
