@@ -306,7 +306,10 @@ class WrappingVisitorTest {
         }
 
         fixture.getSut(
-            replacements = mapOf(Replacement.FileInputStream.STRING),
+            replacements = mapOf(
+                Replacement.FileInputStream.STRING,
+                Replacement.FileOutputStream.STRING
+            ),
             firstPassVisitor = firstPassVisitor
         ).run {
             visitTypeInsn(Opcodes.NEW, "java/io/FileInputStream")
