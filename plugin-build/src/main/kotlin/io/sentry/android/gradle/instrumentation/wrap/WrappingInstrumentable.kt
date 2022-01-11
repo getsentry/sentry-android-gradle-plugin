@@ -9,10 +9,12 @@ import io.sentry.android.gradle.instrumentation.CommonClassVisitor
 import io.sentry.android.gradle.instrumentation.MethodContext
 import io.sentry.android.gradle.instrumentation.MethodInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
+import io.sentry.android.gradle.instrumentation.util.AnalyzingVisitor
 import io.sentry.android.gradle.instrumentation.util.isSentryClass
 import io.sentry.android.gradle.instrumentation.wrap.visitor.WrappingVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
+import org.objectweb.asm.tree.MethodNode
 
 class WrappingInstrumentable : ClassInstrumentable {
 
@@ -24,19 +26,31 @@ class WrappingInstrumentable : ClassInstrumentable {
     ): ClassVisitor {
         val simpleClassName =
             instrumentableContext.currentClassData.className.substringAfterLast('.')
-        return CommonClassVisitor(
+        return AnalyzingVisitor(
             apiVersion = apiVersion,
-            classVisitor = originalVisitor,
-            className = simpleClassName,
-            methodInstrumentables = listOf(Wrap(instrumentableContext.currentClassData)),
-            parameters = parameters
+            nextVisitor = { methods ->
+                CommonClassVisitor(
+                    apiVersion = apiVersion,
+                    classVisitor = originalVisitor,
+                    className = simpleClassName,
+                    methodInstrumentables = methods.map {
+                        Wrap(instrumentableContext.currentClassData, it)
+                    },
+                    parameters = parameters
+                )
+            }
         )
     }
 
     override fun isInstrumentable(data: ClassContext): Boolean = !data.isSentryClass()
 }
 
-class Wrap(private val classContext: ClassData) : MethodInstrumentable {
+class Wrap(
+    private val classContext: ClassData,
+    private val methodNode: MethodNode
+) : MethodInstrumentable {
+
+    override val fqName: String = methodNode.name
 
     companion object {
         private val replacements = mapOf(
@@ -67,10 +81,14 @@ class Wrap(private val classContext: ClassData) : MethodInstrumentable {
         WrappingVisitor(
             api = apiVersion,
             originalVisitor = originalVisitor,
+            firstPassVisitor = methodNode,
             classContext = classContext,
             context = instrumentableContext,
             replacements = replacements
         )
 
-    override fun isInstrumentable(data: MethodContext): Boolean = true
+    override fun isInstrumentable(data: MethodContext): Boolean =
+        data.name == fqName &&
+            data.descriptor == methodNode.desc &&
+            data.access == methodNode.access
 }

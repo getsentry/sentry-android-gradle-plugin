@@ -125,6 +125,12 @@ class VisitorTest(
                 "Test",
                 ChainedInstrumentable(listOf(WrappingInstrumentable(), RemappingInstrumentable())),
                 null
+            ),
+            arrayOf(
+                "fileIO",
+                "zzhm",
+                ChainedInstrumentable(listOf(WrappingInstrumentable(), RemappingInstrumentable())),
+                null
             )
         )
 

@@ -6,9 +6,12 @@ import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import io.sentry.android.gradle.instrumentation.fakes.TestClassData
 import io.sentry.android.gradle.instrumentation.wrap.Replacement
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.junit.Test
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.Type
+import org.objectweb.asm.tree.MethodNode
 
 class WrappingVisitorTest {
 
@@ -17,12 +20,20 @@ class WrappingVisitorTest {
         val visitor = CapturingMethodVisitor()
 
         fun getSut(
-            methodContext: MethodContext,
+            methodContext: MethodContext = MethodContext(
+                Opcodes.ACC_PUBLIC,
+                "test",
+                "()V",
+                null,
+                null
+            ),
             classContext: ClassData = TestClassData("io/sentry/RandomClass"),
-            replacements: Map<Replacement, Replacement> = mapOf()
+            replacements: Map<Replacement, Replacement> = mapOf(),
+            firstPassVisitor: MethodNode = MethodNode(Opcodes.ASM9)
         ) = WrappingVisitor(
             Opcodes.ASM9,
             visitor,
+            firstPassVisitor,
             classContext,
             methodContext,
             replacements,
@@ -163,13 +174,6 @@ class WrappingVisitorTest {
 
     @Test
     fun `when replacement found modifies method visit`() {
-        val context = MethodContext(
-            Opcodes.ACC_PUBLIC,
-            "test",
-            "()V",
-            null,
-            null
-        )
         val methodVisit = MethodVisit(
             opcode = Opcodes.INVOKESPECIAL,
             owner = "java/io/FileInputStream",
@@ -178,7 +182,7 @@ class WrappingVisitorTest {
             isInterface = false
         )
         /* ktlint-disable experimental:argument-list-wrapping */
-        fixture.getSut(context, replacements = mapOf(Replacement.FileInputStream.STRING))
+        fixture.getSut(replacements = mapOf(Replacement.FileInputStream.STRING))
             .visitMethodInsn(
                 methodVisit.opcode,
                 methodVisit.owner,
@@ -211,6 +215,109 @@ class WrappingVisitorTest {
             )
         )
     }
+
+    @Test
+    fun `when NEW insn with DUP does not modify operand stack`() {
+        val methodVisit = MethodVisit(
+            opcode = Opcodes.INVOKESPECIAL,
+            owner = "java/io/FileInputStream",
+            name = "<init>",
+            descriptor = "(Ljava/lang/String;)V",
+            isInterface = false
+        )
+        val firstPassVisitor = MethodNode(Opcodes.ASM9).apply {
+            visitTypeInsn(Opcodes.NEW, "java/io/FileInputStream")
+            visitInsn(Opcodes.DUP)
+        }
+
+        fixture.getSut(
+            replacements = mapOf(Replacement.FileInputStream.STRING),
+            firstPassVisitor = firstPassVisitor
+        ).run {
+            visitTypeInsn(Opcodes.NEW, "java/io/FileInputStream")
+            visitMethodInsn(
+                methodVisit.opcode,
+                methodVisit.owner,
+                methodVisit.name,
+                methodVisit.descriptor,
+                methodVisit.isInterface
+            )
+        }
+
+        // DUP was not visited by our visitor
+        assertEquals(fixture.visitor.insnVisits.size, 0)
+        // ASTORE was not visited by our visitor in the end (count would be 4 otherwise)
+        assertEquals(fixture.visitor.varVisits.size, 3)
+    }
+
+    @Test
+    fun `when NEW insn without DUP - modifies operand stack with DUP and ASTORE`() {
+        val methodVisit = MethodVisit(
+            opcode = Opcodes.INVOKESPECIAL,
+            owner = "java/io/FileInputStream",
+            name = "<init>",
+            descriptor = "(Ljava/lang/String;)V",
+            isInterface = false
+        )
+        val firstPassVisitor = MethodNode(Opcodes.ASM9).apply {
+            visitTypeInsn(Opcodes.NEW, "java/io/FileInputStream")
+            visitVarInsn(Opcodes.ASTORE, 1)
+        }
+
+        fixture.getSut(
+            replacements = mapOf(Replacement.FileInputStream.STRING),
+            firstPassVisitor = firstPassVisitor
+        ).run {
+            visitTypeInsn(Opcodes.NEW, "java/io/FileInputStream")
+            val local = newLocal(Type.getObjectType("java/io/FileInputStream"))
+            storeLocal(local)
+            visitMethodInsn(
+                methodVisit.opcode,
+                methodVisit.owner,
+                methodVisit.name,
+                methodVisit.descriptor,
+                methodVisit.isInterface
+            )
+        }
+
+        // DUP was visited by our visitor
+        assertTrue {
+            fixture.visitor.insnVisits.size == 1 &&
+                fixture.visitor.insnVisits.first() == InsnVisit(Opcodes.DUP)
+        }
+        // ASTORE was visited by our visitor in the end
+        assertTrue {
+            fixture.visitor.varVisits.size == 5 &&
+                fixture.visitor.varVisits.last() == VarVisit(Opcodes.ASTORE, 1)
+        }
+    }
+
+    @Test
+    fun `multiple NEW insns`() {
+        val firstPassVisitor = MethodNode(Opcodes.ASM9).apply {
+            visitTypeInsn(Opcodes.NEW, "java/io/FileInputStream")
+            visitVarInsn(Opcodes.ASTORE, 1)
+
+            visitTypeInsn(Opcodes.NEW, "some/random/Class")
+            visitInsn(Opcodes.DUP)
+
+            visitTypeInsn(Opcodes.NEW, "java/io/FileOutputStream")
+            visitInsn(Opcodes.DUP)
+        }
+
+        fixture.getSut(
+            replacements = mapOf(Replacement.FileInputStream.STRING),
+            firstPassVisitor = firstPassVisitor
+        ).run {
+            visitTypeInsn(Opcodes.NEW, "java/io/FileInputStream")
+            visitTypeInsn(Opcodes.NEW, "some/random/Class")
+            visitTypeInsn(Opcodes.NEW, "java/io/FileOutputStream")
+        }
+        assertTrue {
+            fixture.visitor.insnVisits.size == 1 &&
+                fixture.visitor.insnVisits.first() == InsnVisit(Opcodes.DUP)
+        }
+    }
 }
 
 data class MethodVisit(
@@ -226,14 +333,24 @@ data class VarVisit(
     val variable: Int
 )
 
+data class InsnVisit(
+    val opcode: Int
+)
+
 class CapturingMethodVisitor : MethodVisitor(Opcodes.ASM9) {
 
     val methodVisits = mutableListOf<MethodVisit>()
     val varVisits = mutableListOf<VarVisit>()
+    val insnVisits = mutableListOf<InsnVisit>()
 
     override fun visitVarInsn(opcode: Int, variable: Int) {
         super.visitVarInsn(opcode, variable)
         varVisits += VarVisit(opcode, variable)
+    }
+
+    override fun visitInsn(opcode: Int) {
+        super.visitInsn(opcode)
+        insnVisits += InsnVisit(opcode)
     }
 
     override fun visitMethodInsn(

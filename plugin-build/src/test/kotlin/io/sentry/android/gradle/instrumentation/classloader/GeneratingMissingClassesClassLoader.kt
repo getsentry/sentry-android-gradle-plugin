@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.instrumentation.classloader
 
 import io.sentry.android.gradle.instrumentation.classloader.mapping.deletionDaoMissingClasses
+import io.sentry.android.gradle.instrumentation.classloader.mapping.gmsMapping
 import io.sentry.android.gradle.instrumentation.classloader.mapping.insertionDaoMissingClasses
 import io.sentry.android.gradle.instrumentation.classloader.mapping.selectDaoMissingClasses
 import io.sentry.android.gradle.instrumentation.classloader.mapping.sqliteCopyOpenHelperMissingClasses
@@ -14,7 +15,8 @@ class GeneratingMissingClassesClassLoader : ClassLoader(getSystemClassLoader()) 
             *insertionDaoMissingClasses,
             *updateDaoMissingClasses,
             *selectDaoMissingClasses,
-            *sqliteCopyOpenHelperMissingClasses
+            *sqliteCopyOpenHelperMissingClasses,
+            *gmsMapping
         )
     }
 
