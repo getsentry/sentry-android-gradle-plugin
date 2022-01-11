@@ -38,6 +38,7 @@ class WrappingVisitor(
         .map { it.owner }
 
     private val newInsnsForTargets by lazy {
+        // filter all NEW insns for the target types that we are going to wrap
         val insns = firstPassVisitor.instructions
             .toArray()
             .filter { it is TypeInsnNode && it.opcode == Opcodes.NEW && it.desc in targetTypes }
@@ -51,6 +52,8 @@ class WrappingVisitor(
         super.visitTypeInsn(opcode, type)
         if (opcode == Opcodes.NEW && type in targetTypes) {
             val nextInsn = newInsnsForTargets.poll()?.next
+            // in case the next insn after NEW is not a DUP, we inject our own DUP and flip a flag
+            // to later store our wrapping instance with the same index as the original instance
             if (nextInsn != null && (nextInsn as? InsnNode)?.opcode != Opcodes.DUP) {
                 dup()
                 newWithoutDupInsn = true
@@ -166,8 +169,6 @@ class WrappingVisitor(
             false
         )
         if (newWithoutDupInsn && currentLocal > 0) { // 0 is reserved for "this"
-            // in case there's a NEW insn without DUP, we need to store our Sentry replacing
-            // class with the same index as was the original class, e.g.
             storeLocal(currentLocal)
             newWithoutDupInsn = false
         }
