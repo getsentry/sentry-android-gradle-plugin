@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 3.0.0-beta.3
 
 * Introduce the `includeProguardMapping` option to exclude the proguard logic, and deprecate `autoUpload` in favor of `autoUploadProguardMapping` (#240)
