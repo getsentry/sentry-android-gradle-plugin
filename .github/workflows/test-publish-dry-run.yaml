@@ -45,7 +45,7 @@ jobs:
           java-version: ${{ matrix.java }}
 
       - name: Build the Release variant
-        uses: gradle/gradle-build-action@v2.1
+        uses: gradle/gradle-build-action@v2
         with:
           gradle-version: ${{ matrix.gradle }}
           arguments: assembleRelease
@@ -60,7 +60,7 @@ jobs:
           rm -r output
 
       - name: Build the Release Bundle variant
-        uses: gradle/gradle-build-action@v2.1
+        uses: gradle/gradle-build-action@v2
         with:
           gradle-version: ${{ matrix.gradle }}
           arguments: bundleRelease
