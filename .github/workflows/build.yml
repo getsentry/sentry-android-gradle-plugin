@@ -12,7 +12,6 @@ jobs:
     name: Build and upload distribution artifact
     runs-on: ubuntu-latest
     steps:
-
       - name: Checkout current commit (${{ github.sha }})
         uses: actions/checkout@v2
 
