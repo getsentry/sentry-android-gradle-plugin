@@ -1,0 +1,32 @@
+#!/bin/bash
+set -eux
+
+if ! command -v gradle-profiler &> /dev/null
+then
+    echo "Make sure to install gradle-profiler - brew install gradle-profiler"
+    exit
+fi
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $SCRIPT_DIR
+
+git clone git@github.com:duckduckgo/Android.git
+
+cd Android
+git submodule update --init --recursive
+cd ..
+
+gradle-profiler --benchmark \
+ --project-dir Android \
+ --scenario-file duckduckgo/duckduckgo.scenarios \
+ --output-dir results/pre-sentry/
+
+git apply duckduckgo/add-sentry-to-duckduckgo.patch
+
+gradle-profiler --benchmark \
+ --project-dir Android \
+ --scenario-file duckduckgo/duckduckgo.scenarios \
+ --output-dir results/post-sentry/
+
+rm -rf Android
+rm -rf gradle-user-home

@@ -1,0 +1,66 @@
+diff --git a/build.gradle b/build.gradle
+index 3dcf39810f..be03ac46f0 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -14,10 +14,10 @@ buildscript {
+         mavenCentral()
+     }
+     dependencies {
+-        classpath 'com.android.tools.build:gradle:4.1.3'
++        classpath 'com.android.tools.build:gradle:7.0.2'
+         classpath "com.diffplug.spotless:spotless-plugin-gradle:$spotless"
+         classpath "com.squareup.anvil:gradle-plugin:$anvil_version"
+-
++        classpath "io.sentry:sentry-android-gradle-plugin:3.0.0-beta.3"
+         // NOTE: Do not place your application dependencies here; they belong
+         // in the individual module build.gradle files
+     }
+@@ -28,6 +28,25 @@ allprojects {
+         google()
+         mavenCentral()
+     }
++
++}
++
++subprojects {
++     apply plugin: 'io.sentry.android.gradle'
++
++     sentry {
++         autoUpload false
++
++         tracingInstrumentation {
++             enabled = true
++         }
++     }
++
++    plugins.withId('com.android.application') {
++        dependencies {
++            implementation 'io.sentry:sentry-android:5.5.2'
++        }
++    }
+ }
+
+ task clean(type: Delete) {
+diff --git a/gradle.properties b/gradle.properties
+index 40b247a695..43863ad18d 100644
+--- a/gradle.properties
++++ b/gradle.properties
+@@ -10,7 +10,7 @@
+ # Specifies the JVM arguments used for the daemon process.
+ # The setting is particularly useful for tweaking memory settings.
+ android.useAndroidX=true
+-android.nonTransitiveRClass=true
++android.nonTransitiveRClass=false
+ org.gradle.jvmargs=-Xmx1536m -XX:+UseParallelGC
+ org.gradle.caching=true
+
+diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+index 5ab9418f38..35022c8531 100644
+--- a/gradle/wrapper/gradle-wrapper.properties
++++ b/gradle/wrapper/gradle-wrapper.properties
+@@ -3,4 +3,4 @@ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+ zipStoreBase=GRADLE_USER_HOME
+ zipStorePath=wrapper/dists
+-distributionUrl=https\://services.gradle.org/distributions/gradle-6.5-bin.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-7.0.2-bin.zip
