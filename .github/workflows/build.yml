@@ -12,18 +12,11 @@ jobs:
     name: Build and upload distribution artifact
     runs-on: ubuntu-latest
     steps:
-
       - name: Checkout current commit (${{ github.sha }})
         uses: actions/checkout@v2
-      - name: Cache Gradle Files
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches/
-            ~/.gradle/wrapper/
-          key: cache-gradle-${{ matrix.os }}
-          restore-keys: |
-            cache-gradle-
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
 
       - name: Set up Java
         uses: actions/setup-java@v2
