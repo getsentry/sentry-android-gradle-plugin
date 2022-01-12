@@ -19,15 +19,8 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v2
 
-      - name: Cache Gradle Files
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches/
-            ~/.gradle/wrapper/
-          key: cache-gradle-${{ matrix.os }}
-          restore-keys: |
-            cache-gradle-
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2.1
 
       - name: Build the Release variant
         run: ./gradlew assembleRelease | tee gradle.log

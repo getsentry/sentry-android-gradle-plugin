@@ -15,15 +15,9 @@ jobs:
 
       - name: Checkout current commit (${{ github.sha }})
         uses: actions/checkout@v2
-      - name: Cache Gradle Files
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches/
-            ~/.gradle/wrapper/
-          key: cache-gradle-${{ matrix.os }}
-          restore-keys: |
-            cache-gradle-
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2.1
 
       - name: Set up Java
         uses: actions/setup-java@v2
