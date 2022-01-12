@@ -23,11 +23,11 @@ jobs:
           - agp: "7.0.3"
             gradle: "7.2"
             java: "11"
-          - agp: "7.1.0-beta02"
+          - agp: "7.1.0-rc01"
             gradle: "7.2"
             java: "11"
-          - agp: "7.2.0-alpha03"
-            gradle: "7.3-rc-5"
+          - agp: "7.2.0-alpha07"
+            gradle: "7.3.1"
             java: "11"
 
     name: Publish Dry Run - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
