@@ -1,19 +1,23 @@
 package io.sentry.android.gradle.instrumentation.androidx.room.visitor
 
+import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.instrumentation.androidx.room.RoomMethodType
+import io.sentry.android.gradle.util.warn
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
-import org.slf4j.LoggerFactory
+import org.slf4j.Logger
+
+typealias NextVisitorInitializer = (List<Pair<MethodNode, RoomMethodType>>) -> ClassVisitor
 
 class InstrumentableMethodsCollectingVisitor(
     private val apiVersion: Int,
-    private val nextVisitorInitializer: (List<Pair<MethodNode, RoomMethodType>>) -> ClassVisitor
+    private val nextVisitorInitializer: NextVisitorInitializer,
+    private val logger: Logger = SentryPlugin.logger
 ) : ClassNode(apiVersion) {
 
     private val methodsToInstrument = mutableMapOf<MethodNode, RoomMethodType>()
-    private val logger by lazy { LoggerFactory.getLogger(this::class.java) }
 
     override fun visitMethod(
         access: Int,
@@ -64,9 +68,9 @@ class InstrumentableMethodsCollectingVisitor(
                             prevType == RoomMethodType.QUERY_WITH_TRANSACTION ->
                                 RoomMethodType.QUERY_WITH_TRANSACTION
                             else -> {
-                                logger.warn(
-                                    "Unable to identify RoomMethodType, skipping $name from instrumentation"
-                                )
+                                logger.warn {
+                                    "Unable to identify RoomMethodType, skipping ${methodNode.name} from instrumentation"
+                                }
                                 null
                             }
                         }

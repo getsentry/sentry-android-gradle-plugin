@@ -2,11 +2,8 @@ package io.sentry.android.gradle
 
 import java.io.File
 import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
@@ -15,88 +12,27 @@ import org.junit.runners.Parameterized
 @Suppress("FunctionName")
 @RunWith(Parameterized::class)
 class SentryPluginVariantTest(
-    private val androidGradlePluginVersion: String,
-    private val gradleVersion: String
-) {
-    @get:Rule
-    val testProjectDir = TemporaryFolder()
+    androidGradlePluginVersion: String,
+    gradleVersion: String
+) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
 
-    private val projectTemplateFolder = File("src/test/resources/testFixtures/appTestProject")
-
-    private lateinit var rootBuildFile: File
-    private lateinit var appBuildFile: File
-    private lateinit var runner: GradleRunner
-
-    @Before
-    fun setup() {
-        projectTemplateFolder.copyRecursively(testProjectDir.root)
-
-        val pluginClasspath = PluginUnderTestMetadataReading.readImplementationClasspath()
-            .joinToString(separator = ", ") { "\"$it\"" }
-            .replace(File.separator, "/")
-
-        appBuildFile = File(testProjectDir.root, "app/build.gradle")
-        rootBuildFile = testProjectDir.writeFile("build.gradle") {
-            // language=Groovy
-            """
-            buildscript {
-              repositories {
-                google()
-                gradlePluginPortal()
-              }
-              dependencies {
-                classpath 'com.android.tools.build:gradle:$androidGradlePluginVersion'
-                // This is needed to populate the plugin classpath instead of using
-                // withPluginClasspath on the Gradle Runner.
-                classpath files($pluginClasspath)
-              }
+    override val additionalRootProjectConfig: String =
+        // language=Groovy
+        """
+          flavorDimensions "version"
+          productFlavors {
+            create("demo") {
+                applicationIdSuffix = ".demo"
             }
-
-            allprojects {
-              repositories {
-                google()
-                mavenCentral()
-              }
+            create("full") {
+                applicationIdSuffix = ".full"
             }
-            subprojects {
-              pluginManager.withPlugin('com.android.application') {
-                android {
-                  compileSdkVersion 30
-                  defaultConfig {
-                    applicationId "com.example"
-                    minSdkVersion 21
-                  }
-                  buildTypes {
-                    release {
-                      minifyEnabled true
-                      proguardFiles("src/release/proguard-rules.pro")
-                    }
-                  }
-                  flavorDimensions "version"
-                  productFlavors {
-                    create("demo") {
-                        applicationIdSuffix = ".demo"
-                    }
-                    create("full") {
-                        applicationIdSuffix = ".full"
-                    }
-                  }
-                }
-              }
-            }
-            """.trimIndent()
-        }
-
-        runner = GradleRunner.create()
-            .withProjectDir(testProjectDir.root)
-            .withArguments("--stacktrace")
-            .withPluginClasspath()
-            .withGradleVersion(gradleVersion)
-    }
+          }
+        """.trimIndent()
 
     @Test
     fun `skips variant if set with ignoredVariants`() {
-        applyIgnores(ignoredVariants = listOf("fullRelease"))
+        applyIgnores(ignoredVariants = setOf("fullRelease"))
 
         val build = runner
             .appendArguments(":app:assembleFullRelease", "--dry-run")
@@ -107,7 +43,7 @@ class SentryPluginVariantTest(
 
     @Test
     fun `does not skip variant if not included in ignoredVariants`() {
-        applyIgnores(ignoredVariants = listOf("demoRelease", "fullDebug", "demoDebug"))
+        applyIgnores(ignoredVariants = setOf("demoRelease", "fullDebug", "demoDebug"))
 
         val build = runner
             .appendArguments(":app:assembleFullRelease", "--dry-run")
@@ -118,7 +54,7 @@ class SentryPluginVariantTest(
 
     @Test
     fun `skips buildType if set with ignoredBuildTypes`() {
-        applyIgnores(ignoredBuildTypes = listOf("debug"))
+        applyIgnores(ignoredBuildTypes = setOf("debug"))
 
         val build = runner
             .appendArguments(":app:assembleFullDebug", "--dry-run")
@@ -130,7 +66,7 @@ class SentryPluginVariantTest(
 
     @Test
     fun `does not skip buildType if not included in ignoredBuildTypes`() {
-        applyIgnores(ignoredBuildTypes = listOf("debug"))
+        applyIgnores(ignoredBuildTypes = setOf("debug"))
 
         val build = runner
             .appendArguments(":app:assembleFullRelease", "--dry-run")
@@ -141,7 +77,7 @@ class SentryPluginVariantTest(
 
     @Test
     fun `skips flavor if set with ignoredFlavors`() {
-        applyIgnores(ignoredFlavors = listOf("full"))
+        applyIgnores(ignoredFlavors = setOf("full"))
 
         var build = runner
             .appendArguments(":app:assembleFullDebug", "--dry-run")
@@ -158,7 +94,7 @@ class SentryPluginVariantTest(
 
     @Test
     fun `does not skip flavor if not included in ignoredFlavors`() {
-        applyIgnores(ignoredFlavors = listOf("full"))
+        applyIgnores(ignoredFlavors = setOf("full"))
 
         val build = runner
             .appendArguments(":app:assembleDemoRelease", "--dry-run")
@@ -168,9 +104,9 @@ class SentryPluginVariantTest(
     }
 
     private fun applyIgnores(
-        ignoredVariants: List<String> = listOf(),
-        ignoredBuildTypes: List<String> = listOf(),
-        ignoredFlavors: List<String> = listOf()
+        ignoredVariants: Set<String> = setOf(),
+        ignoredBuildTypes: Set<String> = setOf(),
+        ignoredFlavors: Set<String> = setOf()
     ) {
         val variants = ignoredVariants.joinToString(",") { "\"$it\"" }
         val buildTypes = ignoredBuildTypes.joinToString(",") { "\"$it\"" }
@@ -184,7 +120,7 @@ class SentryPluginVariantTest(
                 }
 
                 sentry {
-                  autoUpload = false
+                  autoUploadProguardMapping = false
                   ignoredVariants = [$variants]
                   ignoredBuildTypes = [$buildTypes]
                   ignoredFlavors = [$flavors]

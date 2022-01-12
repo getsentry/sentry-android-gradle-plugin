@@ -26,13 +26,8 @@ class AndroidXSQLiteStatement : ClassInstrumentable {
         apiVersion = apiVersion,
         classVisitor = originalVisitor,
         className = fqName.substringAfterLast('.'),
-        methodInstrumentables = children,
+        methodInstrumentables = listOf(ExecuteInsert(), ExecuteUpdateDelete()),
         parameters = parameters
-    )
-
-    override val children: List<MethodInstrumentable> = listOf(
-        ExecuteInsert(),
-        ExecuteUpdateDelete()
     )
 }
 

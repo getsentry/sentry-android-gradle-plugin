@@ -3,19 +3,44 @@ package io.sentry.android.gradle
 import javax.inject.Inject
 import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 
 abstract class SentryPluginExtension @Inject constructor(project: Project) {
 
     private val objects = project.objects
 
     /**
+     * Disables or enables the handling of Proguard mapping for Sentry.
+     * If enabled the plugin will generate a UUID and will take care of
+     * uploading the mapping to Sentry. If disabled, all the logic
+     * related to proguard mapping will be excluded.
+     * Default is enabled.
+     *
+     * @see [autoUpload]
+     * @see [autoUploadProguardMapping]
+     */
+    val includeProguardMapping: Property<Boolean> = objects
+        .property(Boolean::class.java).convention(true)
+
+    /**
      * Whether the plugin should attempt to auto-upload the mapping file to Sentry or not.
      * If disabled the plugin will run a dry-run.
      * Default is enabled.
      */
-    val autoUpload: Property<Boolean> = objects.property(Boolean::class.java).convention(true)
+    val autoUploadProguardMapping: Property<Boolean> = objects
+        .property(Boolean::class.java).convention(true)
+
+    /**
+     * Whether the plugin should attempt to auto-upload the mapping file to Sentry or not.
+     * If disabled the plugin will run a dry-run.
+     * Default is enabled.
+     */
+    @Deprecated(
+        "Use autoUploadProguardMapping instead",
+        replaceWith = ReplaceWith("autoUploadProguardMapping")
+    )
+    val autoUpload: Property<Boolean> = autoUploadProguardMapping
 
     /**
      * Disables or enables the automatic configuration of Native Symbols
@@ -48,16 +73,16 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     )
 
     /** List of Android build variants that should be ignored by the Sentry plugin. */
-    val ignoredVariants: ListProperty<String> = objects.listProperty(String::class.java)
-        .convention(emptyList())
+    val ignoredVariants: SetProperty<String> = objects.setProperty(String::class.java)
+        .convention(emptySet())
 
     /** List of Android build types that should be ignored by the Sentry plugin. */
-    val ignoredBuildTypes: ListProperty<String> = objects.listProperty(String::class.java)
-        .convention(emptyList())
+    val ignoredBuildTypes: SetProperty<String> = objects.setProperty(String::class.java)
+        .convention(emptySet())
 
     /** List of Android build flavors that should be ignored by the Sentry plugin. */
-    val ignoredFlavors: ListProperty<String> = objects.listProperty(String::class.java)
-        .convention(emptyList())
+    val ignoredFlavors: SetProperty<String> = objects.setProperty(String::class.java)
+        .convention(emptySet())
 
     val tracingInstrumentation: TracingInstrumentationExtension = objects.newInstance(
         TracingInstrumentationExtension::class.java

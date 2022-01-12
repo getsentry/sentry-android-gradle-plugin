@@ -1,18 +1,19 @@
 package io.sentry.android.gradle.instrumentation.androidx.room.visitor
 
-import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.MethodNode
 
 class RoomQueryWithTransactionVisitor(
+    className: String,
     api: Int,
     firstPassVisitor: MethodNode,
     private val originalVisitor: MethodVisitor,
     access: Int,
     descriptor: String?
-) : AbstractSpanAddingMethodVisitor(
+) : AbstractRoomVisitor(
+    className = className,
     api = api,
     originalVisitor = originalVisitor,
     access = access,
@@ -23,7 +24,6 @@ class RoomQueryWithTransactionVisitor(
     private val label6 = Label()
     private val label7 = Label()
     private val label8 = Label()
-    private val spanIfNull = Label()
     private val childIfNullStatusOk = Label()
     private val childIfNullFinallyPositive = Label()
     private val childIfNullFinallyNegative = Label()
@@ -65,27 +65,6 @@ class RoomQueryWithTransactionVisitor(
         visitTryCatchBlock(label2, label6, label6, expectedException)
         visitTryCatchBlock(label4, label5, label7, null)
         visitTryCatchBlock(label2, label8, label7, null)
-    }
-
-    override fun visitTryCatchBlock(start: Label?, end: Label?, handler: Label?, type: String?) {
-        if (!instrumenting.get()) {
-            // we will rewrite try-catch blocks completely by ourselves
-            return
-        }
-        super.visitTryCatchBlock(start, end, handler, type)
-    }
-
-    override fun visitCode() {
-        super.visitCode()
-        instrumenting.set(true)
-        originalVisitor.visitTryCatchBlocks("java/lang/Exception")
-
-        originalVisitor.visitStartSpan(spanIfNull) {
-            visitLdcInsn(DESCRIPTION)
-        }
-
-        originalVisitor.visitLabel(spanIfNull)
-        instrumenting.set(false)
     }
 
     override fun visitMethodInsn(

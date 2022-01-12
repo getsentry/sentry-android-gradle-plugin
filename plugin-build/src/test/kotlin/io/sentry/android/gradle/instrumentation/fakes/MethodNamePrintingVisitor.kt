@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.instrumentation
+package io.sentry.android.gradle.instrumentation.fakes
 
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor

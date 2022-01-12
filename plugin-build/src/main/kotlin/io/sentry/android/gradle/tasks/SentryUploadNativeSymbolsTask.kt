@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.util.info
 import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
@@ -59,7 +60,7 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
         if (sentryProperties != null) {
             environment("SENTRY_PROPERTIES", sentryProperties)
         } else {
-            logger.info("[sentry] sentryProperties is null")
+            logger.info { "sentryProperties is null" }
         }
     }
 

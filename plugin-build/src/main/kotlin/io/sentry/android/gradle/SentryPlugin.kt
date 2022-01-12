@@ -4,6 +4,7 @@ import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AppExtension
+import com.android.build.gradle.internal.cxx.json.writeJsonFile
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
@@ -21,17 +22,18 @@ import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
+import io.sentry.android.gradle.util.getSentryAndroidSdkState
+import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.TaskProvider
+import org.slf4j.LoggerFactory
 
 @Suppress("UnstableApiUsage")
 class SentryPlugin : Plugin<Project> {
-
-    private val sep = File.separator
 
     override fun apply(project: Project) {
         val extension = project.extensions.create(
@@ -77,6 +79,14 @@ class SentryPlugin : Plugin<Project> {
                         params.debug.setDisallowChanges(
                             extension.tracingInstrumentation.debug.get()
                         )
+                        params.features.setDisallowChanges(
+                            extension.tracingInstrumentation.features.get()
+                        )
+                        params.sdkStateFile.set(
+                            project.file(
+                                File(project.buildDir, buildSdkStateFilePath(variant.name))
+                            )
+                        )
                         params.tmpDir.set(tmpDir)
                     }
                     variant.setAsmFramesComputationMode(
@@ -112,14 +122,12 @@ class SentryPlugin : Plugin<Project> {
                         getPackageBundleTask(project, variant.name)
                     }
                 } else {
-                    project.logger.info(
-                        "[sentry] isMinifyEnabled is false for variant ${variant.name}."
-                    )
+                    project.logger.info { "isMinifyEnabled is false for variant ${variant.name}." }
                 }
 
                 val taskSuffix = variant.name.capitalizeUS()
 
-                if (isMinifyEnabled) {
+                if (isMinifyEnabled && extension.includeProguardMapping.get()) {
                     // Setup the task to generate a UUID asset file
                     val generateUuidTask = project.tasks.register(
                         "generateSentryProguardUuid$taskSuffix",
@@ -151,7 +159,7 @@ class SentryPlugin : Plugin<Project> {
                         )
                         task.uuidDirectory.set(generateUuidTask.flatMap { it.outputDirectory })
                         task.mappingsFiles = getMappingFileProvider(variant)
-                        task.autoUpload.set(extension.autoUpload)
+                        task.autoUploadProguardMapping.set(extension.autoUploadProguardMapping)
                         task.sentryOrganization.set(sentryOrgParameter)
                         task.sentryProject.set(sentryProjectParameter)
                     }
@@ -209,7 +217,27 @@ class SentryPlugin : Plugin<Project> {
                     // if its a bundle aab, assemble might not be executed, so we hook into bundle task
                     bundleTask?.configure { it.finalizedBy(uploadSentryNativeSymbolsTask) }
                 } else {
-                    project.logger.info("[sentry] uploadSentryNativeSymbols won't be executed")
+                    project.logger.info { "uploadSentryNativeSymbols won't be executed" }
+                }
+
+                // dependency configuration can only be resolved after the configuration/evaluation
+                // phase is done. Ideally this would've been a task, but it was hard finding out
+                // which task we should depend on - seems like AGP starts its transforms without
+                // binding to a specific task.
+                // (and we need to know the SDK version before the transforms are executed)
+                project.afterEvaluate {
+                    if (extension.tracingInstrumentation.enabled.get()) {
+                        val sdkState = project.getSentryAndroidSdkState(
+                            variant.runtimeConfiguration.name,
+                            variant.name
+                        )
+                        writeJsonFile(
+                            project.file(
+                                File(project.buildDir, buildSdkStateFilePath(variant.name))
+                            ),
+                            sdkState
+                        )
+                    }
                 }
             }
         }
@@ -229,5 +257,14 @@ class SentryPlugin : Plugin<Project> {
     companion object {
         const val SENTRY_ORG_PARAMETER = "sentryOrg"
         const val SENTRY_PROJECT_PARAMETER = "sentryProject"
+
+        internal val sep = File.separator
+        internal fun buildSdkStateFilePath(variantName: String) =
+            "intermediates${sep}sentry${sep}sdk-state-$variantName.json"
+
+        // a single unified logger used by instrumentation
+        internal val logger by lazy {
+            LoggerFactory.getLogger(SentryPlugin::class.java)
+        }
     }
 }

@@ -69,10 +69,9 @@ dependencies {
 }
 
 sentry {
-    autoUpload.set(false)
+    autoUploadProguardMapping.set(false)
 
     tracingInstrumentation {
         forceInstrumentDependencies.set(true)
-        debug.set(true)
     }
 }

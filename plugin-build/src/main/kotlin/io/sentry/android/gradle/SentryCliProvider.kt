@@ -1,5 +1,7 @@
 package io.sentry.android.gradle
 
+import io.sentry.android.gradle.util.error
+import io.sentry.android.gradle.util.info
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -16,38 +18,38 @@ internal object SentryCliProvider {
     @JvmStatic
     fun getSentryCliPath(project: Project): String {
         // If a path is provided explicitly use that first.
-        project.logger.info("[sentry] Searching cli from sentry.properties file...")
+        project.logger.info { "Searching cli from sentry.properties file..." }
 
         searchCliInPropertiesFile(project)?.let {
-            project.logger.info("[sentry] cli Found: $it")
+            project.logger.info { "cli Found: $it" }
             return@getSentryCliPath it
-        } ?: project.logger.info("[sentry] sentry-cli not found in sentry.properties file")
+        } ?: project.logger.info { "sentry-cli not found in sentry.properties file" }
 
         // next up try a packaged version of sentry-cli
         val cliSuffix = getCliSuffix()
-        project.logger.info("[sentry] cliSuffix is $cliSuffix")
+        project.logger.info { "cliSuffix is $cliSuffix" }
 
         if (!cliSuffix.isNullOrBlank()) {
             val resourcePath = "/bin/sentry-cli-$cliSuffix"
 
             // if we are not in a jar, we can use the file directly
-            project.logger.info("[sentry] Searching for $resourcePath in resources folder...")
+            project.logger.info { "Searching for $resourcePath in resources folder..." }
 
             searchCliInResources(resourcePath)?.let {
-                project.logger.info("[sentry] cli Found: $it")
+                project.logger.info { "cli Found: $it" }
                 return@getSentryCliPath it
-            } ?: project.logger.info("[sentry] Failed to load sentry-cli from resource folder")
+            } ?: project.logger.info { "Failed to load sentry-cli from resource folder" }
 
             // otherwise we need to unpack into a file
-            project.logger.info("[sentry] Trying to load cli from $resourcePath in a temp file...")
+            project.logger.info { "Trying to load cli from $resourcePath in a temp file..." }
 
             loadCliFromResourcesToTemp(resourcePath)?.let {
-                project.logger.info("[sentry] cli Found: $it")
+                project.logger.info { "cli Found: $it" }
                 return@getSentryCliPath it
-            } ?: project.logger.info("[sentry] Failed to load sentry-cli from resource folder")
+            } ?: project.logger.info { "Failed to load sentry-cli from resource folder" }
         }
 
-        project.logger.error("[sentry] Falling back to invoking `sentry-cli` from shell")
+        project.logger.error { "Falling back to invoking `sentry-cli` from shell" }
         return "sentry-cli"
     }
 
