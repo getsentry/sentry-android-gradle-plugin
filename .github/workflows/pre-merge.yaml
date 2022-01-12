@@ -26,12 +26,9 @@ jobs:
           java-version: '11'
 
       - name: Run Gradle tasks
-        uses: gradle/gradle-build-action@v1
+        uses: gradle/gradle-build-action@v2.1
         with:
           arguments: preMerge --continue
-          distributions-cache-enabled: true
-          dependencies-cache-enabled: true
-          configuration-cache-enabled: true
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v2
@@ -41,17 +38,11 @@ jobs:
         if: always()
 
       - name: Build the Debug variant
-        uses: gradle/gradle-build-action@v1
+        uses: gradle/gradle-build-action@v2.1
         with:
           arguments: assembleDebug
-          distributions-cache-enabled: true
-          dependencies-cache-enabled: true
-          configuration-cache-enabled: true
 
       - name: Build the Release variant
-        uses: gradle/gradle-build-action@v1
+        uses: gradle/gradle-build-action@v2.1
         with:
           arguments: assembleRelease
-          distributions-cache-enabled: true
-          dependencies-cache-enabled: true
-          configuration-cache-enabled: true
