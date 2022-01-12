@@ -40,19 +40,9 @@ jobs:
       - name: Build the Debug variant
         uses: gradle/gradle-build-action@v2
         with:
-          gradle-home-cache-includes: |
-            caches
-            notifications
-            jdks
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           arguments: assembleDebug
 
       - name: Build the Release variant
         uses: gradle/gradle-build-action@v2
         with:
-          gradle-home-cache-includes: |
-            caches
-            notifications
-            jdks
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           arguments: assembleRelease

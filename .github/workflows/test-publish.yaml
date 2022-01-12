@@ -21,12 +21,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-        with:
-          gradle-home-cache-includes: |
-            caches
-            notifications
-            jdks
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Build the Release variant
         run: ./gradlew assembleRelease | tee gradle.log

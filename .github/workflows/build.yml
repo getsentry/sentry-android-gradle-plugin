@@ -17,12 +17,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-        with:
-          gradle-home-cache-includes: |
-            caches
-            notifications
-            jdks
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Set up Java
         uses: actions/setup-java@v2
