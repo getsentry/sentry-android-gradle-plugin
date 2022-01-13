@@ -14,6 +14,13 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v2
 
+      - name: Checkout Duckduckgo
+        uses: actions/checkout@v2
+        with:
+          repository: duckduckgo/Android
+          path: scripts/benchmark
+          ref: 635cda1c1e5b7a6f8b5f04703b946663370d6c71
+
       - name: Install SDKMAN, Gradle Profiler and Begin Profiling
         run: |
           curl -s "https://get.sdkman.io" | bash

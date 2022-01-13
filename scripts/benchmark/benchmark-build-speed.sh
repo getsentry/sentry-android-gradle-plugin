@@ -10,18 +10,18 @@ fi
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $SCRIPT_DIR
 
-git clone git@github.com:duckduckgo/Android.git
-
-cd Android
-git submodule update --init --recursive
-cd ..
+if [ ! -d Android ]; then
+    git clone git@github.com:duckduckgo/Android.git
+    cd Android
+    git checkout 635cda1c1e5b7a6f8b5f04703b946663370d6c71
+    git submodule update --init --recursive
+    cd ..
+fi
 
 gradle-profiler --benchmark \
  --project-dir Android \
  --scenario-file duckduckgo/duckduckgo.scenarios \
  --output-dir results/pre-sentry/
-
-rm -rf gradle-user-home
 
 cd Android
 git apply ../duckduckgo/add-sentry-to-duckduckgo.patch
