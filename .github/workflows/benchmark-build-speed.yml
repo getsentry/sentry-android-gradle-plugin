@@ -20,13 +20,14 @@ jobs:
           repository: duckduckgo/Android
           path: scripts/benchmark
           ref: 635cda1c1e5b7a6f8b5f04703b946663370d6c71
+          submodules: true
 
       - name: Install SDKMAN, Gradle Profiler and Begin Profiling
         run: |
           curl -s "https://get.sdkman.io" | bash
           source "$HOME/.sdkman/bin/sdkman-init.sh"
           sdk install gradleprofiler
-          cd scripts/benchmark
+          cd scripts/benchmark/Android
           chmod +x benchmark-build-speed.sh
           ./benchmark-build-speed.sh
 
