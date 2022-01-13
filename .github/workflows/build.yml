@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - release/**
+      - ci/integration-test
+
   pull_request:
 
 jobs:
@@ -41,5 +43,17 @@ jobs:
           zipfile=$(ls -1 plugin-build/build/distributions | grep -v "PluginMarker")
           filename=${zipfile/\.zip/}
           unzip plugin-build/build/distributions/$filename.zip -d /tmp
-          unzip /tmp/$filename/$filename.jar -d /tmp/jar/
+          unzip /tmp/$filename/$filena
+          me.jar -d /tmp/jar/
           find /tmp/jar | grep "bin/sentry-cli"
+
+  iosched-tests:
+    needs: job_build_upload
+    runs-on: ubuntu-latest
+    name: "bla"
+    steps:
+        - uses: actions/download-artifact@v2
+          with:
+            name: ${{ github.sha }}
+
+
