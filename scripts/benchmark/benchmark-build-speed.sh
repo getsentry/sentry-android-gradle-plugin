@@ -21,7 +21,11 @@ gradle-profiler --benchmark \
  --scenario-file duckduckgo/duckduckgo.scenarios \
  --output-dir results/pre-sentry/
 
-git apply duckduckgo/add-sentry-to-duckduckgo.patch
+rm -rf gradle-user-home
+
+cd Android
+git apply ../duckduckgo/add-sentry-to-duckduckgo.patch
+cd ..
 
 gradle-profiler --benchmark \
  --project-dir Android \

@@ -1,66 +1,86 @@
 diff --git a/build.gradle b/build.gradle
-index 3dcf39810f..be03ac46f0 100644
+index 94382bad..172c5d31 100644
 --- a/build.gradle
 +++ b/build.gradle
-@@ -14,10 +14,10 @@ buildscript {
-         mavenCentral()
-     }
-     dependencies {
--        classpath 'com.android.tools.build:gradle:4.1.3'
-+        classpath 'com.android.tools.build:gradle:7.0.2'
+@@ -21,7 +21,7 @@ buildscript {
          classpath "com.diffplug.spotless:spotless-plugin-gradle:$spotless"
          classpath "com.squareup.anvil:gradle-plugin:$anvil_version"
+         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 -
-+        classpath "io.sentry:sentry-android-gradle-plugin:3.0.0-beta.3"
++        classpath "io.sentry:sentry-android-gradle-plugin"
          // NOTE: Do not place your application dependencies here; they belong
          // in the individual module build.gradle files
      }
-@@ -28,6 +28,25 @@ allprojects {
-         google()
-         mavenCentral()
+@@ -37,8 +37,27 @@ allprojects {
      }
-+
-+}
-+
+ }
+
 +subprojects {
-+     apply plugin: 'io.sentry.android.gradle'
++    apply plugin: 'io.sentry.android.gradle'
 +
-+     sentry {
-+         autoUpload false
++    sentry {
++        includeProguardMapping = true
++        autoUploadProguardMapping = false
 +
-+         tracingInstrumentation {
-+             enabled = true
-+         }
-+     }
++        tracingInstrumentation {
++            enabled = true
++        }
++    }
 +
 +    plugins.withId('com.android.application') {
 +        dependencies {
-+            implementation 'io.sentry:sentry-android:5.5.2'
++            implementation 'io.sentry:sentry-android:5.+'
 +        }
 +    }
++}
++
+ task clean(type: Delete) {
+     delete rootProject.buildDir
  }
 
- task clean(type: Delete) {
+-apply plugin: 'android-reporting'
+\ No newline at end of file
++apply plugin: 'android-reporting'
+diff --git a/buildSrc/build.gradle.kts b/buildSrc/build.gradle.kts
+index 69260faa..85a90a48 100644
+--- a/buildSrc/build.gradle.kts
++++ b/buildSrc/build.gradle.kts
+@@ -25,7 +25,7 @@ repositories {
+
+ dependencies {
+     /* Depend on the android gradle plugin, since we want to access it in our plugin */
+-    implementation("com.android.tools.build:gradle:4.1.3")
++    implementation("com.android.tools.build:gradle:7.0.3")
+
+     /* Depend on the default Gradle API's since we want to build a custom plugin */
+     implementation(gradleApi())
 diff --git a/gradle.properties b/gradle.properties
-index 40b247a695..43863ad18d 100644
+index 5773597d..288a82b1 100644
 --- a/gradle.properties
 +++ b/gradle.properties
-@@ -10,7 +10,7 @@
- # Specifies the JVM arguments used for the daemon process.
+@@ -11,7 +11,7 @@
  # The setting is particularly useful for tweaking memory settings.
  android.useAndroidX=true
+ android.uniquePackageNames = true
 -android.nonTransitiveRClass=true
 +android.nonTransitiveRClass=false
- org.gradle.jvmargs=-Xmx1536m -XX:+UseParallelGC
+ org.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=2048m -XX:+UseParallelGC
  org.gradle.caching=true
 
-diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
-index 5ab9418f38..35022c8531 100644
---- a/gradle/wrapper/gradle-wrapper.properties
-+++ b/gradle/wrapper/gradle-wrapper.properties
-@@ -3,4 +3,4 @@ distributionBase=GRADLE_USER_HOME
- distributionPath=wrapper/dists
- zipStoreBase=GRADLE_USER_HOME
- zipStorePath=wrapper/dists
--distributionUrl=https\://services.gradle.org/distributions/gradle-6.5-bin.zip
-+distributionUrl=https\://services.gradle.org/distributions/gradle-7.0.2-bin.zip
+diff --git a/settings.gradle b/settings.gradle
+index 98cd4fc7..0b3e76d7 100644
+--- a/settings.gradle
++++ b/settings.gradle
+@@ -45,6 +45,12 @@ project(':anrs-api').projectDir = new File('anrs/anrs-api')
+ project(':anrs-impl').projectDir = new File('anrs/anrs-impl')
+ project(':anrs-store').projectDir = new File('anrs/anrs-store')
+
++includeBuild('../../../plugin-build') {
++    dependencySubstitution {
++        substitute(module('io.sentry:sentry-android-gradle-plugin')).using(project(':'))
++    }
++}
++
+ rootProject.children.each { subproject ->
+
+     if (subproject.name == "vpn") {
