@@ -1,0 +1,33 @@
+name: Benchmark build speed and upload results
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Install SDKMAN, Gradle Profiler and Begin Profiling
+        run: |
+          curl -s "https://get.sdkman.io" | bash
+          source "$HOME/.sdkman/bin/sdkman-init.sh"
+          sdk install gradleprofiler
+
+      - name: Benchmark builds
+        run: |
+          cd scripts/benchmark
+          chmod +x benchmark-build-speed.sh
+          ./benchmark-build-speed.sh
+
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ github.sha }}
+          path: ${{ github.workspace }}/scripts/benchmark/results/
