@@ -57,12 +57,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          path: 'sentry-android-gradle-plugin'
+          repository: 'google/iosched'
+          ref: '6f96c1528c00d3d89bedb33e5a0a10d67629e8bd'
 
       - uses: actions/checkout@v2
         with:
-          repository: 'google/iosched'
-          ref: '6f96c1528c00d3d89bedb33e5a0a10d67629e8bd'
+          path: 'sentry-android-gradle-plugin'
 
       - name: Add Sentry
         run: git apply ./sentry-android-gradle-plugin/scripts/add-sentry-to-iosched.patch
@@ -103,12 +103,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          path: 'sentry-android-gradle-plugin'
+          repository: 'google/iosched'
+          ref: '6f96c1528c00d3d89bedb33e5a0a10d67629e8bd'
 
       - uses: actions/checkout@v2
         with:
-          repository: 'google/iosched'
-          ref: '6f96c1528c00d3d89bedb33e5a0a10d67629e8bd'
+          path: 'sentry-android-gradle-plugin'
 
       - name: Add Sentry
         run: git apply ./sentry-android-gradle-plugin/scripts/add-sentry-to-iosched.patch
