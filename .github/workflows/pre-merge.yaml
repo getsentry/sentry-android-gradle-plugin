@@ -7,6 +7,9 @@ on:
       - release/**
   pull_request:
 
+env:
+    GRADLE_BUILD_ACTION_CACHE_DEBUG_ENABLED: true
+
 jobs:
   pre-merge-checks:
     strategy:
@@ -28,12 +31,8 @@ jobs:
       - name: Run Gradle tasks
         uses: gradle/gradle-build-action@v2
         with:
-          gradle-home-cache-includes: |
-            caches
-            notifications
-            jdks
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: preMerge --continue
+          cache_disabled: true
+          arguments: preMerge --continue --no-build-cache --rerun-tasks --refresh-dependencies
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v2
