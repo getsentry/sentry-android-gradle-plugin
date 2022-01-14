@@ -18,15 +18,6 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
-      - name: Cache Gradle Files
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches/
-            ~/.gradle/wrapper/
-          key: cache-gradle-${{ matrix.os }}
-          restore-keys: |
-            cache-gradle-
 
       - name: Setup Java Version
         uses: actions/setup-java@v2
@@ -35,7 +26,14 @@ jobs:
           java-version: '11'
 
       - name: Run Gradle tasks
-        run: ./gradlew preMerge --continue
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          arguments: preMerge --continue
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v2
@@ -45,7 +43,21 @@ jobs:
         if: always()
 
       - name: Build the Debug variant
-        run: ./gradlew assembleDebug
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          arguments: assembleDebug
 
       - name: Build the Release variant
-        run: ./gradlew assembleRelease
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          arguments: assembleRelease

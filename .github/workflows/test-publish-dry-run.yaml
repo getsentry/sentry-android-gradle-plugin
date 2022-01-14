@@ -33,21 +33,10 @@ jobs:
     name: Publish Dry Run - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
     env:
       VERSION_AGP: ${{ matrix.agp }}
-      VERSION_GRADLE: ${{ matrix.gradle }}
 
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
-      - name: Cache Gradle Files
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches/
-            ~/.gradle/wrapper/
-          key: cache-gradle-${{ matrix.gradle }}-${{ matrix.agp }}
-          restore-keys: |
-            cache-gradle-${{ matrix.gradle }}-
-            cache-gradle-
 
       - name: Setup Java Version
         uses: actions/setup-java@v2
@@ -55,11 +44,12 @@ jobs:
           distribution: 'adopt'
           java-version: ${{ matrix.java }}
 
-      - name: Set Gradle Version
-        run: ./gradlew wrapper --gradle-version=$VERSION_GRADLE --distribution-type=all
-
       - name: Build the Release variant
-        run: ./gradlew assembleRelease
+        uses: gradle/gradle-build-action@v2
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          gradle-version: ${{ matrix.gradle }}
+          arguments: assembleRelease
 
       - name: Check sentry-debug-meta.properties inside APKs
         run: |
@@ -71,7 +61,11 @@ jobs:
           rm -r output
 
       - name: Build the Release Bundle variant
-        run: ./gradlew bundleRelease
+        uses: gradle/gradle-build-action@v2
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          gradle-version: ${{ matrix.gradle }}
+          arguments: bundleRelease
 
       - name: Check sentry-debug-meta.properties inside App Bundle
         run: |
