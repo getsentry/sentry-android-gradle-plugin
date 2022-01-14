@@ -1,0 +1,97 @@
+diff --git a/build.gradle.kts b/build.gradle.kts
+index ae1d146d2..77a97187d 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -17,6 +17,7 @@
+ // Top-level build file where you can add configuration options common to all
+ // sub-projects/modules.
+ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
++import io.sentry.android.gradle.InstrumentationFeature
+
+ buildscript {
+
+@@ -35,11 +36,13 @@ buildscript {
+         classpath("androidx.navigation:navigation-safe-args-gradle-plugin:${Versions.NAVIGATION}")
+         classpath("com.google.firebase:firebase-crashlytics-gradle:${Versions.FIREBASE_CRASHLYTICS}")
+         classpath("com.google.dagger:hilt-android-gradle-plugin:${Versions.HILT_AGP}")
++        classpath("io.sentry:sentry-android-gradle-plugin:3.0.0-beta.3")
+     }
+ }
+
+ plugins {
+     id("com.diffplug.gradle.spotless") version "3.27.1"
++    id("io.sentry.android.gradle") version "3.0.0-beta.3"
+ }
+
+ allprojects {
+@@ -65,6 +68,16 @@ allprojects {
+ }
+
+ subprojects {
++    apply(plugin= "io.sentry.android.gradle")
++
++    sentry {
++        tracingInstrumentation {
++            enabled.set(true)
++
++            features.set(setOf(InstrumentationFeature.DATABASE, InstrumentationFeature.FILE_IO))
++        }
++    }
++
+     apply(plugin = "com.diffplug.gradle.spotless")
+     val ktlintVer = "0.40.0"
+     spotless {
+diff --git a/buildSrc/src/main/java/Versions.kt b/buildSrc/src/main/java/Versions.kt
+index e1933a9e4..713a7b875 100644
+--- a/buildSrc/src/main/java/Versions.kt
++++ b/buildSrc/src/main/java/Versions.kt
+@@ -23,7 +23,7 @@ object Versions {
+     const val TARGET_SDK = 30
+     const val MIN_SDK = 21
+
+-    const val ANDROID_GRADLE_PLUGIN = "7.0.0-beta05"
++    const val ANDROID_GRADLE_PLUGIN = "7.0.4"
+     const val BENCHMARK = "1.0.0"
+     const val COMPOSE = "1.0.0-beta04"
+     const val FIREBASE_CRASHLYTICS = "2.3.0"
+diff --git a/mobile/build.gradle.kts b/mobile/build.gradle.kts
+index a9f3cf60b..00d606d6b 100644
+--- a/mobile/build.gradle.kts
++++ b/mobile/build.gradle.kts
+@@ -289,6 +289,8 @@ dependencies {
+     implementation(Libs.GSON)
+
+     implementation(Libs.ARCORE)
++
++    implementation("io.sentry:sentry-android:5+")
+ }
+
+ apply(plugin = "com.google.gms.google-services")
+diff --git a/mobile/src/main/AndroidManifest.xml b/mobile/src/main/AndroidManifest.xml
+index ae4e12fb8..6c409d2e5 100644
+--- a/mobile/src/main/AndroidManifest.xml
++++ b/mobile/src/main/AndroidManifest.xml
+@@ -36,6 +36,9 @@
+
+         <meta-data android:name="com.google.ar.core" android:value="optional" />
+
++        <meta-data android:name="io.sentry.dsn" android:value="https://1053864c67cc410aa1ffc9701bd6f93d@o447951.ingest.sentry.io/5428559" />
++        <meta-data android:name="io.sentry.traces.sample-rate" android:value="0.0" />
++
+         <meta-data tools:replace="android:value"
+             android:name="com.google.ar.core.min_apk_version"
+             android:value="190128000" />
+diff --git a/settings.gradle.kts b/settings.gradle.kts
+index 6d83e497f..a9316ab7c 100644
+--- a/settings.gradle.kts
++++ b/settings.gradle.kts
+@@ -25,3 +25,9 @@ include(
+   "depconstraints",
+   ":macrobenchmark"
+ )
++
++includeBuild("./sentry-android-gradle-plugin/plugin-build") {
++    dependencySubstitution {
++        substitute(module("io.sentry:sentry-android-gradle-plugin")).using(project(":"))
++    }
++}
