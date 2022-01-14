@@ -81,7 +81,7 @@ jobs:
             ~/.gradle/caches/modules-*
             ~/.gradle/caches/jars-*
             ~/.gradle/caches/build-cache-*
-          key: gradle-${{ hashFiles('checksum.txt') }}
+          key: iosched-gradle-${{ hashFiles('checksum.txt') }}
 
       - name: Build project
         run: ./gradlew spotlessCheck assembleDebug --stacktrace
