@@ -56,10 +56,11 @@ jobs:
           path: mobile/build/reports/
 
   test-iosched:
-    name: Test iosched api ${{ matrix.api-level }} sentry enabled ${{ matrix.enable-sentry }}
+    name: iosched api ${{ matrix.api-level }} sentry enabled ${{ matrix.enable-sentry }}
     runs-on: macos-latest # enables hardware acceleration in the virtual machine
     timeout-minutes: 30
     strategy:
+      fail-fast: false
       matrix:
         api-level: [23, 26, 29]
         # To find out if Sentry causes tests to fail or maybe the tests itself are flaky
