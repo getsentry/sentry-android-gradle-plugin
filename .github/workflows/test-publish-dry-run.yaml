@@ -47,6 +47,7 @@ jobs:
       - name: Build the Release variant
         uses: gradle/gradle-build-action@v2
         with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           gradle-version: ${{ matrix.gradle }}
           arguments: assembleRelease
 
@@ -62,6 +63,7 @@ jobs:
       - name: Build the Release Bundle variant
         uses: gradle/gradle-build-action@v2
         with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           gradle-version: ${{ matrix.gradle }}
           arguments: bundleRelease
 

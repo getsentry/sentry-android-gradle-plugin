@@ -55,3 +55,7 @@ tasks.register("closeAndReleaseRepository") {
 tasks.getByName("ktlintFormat") {
     dependsOn(gradle.includedBuild("plugin-build").task(":ktlintFormat"))
 }
+
+tasks.getByName("ktlintCheck") {
+    dependsOn(gradle.includedBuild("plugin-build").task(":ktlintCheck"))
+}
