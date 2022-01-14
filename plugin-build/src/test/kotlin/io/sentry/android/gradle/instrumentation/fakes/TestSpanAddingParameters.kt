@@ -1,12 +1,10 @@
 package io.sentry.android.gradle.instrumentation.fakes
 
-import com.nhaarman.mockitokotlin2.mock
 import io.sentry.android.gradle.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.ClassInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import java.io.File
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.internal.file.DefaultFileLookup
 import org.gradle.api.internal.provider.DefaultProperty
 import org.gradle.api.internal.provider.DefaultSetProperty
 import org.gradle.api.internal.provider.PropertyHost

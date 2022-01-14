@@ -82,11 +82,14 @@ class VisitorTest(
 
     @After
     fun printLogs() {
-        tmpDir.root.listFiles()
-            ?.filter { it.name.contains("instrumentation") }
-            ?.forEach {
-                print(it.readText())
-            }
+        // only print bytecode when running locally
+        if (System.getenv("CI")?.toBoolean() != true) {
+            tmpDir.root.listFiles()
+                ?.filter { it.name.contains("instrumentation") }
+                ?.forEach {
+                    print(it.readText())
+                }
+        }
     }
 
     companion object {
