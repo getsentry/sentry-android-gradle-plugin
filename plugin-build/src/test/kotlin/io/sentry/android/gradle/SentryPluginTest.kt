@@ -1,6 +1,5 @@
 package io.sentry.android.gradle
 
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
@@ -58,7 +57,12 @@ class SentryPluginTest(
             .filter { it.startsWith(prefix) }
             .map { it.removePrefix(prefix) }
             .sorted()
-        assertEquals(listOf(), configuredTasks)
+            .toMutableList()
+
+        // AGP 7.2.x configures the 'clean' task, so ignore it
+        configuredTasks.remove(":app:clean")
+
+        assertTrue(configuredTasks.isEmpty())
     }
 
     @Test

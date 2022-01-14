@@ -1,11 +1,8 @@
 package io.sentry.android.gradle
 
-import java.io.File
-import org.gradle.testkit.runner.GradleRunner
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
@@ -130,31 +127,5 @@ class SentryPluginVariantTest(
                 }
             """.trimIndent()
         )
-    }
-
-    companion object {
-
-        @Parameterized.Parameters(name = "AGP {0}, Gradle {1}")
-        @JvmStatic
-        fun parameters() = listOf(
-            // The supported Gradle version can be found here:
-            // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
-            // The pair is [AGP Version, Gradle Version]
-            arrayOf("7.0.3", "7.0.2"),
-            arrayOf("7.0.3", "7.1.1"),
-            arrayOf("7.0.3", "7.2"),
-            arrayOf("7.1.0-beta01", "7.2"),
-            arrayOf("7.2.0-alpha01", "7.2")
-        )
-
-        private fun GradleRunner.appendArguments(vararg arguments: String) =
-            withArguments(this.arguments + arguments)
-
-        private fun TemporaryFolder.writeFile(fileName: String, text: () -> String): File {
-            val file = File(root, fileName)
-            file.parentFile.mkdirs()
-            file.writeText(text())
-            return file
-        }
     }
 }
