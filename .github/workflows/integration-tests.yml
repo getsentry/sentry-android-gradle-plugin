@@ -10,42 +10,6 @@ on:
   pull_request:
 
 jobs:
-  job_build_upload:
-    name: Build and upload distribution artifact
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout current commit (${{ github.sha }})
-        uses: actions/checkout@v2
-
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-
-      - name: Set up Java
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'adopt'
-          java-version: '11'
-
-      - name: Build distribution artifacts
-        run: |
-          cd plugin-build
-          make all
-
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ github.sha }}
-          path: ${{ github.workspace }}/plugin-build/build/distributions/*.zip
-
-      - name: Verifies Sentry CLI is bundled
-        shell: bash
-        run: |
-          zipfile=$(ls -1 plugin-build/build/distributions | grep -v "PluginMarker")
-          filename=${zipfile/\.zip/}
-          unzip plugin-build/build/distributions/$filename.zip -d /tmp
-          unzip /tmp/$filename/$filename.jar -d /tmp/jar/
-          find /tmp/jar | grep "bin/sentry-cli"
-
 
   # We borrow the tests from the Google I/O Android App under the Apache license: https://github.com/google/iosched/.
   # The following steps checkout iosched and apply a github patch to the project. The patch adds
@@ -94,7 +58,7 @@ jobs:
           path: mobile/build/reports/
 
   test-iosched:
-    name: Test iosched Sentry enabled ${{ matrix.enable-sentry }}
+    name: iosched api ${{ matrix.api-level }} sentry enabled ${{ matrix.enable-sentry }}
     runs-on: macos-latest # enables hardware acceleration in the virtual machine
     timeout-minutes: 30
     strategy:
