@@ -1,0 +1,137 @@
+name: Integration Tests
+
+on:
+  push:
+    branches:
+      - main
+      - release/**
+      - ci/integration-test
+
+  pull_request:
+
+jobs:
+  job_build_upload:
+    name: Build and upload distribution artifact
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current commit (${{ github.sha }})
+        uses: actions/checkout@v2
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+
+      - name: Build distribution artifacts
+        run: |
+          cd plugin-build
+          make all
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ github.sha }}
+          path: ${{ github.workspace }}/plugin-build/build/distributions/*.zip
+
+      - name: Verifies Sentry CLI is bundled
+        shell: bash
+        run: |
+          zipfile=$(ls -1 plugin-build/build/distributions | grep -v "PluginMarker")
+          filename=${zipfile/\.zip/}
+          unzip plugin-build/build/distributions/$filename.zip -d /tmp
+          unzip /tmp/$filename/$filename.jar -d /tmp/jar/
+          find /tmp/jar | grep "bin/sentry-cli"
+
+
+  # We borrow the tests from the Google I/O Android App under the Apache license: https://github.com/google/iosched/.
+  # The following steps checkout iosched and apply a github patch to the project. The patch adds
+  # Sentry to the app with auto performance monitoring enabled. We then run the UI tests to make sure
+  # adding our SDK doesn't cause any major issues.
+  build-iosched:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: 'google/iosched'
+          ref: '6f96c1528c00d3d89bedb33e5a0a10d67629e8bd'
+
+      - uses: actions/checkout@v2
+        with:
+          path: 'sentry-android-gradle-plugin'
+
+      - name: Add Sentry
+        run: git apply ./sentry-android-gradle-plugin/scripts/add-sentry-to-iosched.patch
+
+      - name: Copy CI gradle.properties
+        run: mkdir -p ~/.gradle ; cp .github/ci-gradle.properties ~/.gradle/gradle.properties
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches/modules-*
+            ~/.gradle/caches/jars-*
+            ~/.gradle/caches/build-cache-*
+          key: iosched-gradle-${{ hashFiles('checksum.txt') }}
+
+      - name: Build project
+        run: ./gradlew spotlessCheck assembleDebug --stacktrace
+
+      - name: Upload build reports
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-reports
+          path: mobile/build/reports/
+
+  test-iosched:
+    runs-on: macos-latest # enables hardware acceleration in the virtual machine
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        api-level: [23, 26, 29]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: 'google/iosched'
+          ref: '6f96c1528c00d3d89bedb33e5a0a10d67629e8bd'
+
+      - uses: actions/checkout@v2
+        with:
+          path: 'sentry-android-gradle-plugin'
+
+      - name: Add Sentry
+        run: git apply ./sentry-android-gradle-plugin/scripts/add-sentry-to-iosched.patch
+
+      - name: Copy CI gradle.properties
+        run: mkdir -p ~/.gradle ; cp .github/ci-gradle.properties ~/.gradle/gradle.properties
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Run instrumentation tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: x86
+          disable-animations: true
+          script: ./gradlew mobile:cAT --stacktrace
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-reports
+          path: mobile/build/reports/
