@@ -5,8 +5,6 @@ on:
     branches:
       - main
       - release/**
-      - ci/integration-test
-
   pull_request:
 
 jobs:
