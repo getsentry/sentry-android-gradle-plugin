@@ -76,7 +76,7 @@ index ae4e12fb8..6c409d2e5 100644
          <meta-data android:name="com.google.ar.core" android:value="optional" />
 
 +        <meta-data android:name="io.sentry.dsn" android:value="https://1053864c67cc410aa1ffc9701bd6f93d@o447951.ingest.sentry.io/5428559" />
-+        <meta-data android:name="io.sentry.traces.sample-rate" android:value="0.0" />
++        <meta-data android:name="io.sentry.traces.sample-rate" android:value="1.0" />
 +
          <meta-data tools:replace="android:value"
              android:name="com.google.ar.core.min_apk_version"
