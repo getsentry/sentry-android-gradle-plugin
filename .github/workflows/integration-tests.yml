@@ -94,11 +94,13 @@ jobs:
           path: mobile/build/reports/
 
   test-iosched:
+    name: Test iosched Sentry enabled ${{ matrix.enable-sentry }}
     runs-on: macos-latest # enables hardware acceleration in the virtual machine
     timeout-minutes: 30
     strategy:
       matrix:
         api-level: [23, 26, 29]
+        enable-sentry: [true, false]
 
     steps:
       - uses: actions/checkout@v2
@@ -111,6 +113,7 @@ jobs:
           path: 'sentry-android-gradle-plugin'
 
       - name: Add Sentry
+        if: ${{ matrix.enable-sentry == true }}
         run: git apply ./sentry-android-gradle-plugin/scripts/add-sentry-to-iosched.patch
 
       - name: Copy CI gradle.properties
