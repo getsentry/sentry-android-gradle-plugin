@@ -1,0 +1,109 @@
+name: Integration Tests
+
+on:
+  push:
+    branches:
+      - main
+      - release/**
+  pull_request:
+
+jobs:
+
+  # We borrow the tests from the Google I/O Android App under the Apache license: https://github.com/google/iosched/.
+  # Most parts of the yml are also copied from
+  # https://github.com/google/iosched/blob/6f96c1528c00d3d89bedb33e5a0a10d67629e8bd/.github/workflows/iosched.yaml.
+  # The following steps checkout iosched and apply a github patch to the project. The patch adds
+  # Sentry to the app with auto performance monitoring enabled. We then run the UI tests to make sure
+  # adding our SDK doesn't cause any major issues.
+  build-iosched:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: 'google/iosched'
+          # We point to a specific ref so a flaky merge to main of iosched doesn't break our CI. We have to update the ref from
+          # time to time though.
+          ref: '6f96c1528c00d3d89bedb33e5a0a10d67629e8bd'
+
+      - uses: actions/checkout@v2
+        with:
+          path: 'sentry-android-gradle-plugin'
+
+      - name: Add Sentry
+        run: git apply ./sentry-android-gradle-plugin/scripts/add-sentry-to-iosched.patch
+
+      - name: Copy CI gradle.properties
+        run: mkdir -p ~/.gradle && cp .github/ci-gradle.properties ~/.gradle/gradle.properties
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches/modules-*
+            ~/.gradle/caches/jars-*
+            ~/.gradle/caches/build-cache-*
+          key: iosched-gradle-${{ hashFiles('checksum.txt') }}
+
+      - name: Build project
+        run: ./gradlew spotlessCheck assembleDebug --stacktrace
+
+      - name: Upload build reports
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-reports
+          path: mobile/build/reports/
+
+  test-iosched:
+    name: iosched api ${{ matrix.api-level }} sentry enabled ${{ matrix.enable-sentry }}
+    runs-on: macos-latest # enables hardware acceleration in the virtual machine
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [23, 26, 29]
+        # To find out if Sentry causes tests to fail or maybe the tests itself are flaky
+        # we run them with and without Sentry enabled.
+        enable-sentry: [true, false]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: 'google/iosched'
+          ref: '6f96c1528c00d3d89bedb33e5a0a10d67629e8bd'
+
+      - uses: actions/checkout@v2
+        with:
+          path: 'sentry-android-gradle-plugin'
+
+      - name: Add Sentry
+        if: ${{ matrix.enable-sentry == true }}
+        run: git apply ./sentry-android-gradle-plugin/scripts/add-sentry-to-iosched.patch
+
+      - name: Copy CI gradle.properties
+        run: mkdir -p ~/.gradle ; cp .github/ci-gradle.properties ~/.gradle/gradle.properties
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Run instrumentation tests
+        uses: reactivecircus/android-emulator-runner@48744f20730dfa6545f371626eb9a2c3908199b0
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: x86
+          disable-animations: true
+          script: ./gradlew mobile:cAT --stacktrace
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-reports
+          path: mobile/build/reports/
