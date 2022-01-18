@@ -25,7 +25,7 @@ jobs:
         run: |
           curl -s "https://get.sdkman.io" | bash
           source "$HOME/.sdkman/bin/sdkman-init.sh"
-          sdk install gradleprofiler
+          sdk install gradleprofiler 0.17.0
           cd scripts/benchmark
           chmod +x benchmark-build-speed.sh
           ./benchmark-build-speed.sh

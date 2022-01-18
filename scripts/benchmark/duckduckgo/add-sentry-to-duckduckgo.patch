@@ -19,12 +19,7 @@ index 94382bad..172c5d31 100644
 +    apply plugin: 'io.sentry.android.gradle'
 +
 +    sentry {
-+        includeProguardMapping = true
 +        autoUploadProguardMapping = false
-+
-+        tracingInstrumentation {
-+            enabled = true
-+        }
 +    }
 +
 +    plugins.withId('com.android.application') {
