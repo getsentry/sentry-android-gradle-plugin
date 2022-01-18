@@ -1,42 +1,20 @@
 diff --git a/build.gradle.kts b/build.gradle.kts
-index ae1d146d2..77a97187d 100644
+index ae1d146d2..cbca11ba7 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -17,6 +17,7 @@
- // Top-level build file where you can add configuration options common to all
- // sub-projects/modules.
- import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-+import io.sentry.android.gradle.InstrumentationFeature
-
- buildscript {
-
-@@ -35,11 +36,13 @@ buildscript {
+@@ -35,6 +35,7 @@ buildscript {
          classpath("androidx.navigation:navigation-safe-args-gradle-plugin:${Versions.NAVIGATION}")
          classpath("com.google.firebase:firebase-crashlytics-gradle:${Versions.FIREBASE_CRASHLYTICS}")
          classpath("com.google.dagger:hilt-android-gradle-plugin:${Versions.HILT_AGP}")
-+        classpath("io.sentry:sentry-android-gradle-plugin:3.0.0-beta.3")
++        classpath("io.sentry:sentry-android-gradle-plugin")
      }
  }
 
- plugins {
-     id("com.diffplug.gradle.spotless") version "3.27.1"
-+    id("io.sentry.android.gradle") version "3.0.0-beta.3"
- }
-
- allprojects {
-@@ -65,6 +68,16 @@ allprojects {
+@@ -65,6 +66,8 @@ allprojects {
  }
 
  subprojects {
-+    apply(plugin= "io.sentry.android.gradle")
-+
-+    sentry {
-+        tracingInstrumentation {
-+            enabled.set(true)
-+
-+            features.set(setOf(InstrumentationFeature.DATABASE, InstrumentationFeature.FILE_IO))
-+        }
-+    }
++    apply(plugin = "io.sentry.android.gradle")
 +
      apply(plugin = "com.diffplug.gradle.spotless")
      val ktlintVer = "0.40.0"
