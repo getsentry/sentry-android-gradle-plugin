@@ -11,7 +11,8 @@ class SentryPackageNameUtilsTest {
     fun `test is sentry class or not`() {
         assertTrue { TestClassContext("io.sentry.Sentry").isSentryClass() }
         assertFalse {
-            TestClassContext("io.sentry.android.roomsample.MainActivity").isSentryClass()
+            TestClassContext("io.sentry.samples.instrumentation.ui.MainActivity")
+                .isSentryClass()
         }
         assertFalse {
             TestClassContext("io.sentry.samples.MainActivity").isSentryClass()
