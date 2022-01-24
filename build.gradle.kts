@@ -41,7 +41,7 @@ tasks.register("preMerge") {
     dependsOn(":examples:android-gradle:check")
     dependsOn(":examples:android-gradle-kts:check")
     dependsOn(":examples:android-ndk:check")
-    dependsOn(":examples:android-room:check")
+    dependsOn(":examples:android-instrumentation-sample:check")
     dependsOn(":examples:android-room-lib:check")
     dependsOn(gradle.includedBuild("plugin-build").task(":check"))
 }
