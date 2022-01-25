@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Bump sentry-cli 1.72.0 which prevent daemonize mode from crashing upload process (#262)
+
 ## 3.0.0-beta.3
 
 * Introduce the `includeProguardMapping` option to exclude the proguard logic, and deprecate `autoUpload` in favor of `autoUploadProguardMapping` (#240)
