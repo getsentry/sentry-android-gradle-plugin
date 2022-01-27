@@ -82,17 +82,17 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
             dependencies.attributesSchema { schema ->
                 schema.attribute(metaInfStripped) { matchingStrategy ->
                     /*
-                    * This is necessary so our transform is selected before the AGP's one
+                    * This is necessary so our transform is selected before the AGP's one.
                     * AGP's transform chain looks roughly like that:
                     *
-                    * IdentityTransform (jar to processed-jar) -> IdentityTransform
-                    * (processed-jar to classes-jar) AsmClassesTransform (classes-jar to asm-transformed-classes-jar)
+                    * IdentityTransform (jar to processed-jar) -> IdentityTransform (processed-jar to classes-jar)
+                    * -> AsmClassesTransform (classes-jar to asm-transformed-classes-jar)
                     *
                     * We want out transform to run before the first IdentityTransform, so the chain
                     * would look like that:
                     *
                     * MetaInfStripTransform (jar to processed-jar) -> IdentityTransform (jar to processed-jar)
-                    * -> ... -> ...
+                    * -> IdentityTransform (...) -> AsmClassesTransform (...)
                     *
                     * Since the first two transforms have conflicting attributes, we define a
                     * disambiguation rule to make Gradle select our transform first.
