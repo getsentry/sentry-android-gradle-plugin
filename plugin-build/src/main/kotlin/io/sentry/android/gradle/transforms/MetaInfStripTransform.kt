@@ -1,10 +1,14 @@
 package io.sentry.android.gradle.transforms
 
-import java.net.URI
-import java.nio.file.FileSystems
-import java.nio.file.Files
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.jar.Attributes
+import java.util.jar.JarEntry
 import java.util.jar.JarFile
-import kotlin.streams.toList
+import java.util.jar.JarInputStream
+import java.util.jar.JarOutputStream
+import java.util.zip.ZipEntry
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.CacheableTransform
 import org.gradle.api.artifacts.transform.InputArtifact
@@ -48,30 +52,53 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
     override fun transform(outputs: TransformOutputs) {
         val input = inputArtifact.get().asFile
         if (JarFile(input).isMultiRelease) {
-            // open a jar and do changes in-place
-            val uri = URI.create("jar:file:$input")
-            FileSystems.newFileSystem(uri, mapOf<String, Any>()).use { fs ->
-                val versionsDir = fs.getPath("META-INF/versions")
-                if (Files.exists(versionsDir)) {
-                    val unsupportedVersions = Files.list(versionsDir)
-                        .filter { (it.fileName.toString().toIntOrNull() ?: 0) > 11 }
-                        .toList()
-
-                    // unsupportedVersions contains paths like META-INF/versions/16
-                    // we walk the directory in a reverse order to delete all files/subdirectories
-                    // one-by-one and eventually delete the directory itself
-                    unsupportedVersions.forEach { path ->
-                        Files.walk(path)
-                            .sorted(Comparator.reverseOrder())
-                            .forEach { Files.delete(it) }
+            val output = outputs.file("${input.nameWithoutExtension}-meta-inf-stripped.jar")
+            output.jarOutputStream().use { outStream ->
+                var isStillMultiRelease = false
+                input.jarInputStream().use { inStream ->
+                    // copy each .jar entry, except those that are under META-INF/versions/${unsupported_java_version}
+                    var jarEntry: JarEntry? = inStream.nextJarEntry
+                    while (jarEntry != null) {
+                        if (jarEntry.name.startsWith(versionsDir)) {
+                            val javaVersion = jarEntry.javaVersion
+                            if (javaVersion > 11) {
+                                jarEntry = inStream.nextJarEntry
+                                continue
+                            } else if (javaVersion > 0) {
+                                isStillMultiRelease = true
+                            }
+                        }
+                        outStream.putNextEntry(jarEntry)
+                        inStream.buffered().copyTo(outStream)
+                        outStream.closeEntry()
+                        jarEntry = inStream.nextJarEntry
                     }
+
+                    // write MANIFEST.MF as a last entry and modify Multi-Release attribute accordingly
+                    inStream.manifest.mainAttributes.put(
+                        Attributes.Name.MULTI_RELEASE,
+                        isStillMultiRelease.toString()
+                    )
+                    outStream.putNextEntry(ZipEntry(JarFile.MANIFEST_NAME))
+                    inStream.manifest.write(outStream.buffered())
+                    outStream.closeEntry()
                 }
             }
+        } else {
+            outputs.file(inputArtifact)
         }
-        outputs.file(input)
     }
 
+    private val JarEntry.javaVersion: Int get() = regex.find(name)?.value?.toIntOrNull() ?: 0
+
+    private fun File.jarInputStream(): JarInputStream = JarInputStream(FileInputStream(this))
+
+    private fun File.jarOutputStream(): JarOutputStream = JarOutputStream(FileOutputStream(this))
+
     companion object {
+        private val regex = "(?<=${File.separator})([0-9]*)(?=${File.separator})".toRegex()
+        private const val versionsDir = "META-INF/versions/"
+
         internal val artifactType: Attribute<String> =
             Attribute.of("artifactType", String::class.java)
         internal val metaInfStripped: Attribute<Boolean> =
@@ -107,11 +134,8 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
             }
             // registers a transform
             dependencies.registerTransform(MetaInfStripTransform::class.java) {
-                it.from.attribute(metaInfStripped, false)
-                    .attribute(artifactType, "jar")
-
-                it.to.attribute(metaInfStripped, true)
-                    .attribute(artifactType, "processed-jar")
+                it.from.attribute(artifactType, "jar").attribute(metaInfStripped, false)
+                it.to.attribute(artifactType, "processed-jar").attribute(metaInfStripped, true)
 
                 if (forceInstrument) {
                     it.parameters.invalidate.set(System.currentTimeMillis())
