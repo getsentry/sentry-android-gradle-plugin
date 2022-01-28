@@ -74,14 +74,17 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
                         jarEntry = inStream.nextJarEntry
                     }
 
-                    // write MANIFEST.MF as a last entry and modify Multi-Release attribute accordingly
-                    inStream.manifest.mainAttributes.put(
-                        Attributes.Name.MULTI_RELEASE,
-                        isStillMultiRelease.toString()
-                    )
-                    outStream.putNextEntry(ZipEntry(JarFile.MANIFEST_NAME))
-                    inStream.manifest.write(outStream.buffered())
-                    outStream.closeEntry()
+                    val manifest = inStream.manifest
+                    if (manifest != null) {
+                        // write MANIFEST.MF as a last entry and modify Multi-Release attribute accordingly
+                        manifest.mainAttributes.put(
+                            Attributes.Name.MULTI_RELEASE,
+                            isStillMultiRelease.toString()
+                        )
+                        outStream.putNextEntry(ZipEntry(JarFile.MANIFEST_NAME))
+                        manifest.write(outStream.buffered())
+                        outStream.closeEntry()
+                    }
                 }
             }
         } else {
