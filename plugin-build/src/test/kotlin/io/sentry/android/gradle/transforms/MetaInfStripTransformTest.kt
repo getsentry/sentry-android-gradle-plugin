@@ -206,9 +206,9 @@ class MetaInfStripTransformTest {
 
     private fun JarFile.read(): Map<String, String> {
         val entries = mutableMapOf<String, String>() // entry.name to entry.content
-        val iter = entries().asIterator()
-        while (iter.hasNext()) {
-            val jarEntry = iter.next()
+        val iter = entries()
+        while (iter.hasMoreElements()) {
+            val jarEntry = iter.nextElement()
             entries[jarEntry.name] = getInputStream(jarEntry).reader().readText()
         }
         return entries

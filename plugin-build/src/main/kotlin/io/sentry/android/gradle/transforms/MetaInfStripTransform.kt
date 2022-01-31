@@ -4,7 +4,6 @@ import java.io.File
 import java.util.jar.Attributes
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
-import java.util.jar.JarInputStream
 import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
 import org.gradle.api.artifacts.dsl.DependencyHandler
@@ -54,10 +53,10 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
             val output = outputs.file("${input.nameWithoutExtension}-meta-inf-stripped.jar")
             var isStillMultiRelease = false
             output.jarOutputStream().use { outStream ->
-                val iterator = jarFile.entries().asIterator()
+                val entries = jarFile.entries()
                 // copy each .jar entry, except those that are under META-INF/versions/${unsupported_java_version}
-                while (iterator.hasNext()) {
-                    val jarEntry = iterator.next()
+                while (entries.hasMoreElements()) {
+                    val jarEntry = entries.nextElement()
                     if (jarEntry.name.equals(JarFile.MANIFEST_NAME, ignoreCase = true)) {
                         // we deal with the manifest as a last step, since we need to know if there
                         // any multi-release entries remained
