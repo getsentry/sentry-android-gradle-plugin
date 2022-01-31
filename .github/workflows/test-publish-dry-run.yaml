@@ -17,16 +17,19 @@ jobs:
         gradle: ["7.2"]
         java: ["11"]
         include:
-          - agp: "7.0.3"
+          - agp: "7.0.4"
             gradle: "7.1.1"
             java: "11"
-          - agp: "7.0.3"
+          - agp: "7.0.4"
             gradle: "7.2"
             java: "11"
-          - agp: "7.1.0-rc01"
+          - agp: "7.1.0"
             gradle: "7.2"
             java: "11"
-          - agp: "7.2.0-alpha07"
+          - agp: "7.2.0-beta01"
+            gradle: "7.3.3"
+            java: "11"
+          - agp: "7.3.0-alpha01"
             gradle: "7.3.3"
             java: "11"
 
