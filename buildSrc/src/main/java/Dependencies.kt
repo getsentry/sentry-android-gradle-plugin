@@ -11,7 +11,7 @@ object BuildPluginsVersion {
 
 object LibsVersion {
     const val JUNIT = "4.13.2"
-    const val ASM = "9.2"
+    const val ASM = "7.0"
     const val SQLITE = "2.1.0"
     const val SENTRY = "5.5.0"
 }
