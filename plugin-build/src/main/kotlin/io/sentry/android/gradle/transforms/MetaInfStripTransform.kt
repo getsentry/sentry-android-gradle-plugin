@@ -98,7 +98,7 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
     private fun File.jarOutputStream(): JarOutputStream = JarOutputStream(outputStream())
 
     companion object {
-        private val regex = "(?<=${File.separator})([0-9]*)(?=${File.separator})".toRegex()
+        private val regex = "(?<=/)([0-9]*)(?=/)".toRegex()
         private const val versionsDir = "META-INF/versions/"
 
         internal val artifactType: Attribute<String> =
