@@ -1,8 +1,6 @@
 package io.sentry.android.gradle.transforms
 
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.util.jar.Attributes
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
@@ -51,40 +49,44 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
 
     override fun transform(outputs: TransformOutputs) {
         val input = inputArtifact.get().asFile
-        if (JarFile(input).isMultiRelease) {
+        val jarFile = JarFile(input)
+        if (jarFile.isMultiRelease) {
             val output = outputs.file("${input.nameWithoutExtension}-meta-inf-stripped.jar")
+            var isStillMultiRelease = false
             output.jarOutputStream().use { outStream ->
-                var isStillMultiRelease = false
-                input.jarInputStream().use { inStream ->
-                    // copy each .jar entry, except those that are under META-INF/versions/${unsupported_java_version}
-                    var jarEntry: JarEntry? = inStream.nextJarEntry
-                    while (jarEntry != null) {
-                        if (jarEntry.name.startsWith(versionsDir)) {
-                            val javaVersion = jarEntry.javaVersion
-                            if (javaVersion > 11) {
-                                jarEntry = inStream.nextJarEntry
-                                continue
-                            } else if (javaVersion > 0) {
-                                isStillMultiRelease = true
-                            }
-                        }
-                        outStream.putNextEntry(jarEntry)
-                        inStream.buffered().copyTo(outStream)
-                        outStream.closeEntry()
-                        jarEntry = inStream.nextJarEntry
+                val iterator = jarFile.entries().asIterator()
+                // copy each .jar entry, except those that are under META-INF/versions/${unsupported_java_version}
+                while (iterator.hasNext()) {
+                    val jarEntry = iterator.next()
+                    if (jarEntry.name.equals(JarFile.MANIFEST_NAME, ignoreCase = true)) {
+                        // we deal with the manifest as a last step, since we need to know if there
+                        // any multi-release entries remained
+                        continue
                     }
 
-                    val manifest = inStream.manifest
-                    if (manifest != null) {
-                        // write MANIFEST.MF as a last entry and modify Multi-Release attribute accordingly
-                        manifest.mainAttributes.put(
-                            Attributes.Name.MULTI_RELEASE,
-                            isStillMultiRelease.toString()
-                        )
-                        outStream.putNextEntry(ZipEntry(JarFile.MANIFEST_NAME))
-                        manifest.write(outStream.buffered())
-                        outStream.closeEntry()
+                    if (jarEntry.name.startsWith(versionsDir, ignoreCase = true)) {
+                        val javaVersion = jarEntry.javaVersion
+                        if (javaVersion > 11) {
+                            continue
+                        } else if (javaVersion > 0) {
+                            isStillMultiRelease = true
+                        }
                     }
+                    outStream.putNextEntry(jarEntry)
+                    jarFile.getInputStream(jarEntry).buffered().copyTo(outStream)
+                    outStream.closeEntry()
+                }
+
+                val manifest = jarFile.manifest
+                if (manifest != null) {
+                    // write MANIFEST.MF as a last entry and modify Multi-Release attribute accordingly
+                    manifest.mainAttributes.put(
+                        Attributes.Name.MULTI_RELEASE,
+                        isStillMultiRelease.toString()
+                    )
+                    outStream.putNextEntry(ZipEntry(JarFile.MANIFEST_NAME))
+                    manifest.write(outStream.buffered())
+                    outStream.closeEntry()
                 }
             }
         } else {
@@ -94,9 +96,7 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
 
     private val JarEntry.javaVersion: Int get() = regex.find(name)?.value?.toIntOrNull() ?: 0
 
-    private fun File.jarInputStream(): JarInputStream = JarInputStream(FileInputStream(this))
-
-    private fun File.jarOutputStream(): JarOutputStream = JarOutputStream(FileOutputStream(this))
+    private fun File.jarOutputStream(): JarOutputStream = JarOutputStream(outputStream())
 
     companion object {
         private val regex = "(?<=${File.separator})([0-9]*)(?=${File.separator})".toRegex()
