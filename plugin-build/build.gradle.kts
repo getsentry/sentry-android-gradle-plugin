@@ -42,6 +42,7 @@ dependencies {
     testImplementation(Libs.MOCKITO_KOTLIN)
 
     testImplementation(Libs.ASM)
+    testImplementation(Libs.ASM_COMMONS)
 
     // we need these dependencies for tests, because the bytecode verifier also analyzes superclasses
     testImplementationAar(Libs.SQLITE)
