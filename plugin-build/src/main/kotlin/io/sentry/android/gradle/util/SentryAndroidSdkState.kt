@@ -13,9 +13,12 @@ enum class SentryAndroidSdkState(val minVersion: SemVer) : Serializable {
 
     companion object {
         fun from(version: String): SentryAndroidSdkState {
+            if (version == "unspecified") {
+                return MISSING
+            }
+
             val semVer = SemVer.parse(version)
             return when {
-                version == "unspecified" -> MISSING
                 semVer < PERFORMANCE.minVersion -> MISSING
                 semVer >= PERFORMANCE.minVersion && semVer < FILE_IO.minVersion -> PERFORMANCE
                 semVer >= FILE_IO.minVersion -> FILE_IO
