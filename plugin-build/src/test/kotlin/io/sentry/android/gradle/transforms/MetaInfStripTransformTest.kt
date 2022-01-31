@@ -22,7 +22,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-
 class MetaInfStripTransformTest {
 
     class Fixture {
@@ -58,7 +57,9 @@ class MetaInfStripTransformTest {
 
                 if (multiRelease) {
                     // META-INF/versions/16
-                    it.putNextEntry(ZipEntry("META-INF/versions/16/com/squareup/moshi/RecordJsonAdapter.class"))
+                    it.putNextEntry(
+                        ZipEntry("META-INF/versions/16/com/squareup/moshi/RecordJsonAdapter.class")
+                    )
                     it.write(
                         """
                         import com.squareup.moshi.RecordJsonAdapter.1;
@@ -70,7 +71,11 @@ class MetaInfStripTransformTest {
                     )
                     it.closeEntry()
 
-                    it.putNextEntry(ZipEntry("META-INF/versions/16/com/squareup/moshi/RecordJsonAdapter$1.class"))
+                    it.putNextEntry(
+                        ZipEntry(
+                            "META-INF/versions/16/com/squareup/moshi/RecordJsonAdapter$1.class"
+                        )
+                    )
                     it.write(
                         """
                         import com.squareup.moshi.JsonAdapter.Factory;
@@ -167,7 +172,7 @@ class MetaInfStripTransformTest {
     }
 
     @Test
-    fun `when multi-release jar with supported classes, keeps supported classes and multi-release flag`() {
+    fun `when multi-release jar with supported classes, keeps them and multi-release flag`() {
         val outputs = FakeTransformOutputs(tmp)
 
         val sut = fixture.getSut(tmp, includeSupportedVersion = true)

@@ -1,7 +1,6 @@
 package io.sentry.android.gradle.util
 
 import kotlin.test.assertTrue
-import org.gradle.util.internal.VersionNumber
 import org.junit.Test
 
 class AgpVersionsTest {

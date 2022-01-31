@@ -3,7 +3,6 @@ package io.sentry.android.gradle.util
 import com.android.builder.model.Version
 import io.sentry.android.gradle.util.SemVer.Companion.equals
 import kotlin.math.min
-import org.gradle.util.internal.VersionNumber
 
 internal object AgpVersions {
     val CURRENT: SemVer = SemVer.parse(Version.ANDROID_GRADLE_PLUGIN_VERSION)
@@ -22,6 +21,13 @@ data class SemVer(
 ) : Comparable<SemVer> {
 
     companion object {
+        /* ktlint-disable max-line-length */
+        val pattern =
+            Regex(
+                """(0|[1-9]\d*)?(?:\.)?(0|[1-9]\d*)?(?:\.)?(0|[1-9]\d*)?(?:-([\dA-z\-]+(?:\.[\dA-z\-]+)*))?(?:\+([\dA-z\-]+(?:\.[\dA-z\-]+)*))?"""
+            )
+        /* ktlint-enable max-line-length */
+
         /**
          * Parse the version string to [SemVer] data object.
          * @param version version string.
@@ -29,8 +35,6 @@ data class SemVer(
          */
         @JvmStatic
         fun parse(version: String): SemVer {
-            val pattern =
-                Regex("""(0|[1-9]\d*)?(?:\.)?(0|[1-9]\d*)?(?:\.)?(0|[1-9]\d*)?(?:-([\dA-z\-]+(?:\.[\dA-z\-]+)*))?(?:\+([\dA-z\-]+(?:\.[\dA-z\-]+)*))?""")
             val result = pattern.matchEntire(version)
                 ?: throw IllegalArgumentException("Invalid version string [$version]")
             return SemVer(
@@ -47,8 +51,16 @@ data class SemVer(
         require(major >= 0) { "Major version must be a positive number" }
         require(minor >= 0) { "Minor version must be a positive number" }
         require(patch >= 0) { "Patch version must be a positive number" }
-        if (preRelease != null) require(preRelease.matches(Regex("""[\dA-z\-]+(?:\.[\dA-z\-]+)*"""))) { "Pre-release version is not valid" }
-        if (buildMetadata != null) require(buildMetadata.matches(Regex("""[\dA-z\-]+(?:\.[\dA-z\-]+)*"""))) { "Build metadata is not valid" }
+        if (preRelease != null) {
+            require(preRelease.matches(Regex("""[\dA-z\-]+(?:\.[\dA-z\-]+)*"""))) {
+                "Pre-release version is not valid"
+            }
+        }
+        if (buildMetadata != null) {
+            require(buildMetadata.matches(Regex("""[\dA-z\-]+(?:\.[\dA-z\-]+)*"""))) {
+                "Build metadata is not valid"
+            }
+        }
     }
 
     /**
