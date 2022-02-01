@@ -74,3 +74,69 @@ index 6d83e497f..a9316ab7c 100644
 +        substitute(module("io.sentry:sentry-android-gradle-plugin")).using(project(":"))
 +    }
 +}
+diff --git a/mobile/src/androidTest/java/com/google/samples/apps/iosched/tests/di/TestPreferencesStorageModule.kt b/mobile/src/androidTest/java/com/google/samples/apps/iosched/tests/di/TestPreferencesStorageModule.kt
+index a1cbfdeef..61ebbae8c 100644
+--- a/mobile/src/androidTest/java/com/google/samples/apps/iosched/tests/di/TestPreferencesStorageModule.kt
++++ b/mobile/src/androidTest/java/com/google/samples/apps/iosched/tests/di/TestPreferencesStorageModule.kt
+@@ -17,22 +17,17 @@
+ package com.google.samples.apps.iosched.tests.di
+
+ import android.content.Context
+-import androidx.datastore.core.DataStore
+ import androidx.datastore.preferences.SharedPreferencesMigration
+-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+-import androidx.datastore.preferences.core.Preferences
+-import androidx.datastore.preferences.preferencesDataStoreFile
+-import com.google.samples.apps.iosched.shared.data.prefs.DataStorePreferenceStorage.Companion.PREFS_NAME
++import androidx.datastore.preferences.preferencesDataStore
+ import com.google.samples.apps.iosched.di.PreferencesStorageModule
+ import com.google.samples.apps.iosched.shared.data.prefs.DataStorePreferenceStorage
++import com.google.samples.apps.iosched.shared.data.prefs.DataStorePreferenceStorage.Companion.PREFS_NAME
+ import com.google.samples.apps.iosched.shared.data.prefs.PreferenceStorage
+-import com.google.samples.apps.iosched.shared.di.ApplicationScope
+ import dagger.Module
+ import dagger.Provides
+ import dagger.hilt.android.qualifiers.ApplicationContext
+ import dagger.hilt.components.SingletonComponent
+ import dagger.hilt.testing.TestInstallIn
+-import kotlinx.coroutines.CoroutineScope
+ import javax.inject.Singleton
+
+ @TestInstallIn(
+@@ -44,23 +39,18 @@ object TestPreferencesStorageModule {
+
+     @Singleton
+     @Provides
+-    fun providePreferenceStorage(dataStore: DataStore<Preferences>): PreferenceStorage =
+-        DataStorePreferenceStorage(dataStore)
++    fun providePreferenceStorage(@ApplicationContext context: Context): PreferenceStorage =
++        DataStorePreferenceStorage(context.dataStore)
+
+-    @Singleton
+-    @Provides
+-    fun provideDataStore(
+-        @ApplicationContext context: Context,
+-        @ApplicationScope applicationScope: CoroutineScope
+-    ): DataStore<Preferences> {
+-        // Using PreferenceDataStoreFactory so we can set our own application scope
+-        // that we can control and cancel in UI tests
+-        val datastore = PreferenceDataStoreFactory.create(
+-            migrations = listOf(SharedPreferencesMigration(context, PREFS_NAME)),
+-            scope = applicationScope
+-        ) {
+-            context.preferencesDataStoreFile(PREFS_NAME)
++    val Context.dataStore by preferencesDataStore(
++        name = PREFS_NAME,
++        produceMigrations = { context ->
++            listOf(
++                SharedPreferencesMigration(
++                    context,
++                    PREFS_NAME
++                )
++            )
+         }
+-        return datastore
+-    }
++    )
+ }
+
