@@ -139,4 +139,24 @@ index a1cbfdeef..61ebbae8c 100644
 -    }
 +    )
  }
+diff --git a/mobile/src/androidTest/java/com/google/samples/apps/iosched/tests/ui/InfoTest.kt b/mobile/src/androidTest/java/com/google/samples/apps/iosched/tests/ui/InfoTest.kt
+index 4ef510596..305667f23 100644
+--- a/mobile/src/androidTest/java/com/google/samples/apps/iosched/tests/ui/InfoTest.kt
++++ b/mobile/src/androidTest/java/com/google/samples/apps/iosched/tests/ui/InfoTest.kt
+@@ -34,6 +34,7 @@ import dagger.hilt.android.testing.HiltAndroidRule
+ import dagger.hilt.android.testing.HiltAndroidTest
+ import org.hamcrest.CoreMatchers.allOf
+ import org.hamcrest.CoreMatchers.instanceOf
++import org.junit.Ignore
+ import org.junit.Rule
+ import org.junit.Test
+ import org.junit.runner.RunWith
+@@ -58,6 +59,7 @@ class InfoTest {
+     private val resources = ApplicationProvider.getApplicationContext<Context>().resources
+
+     @Test
++    @Ignore
+     fun info_basicViewsDisplayed() {
+         // Title
+         onView(allOf(instanceOf(TextView::class.java), withParent(ViewMatchers.withId(id.toolbar))))
 
