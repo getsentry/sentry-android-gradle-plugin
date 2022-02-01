@@ -8,6 +8,7 @@ import com.android.build.gradle.internal.cxx.json.writeJsonFile
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
+import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
@@ -23,6 +24,7 @@ import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.transforms.MetaInfStripTransform.Companion.metaInfStripped
 import io.sentry.android.gradle.util.AgpVersions
+import io.sentry.android.gradle.util.GroovyCompat
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
@@ -173,23 +175,35 @@ class SentryPlugin : Plugin<Project> {
                         generateUuidTask.flatMap { it.outputDirectory }
                     )
 
-                    // we just hack ourselves into the proguard task's doLast.
-                    transformerTaskProvider?.configure {
-                        it.finalizedBy(uploadSentryProguardMappingsTask)
+                    if (GroovyCompat.isDexguardEnabledForVariant(project, variant.name)) {
+                        // If Dexguard is enabled, we will have to wait for the project to be evaluated
+                        // to be able to let the uploadSentryProguardMappings run after them.
+                        project.afterEvaluate {
+                            project.tasks.named(
+                                "dexguardApk${variant.name.capitalized}"
+                            ).configure { it.finalizedBy(uploadSentryProguardMappingsTask) }
+                            project.tasks.named(
+                                "dexguardAab${variant.name.capitalized}"
+                            ).configure { it.finalizedBy(uploadSentryProguardMappingsTask) }
+                        }
+                    } else {
+                        // we just hack ourselves into the Proguard/R8 task's doLast.
+                        transformerTaskProvider?.configure {
+                            it.finalizedBy(uploadSentryProguardMappingsTask)
+                        }
                     }
 
                     // To include proguard uuid file into aab, run before bundle task.
                     preBundleTaskProvider?.configure { task ->
-                        task.dependsOn(uploadSentryProguardMappingsTask)
+                        task.dependsOn(generateUuidTask)
                     }
-
-                    // The package task will only be executed if the uploadSentryProguardMappingsTask has already been executed.
+                    // The package task will only be executed if the generateUuidTask has already been executed.
                     getPackageProvider(variant)?.configure { task ->
-                        task.dependsOn(uploadSentryProguardMappingsTask)
+                        task.dependsOn(generateUuidTask)
                     }
                     // App bundle has different package task
                     packageBundleTaskProvider?.configure { task ->
-                        task.dependsOn(uploadSentryProguardMappingsTask)
+                        task.dependsOn(generateUuidTask)
                     }
                 }
 

@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN
     id("distribution")
+    id("groovy")
     id("org.jetbrains.dokka") version BuildPluginsVersion.DOKKA
     id("java-gradle-plugin")
     id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
@@ -65,9 +66,18 @@ configure<JavaPluginExtension> {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+// We need to compile Groovy first and let Kotlin depend on it.
+// See https://docs.gradle.org/6.1-rc-1/release-notes.html#compilation-order
+tasks.withType<GroovyCompile>().configureEach {
+    sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+    targetCompatibility = JavaVersion.VERSION_1_8.toString()
+    classpath = sourceSets["main"].compileClasspath
+}
+
 tasks.withType<KotlinCompile>().configureEach {
     sourceCompatibility = JavaVersion.VERSION_1_8.toString()
     targetCompatibility = JavaVersion.VERSION_1_8.toString()
+    classpath += files(sourceSets["main"].groovy.classesDirectory)
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()

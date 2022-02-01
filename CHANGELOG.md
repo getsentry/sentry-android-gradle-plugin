@@ -9,6 +9,8 @@
 * Fix: Strip out unsupported java classes from META-INF/ (so AGP does not fail before our code is reached) (#264)
 * Bump sentry-cli 1.72.0 which prevent daemonize mode from crashing upload process (#262)
 * Fix: Incompatibilities with other Gradle plugins using the same API from AGP for bytecode instrumentation (#270)
+* Feature: Add support for GuardSquare's Proguard (#263)
+* Feature: Add support for GuardSquare's Dexguard (#267)
 
 ## 3.0.0-beta.3
 
