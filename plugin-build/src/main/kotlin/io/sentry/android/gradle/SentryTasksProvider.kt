@@ -92,12 +92,29 @@ internal object SentryTasksProvider {
         isDexguardAvailable(project)
     ) {
         val sep = File.separator
-        val path = if (project.plugins.hasPlugin("com.guardsquare.proguard")) {
-            "outputs${sep}proguard${sep}${variant.name}${sep}mapping${sep}mapping.txt"
+        val fileCollection = if (project.plugins.hasPlugin("com.guardsquare.proguard")) {
+            project.files(
+                File(
+                    project.buildDir,
+                    "outputs${sep}proguard${sep}${variant.name}${sep}mapping${sep}mapping.txt"
+                )
+            )
         } else {
-            "outputs${sep}dexguard${sep}mapping${sep}apk${sep}${variant.name}${sep}mapping.txt"
+            // For DexGuard the mapping file can either be inside the /apk or the /aab folder
+            // (depends on the task that generated it).
+            val mappingDir = "outputs${sep}dexguard${sep}mapping$sep"
+            project.files(
+                File(
+                    project.buildDir,
+                    "${mappingDir}apk${sep}${variant.name}${sep}mapping.txt"
+                ),
+                File(
+                    project.buildDir,
+                    "${mappingDir}aab${sep}${variant.name}${sep}mapping.txt"
+                )
+            )
         }
-        project.provider { project.files(File(project.buildDir, path)) }
+        project.provider { fileCollection }
     } else {
         variant.mappingFileProvider
     }
