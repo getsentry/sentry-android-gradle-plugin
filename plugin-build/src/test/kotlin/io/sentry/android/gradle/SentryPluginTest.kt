@@ -303,6 +303,4 @@ class SentryPluginTest(
             """.trimIndent()
         )
     }
-
-    override val additionalRootProjectConfig: String = ""
 }

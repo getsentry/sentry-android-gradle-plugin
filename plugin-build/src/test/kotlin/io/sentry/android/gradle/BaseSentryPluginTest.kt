@@ -22,7 +22,8 @@ abstract class BaseSentryPluginTest(
     protected lateinit var appBuildFile: File
     protected lateinit var runner: GradleRunner
 
-    abstract val additionalRootProjectConfig: String
+    protected open val additionalRootProjectConfig: String = ""
+    protected open val additionalBuildClasspath: String = ""
 
     @Before
     fun setup() {
@@ -46,6 +47,7 @@ abstract class BaseSentryPluginTest(
                 // This is needed to populate the plugin classpath instead of using
                 // withPluginClasspath on the Gradle Runner.
                 classpath files($pluginClasspath)
+                $additionalBuildClasspath
               }
             }
 

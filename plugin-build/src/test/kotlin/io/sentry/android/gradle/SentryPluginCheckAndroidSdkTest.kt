@@ -15,8 +15,6 @@ class SentryPluginCheckAndroidSdkTest(
     gradleVersion: String
 ) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
 
-    override val additionalRootProjectConfig: String = ""
-
     @Test
     fun `when tracingInstrumentation is disabled does not check sentry-android sdk state`() {
         appBuildFile.writeText(

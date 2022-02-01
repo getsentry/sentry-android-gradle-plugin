@@ -22,7 +22,7 @@ abstract class TracksDao {
     abstract fun allByArtist(bandName: String): List<Track>
 
     @Transaction
-    @Query("DELETE FROM Track")
+    @Query("SELECT COUNT(*) FROM Track")
     abstract suspend fun count(): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
