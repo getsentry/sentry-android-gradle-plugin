@@ -65,7 +65,7 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
 
                     if (jarEntry.name.startsWith(versionsDir, ignoreCase = true)) {
                         val javaVersion = jarEntry.javaVersion
-                        if (javaVersion > 11) {
+                        if (javaVersion > MIN_SUPPORTED_JAVA_VERSION) {
                             continue
                         } else if (javaVersion > 0) {
                             isStillMultiRelease = true
@@ -100,6 +100,7 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
     companion object {
         private val regex = "(?<=/)([0-9]*)(?=/)".toRegex()
         private const val versionsDir = "META-INF/versions/"
+        private const val MIN_SUPPORTED_JAVA_VERSION = 11
 
         internal val artifactType: Attribute<String> =
             Attribute.of("artifactType", String::class.java)
