@@ -51,6 +51,38 @@ class SentryUploadProguardMappingTaskTest {
     }
 
     @Test
+    fun `with multiple mappingFiles picks the first existing file`() {
+        val randomUuid = UUID.randomUUID()
+        createFakeUuid(randomUuid)
+
+        val project = createProject()
+        val mappingFiles = createMappingFileProvider(
+            project,
+            "dummy/folder/missing-mapping.txt",
+            "dummy/folder/existing-mapping.txt"
+        )
+        val existingFile = project.file("dummy/folder/existing-mapping.txt").apply {
+            parentFile.mkdirs()
+            writeText("dummy-file")
+        }
+
+        val task: TaskProvider<SentryUploadProguardMappingsTask> =
+            project.tasks.register(
+                "testUploadProguardMapping",
+                SentryUploadProguardMappingsTask::class.java
+            ) {
+                it.cliExecutable.set("sentry-cli")
+                it.uuidDirectory.set(tempDir.root)
+                it.mappingsFiles = mappingFiles
+                it.autoUploadProguardMapping.set(true)
+            }
+
+        val args = task.get().computeCommandLineArgs()
+
+        assertTrue(existingFile.toString() in args)
+    }
+
+    @Test
     fun `--auto-upload is set correctly`() {
         createFakeUuid()
         val project = createProject()
@@ -204,6 +236,6 @@ class SentryUploadProguardMappingTaskTest {
 
     private fun createMappingFileProvider(
         project: Project,
-        path: String
-    ): Provider<FileCollection> = project.providers.provider { project.files(path) }
+        vararg path: String
+    ): Provider<FileCollection> = project.providers.provider { project.files(*path) }
 }

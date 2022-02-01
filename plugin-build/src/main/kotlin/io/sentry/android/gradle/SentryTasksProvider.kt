@@ -100,7 +100,7 @@ internal object SentryTasksProvider {
                 )
             )
         } else {
-            // For DexGuard the mapping file can either be inside the /apk or the /aab folder
+            // For DexGuard the mapping file can either be inside the /apk or the /bundle folder
             // (depends on the task that generated it).
             val mappingDir = "outputs${sep}dexguard${sep}mapping$sep"
             project.files(
@@ -110,7 +110,7 @@ internal object SentryTasksProvider {
                 ),
                 File(
                     project.buildDir,
-                    "${mappingDir}aab${sep}${variant.name}${sep}mapping.txt"
+                    "${mappingDir}bundle${sep}${variant.name}${sep}mapping.txt"
                 )
             )
         }
