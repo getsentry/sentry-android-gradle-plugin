@@ -1,7 +1,7 @@
 package io.sentry.android.gradle.util
 
 import com.android.build.gradle.api.ApplicationVariant
-import io.sentry.android.gradle.util.GroovyCompat.*
+import io.sentry.android.gradle.util.GroovyCompat.isDexguardEnabledForVariant
 import java.util.Locale
 import org.gradle.api.Project
 import org.gradle.api.Task
