@@ -66,7 +66,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [23, 26, 29]
+        api-level: [23, 26]
         # To find out if Sentry causes tests to fail or maybe the tests itself are flaky
         # we run them with and without Sentry enabled.
         enable-sentry: [true, false]
@@ -99,7 +99,18 @@ jobs:
           api-level: ${{ matrix.api-level }}
           arch: x86
           disable-animations: true
-          script: ./gradlew mobile:cAT --stacktrace
+          script: |
+            touch emulator.log                    # create log file
+            chmod 777 emulator.log                # allow writing to log file
+            adb logcat >> emulator.log &          # pipe all logcat messages into log file as a background process
+            ./gradlew mobile:cAT --stacktrace         # here run your tests
+
+      - name: Upload device logs
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: emulator-logs
+          path: emulator.log
 
       - name: Upload test reports
         if: always()
