@@ -41,7 +41,7 @@ proguard {
 }
 
 sentry {
-    autoUploadProguardMapping = true
+    autoUploadProguardMapping = CI.INSTANCE.canAutoUpload()
 
     tracingInstrumentation {
         enabled = false
