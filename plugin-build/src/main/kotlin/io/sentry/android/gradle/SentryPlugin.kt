@@ -20,6 +20,9 @@ import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
+import io.sentry.android.gradle.transforms.MetaInfStripTransform
+import io.sentry.android.gradle.transforms.MetaInfStripTransform.Companion.metaInfStripped
+import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
 import io.sentry.android.gradle.util.getSentryAndroidSdkState
@@ -238,6 +241,31 @@ class SentryPlugin : Plugin<Project> {
                             sdkState
                         )
                     }
+                }
+
+                /**
+                 * This necessary to address the issue when target app uses a multi-release jar
+                 * (MR-JAR) as a dependency. https://github.com/getsentry/sentry-android-gradle-plugin/issues/256
+                 *
+                 * We register a transform (https://docs.gradle.org/current/userguide/artifact_transforms.html)
+                 * that will strip-out unnecessary files from the MR-JAR, so the AGP transforms
+                 * will consume corrected artifacts. We only do this when auto-instrumentation is
+                 * enabled (otherwise there's no need in this fix) AND when AGP version
+                 * is below 7.2.0-alpha06, where this issue has been fixed.
+                 * (https://issuetracker.google.com/issues/206655905#comment5)
+                 */
+                if (extension.tracingInstrumentation.enabled.get() &&
+                    AgpVersions.CURRENT < AgpVersions.VERSION_7_2_0_alpha06
+                ) {
+                    project.configurations.all {
+                        // request metaInfStripped attribute for all configurations to trigger our
+                        // transform
+                        it.attributes.attribute(metaInfStripped, true)
+                    }
+                    MetaInfStripTransform.register(
+                        project.dependencies,
+                        extension.tracingInstrumentation.forceInstrumentDependencies.get()
+                    )
                 }
             }
         }

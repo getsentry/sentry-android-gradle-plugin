@@ -2,31 +2,28 @@ package io.sentry.android.gradle.util
 
 import java.io.Serializable
 
-enum class SentryAndroidSdkState(val minVersion: String) : Serializable {
-    MISSING(""),
+enum class SentryAndroidSdkState(val minVersion: SemVer) : Serializable {
+    MISSING(SemVer()),
 
-    PERFORMANCE("4.0.0"),
+    PERFORMANCE(SemVer(4, 0, 0)),
 
-    FILE_IO("5.5.0");
+    FILE_IO(SemVer(5, 5, 0));
 
     fun isAtLeast(state: SentryAndroidSdkState): Boolean = this.ordinal >= state.ordinal
 
     companion object {
-        /* ktlint-disable max-line-length */
-        val semverRegex =
-            Regex(
-                "((([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?)"
-            )
-        /* ktlint-enable max-line-length */
+        fun from(version: String): SentryAndroidSdkState {
+            if (version == "unspecified") {
+                return MISSING
+            }
 
-        fun from(semVer: String): SentryAndroidSdkState =
-            when {
-                semVer == "unspecified" -> MISSING
-                !semverRegex.matches(semVer) -> error("Unknown version $semVer of sentry-android")
+            val semVer = SemVer.parse(version)
+            return when {
                 semVer < PERFORMANCE.minVersion -> MISSING
                 semVer >= PERFORMANCE.minVersion && semVer < FILE_IO.minVersion -> PERFORMANCE
                 semVer >= FILE_IO.minVersion -> FILE_IO
-                else -> error("Unknown version $semVer of sentry-android")
+                else -> error("Unknown version $version of sentry-android")
             }
+        }
     }
 }
