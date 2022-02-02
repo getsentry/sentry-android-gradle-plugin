@@ -16,14 +16,11 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     env:
-      GRADLE_OPTS: -Dorg.gradle.jvmargs="-XX:MaxMetaspaceSize=1g"
+      GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4608m -XX:MaxMetaspaceSize=1024m"
 
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
-
-#      - name: Copy CI gradle.properties
-#        run: mkdir -p ~/.gradle && cp .github/ci-gradle.properties ~/.gradle/gradle.properties
 
       - name: Setup Java Version
         uses: actions/setup-java@v2
