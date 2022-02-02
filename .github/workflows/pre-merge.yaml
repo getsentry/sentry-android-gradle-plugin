@@ -19,6 +19,9 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v2
 
+      - name: Copy CI gradle.properties
+        run: mkdir -p ~/.gradle && cp .github/ci-gradle.properties ~/.gradle/gradle.properties
+
       - name: Setup Java Version
         uses: actions/setup-java@v2
         with:
