@@ -66,7 +66,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [23, 26, 29]
+        api-level: [23, 26]
         # To find out if Sentry causes tests to fail or maybe the tests itself are flaky
         # we run them with and without Sentry enabled.
         enable-sentry: [true, false]
