@@ -74,6 +74,7 @@ class RoomTransactionVisitor(
         // the original method does not have a catch block, but we add ours here
         if (remapped == label2 && !instrumenting.getAndSet(true)) {
             originalVisitor.visitCatchBlock(catchLabel = label2, throwLabel = label8)
+            originalVisitor.visitStoreException(handler = label3, end = label4)
             instrumenting.set(false)
         } else {
             super.visitLabel(remapped)
@@ -86,33 +87,6 @@ class RoomTransactionVisitor(
             return
         }
         super.visitVarInsn(opcode, `var`)
-    }
-
-    override fun visitFrame(
-        type: Int,
-        numLocal: Int,
-        local: Array<out Any>?,
-        numStack: Int,
-        stack: Array<out Any>?
-    ) {
-        if (type == Opcodes.F_FULL || type == Opcodes.F_NEW) {
-            val hasThrowableOnStack = (stack?.getOrNull(0) as? String) == "java/lang/Throwable"
-
-            /**
-             * We visit the labels in case there's a Throwable on stack:
-             *     - It's a transaction and it's a finally block
-             */
-            if (hasThrowableOnStack) {
-                originalVisitor.visitLabel(label3)
-                super.visitFrame(type, numLocal, local, numStack, stack)
-                val exceptionIndex = nextLocal
-                originalVisitor.visitVarInsn(Opcodes.ASTORE, exceptionIndex)
-                originalVisitor.visitLabel(label4)
-                skipVarVisit = true
-                return
-            }
-        }
-        super.visitFrame(type, numLocal, local, numStack, stack)
     }
 
     override fun visitLocalVariable(

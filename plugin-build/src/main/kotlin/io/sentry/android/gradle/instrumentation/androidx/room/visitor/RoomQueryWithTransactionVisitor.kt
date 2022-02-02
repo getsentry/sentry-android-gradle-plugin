@@ -106,6 +106,7 @@ class RoomQueryWithTransactionVisitor(
 
         if (remapped == label6 && !instrumenting.getAndSet(true)) {
             originalVisitor.visitCatchBlock(catchLabel = label6, throwLabel = childIfNullCatch)
+            originalVisitor.visitStoreException(handler = label7, end = label8)
             instrumenting.set(false)
         } else {
             super.visitLabel(remapped)
@@ -118,38 +119,6 @@ class RoomQueryWithTransactionVisitor(
             return
         }
         super.visitVarInsn(opcode, `var`)
-    }
-
-    override fun visitFrame(
-        type: Int,
-        numLocal: Int,
-        local: Array<out Any>?,
-        numStack: Int,
-        stack: Array<out Any>?
-    ) {
-        if (type == Opcodes.F_FULL || type == Opcodes.F_NEW) {
-            // we only care about an outer try-catch block in case of nested blocks, hence, if the cursor
-            // is in locals, it's the inner finally-block to close the cursor -> skip it
-            val hasThrowableOnStack = (stack?.getOrNull(0) as? String) == "java/lang/Throwable"
-            val hasCursorInLocals =
-                local?.any { (it as? String) == "android/database/Cursor" } ?: false
-
-            /**
-             * We visit the labels in case there's a Throwable on stack AND no cursor in locals:
-             *     - It's a query within transaction and it's a finally block
-             */
-            if (hasThrowableOnStack && !hasCursorInLocals) {
-                originalVisitor.visitLabel(label7)
-                super.visitFrame(type, numLocal, local, numStack, stack)
-                val exceptionIndex = nextLocal
-                originalVisitor.visitVarInsn(Opcodes.ASTORE, exceptionIndex)
-                originalVisitor.visitLabel(label8)
-
-                skipVarVisit = true
-                return
-            }
-        }
-        super.visitFrame(type, numLocal, local, numStack, stack)
     }
 
     override fun visitLocalVariable(

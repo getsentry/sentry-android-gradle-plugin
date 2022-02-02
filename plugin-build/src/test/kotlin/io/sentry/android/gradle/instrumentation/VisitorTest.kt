@@ -58,7 +58,7 @@ class VisitorTest(
         )
         // here we visit the bytecode, so it gets modified by our instrumentation visitor
         // the ClassReader flags here are identical to those that are set by AGP and R8
-        classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES)
+        classReader.accept(classVisitor, ClassReader.SKIP_FRAMES)
 
         // after that we convert the modified bytecode with computed MAXS back to byte array
         // and pass it through CheckClassAdapter to verify that the bytecode is correct and can be accepted by JVM

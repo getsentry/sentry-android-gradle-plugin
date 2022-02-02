@@ -4,6 +4,7 @@ import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
 import io.sentry.android.gradle.instrumentation.SpanOperations
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
+import org.objectweb.asm.Opcodes
 
 abstract class AbstractRoomVisitor(
     private val className: String,
@@ -19,6 +20,7 @@ abstract class AbstractRoomVisitor(
 ) {
 
     private val startSpanIfNull = Label()
+    private var skipVarVisit = false
 
     override fun visitTryCatchBlock(start: Label?, end: Label?, handler: Label?, type: String?) {
         if (!instrumenting.get()) {
@@ -40,5 +42,22 @@ abstract class AbstractRoomVisitor(
 
         originalVisitor.visitLabel(startSpanIfNull)
         instrumenting.set(false)
+    }
+
+    protected fun MethodVisitor.visitStoreException(handler: Label, end: Label) {
+        visitLabel(handler)
+        val exceptionIndex = nextLocal
+        visitVarInsn(Opcodes.ASTORE, exceptionIndex)
+        visitLabel(end)
+
+        skipVarVisit = true
+    }
+
+    override fun visitVarInsn(opcode: Int, `var`: Int) {
+        if (skipVarVisit) {
+            skipVarVisit = false
+            return
+        }
+        super.visitVarInsn(opcode, `var`)
     }
 }
