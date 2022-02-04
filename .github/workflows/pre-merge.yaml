@@ -34,7 +34,7 @@ jobs:
             notifications
             jdks
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: preMerge --continue
+          arguments: preMerge --continue --no-daemon
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v2
