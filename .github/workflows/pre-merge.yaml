@@ -26,6 +26,7 @@ jobs:
           java-version: '11'
 
       - name: Run Gradle tasks
+        if: runner.os != 'Windows'
         uses: gradle/gradle-build-action@v2
         with:
           gradle-home-cache-includes: |
