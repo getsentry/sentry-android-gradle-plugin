@@ -8,6 +8,6 @@ compile:
 
 # build distribution artifacts
 dist:
-	./gradlew distZip --no-daemon --no-parallel
+	./gradlew distZip --no-daemon
 
 all: clean compile dist
