@@ -1,8 +1,7 @@
 package io.sentry.android.gradle.util
 
-import java.util.LinkedList
 import org.gradle.api.Project
-import org.gradle.api.artifacts.ResolvedDependency
+import org.gradle.api.artifacts.result.ResolvedComponentResult
 
 fun Project.getSentryAndroidSdkState(
     configurationName: String,
@@ -17,15 +16,9 @@ fun Project.getSentryAndroidSdkState(
         return SentryAndroidSdkState.MISSING
     }
 
-    val resolvedConfiguration = configuration.resolvedConfiguration
-    if (resolvedConfiguration.hasError()) {
-        resolvedConfiguration.rethrowFailure()
-        logger.warn { "Unable to resolve configuration $configurationName." }
-        return SentryAndroidSdkState.MISSING
-    }
+    val dependencyResolution = configuration.incoming.resolutionResult
 
-    val deps = resolvedConfiguration.firstLevelModuleDependencies
-    val version = deps.findSentryAndroidSdk()
+    val version = dependencyResolution.allComponents.findSentryAndroidSdk()
     if (version == null) {
         logger.warn { "sentry-android dependency was not found." }
         return SentryAndroidSdkState.MISSING
@@ -44,14 +37,10 @@ fun Project.getSentryAndroidSdkState(
     }
 }
 
-private fun Set<ResolvedDependency>.findSentryAndroidSdk(): String? {
-    val queue = LinkedList(this)
-    while (queue.isNotEmpty()) {
-        val dep = queue.remove()
-        if (dep.moduleGroup == "io.sentry" && dep.moduleName == "sentry-android-core") {
-            return dep.moduleVersion
-        }
-        queue.addAll(dep.children)
+private fun Set<ResolvedComponentResult>.findSentryAndroidSdk(): String? {
+    val sentryDep = find { resolvedComponent: ResolvedComponentResult ->
+        val moduleVersion = resolvedComponent.moduleVersion ?: return@find false
+        moduleVersion.group == "io.sentry" && moduleVersion.name == "sentry-android-core"
     }
-    return null
+    return sentryDep?.moduleVersion?.version
 }
