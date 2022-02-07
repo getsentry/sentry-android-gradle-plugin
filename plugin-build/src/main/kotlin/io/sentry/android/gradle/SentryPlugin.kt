@@ -23,11 +23,13 @@ import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.transforms.MetaInfStripTransform.Companion.metaInfStripped
 import io.sentry.android.gradle.util.AgpVersions
+import io.sentry.android.gradle.util.SentryAndroidSdkState
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
-import io.sentry.android.gradle.util.getSentryAndroidSdkState
+import io.sentry.android.gradle.util.detectSentryAndroidSdk
 import io.sentry.android.gradle.util.info
+import io.sentry.android.gradle.util.warn
 import java.io.File
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -231,19 +233,8 @@ class SentryPlugin : Plugin<Project> {
                 // which task we should depend on - seems like AGP starts its transforms without
                 // binding to a specific task.
                 // (and we need to know the SDK version before the transforms are executed)
-                project.afterEvaluate {
-                    if (extension.tracingInstrumentation.enabled.get()) {
-                        val sdkState = project.getSentryAndroidSdkState(
-                            variant.runtimeConfiguration.name,
-                            variant.name
-                        )
-                        writeJsonFile(
-                            project.file(
-                                File(project.buildDir, buildSdkStateFilePath(variant.name))
-                            ),
-                            sdkState
-                        )
-                    }
+                if (extension.tracingInstrumentation.enabled.get()) {
+                    project.detectSentryAndroidSdk(variant.runtimeConfiguration.name, variant.name)
                 }
 
                 /**

@@ -1,39 +1,60 @@
 package io.sentry.android.gradle.util
 
+import com.android.build.gradle.internal.cxx.json.writeJsonFile
+import io.sentry.android.gradle.SentryPlugin
+import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 
-fun Project.getSentryAndroidSdkState(
+fun Project.detectSentryAndroidSdk(
     configurationName: String,
     variantName: String
-): SentryAndroidSdkState {
-    val configuration = configurations.findByName(configurationName)
+) {
+    val configProvider = configurations.named(configurationName)
 
-    if (configuration == null) {
+    if (!configProvider.isPresent) {
         logger.warn {
             "Unable to find configuration $configurationName for variant $variantName."
         }
-        return SentryAndroidSdkState.MISSING
+        writeJsonFile(
+            project.file(File(project.buildDir, SentryPlugin.buildSdkStateFilePath(variantName))),
+            SentryAndroidSdkState.MISSING
+        )
+        return
     }
 
-    val dependencyResolution = configuration.incoming.resolutionResult
+    configProvider.configure { configuration ->
+        configuration.incoming.afterResolve {
+            val version = it.resolutionResult.allComponents.findSentryAndroidSdk()
+            if (version == null) {
+                logger.warn { "sentry-android dependency was not found." }
+                writeJsonFile(
+                    project.file(
+                        File(project.buildDir, SentryPlugin.buildSdkStateFilePath(variantName))
+                    ),
+                    SentryAndroidSdkState.MISSING
+                )
+                return@afterResolve
+            }
 
-    val version = dependencyResolution.allComponents.findSentryAndroidSdk()
-    if (version == null) {
-        logger.warn { "sentry-android dependency was not found." }
-        return SentryAndroidSdkState.MISSING
-    }
-
-    return try {
-        val sdkState = SentryAndroidSdkState.from(version)
-        logger.info {
-            "Detected sentry-android $sdkState for version: $version, " +
-                "variant: $variantName, config: $configurationName"
+            val state = try {
+                val sdkState = SentryAndroidSdkState.from(version)
+                logger.info {
+                    "Detected sentry-android $sdkState for version: $version, " +
+                        "variant: $variantName, config: $configurationName"
+                }
+                sdkState
+            } catch (e: IllegalStateException) {
+                logger.warn { e.localizedMessage }
+                SentryAndroidSdkState.MISSING
+            }
+            writeJsonFile(
+                project.file(
+                    File(project.buildDir, SentryPlugin.buildSdkStateFilePath(variantName))
+                ),
+                state
+            )
         }
-        sdkState
-    } catch (e: IllegalStateException) {
-        logger.warn { e.localizedMessage }
-        SentryAndroidSdkState.MISSING
     }
 }
 
