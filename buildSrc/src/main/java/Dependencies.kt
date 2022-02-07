@@ -1,5 +1,5 @@
 object BuildPluginsVersion {
-    val AGP = System.getenv("VERSION_AGP") ?: "7.0.3"
+    val AGP = System.getenv("VERSION_AGP") ?: "7.1.0"
     const val DOKKA = "1.4.32"
     const val KOTLIN = "1.4.32"
     const val AAR_2_JAR = "0.6"
@@ -12,7 +12,7 @@ object BuildPluginsVersion {
 
 object LibsVersion {
     const val JUNIT = "4.13.2"
-    const val ASM = "9.2"
+    const val ASM = "7.0" // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
     const val SQLITE = "2.1.0"
     const val SENTRY = "5.5.0"
 }
