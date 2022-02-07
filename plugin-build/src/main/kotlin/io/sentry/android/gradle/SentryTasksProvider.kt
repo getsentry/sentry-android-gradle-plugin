@@ -4,6 +4,7 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
 import com.android.build.gradle.tasks.PackageAndroidArtifact
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
+import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
@@ -22,6 +23,8 @@ internal object SentryTasksProvider {
     @JvmStatic
     fun getTransformerTask(project: Project, variantName: String): TaskProvider<Task>? =
         project.findTask(
+            // We prioritize the Guardsquare's Proguard task towards the AGP ones.
+            "transformClassesAndResourcesWithProguardTransformFor${variantName.capitalized}",
             // AGP 3.3 includes the R8 shrinker.
             "minify${variantName.capitalized}WithR8",
             "minify${variantName.capitalized}WithProguard"
@@ -81,8 +84,22 @@ internal object SentryTasksProvider {
      * @return the provider if found or null otherwise
      */
     @JvmStatic
-    fun getMappingFileProvider(variant: ApplicationVariant): Provider<FileCollection> =
+    fun getMappingFileProvider(
+        project: Project,
+        variant: ApplicationVariant
+    ): Provider<FileCollection> = if (project.plugins.hasPlugin("com.guardsquare.proguard")) {
+        val sep = File.separator
+        project.provider {
+            project.files(
+                File(
+                    project.buildDir,
+                    "outputs${sep}proguard${sep}${variant.name}${sep}mapping${sep}mapping.txt"
+                )
+            )
+        }
+    } else {
         variant.mappingFileProvider
+    }
 
     /**
      * Returns the package provider

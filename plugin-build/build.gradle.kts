@@ -31,6 +31,7 @@ val testImplementationAar by configurations.getting // this converts .aar into .
 dependencies {
     compileOnly(gradleApi())
     compileOnly(Libs.AGP)
+    compileOnly(Libs.PROGUARD)
 
     compileOnly(Libs.ASM)
     compileOnly(Libs.ASM_COMMONS)
@@ -38,6 +39,7 @@ dependencies {
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(Libs.AGP)
+    testImplementation(Libs.PROGUARD)
     testImplementation(Libs.JUNIT)
     testImplementation(Libs.MOCKITO_KOTLIN)
 

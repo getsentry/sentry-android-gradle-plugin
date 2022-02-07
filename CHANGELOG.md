@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Feature: Add support for GuardSquare's Proguard (#263)
+
 ## 3.0.0-beta.4
 
 * Fix: Strip out unsupported java classes from META-INF/ (so AGP does not fail before our code is reached) (#264)

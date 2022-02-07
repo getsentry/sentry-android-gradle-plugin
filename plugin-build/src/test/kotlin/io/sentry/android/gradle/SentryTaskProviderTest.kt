@@ -30,6 +30,15 @@ class SentryTaskProviderTest {
     }
 
     @Test
+    fun `getTransformerTask returns transformClassesAndResources for standalone Proguard`() {
+        val (project, task) = getTestProjectWithTask(
+            "transformClassesAndResourcesWithProguardTransformForDebug"
+        )
+
+        assertEquals(task, getTransformerTask(project, "debug")?.get())
+    }
+
+    @Test
     fun `getTransformerTask returns minify for R8`() {
         val (project, task) = getTestProjectWithTask("minifyDebugWithR8")
 
@@ -37,10 +46,21 @@ class SentryTaskProviderTest {
     }
 
     @Test
-    fun `getTransformerTask returns minify for Proguard`() {
+    fun `getTransformerTask returns minify for embedded Proguard`() {
         val (project, task) = getTestProjectWithTask("minifyDebugWithProguard")
 
         assertEquals(task, getTransformerTask(project, "debug")?.get())
+    }
+
+    @Test
+    fun `getTransformerTask gives standalone Proguard priority`() {
+        val (project, _) = getTestProjectWithTask("minifyDebugWithR8")
+        project.tasks.register("transformClassesAndResourcesWithProguardTransformForDebug")
+
+        assertEquals(
+            "transformClassesAndResourcesWithProguardTransformForDebug",
+            getTransformerTask(project, "debug")?.get()?.name
+        )
     }
 
     @Test
