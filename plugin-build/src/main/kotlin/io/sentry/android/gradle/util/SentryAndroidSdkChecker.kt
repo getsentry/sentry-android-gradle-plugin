@@ -1,14 +1,14 @@
 package io.sentry.android.gradle.util
 
-import com.android.build.gradle.internal.cxx.json.writeJsonFile
-import io.sentry.android.gradle.SentryPlugin
-import java.io.File
+import io.sentry.android.gradle.services.SentrySdkStateHolder
 import org.gradle.api.Project
 import org.gradle.api.artifacts.result.ResolvedComponentResult
+import org.gradle.api.provider.Provider
 
 fun Project.detectSentryAndroidSdk(
     configurationName: String,
-    variantName: String
+    variantName: String,
+    sdkStateHolder: Provider<SentrySdkStateHolder>
 ) {
     val configProvider = configurations.named(configurationName)
 
@@ -16,10 +16,7 @@ fun Project.detectSentryAndroidSdk(
         logger.warn {
             "Unable to find configuration $configurationName for variant $variantName."
         }
-        writeJsonFile(
-            project.file(File(project.buildDir, SentryPlugin.buildSdkStateFilePath(variantName))),
-            SentryAndroidSdkState.MISSING
-        )
+        sdkStateHolder.get().sdkState = SentryAndroidSdkState.MISSING
         return
     }
 
@@ -28,12 +25,7 @@ fun Project.detectSentryAndroidSdk(
             val version = it.resolutionResult.allComponents.findSentryAndroidSdk()
             if (version == null) {
                 logger.warn { "sentry-android dependency was not found." }
-                writeJsonFile(
-                    project.file(
-                        File(project.buildDir, SentryPlugin.buildSdkStateFilePath(variantName))
-                    ),
-                    SentryAndroidSdkState.MISSING
-                )
+                sdkStateHolder.get().sdkState = SentryAndroidSdkState.MISSING
                 return@afterResolve
             }
 
@@ -48,12 +40,7 @@ fun Project.detectSentryAndroidSdk(
                 logger.warn { e.localizedMessage }
                 SentryAndroidSdkState.MISSING
             }
-            writeJsonFile(
-                project.file(
-                    File(project.buildDir, SentryPlugin.buildSdkStateFilePath(variantName))
-                ),
-                state
-            )
+            sdkStateHolder.get().sdkState = state
         }
     }
 }

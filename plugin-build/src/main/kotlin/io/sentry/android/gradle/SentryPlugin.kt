@@ -4,7 +4,6 @@ import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AppExtension
-import com.android.build.gradle.internal.cxx.json.writeJsonFile
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
@@ -17,19 +16,18 @@ import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
+import io.sentry.android.gradle.services.SentrySdkStateHolder
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.transforms.MetaInfStripTransform.Companion.metaInfStripped
 import io.sentry.android.gradle.util.AgpVersions
-import io.sentry.android.gradle.util.SentryAndroidSdkState
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
 import io.sentry.android.gradle.util.detectSentryAndroidSdk
 import io.sentry.android.gradle.util.info
-import io.sentry.android.gradle.util.warn
 import java.io.File
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -75,6 +73,21 @@ class SentryPlugin : Plugin<Project> {
                         variant.buildType
                     ) && extension.tracingInstrumentation.enabled.get()
                 ) {
+                    /**
+                     * We detect sentry-android SDK version using configurations.incoming.afterResolve.
+                     * This is guaranteed to be executed BEFORE any of the build tasks/transforms are started.
+                     *
+                     * After detecting the sdk state, we use Gradle's shared build service to persist
+                     * the state between builds and also during a single build, because transforms
+                     * are run in parallel.
+                     */
+                    val sdkStateHolderProvider = SentrySdkStateHolder.register(project)
+                    project.detectSentryAndroidSdk(
+                        "${variant.name}RuntimeClasspath",
+                        variant.name,
+                        sdkStateHolderProvider
+                    )
+
                     variant.transformClassesWith(
                         SpanAddingClassVisitorFactory::class.java,
                         InstrumentationScope.ALL
@@ -88,16 +101,37 @@ class SentryPlugin : Plugin<Project> {
                         params.features.setDisallowChanges(
                             extension.tracingInstrumentation.features.get()
                         )
-                        params.sdkStateFile.set(
-                            project.file(
-                                File(project.buildDir, buildSdkStateFilePath(variant.name))
-                            )
-                        )
+                        params.sdkStateHolder.set(sdkStateHolderProvider)
                         params.tmpDir.set(tmpDir)
                     }
                     variant.setAsmFramesComputationMode(
                         FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
                     )
+
+                    /**
+                     * This necessary to address the issue when target app uses a multi-release jar
+                     * (MR-JAR) as a dependency. https://github.com/getsentry/sentry-android-gradle-plugin/issues/256
+                     *
+                     * We register a transform (https://docs.gradle.org/current/userguide/artifact_transforms.html)
+                     * that will strip-out unnecessary files from the MR-JAR, so the AGP transforms
+                     * will consume corrected artifacts. We only do this when auto-instrumentation is
+                     * enabled (otherwise there's no need in this fix) AND when AGP version
+                     * is below 7.2.0-alpha06, where this issue has been fixed.
+                     * (https://issuetracker.google.com/issues/206655905#comment5)
+                     */
+                    if (extension.tracingInstrumentation.enabled.get() &&
+                        AgpVersions.CURRENT < AgpVersions.VERSION_7_2_0_alpha06
+                    ) {
+                        project.configurations.all {
+                            // request metaInfStripped attribute for all configurations to trigger our
+                            // transform
+                            it.attributes.attribute(metaInfStripped, true)
+                        }
+                        MetaInfStripTransform.register(
+                            project.dependencies,
+                            extension.tracingInstrumentation.forceInstrumentDependencies.get()
+                        )
+                    }
                 }
             }
 
@@ -226,40 +260,6 @@ class SentryPlugin : Plugin<Project> {
                     bundleTask?.configure { it.finalizedBy(uploadSentryNativeSymbolsTask) }
                 } else {
                     project.logger.info { "uploadSentryNativeSymbols won't be executed" }
-                }
-
-                // dependency configuration can only be resolved after the configuration/evaluation
-                // phase is done. Ideally this would've been a task, but it was hard finding out
-                // which task we should depend on - seems like AGP starts its transforms without
-                // binding to a specific task.
-                // (and we need to know the SDK version before the transforms are executed)
-                if (extension.tracingInstrumentation.enabled.get()) {
-                    project.detectSentryAndroidSdk(variant.runtimeConfiguration.name, variant.name)
-                }
-
-                /**
-                 * This necessary to address the issue when target app uses a multi-release jar
-                 * (MR-JAR) as a dependency. https://github.com/getsentry/sentry-android-gradle-plugin/issues/256
-                 *
-                 * We register a transform (https://docs.gradle.org/current/userguide/artifact_transforms.html)
-                 * that will strip-out unnecessary files from the MR-JAR, so the AGP transforms
-                 * will consume corrected artifacts. We only do this when auto-instrumentation is
-                 * enabled (otherwise there's no need in this fix) AND when AGP version
-                 * is below 7.2.0-alpha06, where this issue has been fixed.
-                 * (https://issuetracker.google.com/issues/206655905#comment5)
-                 */
-                if (extension.tracingInstrumentation.enabled.get() &&
-                    AgpVersions.CURRENT < AgpVersions.VERSION_7_2_0_alpha06
-                ) {
-                    project.configurations.all {
-                        // request metaInfStripped attribute for all configurations to trigger our
-                        // transform
-                        it.attributes.attribute(metaInfStripped, true)
-                    }
-                    MetaInfStripTransform.register(
-                        project.dependencies,
-                        extension.tracingInstrumentation.forceInstrumentDependencies.get()
-                    )
                 }
             }
         }

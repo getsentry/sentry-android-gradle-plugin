@@ -4,7 +4,6 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
-import com.android.build.gradle.internal.cxx.json.readJsonFile
 import io.sentry.android.gradle.InstrumentationFeature
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
@@ -12,6 +11,7 @@ import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.Android
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
+import io.sentry.android.gradle.services.SentrySdkStateHolder
 import io.sentry.android.gradle.util.SentryAndroidSdkState
 import io.sentry.android.gradle.util.SentryAndroidSdkState.FILE_IO
 import io.sentry.android.gradle.util.SentryAndroidSdkState.PERFORMANCE
@@ -19,15 +19,11 @@ import io.sentry.android.gradle.util.debug
 import io.sentry.android.gradle.util.info
 import io.sentry.android.gradle.util.warn
 import java.io.File
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
 import org.objectweb.asm.ClassVisitor
 
 @Suppress("UnstableApiUsage")
@@ -51,9 +47,8 @@ abstract class SpanAddingClassVisitorFactory :
         @get:Input
         val features: SetProperty<InstrumentationFeature>
 
-        @get:PathSensitive(value = PathSensitivity.NONE)
-        @get:InputFile
-        val sdkStateFile: RegularFileProperty
+        @get:Internal
+        val sdkStateHolder: Property<SentrySdkStateHolder>
 
         @get:Internal
         val tmpDir: Property<File>
@@ -72,10 +67,7 @@ abstract class SpanAddingClassVisitorFactory :
                 return memoized
             }
 
-            val sdkState = readJsonFile(
-                parameters.get().sdkStateFile.get().asFile,
-                SentryAndroidSdkState::class.java
-            )
+            val sdkState = parameters.get().sdkStateHolder.get().sdkState
             SentryPlugin.logger.info { "Read sentry-android sdk state: $sdkState" }
             /**
              * When adding a new instrumentable to the list below, do not forget to add a new
