@@ -25,19 +25,28 @@ internal object SentryPluginUtils {
         substring(0, 1).toUpperCase(Locale.US) + substring(1)
     }
 
-    fun isMinificationEnabled(project: Project, variant: ApplicationVariant): Boolean {
-        var isConfiguredWithGuardsquareProguard = false
-        project.plugins.withId("com.guardsquare.proguard") {
-            val proguardExtension = project.extensions.getByType(
-                ProGuardAndroidExtension::class.java
+    fun isMinificationEnabled(
+        project: Project,
+        variant: ApplicationVariant,
+        experimentalGuardsquareSupport: Boolean = false
+    ): Boolean {
+        if (experimentalGuardsquareSupport) {
+            var isConfiguredWithGuardsquareProguard = false
+            project.plugins.withId("com.guardsquare.proguard") {
+                val proguardExtension = project.extensions.getByType(
+                    ProGuardAndroidExtension::class.java
+                )
+                val variantConfiguration = proguardExtension.configurations.findByName(variant.name)
+                isConfiguredWithGuardsquareProguard = variantConfiguration != null
+            }
+            val isConfiguredWithGuardsquareDexguard = isDexguardEnabledForVariant(
+                project,
+                variant.name
             )
-            val variantConfiguration = proguardExtension.configurations.findByName(variant.name)
-            isConfiguredWithGuardsquareProguard = variantConfiguration != null
+            if (isConfiguredWithGuardsquareProguard || isConfiguredWithGuardsquareDexguard) {
+                return true
+            }
         }
-        val isConfiguredWithGuardsquareDexguard = isDexguardEnabledForVariant(project, variant.name)
-
-        return isConfiguredWithGuardsquareProguard ||
-            isConfiguredWithGuardsquareDexguard ||
-            variant.buildType.isMinifyEnabled
+        return variant.buildType.isMinifyEnabled
     }
 }
