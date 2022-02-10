@@ -101,7 +101,7 @@ class SentryPlugin : Plugin<Project> {
                         params.features.setDisallowChanges(
                             extension.tracingInstrumentation.features.get()
                         )
-                        params.sdkStateHolder.set(sdkStateHolderProvider)
+                        params.sdkStateHolder.setDisallowChanges(sdkStateHolderProvider)
                         params.tmpDir.set(tmpDir)
                     }
                     variant.setAsmFramesComputationMode(
@@ -281,8 +281,6 @@ class SentryPlugin : Plugin<Project> {
         const val SENTRY_PROJECT_PARAMETER = "sentryProject"
 
         internal val sep = File.separator
-        internal fun buildSdkStateFilePath(variantName: String) =
-            "intermediates${sep}sentry${sep}sdk-state-$variantName.json"
 
         // a single unified logger used by instrumentation
         internal val logger by lazy {
