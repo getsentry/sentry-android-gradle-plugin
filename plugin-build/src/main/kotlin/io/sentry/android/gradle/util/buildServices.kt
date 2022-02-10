@@ -16,9 +16,11 @@ fun <ServiceT : BuildService<out BuildServiceParameters>> getBuildService(
     buildServiceClass: Class<ServiceT>
 ): Provider<ServiceT> {
     @Suppress("UNCHECKED_CAST")
-    return (buildServiceRegistry.registrations.getByName(
-        getBuildServiceName(buildServiceClass)
-    ) as BuildServiceRegistration<ServiceT, *>).getService()
+    return (
+        buildServiceRegistry.registrations.getByName(
+            getBuildServiceName(buildServiceClass)
+        ) as BuildServiceRegistration<ServiceT, *>
+        ).getService()
 }
 
 /*

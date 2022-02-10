@@ -33,6 +33,7 @@ class SentryPluginCheckAndroidSdkTest(
         val result = runner
             .appendArguments("app:tasks")
             .buildAndFail()
+        /* ktlint-disable max-line-length */
         assertTrue {
             result.output.contains(
                 Regex(
@@ -40,6 +41,7 @@ class SentryPluginCheckAndroidSdkTest(
                 )
             )
         }
+        /* ktlint-enable max-line-length */
     }
 
     @Test
