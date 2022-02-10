@@ -2,6 +2,7 @@ package io.sentry.android.gradle.util
 
 import io.sentry.android.gradle.services.SentrySdkStateHolder
 import org.gradle.api.Project
+import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.provider.Provider
 
@@ -10,9 +11,9 @@ fun Project.detectSentryAndroidSdk(
     variantName: String,
     sdkStateHolder: Provider<SentrySdkStateHolder>
 ) {
-    val configProvider = configurations.named(configurationName)
-
-    if (!configProvider.isPresent) {
+    val configProvider = try {
+        configurations.named(configurationName)
+    } catch (e: UnknownDomainObjectException) {
         logger.warn {
             "Unable to find configuration $configurationName for variant $variantName."
         }
