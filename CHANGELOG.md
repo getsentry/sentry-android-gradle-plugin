@@ -4,6 +4,7 @@
 
 * Feature: Add support for GuardSquare's Proguard (#263)
 * Feature: Add support for GuardSquare's Dexguard (#267)
+* Fix: Do not resolve dependencies at configuration time (#278)
 
 ## 3.0.0-beta.4
 

@@ -1,8 +1,5 @@
 package io.sentry.android.gradle
 
-import com.android.build.gradle.internal.cxx.json.readJsonFile
-import io.sentry.android.gradle.util.SentryAndroidSdkState
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,15 +23,25 @@ class SentryPluginCheckAndroidSdkTest(
             }
 
             sentry.tracingInstrumentation.enabled = false
+
+            ${captureSdkState()}
             """.trimIndent()
         )
 
-        runner
+        // we query the SdkStateHolder intentionally so the build fails, which confirms that the
+        // service was not registered
+        val result = runner
             .appendArguments("app:tasks")
-            .build()
-        val sdkStateFile = testProjectDir.root
-            .resolve("app/build/${SentryPlugin.buildSdkStateFilePath("debug")}")
-        assertFalse { sdkStateFile.exists() }
+            .buildAndFail()
+        /* ktlint-disable max-line-length */
+        assertTrue {
+            result.output.contains(
+                Regex(
+                    """[BuildServiceRegistration with name 'io.sentry.android.gradle.services.SentrySdkStateHolder_(\w*)' not found]"""
+                )
+            )
+        }
+        /* ktlint-enable max-line-length */
     }
 
     @Test
@@ -49,20 +56,16 @@ class SentryPluginCheckAndroidSdkTest(
 
             sentry.tracingInstrumentation.enabled = true
             sentry.includeProguardMapping = false
+
+            ${captureSdkState()}
             """.trimIndent()
         )
 
-        runner
+        val result = runner
             .appendArguments("app:tasks")
             .build()
-        val sdkStateFile = testProjectDir.root
-            .resolve("app/build/${SentryPlugin.buildSdkStateFilePath("debug")}")
         assertTrue {
-            sdkStateFile.exists() &&
-                readJsonFile(
-                    sdkStateFile,
-                    SentryAndroidSdkState::class.java
-                ) == SentryAndroidSdkState.MISSING
+            "SDK STATE: MISSING" in result.output
         }
     }
 
@@ -90,31 +93,29 @@ class SentryPluginCheckAndroidSdkTest(
               debugImplementation 'io.sentry:sentry-android:5.4.0'
               releaseImplementation 'io.sentry:sentry-android:5.5.0'
             }
+
+            ${captureSdkState()}
             """.trimIndent()
         )
 
-        runner
-            .appendArguments("app:tasks")
+        val result = runner
+            .appendArguments("app:assembleDebug")
             .build()
 
-        val sdkStateFileDebug = testProjectDir.root
-            .resolve("app/build/${SentryPlugin.buildSdkStateFilePath("debug")}")
-        val sdkStateFileRelease = testProjectDir.root
-            .resolve("app/build/${SentryPlugin.buildSdkStateFilePath("release")}")
-
-        assertTrue {
-            sdkStateFileDebug.exists() &&
-                readJsonFile(
-                    sdkStateFileDebug,
-                    SentryAndroidSdkState::class.java
-                ) == SentryAndroidSdkState.PERFORMANCE
-        }
-        assertTrue {
-            sdkStateFileRelease.exists() &&
-                readJsonFile(
-                    sdkStateFileRelease,
-                    SentryAndroidSdkState::class.java
-                ) == SentryAndroidSdkState.FILE_IO
-        }
+        print(result.output)
     }
+
+    private fun captureSdkState(): String =
+        // language=Groovy
+        """
+        import io.sentry.android.gradle.util.*
+        import io.sentry.android.gradle.services.*
+        project.gradle.buildFinished {
+          println(
+            "SDK STATE: " + BuildServicesKt
+              .getBuildService(project.gradle.sharedServices, SentrySdkStateHolder.class)
+              .get().sdkState
+          )
+        }
+        """.trimIndent()
 }
