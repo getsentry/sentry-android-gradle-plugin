@@ -2,8 +2,6 @@ package io.sentry.android.gradle
 
 import kotlin.test.assertTrue
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
 class SentryPluginWithFirebaseTest :
     BaseSentryPluginTest(androidGradlePluginVersion = "7.1.0", gradleVersion = "7.3.3") {
