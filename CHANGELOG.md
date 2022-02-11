@@ -3,6 +3,7 @@
 ## Unreleased
 
 * Feature: Add support for GuardSquare's Proguard (#263)
+* Fix: Do not resolve dependencies at configuration time (#278)
 
 ## 3.0.0-beta.4
 
