@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.util
 
 import com.android.build.gradle.api.ApplicationVariant
+import io.sentry.android.gradle.util.GroovyCompat.isDexguardEnabledForVariant
 import java.util.Locale
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -33,6 +34,10 @@ internal object SentryPluginUtils {
             val variantConfiguration = proguardExtension.configurations.findByName(variant.name)
             isConfiguredWithGuardsquareProguard = variantConfiguration != null
         }
-        return isConfiguredWithGuardsquareProguard || variant.buildType.isMinifyEnabled
+        val isConfiguredWithGuardsquareDexguard = isDexguardEnabledForVariant(project, variant.name)
+
+        return isConfiguredWithGuardsquareProguard ||
+            isConfiguredWithGuardsquareDexguard ||
+            variant.buildType.isMinifyEnabled
     }
 }

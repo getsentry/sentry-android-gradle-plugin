@@ -3,6 +3,7 @@ package io.sentry.android.gradle
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
 import com.android.build.gradle.tasks.PackageAndroidArtifact
+import io.sentry.android.gradle.util.GroovyCompat.isDexguardAvailable
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import java.io.File
 import org.gradle.api.Project
@@ -87,19 +88,35 @@ internal object SentryTasksProvider {
     fun getMappingFileProvider(
         project: Project,
         variant: ApplicationVariant
-    ): Provider<FileCollection> = if (project.plugins.hasPlugin("com.guardsquare.proguard")) {
-        val sep = File.separator
-        project.provider {
-            project.files(
-                File(
-                    project.buildDir,
-                    "outputs${sep}proguard${sep}${variant.name}${sep}mapping${sep}mapping.txt"
+    ): Provider<FileCollection> =
+        if (project.plugins.hasPlugin("com.guardsquare.proguard") || isDexguardAvailable(project)) {
+            val sep = File.separator
+            val fileCollection = if (project.plugins.hasPlugin("com.guardsquare.proguard")) {
+                project.files(
+                    File(
+                        project.buildDir,
+                        "outputs${sep}proguard${sep}${variant.name}${sep}mapping${sep}mapping.txt"
+                    )
                 )
-            )
+            } else {
+                // For DexGuard the mapping file can either be inside the /apk or the /bundle folder
+                // (depends on the task that generated it).
+                val mappingDir = "outputs${sep}dexguard${sep}mapping$sep"
+                project.files(
+                    File(
+                        project.buildDir,
+                        "${mappingDir}apk${sep}${variant.name}${sep}mapping.txt"
+                    ),
+                    File(
+                        project.buildDir,
+                        "${mappingDir}bundle${sep}${variant.name}${sep}mapping.txt"
+                    )
+                )
+            }
+            project.provider { fileCollection }
+        } else {
+            variant.mappingFileProvider
         }
-    } else {
-        variant.mappingFileProvider
-    }
 
     /**
      * Returns the package provider
@@ -122,5 +139,5 @@ internal object SentryTasksProvider {
             }
             .firstOrNull()
 
-    private val String.capitalized: String get() = this.capitalizeUS()
+    internal val String.capitalized: String get() = this.capitalizeUS()
 }
