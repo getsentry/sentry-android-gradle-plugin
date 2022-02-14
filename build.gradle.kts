@@ -46,12 +46,6 @@ tasks.register("preMerge") {
     dependsOn(gradle.includedBuild("plugin-build").task(":check"))
 }
 
-tasks.register("closeAndReleaseRepository") {
-    description = "Runs closeAndReleaseRepository for plugin-build"
-
-    dependsOn(gradle.includedBuild("plugin-build").task(":closeAndReleaseRepository"))
-}
-
 tasks.getByName("ktlintFormat") {
     dependsOn(gradle.includedBuild("plugin-build").task(":ktlintFormat"))
 }
