@@ -50,8 +50,6 @@ android {
 // }
 
 dependencies {
-    implementation(Libs.SENTRY_ANDROID)
-
     implementation(Samples.AndroidX.recyclerView)
     implementation(Samples.AndroidX.lifecycle)
     implementation(Samples.AndroidX.appcompat)
