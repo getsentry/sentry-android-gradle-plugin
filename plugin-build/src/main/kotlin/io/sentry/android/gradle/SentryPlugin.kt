@@ -295,6 +295,10 @@ class SentryPlugin : Plugin<Project> {
 
             project.installDependencies(extension)
         }
+
+        if (extension.autoInstallation.enabled.get()) {
+            project.installDependencies(extension)
+        }
     }
 
     private fun isVariantAllowed(
