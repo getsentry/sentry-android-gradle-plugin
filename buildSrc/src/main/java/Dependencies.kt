@@ -60,4 +60,9 @@ object Samples {
         const val compiler = "androidx.room:room-compiler:${version}"
         const val rxjava = "androidx.room:room-rxjava2:${version}"
     }
+
+    object OkHttp {
+        private const val version = "4.9.3"
+        const val okhttp = "con.squareup.okhttp3:okhttp:${version}"
+    }
 }

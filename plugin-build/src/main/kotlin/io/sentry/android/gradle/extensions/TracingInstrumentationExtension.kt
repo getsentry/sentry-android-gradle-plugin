@@ -1,4 +1,4 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.extensions
 
 import javax.inject.Inject
 import org.gradle.api.model.ObjectFactory
