@@ -1,19 +1,20 @@
 package io.sentry.android.gradle.autoinstall
 
 import io.sentry.android.gradle.autoinstall.okhttp.OkHttpInstallStrategy
+import io.sentry.android.gradle.autoinstall.okhttp.OkHttpInstallStrategy.Registrar.SENTRY_OKHTTP_ID
+import io.sentry.android.gradle.autoinstall.timber.TimberInstallStrategy
+import io.sentry.android.gradle.autoinstall.timber.TimberInstallStrategy.Registrar.SENTRY_TIMBER_ID
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.util.info
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
 
-private const val SENTRY_GROUP = "io.sentry"
+internal const val SENTRY_GROUP = "io.sentry"
 private const val SENTRY_ANDROID_ID = "sentry-android"
-private const val SENTRY_OKHTTP_ID = "sentry-android-okhttp"
-private const val SENTRY_TIMBER_ID = "sentry-android-timber"
-private const val SENTRY_FRAGMENT_ID = "sentry-android-fragment"
 
-private val strategies = listOf<InstallStrategyRegistrar>(
-    OkHttpInstallStrategy.Registrar
+private val strategies = listOf(
+    OkHttpInstallStrategy.Registrar,
+    TimberInstallStrategy.Registrar
 )
 
 fun Project.installDependencies(extension: SentryPluginExtension) {
@@ -23,11 +24,12 @@ fun Project.installDependencies(extension: SentryPluginExtension) {
             sentryVersion = installSentrySdk(sentryVersion, dependencies, extension)
 
             val installOkHttp = !dependencies.isModuleAvailable(SENTRY_OKHTTP_ID)
+            val installTimber = !dependencies.isModuleAvailable(SENTRY_TIMBER_ID)
             AutoInstallState.apply {
                 this.sentryVersion = sentryVersion
                 this.installOkHttp = installOkHttp
                 this.installFragment = false
-                this.installTimber = false
+                this.installTimber = installTimber
             }
         }
     }

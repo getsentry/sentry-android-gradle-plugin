@@ -63,6 +63,11 @@ object Samples {
 
     object OkHttp {
         private const val version = "4.9.3"
-        const val okhttp = "con.squareup.okhttp3:okhttp:${version}"
+        const val okhttp = "com.squareup.okhttp3:okhttp:${version}"
+    }
+
+    object Timber {
+        private const val version = "5.0.1"
+        const val timber = "com.jakewharton.timber:timber:${version}"
     }
 }
