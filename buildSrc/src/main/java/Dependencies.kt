@@ -70,4 +70,9 @@ object Samples {
         private const val version = "5.0.1"
         const val timber = "com.jakewharton.timber:timber:${version}"
     }
+
+    object Fragment {
+        private const val version = "1.3.5"
+        const val fragmentKtx = "androidx.fragment:fragment-ktx:${version}"
+    }
 }
