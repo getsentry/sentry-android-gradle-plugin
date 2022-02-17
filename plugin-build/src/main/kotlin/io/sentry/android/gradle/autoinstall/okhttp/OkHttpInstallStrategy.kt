@@ -13,22 +13,32 @@ import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.dsl.ComponentMetadataHandler
+import org.slf4j.Logger
 
 //@CacheableRule
 abstract class OkHttpInstallStrategy @Inject constructor(
     private val autoInstallState: AutoInstallState
 ) : ComponentMetadataRule {
 
+    private var logger: Logger = SentryPlugin.logger
+
+    constructor(
+        autoInstallState: AutoInstallState,
+        logger: Logger
+    ) : this(autoInstallState) {
+        this.logger = logger
+    }
+
     override fun execute(context: ComponentMetadataContext) {
         if (!autoInstallState.installOkHttp) {
-            SentryPlugin.logger.info {
+            logger.info {
                 "sentry-android-okhttp won't be installed because it was already installed directly"
             }
             return
         }
         val semVer = SemVer.parse(context.details.id.version)
         if (semVer < MIN_SUPPORTED_VERSION) {
-            SentryPlugin.logger.warn {
+            logger.warn {
                 "$SENTRY_OKHTTP_ID won't be installed because the current okhttp version is " +
                     "lower than the minimum supported version ($MIN_SUPPORTED_VERSION)"
             }
@@ -40,7 +50,7 @@ abstract class OkHttpInstallStrategy @Inject constructor(
                 val sentryVersion = autoInstallState.sentryVersion
                 dependencies.add("$SENTRY_GROUP:$SENTRY_OKHTTP_ID:$sentryVersion")
 
-                SentryPlugin.logger.info {
+                logger.info {
                     "$SENTRY_OKHTTP_ID is successfully installed with version: $sentryVersion"
                 }
             }

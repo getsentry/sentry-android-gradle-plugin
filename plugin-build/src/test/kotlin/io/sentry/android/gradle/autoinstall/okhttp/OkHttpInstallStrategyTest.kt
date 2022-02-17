@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.autoinstall.timber
+package io.sentry.android.gradle.autoinstall.okhttp
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.check
@@ -21,7 +21,7 @@ import org.gradle.api.artifacts.VariantMetadata
 import org.junit.Test
 import org.slf4j.Logger
 
-class TimberInstallStrategyTest {
+class OkHttpInstallStrategyTest {
     class Fixture {
         val logger = CapturingTestLogger()
         val dependencies = mock<DirectDependenciesMetadata>()
@@ -40,68 +40,68 @@ class TimberInstallStrategyTest {
         }
 
         fun getSut(
-            installTimber: Boolean = true,
-            timberVersion: String = "4.7.1"
-        ): TimberInstallStrategy {
+            installOkHttp: Boolean = true,
+            okHttpVersion: String = "4.9.3"
+        ): OkHttpInstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
-                whenever(it.version).doReturn(timberVersion)
+                whenever(it.version).doReturn(okHttpVersion)
             }
             whenever(metadataDetails.id).thenReturn(id)
 
             val autoInstallState = AutoInstallState.apply {
-                AutoInstallState.installTimber = installTimber
-                sentryVersion = "5.6.1"
+                this.installOkHttp = installOkHttp
+                this.sentryVersion = "5.6.1"
             }
-            return TimberInstallStrategyImpl(autoInstallState, logger)
+            return OkHttpInstallStrategyImpl(autoInstallState, logger)
         }
     }
 
     private val fixture = Fixture()
 
     @Test
-    fun `when sentry-android-timber is a direct dependency logs a message and does nothing`() {
-        val sut = fixture.getSut(installTimber = false)
+    fun `when sentry-android-okhttp is a direct dependency logs a message and does nothing`() {
+        val sut = fixture.getSut(installOkHttp = false)
         sut.execute(fixture.metadataContext)
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-android-timber won't be installed because it was already " +
+                "[sentry] sentry-android-okhttp won't be installed because it was already " +
                 "installed directly"
         }
         verify(fixture.metadataContext, never()).details
     }
 
     @Test
-    fun `when timber version is unsupported logs a message and does nothing`() {
-        val sut = fixture.getSut(timberVersion = "4.5.0")
+    fun `when okhttp version is unsupported logs a message and does nothing`() {
+        val sut = fixture.getSut(okHttpVersion = "3.11.0")
         sut.execute(fixture.metadataContext)
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-android-timber won't be installed because the current timber " +
-                "version is lower than the minimum supported version (4.6.0)"
+                "[sentry] sentry-android-okhttp won't be installed because the current okhttp " +
+                "version is lower than the minimum supported version (3.13.0)"
         }
         verify(fixture.metadataDetails, never()).allVariants(any())
     }
 
     @Test
-    fun `installs sentry-android-timber with info message`() {
+    fun `installs sentry-android-okhttp with info message`() {
         val sut = fixture.getSut()
         sut.execute(fixture.metadataContext)
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-android-timber is successfully installed with version: 5.6.1"
+                "[sentry] sentry-android-okhttp is successfully installed with version: 5.6.1"
         }
         verify(fixture.dependencies).add(
             check<String> {
-                assertEquals("io.sentry:sentry-android-timber:5.6.1", it)
+                assertEquals("io.sentry:sentry-android-okhttp:5.6.1", it)
             }
         )
     }
 
-    private class TimberInstallStrategyImpl(
+    private class OkHttpInstallStrategyImpl(
         autoInstallState: AutoInstallState,
         logger: Logger
-    ) : TimberInstallStrategy(autoInstallState, logger)
+    ) : OkHttpInstallStrategy(autoInstallState, logger)
 }
