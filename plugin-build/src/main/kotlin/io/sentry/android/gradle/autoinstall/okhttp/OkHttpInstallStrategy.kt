@@ -6,6 +6,7 @@ import io.sentry.android.gradle.autoinstall.InstallStrategyRegistrar
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
 import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.info
+import io.sentry.android.gradle.util.warn
 import javax.inject.Inject
 import org.gradle.api.artifacts.CacheableRule
 import org.gradle.api.artifacts.ComponentMetadataContext
@@ -27,9 +28,9 @@ abstract class OkHttpInstallStrategy @Inject constructor(
         }
         val semVer = SemVer.parse(context.details.id.version)
         if (semVer < MIN_SUPPORTED_VERSION) {
-            SentryPlugin.logger.info {
-                "$SENTRY_OKHTTP_ID won't be installed because the current okhttp is lower " +
-                    "than the minimum supported version ($MIN_SUPPORTED_VERSION)"
+            SentryPlugin.logger.warn {
+                "$SENTRY_OKHTTP_ID won't be installed because the current okhttp version is " +
+                    "lower than the minimum supported version ($MIN_SUPPORTED_VERSION)"
             }
             return
         }
