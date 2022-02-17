@@ -9,34 +9,36 @@ import javax.inject.Inject
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
 import org.gradle.api.artifacts.dsl.ComponentMetadataHandler
+import org.slf4j.Logger
 
 //@CacheableRule
 abstract class FragmentInstallStrategy @Inject constructor(
     private val autoInstallState: AutoInstallState
 ) : ComponentMetadataRule {
 
+    private var logger: Logger = SentryPlugin.logger
+
+    constructor(
+        autoInstallState: AutoInstallState,
+        logger: Logger
+    ) : this(autoInstallState) {
+        this.logger = logger
+    }
+
     override fun execute(context: ComponentMetadataContext) {
         if (!autoInstallState.installFragment) {
-            SentryPlugin.logger.info {
+            logger.info {
                 "$SENTRY_FRAGMENT_ID won't be installed because it was already installed directly"
             }
             return
         }
-
-        // TODO: technically we support all versions of androidx.fragment, but there can be a case
-        // when we bump the version of androidx.fragment in the sentry-android SDK to 1.4+, which
-        // requires compileSdkVersion 31+, so the user's app might stop compiling. Should we make the
-        // transitive dependency of androidx.fragment `compileOnly` in the sentry-android SDK to avoid this?
-        // Another option: we could check the user's compileSdkVersion and do not add sentry-android-fragment
-        // (this is, when we bump the transitive androidx.fragment version there to 1.4.1, so
-        // no action item for now)
 
         context.details.allVariants { metadata ->
             metadata.withDependencies { dependencies ->
                 val sentryVersion = autoInstallState.sentryVersion
                 dependencies.add("$SENTRY_GROUP:$SENTRY_FRAGMENT_ID:$sentryVersion")
 
-                SentryPlugin.logger.info {
+                logger.info {
                     "$SENTRY_FRAGMENT_ID is successfully installed with version: $sentryVersion"
                 }
             }

@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.autoinstall
+package io.sentry.android.gradle.autoinstall.timber
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.check
@@ -8,7 +8,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import io.sentry.android.gradle.autoinstall.timber.TimberInstallStrategy
+import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -46,8 +46,8 @@ class TimberInstallStrategyTest {
             whenever(metadataDetails.id).thenReturn(id)
 
             val autoInstallState = AutoInstallState.apply {
-                this.installTimber = installTimber
-                this.sentryVersion = "5.6.1"
+                AutoInstallState.installTimber = installTimber
+                sentryVersion = "5.6.1"
             }
             return TimberInstallStrategyImpl(autoInstallState, logger)
         }
