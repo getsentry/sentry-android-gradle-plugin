@@ -1,10 +1,9 @@
 package io.sentry.android.gradle
 
-import com.android.build.gradle.AppExtension
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
+import io.sentry.android.gradle.testutil.createTestAndroidProject
 import java.io.File
 import kotlin.test.assertEquals
-import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
 
@@ -172,24 +171,6 @@ class SentryPropertiesFileProviderTest {
         val variant = android.applicationVariants.first { it.name == "liteDebug" }
 
         assertEquals("42", File(getPropertiesFilePath(project, variant)!!).readText())
-    }
-
-    private fun createTestAndroidProject(
-        parent: Project? = null,
-        block: AppExtension.() -> Unit = {}
-    ): Pair<Project, AppExtension> {
-        val project = ProjectBuilder
-            .builder()
-            .apply { parent?.let { withParent(parent) } }
-            .build()
-        project.plugins.apply("com.android.application")
-        val appExtension = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
-            this.block()
-        }
-        // This will force the project to be evaluated
-        project.getTasksByName("assembleDebug", false)
-        return project to appExtension
     }
 
     private fun createTestFile(parent: File, path: String) =

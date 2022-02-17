@@ -31,5 +31,9 @@ android {
 }
 
 sentry {
-    autoUpload = System.getenv("AUTO_UPLOAD")?.toBoolean() ?: false
+    autoUploadProguardMapping = CI.INSTANCE.canAutoUpload()
+
+    tracingInstrumentation {
+        enabled = false
+    }
 }

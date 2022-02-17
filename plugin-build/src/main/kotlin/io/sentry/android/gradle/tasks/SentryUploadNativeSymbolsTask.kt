@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.util.info
 import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
@@ -23,6 +24,9 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
 
     @get:Input
     abstract val cliExecutable: Property<String>
+
+    @get:Input
+    abstract val autoUploadNativeSymbol: Property<Boolean>
 
     @get:InputFile
     @get:Optional
@@ -56,7 +60,7 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
         if (sentryProperties != null) {
             environment("SENTRY_PROPERTIES", sentryProperties)
         } else {
-            logger.info("[sentry] sentryProperties is null")
+            logger.info { "sentryProperties is null" }
         }
     }
 
@@ -65,6 +69,10 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
             cliExecutable.get(),
             "upload-dif"
         )
+
+        if (!autoUploadNativeSymbol.get()) {
+            args.add("--no-upload")
+        }
 
         sentryOrganization.orNull?.let {
             args.add("--org")

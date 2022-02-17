@@ -48,7 +48,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     abstract val sentryProject: Property<String>
 
     @get:Input
-    abstract val autoUpload: Property<Boolean>
+    abstract val autoUploadProguardMapping: Property<Boolean>
 
     override fun exec() {
         if (!mappingsFiles.isPresent || mappingsFiles.get().isEmpty) {
@@ -73,15 +73,27 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
 
     internal fun computeCommandLineArgs(): List<String> {
         val uuid = readUuidFromFile(uuidFile.get().asFile)
+        val firstExistingFile = mappingsFiles.get().files.firstOrNull { it.exists() }
+
+        val mappingFile = if (firstExistingFile == null) {
+            logger.warn(
+                "None of the provided mappingFiles was found on disk. " +
+                    "Upload is most likely going to be skipped"
+            )
+            mappingsFiles.get().files.first()
+        } else {
+            firstExistingFile
+        }
+
         val args = mutableListOf(
             cliExecutable.get(),
             "upload-proguard",
             "--uuid",
             uuid,
-            mappingsFiles.get().files.first().toString()
+            mappingFile.toString()
         )
 
-        if (!autoUpload.get()) {
+        if (!autoUploadProguardMapping.get()) {
             args.add("--no-upload")
         }
 

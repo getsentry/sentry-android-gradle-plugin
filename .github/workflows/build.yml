@@ -1,4 +1,4 @@
-name: Build and upload artifacts
+name: Build
 
 on:
   push:
@@ -6,26 +6,23 @@ on:
       - main
       - release/**
   pull_request:
-    branches:
-      - '*'
 
 jobs:
   job_build_upload:
     name: Build and upload distribution artifact
     runs-on: ubuntu-latest
     steps:
-
       - name: Checkout current commit (${{ github.sha }})
         uses: actions/checkout@v2
-      - name: Cache Gradle Files
-        uses: actions/cache@v2
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
         with:
-          path: |
-            ~/.gradle/caches/
-            ~/.gradle/wrapper/
-          key: cache-gradle-${{ matrix.os }}
-          restore-keys: |
-            cache-gradle-
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Set up Java
         uses: actions/setup-java@v2

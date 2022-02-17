@@ -6,8 +6,6 @@ on:
       - main
       - release/**
   pull_request:
-    branches:
-      - '*'
 
 jobs:
   publish-dry-run:
@@ -15,50 +13,33 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        agp: ["7.0.1"]
+        agp: ["7.0.3"]
         gradle: ["7.2"]
         java: ["11"]
         include:
-          - agp: "4.1.3"
-            gradle: "6.8.3"
-            java: "8"
-          - agp: "4.1.3"
-            gradle: "6.8.3"
-            java: "8"
-          - agp: "4.1.3"
-            gradle: "7.0.2"
-            java: "8"
-          - agp: "4.2.2"
-            gradle: "6.8.3"
-            java: "8"
-          - agp: "4.2.2"
-            gradle: "7.0.2"
-            java: "8"
-          - agp: "7.0.1"
+          - agp: "7.0.4"
             gradle: "7.1.1"
             java: "11"
-          - agp: "7.0.1"
+          - agp: "7.0.4"
             gradle: "7.2"
+            java: "11"
+          - agp: "7.1.0"
+            gradle: "7.2"
+            java: "11"
+          - agp: "7.2.0-beta01"
+            gradle: "7.3.3"
+            java: "11"
+          - agp: "7.3.0-alpha01"
+            gradle: "7.3.3"
             java: "11"
 
     name: Publish Dry Run - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
     env:
       VERSION_AGP: ${{ matrix.agp }}
-      VERSION_GRADLE: ${{ matrix.gradle }}
 
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
-      - name: Cache Gradle Files
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches/
-            ~/.gradle/wrapper/
-          key: cache-gradle-${{ matrix.gradle }}-${{ matrix.agp }}
-          restore-keys: |
-            cache-gradle-${{ matrix.gradle }}-
-            cache-gradle-
 
       - name: Setup Java Version
         uses: actions/setup-java@v2
@@ -66,11 +47,12 @@ jobs:
           distribution: 'adopt'
           java-version: ${{ matrix.java }}
 
-      - name: Set Gradle Version
-        run: ./gradlew wrapper --gradle-version $VERSION_GRADLE --distribution-type=all
-
       - name: Build the Release variant
-        run: ./gradlew assembleRelease
+        uses: gradle/gradle-build-action@v2
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          gradle-version: ${{ matrix.gradle }}
+          arguments: assembleRelease
 
       - name: Check sentry-debug-meta.properties inside APKs
         run: |
@@ -82,7 +64,11 @@ jobs:
           rm -r output
 
       - name: Build the Release Bundle variant
-        run: ./gradlew bundleRelease
+        uses: gradle/gradle-build-action@v2
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          gradle-version: ${{ matrix.gradle }}
+          arguments: bundleRelease
 
       - name: Check sentry-debug-meta.properties inside App Bundle
         run: |

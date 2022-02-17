@@ -6,8 +6,6 @@ on:
       - main
       - release/**
   pull_request:
-    branches:
-      - '*'
 
 jobs:
   publish:
@@ -20,22 +18,18 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
-        if: env.SENTRY_AUTH_TOKEN != null
-        
-      - name: Cache Gradle Files
-        uses: actions/cache@v2
-        if: env.SENTRY_AUTH_TOKEN != null
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
         with:
-          path: |
-            ~/.gradle/caches/
-            ~/.gradle/wrapper/
-          key: cache-gradle-${{ matrix.os }}
-          restore-keys: |
-            cache-gradle-
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Build the Release variant
         run: ./gradlew assembleRelease | tee gradle.log
-        if: env.SENTRY_AUTH_TOKEN != null
 
       - name: Verify that Native Symbols were uploaded
         run: grep "Uploaded 4 missing debug information files" gradle.log

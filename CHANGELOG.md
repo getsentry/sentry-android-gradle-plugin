@@ -1,8 +1,58 @@
 # Changelog
 
-## Unreleased
+## 3.0.0-rc.1
 
-* Bump: AGP to 7.0.1 (#181)
+* Feature: Add support for GuardSquare's Proguard (#263)
+* Feature: Add support for GuardSquare's Dexguard (#267)
+* Fix: Do not resolve dependencies at configuration time (#278)
+
+## 3.0.0-beta.4
+
+* Fix: Strip out unsupported java classes from META-INF/ (so AGP does not fail before our code is reached) (#264)
+* Bump sentry-cli 1.72.0 which prevent daemonize mode from crashing upload process (#262)
+* Fix: Incompatibilities with other Gradle plugins using the same API from AGP for bytecode instrumentation (#270)
+
+## 3.0.0-beta.3
+
+* Introduce the `includeProguardMapping` option to exclude the proguard logic, and deprecate `autoUpload` in favor of `autoUploadProguardMapping` (#240)
+* Feature: New File I/O auto-instrumentation (#249)
+* Feature: Add compile-time check for sentry-android SDK presence (#243)
+* Feature: New configuration option `tracingInstrumentation.features` to allow enabling/disabling certain features for auto-instrumentation (#245)
+
+## 3.0.0-beta.2
+
+* Fix: Correctly add the proguard UUID output directory to the source set (#226)
+* Feature: Make the ignoreXXX properties in SentryPluginExtension sets (#225)
+* Expose SentryPluginExtension.tracingInstrumentation (#229)
+* Ref: Change Room queries description to Dao class name (#232)
+* Fix: Log broken bytecode when build fails (#233)
+* Ref: Change db operation names (#237)
+
+## 3.0.0-beta.1
+
+* Fix: Associate spans and events when it throws (#219)
+
+## 3.0.0-alpha.2
+
+* Fix: Do not throw exceptions in case something goes wrong with instrumentation (#217)
+* Add support for dry-run on upload native symbols (#209)
+
+## 3.0.0-alpha.1
+
+* Feat: Add support for M1 Macs (#204)
+* Feat: Auto-instrumentation for `androidx.sqlite` and `androidx.room` (#180)
+
+**Breaking changes**
+
+* The min AGP version required is `7.0.0`
+* The min Sentry's Android SDK is `4.0.0`
+
+See the migration guide on our [documentation](https://github.com/getsentry/sentry-docs/pull/4281).
+
+## 2.1.5
+
+* Bump: AGP to 7.0.2 (#193)
+* Bump sentry-cli 1.69.1 which includes a fix for Dart debug symbols (#191)
 
 ## 2.1.4
 

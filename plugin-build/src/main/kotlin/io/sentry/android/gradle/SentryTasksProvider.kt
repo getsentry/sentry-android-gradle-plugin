@@ -3,7 +3,9 @@ package io.sentry.android.gradle
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
 import com.android.build.gradle.tasks.PackageAndroidArtifact
+import io.sentry.android.gradle.util.GroovyCompat.isDexguardAvailable
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
+import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
@@ -20,12 +22,23 @@ internal object SentryTasksProvider {
      * @return the task or null otherwise
      */
     @JvmStatic
-    fun getTransformerTask(project: Project, variantName: String): TaskProvider<Task>? =
-        project.findTask(
-            // AGP 3.3 includes the R8 shrinker.
-            "minify${variantName.capitalized}WithR8",
-            "minify${variantName.capitalized}WithProguard"
-        )
+    fun getTransformerTask(
+        project: Project,
+        variantName: String,
+        experimentalGuardsquareSupport: Boolean = false
+    ): TaskProvider<Task>? {
+        val taskList = mutableListOf<String>()
+        if (experimentalGuardsquareSupport) {
+            // We prioritize the Guardsquare's Proguard task towards the AGP ones.
+            taskList.add(
+                "transformClassesAndResourcesWithProguardTransformFor${variantName.capitalized}"
+            )
+        }
+        // AGP 3.3 includes the R8 shrinker.
+        taskList.add("minify${variantName.capitalized}WithR8")
+        taskList.add("minify${variantName.capitalized}WithProguard")
+        return project.findTask(taskList)
+    }
 
     /**
      * Returns the pre bundle task for the given project and variant.
@@ -34,7 +47,7 @@ internal object SentryTasksProvider {
      */
     @JvmStatic
     fun getPreBundleTask(project: Project, variantName: String): TaskProvider<Task>? =
-        project.findTask("build${variantName.capitalized}PreBundle")
+        project.findTask(listOf("build${variantName.capitalized}PreBundle"))
 
     /**
      * Returns the pre bundle task for the given project and variant.
@@ -43,7 +56,7 @@ internal object SentryTasksProvider {
      */
     @JvmStatic
     fun getBundleTask(project: Project, variantName: String): TaskProvider<Task>? =
-        project.findTask("bundle${variantName.capitalized}")
+        project.findTask(listOf("bundle${variantName.capitalized}"))
 
     /**
      * Returns the package bundle task (App Bundle only)
@@ -53,9 +66,7 @@ internal object SentryTasksProvider {
     @JvmStatic
     fun getPackageBundleTask(project: Project, variantName: String): TaskProvider<Task>? =
         // for APK it uses getPackageProvider
-        project.findTask(
-            "package${variantName.capitalized}Bundle"
-        )
+        project.findTask(listOf("package${variantName.capitalized}Bundle"))
 
     /**
      * Returns the assemble task provider
@@ -81,8 +92,41 @@ internal object SentryTasksProvider {
      * @return the provider if found or null otherwise
      */
     @JvmStatic
-    fun getMappingFileProvider(variant: ApplicationVariant): Provider<FileCollection> =
-        variant.mappingFileProvider
+    fun getMappingFileProvider(
+        project: Project,
+        variant: ApplicationVariant,
+        experimentalGuardsquareSupport: Boolean = false
+    ): Provider<FileCollection> {
+        if (experimentalGuardsquareSupport) {
+            val sep = File.separator
+            if (project.plugins.hasPlugin("com.guardsquare.proguard")) {
+                val fileCollection = project.files(
+                    File(
+                        project.buildDir,
+                        "outputs${sep}proguard${sep}${variant.name}${sep}mapping${sep}mapping.txt"
+                    )
+                )
+                return project.provider { fileCollection }
+            }
+            if (isDexguardAvailable(project)) {
+                // For DexGuard the mapping file can either be inside the /apk or the /bundle folder
+                // (depends on the task that generated it).
+                val mappingDir = "outputs${sep}dexguard${sep}mapping$sep"
+                val fileCollection = project.files(
+                    File(
+                        project.buildDir,
+                        "${mappingDir}apk${sep}${variant.name}${sep}mapping.txt"
+                    ),
+                    File(
+                        project.buildDir,
+                        "${mappingDir}bundle${sep}${variant.name}${sep}mapping.txt"
+                    )
+                )
+                return project.provider { fileCollection }
+            }
+        }
+        return variant.mappingFileProvider
+    }
 
     /**
      * Returns the package provider
@@ -94,7 +138,7 @@ internal object SentryTasksProvider {
         // for App Bundle it uses getPackageBundleTask
         variant.packageApplicationProvider
 
-    private fun Project.findTask(vararg taskName: String): TaskProvider<Task>? =
+    private fun Project.findTask(taskName: List<String>): TaskProvider<Task>? =
         taskName
             .mapNotNull {
                 try {
@@ -105,5 +149,5 @@ internal object SentryTasksProvider {
             }
             .firstOrNull()
 
-    private val String.capitalized: String get() = this.capitalizeUS()
+    internal val String.capitalized: String get() = this.capitalizeUS()
 }

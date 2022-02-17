@@ -30,6 +30,37 @@ class SentryTaskProviderTest {
     }
 
     @Test
+    fun `getTransformerTask returns transform task for standalone Proguard with opt-in`() {
+        val (project, task) = getTestProjectWithTask(
+            "transformClassesAndResourcesWithProguardTransformForDebug"
+        )
+
+        assertEquals(
+            task,
+            getTransformerTask(
+                project,
+                "debug",
+                experimentalGuardsquareSupport = true
+            )?.get()
+        )
+    }
+
+    @Test
+    fun `getTransformerTask returns null for standalone Proguard without opt-in`() {
+        val (project, task) = getTestProjectWithTask(
+            "transformClassesAndResourcesWithProguardTransformForDebug"
+        )
+
+        assertNull(
+            getTransformerTask(
+                project,
+                "debug",
+                experimentalGuardsquareSupport = false
+            )
+        )
+    }
+
+    @Test
     fun `getTransformerTask returns minify for R8`() {
         val (project, task) = getTestProjectWithTask("minifyDebugWithR8")
 
@@ -37,10 +68,40 @@ class SentryTaskProviderTest {
     }
 
     @Test
-    fun `getTransformerTask returns minify for Proguard`() {
+    fun `getTransformerTask returns minify for embedded Proguard`() {
         val (project, task) = getTestProjectWithTask("minifyDebugWithProguard")
 
         assertEquals(task, getTransformerTask(project, "debug")?.get())
+    }
+
+    @Test
+    fun `getTransformerTask gives standalone Proguard priority with opt-in`() {
+        val (project, _) = getTestProjectWithTask("minifyDebugWithR8")
+        project.tasks.register("transformClassesAndResourcesWithProguardTransformForDebug")
+
+        assertEquals(
+            "transformClassesAndResourcesWithProguardTransformForDebug",
+            getTransformerTask(
+                project,
+                "debug",
+                experimentalGuardsquareSupport = true
+            )?.get()?.name
+        )
+    }
+
+    @Test
+    fun `getTransformerTask ignores standalone Proguard priority without opt-in`() {
+        val (project, r8task) = getTestProjectWithTask("minifyDebugWithR8")
+        project.tasks.register("transformClassesAndResourcesWithProguardTransformForDebug")
+
+        assertEquals(
+            r8task,
+            getTransformerTask(
+                project,
+                "debug",
+                experimentalGuardsquareSupport = false
+            )?.get()
+        )
     }
 
     @Test

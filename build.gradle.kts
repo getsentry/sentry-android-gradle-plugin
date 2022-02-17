@@ -28,24 +28,6 @@ subprojects {
             include("**/kotlin/**")
         }
     }
-
-    // to be compatible with AGP <= 4.1.x https://developer.android.com/studio/releases/gradle-plugin#java-8-default
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        sourceCompatibility = JavaVersion.VERSION_1_8.toString()
-        targetCompatibility = JavaVersion.VERSION_1_8.toString()
-
-        kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_1_8.toString()
-        }
-    }
-
-    plugins.withId("com.android.application") {
-        val ext = extensions.getByName("android") as com.android.build.gradle.AppExtension
-        ext.compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_1_8
-            targetCompatibility = JavaVersion.VERSION_1_8
-        }
-    }
 }
 
 tasks.register("clean", Delete::class.java) {
@@ -59,11 +41,15 @@ tasks.register("preMerge") {
     dependsOn(":examples:android-gradle:check")
     dependsOn(":examples:android-gradle-kts:check")
     dependsOn(":examples:android-ndk:check")
+    dependsOn(":examples:android-instrumentation-sample:check")
+    dependsOn(":examples:android-room-lib:check")
     dependsOn(gradle.includedBuild("plugin-build").task(":check"))
 }
 
-tasks.register("closeAndReleaseRepository") {
-    description = "Runs closeAndReleaseRepository for plugin-build"
+tasks.getByName("ktlintFormat") {
+    dependsOn(gradle.includedBuild("plugin-build").task(":ktlintFormat"))
+}
 
-    dependsOn(gradle.includedBuild("plugin-build").task(":closeAndReleaseRepository"))
+tasks.getByName("ktlintCheck") {
+    dependsOn(gradle.includedBuild("plugin-build").task(":ktlintCheck"))
 }

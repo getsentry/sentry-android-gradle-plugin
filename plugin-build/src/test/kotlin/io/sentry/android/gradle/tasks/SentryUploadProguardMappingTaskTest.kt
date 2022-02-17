@@ -37,7 +37,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.cliExecutable.set("sentry-cli")
                 it.uuidDirectory.set(tempDir.root)
                 it.mappingsFiles = mappingFile
-                it.autoUpload.set(true)
+                it.autoUploadProguardMapping.set(true)
             }
 
         val args = task.get().computeCommandLineArgs()
@@ -48,6 +48,38 @@ class SentryUploadProguardMappingTaskTest {
         assertTrue(randomUuid.toString() in args)
         assertTrue(mappingFile.get().first().toString() in args)
         assertFalse("--no-upload" in args)
+    }
+
+    @Test
+    fun `with multiple mappingFiles picks the first existing file`() {
+        val randomUuid = UUID.randomUUID()
+        createFakeUuid(randomUuid)
+
+        val project = createProject()
+        val mappingFiles = createMappingFileProvider(
+            project,
+            "dummy/folder/missing-mapping.txt",
+            "dummy/folder/existing-mapping.txt"
+        )
+        val existingFile = project.file("dummy/folder/existing-mapping.txt").apply {
+            parentFile.mkdirs()
+            writeText("dummy-file")
+        }
+
+        val task: TaskProvider<SentryUploadProguardMappingsTask> =
+            project.tasks.register(
+                "testUploadProguardMapping",
+                SentryUploadProguardMappingsTask::class.java
+            ) {
+                it.cliExecutable.set("sentry-cli")
+                it.uuidDirectory.set(tempDir.root)
+                it.mappingsFiles = mappingFiles
+                it.autoUploadProguardMapping.set(true)
+            }
+
+        val args = task.get().computeCommandLineArgs()
+
+        assertTrue(existingFile.toString() in args)
     }
 
     @Test
@@ -63,7 +95,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.cliExecutable.set("sentry-cli")
                 it.uuidDirectory.set(tempDir.root)
                 it.mappingsFiles = mappingFile
-                it.autoUpload.set(false)
+                it.autoUploadProguardMapping.set(false)
             }
 
         val args = task.get().computeCommandLineArgs()
@@ -118,7 +150,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.cliExecutable.set("sentry-cli")
                 it.uuidDirectory.set(tempDir.root)
                 it.mappingsFiles = mappingFile
-                it.autoUpload.set(false)
+                it.autoUploadProguardMapping.set(false)
                 it.sentryOrganization.set("dummy-org")
             }
 
@@ -141,7 +173,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.cliExecutable.set("sentry-cli")
                 it.uuidDirectory.set(tempDir.root)
                 it.mappingsFiles = mappingFile
-                it.autoUpload.set(false)
+                it.autoUploadProguardMapping.set(false)
                 it.sentryProject.set("dummy-proj")
             }
 
@@ -204,6 +236,6 @@ class SentryUploadProguardMappingTaskTest {
 
     private fun createMappingFileProvider(
         project: Project,
-        path: String
-    ): Provider<FileCollection> = project.providers.provider { project.files(path) }
+        vararg path: String
+    ): Provider<FileCollection> = project.providers.provider { project.files(*path) }
 }

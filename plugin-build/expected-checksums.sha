@@ -1,4 +1,4 @@
-245094273dcb05b357c2d3bfca7147bf8350fd8a  src/main/resources/bin/sentry-cli-Darwin-x86_64
-657d92b044dfce2802961a74a3e16042c4983b33  src/main/resources/bin/sentry-cli-Linux-i686
-8ce50141d82f750371ea870a8be29043731f1d1d  src/main/resources/bin/sentry-cli-Linux-x86_64
-d2e48001d3615f345518cb28248f1abf27195ad8  src/main/resources/bin/sentry-cli-Windows-i686.exe
+3c71bab6aaf69c3f212d2c326ce50b539141e7ba  src/main/resources/bin/sentry-cli-Darwin-universal
+0cb60f0d0ba097a6477ebc940a7663954aa56b1b  src/main/resources/bin/sentry-cli-Linux-i686
+1a460287bf66df38dbcdacf75b8e428c9976644b  src/main/resources/bin/sentry-cli-Linux-x86_64
+22e07c62656b5fae564805e80f67b4d6862ef2c4  src/main/resources/bin/sentry-cli-Windows-i686.exe
