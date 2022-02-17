@@ -62,27 +62,27 @@ dependencies {
 }
 
 configure<JavaPluginExtension> {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 // We need to compile Groovy first and let Kotlin depend on it.
 // See https://docs.gradle.org/6.1-rc-1/release-notes.html#compilation-order
 tasks.withType<GroovyCompile>().configureEach {
-    sourceCompatibility = JavaVersion.VERSION_1_8.toString()
-    targetCompatibility = JavaVersion.VERSION_1_8.toString()
+    sourceCompatibility = JavaVersion.VERSION_11.toString()
+    targetCompatibility = JavaVersion.VERSION_11.toString()
     classpath = sourceSets["main"].compileClasspath
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-    sourceCompatibility = JavaVersion.VERSION_1_8.toString()
-    targetCompatibility = JavaVersion.VERSION_1_8.toString()
+    sourceCompatibility = JavaVersion.VERSION_11.toString()
+    targetCompatibility = JavaVersion.VERSION_11.toString()
     classpath += files(sourceSets["main"].groovy.classesDirectory)
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = JavaVersion.VERSION_11.toString()
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
-        languageVersion = "1.3"
+        languageVersion = BuildPluginsVersion.KOTLIN_LANG_VERSION
     }
 }
 

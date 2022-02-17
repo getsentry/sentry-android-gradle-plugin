@@ -1,9 +1,10 @@
 object BuildPluginsVersion {
     val AGP = System.getenv("VERSION_AGP") ?: "7.1.0"
-    const val DOKKA = "1.4.32"
-    const val KOTLIN = "1.4.32"
+    const val DOKKA = "1.5.31"
+    const val KOTLIN = "1.5.31"
+    const val KOTLIN_LANG_VERSION = "1.5"
     const val AAR_2_JAR = "0.6"
-    const val KTLINT = "10.2.0"
+    const val KTLINT = "10.2.1"
     // do not upgrade to 0.18.0, it does not generate the pom-default.xml and module.json under
     // build/publications/maven
     const val MAVEN_PUBLISH = "0.17.0"
@@ -48,7 +49,7 @@ object Samples {
     }
 
     object Coroutines {
-        private const val version = "1.5.1"
+        private const val version = "1.5.2"
         const val core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version"
         const val android = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version"
     }
