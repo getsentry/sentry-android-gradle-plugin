@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 3.0.0-rc.1
 
 * Feature: Add support for GuardSquare's Proguard (#263)
