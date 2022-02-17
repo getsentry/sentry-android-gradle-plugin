@@ -22,14 +22,23 @@ internal object SentryTasksProvider {
      * @return the task or null otherwise
      */
     @JvmStatic
-    fun getTransformerTask(project: Project, variantName: String): TaskProvider<Task>? =
-        project.findTask(
+    fun getTransformerTask(
+        project: Project,
+        variantName: String,
+        experimentalGuardsquareSupport: Boolean = false
+    ): TaskProvider<Task>? {
+        val taskList = mutableListOf<String>()
+        if (experimentalGuardsquareSupport) {
             // We prioritize the Guardsquare's Proguard task towards the AGP ones.
-            "transformClassesAndResourcesWithProguardTransformFor${variantName.capitalized}",
-            // AGP 3.3 includes the R8 shrinker.
-            "minify${variantName.capitalized}WithR8",
-            "minify${variantName.capitalized}WithProguard"
-        )
+            taskList.add(
+                "transformClassesAndResourcesWithProguardTransformFor${variantName.capitalized}"
+            )
+        }
+        // AGP 3.3 includes the R8 shrinker.
+        taskList.add("minify${variantName.capitalized}WithR8")
+        taskList.add("minify${variantName.capitalized}WithProguard")
+        return project.findTask(taskList)
+    }
 
     /**
      * Returns the pre bundle task for the given project and variant.
@@ -38,7 +47,7 @@ internal object SentryTasksProvider {
      */
     @JvmStatic
     fun getPreBundleTask(project: Project, variantName: String): TaskProvider<Task>? =
-        project.findTask("build${variantName.capitalized}PreBundle")
+        project.findTask(listOf("build${variantName.capitalized}PreBundle"))
 
     /**
      * Returns the pre bundle task for the given project and variant.
@@ -47,7 +56,7 @@ internal object SentryTasksProvider {
      */
     @JvmStatic
     fun getBundleTask(project: Project, variantName: String): TaskProvider<Task>? =
-        project.findTask("bundle${variantName.capitalized}")
+        project.findTask(listOf("bundle${variantName.capitalized}"))
 
     /**
      * Returns the package bundle task (App Bundle only)
@@ -57,9 +66,7 @@ internal object SentryTasksProvider {
     @JvmStatic
     fun getPackageBundleTask(project: Project, variantName: String): TaskProvider<Task>? =
         // for APK it uses getPackageProvider
-        project.findTask(
-            "package${variantName.capitalized}Bundle"
-        )
+        project.findTask(listOf("package${variantName.capitalized}Bundle"))
 
     /**
      * Returns the assemble task provider
@@ -87,22 +94,25 @@ internal object SentryTasksProvider {
     @JvmStatic
     fun getMappingFileProvider(
         project: Project,
-        variant: ApplicationVariant
-    ): Provider<FileCollection> =
-        if (project.plugins.hasPlugin("com.guardsquare.proguard") || isDexguardAvailable(project)) {
+        variant: ApplicationVariant,
+        experimentalGuardsquareSupport: Boolean = false
+    ): Provider<FileCollection> {
+        if (experimentalGuardsquareSupport) {
             val sep = File.separator
-            val fileCollection = if (project.plugins.hasPlugin("com.guardsquare.proguard")) {
-                project.files(
+            if (project.plugins.hasPlugin("com.guardsquare.proguard")) {
+                val fileCollection = project.files(
                     File(
                         project.buildDir,
                         "outputs${sep}proguard${sep}${variant.name}${sep}mapping${sep}mapping.txt"
                     )
                 )
-            } else {
+                return project.provider { fileCollection }
+            }
+            if (isDexguardAvailable(project)) {
                 // For DexGuard the mapping file can either be inside the /apk or the /bundle folder
                 // (depends on the task that generated it).
                 val mappingDir = "outputs${sep}dexguard${sep}mapping$sep"
-                project.files(
+                val fileCollection = project.files(
                     File(
                         project.buildDir,
                         "${mappingDir}apk${sep}${variant.name}${sep}mapping.txt"
@@ -112,11 +122,11 @@ internal object SentryTasksProvider {
                         "${mappingDir}bundle${sep}${variant.name}${sep}mapping.txt"
                     )
                 )
+                return project.provider { fileCollection }
             }
-            project.provider { fileCollection }
-        } else {
-            variant.mappingFileProvider
         }
+        return variant.mappingFileProvider
+    }
 
     /**
      * Returns the package provider
@@ -128,7 +138,7 @@ internal object SentryTasksProvider {
         // for App Bundle it uses getPackageBundleTask
         variant.packageApplicationProvider
 
-    private fun Project.findTask(vararg taskName: String): TaskProvider<Task>? =
+    private fun Project.findTask(taskName: List<String>): TaskProvider<Task>? =
         taskName
             .mapNotNull {
                 try {

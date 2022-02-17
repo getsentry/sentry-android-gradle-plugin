@@ -89,6 +89,15 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     )
 
     /**
+     * Experimental flag to turn on support for GuardSquare's tools integration (Dexguard and External Proguard).
+     * If enabled, the plugin will try to consume and upload the mapping file
+     * produced by Dexguard and External Proguard.
+     * Default is disabled.
+     */
+    val experimentalGuardsquareSupport: Property<Boolean> = objects
+        .property(Boolean::class.java).convention(false)
+
+    /**
      * Configure the tracing instrumentation.
      * Default configuration is enabled.
      */

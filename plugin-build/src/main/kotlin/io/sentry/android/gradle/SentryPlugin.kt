@@ -146,7 +146,11 @@ class SentryPlugin : Plugin<Project> {
 
                 val sentryProperties = getPropertiesFilePath(project, variant)
 
-                val isMinificationEnabled = isMinificationEnabled(project, variant)
+                val isMinificationEnabled = isMinificationEnabled(
+                    project,
+                    variant,
+                    extension.experimentalGuardsquareSupport.get()
+                )
                 val isDebuggable = variant.buildType.isDebuggable
 
                 var preBundleTaskProvider: TaskProvider<Task>? = null
@@ -158,7 +162,11 @@ class SentryPlugin : Plugin<Project> {
                         getPreBundleTask(project, variant.name)
                     }
                     transformerTaskProvider = withLogging(project.logger, "transformerTask") {
-                        getTransformerTask(project, variant.name)
+                        getTransformerTask(
+                            project,
+                            variant.name,
+                            extension.experimentalGuardsquareSupport.get()
+                        )
                     }
                     packageBundleTaskProvider = withLogging(project.logger, "packageBundleTask") {
                         getPackageBundleTask(project, variant.name)
@@ -202,7 +210,11 @@ class SentryPlugin : Plugin<Project> {
                             sentryProperties?.let { file -> project.file(file) }
                         )
                         task.uuidDirectory.set(generateUuidTask.flatMap { it.outputDirectory })
-                        task.mappingsFiles = getMappingFileProvider(project, variant)
+                        task.mappingsFiles = getMappingFileProvider(
+                            project,
+                            variant,
+                            extension.experimentalGuardsquareSupport.get()
+                        )
                         task.autoUploadProguardMapping.set(extension.autoUploadProguardMapping)
                         task.sentryOrganization.set(sentryOrgParameter)
                         task.sentryProject.set(sentryProjectParameter)
@@ -211,7 +223,9 @@ class SentryPlugin : Plugin<Project> {
                         generateUuidTask.flatMap { it.outputDirectory }
                     )
 
-                    if (GroovyCompat.isDexguardEnabledForVariant(project, variant.name)) {
+                    if (extension.experimentalGuardsquareSupport.get() &&
+                        GroovyCompat.isDexguardEnabledForVariant(project, variant.name)
+                    ) {
                         // If Dexguard is enabled, we will have to wait for the project to be evaluated
                         // to be able to let the uploadSentryProguardMappings run after them.
                         project.afterEvaluate {

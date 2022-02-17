@@ -30,7 +30,10 @@ class SentryPluginUtilsTest {
         val (project, android) = createTestProguardProject()
         val debug = android.applicationVariants.first { it.name == "debug" }
 
-        assertEquals(false, isMinificationEnabled(project, debug))
+        assertEquals(
+            false,
+            isMinificationEnabled(project, debug, experimentalGuardsquareSupport = true)
+        )
     }
 
     @Test
@@ -43,7 +46,26 @@ class SentryPluginUtilsTest {
         }
         val debug = android.applicationVariants.first { it.name == "debug" }
 
-        assertEquals(true, isMinificationEnabled(project, debug))
+        assertEquals(
+            true,
+            isMinificationEnabled(project, debug, experimentalGuardsquareSupport = true)
+        )
+    }
+
+    @Test
+    fun `isMinificationEnabled returns false for standalone Proguard without opt-in`() {
+        val (project, android) = createTestProguardProject()
+        project.extensions.getByType(ProGuardAndroidExtension::class.java).apply {
+            configurations.create("debug") {
+                it.defaultConfiguration("proguard-android-optimize.txt")
+            }
+        }
+        val debug = android.applicationVariants.first { it.name == "debug" }
+
+        assertEquals(
+            false,
+            isMinificationEnabled(project, debug, experimentalGuardsquareSupport = false)
+        )
     }
 
     @Test

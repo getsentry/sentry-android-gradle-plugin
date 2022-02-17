@@ -43,6 +43,8 @@ proguard {
 sentry {
     autoUploadProguardMapping = CI.INSTANCE.canAutoUpload()
 
+    experimentalGuardsquareSupport = true
+
     tracingInstrumentation {
         enabled = false
     }
