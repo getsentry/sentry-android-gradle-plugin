@@ -8,29 +8,28 @@ import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.info
 import io.sentry.android.gradle.util.warn
 import javax.inject.Inject
-import org.gradle.api.artifacts.CacheableRule
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
-import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.dsl.ComponentMetadataHandler
+import org.gradle.api.provider.Provider
 import org.slf4j.Logger
 
 //@CacheableRule
 abstract class OkHttpInstallStrategy @Inject constructor(
-    private val autoInstallState: AutoInstallState
+    private val autoInstallState: Provider<AutoInstallState>
 ) : ComponentMetadataRule {
 
     private var logger: Logger = SentryPlugin.logger
 
     constructor(
-        autoInstallState: AutoInstallState,
+        autoInstallState: Provider<AutoInstallState>,
         logger: Logger
     ) : this(autoInstallState) {
         this.logger = logger
     }
 
     override fun execute(context: ComponentMetadataContext) {
-        if (!autoInstallState.installOkHttp) {
+        if (!autoInstallState.get().installOkHttp) {
             logger.info {
                 "sentry-android-okhttp won't be installed because it was already installed directly"
             }
@@ -47,7 +46,7 @@ abstract class OkHttpInstallStrategy @Inject constructor(
 
         context.details.allVariants { metadata ->
             metadata.withDependencies { dependencies ->
-                val sentryVersion = autoInstallState.sentryVersion
+                val sentryVersion = autoInstallState.get().sentryVersion
                 dependencies.add("$SENTRY_GROUP:$SENTRY_OKHTTP_ID:$sentryVersion")
 
                 logger.info {
@@ -65,9 +64,12 @@ abstract class OkHttpInstallStrategy @Inject constructor(
 
         private val MIN_SUPPORTED_VERSION = SemVer(3, 13, 0)
 
-        override fun register(component: ComponentMetadataHandler) {
+        override fun register(
+            component: ComponentMetadataHandler,
+            autoInstallState: Provider<AutoInstallState>
+        ) {
             component.withModule("$OKHTTP_GROUP:$OKHTTP_ID", OkHttpInstallStrategy::class.java) {
-                it.params(AutoInstallState)
+                it.params(autoInstallState)
             }
         }
     }

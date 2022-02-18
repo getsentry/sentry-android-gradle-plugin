@@ -292,9 +292,7 @@ class SentryPlugin : Plugin<Project> {
                     project.logger.info { "uploadSentryNativeSymbols won't be executed" }
                 }
             }
-        }
 
-        if (extension.autoInstallation.enabled.get()) {
             project.installDependencies(extension)
         }
     }

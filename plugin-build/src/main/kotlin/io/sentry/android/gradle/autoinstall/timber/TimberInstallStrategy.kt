@@ -4,7 +4,6 @@ import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.autoinstall.InstallStrategyRegistrar
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
-import io.sentry.android.gradle.autoinstall.okhttp.OkHttpInstallStrategy
 import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.info
 import io.sentry.android.gradle.util.warn
@@ -12,24 +11,25 @@ import javax.inject.Inject
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
 import org.gradle.api.artifacts.dsl.ComponentMetadataHandler
+import org.gradle.api.provider.Provider
 import org.slf4j.Logger
 
 //@CacheableRule
 abstract class TimberInstallStrategy @Inject constructor(
-    private val autoInstallState: AutoInstallState
+    private val autoInstallState: Provider<AutoInstallState>
 ) : ComponentMetadataRule {
 
     private var logger: Logger = SentryPlugin.logger
 
     constructor(
-        autoInstallState: AutoInstallState,
+        autoInstallState: Provider<AutoInstallState>,
         logger: Logger
     ) : this(autoInstallState) {
         this.logger = logger
     }
 
     override fun execute(context: ComponentMetadataContext) {
-        if (!autoInstallState.installTimber) {
+        if (!autoInstallState.get().installTimber) {
             logger.info {
                 "$SENTRY_TIMBER_ID won't be installed because it was already installed directly"
             }
@@ -46,7 +46,7 @@ abstract class TimberInstallStrategy @Inject constructor(
 
         context.details.allVariants { metadata ->
             metadata.withDependencies { dependencies ->
-                val sentryVersion = autoInstallState.sentryVersion
+                val sentryVersion = autoInstallState.get().sentryVersion
                 dependencies.add("$SENTRY_GROUP:$SENTRY_TIMBER_ID:$sentryVersion")
 
                 logger.info {
@@ -62,9 +62,12 @@ abstract class TimberInstallStrategy @Inject constructor(
         internal const val SENTRY_TIMBER_ID = "sentry-android-timber"
         private val MIN_SUPPORTED_VERSION = SemVer(4, 6, 0)
 
-        override fun register(component: ComponentMetadataHandler) {
+        override fun register(
+            component: ComponentMetadataHandler,
+            autoInstallState: Provider<AutoInstallState>
+        ) {
             component.withModule("$TIMBER_GROUP:$TIMBER_ID", TimberInstallStrategy::class.java) {
-                it.params(AutoInstallState)
+                it.params(autoInstallState)
             }
         }
     }

@@ -21,24 +21,29 @@ private val strategies = listOf(
 )
 
 fun Project.installDependencies(extension: SentryPluginExtension) {
+    val autoInstallState = AutoInstallState.register(project)
     configurations.named("implementation").configure { configuration ->
         configuration.withDependencies { dependencies ->
-            var sentryVersion = dependencies.findSentryAndroidVersion()
-            sentryVersion = installSentrySdk(sentryVersion, dependencies, extension)
+            // if autoInstallation is disabled, the autoInstallState will contain initial values
+            // which all default to false, hence, the integrations won't be installed as well
+            if (extension.autoInstallation.enabled.get()) {
+                var sentryVersion = dependencies.findSentryAndroidVersion()
+                sentryVersion = installSentrySdk(sentryVersion, dependencies, extension)
 
-            val installOkHttp = !dependencies.isModuleAvailable(SENTRY_OKHTTP_ID)
-            val installTimber = !dependencies.isModuleAvailable(SENTRY_TIMBER_ID)
-            val installFragment = !dependencies.isModuleAvailable(SENTRY_FRAGMENT_ID)
-            AutoInstallState.apply {
-                this.sentryVersion = sentryVersion
-                this.installOkHttp = installOkHttp
-                this.installFragment = installFragment
-                this.installTimber = installTimber
+                val installOkHttp = !dependencies.isModuleAvailable(SENTRY_OKHTTP_ID)
+                val installTimber = !dependencies.isModuleAvailable(SENTRY_TIMBER_ID)
+                val installFragment = !dependencies.isModuleAvailable(SENTRY_FRAGMENT_ID)
+                autoInstallState.get().apply {
+                    this.sentryVersion = sentryVersion
+                    this.installOkHttp = installOkHttp
+                    this.installFragment = installFragment
+                    this.installTimber = installTimber
+                }
             }
         }
     }
     project.dependencies.components { component ->
-        strategies.forEach { it.register(component) }
+        strategies.forEach { it.register(component, autoInstallState) }
     }
 }
 
