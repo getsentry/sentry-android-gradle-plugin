@@ -8,6 +8,7 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import io.sentry.android.gradle.autoinstall.AutoInstallState
+import io.sentry.android.gradle.autoinstall.TestAutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -16,6 +17,7 @@ import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataDetails
 import org.gradle.api.artifacts.DirectDependenciesMetadata
 import org.gradle.api.artifacts.VariantMetadata
+import org.gradle.api.internal.provider.DefaultProvider
 import org.junit.Test
 import org.slf4j.Logger
 
@@ -38,7 +40,7 @@ class FragmentInstallStrategyTest {
         }
 
         fun getSut(installFragment: Boolean = true): FragmentInstallStrategy {
-            val autoInstallState = AutoInstallState.apply {
+            val autoInstallState = TestAutoInstallState().apply {
                 this.installFragment = installFragment
                 this.sentryVersion = "5.6.1"
             }
@@ -80,5 +82,5 @@ class FragmentInstallStrategyTest {
     private class FragmentInstallStrategyImpl(
         autoInstallState: AutoInstallState,
         logger: Logger
-    ) : FragmentInstallStrategy(autoInstallState, logger)
+    ) : FragmentInstallStrategy(DefaultProvider { autoInstallState }, logger)
 }
