@@ -32,7 +32,6 @@ abstract class AutoInstallState :
     var installTimber: Boolean = false
 
     override fun close() {
-        println("close")
         sentryVersion = SENTRY_SDK_VERSION
         installTimber = false
         installFragment = false
