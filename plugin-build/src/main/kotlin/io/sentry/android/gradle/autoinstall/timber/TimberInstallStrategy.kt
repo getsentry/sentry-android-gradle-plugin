@@ -14,7 +14,7 @@ import org.gradle.api.artifacts.dsl.ComponentMetadataHandler
 import org.gradle.api.provider.Provider
 import org.slf4j.Logger
 
-//@CacheableRule
+// @CacheableRule
 abstract class TimberInstallStrategy @Inject constructor(
     private val autoInstallState: Provider<AutoInstallState>
 ) : ComponentMetadataRule {

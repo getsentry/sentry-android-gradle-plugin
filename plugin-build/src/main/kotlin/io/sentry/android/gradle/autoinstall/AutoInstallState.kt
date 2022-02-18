@@ -1,7 +1,8 @@
+@file:Suppress("UnstableApiUsage")
+
 package io.sentry.android.gradle.autoinstall
 
 import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
-import io.sentry.android.gradle.services.SentrySdkStateHolder
 import io.sentry.android.gradle.util.getBuildServiceName
 import java.io.Serializable
 import org.gradle.api.Project
@@ -9,7 +10,11 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 
-abstract class AutoInstallState : BuildService<BuildServiceParameters.None>, AutoCloseable, Serializable {
+abstract class AutoInstallState :
+    BuildService<BuildServiceParameters.None>,
+    AutoCloseable,
+    Serializable {
+
     @get:Synchronized
     @set:Synchronized
     var sentryVersion: String = SENTRY_SDK_VERSION

@@ -132,5 +132,4 @@ class SentryPluginAutoInstallTest(
         assertTrue { "io.sentry:sentry-android-okhttp:5.1.2" in result.output }
         assertTrue { "io.sentry:sentry-android-fragment:5.4.0" in result.output }
     }
-
 }

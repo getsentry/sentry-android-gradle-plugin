@@ -14,7 +14,7 @@ import org.gradle.api.artifacts.dsl.ComponentMetadataHandler
 import org.gradle.api.provider.Provider
 import org.slf4j.Logger
 
-//@CacheableRule
+// @CacheableRule
 abstract class OkHttpInstallStrategy @Inject constructor(
     private val autoInstallState: Provider<AutoInstallState>
 ) : ComponentMetadataRule {
@@ -55,7 +55,6 @@ abstract class OkHttpInstallStrategy @Inject constructor(
             }
         }
     }
-
 
     companion object Registrar : InstallStrategyRegistrar {
         private const val OKHTTP_GROUP = "com.squareup.okhttp3"
