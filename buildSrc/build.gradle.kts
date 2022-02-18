@@ -13,11 +13,11 @@ tasks.withType<KotlinCompile>().configureEach {
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
-        languageVersion = BuildPluginsVersion.KOTLIN_LANG_VERSION
+        languageVersion = "1.5"
     }
 }
 
-configure<JavaPluginExtension> {
+java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 }
