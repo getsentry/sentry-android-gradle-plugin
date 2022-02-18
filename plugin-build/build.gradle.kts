@@ -74,7 +74,7 @@ tasks.withType<GroovyCompile>().configureEach {
     classpath = sourceSets["main"].compileClasspath
 }
 
-tasks.withType<KotlinCompile>().configureEach {
+tasks.withType<KotlinCompile>().all {
     sourceCompatibility = JavaVersion.VERSION_11.toString()
     targetCompatibility = JavaVersion.VERSION_11.toString()
     classpath += files(sourceSets["main"].groovy.classesDirectory)

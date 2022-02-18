@@ -7,7 +7,7 @@ repositories {
     mavenCentral()
 }
 
-tasks.withType<KotlinCompile>().configureEach {
+tasks.withType<KotlinCompile>().all {
     sourceCompatibility = JavaVersion.VERSION_11.toString()
     targetCompatibility = JavaVersion.VERSION_11.toString()
 

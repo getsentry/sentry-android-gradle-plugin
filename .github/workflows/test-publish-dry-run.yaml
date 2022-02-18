@@ -23,7 +23,7 @@ jobs:
           - agp: "7.0.4"
             gradle: "7.2"
             java: "11"
-          - agp: "7.1.0"
+          - agp: "7.1.1"
             gradle: "7.2"
             java: "11"
           - agp: "7.2.0-beta01"
