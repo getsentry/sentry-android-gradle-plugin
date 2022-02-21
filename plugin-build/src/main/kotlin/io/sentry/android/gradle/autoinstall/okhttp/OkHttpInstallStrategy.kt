@@ -50,7 +50,7 @@ abstract class OkHttpInstallStrategy @Inject constructor(
                 dependencies.add("$SENTRY_GROUP:$SENTRY_OKHTTP_ID:$sentryVersion")
 
                 logger.info {
-                    "$SENTRY_OKHTTP_ID is successfully installed with version: $sentryVersion"
+                    "$SENTRY_OKHTTP_ID was successfully installed with version: $sentryVersion"
                 }
             }
         }

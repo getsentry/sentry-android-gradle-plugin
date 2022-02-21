@@ -13,6 +13,7 @@ import org.gradle.api.artifacts.DependencySet
 
 internal const val SENTRY_GROUP = "io.sentry"
 private const val SENTRY_ANDROID_ID = "sentry-android"
+private const val SENTRY_ANDROID_CORE_ID = "sentry-android-core"
 
 private val strategies = listOf(
     OkHttpInstallStrategy.Registrar,
@@ -58,7 +59,7 @@ private fun Project.installSentrySdk(
             this.dependencies.create("$SENTRY_GROUP:$SENTRY_ANDROID_ID:$userDefinedVersion")
         dependencies.add(sentryAndroidDep)
         logger.info {
-            "sentry-android is successfully installed with version: $userDefinedVersion"
+            "sentry-android was successfully installed with version: $userDefinedVersion"
         }
         userDefinedVersion
     } else {
@@ -70,7 +71,10 @@ private fun Project.installSentrySdk(
 }
 
 private fun DependencySet.findSentryAndroidVersion(): String? =
-    find { it.group == SENTRY_GROUP && it.name == SENTRY_ANDROID_ID }?.version
+    find {
+        it.group == SENTRY_GROUP &&
+            (it.name == SENTRY_ANDROID_ID || it.name == SENTRY_ANDROID_CORE_ID)
+    }?.version
 
 private fun DependencySet.isModuleAvailable(id: String): Boolean =
     any { it.group == SENTRY_GROUP && it.name == id }

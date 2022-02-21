@@ -93,7 +93,7 @@ class TimberInstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-android-timber is successfully installed with version: 5.6.1"
+                "[sentry] sentry-android-timber was successfully installed with version: 5.6.1"
         }
         verify(fixture.dependencies).add(
             check<String> {

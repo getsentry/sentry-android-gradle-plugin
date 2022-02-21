@@ -50,7 +50,7 @@ abstract class TimberInstallStrategy @Inject constructor(
                 dependencies.add("$SENTRY_GROUP:$SENTRY_TIMBER_ID:$sentryVersion")
 
                 logger.info {
-                    "$SENTRY_TIMBER_ID is successfully installed with version: $sentryVersion"
+                    "$SENTRY_TIMBER_ID was successfully installed with version: $sentryVersion"
                 }
             }
         }

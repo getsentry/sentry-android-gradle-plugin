@@ -40,7 +40,7 @@ abstract class FragmentInstallStrategy @Inject constructor(
                 dependencies.add("$SENTRY_GROUP:$SENTRY_FRAGMENT_ID:$sentryVersion")
 
                 logger.info {
-                    "$SENTRY_FRAGMENT_ID is successfully installed with version: $sentryVersion"
+                    "$SENTRY_FRAGMENT_ID was successfully installed with version: $sentryVersion"
                 }
             }
         }

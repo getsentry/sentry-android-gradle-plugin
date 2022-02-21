@@ -93,13 +93,13 @@ abstract class BaseSentryPluginTest(
             // The supported Gradle version can be found here:
             // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
             // The pair is [AGP Version, Gradle Version]
-            arrayOf("7.0.4", "7.0.2"),
-            arrayOf("7.0.4", "7.1.1"),
-            arrayOf("7.0.4", "7.2"),
-            arrayOf("7.1.0", "7.2"),
-            arrayOf("7.1.0", "7.3.3"),
-            arrayOf("7.2.0-beta01", "7.3.3"),
-            arrayOf("7.3.0-alpha01", "7.3.3")
+//            arrayOf("7.0.4", "7.0.2"),
+//            arrayOf("7.0.4", "7.1.1"),
+//            arrayOf("7.0.4", "7.2"),
+//            arrayOf("7.1.0", "7.2"),
+            arrayOf("7.1.0", "7.3.3")
+//            arrayOf("7.2.0-beta01", "7.3.3"),
+//            arrayOf("7.3.0-alpha01", "7.3.3")
         )
 
         internal fun GradleRunner.appendArguments(vararg arguments: String) =

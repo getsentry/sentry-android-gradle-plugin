@@ -47,6 +47,8 @@ class SentryPluginAutoInstallTest(
             }
 
             dependencies {
+              // sentry-android shouldn't be installed, since sentry-android-core is present
+              implementation 'io.sentry:sentry-android-core:5.1.0'
               implementation 'com.jakewharton.timber:timber:4.7.1'
               implementation 'androidx.fragment:fragment:1.3.5'
               // our plugin shouldn't install okhttp, since it's a direct dep
@@ -61,10 +63,10 @@ class SentryPluginAutoInstallTest(
             .appendArguments("--configuration")
             .appendArguments("debugRuntimeClasspath")
             .build()
-        assertTrue { "io.sentry:sentry-android:5.6.1" in result.output }
-        assertTrue { "io.sentry:sentry-android-timber:5.6.1" in result.output }
-        assertTrue { "io.sentry:sentry-android-fragment:5.6.1" in result.output }
-        assertFalse { "io.sentry:sentry-android-okhttp:5.6.1" in result.output }
+        assertFalse { "io.sentry:sentry-android:5.1.0" in result.output }
+        assertTrue { "io.sentry:sentry-android-timber:5.1.0" in result.output }
+        assertTrue { "io.sentry:sentry-android-fragment:5.1.0" in result.output }
+        assertFalse { "io.sentry:sentry-android-okhttp:5.1.0" in result.output }
         assertTrue { "io.sentry:sentry-android-okhttp:5.4.0" in result.output }
     }
 
