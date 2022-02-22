@@ -22,29 +22,25 @@ private val strategies = listOf(
 )
 
 fun Project.installDependencies(extension: SentryPluginExtension) {
-    val autoInstallState = AutoInstallState.register(project)
     configurations.named("implementation").configure { configuration ->
         configuration.withDependencies { dependencies ->
             // if autoInstallation is disabled, the autoInstallState will contain initial values
             // which all default to false, hence, the integrations won't be installed as well
             if (extension.autoInstallation.enabled.get()) {
-                var sentryVersion = dependencies.findSentryAndroidVersion()
-                sentryVersion = installSentrySdk(sentryVersion, dependencies, extension)
+                val sentryVersion = dependencies.findSentryAndroidVersion()
+                with(AutoInstallState.getInstance(gradle)) {
 
-                val installOkHttp = !dependencies.isModuleAvailable(SENTRY_OKHTTP_ID)
-                val installTimber = !dependencies.isModuleAvailable(SENTRY_TIMBER_ID)
-                val installFragment = !dependencies.isModuleAvailable(SENTRY_FRAGMENT_ID)
-                autoInstallState.get().apply {
-                    this.sentryVersion = sentryVersion
-                    this.installOkHttp = installOkHttp
-                    this.installFragment = installFragment
-                    this.installTimber = installTimber
+                    this.sentryVersion = installSentrySdk(sentryVersion, dependencies, extension)
+
+                    installOkHttp = !dependencies.isModuleAvailable(SENTRY_OKHTTP_ID)
+                    installTimber = !dependencies.isModuleAvailable(SENTRY_TIMBER_ID)
+                    installFragment = !dependencies.isModuleAvailable(SENTRY_FRAGMENT_ID)
                 }
             }
         }
     }
     project.dependencies.components { component ->
-        strategies.forEach { it.register(component, autoInstallState) }
+        strategies.forEach { it.register(component) }
     }
 }
 

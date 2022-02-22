@@ -3,17 +3,10 @@
 package io.sentry.android.gradle.autoinstall
 
 import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
-import io.sentry.android.gradle.util.getBuildServiceName
 import java.io.Serializable
-import org.gradle.api.Project
-import org.gradle.api.provider.Provider
-import org.gradle.api.services.BuildService
-import org.gradle.api.services.BuildServiceParameters
+import org.gradle.api.invocation.Gradle
 
-abstract class AutoInstallState :
-    BuildService<BuildServiceParameters.None>,
-    AutoCloseable,
-    Serializable {
+class AutoInstallState private constructor() : Serializable {
 
     @get:Synchronized
     @set:Synchronized
@@ -31,19 +24,56 @@ abstract class AutoInstallState :
     @set:Synchronized
     var installTimber: Boolean = false
 
-    override fun close() {
-        sentryVersion = SENTRY_SDK_VERSION
-        installTimber = false
-        installFragment = false
-        installOkHttp = false
+    override fun toString(): String {
+        return "AutoInstallState(sentryVersion='$sentryVersion', " +
+            "installOkHttp=$installOkHttp, " +
+            "installFragment=$installFragment, " +
+            "installTimber=$installTimber)"
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as AutoInstallState
+
+        if (sentryVersion != other.sentryVersion) return false
+        if (installOkHttp != other.installOkHttp) return false
+        if (installFragment != other.installFragment) return false
+        if (installTimber != other.installTimber) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = sentryVersion.hashCode()
+        result = 31 * result + installOkHttp.hashCode()
+        result = 31 * result + installFragment.hashCode()
+        result = 31 * result + installTimber.hashCode()
+        return result
+    }
+
+    // We can't use Kotlin object because we need new instance on each Gradle rebuild
+    // But if we're inside Gradle daemon, Kotlin object will be shared between builds
     companion object {
-        fun register(project: Project): Provider<AutoInstallState> {
-            return project.gradle.sharedServices.registerIfAbsent(
-                getBuildServiceName(AutoInstallState::class.java),
-                AutoInstallState::class.java
-            ) {}
+        @field:Volatile
+        private var instance: AutoInstallState? = null
+
+        @JvmStatic
+        @Synchronized
+        fun getInstance(gradle: Gradle? = null): AutoInstallState {
+            if (instance != null) {
+                return instance!!
+            }
+
+            val state = AutoInstallState()
+            instance = state
+
+            if (gradle != null) {
+                BuildFinishedListenerService.getInstance(gradle).onClose { instance = null }
+            }
+
+            return state
         }
     }
 }

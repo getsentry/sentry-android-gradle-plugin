@@ -96,6 +96,7 @@ class SentryPluginAutoInstallTest(
             .appendArguments("--configuration")
             .appendArguments("debugRuntimeClasspath")
             .build()
+        print(result.output)
         assertFalse { "io.sentry:sentry-android:5.6.1" in result.output }
         assertFalse { "io.sentry:sentry-android-timber:5.6.1" in result.output }
         assertFalse { "io.sentry:sentry-android-fragment:5.6.1" in result.output }
