@@ -8,14 +8,13 @@ import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.info
 import io.sentry.android.gradle.util.warn
 import javax.inject.Inject
-import org.gradle.api.artifacts.CacheableRule
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
 import org.gradle.api.artifacts.dsl.ComponentMetadataHandler
 import org.slf4j.Logger
 
 // @Inject is needed to avoid Gradle error
-//@CacheableRule
+// @CacheableRule
 abstract class OkHttpInstallStrategy @Inject constructor() : ComponentMetadataRule {
 
     private var logger: Logger = SentryPlugin.logger

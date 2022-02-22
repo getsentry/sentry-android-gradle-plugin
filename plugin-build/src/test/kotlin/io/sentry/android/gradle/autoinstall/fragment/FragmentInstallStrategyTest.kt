@@ -16,7 +16,6 @@ import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataDetails
 import org.gradle.api.artifacts.DirectDependenciesMetadata
 import org.gradle.api.artifacts.VariantMetadata
-import org.gradle.api.internal.provider.DefaultProvider
 import org.junit.Test
 import org.slf4j.Logger
 

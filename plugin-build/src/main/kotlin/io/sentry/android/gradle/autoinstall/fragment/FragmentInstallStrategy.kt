@@ -6,14 +6,13 @@ import io.sentry.android.gradle.autoinstall.InstallStrategyRegistrar
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
 import io.sentry.android.gradle.util.info
 import javax.inject.Inject
-import org.gradle.api.artifacts.CacheableRule
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
 import org.gradle.api.artifacts.dsl.ComponentMetadataHandler
 import org.slf4j.Logger
 
 // @Inject is needed to avoid Gradle error
-//@CacheableRule // TODO: make it cacheable somehow (probably depends on parameters)
+// @CacheableRule // TODO: make it cacheable somehow (probably depends on parameters)
 abstract class FragmentInstallStrategy @Inject constructor() : ComponentMetadataRule {
 
     private var logger: Logger = SentryPlugin.logger

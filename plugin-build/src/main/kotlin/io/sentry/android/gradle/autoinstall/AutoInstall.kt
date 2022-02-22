@@ -29,7 +29,6 @@ fun Project.installDependencies(extension: SentryPluginExtension) {
             if (extension.autoInstallation.enabled.get()) {
                 val sentryVersion = dependencies.findSentryAndroidVersion()
                 with(AutoInstallState.getInstance(gradle)) {
-
                     this.sentryVersion = installSentrySdk(sentryVersion, dependencies, extension)
 
                     installOkHttp = !dependencies.isModuleAvailable(SENTRY_OKHTTP_ID)

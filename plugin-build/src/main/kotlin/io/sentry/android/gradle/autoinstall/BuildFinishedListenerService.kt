@@ -7,8 +7,10 @@ import org.gradle.api.invocation.Gradle
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 
-abstract class BuildFinishedListenerService : BuildService<BuildServiceParameters.None>,
+abstract class BuildFinishedListenerService :
+    BuildService<BuildServiceParameters.None>,
     AutoCloseable {
+
     private val actionsOnClose = mutableListOf<() -> Unit>()
 
     fun onClose(action: () -> Unit) {
@@ -24,11 +26,10 @@ abstract class BuildFinishedListenerService : BuildService<BuildServiceParameter
 
     companion object {
         fun getInstance(gradle: Gradle): BuildFinishedListenerService {
-            return gradle.sharedServices
-                .registerIfAbsent(
-                    getBuildServiceName(BuildFinishedListenerService::class.java),
-                    BuildFinishedListenerService::class.java
-                ) {}.get()
+            return gradle.sharedServices.registerIfAbsent(
+                getBuildServiceName(BuildFinishedListenerService::class.java),
+                BuildFinishedListenerService::class.java
+            ) {}.get()
         }
     }
 }
