@@ -77,6 +77,7 @@ tasks.withType<KotlinCompile>().all {
     classpath += files(sourceSets["main"].groovy.classesDirectory)
 
     kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
         languageVersion = BuildPluginsVersion.KOTLIN_LANG_VERSION
     }
