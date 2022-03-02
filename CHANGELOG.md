@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Bump: AGP to 7.1.2
+
 ## 3.0.0-rc.1
 
 * Feature: Add support for GuardSquare's Proguard (#263)
