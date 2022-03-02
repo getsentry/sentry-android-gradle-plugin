@@ -10,6 +10,7 @@ repositories {
 tasks.withType<KotlinCompile>().all {
 
     kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
         languageVersion = "1.5"
     }
 }
