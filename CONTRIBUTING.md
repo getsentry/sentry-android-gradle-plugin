@@ -5,7 +5,7 @@ We suggest opening an issue to discuss bigger changes before investing on a big 
 
 # Requirements
 
-The project currently requires you run JDK version `1.8.x` and the Android SDK.
+The project currently requires you run JDK version `11` and the Android SDK.
 
 # CI
 
