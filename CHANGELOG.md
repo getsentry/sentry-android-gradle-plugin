@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 3.0.0-rc.2
+
+### Various fixes & improvements
+
+- Prepare 3.0.0-rc.2 (d8f1ab31) by @bruno-garcia
 
 ## 3.0.0-rc.1
 
