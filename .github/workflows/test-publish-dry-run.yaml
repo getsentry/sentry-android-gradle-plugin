@@ -29,10 +29,10 @@ jobs:
           - agp: "7.1.2"
             gradle: "7.4"
             java: "11"
-          - agp: "7.2.0-beta02"
+          - agp: "7.2.0-beta03"
             gradle: "7.4"
             java: "11"
-          - agp: "7.3.0-alpha02"
+          - agp: "7.3.0-alpha04"
             gradle: "7.4"
             java: "11"
 
