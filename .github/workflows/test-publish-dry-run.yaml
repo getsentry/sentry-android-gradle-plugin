@@ -13,24 +13,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        agp: ["7.0.3"]
-        gradle: ["7.2"]
+        agp: ["7.0.4"]
+        gradle: ["7.1.1"]
         java: ["11"]
         include:
           - agp: "7.0.4"
-            gradle: "7.1.1"
-            java: "11"
-          - agp: "7.0.4"
             gradle: "7.2"
             java: "11"
-          - agp: "7.1.0"
+          - agp: "7.1.2"
             gradle: "7.2"
             java: "11"
-          - agp: "7.2.0-beta01"
+          - agp: "7.1.2"
             gradle: "7.3.3"
             java: "11"
-          - agp: "7.3.0-alpha01"
-            gradle: "7.3.3"
+          - agp: "7.1.2"
+            gradle: "7.4"
+            java: "11"
+          - agp: "7.2.0-beta03"
+            gradle: "7.4"
+            java: "11"
+          - agp: "7.3.0-alpha04"
+            gradle: "7.4"
             java: "11"
 
     name: Publish Dry Run - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}

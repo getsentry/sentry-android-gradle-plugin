@@ -47,7 +47,7 @@ class SentryTaskProviderTest {
 
     @Test
     fun `getTransformerTask returns null for standalone Proguard without opt-in`() {
-        val (project, task) = getTestProjectWithTask(
+        val (project, _) = getTestProjectWithTask(
             "transformClassesAndResourcesWithProguardTransformForDebug"
         )
 
