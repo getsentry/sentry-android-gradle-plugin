@@ -11,7 +11,6 @@ import io.sentry.android.gradle.instrumentation.fakes.TestSpanAddingParameters
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
-import java.io.File
 import java.io.FileInputStream
 import java.io.PrintWriter
 import java.io.StringWriter
