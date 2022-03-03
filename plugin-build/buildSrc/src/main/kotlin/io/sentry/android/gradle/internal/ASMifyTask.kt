@@ -45,7 +45,7 @@ abstract class ASMifyTask : Exec() {
     private val tmpDir: String get() = "${project.buildDir}/tmp/asmified"
 
     override fun exec() {
-        val asmJars = project.configurations.getByName("runtimeClasspath")
+        val asmJars = project.configurations.getByName("compileClasspath")
             .resolvedConfiguration
             .resolvedArtifacts
             .filter {

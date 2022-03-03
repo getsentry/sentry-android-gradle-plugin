@@ -8,8 +8,10 @@ import io.sentry.android.gradle.instrumentation.classloader.GeneratingMissingCla
 import io.sentry.android.gradle.instrumentation.fakes.TestClassContext
 import io.sentry.android.gradle.instrumentation.fakes.TestClassData
 import io.sentry.android.gradle.instrumentation.fakes.TestSpanAddingParameters
+import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
+import java.io.File
 import java.io.FileInputStream
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -134,7 +136,9 @@ class VisitorTest(
                 "zzhm",
                 ChainedInstrumentable(listOf(WrappingInstrumentable(), RemappingInstrumentable())),
                 null
-            )
+            ),
+            arrayOf("okhttp/v3", "RealCall", OkHttp(), null),
+            arrayOf("okhttp/v4", "RealCall", OkHttp(), null)
         )
 
         private fun roomDaoTestParameters(suffix: String = "") = arrayOf(

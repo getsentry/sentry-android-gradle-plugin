@@ -1,7 +1,9 @@
 package io.sentry.samples.instrumentation.ui
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
@@ -11,8 +13,21 @@ import io.sentry.Sentry
 import io.sentry.SpanStatus
 import io.sentry.samples.instrumentation.R
 import io.sentry.samples.instrumentation.SampleApp
+import io.sentry.samples.instrumentation.network.TrackService
 import io.sentry.samples.instrumentation.ui.list.TrackAdapter
+import java.io.IOException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.withContext
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,14 +39,21 @@ class MainActivity : ComponentActivity() {
         list.adapter = TrackAdapter()
 
         lifecycleScope.launchWhenStarted {
+            Sentry.getSpan()?.finish()
+            val transaction = Sentry.startTransaction(
+                "Track Interaction",
+                "ui.action.load",
+                true
+            )
             SampleApp.database.tracksDao()
                 .all()
+                .map {
+                    val remote = withContext(Dispatchers.IO) {
+                        TrackService.instance.tracks("9365c2e9-906c-407c-851c-7204cc2975f7")
+                    }
+                    remote + it
+                }
                 .collect {
-                    val transaction = Sentry.startTransaction(
-                        "Track Interaction",
-                        "ui.action.load",
-                        true
-                    )
                     (list.adapter as TrackAdapter).populate(it)
                     transaction.finish(SpanStatus.OK)
                 }

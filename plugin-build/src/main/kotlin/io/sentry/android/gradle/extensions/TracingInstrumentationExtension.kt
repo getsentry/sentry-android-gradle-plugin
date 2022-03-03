@@ -41,7 +41,8 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
         objects.setProperty(InstrumentationFeature::class.java).convention(
             setOf(
                 InstrumentationFeature.DATABASE,
-                InstrumentationFeature.FILE_IO
+                InstrumentationFeature.FILE_IO,
+                InstrumentationFeature.OKHTTP
             )
         )
 }
@@ -59,5 +60,13 @@ enum class InstrumentationFeature {
      * This feature uses bytecode manipulation and replaces the above
      * mentioned classes with Sentry-specific implementations.
      */
-    FILE_IO
+    FILE_IO,
+
+    /**
+     * When enabled the SDK will create spans for outgoing network requests and attach
+     * sentry-trace-header for distributed tracing.
+     * This feature uses bytecode manipulation and attaches SentryOkHttpInterceptor to all OkHttp
+     * clients in the project.
+     */
+    OKHTTP
 }

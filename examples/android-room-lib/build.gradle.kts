@@ -24,5 +24,6 @@ dependencies {
 
     // this is here for test purposes, to ensure that transitive dependencies are also recognized
     // by our auto-installation
-    implementation(Samples.OkHttp.okhttp)
+    api(Samples.Retrofit.retrofit)
+    api(Samples.Retrofit.retrofitGson)
 }
