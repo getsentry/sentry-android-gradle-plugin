@@ -1,5 +1,3 @@
-@file:Suppress("UnstableApiUsage")
-
 package io.sentry.android.gradle.autoinstall
 
 import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION

@@ -83,7 +83,7 @@ class SentryPluginAutoInstallTest(
             dependencies {
               implementation 'com.jakewharton.timber:timber:4.7.1'
               implementation 'androidx.fragment:fragment:1.3.5'
-              implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+              implementation 'com.squareup.okhttp3:okhttp:4.9.2'
             }
 
             sentry.autoInstallation.enabled = false
@@ -115,7 +115,7 @@ class SentryPluginAutoInstallTest(
 
             dependencies {
               implementation 'com.jakewharton.timber:timber:4.7.1'
-              implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+              implementation 'com.squareup.okhttp3:okhttp:4.9.2'
               // the fragment integration should stay as it is, the version shouldn't be overridden
               implementation 'io.sentry:sentry-android-fragment:5.4.0'
             }
