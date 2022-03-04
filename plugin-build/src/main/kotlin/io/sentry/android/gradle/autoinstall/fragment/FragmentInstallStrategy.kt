@@ -4,11 +4,7 @@ import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.AbstractInstallStrategy
 import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.autoinstall.InstallStrategyRegistrar
-import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
-import io.sentry.android.gradle.util.info
 import javax.inject.Inject
-import org.gradle.api.artifacts.ComponentMetadataContext
-import org.gradle.api.artifacts.ComponentMetadataRule
 import org.gradle.api.artifacts.dsl.ComponentMetadataHandler
 import org.slf4j.Logger
 
