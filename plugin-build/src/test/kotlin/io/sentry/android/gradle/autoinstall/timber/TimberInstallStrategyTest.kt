@@ -78,7 +78,7 @@ class TimberInstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-android-timber won't be installed because the current timber " +
+                "[sentry] sentry-android-timber won't be installed because the current " +
                 "version is lower than the minimum supported version (4.6.0)"
         }
         verify(fixture.metadataDetails, never()).allVariants(any())

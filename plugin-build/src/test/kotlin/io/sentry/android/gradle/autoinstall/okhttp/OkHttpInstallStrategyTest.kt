@@ -78,7 +78,7 @@ class OkHttpInstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-android-okhttp won't be installed because the current okhttp " +
+                "[sentry] sentry-android-okhttp won't be installed because the current " +
                 "version is lower than the minimum supported version (3.13.0)"
         }
         verify(fixture.metadataDetails, never()).allVariants(any())

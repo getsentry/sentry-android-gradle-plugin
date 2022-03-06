@@ -3,6 +3,7 @@ package io.sentry.android.gradle.autoinstall.fragment
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.check
 import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
@@ -15,6 +16,7 @@ import org.gradle.api.Action
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataDetails
 import org.gradle.api.artifacts.DirectDependenciesMetadata
+import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.VariantMetadata
 import org.junit.Test
 import org.slf4j.Logger
@@ -38,6 +40,11 @@ class FragmentInstallStrategyTest {
         }
 
         fun getSut(installFragment: Boolean = true): FragmentInstallStrategy {
+            val id = mock<ModuleVersionIdentifier> {
+                whenever(it.version).doReturn("1.3.5")
+            }
+            whenever(metadataDetails.id).thenReturn(id)
+
             with(AutoInstallState.getInstance()) {
                 this.installFragment = installFragment
                 this.sentryVersion = "5.6.1"
