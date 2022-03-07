@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-* Fix MetaInfStripTransform breaking Kotlin Gradle and IDE plugin (#283)
+* Fix MetaInfStripTransform breaking Kotlin Gradle and IDE plugin (#291)
 
 ## 3.0.0-rc.2
 
