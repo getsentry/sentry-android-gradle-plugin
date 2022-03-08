@@ -6,7 +6,7 @@ import kotlin.math.min
 
 internal object AgpVersions {
     val CURRENT: SemVer = SemVer.parse(Version.ANDROID_GRADLE_PLUGIN_VERSION)
-    val VERSION_7_2_0_alpha06: SemVer = SemVer.parse("7.2.0-alpha06")
+    val VERSION_7_1_2: SemVer = SemVer.parse("7.1.2")
 }
 
 /**
