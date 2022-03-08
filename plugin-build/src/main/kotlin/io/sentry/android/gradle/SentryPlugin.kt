@@ -118,17 +118,18 @@ class SentryPlugin : Plugin<Project> {
                      * that will strip-out unnecessary files from the MR-JAR, so the AGP transforms
                      * will consume corrected artifacts. We only do this when auto-instrumentation is
                      * enabled (otherwise there's no need in this fix) AND when AGP version
-                     * is below 7.2.0-alpha06, where this issue has been fixed.
-                     * (https://issuetracker.google.com/issues/206655905#comment5)
+                     * is below 7.1.2, where this issue has been fixed.
+                     * (https://androidstudio.googleblog.com/2022/02/android-studio-bumblebee-202111-patch-2.html)
                      */
                     if (extension.tracingInstrumentation.enabled.get() &&
-                        AgpVersions.CURRENT < AgpVersions.VERSION_7_2_0_alpha06
+                        AgpVersions.CURRENT < AgpVersions.VERSION_7_1_2
                     ) {
-                        project.configurations.all {
-                            // request metaInfStripped attribute for all configurations to trigger our
-                            // transform
-                            it.attributes.attribute(metaInfStripped, true)
-                        }
+                        // we are only interested in runtime configuration (as ASM transform is
+                        // also run just for the runtime configuration)
+                        project.configurations.named("${variant.name}RuntimeClasspath")
+                            .configure {
+                                it.attributes.attribute(metaInfStripped, true)
+                            }
                         MetaInfStripTransform.register(
                             project.dependencies,
                             extension.tracingInstrumentation.forceInstrumentDependencies.get()
