@@ -60,4 +60,19 @@ object Samples {
         const val compiler = "androidx.room:room-compiler:${version}"
         const val rxjava = "androidx.room:room-rxjava2:${version}"
     }
+
+    object OkHttp {
+        private const val version = "4.9.3"
+        const val okhttp = "com.squareup.okhttp3:okhttp:${version}"
+    }
+
+    object Timber {
+        private const val version = "5.0.1"
+        const val timber = "com.jakewharton.timber:timber:${version}"
+    }
+
+    object Fragment {
+        private const val version = "1.3.5"
+        const val fragmentKtx = "androidx.fragment:fragment-ktx:${version}"
+    }
 }

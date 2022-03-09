@@ -59,6 +59,16 @@ index 5773597d..288a82b1 100644
  org.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=2048m -XX:+UseParallelGC
  org.gradle.caching=true
 
+diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+index 35022c85..4f3e5389 100644
+--- a/gradle/wrapper/gradle-wrapper.properties
++++ b/gradle/wrapper/gradle-wrapper.properties
+@@ -3,4 +3,4 @@ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+ zipStoreBase=GRADLE_USER_HOME
+ zipStorePath=wrapper/dists
+-distributionUrl=https\://services.gradle.org/distributions/gradle-7.0.2-bin.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-7.1-bin.zip
 diff --git a/settings.gradle b/settings.gradle
 index 98cd4fc7..0b3e76d7 100644
 --- a/settings.gradle

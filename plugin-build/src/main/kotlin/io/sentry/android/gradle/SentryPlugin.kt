@@ -16,6 +16,8 @@ import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
+import io.sentry.android.gradle.autoinstall.installDependencies
+import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentrySdkStateHolder
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
@@ -290,6 +292,8 @@ class SentryPlugin : Plugin<Project> {
                     project.logger.info { "uploadSentryNativeSymbols won't be executed" }
                 }
             }
+
+            project.installDependencies(extension)
         }
     }
 
@@ -307,6 +311,7 @@ class SentryPlugin : Plugin<Project> {
     companion object {
         const val SENTRY_ORG_PARAMETER = "sentryOrg"
         const val SENTRY_PROJECT_PARAMETER = "sentryProject"
+        internal const val SENTRY_SDK_VERSION = "5.6.1"
 
         internal val sep = File.separator
 
