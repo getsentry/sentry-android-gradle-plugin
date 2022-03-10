@@ -11,8 +11,12 @@ import io.sentry.Sentry
 import io.sentry.SpanStatus
 import io.sentry.samples.instrumentation.R
 import io.sentry.samples.instrumentation.SampleApp
+import io.sentry.samples.instrumentation.network.TrackService
 import io.sentry.samples.instrumentation.ui.list.TrackAdapter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,14 +28,21 @@ class MainActivity : ComponentActivity() {
         list.adapter = TrackAdapter()
 
         lifecycleScope.launchWhenStarted {
+            Sentry.getSpan()?.finish()
+            val transaction = Sentry.startTransaction(
+                "Track Interaction",
+                "ui.action.load",
+                true
+            )
             SampleApp.database.tracksDao()
                 .all()
+                .map {
+                    val remote = withContext(Dispatchers.IO) {
+                        TrackService.instance.tracks("9365c2e9-906c-407c-851c-7204cc2975f7")
+                    }
+                    remote + it
+                }
                 .collect {
-                    val transaction = Sentry.startTransaction(
-                        "Track Interaction",
-                        "ui.action.load",
-                        true
-                    )
                     (list.adapter as TrackAdapter).populate(it)
                     transaction.finish(SpanStatus.OK)
                 }

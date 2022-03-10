@@ -9,11 +9,13 @@ import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
+import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.services.SentrySdkStateHolder
 import io.sentry.android.gradle.util.SentryAndroidSdkState
 import io.sentry.android.gradle.util.SentryAndroidSdkState.FILE_IO
+import io.sentry.android.gradle.util.SentryAndroidSdkState.OKHTTP
 import io.sentry.android.gradle.util.SentryAndroidSdkState.PERFORMANCE
 import io.sentry.android.gradle.util.debug
 import io.sentry.android.gradle.util.info
@@ -82,6 +84,7 @@ abstract class SpanAddingClassVisitorFactory :
                     isDatabaseInstrEnabled(sdkState, parameters.get())
                 },
                 AndroidXRoomDao().takeIf { isDatabaseInstrEnabled(sdkState, parameters.get()) },
+                OkHttp().takeIf { isOkHttpInstrEnabled(sdkState, parameters.get()) },
                 ChainedInstrumentable(
                     listOf(WrappingInstrumentable(), RemappingInstrumentable())
                 ).takeIf { isFileIOInstrEnabled(sdkState, parameters.get()) }
@@ -106,6 +109,12 @@ abstract class SpanAddingClassVisitorFactory :
     ): Boolean =
         sdkState.isAtLeast(FILE_IO) &&
             parameters.features.get().contains(InstrumentationFeature.FILE_IO)
+
+    private fun isOkHttpInstrEnabled(
+        sdkState: SentryAndroidSdkState,
+        parameters: SpanAddingParameters
+    ): Boolean = sdkState.isAtLeast(OKHTTP) &&
+        parameters.features.get().contains(InstrumentationFeature.OKHTTP)
 
     override fun createClassVisitor(
         classContext: ClassContext,

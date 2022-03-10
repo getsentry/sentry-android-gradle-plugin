@@ -61,9 +61,10 @@ object Samples {
         const val rxjava = "androidx.room:room-rxjava2:${version}"
     }
 
-    object OkHttp {
-        private const val version = "4.9.3"
-        const val okhttp = "com.squareup.okhttp3:okhttp:${version}"
+    object Retrofit {
+        private const val version = "2.9.0"
+        const val retrofit = "com.squareup.retrofit2:retrofit:${version}"
+        const val retrofitGson = "com.squareup.retrofit2:converter-gson:${version}"
     }
 
     object Timber {
