@@ -10,7 +10,6 @@ import kotlin.test.assertTrue
 import org.junit.Test
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
-import org.objectweb.asm.Type
 import org.objectweb.asm.tree.MethodNode
 
 class WrappingVisitorTest {
@@ -269,8 +268,7 @@ class WrappingVisitorTest {
             firstPassVisitor = firstPassVisitor
         ).run {
             visitTypeInsn(Opcodes.NEW, "java/io/FileInputStream")
-            val local = newLocal(Type.getObjectType("java/io/FileInputStream"))
-            storeLocal(local)
+            visitVarInsn(Opcodes.ASTORE, 1)
             visitMethodInsn(
                 methodVisit.opcode,
                 methodVisit.owner,

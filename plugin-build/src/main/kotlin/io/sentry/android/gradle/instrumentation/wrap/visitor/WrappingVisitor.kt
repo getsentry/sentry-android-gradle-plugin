@@ -47,6 +47,7 @@ class WrappingVisitor(
     private val className = classContext.className.replace('.', '/')
 
     private var newWithoutDupInsn = false
+    private var varIndex = -1
 
     override fun visitTypeInsn(opcode: Int, type: String?) {
         super.visitTypeInsn(opcode, type)
@@ -58,6 +59,15 @@ class WrappingVisitor(
                 dup()
                 newWithoutDupInsn = true
             }
+        }
+    }
+
+    override fun visitVarInsn(opcode: Int, `var`: Int) {
+        super.visitVarInsn(opcode, `var`)
+        // capture the variable index of the instrumented type to later store our wrapped type
+        // with the same index
+        if (opcode == Opcodes.ASTORE && newWithoutDupInsn && varIndex == -1) {
+            varIndex = `var`
         }
     }
 
@@ -137,7 +147,6 @@ class WrappingVisitor(
         descriptor: String,
         isInterface: Boolean
     ) {
-        val currentLocal = nextLocal - 1
         // create a new method to figure out the number of arguments
         val originalMethod = Method(name, descriptor)
 
@@ -168,8 +177,9 @@ class WrappingVisitor(
             replacement.descriptor,
             false
         )
-        if (newWithoutDupInsn && currentLocal > 0) { // 0 is reserved for "this"
-            storeLocal(currentLocal)
+        if (newWithoutDupInsn && varIndex > 0) { // 0 is reserved for "this"
+            mv.visitVarInsn(Opcodes.ASTORE, varIndex)
+            varIndex = -1
             newWithoutDupInsn = false
         }
     }
