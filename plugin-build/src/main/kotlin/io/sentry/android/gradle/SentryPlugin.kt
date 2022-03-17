@@ -35,6 +35,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtraPropertiesExtension
+import org.gradle.api.tasks.StopExecutionException
 import org.gradle.api.tasks.TaskProvider
 import org.slf4j.LoggerFactory
 
@@ -42,6 +43,17 @@ import org.slf4j.LoggerFactory
 class SentryPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
+        if (AgpVersions.CURRENT < AgpVersions.VERSION_7_0_0) {
+            throw StopExecutionException(
+                """
+                Using io.sentry.android.gradle:3+ with Android Gradle Plugin < 7 is not supported.
+                Either upgrade the AGP version to 7+, or use an earlier version of the Sentry
+                Android Gradle Plugin. For more information check our migration guide
+                https://docs.sentry.io/platforms/android/migration/#migrating-from-iosentrysentry-android-gradle-plugin-2x-to-iosentrysentry-android-gradle-plugin-300
+                """.trimIndent()
+            )
+        }
+
         val extension = project.extensions.create(
             "sentry",
             SentryPluginExtension::class.java,
