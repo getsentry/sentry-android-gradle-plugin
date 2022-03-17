@@ -1,16 +1,6 @@
 # Changelog
 
-## 3.0.0
-
-* Fix instrumenting obfuscated libs (play-core) (#293)
-
-## 3.0.0-rc.3
-
-* Fix MetaInfStripTransform breaking Kotlin Gradle and IDE plugin (#291)
-
-## 3.0.0-rc.2
-
-* Bump: AGP to 7.1.2 (#287)
+## Unreleased
 
 * Feature: Auto-install sentry-android SDK and integration dependencies (fragment, timber, okhttp) (#282)
 * Feature: `OkHttp` auto-instrumentation (#288)
