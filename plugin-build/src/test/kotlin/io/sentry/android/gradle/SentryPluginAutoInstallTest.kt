@@ -1,5 +1,6 @@
 package io.sentry.android.gradle
 
+import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.junit.Test
@@ -31,8 +32,9 @@ class SentryPluginAutoInstallTest(
             .appendArguments("--configuration")
             .appendArguments("debugRuntimeClasspath")
             .build()
+        println(result.output)
         assertTrue {
-            "io.sentry:sentry-android:5.6.1" in result.output
+            "io.sentry:sentry-android:$SENTRY_SDK_VERSION" in result.output
         }
     }
 
@@ -97,10 +99,10 @@ class SentryPluginAutoInstallTest(
             .appendArguments("debugRuntimeClasspath")
             .build()
         print(result.output)
-        assertFalse { "io.sentry:sentry-android:5.6.1" in result.output }
-        assertFalse { "io.sentry:sentry-android-timber:5.6.1" in result.output }
-        assertFalse { "io.sentry:sentry-android-fragment:5.6.1" in result.output }
-        assertFalse { "io.sentry:sentry-android-okhttp:5.6.1" in result.output }
+        assertFalse { "io.sentry:sentry-android:$SENTRY_SDK_VERSION" in result.output }
+        assertFalse { "io.sentry:sentry-android-timber:$SENTRY_SDK_VERSION" in result.output }
+        assertFalse { "io.sentry:sentry-android-fragment:$SENTRY_SDK_VERSION" in result.output }
+        assertFalse { "io.sentry:sentry-android-okhttp:$SENTRY_SDK_VERSION" in result.output }
     }
 
     @Test
