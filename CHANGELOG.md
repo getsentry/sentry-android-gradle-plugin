@@ -7,7 +7,7 @@
 * Bump: AGP to 7.1.2 (#287)
 * Feature: Add support for GuardSquare's Proguard (#263) by @cortinico
 * Feature: Add support for GuardSquare's Dexguard (#267) by @cortinico
-* Bump sentry-cli 1.72.0 which prevent daemonize mode from crashing upload process (#262) by @cortinico
+* Bump: sentry-cli 1.72.0 which prevent daemonize mode from crashing upload process (#262) by @cortinico
 * Introduce the `includeProguardMapping` option to exclude the proguard logic, and deprecate `autoUpload` in favor of `autoUploadProguardMapping` (#240) by @cortinico
 * Feature: New File I/O auto-instrumentation (#249)
 * Feature: Add compile-time check for sentry-android SDK presence (#243)
