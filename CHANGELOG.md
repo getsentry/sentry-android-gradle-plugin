@@ -15,7 +15,7 @@
 * Feature: Make the ignoreXXX properties in SentryPluginExtension sets (#225)
 * Add support for dry-run on upload native symbols (#209)
 * Feature: Add support for M1 Macs (#204)
-* Feat: Auto-instrumentation for `androidx.sqlite` and `androidx.room` (#180)
+* Feature: Auto-instrumentation for `androidx.sqlite` and `androidx.room` (#180)
 
 **Breaking changes**
 
