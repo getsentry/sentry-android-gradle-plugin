@@ -177,7 +177,7 @@ class WrappingVisitor(
             replacement.descriptor,
             false
         )
-        if (newWithoutDupInsn && varIndex > 0) { // 0 is reserved for "this"
+        if (newWithoutDupInsn && varIndex >= 0) {
             mv.visitVarInsn(Opcodes.ASTORE, varIndex)
             varIndex = -1
             newWithoutDupInsn = false
