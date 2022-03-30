@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-## Unreleased
+## 3.0.1
+
+* Fix: obfuscated libs instrumentation (gms) (#303)
 
 ## 3.1.0-alpha.1
 
