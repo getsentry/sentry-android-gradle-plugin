@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Unreleased
+
 ## 3.1.0-alpha.1
 
 * Feature: Auto-install sentry-android SDK and integration dependencies (fragment, timber, okhttp) (#282)
