@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.0.1
 
 * Fix: obfuscated libs instrumentation (gms) (#303)
 
