@@ -2,33 +2,11 @@
 
 ## Unreleased
 
-* Fix: instrumenting obfuscated libs (gms) (#302)
-
-## 3.1.0-alpha.1
-
-* Feature: Auto-install sentry-android SDK and integration dependencies (fragment, timber, okhttp) (#282)
-* Feature: `OkHttp` auto-instrumentation (#288)
+* Fix instrumenting obfuscated libs (gms) (#302)
 
 ## 3.0.0
 
-* Bump: AGP to 7.1.2 (#287)
-* Feature: Add support for GuardSquare's Proguard (#263) by @cortinico
-* Feature: Add support for GuardSquare's Dexguard (#267) by @cortinico
-* Bump: sentry-cli 1.72.0 which prevent daemonize mode from crashing upload process (#262) by @cortinico
-* Introduce the `includeProguardMapping` option to exclude the proguard logic, and deprecate `autoUpload` in favor of `autoUploadProguardMapping` (#240) by @cortinico
-* Feature: New File I/O auto-instrumentation (#249)
-* Feature: Add compile-time check for sentry-android SDK presence (#243)
-* Fix: Correctly add the proguard UUID output directory to the source set (#226)
-* Feature: Make the ignoreXXX properties in SentryPluginExtension sets (#225)
-* Add support for dry-run on upload native symbols (#209)
-* Feature: Add support for M1 Macs (#204)
-* Feature: Auto-instrumentation for `androidx.sqlite` and `androidx.room` (#180)
-
-**Breaking changes**
-
-* The min AGP version required is `7.0.0`
-
-See the migration guide on our [documentation](https://docs.sentry.io/platforms/android/migration/#migrating-from-iosentrysentry-android-gradle-plugin-2x-to-iosentrysentry-android-gradle-plugin-300).
+* Fix instrumenting obfuscated libs (play-core) (#293)
 
 ## 3.0.0-rc.3
 

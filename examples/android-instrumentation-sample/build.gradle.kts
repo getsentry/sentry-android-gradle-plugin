@@ -50,6 +50,8 @@ android {
 // }
 
 dependencies {
+    implementation(Libs.SENTRY_ANDROID)
+
     implementation(Samples.AndroidX.recyclerView)
     implementation(Samples.AndroidX.lifecycle)
     implementation(Samples.AndroidX.appcompat)
@@ -61,8 +63,6 @@ dependencies {
     implementation(Samples.Room.ktx)
     implementation(Samples.Room.rxjava)
 
-    implementation(Samples.Timber.timber)
-    implementation(Samples.Fragment.fragmentKtx)
     implementation(project(":examples:android-room-lib"))
 
     kapt(Samples.Room.compiler)

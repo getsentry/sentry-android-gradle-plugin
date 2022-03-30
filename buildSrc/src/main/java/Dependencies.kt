@@ -61,20 +61,4 @@ object Samples {
         const val compiler = "androidx.room:room-compiler:${version}"
         const val rxjava = "androidx.room:room-rxjava2:${version}"
     }
-
-    object Retrofit {
-        private const val version = "2.9.0"
-        const val retrofit = "com.squareup.retrofit2:retrofit:${version}"
-        const val retrofitGson = "com.squareup.retrofit2:converter-gson:${version}"
-    }
-
-    object Timber {
-        private const val version = "5.0.1"
-        const val timber = "com.jakewharton.timber:timber:${version}"
-    }
-
-    object Fragment {
-        private const val version = "1.3.5"
-        const val fragmentKtx = "androidx.fragment:fragment-ktx:${version}"
-    }
 }

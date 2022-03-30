@@ -1,6 +1,6 @@
 package io.sentry.android.gradle.instrumentation.fakes
 
-import io.sentry.android.gradle.extensions.InstrumentationFeature
+import io.sentry.android.gradle.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.ClassInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentrySdkStateHolder

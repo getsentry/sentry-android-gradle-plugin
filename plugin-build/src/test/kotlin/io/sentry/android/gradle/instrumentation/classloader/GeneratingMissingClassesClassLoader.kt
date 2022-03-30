@@ -1,8 +1,8 @@
 package io.sentry.android.gradle.instrumentation.classloader
 
 import io.sentry.android.gradle.instrumentation.classloader.mapping.deletionDaoMissingClasses
+import io.sentry.android.gradle.instrumentation.classloader.mapping.gmsMapping
 import io.sentry.android.gradle.instrumentation.classloader.mapping.insertionDaoMissingClasses
-import io.sentry.android.gradle.instrumentation.classloader.mapping.okHttpMissingClasses
 import io.sentry.android.gradle.instrumentation.classloader.mapping.selectDaoMissingClasses
 import io.sentry.android.gradle.instrumentation.classloader.mapping.sqliteCopyOpenHelperMissingClasses
 import io.sentry.android.gradle.instrumentation.classloader.mapping.updateDaoMissingClasses
@@ -16,28 +16,17 @@ class GeneratingMissingClassesClassLoader : ClassLoader(getSystemClassLoader()) 
             *updateDaoMissingClasses,
             *selectDaoMissingClasses,
             *sqliteCopyOpenHelperMissingClasses,
-            *okHttpMissingClasses
+            *gmsMapping
         )
     }
 
     override fun findClass(name: String): Class<*> {
         if (name in missingClasses) {
-            return generateClass(name, missingClasses[name]!!.invoke(name))
+            val fqName = name.replace('.', '/')
+            val source = missingClasses[name]!!.invoke(name)
+            val bytes = compileClass(fqName, source)
+            return defineClass(name, bytes.toByteArray(), 0, bytes.size())
         }
-
-        return try {
-            super.findClass(name)
-        } catch (e: ClassNotFoundException) {
-            generateClass(name)
-        }
-    }
-
-    private fun generateClass(
-        name: String,
-        source: String = standardClassSource(name)
-    ): Class<*> {
-        val fqName = name.replace('.', '/')
-        val bytes = compileClass(fqName, source)
-        return defineClass(name, bytes.toByteArray(), 0, bytes.size())
+        return super.findClass(name)
     }
 }

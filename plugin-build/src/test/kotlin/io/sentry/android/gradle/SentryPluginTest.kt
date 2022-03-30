@@ -1,6 +1,5 @@
 package io.sentry.android.gradle
 
-import io.sentry.android.gradle.extensions.InstrumentationFeature
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue

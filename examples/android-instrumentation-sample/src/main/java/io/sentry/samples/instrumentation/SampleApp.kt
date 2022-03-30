@@ -5,6 +5,12 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
 import io.sentry.samples.instrumentation.data.TracksDatabase
+import io.sentry.samples.instrumentation.util.DEFAULT_LYRICS
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class SampleApp : Application() {
 
@@ -24,5 +30,18 @@ class SampleApp : Application() {
             .build()
 
         analytics = getSharedPreferences("analytics", Context.MODE_PRIVATE)
+
+        GlobalScope.launch(Dispatchers.IO) {
+            database.tracksDao().all()
+                .collect { tracks ->
+                    tracks.forEachIndexed { index, track ->
+                        // add lyrics for every 2nd track
+                        if (index % 2 == 0) {
+                            val file = File(filesDir, "${track.id}.txt")
+                            file.writeText(DEFAULT_LYRICS)
+                        }
+                    }
+                }
+        }
     }
 }

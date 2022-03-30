@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.extensions
+package io.sentry.android.gradle
 
 import javax.inject.Inject
 import org.gradle.api.Action
@@ -105,18 +105,5 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
         tracingInstrumentationAction: Action<TracingInstrumentationExtension>
     ) {
         tracingInstrumentationAction.execute(tracingInstrumentation)
-    }
-
-    val autoInstallation: AutoInstallExtension = objects.newInstance(
-        AutoInstallExtension::class.java
-    )
-
-    /**
-     * Configure the auto installation feature.
-     */
-    fun autoInstallation(
-        autoInstallationAction: Action<AutoInstallExtension>
-    ) {
-        autoInstallationAction.execute(autoInstallation)
     }
 }
