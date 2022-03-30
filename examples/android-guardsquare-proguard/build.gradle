@@ -48,4 +48,8 @@ sentry {
     tracingInstrumentation {
         enabled = false
     }
+
+    autoInstallation {
+        enabled = false
+    }
 }

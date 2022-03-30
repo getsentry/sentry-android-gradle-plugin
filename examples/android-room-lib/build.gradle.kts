@@ -21,4 +21,9 @@ dependencies {
 
     implementation(Samples.Room.runtime)
     implementation(Samples.Room.ktx)
+
+    // this is here for test purposes, to ensure that transitive dependencies are also recognized
+    // by our auto-installation
+    api(Samples.Retrofit.retrofit)
+    api(Samples.Retrofit.retrofitGson)
 }
