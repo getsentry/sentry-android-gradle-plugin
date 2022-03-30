@@ -1,9 +1,5 @@
 # Changelog
 
-## Unreleased
-
-* Fix instrumenting obfuscated libs (gms) (#302)
-
 ## 3.0.0
 
 * Fix instrumenting obfuscated libs (play-core) (#293)
