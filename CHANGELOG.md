@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 3.1.0-beta.1
 
 * Fix: obfuscated libs instrumentation (adcolony) (#307)
