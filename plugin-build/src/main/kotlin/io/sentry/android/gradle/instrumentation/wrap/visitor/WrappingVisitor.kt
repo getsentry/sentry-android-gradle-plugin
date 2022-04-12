@@ -15,6 +15,7 @@ import org.objectweb.asm.commons.Method
 import org.objectweb.asm.tree.InsnNode
 import org.objectweb.asm.tree.MethodNode
 import org.objectweb.asm.tree.TypeInsnNode
+import org.objectweb.asm.tree.VarInsnNode
 import org.slf4j.Logger
 
 class WrappingVisitor(
@@ -46,18 +47,26 @@ class WrappingVisitor(
     }
     private val className = classContext.className.replace('.', '/')
 
-    private var newWithoutDupInsn = false
+    private var manuallyDuped = false
     private var varIndex = -1
 
     override fun visitTypeInsn(opcode: Int, type: String?) {
         super.visitTypeInsn(opcode, type)
         if (opcode == Opcodes.NEW && type in targetTypes) {
-            val nextInsn = newInsnsForTargets.poll()?.next
+            val nextInsn = newInsnsForTargets.poll()?.next ?: return
             // in case the next insn after NEW is not a DUP, we inject our own DUP and flip a flag
             // to later store our wrapping instance with the same index as the original instance
-            if (nextInsn != null && (nextInsn as? InsnNode)?.opcode != Opcodes.DUP) {
+            val isNextInsnDup = (nextInsn as? InsnNode)?.opcode == Opcodes.DUP
+            // in case the next insn after NEW is DUP, but is followed by ASTORE, we do the same
+            // thing as above. This case cannot be written by a developer, but rather is produced
+            // by a code obfuscator/compiler, because the usage of uninitialized instance
+            // is prohibited by the java verifier (NEW should be followed by INVOKESPECIAL before
+            // using it, which is not the case with ASTORE)
+            val isDupFollowedByStore =
+                isNextInsnDup && (nextInsn.next as? VarInsnNode)?.opcode == Opcodes.ASTORE
+            if (!isNextInsnDup || isDupFollowedByStore) {
                 dup()
-                newWithoutDupInsn = true
+                manuallyDuped = true
             }
         }
     }
@@ -66,7 +75,7 @@ class WrappingVisitor(
         super.visitVarInsn(opcode, `var`)
         // capture the variable index of the instrumented type to later store our wrapped type
         // with the same index
-        if (opcode == Opcodes.ASTORE && newWithoutDupInsn && varIndex == -1) {
+        if (opcode == Opcodes.ASTORE && manuallyDuped && varIndex == -1) {
             varIndex = `var`
         }
     }
@@ -177,10 +186,10 @@ class WrappingVisitor(
             replacement.descriptor,
             false
         )
-        if (newWithoutDupInsn && varIndex >= 0) {
+        if (manuallyDuped && varIndex >= 0) {
             mv.visitVarInsn(Opcodes.ASTORE, varIndex)
             varIndex = -1
-            newWithoutDupInsn = false
+            manuallyDuped = false
         }
     }
 }
