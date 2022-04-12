@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Fix: obfuscated libs instrumentation (adcolony) (#307)
+
 ## 3.0.1
 
 * Fix: obfuscated libs instrumentation (gms) (#303)
