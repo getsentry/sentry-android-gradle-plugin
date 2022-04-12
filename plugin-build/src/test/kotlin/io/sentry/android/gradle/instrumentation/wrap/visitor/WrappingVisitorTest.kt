@@ -319,6 +319,49 @@ class WrappingVisitorTest {
                 fixture.visitor.insnVisits.first() == InsnVisit(Opcodes.DUP)
         }
     }
+
+    @Test
+    fun `when NEW insn with DUP followed by ASTORE - modifies operand stack with DUP and ASTORE`() {
+        val methodVisit = MethodVisit(
+            opcode = Opcodes.INVOKESPECIAL,
+            owner = "java/io/FileInputStream",
+            name = "<init>",
+            descriptor = "(Ljava/lang/String;)V",
+            isInterface = false
+        )
+        val firstPassVisitor = MethodNode(Opcodes.ASM9).apply {
+            visitTypeInsn(Opcodes.NEW, "java/io/FileInputStream")
+            visitInsn(Opcodes.DUP)
+            visitVarInsn(Opcodes.ASTORE, 1)
+        }
+
+        fixture.getSut(
+            replacements = mapOf(Replacement.FileInputStream.STRING),
+            firstPassVisitor = firstPassVisitor
+        ).run {
+            visitTypeInsn(Opcodes.NEW, "java/io/FileInputStream")
+            visitInsn(Opcodes.DUP)
+            visitVarInsn(Opcodes.ASTORE, 1)
+            visitMethodInsn(
+                methodVisit.opcode,
+                methodVisit.owner,
+                methodVisit.name,
+                methodVisit.descriptor,
+                methodVisit.isInterface
+            )
+        }
+
+        // DUP was visited by our visitor
+        assertTrue {
+            fixture.visitor.insnVisits.size == 2 &&
+                fixture.visitor.insnVisits.all { it == InsnVisit(Opcodes.DUP) }
+        }
+        // ASTORE was visited by our visitor in the end
+        assertTrue {
+            fixture.visitor.varVisits.size == 5 &&
+                fixture.visitor.varVisits.last() == VarVisit(Opcodes.ASTORE, 1)
+        }
+    }
 }
 
 data class MethodVisit(
