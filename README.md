@@ -14,7 +14,11 @@ Gradle Plugin for Sentry Android
 
 Upload proguard, debug files, and more.
 
-## Resources
+# Blog posts
+* [Sentry’s Android Gradle Plugin Updated with Room Support and More](https://blog.sentry.io/2022/04/20/sentrys-android-gradle-plugin-updated-with-room-support-and-more/)
+* [Bytecode transformations: The Android Gradle Plugin](https://blog.sentry.io/2021/12/14/bytecode-transformations-the-android-gradle-plugin)
+
+# Resources
 
 * [![Documentation](https://img.shields.io/badge/documentation-sentry.io-green.svg)](https://docs.sentry.io/platforms/android/)
 * [![Forum](https://img.shields.io/badge/forum-sentry-green.svg)](https://forum.sentry.io/c/sdks)
