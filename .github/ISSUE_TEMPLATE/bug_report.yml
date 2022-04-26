@@ -1,0 +1,84 @@
+name: 🐞 Bug Report
+description: Tell us about something that's not working the way we (probably) intend.
+labels: ["Platform: Android", "bug"]
+body:
+  - type: input
+    id: gradle_version
+    attributes:
+      label: Gradle Version
+      description: Gradle Version
+      placeholder: 7.4.0 ← should look like this
+    validations:
+      required: true
+
+  - type: input
+    id: agp_version
+    attributes:
+      label: AGP Version
+      description: Android Gradle Plugin Version
+      placeholder: 7.0.0 ← should look like this
+    validations:
+      required: true
+
+  - type: dropdown
+    id: minifier
+    attributes:
+      label: Code Minifier/Optimizer
+      description: Which code optimization/obfuscation tool is used?
+      options:
+        - R8
+        - Proguard
+        - Dexguard
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Sentry Android Gradle Plugin Version
+      placeholder: 3.0.1 ← should look like this
+    validations:
+      required: true
+
+  - type: input
+    id: sdk_version
+    attributes:
+      label: Sentry SDK Version
+      description: The version of the Sentry Android/React Native SDK
+      placeholder: 6.0.0 ← should look like this
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to Reproduce
+      description: How can we see what you're seeing? Specific is terrific.
+      placeholder: |-
+        1. foo
+        2. bar
+        3. baz
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Result
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Result
+      description: Logs? Screenshots? Yes, please.
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |-
+        ## Thanks 🙏
+        Check our [triage docs](https://open.sentry.io/triage/) for what to expect next.
