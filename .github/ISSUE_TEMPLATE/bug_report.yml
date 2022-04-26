@@ -29,9 +29,8 @@ body:
         - R8
         - Proguard
         - Dexguard
-        - None
     validations:
-      required: true
+      required: false
 
   - type: input
     id: version
