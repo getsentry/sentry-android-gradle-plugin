@@ -11,6 +11,7 @@ Gradle Plugin for Sentry Android
 [![build](https://github.com/getsentry/sentry-android-gradle-plugin/workflows/Test%20Publishing%20UUID%20Dry%20Run/badge.svg?branch=main)](https://github.com/getsentry/sentry-android-gradle-plugin/actions?query=branch%3Amain)
 [![build](https://github.com/getsentry/sentry-android-gradle-plugin/workflows/Test%20Publishing%20UUID/badge.svg?branch=main)](https://github.com/getsentry/sentry-android-gradle-plugin/actions?query=branch%3Amain)
 [![build](https://github.com/getsentry/sentry-android-gradle-plugin/workflows/Pre%20Merge%20Checks/badge.svg?branch=main)](https://github.com/getsentry/sentry-android-gradle-plugin/actions?query=branch%3Amain)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgetsentry%2Fsentry-android-gradle-plugin.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgetsentry%2Fsentry-android-gradle-plugin?ref=badge_shield)
 
 Upload proguard, debug files, and more.
 
@@ -25,3 +26,7 @@ Upload proguard, debug files, and more.
 * [![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)  
 * [![Stack Overflow](https://img.shields.io/badge/stack%20overflow-sentry-green.svg)](http://stackoverflow.com/questions/tagged/sentry)
 * [![Twitter Follow](https://img.shields.io/twitter/follow/getsentry?label=getsentry&style=social)](https://twitter.com/intent/follow?screen_name=getsentry)
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fgetsentry%2Fsentry-android-gradle-plugin.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fgetsentry%2Fsentry-android-gradle-plugin?ref=badge_large)
