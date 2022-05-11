@@ -55,12 +55,13 @@ abstract class BaseSentryPluginTest(
               repositories {
                 google()
                 mavenCentral()
+                maven { url 'https://appboy.github.io/appboy-android-sdk/sdk' }
               }
             }
             subprojects {
               pluginManager.withPlugin('com.android.application') {
                 android {
-                  compileSdkVersion 30
+                  compileSdkVersion 31
                   defaultConfig {
                     applicationId "com.example"
                     minSdkVersion 21
