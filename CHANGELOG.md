@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+* Ignore R8 minified libs from instrumentation (#316)
+
 ## 3.1.0-beta.1
 
 * Fix: obfuscated libs instrumentation (adcolony) (#307)
