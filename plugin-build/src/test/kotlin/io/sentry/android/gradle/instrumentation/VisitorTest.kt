@@ -136,6 +136,12 @@ class VisitorTest(
                 ChainedInstrumentable(listOf(WrappingInstrumentable(), RemappingInstrumentable())),
                 null
             ),
+            arrayOf(
+                "fileIO",
+                "BrazeImageUtils",
+                ChainedInstrumentable(listOf(WrappingInstrumentable(), RemappingInstrumentable())),
+                null
+            ),
             arrayOf("okhttp/v3", "RealCall", OkHttp(), null),
             arrayOf("okhttp/v4", "RealCall", OkHttp(), null)
         )
