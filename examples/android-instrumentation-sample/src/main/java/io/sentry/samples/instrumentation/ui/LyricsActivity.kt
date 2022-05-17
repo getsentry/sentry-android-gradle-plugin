@@ -5,8 +5,8 @@ import android.os.Bundle
 import android.widget.EditText
 import androidx.activity.ComponentActivity
 import androidx.appcompat.widget.Toolbar
-import io.sentry.Sentry
-import io.sentry.SpanStatus
+//import io.sentry.Sentry
+//import io.sentry.SpanStatus
 import io.sentry.samples.instrumentation.R
 import io.sentry.samples.instrumentation.data.Track
 import io.sentry.samples.instrumentation.util.Filesystem
@@ -22,11 +22,11 @@ class LyricsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lyrics)
 
-        val transaction = Sentry.startTransaction(
-            "Track Interaction",
-            "ui.action.lyrics",
-            true
-        )
+//        val transaction = Sentry.startTransaction(
+//            "Track Interaction",
+//            "ui.action.lyrics",
+//            true
+//        )
 
         lyricsInput = findViewById(R.id.lyrics)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
@@ -39,17 +39,17 @@ class LyricsActivity : ComponentActivity() {
         dir.mkdirs()
 
         lyricsInput.setText(filesystem.read(this, "${track.id}.txt"))
-        transaction.finish(SpanStatus.OK)
+//        transaction.finish(SpanStatus.OK)
     }
 
     override fun onBackPressed() {
-        val transaction = Sentry.getSpan() ?: Sentry.startTransaction(
-            "Track Interaction",
-            "ui.action.lyrics_finish",
-            true
-        )
+//        val transaction = Sentry.getSpan() ?: Sentry.startTransaction(
+//            "Track Interaction",
+//            "ui.action.lyrics_finish",
+//            true
+//        )
         filesystem.write(this, "${track.id}.txt", lyricsInput.text.toString())
-        transaction.finish(SpanStatus.OK)
+//        transaction.finish(SpanStatus.OK)
         super.onBackPressed()
     }
 

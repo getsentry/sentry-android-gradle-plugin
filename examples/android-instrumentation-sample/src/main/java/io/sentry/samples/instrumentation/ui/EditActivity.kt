@@ -5,8 +5,8 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.appcompat.widget.Toolbar
-import io.sentry.Sentry
-import io.sentry.SpanStatus
+//import io.sentry.Sentry
+//import io.sentry.SpanStatus
 import io.sentry.samples.instrumentation.R
 import io.sentry.samples.instrumentation.SampleApp
 import io.sentry.samples.instrumentation.data.Track
@@ -33,11 +33,11 @@ class EditActivity : ComponentActivity() {
 
         findViewById<Toolbar>(R.id.toolbar).setOnMenuItemClickListener {
             if (it.itemId == R.id.action_save) {
-                val transaction = Sentry.startTransaction(
-                    "Track Interaction",
-                    if (originalTrack == null) "ui.action.add" else "ui.action.edit",
-                    true
-                )
+//                val transaction = Sentry.startTransaction(
+//                    "Track Interaction",
+//                    if (originalTrack == null) "ui.action.add" else "ui.action.edit",
+//                    true
+//                )
 
                 val name = nameInput.text.toString()
                 val composer = composerInput.text.toString()
@@ -65,7 +65,7 @@ class EditActivity : ComponentActivity() {
                         val editCount = SampleApp.analytics.getInt("edit_count", 0) + 1
                         SampleApp.analytics.edit().putInt("edit_count", editCount).apply()
                     }
-                    transaction.finish(SpanStatus.OK)
+//                    transaction.finish(SpanStatus.OK)
                     finish()
                 }
                 return@setOnMenuItemClickListener true

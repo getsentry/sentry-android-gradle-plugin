@@ -6,8 +6,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.recyclerview.widget.RecyclerView
-import io.sentry.Sentry
-import io.sentry.SpanStatus
+//import io.sentry.Sentry
+//import io.sentry.SpanStatus
 import io.sentry.samples.instrumentation.R
 import io.sentry.samples.instrumentation.SampleApp
 import io.sentry.samples.instrumentation.data.Track
@@ -40,17 +40,17 @@ class TrackAdapter : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.row.populate(data[position])
         holder.row.deleteButton.setOnClickListener {
-            val transaction = Sentry.startTransaction(
-                "Track Interaction",
-                "ui.action.delete",
-                true
-            )
+//            val transaction = Sentry.startTransaction(
+//                "Track Interaction",
+//                "ui.action.delete",
+//                true
+//            )
             runBlocking {
                 SampleApp.database.tracksDao().delete(data[holder.bindingAdapterPosition])
                 val deleteCount = SampleApp.analytics.getInt("delete_count", 0) + 1
                 SampleApp.analytics.edit().putInt("delete_count", deleteCount).apply()
             }
-            transaction.finish(SpanStatus.OK)
+//            transaction.finish(SpanStatus.OK)
         }
         holder.row.editButton.setOnClickListener {
             val context = holder.row.context

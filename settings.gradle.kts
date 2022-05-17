@@ -7,6 +7,9 @@ pluginManagement {
             if (requested.id.id == "io.sentry.android.gradle") {
                 useModule("io.sentry:sentry-android-gradle-plugin:${requested.version}")
             }
+            if (requested.id.id == "androidx.benchmark") {
+                useModule("androidx.benchmark:benchmark-gradle-plugin:${requested.version}")
+            }
         }
     }
     repositories {
@@ -29,3 +32,4 @@ includeBuild("plugin-build") {
         substitute(module("io.sentry:sentry-android-gradle-plugin")).using(project(":"))
     }
 }
+include(":examples:android-instrumentation-sample:benchmark")

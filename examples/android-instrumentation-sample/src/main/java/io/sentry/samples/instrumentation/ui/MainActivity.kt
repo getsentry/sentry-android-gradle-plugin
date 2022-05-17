@@ -7,8 +7,8 @@ import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import io.sentry.Sentry
-import io.sentry.SpanStatus
+//import io.sentry.Sentry
+//import io.sentry.SpanStatus
 import io.sentry.samples.instrumentation.R
 import io.sentry.samples.instrumentation.SampleApp
 import io.sentry.samples.instrumentation.network.TrackService
@@ -28,12 +28,12 @@ class MainActivity : ComponentActivity() {
         list.adapter = TrackAdapter()
 
         lifecycleScope.launchWhenStarted {
-            Sentry.getSpan()?.finish()
-            val transaction = Sentry.startTransaction(
-                "Track Interaction",
-                "ui.action.load",
-                true
-            )
+//            Sentry.getSpan()?.finish()
+//            val transaction = Sentry.startTransaction(
+//                "Track Interaction",
+//                "ui.action.load",
+//                true
+//            )
             SampleApp.database.tracksDao()
                 .all()
                 .map {
@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
                 }
                 .collect {
                     (list.adapter as TrackAdapter).populate(it)
-                    transaction.finish(SpanStatus.OK)
+//                    transaction.finish(SpanStatus.OK)
                 }
         }
 

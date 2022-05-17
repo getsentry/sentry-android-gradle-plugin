@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("kapt")
-    id("io.sentry.android.gradle")
+//    id("io.sentry.android.gradle")
 }
 
 // useful for local debugging of the androidx.sqlite lib
@@ -14,18 +14,26 @@ plugins {
 // }
 
 android {
-    compileSdk = 30
+    compileSdk = 31
     defaultConfig {
         minSdk = 21
-        targetSdk = 30
+        targetSdk = 31
         versionCode = 1
         versionName = "1.0"
     }
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
-            proguardFiles.add(getDefaultProguardFile("proguard-android-optimize.txt"))
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "benchmark-proguard-rules.pro"
+            )
             signingConfig = signingConfigs.getByName("debug")
+        }
+        create("benchmark") {
+            matchingFallbacks += "release"
+            isDebuggable = false
+            signingConfig  = signingConfigs.getByName("debug")
         }
     }
 
@@ -64,14 +72,15 @@ dependencies {
     implementation(Samples.Timber.timber)
     implementation(Samples.Fragment.fragmentKtx)
     implementation(project(":examples:android-room-lib"))
+    implementation("io.sentry:sentry-android-core:5.5.2")
 
     kapt(Samples.Room.compiler)
 }
-
-sentry {
-    autoUploadProguardMapping.set(false)
-
-    tracingInstrumentation {
-        forceInstrumentDependencies.set(true)
-    }
-}
+//
+//sentry {
+//    autoUploadProguardMapping.set(false)
+//
+//    tracingInstrumentation {
+//        forceInstrumentDependencies.set(true)
+//    }
+//}
