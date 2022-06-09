@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 3.1.0
+
+### Various fixes & improvements
+
+- Prepare 3.1.0-beta.3 (2d1c919c)
 
 ## 3.1.0-beta.2
 
