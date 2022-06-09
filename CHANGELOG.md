@@ -2,9 +2,14 @@
 
 ## 3.1.0
 
-### Various fixes & improvements
+### Features
+* Auto-install sentry-android SDK and integration dependencies (fragment, timber, okhttp) (#282)
+* `OkHttp` auto-instrumentation (#288)
 
-- Prepare 3.1.0-beta.3 (2d1c919c)
+### Fixes
+
+* Ignore R8 minified libs from instrumentation (#316)
+* obfuscated libs instrumentation (adcolony) (#307)
 
 ## 3.1.0-beta.2
 
