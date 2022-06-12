@@ -1,6 +1,15 @@
 # Changelog
 
-## Unreleased
+## 3.1.0
+
+### Features
+* Auto-install sentry-android SDK and integration dependencies (fragment, timber, okhttp) (#282)
+* `OkHttp` auto-instrumentation (#288)
+
+### Fixes
+
+* Ignore R8 minified libs from instrumentation (#316)
+* obfuscated libs instrumentation (adcolony) (#307)
 
 ### Features
 * Bump sentry runtime SDK version to `6.0.0` ([#321](https://github.com/getsentry/sentry-android-gradle-plugin/pull/321))
