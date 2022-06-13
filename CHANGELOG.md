@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Features
+
 * Bump sentry runtime SDK version to `6.0.0` ([#321](https://github.com/getsentry/sentry-android-gradle-plugin/pull/321))
 
 ## 3.1.0
