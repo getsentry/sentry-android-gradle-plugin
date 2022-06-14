@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- `OkHttp` auto-instrumentation whe `autoInstallation` is disabled ([#327](https://github.com/getsentry/sentry-android-gradle-plugin/pull/327))
+- Fix `OkHttp` auto-instrumentation crash, when `sentry-android-okhttp` is not present on classpath ([#327](https://github.com/getsentry/sentry-android-gradle-plugin/pull/327))
 
 ## 3.1.0
 
