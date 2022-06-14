@@ -138,7 +138,7 @@ class SentryAndroidSdkCheckerTest {
     }
 
     @Test
-    fun `sentry-android performance version - logs a info and persists module in the build service`() {
+    fun `sentry-android performance version - logs a info and persists module in build service`() {
         val sentryAndroidDep = mock<ResolvedComponentResult> {
             whenever(mock.moduleVersion).thenReturn(
                 DefaultModuleVersionIdentifier.newId(
@@ -168,7 +168,7 @@ class SentryAndroidSdkCheckerTest {
     }
 
     @Test
-    fun `sentry-android transitive - logs a info and persists both modules in the build service`() {
+    fun `sentry-android transitive - logs a info and persists both modules in build service`() {
         val firstLevelDep = mock<ResolvedComponentResult> {
             whenever(mock.moduleVersion).thenReturn(
                 DefaultModuleVersionIdentifier.newId(

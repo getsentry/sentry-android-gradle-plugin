@@ -105,7 +105,8 @@ class SentryPluginCheckAndroidSdkTest(
             .build()
 
         assertTrue {
-            "SENTRY MODULES: [sentry-android:5.4.0, sentry-android-core:5.4.0, sentry:5.4.0, sentry-android-ndk:5.4.0]" in result.output
+            "SENTRY MODULES: [sentry-android:5.4.0, sentry-android-core:5.4.0, " +
+                "sentry:5.4.0, sentry-android-ndk:5.4.0]" in result.output
         }
     }
 
