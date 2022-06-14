@@ -42,7 +42,7 @@ private fun Set<ResolvedComponentResult>.filterSentryModules(logger: Logger): Ma
         val name = it.moduleVersion?.name ?: ""
         val version = it.moduleVersion?.version ?: ""
         val semver = try {
-            SemVer.parse(it.moduleVersion?.version ?: "")
+            SemVer.parse(version)
         } catch (e: Throwable) {
             logger.info { "Unable to parse version $version of $name" }
             SemVer()
