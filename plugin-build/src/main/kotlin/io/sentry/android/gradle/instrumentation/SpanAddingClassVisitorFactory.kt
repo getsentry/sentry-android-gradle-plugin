@@ -12,11 +12,10 @@ import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.Androi
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
-import io.sentry.android.gradle.services.SentrySdkStateHolder
-import io.sentry.android.gradle.util.SentryAndroidSdkState
-import io.sentry.android.gradle.util.SentryAndroidSdkState.FILE_IO
-import io.sentry.android.gradle.util.SentryAndroidSdkState.OKHTTP
-import io.sentry.android.gradle.util.SentryAndroidSdkState.PERFORMANCE
+import io.sentry.android.gradle.services.SentryModulesService
+import io.sentry.android.gradle.util.SemVer
+import io.sentry.android.gradle.util.SentryModules
+import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.util.debug
 import io.sentry.android.gradle.util.info
 import io.sentry.android.gradle.util.warn
@@ -50,7 +49,7 @@ abstract class SpanAddingClassVisitorFactory :
         val features: SetProperty<InstrumentationFeature>
 
         @get:Internal
-        val sdkStateHolder: Property<SentrySdkStateHolder>
+        val sentryModulesService: Property<SentryModulesService>
 
         @get:Internal
         val tmpDir: Property<File>
@@ -69,27 +68,29 @@ abstract class SpanAddingClassVisitorFactory :
                 return memoized
             }
 
-            val sdkState = parameters.get().sdkStateHolder.get().sdkState
-            SentryPlugin.logger.info { "Read sentry-android sdk state: $sdkState" }
+            val sentryModules = parameters.get().sentryModulesService.get().modules
+            SentryPlugin.logger.info { "Read sentry modules: $sentryModules" }
             /**
              * When adding a new instrumentable to the list below, do not forget to add a new
-             * version range to [SentryAndroidSdkState.from], if it involves runtime classes
+             * version to [SentryVersions] if it involves runtime classes
              * from the sentry-android SDK.
              */
             val instrumentables = listOfNotNull(
                 AndroidXSQLiteDatabase().takeIf {
-                    isDatabaseInstrEnabled(sdkState, parameters.get())
+                    isDatabaseInstrEnabled(sentryModules, parameters.get())
                 },
                 AndroidXSQLiteStatement().takeIf {
-                    isDatabaseInstrEnabled(sdkState, parameters.get())
+                    isDatabaseInstrEnabled(sentryModules, parameters.get())
                 },
-                AndroidXRoomDao().takeIf { isDatabaseInstrEnabled(sdkState, parameters.get()) },
-                OkHttp().takeIf { isOkHttpInstrEnabled(sdkState, parameters.get()) },
+                AndroidXRoomDao().takeIf {
+                    isDatabaseInstrEnabled(sentryModules, parameters.get())
+                },
+                OkHttp().takeIf { isOkHttpInstrEnabled(sentryModules, parameters.get()) },
                 ChainedInstrumentable(
                     listOf(WrappingInstrumentable(), RemappingInstrumentable())
-                ).takeIf { isFileIOInstrEnabled(sdkState, parameters.get()) }
+                ).takeIf { isFileIOInstrEnabled(sentryModules, parameters.get()) }
             )
-            SentryPlugin.logger.debug {
+            SentryPlugin.logger.info {
                 "Instrumentables: ${instrumentables.joinToString { it::class.java.simpleName }}"
             }
             parameters.get()._instrumentables = ArrayList(instrumentables)
@@ -97,24 +98,33 @@ abstract class SpanAddingClassVisitorFactory :
         }
 
     private fun isDatabaseInstrEnabled(
-        sdkState: SentryAndroidSdkState,
+        sentryModules: Map<String, SemVer>,
         parameters: SpanAddingParameters
     ): Boolean =
-        sdkState.isAtLeast(PERFORMANCE) &&
-            parameters.features.get().contains(InstrumentationFeature.DATABASE)
+        sentryModules.isAtLeast(
+            SentryModules.SENTRY_ANDROID_CORE,
+            SentryVersions.VERSION_PERFORMANCE
+        ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
 
     private fun isFileIOInstrEnabled(
-        sdkState: SentryAndroidSdkState,
+        sentryModules: Map<String, SemVer>,
         parameters: SpanAddingParameters
     ): Boolean =
-        sdkState.isAtLeast(FILE_IO) &&
-            parameters.features.get().contains(InstrumentationFeature.FILE_IO)
+        sentryModules.isAtLeast(
+            SentryModules.SENTRY_ANDROID_CORE,
+            SentryVersions.VERSION_FILE_IO
+        ) && parameters.features.get().contains(InstrumentationFeature.FILE_IO)
 
     private fun isOkHttpInstrEnabled(
-        sdkState: SentryAndroidSdkState,
+        sentryModules: Map<String, SemVer>,
         parameters: SpanAddingParameters
-    ): Boolean = sdkState.isAtLeast(OKHTTP) &&
-        parameters.features.get().contains(InstrumentationFeature.OKHTTP)
+    ): Boolean = sentryModules.isAtLeast(
+        SentryModules.SENTRY_ANDROID_OKHTTP,
+        SentryVersions.VERSION_OKHTTP
+    ) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
+
+    private fun Map<String, SemVer>.isAtLeast(module: String, minVersion: SemVer): Boolean =
+        getOrDefault(module, SentryVersions.VERSION_DEFAULT) >= minVersion
 
     override fun createClassVisitor(
         classContext: ClassContext,

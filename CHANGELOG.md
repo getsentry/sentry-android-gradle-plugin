@@ -4,7 +4,11 @@
 
 ### Features
 
-* Bump sentry runtime SDK version to `6.0.0` ([#321](https://github.com/getsentry/sentry-android-gradle-plugin/pull/321))
+- Bump sentry runtime SDK version to `6.0.0` ([#321](https://github.com/getsentry/sentry-android-gradle-plugin/pull/321))
+
+### Fixes
+
+- Fix `OkHttp` auto-instrumentation crash, when `sentry-android-okhttp` is not present on classpath ([#327](https://github.com/getsentry/sentry-android-gradle-plugin/pull/327))
 
 ## 3.1.0
 

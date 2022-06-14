@@ -19,7 +19,7 @@ import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
 import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
-import io.sentry.android.gradle.services.SentrySdkStateHolder
+import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
@@ -97,11 +97,11 @@ class SentryPlugin : Plugin<Project> {
                      * the state between builds and also during a single build, because transforms
                      * are run in parallel.
                      */
-                    val sdkStateHolderProvider = SentrySdkStateHolder.register(project)
+                    val sentryModulesService = SentryModulesService.register(project)
                     project.detectSentryAndroidSdk(
                         "${variant.name}RuntimeClasspath",
                         variant.name,
-                        sdkStateHolderProvider
+                        sentryModulesService
                     )
 
                     variant.transformClassesWith(
@@ -117,7 +117,7 @@ class SentryPlugin : Plugin<Project> {
                         params.features.setDisallowChanges(
                             extension.tracingInstrumentation.features.get()
                         )
-                        params.sdkStateHolder.setDisallowChanges(sdkStateHolderProvider)
+                        params.sentryModulesService.setDisallowChanges(sentryModulesService)
                         params.tmpDir.set(tmpDir)
                     }
                     variant.setAsmFramesComputationMode(
