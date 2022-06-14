@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- `OkHttp` auto-instrumentation whe `autoInstallation` is disabled ([#327](https://github.com/getsentry/sentry-android-gradle-plugin/pull/327))
+
 ## 3.1.0
 
 ### Features
