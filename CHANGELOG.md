@@ -4,7 +4,7 @@
 
 ### Features
 
-- Bump sentry runtime SDK version to `6.0.0` ([#321](https://github.com/getsentry/sentry-android-gradle-plugin/pull/321))
+- Bump sentry runtime SDK version to `6.1.0` ([#321](https://github.com/getsentry/sentry-android-gradle-plugin/pull/321))
 
 ### Fixes
 
