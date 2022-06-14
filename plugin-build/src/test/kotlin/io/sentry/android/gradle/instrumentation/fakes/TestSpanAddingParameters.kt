@@ -3,7 +3,7 @@ package io.sentry.android.gradle.instrumentation.fakes
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.ClassInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
-import io.sentry.android.gradle.services.SentrySdkStateHolder
+import io.sentry.android.gradle.services.SentryModulesService
 import java.io.File
 import org.gradle.api.internal.provider.DefaultProperty
 import org.gradle.api.internal.provider.DefaultSetProperty
@@ -27,7 +27,7 @@ class TestSpanAddingParameters(
         get() = DefaultSetProperty(PropertyHost.NO_OP, InstrumentationFeature::class.java)
             .convention(setOf(InstrumentationFeature.FILE_IO, InstrumentationFeature.DATABASE))
 
-    override val sdkStateHolder: Property<SentrySdkStateHolder>
+    override val sentryModulesService: Property<SentryModulesService>
         get() = TODO()
 
     override val tmpDir: Property<File>

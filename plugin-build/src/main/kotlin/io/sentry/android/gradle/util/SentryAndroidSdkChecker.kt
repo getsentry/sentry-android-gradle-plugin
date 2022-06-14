@@ -1,15 +1,16 @@
 package io.sentry.android.gradle.util
 
-import io.sentry.android.gradle.services.SentrySdkStateHolder
+import io.sentry.android.gradle.services.SentryModulesService
 import org.gradle.api.Project
 import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.artifacts.result.ResolvedComponentResult
+import org.gradle.api.logging.Logger
 import org.gradle.api.provider.Provider
 
 fun Project.detectSentryAndroidSdk(
     configurationName: String,
     variantName: String,
-    sdkStateHolder: Provider<SentrySdkStateHolder>
+    sentryModulesService: Provider<SentryModulesService>
 ) {
     val configProvider = try {
         configurations.named(configurationName)
@@ -17,39 +18,35 @@ fun Project.detectSentryAndroidSdk(
         logger.warn {
             "Unable to find configuration $configurationName for variant $variantName."
         }
-        sdkStateHolder.get().sdkState = SentryAndroidSdkState.MISSING
+        sentryModulesService.get().modules = emptyMap()
         return
     }
 
     configProvider.configure { configuration ->
         configuration.incoming.afterResolve {
-            val version = it.resolutionResult.allComponents.findSentryAndroidSdk()
-            if (version == null) {
-                logger.warn { "sentry-android dependency was not found." }
-                sdkStateHolder.get().sdkState = SentryAndroidSdkState.MISSING
-                return@afterResolve
+            val sentryModules = it.resolutionResult.allComponents.filterSentryModules(logger)
+            logger.info {
+                "Detected Sentry modules $sentryModules " +
+                    "for variant: $variantName, config: $configurationName"
             }
-
-            val state = try {
-                val sdkState = SentryAndroidSdkState.from(version)
-                logger.info {
-                    "Detected sentry-android $sdkState for version: $version, " +
-                        "variant: $variantName, config: $configurationName"
-                }
-                sdkState
-            } catch (e: IllegalStateException) {
-                logger.warn { e.localizedMessage }
-                SentryAndroidSdkState.MISSING
-            }
-            sdkStateHolder.get().sdkState = state
+            sentryModulesService.get().modules = sentryModules
         }
     }
 }
 
-private fun Set<ResolvedComponentResult>.findSentryAndroidSdk(): String? {
-    val sentryDep = find { resolvedComponent: ResolvedComponentResult ->
-        val moduleVersion = resolvedComponent.moduleVersion ?: return@find false
-        moduleVersion.group == "io.sentry" && moduleVersion.name == "sentry-android-core"
+private fun Set<ResolvedComponentResult>.filterSentryModules(logger: Logger): Map<String, SemVer> {
+    return filter { resolvedComponent: ResolvedComponentResult ->
+        val moduleVersion = resolvedComponent.moduleVersion ?: return@filter false
+        moduleVersion.group == "io.sentry"
+    }.associate {
+        val name = it.moduleVersion?.name ?: ""
+        val version = it.moduleVersion?.version ?: ""
+        val semver = try {
+            SemVer.parse(it.moduleVersion?.version ?: "")
+        } catch (e: Throwable) {
+            logger.info { "Unable to parse version $version of $name" }
+            SemVer()
+        }
+        name to semver
     }
-    return sentryDep?.moduleVersion?.version
 }

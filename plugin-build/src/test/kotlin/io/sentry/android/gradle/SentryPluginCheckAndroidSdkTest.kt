@@ -37,7 +37,7 @@ class SentryPluginCheckAndroidSdkTest(
         assertTrue {
             result.output.contains(
                 Regex(
-                    """[BuildServiceRegistration with name 'io.sentry.android.gradle.services.SentrySdkStateHolder_(\w*)' not found]"""
+                    """[BuildServiceRegistration with name 'io.sentry.android.gradle.services.SentryModulesService_(\w*)' not found]"""
                 )
             )
         }
@@ -55,6 +55,7 @@ class SentryPluginCheckAndroidSdkTest(
             }
 
             sentry.tracingInstrumentation.enabled = true
+            sentry.autoInstallation.enabled = false
             sentry.includeProguardMapping = false
 
             ${captureSdkState()}
@@ -62,10 +63,10 @@ class SentryPluginCheckAndroidSdkTest(
         )
 
         val result = runner
-            .appendArguments("app:tasks")
+            .appendArguments("app:assembleDebug")
             .build()
         assertTrue {
-            "SDK STATE: MISSING" in result.output
+            "SENTRY MODULES: [:]" in result.output
         }
     }
 
@@ -81,6 +82,7 @@ class SentryPluginCheckAndroidSdkTest(
 
             sentry {
               tracingInstrumentation.enabled = true
+              autoInstallation.enabled = false
               includeProguardMapping = false
             }
 
@@ -102,7 +104,9 @@ class SentryPluginCheckAndroidSdkTest(
             .appendArguments("app:assembleDebug")
             .build()
 
-        print(result.output)
+        assertTrue {
+            "SENTRY MODULES: [sentry-android:5.4.0, sentry-android-core:5.4.0, sentry:5.4.0, sentry-android-ndk:5.4.0]" in result.output
+        }
     }
 
     private fun captureSdkState(): String =
@@ -112,9 +116,9 @@ class SentryPluginCheckAndroidSdkTest(
         import io.sentry.android.gradle.services.*
         project.gradle.buildFinished {
           println(
-            "SDK STATE: " + BuildServicesKt
-              .getBuildService(project.gradle.sharedServices, SentrySdkStateHolder.class)
-              .get().sdkState
+            "SENTRY MODULES: " + BuildServicesKt
+              .getBuildService(project.gradle.sharedServices, SentryModulesService.class)
+              .get().modules
           )
         }
         """.trimIndent()
