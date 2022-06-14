@@ -2,24 +2,24 @@
 
 package io.sentry.android.gradle.services
 
-import io.sentry.android.gradle.util.SentryAndroidSdkState
+import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.getBuildServiceName
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 
-abstract class SentrySdkStateHolder : BuildService<BuildServiceParameters.None> {
+abstract class SentryModulesService : BuildService<BuildServiceParameters.None> {
 
     @get:Synchronized
     @set:Synchronized
-    var sdkState: SentryAndroidSdkState = SentryAndroidSdkState.MISSING
+    var modules: Map<String, SemVer> = emptyMap()
 
     companion object {
-        fun register(project: Project): Provider<SentrySdkStateHolder> {
+        fun register(project: Project): Provider<SentryModulesService> {
             return project.gradle.sharedServices.registerIfAbsent(
-                getBuildServiceName(SentrySdkStateHolder::class.java),
-                SentrySdkStateHolder::class.java
+                getBuildServiceName(SentryModulesService::class.java),
+                SentryModulesService::class.java
             ) {}
         }
     }
