@@ -14,6 +14,7 @@ import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.util.SemVer
+import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.util.debug
 import io.sentry.android.gradle.util.info
@@ -100,21 +101,27 @@ abstract class SpanAddingClassVisitorFactory :
         sentryModules: Map<String, SemVer>,
         parameters: SpanAddingParameters
     ): Boolean =
-        sentryModules.isAtLeast("sentry-android-core", SentryVersions.VERSION_PERFORMANCE) &&
-            parameters.features.get().contains(InstrumentationFeature.DATABASE)
+        sentryModules.isAtLeast(
+            SentryModules.SENTRY_ANDROID_CORE,
+            SentryVersions.VERSION_PERFORMANCE
+        ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
 
     private fun isFileIOInstrEnabled(
         sentryModules: Map<String, SemVer>,
         parameters: SpanAddingParameters
     ): Boolean =
-        sentryModules.isAtLeast("sentry-android-core", SentryVersions.VERSION_FILE_IO) &&
-            parameters.features.get().contains(InstrumentationFeature.FILE_IO)
+        sentryModules.isAtLeast(
+            SentryModules.SENTRY_ANDROID_CORE,
+            SentryVersions.VERSION_FILE_IO
+        ) && parameters.features.get().contains(InstrumentationFeature.FILE_IO)
 
     private fun isOkHttpInstrEnabled(
         sentryModules: Map<String, SemVer>,
         parameters: SpanAddingParameters
-    ): Boolean = sentryModules.isAtLeast("sentry-android-okhttp", SentryVersions.VERSION_OKHTTP) &&
-        parameters.features.get().contains(InstrumentationFeature.OKHTTP)
+    ): Boolean = sentryModules.isAtLeast(
+        SentryModules.SENTRY_ANDROID_OKHTTP,
+        SentryVersions.VERSION_OKHTTP
+    ) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
 
     private fun Map<String, SemVer>.isAtLeast(module: String, minVersion: SemVer): Boolean =
         getOrDefault(module, SentryVersions.VERSION_DEFAULT) >= minVersion
