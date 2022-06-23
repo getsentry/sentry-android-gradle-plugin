@@ -31,12 +31,14 @@ class MetaInfStripTransformTest {
             tmpDir: TemporaryFolder,
             jarName: String = "test.jar",
             multiRelease: Boolean = true,
-            includeSupportedVersion: Boolean = false
+            includeSupportedVersion: Boolean = false,
+            mimicSignedJar: Boolean = false
         ): MetaInfStripTransform {
             val file = tmpDir.newFile(jarName)
             val jar = file.toJar(
                 multiRelease = multiRelease,
-                includeSupportedVersion = includeSupportedVersion
+                includeSupportedVersion = includeSupportedVersion,
+                mimicSignedJar = mimicSignedJar
             )
 
             whenever(provider.get()).thenReturn(RegularFile { jar })
@@ -44,7 +46,7 @@ class MetaInfStripTransformTest {
             return TestMetaInfStripTransform(provider)
         }
 
-        private fun File.toJar(multiRelease: Boolean, includeSupportedVersion: Boolean): File {
+        private fun File.toJar(multiRelease: Boolean, includeSupportedVersion: Boolean, mimicSignedJar: Boolean): File {
             JarOutputStream(outputStream()).use {
                 // normal classpath
                 it.putNextEntry(ZipEntry("com/squareup/moshi/Types.class"))
@@ -100,6 +102,11 @@ class MetaInfStripTransformTest {
                         )
                         it.closeEntry()
                     }
+
+                    if (mimicSignedJar) {
+                        it.putNextEntry(ZipEntry("META-INF/SIGNING_FILE.SF"))
+                        it.putNextEntry(ZipEntry("META-INF/SIGNING_FILE.DSA"))
+                    }
                 }
 
                 // manifest
@@ -154,6 +161,7 @@ class MetaInfStripTransformTest {
         val outputs = FakeTransformOutputs(tmp)
 
         val sut = fixture.getSut(tmp)
+
         sut.transform(outputs)
 
         val jar = JarFile(outputs.outputFile)
@@ -172,7 +180,7 @@ class MetaInfStripTransformTest {
     }
 
     @Test
-    fun `when multi-release jar with supported classes, keeps them and multi-release flag`() {
+    fun `when multi-release, signed jar with supported classes, keeps them and multi-release flag`() {
         val outputs = FakeTransformOutputs(tmp)
 
         val sut = fixture.getSut(tmp, includeSupportedVersion = true)
@@ -217,5 +225,19 @@ class MetaInfStripTransformTest {
             entries[jarEntry.name] = getInputStream(jarEntry).reader().readText()
         }
         return entries
+    }
+
+    @Test
+    fun `when multi-release signed-jar, skip transform`() {
+
+        val outputs = FakeTransformOutputs(tmp)
+
+        val sut = fixture.getSut(tmp, includeSupportedVersion = true, mimicSignedJar = true)
+        sut.transform(outputs)
+
+        val jar = JarFile(outputs.outputFile)
+
+        assertTrue { jar.read().any { it.key.startsWith("META-INF/versions/16") } }
+        assertTrue { outputs.outputFile.name == "test.jar" }
     }
 }

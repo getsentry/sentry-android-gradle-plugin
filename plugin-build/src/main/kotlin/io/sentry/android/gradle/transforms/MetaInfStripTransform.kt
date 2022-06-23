@@ -20,6 +20,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
+import java.util.logging.Logger
 
 /**
  * Gradle's [TransformAction] that strips out unsupported Java classes from
@@ -63,6 +64,13 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
                         continue
                     }
 
+                    if (jarEntry.isSignatureEntry) {
+                        logger.warning("Signed Multirelease Jar (${jarFile.name}) found, skipping transform. This might lead to duplicate class errors due to a bug in AGP (https://issuetracker.google.com/issues/206655905). Please update to AGP >= 7.1.2 (https://developer.android.com/studio/releases/gradle-plugin)")
+                        output.delete()
+                        outputs.file(inputArtifact)
+                        return
+                    }
+
                     if (jarEntry.name.startsWith(versionsDir, ignoreCase = true)) {
                         val javaVersion = jarEntry.javaVersion
                         if (javaVersion > MIN_SUPPORTED_JAVA_VERSION) {
@@ -93,12 +101,16 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
         }
     }
 
+    private val JarEntry.isSignatureEntry get() = signatureRelevantFileRegex.matches(name)
+
     private val JarEntry.javaVersion: Int get() = regex.find(name)?.value?.toIntOrNull() ?: 0
 
     private fun File.jarOutputStream(): JarOutputStream = JarOutputStream(outputStream())
 
     companion object {
         private val regex = "(?<=/)([0-9]*)(?=/)".toRegex()
+        private val signatureRelevantFileRegex = "^META-INF/.*.SF|^META-INF/.*.DSA|^META-INF/.*.RSA|^META-INF/.*.EC|^META-INF/SIG-.*".toRegex()
+        private val logger = Logger.getLogger(MetaInfStripTransform::class.java.simpleName)
         private const val versionsDir = "META-INF/versions/"
         private const val MIN_SUPPORTED_JAVA_VERSION = 11
 
