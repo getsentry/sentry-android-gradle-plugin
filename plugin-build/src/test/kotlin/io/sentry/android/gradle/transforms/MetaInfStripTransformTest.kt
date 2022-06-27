@@ -180,7 +180,7 @@ class MetaInfStripTransformTest {
     }
 
     @Test
-    fun `when multi-release, signed jar with supported classes, keeps them and multi-release flag`() {
+    fun `when multi-release jar with supported classes, keeps them and multi-release flag`() {
         val outputs = FakeTransformOutputs(tmp)
 
         val sut = fixture.getSut(tmp, includeSupportedVersion = true)
