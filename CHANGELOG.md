@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Skip jar processing on AGP < 7.1.2 for signed multi release jars ([#334](https://github.com/getsentry/sentry-android-gradle-plugin/pull/334))
+
 ## 3.1.2
 
 ### Features
