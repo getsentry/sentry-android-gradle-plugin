@@ -5,6 +5,7 @@ import java.util.jar.Attributes
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
+import java.util.logging.Logger
 import java.util.zip.ZipEntry
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.CacheableTransform
@@ -20,7 +21,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
-import java.util.logging.Logger
 
 /**
  * Gradle's [TransformAction] that strips out unsupported Java classes from
@@ -65,7 +65,13 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
                     }
 
                     if (jarEntry.isSignatureEntry) {
-                        logger.warning("Signed Multirelease Jar (${jarFile.name}) found, skipping transform. This might lead to duplicate class errors due to a bug in AGP (https://issuetracker.google.com/issues/206655905). Please update to AGP >= 7.1.2 (https://developer.android.com/studio/releases/gradle-plugin)")
+                        logger.warning(
+                            """
+                               Signed Multirelease Jar (${jarFile.name}) found, skipping transform.
+                               This might lead to duplicate class errors due to a bug in AGP (https://issuetracker.google.com/issues/206655905).
+                               Please update to AGP >= 7.1.2 (https://developer.android.com/studio/releases/gradle-plugin)
+                            """.trimIndent()
+                        )
                         output.delete()
                         outputs.file(inputArtifact)
                         return
@@ -101,7 +107,7 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
         }
     }
 
-    private val JarEntry.isSignatureEntry get() = signatureRelevantFileRegex.matches(name)
+    private val JarEntry.isSignatureEntry get() = signatureFileRegex.matches(name)
 
     private val JarEntry.javaVersion: Int get() = regex.find(name)?.value?.toIntOrNull() ?: 0
 
@@ -109,7 +115,8 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
 
     companion object {
         private val regex = "(?<=/)([0-9]*)(?=/)".toRegex()
-        private val signatureRelevantFileRegex = "^META-INF/.*.SF|^META-INF/.*.DSA|^META-INF/.*.RSA|^META-INF/.*.EC|^META-INF/SIG-.*".toRegex()
+        private val signatureFileRegex = "^META-INF/.*\\.(SF|DSA|RSA|EC)|^META-INF/SIG-.*"
+            .toRegex()
         private val logger = Logger.getLogger(MetaInfStripTransform::class.java.simpleName)
         private const val versionsDir = "META-INF/versions/"
         private const val MIN_SUPPORTED_JAVA_VERSION = 11

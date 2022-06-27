@@ -46,7 +46,11 @@ class MetaInfStripTransformTest {
             return TestMetaInfStripTransform(provider)
         }
 
-        private fun File.toJar(multiRelease: Boolean, includeSupportedVersion: Boolean, mimicSignedJar: Boolean): File {
+        private fun File.toJar(
+            multiRelease: Boolean,
+            includeSupportedVersion: Boolean,
+            mimicSignedJar: Boolean
+        ): File {
             JarOutputStream(outputStream()).use {
                 // normal classpath
                 it.putNextEntry(ZipEntry("com/squareup/moshi/Types.class"))
@@ -229,7 +233,6 @@ class MetaInfStripTransformTest {
 
     @Test
     fun `when multi-release signed-jar, skip transform`() {
-
         val outputs = FakeTransformOutputs(tmp)
 
         val sut = fixture.getSut(tmp, includeSupportedVersion = true, mimicSignedJar = true)
