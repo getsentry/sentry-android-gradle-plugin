@@ -32,13 +32,13 @@ class MetaInfStripTransformTest {
             jarName: String = "test.jar",
             multiRelease: Boolean = true,
             includeSupportedVersion: Boolean = false,
-            mimicSignedJar: Boolean = false
+            signed: Boolean = false
         ): MetaInfStripTransform {
             val file = tmpDir.newFile(jarName)
             val jar = file.toJar(
                 multiRelease = multiRelease,
                 includeSupportedVersion = includeSupportedVersion,
-                mimicSignedJar = mimicSignedJar
+                signed = signed
             )
 
             whenever(provider.get()).thenReturn(RegularFile { jar })
@@ -49,7 +49,7 @@ class MetaInfStripTransformTest {
         private fun File.toJar(
             multiRelease: Boolean,
             includeSupportedVersion: Boolean,
-            mimicSignedJar: Boolean
+            signed: Boolean
         ): File {
             JarOutputStream(outputStream()).use {
                 // normal classpath
@@ -107,7 +107,7 @@ class MetaInfStripTransformTest {
                         it.closeEntry()
                     }
 
-                    if (mimicSignedJar) {
+                    if (signed) {
                         it.putNextEntry(ZipEntry("META-INF/SIGNING_FILE.SF"))
                         it.putNextEntry(ZipEntry("META-INF/SIGNING_FILE.DSA"))
                     }
@@ -235,7 +235,7 @@ class MetaInfStripTransformTest {
     fun `when multi-release signed-jar, skip transform`() {
         val outputs = FakeTransformOutputs(tmp)
 
-        val sut = fixture.getSut(tmp, includeSupportedVersion = true, mimicSignedJar = true)
+        val sut = fixture.getSut(tmp, includeSupportedVersion = true, signed = true)
         sut.transform(outputs)
 
         val jar = JarFile(outputs.outputFile)

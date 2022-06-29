@@ -1,11 +1,13 @@
 package io.sentry.android.gradle.transforms
 
+import io.sentry.android.gradle.SentryPlugin
+import io.sentry.android.gradle.util.warn
 import java.io.File
+import java.nio.file.Files
 import java.util.jar.Attributes
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
-import java.util.logging.Logger
 import java.util.zip.ZipEntry
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.CacheableTransform
@@ -51,9 +53,10 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
         val input = inputArtifact.get().asFile
         val jarFile = JarFile(input)
         if (jarFile.isMultiRelease) {
-            val output = outputs.file("${input.nameWithoutExtension}-meta-inf-stripped.jar")
+            val outputFilename = "${input.nameWithoutExtension}-meta-inf-stripped.jar"
+            val tmpOutputFile = File.createTempFile("tmp-${input.nameWithoutExtension}", ".jar")
             var isStillMultiRelease = false
-            output.jarOutputStream().use { outStream ->
+            tmpOutputFile.jarOutputStream().use { outStream ->
                 val entries = jarFile.entries()
                 // copy each .jar entry, except those that are under META-INF/versions/${unsupported_java_version}
                 while (entries.hasMoreElements()) {
@@ -65,14 +68,14 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
                     }
 
                     if (jarEntry.isSignatureEntry) {
-                        logger.warning(
+                        SentryPlugin.logger.warn {
                             """
-                               Signed Multirelease Jar (${jarFile.name}) found, skipping transform.
-                               This might lead to duplicate class errors due to a bug in AGP (https://issuetracker.google.com/issues/206655905).
-                               Please update to AGP >= 7.1.2 (https://developer.android.com/studio/releases/gradle-plugin)
+                            Signed Multirelease Jar (${jarFile.name}) found, skipping transform.
+                            This might lead to auto-instrumentation issues due to a bug in AGP (https://issuetracker.google.com/issues/206655905).
+                            Please update to AGP >= 7.1.2 (https://developer.android.com/studio/releases/gradle-plugin) in order to keep using `autoInstrumentation` option.
                             """.trimIndent()
-                        )
-                        output.delete()
+                        }
+                        tmpOutputFile.delete()
                         outputs.file(inputArtifact)
                         return
                     }
@@ -102,6 +105,8 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
                     outStream.closeEntry()
                 }
             }
+            val transformedOutput = outputs.file(outputFilename)
+            Files.move(tmpOutputFile.toPath(), transformedOutput.toPath())
         } else {
             outputs.file(inputArtifact)
         }
@@ -117,7 +122,6 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
         private val regex = "(?<=/)([0-9]*)(?=/)".toRegex()
         private val signatureFileRegex = "^META-INF/.*\\.(SF|DSA|RSA|EC)|^META-INF/SIG-.*"
             .toRegex()
-        private val logger = Logger.getLogger(MetaInfStripTransform::class.java.simpleName)
         private const val versionsDir = "META-INF/versions/"
         private const val MIN_SUPPORTED_JAVA_VERSION = 11
 

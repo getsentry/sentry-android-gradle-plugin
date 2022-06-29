@@ -33,5 +33,33 @@ class SentryPluginMRJarTest :
         assertTrue { "BUILD SUCCESSFUL" in result.output }
     }
 
+    @Test
+    fun `shows a warning when there is a signed MR-JAR dependency`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            dependencies {
+              implementation("org.bouncycastle:bcprov-jdk15on:1.63")
+            }
+
+            sentry.tracingInstrumentation.enabled = true
+            """.trimIndent()
+        )
+
+        val result = runner
+            .appendArguments("app:assembleDebug")
+            .build()
+
+        print(result.output)
+
+        assertTrue { "Please update to AGP >= 7.1.2" in result.output }
+        assertTrue { "BUILD SUCCESSFUL" in result.output }
+    }
+
     override val additionalRootProjectConfig: String = ""
 }
