@@ -6,7 +6,7 @@ file='plugin-build/src/main/kotlin/io/sentry/android/gradle/SentryPlugin.kt'
 content=$(cat $file)
 regex='(SENTRY_SDK_VERSION *= *)"([0-9\.]+)"'
 if ! [[ $content =~ $regex ]]; then
-    echo "Failed to find the android plugin version in $file"
+    echo "Failed to find the Android SDK version in $file"
     exit 1
 fi
 
