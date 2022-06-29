@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Features
+
+- Bump CLI to v2.2.0 ([#338](https://github.com/getsentry/sentry-android-gradle-plugin/pull/338))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#220)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/1.72.0...2.2.0)
+
 ### Fixes
 
 - Skip jar processing on AGP < 7.1.2 for signed multi release jars ([#334](https://github.com/getsentry/sentry-android-gradle-plugin/pull/334))
