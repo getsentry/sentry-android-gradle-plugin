@@ -54,7 +54,10 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
         val jarFile = JarFile(input)
         if (jarFile.isMultiRelease) {
             val outputFilename = "${input.nameWithoutExtension}-meta-inf-stripped.jar"
-            val tmpOutputFile = File.createTempFile("sentry-transformed-${input.nameWithoutExtension}", ".jar")
+            val tmpOutputFile = File.createTempFile(
+                "sentry-transformed-${input.nameWithoutExtension}",
+                ".jar"
+            )
             var isStillMultiRelease = false
             tmpOutputFile.jarOutputStream().use { outStream ->
                 val entries = jarFile.entries()
