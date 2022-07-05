@@ -1,6 +1,9 @@
 package io.sentry.android.gradle.transforms
 
+import io.sentry.android.gradle.SentryPlugin
+import io.sentry.android.gradle.util.warn
 import java.io.File
+import java.nio.file.Files
 import java.util.jar.Attributes
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
@@ -50,9 +53,13 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
         val input = inputArtifact.get().asFile
         val jarFile = JarFile(input)
         if (jarFile.isMultiRelease) {
-            val output = outputs.file("${input.nameWithoutExtension}-meta-inf-stripped.jar")
+            val outputFilename = "${input.nameWithoutExtension}-meta-inf-stripped.jar"
+            val tmpOutputFile = File.createTempFile(
+                "sentry-transformed-${input.nameWithoutExtension}",
+                ".jar"
+            )
             var isStillMultiRelease = false
-            output.jarOutputStream().use { outStream ->
+            tmpOutputFile.jarOutputStream().use { outStream ->
                 val entries = jarFile.entries()
                 // copy each .jar entry, except those that are under META-INF/versions/${unsupported_java_version}
                 while (entries.hasMoreElements()) {
@@ -61,6 +68,19 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
                         // we deal with the manifest as a last step, since we need to know if there
                         // any multi-release entries remained
                         continue
+                    }
+
+                    if (jarEntry.isSignatureEntry) {
+                        SentryPlugin.logger.warn {
+                            """
+                            Signed Multirelease Jar (${jarFile.name}) found, skipping transform.
+                            This might lead to auto-instrumentation issues due to a bug in AGP (https://issuetracker.google.com/issues/206655905).
+                            Please update to AGP >= 7.1.2 (https://developer.android.com/studio/releases/gradle-plugin) in order to keep using `autoInstrumentation` option.
+                            """.trimIndent()
+                        }
+                        tmpOutputFile.delete()
+                        outputs.file(inputArtifact)
+                        return
                     }
 
                     if (jarEntry.name.startsWith(versionsDir, ignoreCase = true)) {
@@ -88,10 +108,14 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
                     outStream.closeEntry()
                 }
             }
+            val transformedOutput = outputs.file(outputFilename)
+            Files.move(tmpOutputFile.toPath(), transformedOutput.toPath())
         } else {
             outputs.file(inputArtifact)
         }
     }
+
+    private val JarEntry.isSignatureEntry get() = signatureFileRegex.matches(name)
 
     private val JarEntry.javaVersion: Int get() = regex.find(name)?.value?.toIntOrNull() ?: 0
 
@@ -99,6 +123,8 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
 
     companion object {
         private val regex = "(?<=/)([0-9]*)(?=/)".toRegex()
+        private val signatureFileRegex = "^META-INF/.*\\.(SF|DSA|RSA|EC)|^META-INF/SIG-.*"
+            .toRegex()
         private const val versionsDir = "META-INF/versions/"
         private const val MIN_SUPPORTED_JAVA_VERSION = 11
 

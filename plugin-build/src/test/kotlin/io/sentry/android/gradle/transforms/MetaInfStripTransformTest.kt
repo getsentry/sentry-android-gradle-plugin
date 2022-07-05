@@ -31,12 +31,14 @@ class MetaInfStripTransformTest {
             tmpDir: TemporaryFolder,
             jarName: String = "test.jar",
             multiRelease: Boolean = true,
-            includeSupportedVersion: Boolean = false
+            includeSupportedVersion: Boolean = false,
+            signed: Boolean = false
         ): MetaInfStripTransform {
             val file = tmpDir.newFile(jarName)
             val jar = file.toJar(
                 multiRelease = multiRelease,
-                includeSupportedVersion = includeSupportedVersion
+                includeSupportedVersion = includeSupportedVersion,
+                signed = signed
             )
 
             whenever(provider.get()).thenReturn(RegularFile { jar })
@@ -44,7 +46,11 @@ class MetaInfStripTransformTest {
             return TestMetaInfStripTransform(provider)
         }
 
-        private fun File.toJar(multiRelease: Boolean, includeSupportedVersion: Boolean): File {
+        private fun File.toJar(
+            multiRelease: Boolean,
+            includeSupportedVersion: Boolean,
+            signed: Boolean
+        ): File {
             JarOutputStream(outputStream()).use {
                 // normal classpath
                 it.putNextEntry(ZipEntry("com/squareup/moshi/Types.class"))
@@ -100,6 +106,11 @@ class MetaInfStripTransformTest {
                         )
                         it.closeEntry()
                     }
+
+                    if (signed) {
+                        it.putNextEntry(ZipEntry("META-INF/SIGNING_FILE.SF"))
+                        it.putNextEntry(ZipEntry("META-INF/SIGNING_FILE.DSA"))
+                    }
                 }
 
                 // manifest
@@ -154,6 +165,7 @@ class MetaInfStripTransformTest {
         val outputs = FakeTransformOutputs(tmp)
 
         val sut = fixture.getSut(tmp)
+
         sut.transform(outputs)
 
         val jar = JarFile(outputs.outputFile)
@@ -217,5 +229,18 @@ class MetaInfStripTransformTest {
             entries[jarEntry.name] = getInputStream(jarEntry).reader().readText()
         }
         return entries
+    }
+
+    @Test
+    fun `when multi-release signed-jar, skip transform`() {
+        val outputs = FakeTransformOutputs(tmp)
+
+        val sut = fixture.getSut(tmp, includeSupportedVersion = true, signed = true)
+        sut.transform(outputs)
+
+        val jar = JarFile(outputs.outputFile)
+
+        assertTrue { jar.read().any { it.key.startsWith("META-INF/versions/16") } }
+        assertTrue { outputs.outputFile.name == "test.jar" }
     }
 }

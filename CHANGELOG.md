@@ -8,6 +8,10 @@
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#230)
   - [diff](https://github.com/getsentry/sentry-cli/compare/1.72.0...2.3.0)
 
+### Fixes
+
+- Skip jar processing on AGP < 7.1.2 for signed multi release jars ([#334](https://github.com/getsentry/sentry-android-gradle-plugin/pull/334))
+
 ## 3.1.2
 
 ### Features
