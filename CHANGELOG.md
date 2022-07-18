@@ -4,9 +4,9 @@
 
 ### Features
 
-- Bump CLI to v2.3.1 ([#338](https://github.com/getsentry/sentry-android-gradle-plugin/pull/338), [#341](https://github.com/getsentry/sentry-android-gradle-plugin/pull/341), [#343](https://github.com/getsentry/sentry-android-gradle-plugin/pull/343))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#231)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/1.72.0...2.3.1)
+- Bump CLI to v2.4.1 ([#338](https://github.com/getsentry/sentry-android-gradle-plugin/pull/338), [#341](https://github.com/getsentry/sentry-android-gradle-plugin/pull/341), [#343](https://github.com/getsentry/sentry-android-gradle-plugin/pull/343), [#350](https://github.com/getsentry/sentry-android-gradle-plugin/pull/350))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#241)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/1.72.0...2.4.1)
 
 ### Fixes
 
