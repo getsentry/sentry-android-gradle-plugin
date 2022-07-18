@@ -11,6 +11,7 @@
 ### Fixes
 
 - Skip jar processing on AGP < 7.1.2 for signed multi release jars ([#334](https://github.com/getsentry/sentry-android-gradle-plugin/pull/334))
+- Fix `OkHttp` version `3.x` was not instrumented ([#351](https://github.com/getsentry/sentry-android-gradle-plugin/pull/351))
 
 ## 3.1.2
 
