@@ -11,3 +11,31 @@ The project currently requires you run JDK version `11` and the Android SDK.
 
 Build and tests are automatically run against branches and pull requests
 via GH Actions.
+
+# Debugging the plugin
+
+Set breakpoints in the plugin code like you normally would. Then run a build from the command line
+(we are using `android-instrumentation-sample` as an example, as it's the most complete sample):
+
+```bash
+$ ./gradlew :examples:android-instrumentation-sample:assembleDebug -Dorg.gradle.debug=true --no-daemon
+```
+
+It will probably look like it's hanging. You now have to create a new run configuration in IDEA. 
+Click the *Edit configurations* button, and then the *+* button to add a configuration, and then choose the *Remote* template. 
+Name this configuration something like "GradleDebug" and click OK. Now, click the debug button and IDEA will connect to the gradle build you started from the command line. 
+You should see it hitting your breakpoints.
+
+> if it seems like your breakpoints aren't being hit, and these are in task actions, it might be that the tasks are up to date or coming from the build cache (if build cache is enabled). In this case, run a `clean` and then use `--no-build-cache` when you run your debug build:
+
+```bash
+$ ./gradlew clean && ./gradlew :examples:android-instrumentation-sample:assembleDebug --no-build-cache -Dorg.gradle.debug=true --no-daemon
+```
+
+Another possibility is that gradle is just broken somehow, in which case
+
+```bash
+$ ./gradlew --stop
+```
+
+and try again.
