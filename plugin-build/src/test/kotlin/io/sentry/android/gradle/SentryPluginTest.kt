@@ -234,6 +234,31 @@ class SentryPluginTest(
         }
     }
 
+    @Test
+    fun `instruments okhttp v3`() {
+        applyTracingInstrumentation(features = setOf(InstrumentationFeature.OKHTTP), debug = true)
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+
+            dependencies {
+              implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+              implementation 'io.sentry:sentry-android-okhttp:5.5.0'
+            }
+            """.trimIndent()
+        )
+
+        runner
+            .appendArguments(":app:assembleDebug")
+            .build()
+
+        // since it's an integration test, we just test that the log file was created for the class
+        // meaning our CommonClassVisitor has visited and instrumented it
+        val debugOutput =
+            testProjectDir.root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
+        assertTrue { debugOutput.exists() && debugOutput.length() > 0 }
+    }
+
     private fun applyUploadNativeSymbols() {
         appBuildFile.writeText(
             // language=Groovy
@@ -275,7 +300,8 @@ class SentryPluginTest(
 
     private fun applyTracingInstrumentation(
         tracingInstrumentation: Boolean = true,
-        features: Set<InstrumentationFeature> = setOf()
+        features: Set<InstrumentationFeature> = setOf(),
+        debug: Boolean = false
     ) {
         appBuildFile.writeText(
             // language=Groovy
@@ -292,7 +318,9 @@ class SentryPluginTest(
                 sentry {
                   autoUploadProguardMapping = false
                   tracingInstrumentation {
+                    forceInstrumentDependencies = true
                     enabled = $tracingInstrumentation
+                    debug = $debug
                     features = ${
             features.joinToString(
                 prefix = "[",
