@@ -14,7 +14,10 @@ class MinifiedClassDetectionTest {
             "ccc017zz",
             """ccc017zz${'$'}a""",
             "aa",
-            "aa${'$'}a"
+            "aa${'$'}a",
+            "ab",
+            "aa${'$'}ab",
+            "ab${'$'}a"
         )
 
         classNames.forEach {
@@ -23,13 +26,23 @@ class MinifiedClassDetectionTest {
     }
 
     @Test
+    fun `detects minified class names with minified package name`() {
+        val classNames = listOf(
+            """a${'$'}""",
+            "aa"
+        )
+
+        classNames.forEach {
+            assertTrue(classNameLooksMinified(it, "a/$it"), it)
+        }
+    }
+
+    @Test
     fun `does not consider non minified classes as minified`() {
         val classNames = listOf(
             "ConstantPoolHelpers",
             "FileUtil",
-            """FileUtil${"$"}Inner""",
-            "aa${'$'}ab",
-            "Id"
+            """FileUtil${"$"}Inner"""
         )
 
         classNames.forEach {
