@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Detect minified classes and skip instrumentation to avoid build problems ([#362](https://github.com/getsentry/sentry-android-gradle-plugin/pull/362))
+
 ## 3.1.3
 
 ### Features
