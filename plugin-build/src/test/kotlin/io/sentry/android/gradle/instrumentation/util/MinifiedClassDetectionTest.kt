@@ -49,9 +49,4 @@ class MinifiedClassDetectionTest {
             assertFalse(classNameLooksMinified(it, "com/example/$it"), it)
         }
     }
-
-    @Test
-    fun `tests that something happens`() {
-        """^\w(\\${'$'}(\w))*${'$'}""".toRegex().matches("a${'$'}a")
-    }
 }
