@@ -6,6 +6,10 @@
 
 - Detect minified classes and skip instrumentation to avoid build problems ([#362](https://github.com/getsentry/sentry-android-gradle-plugin/pull/362))
 
+### Features
+
+- Bump AGP to 7.2.1 and Gradle to 7.5.0 ([#363](https://github.com/getsentry/sentry-android-gradle-plugin/pull/363))
+
 ## 3.1.3
 
 ### Features
