@@ -44,7 +44,7 @@ jobs:
           - agp: "7.3.0-beta05"
             gradle: "7.5"
             java: "11"
-          - agp: "7.4.0-alpha05"
+          - agp: "7.4.0-alpha04"
             gradle: "7.5"
             java: "11"
 
