@@ -23,6 +23,7 @@ class SentryPluginWithMinifiedLibsTest :
               implementation 'com.google.android.gms:play-services-mlkit-text-recognition:18.0.0'
               implementation 'com.adcolony:sdk:4.7.1'
               implementation 'com.appboy:android-sdk-ui:19.0.0'
+              implementation 'com.stripe:stripeterminal-internal-common:2.12.0'
             }
             """.trimIndent()
         )
