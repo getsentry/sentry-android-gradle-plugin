@@ -1,5 +1,5 @@
 object BuildPluginsVersion {
-    val AGP = System.getenv("VERSION_AGP") ?: "7.1.2"
+    val AGP = System.getenv("VERSION_AGP") ?: "7.2.1"
     const val DOKKA = "1.5.31"
     const val KOTLIN = "1.5.31"
     const val KOTLIN_LANG_VERSION = "1.5"
