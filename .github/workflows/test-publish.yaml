@@ -32,5 +32,5 @@ jobs:
         run: ./gradlew assembleRelease | tee gradle.log
 
       - name: Verify that Native Symbols were uploaded
-        run: grep "Uploaded 4 missing debug information files" gradle.log
+        run: grep "Uploaded [1-9][0-9]* missing debug information files" gradle.log
         if: env.SENTRY_AUTH_TOKEN != null

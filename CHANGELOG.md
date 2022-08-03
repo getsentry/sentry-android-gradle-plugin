@@ -9,6 +9,9 @@
 ### Features
 
 - Bump AGP to 7.2.1 and Gradle to 7.5.0 ([#363](https://github.com/getsentry/sentry-android-gradle-plugin/pull/363))
+- Bump Android SDK to v6.3.1 ([#365](https://github.com/getsentry/sentry-android-gradle-plugin/pull/365))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#631)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.3.0...6.3.1)
 
 ## 3.1.3
 
