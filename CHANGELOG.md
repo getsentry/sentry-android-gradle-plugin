@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+### Features
+
+- Bump CLI from v2.5.0 to v2.5.2 ([#368](https://github.com/getsentry/sentry-android-gradle-plugin/pull/368))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#252)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.5.0...2.5.2)
+- Bump Android SDK from v6.3.1 to v6.4.0 ([#369](https://github.com/getsentry/sentry-android-gradle-plugin/pull/369))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#640)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.3.1...6.4.0)
+
+## 3.1.4
+
+### Fixes
+
+- Detect minified classes and skip instrumentation to avoid build problems ([#362](https://github.com/getsentry/sentry-android-gradle-plugin/pull/362))
+
+### Features
+
+- Bump AGP to 7.2.1 and Gradle to 7.5.0 ([#363](https://github.com/getsentry/sentry-android-gradle-plugin/pull/363))
+- Bump Android SDK to v6.3.1 ([#365](https://github.com/getsentry/sentry-android-gradle-plugin/pull/365))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#631)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.3.0...6.3.1)
+- Bump CLI to v2.5.0 ([#358](https://github.com/getsentry/sentry-android-gradle-plugin/pull/358))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#250)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.4.1...2.5.0)
+
 ## 3.1.3
 
 ### Features

@@ -4,7 +4,7 @@ import kotlin.test.assertTrue
 import org.junit.Test
 
 class SentryPluginWithFirebaseTest :
-    BaseSentryPluginTest(androidGradlePluginVersion = "7.1.2", gradleVersion = "7.4") {
+    BaseSentryPluginTest(androidGradlePluginVersion = "7.2.1", gradleVersion = "7.5") {
 
     @Test
     fun `does not break when there is a firebase-perf plugin applied`() {
