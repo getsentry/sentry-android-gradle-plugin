@@ -9,7 +9,7 @@ import binascii
 import json
 
 apiOrg = 'sentry-sdks'
-apiProject = 'sentry-fastlane-plugin'
+apiProject = 'sentry-android'
 uri = urlparse(sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8000')
 version='1.1.0'
 appIdentifier='com.sentry.fastlane.app'
@@ -73,7 +73,7 @@ class Handler(BaseHTTPRequestHandler):
         elif self.isApi('/api/0/organizations/{}/releases/{}/assemble/'.format(apiOrg, version)):
             self.writeJSONFile("test/assets/assemble-artifacts-response.json")
         elif self.isApi('/api/0/projects/{}/{}/files/dsyms/'.format(apiOrg, apiProject)):
-            self.writeJSONFile("plugin-build/src/test/resources/testFixtures/integration/debug-info-files.json")
+            self.writeJSONFile("test/assets/debug-info-files.json")
         elif self.isApi('/api/0/projects/{}/{}/files/dsyms/associate/'.format(apiOrg, apiProject)):
             self.writeJSONFile("test/assets/associate-dsyms-response.json")
         else:
