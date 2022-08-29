@@ -15,6 +15,9 @@ class SentryPluginIntegrationTest(
 
     @Test
     fun uploadSentryProguardMappingsIntegration() {
+        if (System.getenv("SENTRY_URL").isNullOrBlank()) {
+            return // Don't run test if local test server endpoint is not set
+        }
         applyAutoUploadProguardMapping()
 
         val build = runner
@@ -29,6 +32,9 @@ class SentryPluginIntegrationTest(
 
     @Test
     fun uploadNativeSymbols() {
+        if (System.getenv("SENTRY_URL").isNullOrBlank()) {
+            return // Don't run test if local test server endpoint is not set
+        }
         applyUploadNativeSymbols()
 
         val build = runner
