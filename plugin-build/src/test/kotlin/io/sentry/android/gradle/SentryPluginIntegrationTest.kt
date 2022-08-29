@@ -21,7 +21,24 @@ class SentryPluginIntegrationTest(
             .appendArguments(":app:assembleRelease")
             .build()
 
-        assertEquals(build.task(":app:uploadSentryProguardMappingsRelease")?.outcome, TaskOutcome.SUCCESS)
+        assertEquals(
+            build.task(":app:uploadSentryProguardMappingsRelease")?.outcome,
+            TaskOutcome.SUCCESS
+        )
+    }
+
+    @Test
+    fun uploadNativeSymbols() {
+        applyUploadNativeSymbols()
+
+        val build = runner
+            .appendArguments(":app:assembleRelease")
+            .build()
+
+        assertEquals(
+            build.task(":app:uploadSentryNativeSymbolsForRelease")?.outcome,
+            TaskOutcome.SUCCESS
+        )
     }
 
     private fun applyAutoUploadProguardMapping() {
@@ -37,6 +54,26 @@ class SentryPluginIntegrationTest(
                   includeProguardMapping = true
                   autoUploadProguardMapping = true
                   uploadNativeSymbols = false
+                  tracingInstrumentation {
+                    enabled = false
+                  }
+                }
+            """.trimIndent()
+        )
+    }
+
+    private fun applyUploadNativeSymbols() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+                plugins {
+                  id "com.android.application"
+                  id "io.sentry.android.gradle"
+                }
+
+                sentry {
+                  autoUploadProguardMapping = false
+                  uploadNativeSymbols = true
                   tracingInstrumentation {
                     enabled = false
                   }
