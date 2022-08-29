@@ -17,11 +17,7 @@ jobs:
         with:
           python-version: '3.10.5'
 
-      - name: Start integration test server
-        run: test/integration-test-server-start.sh
-
-      - name: Run integation test for sentry-cli commands
-        run: ./gradlew -p plugin-build test --tests SentryPluginIntegrationTest
-
-      - name: Stop integration test server
-        run: test/integration-test-server-stop.sh
+      - name: Start server and run integration test for sentry-cli commands
+        run: |
+          test/integration-test-server-start.sh &
+          ./gradlew -p plugin-build test --tests SentryPluginIntegrationTest
