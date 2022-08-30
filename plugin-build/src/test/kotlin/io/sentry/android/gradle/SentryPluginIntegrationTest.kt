@@ -1,10 +1,10 @@
 package io.sentry.android.gradle
 
+import kotlin.test.assertEquals
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import kotlin.test.assertEquals
 
 @Suppress("FunctionName")
 @RunWith(Parameterized::class)
