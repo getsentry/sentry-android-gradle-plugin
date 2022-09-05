@@ -1,0 +1,24 @@
+name: integration-tests-sentry-cli
+
+on:
+  push:
+    branches:
+      - main
+      - release/**
+  pull_request:
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+    env:
+      SENTRY_URL: http://127.0.0.1:8000
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10.5'
+
+      - name: Start server and run integration test for sentry-cli commands
+        run: |
+          test/integration-test-server-start.sh &
+          ./gradlew -p plugin-build test --tests SentryPluginIntegrationTest
