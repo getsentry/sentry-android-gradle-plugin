@@ -11,6 +11,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -25,7 +26,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     @get:Input
     abstract val cliExecutable: Property<String>
 
-    @get:Input
+    @get:InputDirectory
     abstract val uuidDirectory: DirectoryProperty
 
     @get:Internal
