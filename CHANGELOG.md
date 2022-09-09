@@ -8,6 +8,10 @@
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#641)
   - [diff](https://github.com/getsentry/sentry-java/compare/6.4.0...6.4.1)
 
+### Fixes
+
+- Update DirectoryProperty to use @InputDirectory ([#374](https://github.com/getsentry/sentry-android-gradle-plugin/pull/374))
+
 ## 3.1.5
 
 ### Features
