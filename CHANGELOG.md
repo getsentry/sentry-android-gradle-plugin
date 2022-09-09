@@ -10,7 +10,7 @@
 
 ### Fixes
 
-- Update DirectoryProperty to use @InputDirectory so the build no longer fails when using Gradle 8 ([#374](https://github.com/getsentry/sentry-android-gradle-plugin/pull/374))
+- Update DirectoryProperty to use @InputDirectory ([#374](https://github.com/getsentry/sentry-android-gradle-plugin/pull/374))
 
 ## 3.1.5
 
