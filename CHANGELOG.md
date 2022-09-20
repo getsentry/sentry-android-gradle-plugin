@@ -4,9 +4,9 @@
 
 ### Features
 
-- Bump Android SDK from v6.4.0 to v6.4.1 ([#372](https://github.com/getsentry/sentry-android-gradle-plugin/pull/372))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#641)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.4.0...6.4.1)
+- Bump Android SDK from v6.4.0 to v6.4.2 ([#372](https://github.com/getsentry/sentry-android-gradle-plugin/pull/372), [#377](https://github.com/getsentry/sentry-android-gradle-plugin/pull/377))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#642)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.4.0...6.4.2)
 
 ### Fixes
 
