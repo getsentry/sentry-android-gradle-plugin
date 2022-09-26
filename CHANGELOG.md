@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Bump AGP to v7.3.0
+
 ## 3.1.6
 
 ### Features
