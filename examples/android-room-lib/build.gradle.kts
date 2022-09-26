@@ -4,15 +4,16 @@ plugins {
 }
 
 android {
-    compileSdk = 30
+    compileSdk = LibsVersion.SDK_VERSION
     defaultConfig {
-        minSdk = 21
-        targetSdk = 30
+        minSdk = LibsVersion.MIN_SDK_VERSION
+        targetSdk = LibsVersion.SDK_VERSION
     }
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
+    namespace = "io.sentry.android.instrumentation.lib"
 }
 
 dependencies {

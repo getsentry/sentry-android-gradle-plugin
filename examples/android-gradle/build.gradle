@@ -14,10 +14,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.sentry.android.gradle'
 
 android {
-    compileSdkVersion = 30
+    compileSdk = LibsVersion.SDK_VERSION
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 30
+        minSdk LibsVersion.MIN_SDK_VERSION
+        targetSdk LibsVersion.SDK_VERSION
         versionCode = 1
         versionName = "1.0"
     }
@@ -28,6 +28,7 @@ android {
               'proguard-android-optimize.txt')
         }
     }
+    namespace 'com.example.sampleapp'
 }
 
 sentry {
