@@ -13,7 +13,9 @@ buildscript {
 
 apply plugin: 'com.android.application'
 apply plugin: 'io.sentry.android.gradle'
-apply plugin: 'com.guardsquare.proguard'
+if (BuildPluginsVersion.INSTANCE.isProguardApplicable()) {
+    apply plugin: 'com.guardsquare.proguard'
+}
 
 android {
     compileSdk = LibsVersion.SDK_VERSION
@@ -32,13 +34,15 @@ android {
     namespace 'com.example.sampleapp'
 }
 
-proguard {
-   configurations {
-      release {
-         defaultConfiguration "proguard-android-optimize.txt"
-         configuration "proguard-project.txt"
-      }
-   }
+if (BuildPluginsVersion.INSTANCE.isProguardApplicable()) {
+    proguard {
+        configurations {
+            release {
+                defaultConfiguration "proguard-android-optimize.txt"
+                configuration "proguard-project.txt"
+            }
+        }
+    }
 }
 
 sentry {

@@ -1,3 +1,5 @@
+import org.gradle.util.VersionNumber
+
 object BuildPluginsVersion {
     val AGP = System.getenv("VERSION_AGP") ?: "7.3.0"
     const val DOKKA = "1.6.10"
@@ -8,6 +10,8 @@ object BuildPluginsVersion {
     // build/publications/maven
     const val MAVEN_PUBLISH = "0.17.0"
     const val PROGUARD = "7.1.0"
+
+    fun isProguardApplicable(): Boolean = VersionNumber.parse(AGP).major < 8
 }
 
 object LibsVersion {
