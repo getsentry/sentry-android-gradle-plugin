@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Bump AGP to v7.3.0
+- Bump AGP to v7.3.0 ([#378](https://github.com/getsentry/sentry-android-gradle-plugin/pull/378))
 
 ## 3.1.6
 
