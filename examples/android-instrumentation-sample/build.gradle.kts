@@ -14,10 +14,10 @@ plugins {
 // }
 
 android {
-    compileSdk = 30
+    compileSdk = LibsVersion.SDK_VERSION
     defaultConfig {
-        minSdk = 21
-        targetSdk = 30
+        minSdk = LibsVersion.MIN_SDK_VERSION
+        targetSdk = LibsVersion.SDK_VERSION
         versionCode = 1
         versionName = "1.0"
     }
@@ -41,6 +41,7 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
+    namespace = "io.sentry.samples.instrumentation"
 }
 
 // useful, when we want to modify room-generated classes, and then compile them into .class files

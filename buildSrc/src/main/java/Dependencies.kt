@@ -1,17 +1,24 @@
+import org.gradle.util.VersionNumber
+
 object BuildPluginsVersion {
-    val AGP = System.getenv("VERSION_AGP") ?: "7.2.1"
-    const val DOKKA = "1.5.31"
-    const val KOTLIN = "1.5.31"
-    const val KOTLIN_LANG_VERSION = "1.5"
+    val AGP = System.getenv("VERSION_AGP") ?: "7.3.0"
+    const val DOKKA = "1.6.10"
+    const val KOTLIN = "1.6.10"
     const val AAR_2_JAR = "0.6"
     const val KTLINT = "10.2.1"
     // do not upgrade to 0.18.0, it does not generate the pom-default.xml and module.json under
     // build/publications/maven
     const val MAVEN_PUBLISH = "0.17.0"
     const val PROGUARD = "7.1.0"
+	
+	// proguard does not support AGP 8 yet
+    fun isProguardApplicable(): Boolean = VersionNumber.parse(AGP).major < 8
 }
 
 object LibsVersion {
+    const val SDK_VERSION = 33
+    const val MIN_SDK_VERSION = 21
+
     const val JUNIT = "4.13.2"
     const val ASM = "7.0" // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
     const val SQLITE = "2.1.0"
@@ -55,7 +62,7 @@ object Samples {
     }
 
     object Room {
-        private const val version = "2.3.0"
+        private const val version = "2.4.3"
         const val runtime = "androidx.room:room-runtime:${version}"
         const val ktx = "androidx.room:room-ktx:${version}"
         const val compiler = "androidx.room:room-compiler:${version}"

@@ -13,10 +13,10 @@ buildscript {
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion = 30
+    compileSdk = LibsVersion.SDK_VERSION
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 30
+        minSdkVersion LibsVersion.MIN_SDK_VERSION
+        targetSdk LibsVersion.SDK_VERSION
         versionCode = 1
         versionName = "1.0"
     }
@@ -30,6 +30,7 @@ android {
             path "jni/Android.mk"
         }
     }
+    namespace 'com.example.sampleapp'
 }
 
 if (System.getenv("AUTO_UPLOAD")) {
