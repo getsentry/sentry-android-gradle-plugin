@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.1.7
 
 ### Features
 
