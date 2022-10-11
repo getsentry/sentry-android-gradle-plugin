@@ -4,6 +4,9 @@
 
 ### Dependencies
 
+- Bump CLI from v2.6.0 to v2.7.0 ([#383](https://github.com/getsentry/sentry-android-gradle-plugin/pull/383))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#270)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.6.0...2.7.0)
 - Bump Android SDK from v6.4.3 to v6.5.0 ([#385](https://github.com/getsentry/sentry-android-gradle-plugin/pull/385))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#650)
   - [diff](https://github.com/getsentry/sentry-java/compare/6.4.3...6.5.0)
