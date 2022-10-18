@@ -24,6 +24,7 @@ class SentryPluginWithMinifiedLibsTest :
               implementation 'com.adcolony:sdk:4.7.1'
               implementation 'com.appboy:android-sdk-ui:19.0.0'
               implementation 'com.stripe:stripeterminal-internal-common:2.12.0'
+              implementation 'com.synerise.sdk:synerise-mobile-sdk:4.8.0'
             }
             """.trimIndent()
         )

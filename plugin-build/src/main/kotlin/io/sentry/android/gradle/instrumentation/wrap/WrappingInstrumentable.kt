@@ -4,19 +4,14 @@ package io.sentry.android.gradle.instrumentation.wrap
 
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
-import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.instrumentation.ClassInstrumentable
 import io.sentry.android.gradle.instrumentation.CommonClassVisitor
 import io.sentry.android.gradle.instrumentation.MethodContext
 import io.sentry.android.gradle.instrumentation.MethodInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.util.AnalyzingVisitor
-import io.sentry.android.gradle.instrumentation.util.findClassReader
-import io.sentry.android.gradle.instrumentation.util.findClassWriter
-import io.sentry.android.gradle.instrumentation.util.isMinifiedClass
 import io.sentry.android.gradle.instrumentation.util.isSentryClass
 import io.sentry.android.gradle.instrumentation.wrap.visitor.WrappingVisitor
-import io.sentry.android.gradle.util.info
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.tree.MethodNode
@@ -31,18 +26,6 @@ class WrappingInstrumentable : ClassInstrumentable {
     ): ClassVisitor {
         val simpleClassName =
             instrumentableContext.currentClassData.className.substringAfterLast('.')
-
-        val classReader = originalVisitor.findClassWriter()?.findClassReader()
-        val isMinifiedClass = classReader?.isMinifiedClass() ?: false
-        if (isMinifiedClass) {
-            // We only check for minified classes for the WrappingInstrumentable, because it is the
-            // only one which runs over all classes
-            SentryPlugin.logger.info {
-                "$simpleClassName skipped from instrumentation because it's a minified class."
-            }
-            return originalVisitor
-        }
-
         return AnalyzingVisitor(
             apiVersion = apiVersion,
             nextVisitor = { methods ->

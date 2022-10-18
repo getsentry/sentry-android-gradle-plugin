@@ -56,6 +56,7 @@ abstract class BaseSentryPluginTest(
                 google()
                 mavenCentral()
                 maven { url 'https://appboy.github.io/appboy-android-sdk/sdk' }
+                maven { url 'https://pkgs.dev.azure.com/Synerise/AndroidSDK/_packaging/prod/maven/v1' }
               }
             }
             subprojects {
