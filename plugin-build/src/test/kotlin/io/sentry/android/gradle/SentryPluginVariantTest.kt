@@ -111,18 +111,6 @@ class SentryPluginVariantTest(
         appBuildFile.appendText(
             // language=Groovy
             """
-<<<<<<< Updated upstream
-                plugins {
-                  id "com.android.application"
-                  id "io.sentry.android.gradle"
-                }
-
-                android {
-                  namespace 'com.example'
-                }
-
-=======
->>>>>>> Stashed changes
                 sentry {
                   autoUploadProguardMapping = false
                   ignoredVariants = [$variants]
