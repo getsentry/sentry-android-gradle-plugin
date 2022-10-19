@@ -116,6 +116,10 @@ class SentryPluginVariantTest(
                   id "io.sentry.android.gradle"
                 }
 
+                android {
+                  namespace 'com.example'
+                }
+
                 sentry {
                   autoUploadProguardMapping = false
                   ignoredVariants = [$variants]
