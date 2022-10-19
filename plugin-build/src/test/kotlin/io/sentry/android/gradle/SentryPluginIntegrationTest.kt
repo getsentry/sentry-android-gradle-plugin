@@ -48,14 +48,9 @@ class SentryPluginIntegrationTest(
     }
 
     private fun applyAutoUploadProguardMapping() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-                plugins {
-                  id "com.android.application"
-                  id "io.sentry.android.gradle"
-                }
-
                 sentry {
                   includeProguardMapping = true
                   autoUploadProguardMapping = true
@@ -69,14 +64,9 @@ class SentryPluginIntegrationTest(
     }
 
     private fun applyUploadNativeSymbols() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-                plugins {
-                  id "com.android.application"
-                  id "io.sentry.android.gradle"
-                }
-
                 sentry {
                   autoUploadProguardMapping = false
                   uploadNativeSymbols = true

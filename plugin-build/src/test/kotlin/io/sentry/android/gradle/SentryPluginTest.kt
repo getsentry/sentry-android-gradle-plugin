@@ -18,14 +18,9 @@ class SentryPluginTest(
 
     @Test
     fun `plugin can be applied`() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-                plugins {
-                  id "com.android.application"
-                  id "io.sentry.android.gradle"
-                }
-
                 sentry {
                   autoUploadProguardMapping = false
                   tracingInstrumentation {
@@ -41,14 +36,9 @@ class SentryPluginTest(
     @Test
     fun `plugin does not configure tasks`() {
         val prefix = "task-configured-for-test: "
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-                plugins {
-                  id "com.android.application"
-                  id "io.sentry.android.gradle"
-                }
-
                 project.tasks.configureEach { Task task -> println("$prefix" + task.path) }
             """.trimIndent()
         )
@@ -102,14 +92,9 @@ class SentryPluginTest(
 
     @Test
     fun `does not include a UUID in the APK if includeProguardMapping is off`() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-                plugins {
-                  id "com.android.application"
-                  id "io.sentry.android.gradle"
-                }
-
                 sentry {
                   includeProguardMapping = false
                 }
@@ -260,14 +245,9 @@ class SentryPluginTest(
     }
 
     private fun applyUploadNativeSymbols() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-                plugins {
-                  id "com.android.application"
-                  id "io.sentry.android.gradle"
-                }
-
                 sentry {
                   autoUploadProguardMapping = false
                   uploadNativeSymbols = true
@@ -280,13 +260,9 @@ class SentryPluginTest(
     }
 
     private fun applyIgnores(ignoredVariant: String) {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-                plugins {
-                  id "com.android.application"
-                  id "io.sentry.android.gradle"
-                }
                 sentry {
                   autoUploadProguardMapping = true
                   ignoredVariants = ["$ignoredVariant"]
@@ -303,14 +279,9 @@ class SentryPluginTest(
         features: Set<InstrumentationFeature> = setOf(),
         debug: Boolean = false
     ) {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-                plugins {
-                  id "com.android.application"
-                  id "io.sentry.android.gradle"
-                }
-
                 dependencies {
                   implementation 'io.sentry:sentry-android:5.5.0'
                 }

@@ -15,14 +15,9 @@ class SentryPluginAutoInstallTest(
 
     @Test
     fun `adds sentry-android dependency`() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-            plugins {
-              id "com.android.application"
-              id "io.sentry.android.gradle"
-            }
-
             sentry.includeProguardMapping = false
             """.trimIndent()
         )
@@ -40,14 +35,9 @@ class SentryPluginAutoInstallTest(
 
     @Test
     fun `adds integrations`() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-            plugins {
-              id "com.android.application"
-              id "io.sentry.android.gradle"
-            }
-
             dependencies {
               // sentry-android shouldn't be installed, since sentry-android-core is present
               implementation 'io.sentry:sentry-android-core:5.1.0'
@@ -74,14 +64,9 @@ class SentryPluginAutoInstallTest(
 
     @Test
     fun `does not do anything when autoinstall is disabled`() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-            plugins {
-              id "com.android.application"
-              id "io.sentry.android.gradle"
-            }
-
             dependencies {
               implementation 'com.jakewharton.timber:timber:4.7.1'
               implementation 'androidx.fragment:fragment:1.3.5'
@@ -107,14 +92,9 @@ class SentryPluginAutoInstallTest(
 
     @Test
     fun `uses user-provided sentryVersion when sentry-android is not available in direct deps`() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-            plugins {
-              id "com.android.application"
-              id "io.sentry.android.gradle"
-            }
-
             dependencies {
               implementation 'com.jakewharton.timber:timber:4.7.1'
               implementation 'com.squareup.okhttp3:okhttp:4.9.2'

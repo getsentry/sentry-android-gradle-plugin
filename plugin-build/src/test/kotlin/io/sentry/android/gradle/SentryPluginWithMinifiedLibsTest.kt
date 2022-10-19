@@ -8,14 +8,9 @@ class SentryPluginWithMinifiedLibsTest :
 
     @Test
     fun `does not break when there is a minified jar dependency`() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-            plugins {
-              id "com.android.application"
-              id "io.sentry.android.gradle"
-            }
-
             dependencies {
               implementation 'io.sentry:sentry-android-core:5.6.0'
               implementation 'com.google.android.play:core-ktx:1.8.1'
