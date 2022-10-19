@@ -3,6 +3,10 @@ plugins {
     id "io.sentry.android.gradle"
 }
 
+android {
+    namespace 'com.example'
+}
+
 sentry {
     autoUploadProguardMapping = false
 }

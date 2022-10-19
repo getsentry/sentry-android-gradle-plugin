@@ -10,7 +10,6 @@ object BuildPluginsVersion {
     // build/publications/maven
     const val MAVEN_PUBLISH = "0.17.0"
     const val PROGUARD = "7.1.0"
-	
 	// proguard does not support AGP 8 yet
     fun isProguardApplicable(): Boolean = VersionNumber.parse(AGP).major < 8
 }

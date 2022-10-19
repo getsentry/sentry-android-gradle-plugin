@@ -263,6 +263,7 @@ obj/
 .idea/sqlDataSources.xml
 .idea/dynamic.xml
 .idea/uiDesigner.xml
+.idea/kotlinc.xml
 
 # OS-specific files
 .DS_Store

@@ -56,12 +56,13 @@ abstract class BaseSentryPluginTest(
                 google()
                 mavenCentral()
                 maven { url 'https://appboy.github.io/appboy-android-sdk/sdk' }
+                maven { url 'https://pkgs.dev.azure.com/Synerise/AndroidSDK/_packaging/prod/maven/v1' }
               }
             }
             subprojects {
               pluginManager.withPlugin('com.android.application') {
                 android {
-                  compileSdkVersion 31
+                  compileSdkVersion 33
                   defaultConfig {
                     applicationId "com.example"
                     minSdkVersion 21
@@ -101,8 +102,8 @@ abstract class BaseSentryPluginTest(
             arrayOf("7.2.1", "7.5"),
             arrayOf("7.3.0", "7.4"),
             arrayOf("7.3.0", "7.5"),
-            arrayOf("7.4.0-beta01", "7.5"),
-            arrayOf("8.0.0-alpha01", "7.5")
+            arrayOf("7.4.0-beta02", "7.5"),
+            arrayOf("8.0.0-alpha05", "7.5")
         )
 
         internal fun GradleRunner.appendArguments(vararg arguments: String) =

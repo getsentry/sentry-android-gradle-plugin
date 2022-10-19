@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Ignore minified classes from any instrumentation ([#389](https://github.com/getsentry/sentry-android-gradle-plugin/pull/389))
+
 ## 3.2.0
 
 ### Dependencies

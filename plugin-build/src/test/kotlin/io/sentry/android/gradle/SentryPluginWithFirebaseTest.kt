@@ -18,6 +18,8 @@ class SentryPluginWithFirebaseTest :
             }
 
             android {
+              namespace 'com.example'
+
               buildTypes {
                 release {
                   minifyEnabled = true
