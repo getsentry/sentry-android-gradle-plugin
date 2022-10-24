@@ -6,6 +6,7 @@ import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.extensions.InstrumentationFeature
+import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
@@ -79,6 +80,9 @@ abstract class SpanAddingClassVisitorFactory :
              * from the sentry-android SDK.
              */
             val instrumentables = listOfNotNull(
+                ComposeNavigation().takeIf {
+                    isComposeInstrEnabled(sentryModules, parameters.get())
+                },
                 AndroidXSQLiteDatabase().takeIf {
                     isDatabaseInstrEnabled(sentryModules, parameters.get())
                 },
@@ -125,6 +129,15 @@ abstract class SpanAddingClassVisitorFactory :
         SentryModules.SENTRY_ANDROID_OKHTTP,
         SentryVersions.VERSION_OKHTTP
     ) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
+
+    private fun isComposeInstrEnabled(
+        sentryModules: Map<String, SemVer>,
+        parameters: SpanAddingParameters
+    ): Boolean =
+        sentryModules.isAtLeast(
+            SentryModules.SENTRY_ANDROID_COMPOSE,
+            SentryVersions.VERSION_COMPOSE
+        ) && parameters.features.get().contains(InstrumentationFeature.COMPOSE)
 
     private fun Map<String, SemVer>.isAtLeast(module: String, minVersion: SemVer): Boolean =
         getOrDefault(module, SentryVersions.VERSION_DEFAULT) >= minVersion

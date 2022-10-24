@@ -15,11 +15,14 @@ internal object SentryVersions {
     internal val VERSION_PERFORMANCE = SemVer(4, 0, 0)
     internal val VERSION_OKHTTP = SemVer(5, 0, 0)
     internal val VERSION_FILE_IO = SemVer(5, 5, 0)
+    // TODO use correct version
+    internal val VERSION_COMPOSE = SemVer(1, 0, 0)
 }
 
 internal object SentryModules {
     internal const val SENTRY_ANDROID_CORE = "sentry-android-core"
     internal const val SENTRY_ANDROID_OKHTTP = "sentry-android-okhttp"
+    internal const val SENTRY_ANDROID_COMPOSE = "sentry-android-compose"
 }
 
 /**

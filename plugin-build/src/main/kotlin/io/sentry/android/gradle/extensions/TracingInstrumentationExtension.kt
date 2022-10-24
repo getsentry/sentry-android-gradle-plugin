@@ -68,5 +68,13 @@ enum class InstrumentationFeature {
      * This feature uses bytecode manipulation and attaches SentryOkHttpInterceptor to all OkHttp
      * clients in the project.
      */
-    OKHTTP
+    OKHTTP,
+
+    /**
+     * When enabled the SDK will create breadcrumbs when navigating
+     * using [androidx.navigation.NavController].
+     * This feature uses bytecode manipulation and adds an OnDestinationChangedListener to all
+     * navigation controllers used in Jetpack Compose.
+     */
+    COMPOSE
 }
