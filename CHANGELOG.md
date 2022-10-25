@@ -6,6 +6,12 @@
 
 - Ignore minified classes from any instrumentation ([#389](https://github.com/getsentry/sentry-android-gradle-plugin/pull/389))
 
+### Dependencies
+
+- Bump CLI from v2.7.0 to v2.8.0 ([#394](https://github.com/getsentry/sentry-android-gradle-plugin/pull/394))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#280)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.7.0...2.8.0)
+
 ## 3.2.0
 
 ### Dependencies
