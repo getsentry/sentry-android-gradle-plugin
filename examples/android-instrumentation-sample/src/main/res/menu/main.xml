@@ -9,4 +9,11 @@
         android:title="Add"
         app:showAsAction="ifRoom"
         tools:ignore="HardcodedText" />
+
+    <item
+        android:id="@+id/action_compose"
+        android:icon="@android:drawable/ic_menu_gallery"
+        android:title="Compose"
+        app:showAsAction="always"
+        tools:ignore="HardcodedText" />
 </menu>

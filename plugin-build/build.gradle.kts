@@ -76,14 +76,13 @@ tasks.withType<GroovyCompile>().configureEach {
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-    sourceCompatibility = JavaVersion.VERSION_11.toString()
-    targetCompatibility = JavaVersion.VERSION_11.toString()
     classpath += files(sourceSets["main"].groovy.classesDirectory)
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn", "-Xjvm-default=enable")
         languageVersion = "1.4"
+        apiVersion = "1.4"
     }
 }
 

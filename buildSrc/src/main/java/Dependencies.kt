@@ -2,8 +2,8 @@ import org.gradle.util.VersionNumber
 
 object BuildPluginsVersion {
     val AGP = System.getenv("VERSION_AGP") ?: "7.3.0"
-    const val DOKKA = "1.6.10"
-    const val KOTLIN = "1.6.10"
+    const val DOKKA = "1.7.20"
+    const val KOTLIN = "1.7.20"
     const val AAR_2_JAR = "0.6"
     const val KTLINT = "10.2.1"
     // do not upgrade to 0.18.0, it does not generate the pom-default.xml and module.json under
@@ -52,6 +52,12 @@ object Samples {
         const val recyclerView = "androidx.recyclerview:recyclerview:1.2.0"
         const val lifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
         const val appcompat = "androidx.appcompat:appcompat:1.2.0"
+
+        const val composeRuntime = "androidx.compose.runtime:runtime:1.2.1"
+        const val composeNavigation = "androidx.navigation:navigation-compose:2.5.2"
+        const val composeActivity = "androidx.activity:activity-compose:1.4.0"
+        const val composeFoundation = "androidx.compose.foundation:foundation:1.2.1"
+        const val composeFoundationLayout = "androidx.compose.foundation:foundation-layout:1.2.1"
     }
 
     object Coroutines {

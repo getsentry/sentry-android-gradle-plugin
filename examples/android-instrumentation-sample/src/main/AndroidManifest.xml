@@ -13,6 +13,11 @@
         </activity>
 
         <activity
+            android:name=".ui.ComposeActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat" />
+
+        <activity
             android:name=".ui.EditActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
