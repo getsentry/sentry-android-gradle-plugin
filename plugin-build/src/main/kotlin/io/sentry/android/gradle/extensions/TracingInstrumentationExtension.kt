@@ -42,7 +42,8 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
             setOf(
                 InstrumentationFeature.DATABASE,
                 InstrumentationFeature.FILE_IO,
-                InstrumentationFeature.OKHTTP
+                InstrumentationFeature.OKHTTP,
+                InstrumentationFeature.COMPOSE,
             )
         )
 }
