@@ -13,7 +13,7 @@ import org.objectweb.asm.commons.Method
 open class ComposeNavigation : ClassInstrumentable {
 
     companion object {
-        private const val NAV_HOST_CONTROLLER_CLASSNAME = "androidx.navigation.NavHostController"
+        private const val NAV_HOST_CONTROLLER_CLASSNAME = "androidx.navigation.compose.NavHostControllerKt"
         private const val REMEMBER_NAV_CONTROLLER_NAME = "rememberNavController"
 
         /* ktlint-disable max-line-length */
