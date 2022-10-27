@@ -22,7 +22,6 @@ import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.util.debug
 import io.sentry.android.gradle.util.info
-import io.sentry.android.gradle.util.warn
 import java.io.File
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
@@ -59,15 +58,15 @@ abstract class SpanAddingClassVisitorFactory :
         val tmpDir: Property<File>
 
         @get:Internal
-        var _instrumentables: List<ClassInstrumentable>?
+        var _instrumentable: ClassInstrumentable?
     }
 
-    private val instrumentables: List<ClassInstrumentable>
+    private val instrumentable: ClassInstrumentable
         get() {
-            val memoized = parameters.get()._instrumentables
+            val memoized = parameters.get()._instrumentable
             if (memoized != null) {
                 SentryPlugin.logger.debug {
-                    "Memoized: ${memoized.joinToString { it::class.java.simpleName }}"
+                    "Memoized: $memoized"
                 }
                 return memoized
             }
@@ -79,29 +78,41 @@ abstract class SpanAddingClassVisitorFactory :
              * version to [SentryVersions] if it involves runtime classes
              * from the sentry-android SDK.
              */
-            val instrumentables = listOfNotNull(
-                ComposeNavigation().takeIf {
-                    isComposeInstrEnabled(sentryModules, parameters.get())
-                },
-                AndroidXSQLiteDatabase().takeIf {
-                    isDatabaseInstrEnabled(sentryModules, parameters.get())
-                },
-                AndroidXSQLiteStatement().takeIf {
-                    isDatabaseInstrEnabled(sentryModules, parameters.get())
-                },
-                AndroidXRoomDao().takeIf {
-                    isDatabaseInstrEnabled(sentryModules, parameters.get())
-                },
-                OkHttp().takeIf { isOkHttpInstrEnabled(sentryModules, parameters.get()) },
-                ChainedInstrumentable(
-                    listOf(WrappingInstrumentable(), RemappingInstrumentable())
-                ).takeIf { isFileIOInstrEnabled(sentryModules, parameters.get()) }
+            val instrumentable = ChainedInstrumentable(
+                listOfNotNull(
+                    AndroidXSQLiteDatabase().takeIf {
+                        isDatabaseInstrEnabled(sentryModules, parameters.get())
+                    },
+                    AndroidXSQLiteStatement().takeIf {
+                        isDatabaseInstrEnabled(sentryModules, parameters.get())
+                    },
+                    AndroidXRoomDao().takeIf {
+                        isDatabaseInstrEnabled(sentryModules, parameters.get())
+                    },
+                    OkHttp().takeIf { isOkHttpInstrEnabled(sentryModules, parameters.get()) },
+                    WrappingInstrumentable().takeIf {
+                        isFileIOInstrEnabled(
+                            sentryModules,
+                            parameters.get()
+                        )
+                    },
+                    RemappingInstrumentable().takeIf {
+                        isFileIOInstrEnabled(
+                            sentryModules,
+                            parameters.get()
+                        )
+                    },
+                    ComposeNavigation().takeIf {
+                        isComposeInstrEnabled(sentryModules, parameters.get())
+                    },
+                )
             )
+
             SentryPlugin.logger.info {
-                "Instrumentables: ${instrumentables.joinToString { it::class.java.simpleName }}"
+                "Instrumentable: $instrumentable"
             }
-            parameters.get()._instrumentables = ArrayList(instrumentables)
-            return instrumentables
+            parameters.get()._instrumentable = instrumentable
+            return instrumentable
         }
 
     private fun isDatabaseInstrEnabled(
@@ -157,23 +168,14 @@ abstract class SpanAddingClassVisitorFactory :
             return nextClassVisitor
         }
 
-        return instrumentables.find { it.isInstrumentable(classContext) }
-            ?.getVisitor(
-                classContext,
-                instrumentationContext.apiVersion.get(),
-                nextClassVisitor,
-                parameters = parameters.get()
-            )
-            ?: nextClassVisitor.also {
-                SentryPlugin.logger.warn {
-                    """
-                    $className is not supported for instrumentation.
-                    This is likely a bug, please file an issue at https://github.com/getsentry/sentry-android-gradle-plugin/issues
-                    """.trimIndent()
-                }
-            }
+        return instrumentable.getVisitor(
+            classContext,
+            instrumentationContext.apiVersion.get(),
+            nextClassVisitor,
+            parameters = parameters.get()
+        )
     }
 
     override fun isInstrumentable(classData: ClassData): Boolean =
-        instrumentables.any { it.isInstrumentable(classData.toClassContext()) }
+        instrumentable.isInstrumentable(classData.toClassContext())
 }

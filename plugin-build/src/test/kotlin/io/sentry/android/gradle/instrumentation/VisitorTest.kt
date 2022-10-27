@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.instrumentation
 
 import com.android.build.api.instrumentation.ClassContext
+import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
@@ -137,7 +138,8 @@ class VisitorTest(
                 null
             ),
             arrayOf("okhttp/v3", "RealCall", OkHttp(), null),
-            arrayOf("okhttp/v4", "RealCall", OkHttp(), null)
+            arrayOf("okhttp/v4", "RealCall", OkHttp(), null),
+            arrayOf("androidxCompose", "NavHostControllerKt", ComposeNavigation(), null)
         )
 
         private fun roomDaoTestParameters(suffix: String = "") = arrayOf(
