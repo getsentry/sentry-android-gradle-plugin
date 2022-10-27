@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add auto-instrumentation for compose navigation ([#392](https://github.com/getsentry/sentry-android-gradle-plugin/pull/392))
+
 ### Fixes
 
 - Ignore minified classes from any instrumentation ([#389](https://github.com/getsentry/sentry-android-gradle-plugin/pull/389))
