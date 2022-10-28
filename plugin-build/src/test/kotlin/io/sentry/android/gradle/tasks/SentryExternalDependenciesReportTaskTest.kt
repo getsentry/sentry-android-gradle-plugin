@@ -4,7 +4,6 @@ import java.io.File
 import kotlin.test.assertEquals
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.initialization.DefaultSettings
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
@@ -138,7 +137,10 @@ class SentryExternalDependenciesReportTaskTest {
             app.plugins.apply("java")
             app.plugins.apply("io.sentry.android.gradle")
 
-            app.dependencies.add("implementation", app.dependencies.project(mapOf("path" to ":module")))
+            app.dependencies.add(
+                "implementation",
+                app.dependencies.project(mapOf("path" to ":module"))
+            )
 
             return app
         }

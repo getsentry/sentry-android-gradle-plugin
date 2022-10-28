@@ -220,7 +220,9 @@ class SentryPlugin : Plugin<Project> {
 
                 val taskSuffix = variant.name.capitalizeUS()
                 val sentryAssetDir =
-                    project.layout.buildDirectory.dir("generated${sep}assets${sep}sentry${sep}${variant.name}")
+                    project.layout.buildDirectory.dir(
+                        "generated${sep}assets${sep}sentry${sep}${variant.name}"
+                    )
                 androidExtension.sourceSets.getByName(variant.name).assets.srcDir(sentryAssetDir)
 
                 val reportDependenciesTask = project.registerDependenciesTask(
@@ -240,9 +242,11 @@ class SentryPlugin : Plugin<Project> {
                         "generateSentryProguardUuid$taskSuffix",
                         SentryGenerateProguardUuidTask::class.java
                     ) {
-                        it.output.set(sentryAssetDir.flatMap { dir ->
-                            dir.file(project.provider { "sentry-debug-meta.properties" })
-                        })
+                        it.output.set(
+                            sentryAssetDir.flatMap { dir ->
+                                dir.file(project.provider { "sentry-debug-meta.properties" })
+                            }
+                        )
                     }
                     generateUuidTask.setupMergeAssetsDependencies(mergeAssetsDependants)
 
@@ -361,7 +365,11 @@ class SentryPlugin : Plugin<Project> {
                 configurationName = "runtimeClasspath",
                 attributeValueJar = "jar",
                 includeReport = extension.includeDependenciesReport,
-                output = sentryResDir.flatMap { dir -> dir.file(project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT }) }
+                output = sentryResDir.flatMap { dir ->
+                    dir.file(
+                        project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT }
+                    )
+                }
             )
             val resourcesTask = withLogging(project.logger, "processResources") {
                 getProcessResourcesProvider(project)

@@ -241,7 +241,6 @@ class SentryUploadProguardMappingTaskTest {
         return project.layout.file(project.provider { file })
     }
 
-
     private fun createMappingFileProvider(
         project: Project,
         vararg path: String

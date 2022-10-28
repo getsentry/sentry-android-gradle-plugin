@@ -1,7 +1,6 @@
 package io.sentry.android.gradle.tasks
 
 import java.io.File
-import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import org.gradle.api.Project

@@ -40,7 +40,9 @@ abstract class SentryExternalDependenciesReportTask : DefaultTask() {
     // this is a proper input, so our task gets triggered whenever the dependency set changes
     @PathSensitive(PathSensitivity.NAME_ONLY)
     @InputFiles
-    fun getRuntimeClasspath(): FileCollection = runtimeConfiguration.artifactsFor(attributeValueJar.get())
+    fun getRuntimeClasspath(): FileCollection = runtimeConfiguration.artifactsFor(
+        attributeValueJar.get()
+    )
 
     @get:OutputFile
     abstract val output: RegularFileProperty
