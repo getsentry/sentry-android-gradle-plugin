@@ -20,6 +20,7 @@ abstract class BaseSentryPluginTest(
 
     private lateinit var rootBuildFile: File
     protected lateinit var appBuildFile: File
+    protected lateinit var moduleBuildFile: File
     protected lateinit var runner: GradleRunner
 
     protected open val additionalRootProjectConfig: String = ""
@@ -34,6 +35,7 @@ abstract class BaseSentryPluginTest(
             .replace(File.separator, "/")
 
         appBuildFile = File(testProjectDir.root, "app/build.gradle")
+        moduleBuildFile = File(testProjectDir.root, "module/build.gradle")
         rootBuildFile = testProjectDir.writeFile("build.gradle") {
             // language=Groovy
             """
