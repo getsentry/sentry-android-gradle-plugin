@@ -108,14 +108,9 @@ class SentryPluginVariantTest(
         val variants = ignoredVariants.joinToString(",") { "\"$it\"" }
         val buildTypes = ignoredBuildTypes.joinToString(",") { "\"$it\"" }
         val flavors = ignoredFlavors.joinToString(",") { "\"$it\"" }
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-                plugins {
-                  id "com.android.application"
-                  id "io.sentry.android.gradle"
-                }
-
                 sentry {
                   autoUploadProguardMapping = false
                   ignoredVariants = [$variants]

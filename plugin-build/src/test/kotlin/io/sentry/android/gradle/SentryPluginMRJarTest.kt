@@ -8,14 +8,9 @@ class SentryPluginMRJarTest :
 
     @Test
     fun `does not break when there is a MR-JAR dependency with unsupported java version`() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-            plugins {
-              id "com.android.application"
-              id "io.sentry.android.gradle"
-            }
-
             dependencies {
               implementation("com.squareup.moshi:moshi-kotlin:1.13.0")
             }
@@ -35,14 +30,9 @@ class SentryPluginMRJarTest :
 
     @Test
     fun `shows a warning when there is a signed MR-JAR dependency`() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-            plugins {
-              id "com.android.application"
-              id "io.sentry.android.gradle"
-            }
-
             dependencies {
               implementation("org.bouncycastle:bcprov-jdk15on:1.63")
             }

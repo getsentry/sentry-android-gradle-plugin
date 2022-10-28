@@ -14,14 +14,9 @@ class SentryPluginCheckAndroidSdkTest(
 
     @Test
     fun `when tracingInstrumentation is disabled does not check sentry-android sdk state`() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-            plugins {
-              id "com.android.application"
-              id "io.sentry.android.gradle"
-            }
-
             sentry.tracingInstrumentation.enabled = false
 
             ${captureSdkState()}
@@ -46,14 +41,9 @@ class SentryPluginCheckAndroidSdkTest(
 
     @Test
     fun `when tracingInstrumentation is enabled checks sentry-android sdk state`() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-            plugins {
-              id "com.android.application"
-              id "io.sentry.android.gradle"
-            }
-
             sentry.tracingInstrumentation.enabled = true
             sentry.autoInstallation.enabled = false
             sentry.includeProguardMapping = false
@@ -72,14 +62,9 @@ class SentryPluginCheckAndroidSdkTest(
 
     @Test
     fun `respects variant configuration`() {
-        appBuildFile.writeText(
+        appBuildFile.appendText(
             // language=Groovy
             """
-            plugins {
-              id "com.android.application"
-              id "io.sentry.android.gradle"
-            }
-
             sentry {
               tracingInstrumentation.enabled = true
               autoInstallation.enabled = false

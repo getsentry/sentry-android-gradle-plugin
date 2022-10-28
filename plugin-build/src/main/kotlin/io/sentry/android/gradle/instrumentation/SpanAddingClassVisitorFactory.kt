@@ -11,6 +11,9 @@ import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.Android
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
+import io.sentry.android.gradle.instrumentation.util.findClassReader
+import io.sentry.android.gradle.instrumentation.util.findClassWriter
+import io.sentry.android.gradle.instrumentation.util.isMinifiedClass
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.util.SemVer
@@ -129,8 +132,19 @@ abstract class SpanAddingClassVisitorFactory :
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
-    ): ClassVisitor =
-        instrumentables.find { it.isInstrumentable(classContext) }
+    ): ClassVisitor {
+        val className = classContext.currentClassData.className
+
+        val classReader = nextClassVisitor.findClassWriter()?.findClassReader()
+        val isMinifiedClass = classReader?.isMinifiedClass() ?: false
+        if (isMinifiedClass) {
+            SentryPlugin.logger.info {
+                "$className skipped from instrumentation because it's a minified class."
+            }
+            return nextClassVisitor
+        }
+
+        return instrumentables.find { it.isInstrumentable(classContext) }
             ?.getVisitor(
                 classContext,
                 instrumentationContext.apiVersion.get(),
@@ -140,11 +154,12 @@ abstract class SpanAddingClassVisitorFactory :
             ?: nextClassVisitor.also {
                 SentryPlugin.logger.warn {
                     """
-                    ${classContext.currentClassData.className} is not supported for instrumentation.
+                    $className is not supported for instrumentation.
                     This is likely a bug, please file an issue at https://github.com/getsentry/sentry-android-gradle-plugin/issues
                     """.trimIndent()
                 }
             }
+    }
 
     override fun isInstrumentable(classData: ClassData): Boolean =
         instrumentables.any { it.isInstrumentable(classData.toClassContext()) }
