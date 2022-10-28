@@ -3,6 +3,7 @@ package io.sentry.android.gradle
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
 import com.android.build.gradle.tasks.PackageAndroidArtifact
+import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.util.GroovyCompat.isDexguardAvailable
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import java.io.File
@@ -137,6 +138,32 @@ internal object SentryTasksProvider {
     fun getPackageProvider(variant: ApplicationVariant): TaskProvider<PackageAndroidArtifact>? =
         // for App Bundle it uses getPackageBundleTask
         variant.packageApplicationProvider
+
+    /**
+     * Returns the lintVitalAnalyze task provider
+     *
+     * @return the provider if found or null otherwise
+     */
+    @JvmStatic
+    fun getLintVitalAnalyzeProvider(project: Project, variantName: String) =
+        project.findTask(listOf("lintVitalAnalyze${variantName.capitalized}"))
+
+    /**
+     * Returns the lintVitalReport task provider
+     *
+     * @return the provider if found or null otherwise
+     */
+    @JvmStatic
+    fun getLintVitalReportProvider(project: Project, variantName: String) =
+        project.findTask(listOf("lintVitalReport${variantName.capitalized}"))
+
+    /**
+     * Returns the processResources task provider
+     *
+     * @return the provider if found or null otherwise
+     */
+    @JvmStatic
+    fun getProcessResourcesProvider(project: Project) = project.findTask(listOf("processResources"))
 
     private fun Project.findTask(taskName: List<String>): TaskProvider<Task>? =
         taskName

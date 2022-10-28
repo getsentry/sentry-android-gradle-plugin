@@ -12,23 +12,6 @@ import org.junit.Test
 class SentryGenerateProguardUuidTaskTest {
 
     @Test
-    fun `generate proguard UUID sets the output file correctly`() {
-        val project = createProject()
-        val task: TaskProvider<SentryGenerateProguardUuidTask> =
-            project.tasks.register(
-                "testGenerateProguardUuid",
-                SentryGenerateProguardUuidTask::class.java
-            ) {
-                it.outputDirectory.set(project.file("dummy/folder/"))
-            }
-
-        assertEquals(
-            project.file("dummy/folder/sentry-debug-meta.properties"),
-            task.get().outputFile.get().asFile
-        )
-    }
-
-    @Test
     fun `generate proguard UUID generates the UUID correctly`() {
         val project = createProject()
         val task: TaskProvider<SentryGenerateProguardUuidTask> =
@@ -36,7 +19,7 @@ class SentryGenerateProguardUuidTaskTest {
                 "testGenerateProguardUuid",
                 SentryGenerateProguardUuidTask::class.java
             ) {
-                it.outputDirectory.set(project.file("dummy/folder/"))
+                it.output.set(project.file("dummy/folder/sentry-debug-meta.properties"))
             }
 
         task.get().generateProperties()
@@ -54,7 +37,7 @@ class SentryGenerateProguardUuidTaskTest {
                 "testGenerateProguardUuid",
                 SentryGenerateProguardUuidTask::class.java
             ) {
-                it.outputDirectory.set(project.file("dummy/folder/"))
+                it.output.set(project.file("dummy/folder/sentry-debug-meta.properties"))
             }
         val expectedFile = File(project.projectDir, "dummy/folder/sentry-debug-meta.properties")
 

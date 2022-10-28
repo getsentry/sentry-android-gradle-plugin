@@ -10,39 +10,52 @@ import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePa
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
+import io.sentry.android.gradle.SentryTasksProvider.getLintVitalAnalyzeProvider
+import io.sentry.android.gradle.SentryTasksProvider.getLintVitalReportProvider
 import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
+import io.sentry.android.gradle.SentryTasksProvider.getProcessResourcesProvider
 import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
 import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
+import io.sentry.android.gradle.tasks.SentryExternalDependenciesReportTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.transforms.MetaInfStripTransform.Companion.metaInfStripped
-import io.sentry.android.gradle.util.AgpVersions
-import io.sentry.android.gradle.util.GroovyCompat
+import io.sentry.android.gradle.util.*
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
-import io.sentry.android.gradle.util.detectSentryAndroidSdk
-import io.sentry.android.gradle.util.info
 import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.RegularFile
 import org.gradle.api.plugins.ExtraPropertiesExtension
+import org.gradle.api.plugins.JavaBasePlugin
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.StopExecutionException
 import org.gradle.api.tasks.TaskProvider
 import org.slf4j.LoggerFactory
 
 @Suppress("UnstableApiUsage")
 class SentryPlugin : Plugin<Project> {
+
+    /**
+     * Since we're listening for the JavaBasePlugin, there may be multiple plugins inherting from it
+     * applied to the same project, e.g. Spring Boot + Kotlin Jvm, hence we only want our plugin to
+     * be configured only once.
+     */
+    private val configuredForJavaProject = AtomicBoolean(false)
 
     override fun apply(project: Project) {
         if (AgpVersions.CURRENT < AgpVersions.VERSION_7_0_0) {
@@ -172,6 +185,19 @@ class SentryPlugin : Plugin<Project> {
                 var transformerTaskProvider: TaskProvider<Task>? = null
                 var packageBundleTaskProvider: TaskProvider<Task>? = null
 
+                val mergeAssetsDependants = setOf(
+                    getMergeAssetsProvider(variant),
+                    // lint vital tasks scan the entire "build" folder; since we're writing our
+                    // generated stuff in there, we put explicit dependency on them to avoid
+                    // warnings about implicit dependency
+                    withLogging(project.logger, "lintVitalAnalyzeTask") {
+                        getLintVitalAnalyzeProvider(project, variant.name)
+                    },
+                    withLogging(project.logger, "lintVitalReportTask") {
+                        getLintVitalReportProvider(project, variant.name)
+                    }
+                )
+
                 if (isMinificationEnabled) {
                     preBundleTaskProvider = withLogging(project.logger, "preBundleTask") {
                         getPreBundleTask(project, variant.name)
@@ -193,6 +219,20 @@ class SentryPlugin : Plugin<Project> {
                 }
 
                 val taskSuffix = variant.name.capitalizeUS()
+                val sentryAssetDir =
+                    project.layout.buildDirectory.dir("generated${sep}assets${sep}sentry${sep}${variant.name}")
+                androidExtension.sourceSets.getByName(variant.name).assets.srcDir(sentryAssetDir)
+
+                val reportDependenciesTask = project.registerDependenciesTask(
+                    configurationName = "${variant.name}RuntimeClasspath",
+                    attributeValueJar = "android-classes",
+                    includeReport = extension.includeDependenciesReport,
+                    output = sentryAssetDir.flatMap { dir ->
+                        dir.file(project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT })
+                    },
+                    taskSuffix = taskSuffix
+                )
+                reportDependenciesTask.setupMergeAssetsDependencies(mergeAssetsDependants)
 
                 if (isMinificationEnabled && extension.includeProguardMapping.get()) {
                     // Setup the task to generate a UUID asset file
@@ -200,18 +240,11 @@ class SentryPlugin : Plugin<Project> {
                         "generateSentryProguardUuid$taskSuffix",
                         SentryGenerateProguardUuidTask::class.java
                     ) {
-                        it.outputDirectory.set(
-                            project.file(
-                                File(
-                                    project.buildDir,
-                                    "generated${sep}assets${sep}sentry${sep}${variant.name}"
-                                )
-                            )
-                        )
+                        it.output.set(sentryAssetDir.flatMap { dir ->
+                            dir.file(project.provider { "sentry-debug-meta.properties" })
+                        })
                     }
-                    getMergeAssetsProvider(variant)?.configure {
-                        it.dependsOn(generateUuidTask)
-                    }
+                    generateUuidTask.setupMergeAssetsDependencies(mergeAssetsDependants)
 
                     // Setup the task that uploads the proguard mapping and UUIDs
                     val uploadSentryProguardMappingsTask = project.tasks.register(
@@ -224,7 +257,7 @@ class SentryPlugin : Plugin<Project> {
                         task.sentryProperties.set(
                             sentryProperties?.let { file -> project.file(file) }
                         )
-                        task.uuidDirectory.set(generateUuidTask.flatMap { it.outputDirectory })
+                        task.uuidFile.set(generateUuidTask.flatMap { it.output })
                         task.mappingsFiles = getMappingFileProvider(
                             project,
                             variant,
@@ -234,9 +267,6 @@ class SentryPlugin : Plugin<Project> {
                         task.sentryOrganization.set(sentryOrgParameter)
                         task.sentryProject.set(sentryProjectParameter)
                     }
-                    androidExtension.sourceSets.getByName(variant.name).assets.srcDir(
-                        generateUuidTask.flatMap { it.outputDirectory }
-                    )
 
                     if (extension.experimentalGuardsquareSupport.get() &&
                         GroovyCompat.isDexguardEnabledForVariant(project, variant.name)
@@ -308,6 +338,67 @@ class SentryPlugin : Plugin<Project> {
 
             project.installDependencies(extension)
         }
+
+        project.plugins.withType(JavaBasePlugin::class.java) {
+            if (project.pluginManager.hasPlugin("com.android.application")) {
+                // AGP also applies JavaBasePlugin, but since we have a separate setup for it,
+                // we just bail here
+                return@withType
+            }
+            if (configuredForJavaProject.getAndSet(true)) {
+                logger.info { "The Sentry Gradle plugin was already configured" }
+                return@withType
+            }
+
+            val javaExtension = project.extensions.getByType(JavaPluginExtension::class.java)
+
+            val sentryResDir = project.layout.buildDirectory.dir("generated${sep}sentry")
+            javaExtension.sourceSets.getByName("main").resources { sourceSet ->
+                sourceSet.srcDir(sentryResDir)
+            }
+
+            val reportDependenciesTask = project.registerDependenciesTask(
+                configurationName = "runtimeClasspath",
+                attributeValueJar = "jar",
+                includeReport = extension.includeDependenciesReport,
+                output = sentryResDir.flatMap { dir -> dir.file(project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT }) }
+            )
+            val resourcesTask = withLogging(project.logger, "processResources") {
+                getProcessResourcesProvider(project)
+            }
+            resourcesTask?.configure { task -> task.dependsOn(reportDependenciesTask) }
+        }
+    }
+
+    private fun Project.registerDependenciesTask(
+        configurationName: String,
+        attributeValueJar: String,
+        output: Provider<RegularFile>,
+        includeReport: Provider<Boolean>,
+        taskSuffix: String = ""
+    ): TaskProvider<out Task> {
+        val reportDependenciesTask = tasks.register(
+            "collectExternal${taskSuffix}DependenciesForSentry",
+            SentryExternalDependenciesReportTask::class.java
+        ) {
+            it.includeReport.set(includeReport)
+            it.attributeValueJar.set(attributeValueJar)
+            it.setRuntimeConfiguration(
+                project.configurations.getByName(configurationName)
+            )
+            it.output.set(output)
+        }
+        return reportDependenciesTask
+    }
+
+    private fun TaskProvider<out Task>.setupMergeAssetsDependencies(
+        dependants: Set<TaskProvider<out Task>?>
+    ) {
+        dependants.forEach {
+            it?.configure { task ->
+                task.dependsOn(this)
+            }
+        }
     }
 
     private fun isVariantAllowed(
@@ -325,6 +416,7 @@ class SentryPlugin : Plugin<Project> {
         const val SENTRY_ORG_PARAMETER = "sentryOrg"
         const val SENTRY_PROJECT_PARAMETER = "sentryProject"
         internal const val SENTRY_SDK_VERSION = "6.5.0"
+        internal const val SENTRY_DEPENDENCIES_REPORT_OUTPUT = "sentry-external-modules.txt"
 
         internal val sep = File.separator
 

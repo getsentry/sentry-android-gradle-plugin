@@ -1,3 +1,4 @@
+import BuildPluginsVersion.springBootVersion
 import org.gradle.util.VersionNumber
 
 object BuildPluginsVersion {
@@ -10,7 +11,10 @@ object BuildPluginsVersion {
     // build/publications/maven
     const val MAVEN_PUBLISH = "0.17.0"
     const val PROGUARD = "7.1.0"
-	
+
+    val springBootVersion = "2.7.4"
+    val springDependencyManagementVersion = "1.0.11.RELEASE"
+
 	// proguard does not support AGP 8 yet
     fun isProguardApplicable(): Boolean = VersionNumber.parse(AGP).major < 8
 }
@@ -83,5 +87,21 @@ object Samples {
     object Fragment {
         private const val version = "1.3.5"
         const val fragmentKtx = "androidx.fragment:fragment-ktx:${version}"
+    }
+
+    object SpringBoot {
+        val springBoot = "org.springframework.boot"
+        val springDependencyManagement = "io.spring.dependency-management"
+        val springBootStarter = "org.springframework.boot:spring-boot-starter:$springBootVersion"
+        val springBootStarterTest = "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
+        val springBootStarterWeb = "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
+        val springBootStarterWebflux = "org.springframework.boot:spring-boot-starter-webflux:$springBootVersion"
+        val springBootStarterAop = "org.springframework.boot:spring-boot-starter-aop:$springBootVersion"
+        val springBootStarterSecurity = "org.springframework.boot:spring-boot-starter-security:$springBootVersion"
+        val springBootStarterJdbc = "org.springframework.boot:spring-boot-starter-jdbc:$springBootVersion"
+        val hsqldb = "org.hsqldb:hsqldb:2.6.1"
+        val aspectj = "org.aspectj:aspectjweaver"
+        val kotlinReflect = "org.jetbrains.kotlin:kotlin-reflect"
+        val kotlinStdLib = "stdlib-jdk8"
     }
 }

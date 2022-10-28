@@ -26,12 +26,8 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     @get:Input
     abstract val cliExecutable: Property<String>
 
-    @get:InputDirectory
-    abstract val uuidDirectory: DirectoryProperty
-
-    @get:Internal
-    val uuidFile: Provider<RegularFile>
-        get() = uuidDirectory.file("sentry-debug-meta.properties")
+    @get:InputFile
+    abstract val uuidFile: RegularFileProperty
 
     @get:InputFiles
     abstract var mappingsFiles: Provider<FileCollection>

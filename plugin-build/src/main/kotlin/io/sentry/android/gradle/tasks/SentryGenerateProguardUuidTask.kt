@@ -5,9 +5,11 @@ import java.util.UUID
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
 abstract class SentryGenerateProguardUuidTask : DefaultTask() {
@@ -18,23 +20,18 @@ abstract class SentryGenerateProguardUuidTask : DefaultTask() {
             "when uploading the Sentry mapping file"
     }
 
-    @get:OutputDirectory
-    abstract val outputDirectory: DirectoryProperty
-
-    @get:Internal
-    val outputFile: Provider<RegularFile> get() = outputDirectory.file(
-        "sentry-debug-meta.properties"
-    )
+    @get:OutputFile
+    abstract val output: RegularFileProperty
 
     @TaskAction
     fun generateProperties() {
         logger.info {
-            "SentryGenerateProguardUuidTask - outputFile: ${outputFile.get()}"
+            "SentryGenerateProguardUuidTask - outputFile: ${output.get()}"
         }
 
         UUID.randomUUID().also {
-            outputFile.get().asFile.parentFile.mkdirs()
-            outputFile.get().asFile.writeText("io.sentry.ProguardUuids=$it")
+            output.get().asFile.parentFile.mkdirs()
+            output.get().asFile.writeText("io.sentry.ProguardUuids=$it")
         }
     }
 }

@@ -2,10 +2,14 @@ package io.sentry.android.gradle.util
 
 import com.android.build.gradle.api.ApplicationVariant
 import io.sentry.android.gradle.util.GroovyCompat.isDexguardEnabledForVariant
+import java.io.File
 import java.util.Locale
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.RegularFile
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logger
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import proguard.gradle.plugin.android.dsl.ProGuardAndroidExtension
 
@@ -48,5 +52,11 @@ internal object SentryPluginUtils {
             }
         }
         return variant.buildType.isMinifyEnabled
+    }
+
+    fun getAndDelete(property: Provider<RegularFile>): File {
+        val file = property.get().asFile
+        file.delete()
+        return file
     }
 }

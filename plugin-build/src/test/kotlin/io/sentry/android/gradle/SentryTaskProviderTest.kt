@@ -3,10 +3,13 @@ package io.sentry.android.gradle
 import com.android.build.gradle.AppExtension
 import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
+import io.sentry.android.gradle.SentryTasksProvider.getLintVitalAnalyzeProvider
+import io.sentry.android.gradle.SentryTasksProvider.getLintVitalReportProvider
 import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
+import io.sentry.android.gradle.SentryTasksProvider.getProcessResourcesProvider
 import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -183,6 +186,48 @@ class SentryTaskProviderTest {
                 assertEquals("packageRelease", getPackageProvider(it)?.name)
             }
         }
+    }
+
+    @Test
+    fun `getLintVitalAnalyze returns null for missing task`() {
+        val project = ProjectBuilder.builder().build()
+
+        assertNull(getLintVitalAnalyzeProvider(project, "debug")?.get())
+    }
+
+    @Test
+    fun `getLintVitalAnalyze returns correct task`() {
+        val (project, task) = getTestProjectWithTask("lintVitalAnalyzeDebug")
+
+        assertEquals(task, getLintVitalAnalyzeProvider(project, "debug")?.get())
+    }
+
+    @Test
+    fun `getLintVitalReport returns null for missing task`() {
+        val project = ProjectBuilder.builder().build()
+
+        assertNull(getLintVitalReportProvider(project, "debug")?.get())
+    }
+
+    @Test
+    fun `getLintVitalReport returns correct task`() {
+        val (project, task) = getTestProjectWithTask("lintVitalReportDebug")
+
+        assertEquals(task, getLintVitalReportProvider(project, "debug")?.get())
+    }
+
+    @Test
+    fun `getProcessResources returns null for missing task`() {
+        val project = ProjectBuilder.builder().build()
+
+        assertNull(getProcessResourcesProvider(project)?.get())
+    }
+
+    @Test
+    fun `getProcessResources returns correct task`() {
+        val (project, task) = getTestProjectWithTask("processResources")
+
+        assertEquals(task, getProcessResourcesProvider(project)?.get())
     }
 
     private fun getAndroidExtFromProject(): AppExtension {

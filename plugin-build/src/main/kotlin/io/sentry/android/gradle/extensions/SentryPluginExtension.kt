@@ -119,4 +119,7 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     ) {
         autoInstallationAction.execute(autoInstallation)
     }
+
+    val includeDependenciesReport: Property<Boolean> = objects.property(Boolean::class.java)
+        .convention(true)
 }
