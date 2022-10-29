@@ -29,10 +29,13 @@ import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.transforms.MetaInfStripTransform.Companion.metaInfStripped
-import io.sentry.android.gradle.util.*
+import io.sentry.android.gradle.util.AgpVersions
+import io.sentry.android.gradle.util.GroovyCompat
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
+import io.sentry.android.gradle.util.detectSentryAndroidSdk
+import io.sentry.android.gradle.util.info
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import org.gradle.api.Plugin

@@ -1,7 +1,7 @@
 package io.sentry.android.gradle.tasks
 
 import java.io.File
-import java.util.*
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
