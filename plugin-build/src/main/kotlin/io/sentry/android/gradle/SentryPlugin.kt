@@ -43,7 +43,6 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.RegularFile
 import org.gradle.api.plugins.ExtraPropertiesExtension
-import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.StopExecutionException
@@ -346,15 +345,16 @@ class SentryPlugin : Plugin<Project> {
             project.installDependencies(extension)
         }
 
-        project.plugins.withType(JavaBasePlugin::class.java) {
+        project.pluginManager.withPlugin("org.gradle.java") {
             if (project.pluginManager.hasPlugin("com.android.application")) {
                 // AGP also applies JavaBasePlugin, but since we have a separate setup for it,
                 // we just bail here
-                return@withType
+                logger.info { "The Sentry Gradle plugin was already configured for AGP" }
+                return@withPlugin
             }
             if (configuredForJavaProject.getAndSet(true)) {
                 logger.info { "The Sentry Gradle plugin was already configured" }
-                return@withType
+                return@withPlugin
             }
 
             val javaExtension = project.extensions.getByType(JavaPluginExtension::class.java)
