@@ -6,26 +6,15 @@ import io.sentry.android.gradle.instrumentation.CommonClassVisitor
 import io.sentry.android.gradle.instrumentation.MethodContext
 import io.sentry.android.gradle.instrumentation.MethodInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
-import io.sentry.android.gradle.instrumentation.wrap.Replacement
+import io.sentry.android.gradle.instrumentation.androidx.compose.visitor.RememberNavControllerMethodVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
-import org.objectweb.asm.Type
-import org.objectweb.asm.commons.AdviceAdapter
-import org.objectweb.asm.commons.Method
 
 open class ComposeNavigation : ClassInstrumentable {
 
     companion object {
         private const val NAV_HOST_CONTROLLER_CLASSNAME =
             "androidx.navigation.compose.NavHostControllerKt"
-
-        /* ktlint-disable max-line-length */
-        private val replacement = Replacement(
-            "Lio/sentry/compose/SentryNavigationIntegrationKt;",
-            "withSentryObservableEffect",
-            "(Landroidx/navigation/NavHostController;Landroidx/compose/runtime/Composer;I)Landroidx/navigation/NavHostController;"
-        )
-        /* ktlint-enable max-line-length */
     }
 
     override fun getVisitor(
@@ -48,30 +37,11 @@ open class ComposeNavigation : ClassInstrumentable {
                     originalVisitor: MethodVisitor,
                     parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
                 ): MethodVisitor {
-                    return object : AdviceAdapter(
+                    return RememberNavControllerMethodVisitor(
                         apiVersion,
                         originalVisitor,
-                        instrumentableContext.access,
-                        instrumentableContext.name,
-                        instrumentableContext.descriptor
-                    ) {
-                        override fun onMethodExit(opcode: Int) {
-                            // NavHostController is the return value;
-                            // thus it's already on top of stack
-
-                            // Composer $composer
-                            loadArg(1)
-
-                            // int $changed
-                            loadArg(2)
-
-                            invokeStatic(
-                                Type.getType(replacement.owner),
-                                Method(replacement.name, replacement.descriptor)
-                            )
-                            super.onMethodExit(opcode)
-                        }
-                    }
+                        instrumentableContext
+                    )
                 }
             }),
             parameters
