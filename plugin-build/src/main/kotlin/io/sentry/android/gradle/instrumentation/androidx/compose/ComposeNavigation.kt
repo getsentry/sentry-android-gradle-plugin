@@ -2,6 +2,9 @@ package io.sentry.android.gradle.instrumentation.androidx.compose
 
 import com.android.build.api.instrumentation.ClassContext
 import io.sentry.android.gradle.instrumentation.ClassInstrumentable
+import io.sentry.android.gradle.instrumentation.CommonClassVisitor
+import io.sentry.android.gradle.instrumentation.MethodContext
+import io.sentry.android.gradle.instrumentation.MethodInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.wrap.Replacement
 import org.objectweb.asm.ClassVisitor
@@ -13,11 +16,11 @@ import org.objectweb.asm.commons.Method
 open class ComposeNavigation : ClassInstrumentable {
 
     companion object {
-        private const val NAV_HOST_CONTROLLER_CLASSNAME = "androidx.navigation.compose.NavHostControllerKt"
-        private const val REMEMBER_NAV_CONTROLLER_NAME = "rememberNavController"
+        private const val NAV_HOST_CONTROLLER_CLASSNAME =
+            "androidx.navigation.compose.NavHostControllerKt"
 
         /* ktlint-disable max-line-length */
-        val replacement = Replacement(
+        private val replacement = Replacement(
             "Lio/sentry/compose/SentryNavigationIntegrationKt;",
             "withSentryObservableEffect",
             "(Landroidx/navigation/NavHostController;Landroidx/compose/runtime/Composer;I)Landroidx/navigation/NavHostController;"
@@ -31,21 +34,27 @@ open class ComposeNavigation : ClassInstrumentable {
         originalVisitor: ClassVisitor,
         parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
     ): ClassVisitor {
-        return object : ClassVisitor(apiVersion, originalVisitor) {
+        return CommonClassVisitor(
+            apiVersion,
+            originalVisitor,
+            NAV_HOST_CONTROLLER_CLASSNAME,
+            listOf(object : MethodInstrumentable {
 
-            override fun visitMethod(
-                access: Int,
-                name: String?,
-                descriptor: String?,
-                signature: String?,
-                exceptions: Array<out String>?,
-            ): MethodVisitor {
-                val methodVisitor =
-                    originalVisitor.visitMethod(access, name, descriptor, signature, exceptions)
+                override val fqName: String get() = "rememberNavController"
 
-                return if (name == REMEMBER_NAV_CONTROLLER_NAME) {
-                    object : AdviceAdapter(apiVersion, methodVisitor, access, name, descriptor) {
-
+                override fun getVisitor(
+                    instrumentableContext: MethodContext,
+                    apiVersion: Int,
+                    originalVisitor: MethodVisitor,
+                    parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
+                ): MethodVisitor {
+                    return object : AdviceAdapter(
+                        apiVersion,
+                        originalVisitor,
+                        instrumentableContext.access,
+                        instrumentableContext.name,
+                        instrumentableContext.descriptor
+                    ) {
                         override fun onMethodExit(opcode: Int) {
                             // NavHostController is the return value;
                             // thus it's already on top of stack
@@ -63,11 +72,10 @@ open class ComposeNavigation : ClassInstrumentable {
                             super.onMethodExit(opcode)
                         }
                     }
-                } else {
-                    methodVisitor
                 }
-            }
-        }
+            }),
+            parameters
+        )
     }
 
     override fun isInstrumentable(data: ClassContext): Boolean {
