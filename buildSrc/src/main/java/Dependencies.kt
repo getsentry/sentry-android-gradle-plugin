@@ -11,6 +11,7 @@ object BuildPluginsVersion {
     // build/publications/maven
     const val MAVEN_PUBLISH = "0.17.0"
     const val PROGUARD = "7.1.0"
+    const val GROOVY_REDISTRIBUTED = "1.2"
 
     val springBootVersion = "2.7.4"
     val springDependencyManagementVersion = "1.0.11.RELEASE"
@@ -33,6 +34,10 @@ object Libs {
     val AGP = "com.android.tools.build:gradle:${BuildPluginsVersion.AGP}"
     const val JUNIT = "junit:junit:${LibsVersion.JUNIT}"
     const val PROGUARD = "com.guardsquare:proguard-gradle:${BuildPluginsVersion.PROGUARD}"
+    // this allows us to develop against a fixed version of Gradle, as opposed to depending on the
+    // locally available version. kotlin-gradle-plugin follows the same approach.
+    // More info: https://docs.nokee.dev/manual/gradle-plugin-development-plugin.html
+    const val GRADLE_API = "dev.gradleplugins:gradle-api:7.5"
 
     // bytecode instrumentation
     const val ASM = "org.ow2.asm:asm-util:${LibsVersion.ASM}"
