@@ -119,4 +119,15 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     ) {
         autoInstallationAction.execute(autoInstallation)
     }
+
+    /**
+     * Disables or enables the reporting of dependencies metadata for Sentry.
+     * If enabled the plugin will collect external dependencies and will take care of
+     * uploading them to Sentry as part of events. If disabled, all the logic
+     * related to dependencies metadata report will be excluded.
+     *
+     * Default is enabled.
+     */
+    val includeDependenciesReport: Property<Boolean> = objects.property(Boolean::class.java)
+        .convention(true)
 }

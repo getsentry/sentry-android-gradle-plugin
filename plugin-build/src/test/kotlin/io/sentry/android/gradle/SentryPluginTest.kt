@@ -1,6 +1,7 @@
 package io.sentry.android.gradle
 
 import io.sentry.android.gradle.extensions.InstrumentationFeature
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
@@ -242,6 +243,130 @@ class SentryPluginTest(
         val debugOutput =
             testProjectDir.root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
         assertTrue { debugOutput.exists() && debugOutput.length() > 0 }
+    }
+
+    @Test
+    fun `includes flattened list of dependencies into the APK, excluding non-external deps`() {
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+
+            dependencies {
+              implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+              implementation project(':module') // multi-module project dependency
+              implementation ':asm-9.2' // flat jar
+            }
+            """.trimIndent()
+        )
+        runner.appendArguments(":app:assembleDebug")
+
+        val result = runner.build()
+        val deps = verifyDependenciesReportAndroid(testProjectDir.root)
+        assertEquals(
+            """
+            com.squareup.okhttp3:okhttp:3.14.9
+            com.squareup.okio:okio:1.17.2
+            """.trimIndent(),
+            deps
+        )
+    }
+
+    @Test
+    fun `tracks dependency tree changed`() {
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+
+            dependencies {
+              implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+            }
+            """.trimIndent()
+        )
+        runner.appendArguments(":app:assembleDebug")
+
+        runner.build()
+        val deps = verifyDependenciesReportAndroid(testProjectDir.root)
+        assertEquals(
+            """
+            com.squareup.okhttp3:okhttp:3.14.9
+            com.squareup.okio:okio:1.17.2
+            """.trimIndent(),
+            deps
+        )
+
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+
+            dependencies {
+              implementation 'com.jakewharton.timber:timber:5.0.1'
+            }
+            """.trimIndent()
+        )
+        runner.build()
+        val depsAfterChange = verifyDependenciesReportAndroid(testProjectDir.root)
+        assertEquals(
+            """
+            com.jakewharton.timber:timber:5.0.1
+            com.squareup.okhttp3:okhttp:3.14.9
+            com.squareup.okio:okio:1.17.2
+            org.jetbrains.kotlin:kotlin-stdlib-common:1.5.21
+            org.jetbrains.kotlin:kotlin-stdlib:1.5.21
+            org.jetbrains:annotations:20.1.0
+            """.trimIndent(),
+            depsAfterChange
+        )
+    }
+
+    @Test
+    fun `when disabled, skips the task and does not include dependencies report in the APK`() {
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+
+            dependencies {
+              implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+            }
+
+            sentry.includeDependenciesReport = false
+            """.trimIndent()
+        )
+        val output = runner
+            .appendArguments(":app:assembleDebug")
+            .build()
+            .output
+
+        assertTrue { "> Task :app:collectExternalDebugDependenciesForSentry SKIPPED" in output }
+        assertThrows(AssertionError::class.java) {
+            verifyDependenciesReportAndroid(testProjectDir.root)
+        }
+    }
+
+    @Test
+    fun `works for pure java modules`() {
+        moduleBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+                id 'java'
+                id 'io.sentry.android.gradle'
+            }
+
+            dependencies {
+              implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+            }
+            """.trimIndent()
+        )
+
+        runner.appendArguments(":module:jar").build()
+        val deps = verifyDependenciesReportJava(testProjectDir.root)
+        assertEquals(
+            """
+            com.squareup.okhttp3:okhttp:3.14.9
+            com.squareup.okio:okio:1.17.2
+            """.trimIndent(),
+            deps
+        )
     }
 
     private fun applyUploadNativeSymbols() {

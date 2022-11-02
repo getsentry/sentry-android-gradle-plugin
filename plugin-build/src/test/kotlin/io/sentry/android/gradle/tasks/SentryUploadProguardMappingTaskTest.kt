@@ -1,7 +1,6 @@
 package io.sentry.android.gradle.tasks
 
 import java.io.File
-import java.lang.IllegalStateException
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -9,6 +8,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
+import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.testfixtures.ProjectBuilder
@@ -25,9 +25,9 @@ class SentryUploadProguardMappingTaskTest {
     @Test
     fun `cli-executable is set correctly`() {
         val randomUuid = UUID.randomUUID()
-        createFakeUuid(randomUuid)
-
         val project = createProject()
+        val uuidFileProvider = createFakeUuid(project, randomUuid)
+
         val mappingFile = createMappingFileProvider(project, "dummy/folder/mapping.txt")
         val task: TaskProvider<SentryUploadProguardMappingsTask> =
             project.tasks.register(
@@ -35,7 +35,7 @@ class SentryUploadProguardMappingTaskTest {
                 SentryUploadProguardMappingsTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
-                it.uuidDirectory.set(tempDir.root)
+                it.uuidFile.set(uuidFileProvider)
                 it.mappingsFiles = mappingFile
                 it.autoUploadProguardMapping.set(true)
             }
@@ -53,9 +53,9 @@ class SentryUploadProguardMappingTaskTest {
     @Test
     fun `with multiple mappingFiles picks the first existing file`() {
         val randomUuid = UUID.randomUUID()
-        createFakeUuid(randomUuid)
-
         val project = createProject()
+        val uuidFileProvider = createFakeUuid(project, randomUuid)
+
         val mappingFiles = createMappingFileProvider(
             project,
             "dummy/folder/missing-mapping.txt",
@@ -72,7 +72,7 @@ class SentryUploadProguardMappingTaskTest {
                 SentryUploadProguardMappingsTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
-                it.uuidDirectory.set(tempDir.root)
+                it.uuidFile.set(uuidFileProvider)
                 it.mappingsFiles = mappingFiles
                 it.autoUploadProguardMapping.set(true)
             }
@@ -84,8 +84,9 @@ class SentryUploadProguardMappingTaskTest {
 
     @Test
     fun `--auto-upload is set correctly`() {
-        createFakeUuid()
         val project = createProject()
+        val uuidFileProvider = createFakeUuid(project)
+
         val mappingFile = createMappingFileProvider(project, "dummy/folder/mapping.txt")
         val task: TaskProvider<SentryUploadProguardMappingsTask> =
             project.tasks.register(
@@ -93,7 +94,7 @@ class SentryUploadProguardMappingTaskTest {
                 SentryUploadProguardMappingsTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
-                it.uuidDirectory.set(tempDir.root)
+                it.uuidFile.set(uuidFileProvider)
                 it.mappingsFiles = mappingFile
                 it.autoUploadProguardMapping.set(false)
             }
@@ -139,8 +140,9 @@ class SentryUploadProguardMappingTaskTest {
 
     @Test
     fun `with sentryOrganization adds --org`() {
-        createFakeUuid()
         val project = createProject()
+        val uuidFileProvider = createFakeUuid(project)
+
         val mappingFile = createMappingFileProvider(project, "dummy/folder/mapping.txt")
         val task: TaskProvider<SentryUploadProguardMappingsTask> =
             project.tasks.register(
@@ -148,7 +150,7 @@ class SentryUploadProguardMappingTaskTest {
                 SentryUploadProguardMappingsTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
-                it.uuidDirectory.set(tempDir.root)
+                it.uuidFile.set(uuidFileProvider)
                 it.mappingsFiles = mappingFile
                 it.autoUploadProguardMapping.set(false)
                 it.sentryOrganization.set("dummy-org")
@@ -162,8 +164,9 @@ class SentryUploadProguardMappingTaskTest {
 
     @Test
     fun `with sentryProject adds --project`() {
-        createFakeUuid()
         val project = createProject()
+        val uuidFileProvider = createFakeUuid(project)
+
         val mappingFile = createMappingFileProvider(project, "dummy/folder/mapping.txt")
         val task: TaskProvider<SentryUploadProguardMappingsTask> =
             project.tasks.register(
@@ -171,7 +174,7 @@ class SentryUploadProguardMappingTaskTest {
                 SentryUploadProguardMappingsTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
-                it.uuidDirectory.set(tempDir.root)
+                it.uuidFile.set(uuidFileProvider)
                 it.mappingsFiles = mappingFile
                 it.autoUploadProguardMapping.set(false)
                 it.sentryProject.set("dummy-proj")
@@ -228,10 +231,14 @@ class SentryUploadProguardMappingTaskTest {
         }
     }
 
-    private fun createFakeUuid(uuid: UUID = UUID.randomUUID()) {
-        tempDir.newFile("sentry-debug-meta.properties").writeText(
-            "io.sentry.ProguardUuids=$uuid"
-        )
+    private fun createFakeUuid(
+        project: Project,
+        uuid: UUID = UUID.randomUUID()
+    ): Provider<RegularFile> {
+        val file = tempDir.newFile("sentry-debug-meta.properties").apply {
+            writeText("io.sentry.ProguardUuids=$uuid")
+        }
+        return project.layout.file(project.provider { file })
     }
 
     private fun createMappingFileProvider(

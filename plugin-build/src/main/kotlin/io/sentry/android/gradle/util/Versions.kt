@@ -3,11 +3,17 @@ package io.sentry.android.gradle.util
 import com.android.builder.model.Version
 import io.sentry.android.gradle.util.SemVer.Companion.equals
 import kotlin.math.min
+import org.gradle.util.GradleVersion
 
 internal object AgpVersions {
     val CURRENT: SemVer = SemVer.parse(Version.ANDROID_GRADLE_PLUGIN_VERSION)
     val VERSION_7_1_2: SemVer = SemVer.parse("7.1.2")
     val VERSION_7_0_0: SemVer = SemVer.parse("7.0.0")
+}
+
+internal object GradleVersions {
+    val CURRENT: SemVer = SemVer.parse(GradleVersion.current().version)
+    val VERSION_7_4: SemVer = SemVer.parse("7.4")
 }
 
 internal object SentryVersions {

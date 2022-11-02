@@ -18,7 +18,10 @@ class SentryPluginAutoInstallTest(
         appBuildFile.appendText(
             // language=Groovy
             """
-            sentry.includeProguardMapping = false
+            sentry {
+              includeProguardMapping = false
+              autoInstallation.enabled = true
+            }
             """.trimIndent()
         )
 
@@ -27,7 +30,6 @@ class SentryPluginAutoInstallTest(
             .appendArguments("--configuration")
             .appendArguments("debugRuntimeClasspath")
             .build()
-        println(result.output)
         assertTrue {
             "io.sentry:sentry-android:$SENTRY_SDK_VERSION" in result.output
         }
@@ -46,7 +48,11 @@ class SentryPluginAutoInstallTest(
               // our plugin shouldn't install okhttp, since it's a direct dep
               implementation 'io.sentry:sentry-android-okhttp:5.4.0'
             }
-            sentry.includeProguardMapping = false
+
+            sentry {
+              includeProguardMapping = false
+              autoInstallation.enabled = true
+            }
             """.trimIndent()
         )
 
@@ -83,7 +89,6 @@ class SentryPluginAutoInstallTest(
             .appendArguments("--configuration")
             .appendArguments("debugRuntimeClasspath")
             .build()
-        print(result.output)
         assertFalse { "io.sentry:sentry-android:$SENTRY_SDK_VERSION" in result.output }
         assertFalse { "io.sentry:sentry-android-timber:$SENTRY_SDK_VERSION" in result.output }
         assertFalse { "io.sentry:sentry-android-fragment:$SENTRY_SDK_VERSION" in result.output }
@@ -102,6 +107,7 @@ class SentryPluginAutoInstallTest(
               implementation 'io.sentry:sentry-android-fragment:5.4.0'
             }
 
+            sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "5.1.2"
             sentry.includeProguardMapping = false
             """.trimIndent()

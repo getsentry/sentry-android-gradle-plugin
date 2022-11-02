@@ -2,6 +2,10 @@
 
 ## 3.2.1
 
+### Features
+
+- Populate events with dependencies metadata ([#396](https://github.com/getsentry/sentry-android-gradle-plugin/pull/396))
+
 ### Fixes
 
 - Ignore minified classes from any instrumentation ([#389](https://github.com/getsentry/sentry-android-gradle-plugin/pull/389))

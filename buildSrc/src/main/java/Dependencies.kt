@@ -1,3 +1,4 @@
+import BuildPluginsVersion.SPRING_BOOT
 import org.gradle.util.VersionNumber
 
 object BuildPluginsVersion {
@@ -10,6 +11,11 @@ object BuildPluginsVersion {
     // build/publications/maven
     const val MAVEN_PUBLISH = "0.17.0"
     const val PROGUARD = "7.1.0"
+    const val GROOVY_REDISTRIBUTED = "1.2"
+
+    const val SPRING_BOOT = "2.7.4"
+    const val SPRING_DEP_MANAGEMENT = "1.0.11.RELEASE"
+
 	// proguard does not support AGP 8 yet
     fun isProguardApplicable(): Boolean = VersionNumber.parse(AGP).major < 8
 }
@@ -28,6 +34,10 @@ object Libs {
     val AGP = "com.android.tools.build:gradle:${BuildPluginsVersion.AGP}"
     const val JUNIT = "junit:junit:${LibsVersion.JUNIT}"
     const val PROGUARD = "com.guardsquare:proguard-gradle:${BuildPluginsVersion.PROGUARD}"
+    // this allows us to develop against a fixed version of Gradle, as opposed to depending on the
+    // locally available version. kotlin-gradle-plugin follows the same approach.
+    // More info: https://docs.nokee.dev/manual/gradle-plugin-development-plugin.html
+    const val GRADLE_API = "dev.gradleplugins:gradle-api:7.5"
 
     // bytecode instrumentation
     const val ASM = "org.ow2.asm:asm-util:${LibsVersion.ASM}"
@@ -82,5 +92,21 @@ object Samples {
     object Fragment {
         private const val version = "1.3.5"
         const val fragmentKtx = "androidx.fragment:fragment-ktx:${version}"
+    }
+
+    object SpringBoot {
+        val springBoot = "org.springframework.boot"
+        val springDependencyManagement = "io.spring.dependency-management"
+        val springBootStarter = "org.springframework.boot:spring-boot-starter:$SPRING_BOOT"
+        val springBootStarterTest = "org.springframework.boot:spring-boot-starter-test:$SPRING_BOOT"
+        val springBootStarterWeb = "org.springframework.boot:spring-boot-starter-web:$SPRING_BOOT"
+        val springBootStarterWebflux = "org.springframework.boot:spring-boot-starter-webflux:$SPRING_BOOT"
+        val springBootStarterAop = "org.springframework.boot:spring-boot-starter-aop:$SPRING_BOOT"
+        val springBootStarterSecurity = "org.springframework.boot:spring-boot-starter-security:$SPRING_BOOT"
+        val springBootStarterJdbc = "org.springframework.boot:spring-boot-starter-jdbc:$SPRING_BOOT"
+        val hsqldb = "org.hsqldb:hsqldb:2.6.1"
+        val aspectj = "org.aspectj:aspectjweaver"
+        val kotlinReflect = "org.jetbrains.kotlin:kotlin-reflect"
+        val kotlinStdLib = "stdlib-jdk8"
     }
 }
