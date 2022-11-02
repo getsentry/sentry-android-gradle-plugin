@@ -5,6 +5,7 @@
 ### Fixes
 
 - Ignore minified classes from any instrumentation ([#389](https://github.com/getsentry/sentry-android-gradle-plugin/pull/389))
+- Fix short class names should not be flagged as minified ([#398](https://github.com/getsentry/sentry-android-gradle-plugin/pull/398))
 
 ### Dependencies
 
