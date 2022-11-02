@@ -91,8 +91,12 @@ private val MINIFIED_CLASSNAME_SENTRY_REGEX =
 /* ktlint-enable max-line-length */
 
 fun classNameLooksMinified(simpleClassName: String, fullClassName: String): Boolean {
-    return MINIFIED_CLASSNAME_REGEX.matches(simpleClassName) ||
-        MINIFIED_CLASSNAME_SENTRY_REGEX.matches(fullClassName)
+    return simpleClassName.isNotEmpty() &&
+        simpleClassName[0].isLowerCase() &&
+        (
+            MINIFIED_CLASSNAME_REGEX.matches(simpleClassName) ||
+                MINIFIED_CLASSNAME_SENTRY_REGEX.matches(fullClassName)
+            )
 }
 
 /**
