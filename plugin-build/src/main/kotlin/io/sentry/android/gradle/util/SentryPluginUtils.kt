@@ -53,7 +53,7 @@ internal object SentryPluginUtils {
         return variant.buildType.isMinifyEnabled
     }
 
-    fun getAndDelete(property: Provider<RegularFile>): File {
+    fun getAndDeleteFile(property: Provider<RegularFile>): File {
         val file = property.get().asFile
         file.delete()
         return file

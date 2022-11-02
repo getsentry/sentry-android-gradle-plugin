@@ -3,7 +3,7 @@ package io.sentry.android.gradle.util
 import io.sentry.android.gradle.testutil.createTestAndroidProject
 import io.sentry.android.gradle.testutil.createTestProguardProject
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
-import io.sentry.android.gradle.util.SentryPluginUtils.getAndDelete
+import io.sentry.android.gradle.util.SentryPluginUtils.getAndDeleteFile
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -91,7 +91,7 @@ class SentryPluginUtilsTest {
 
         assertTrue { file.exists() }
 
-        getAndDelete(project.layout.file(project.provider { file }))
+        getAndDeleteFile(project.layout.file(project.provider { file }))
         assertFalse { file.exists() }
     }
 }

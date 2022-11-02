@@ -56,7 +56,7 @@ abstract class SentryExternalDependenciesReportTask : DefaultTask() {
 
     @TaskAction
     fun action() {
-        val outputFile = SentryPluginUtils.getAndDelete(output)
+        val outputFile = SentryPluginUtils.getAndDeleteFile(output)
         outputFile.parentFile.mkdirs()
 
         val dependencies = runtimeConfiguration

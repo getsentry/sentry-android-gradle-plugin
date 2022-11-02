@@ -1,4 +1,4 @@
-import BuildPluginsVersion.springBootVersion
+import BuildPluginsVersion.SPRING_BOOT
 import org.gradle.util.VersionNumber
 
 object BuildPluginsVersion {
@@ -13,8 +13,8 @@ object BuildPluginsVersion {
     const val PROGUARD = "7.1.0"
     const val GROOVY_REDISTRIBUTED = "1.2"
 
-    val springBootVersion = "2.7.4"
-    val springDependencyManagementVersion = "1.0.11.RELEASE"
+    const val SPRING_BOOT = "2.7.4"
+    const val SPRING_DEP_MANAGEMENT = "1.0.11.RELEASE"
 
 	// proguard does not support AGP 8 yet
     fun isProguardApplicable(): Boolean = VersionNumber.parse(AGP).major < 8
@@ -97,13 +97,13 @@ object Samples {
     object SpringBoot {
         val springBoot = "org.springframework.boot"
         val springDependencyManagement = "io.spring.dependency-management"
-        val springBootStarter = "org.springframework.boot:spring-boot-starter:$springBootVersion"
-        val springBootStarterTest = "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
-        val springBootStarterWeb = "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
-        val springBootStarterWebflux = "org.springframework.boot:spring-boot-starter-webflux:$springBootVersion"
-        val springBootStarterAop = "org.springframework.boot:spring-boot-starter-aop:$springBootVersion"
-        val springBootStarterSecurity = "org.springframework.boot:spring-boot-starter-security:$springBootVersion"
-        val springBootStarterJdbc = "org.springframework.boot:spring-boot-starter-jdbc:$springBootVersion"
+        val springBootStarter = "org.springframework.boot:spring-boot-starter:$SPRING_BOOT"
+        val springBootStarterTest = "org.springframework.boot:spring-boot-starter-test:$SPRING_BOOT"
+        val springBootStarterWeb = "org.springframework.boot:spring-boot-starter-web:$SPRING_BOOT"
+        val springBootStarterWebflux = "org.springframework.boot:spring-boot-starter-webflux:$SPRING_BOOT"
+        val springBootStarterAop = "org.springframework.boot:spring-boot-starter-aop:$SPRING_BOOT"
+        val springBootStarterSecurity = "org.springframework.boot:spring-boot-starter-security:$SPRING_BOOT"
+        val springBootStarterJdbc = "org.springframework.boot:spring-boot-starter-jdbc:$SPRING_BOOT"
         val hsqldb = "org.hsqldb:hsqldb:2.6.1"
         val aspectj = "org.aspectj:aspectjweaver"
         val kotlinReflect = "org.jetbrains.kotlin:kotlin-reflect"
