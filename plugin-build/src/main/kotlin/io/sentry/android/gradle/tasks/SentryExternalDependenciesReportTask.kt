@@ -27,8 +27,8 @@ abstract class SentryExternalDependenciesReportTask : DefaultTask() {
         description = "Generates an external dependencies report"
 
         if (GradleVersions.CURRENT >= GradleVersions.VERSION_7_4) {
-            @Suppress("LeakingThis")
-            notCompatibleWithConfigurationCache("Cannot serialize Configurations")
+//            @Suppress("LeakingThis")
+//            notCompatibleWithConfigurationCache("Cannot serialize Configurations")
         }
         @Suppress("LeakingThis")
         onlyIf { includeReport.get() }
