@@ -210,7 +210,8 @@ class SentryPluginTest(
         applyTracingInstrumentation(
             features = setOf(InstrumentationFeature.COMPOSE),
             dependencies = setOf(
-                "androidx.compose.runtime:runtime:1.1.0"
+                "androidx.compose.runtime:runtime:1.1.0",
+                "io.sentry:sentry-compose-android:6.6.0"
             )
         )
 
@@ -249,7 +250,8 @@ class SentryPluginTest(
             dependencies = setOf(
                 "com.squareup.okhttp3:okhttp:3.14.9",
                 "io.sentry:sentry-android-okhttp:6.6.0",
-                "androidx.compose.runtime:runtime:1.0.0"
+                "androidx.compose.runtime:runtime:1.1.0",
+                "io.sentry:sentry-compose-android:6.6.0"
             )
         )
         val build = runner
