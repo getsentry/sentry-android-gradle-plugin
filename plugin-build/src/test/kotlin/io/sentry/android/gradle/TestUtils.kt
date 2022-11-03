@@ -33,6 +33,27 @@ internal fun verifyProguardUuid(
     return UUID.fromString(matcher.groupValues[1])
 }
 
+internal fun verifyDependenciesReportAndroid(
+    rootFile: File,
+    variant: String = "debug"
+): String {
+    val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant.apk")
+    val dependenciesReport = extractZip(apk, "assets/sentry-external-modules.txt")
+
+    assertTrue("Dependencies file is missing from the APK") { dependenciesReport.isNotBlank() }
+    return dependenciesReport
+}
+
+internal fun verifyDependenciesReportJava(
+    rootFile: File
+): String {
+    val apk = rootFile.resolve("module/build/libs/module.jar")
+    val dependenciesReport = extractZip(apk, "sentry-external-modules.txt")
+
+    assertTrue("Dependencies file is missing from the APK") { dependenciesReport.isNotBlank() }
+    return dependenciesReport
+}
+
 private fun extractZip(zipFile: File, fileToExtract: String): String {
     ZipInputStream(FileInputStream(zipFile)).use { zis ->
         var entry = zis.nextEntry

@@ -3,10 +3,19 @@ plugins {
     id "io.sentry.android.gradle"
 }
 
+repositories {
+    flatDir {
+        dir('../libs')
+    }
+}
+
 android {
     namespace 'com.example'
 }
 
 sentry {
     autoUploadProguardMapping = false
+    autoInstallation {
+        enabled = false
+    }
 }

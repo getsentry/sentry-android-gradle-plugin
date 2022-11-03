@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 3.2.1
+
+### Features
+
+- Populate events with dependencies metadata ([#396](https://github.com/getsentry/sentry-android-gradle-plugin/pull/396))
 
 ### Features
 
@@ -9,6 +13,16 @@
 ### Fixes
 
 - Ignore minified classes from any instrumentation ([#389](https://github.com/getsentry/sentry-android-gradle-plugin/pull/389))
+- Fix short class names should not be flagged as minified ([#398](https://github.com/getsentry/sentry-android-gradle-plugin/pull/398))
+
+### Dependencies
+
+- Bump CLI from v2.7.0 to v2.8.1 ([#394](https://github.com/getsentry/sentry-android-gradle-plugin/pull/394), [#397](https://github.com/getsentry/sentry-android-gradle-plugin/pull/397))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#281)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.7.0...2.8.1)
+- Bump Android SDK from v6.5.0 to v6.6.0 ([#393](https://github.com/getsentry/sentry-android-gradle-plugin/pull/393))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#660)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.5.0...6.6.0)
 
 ## 3.2.0
 

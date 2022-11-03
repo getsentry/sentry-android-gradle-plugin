@@ -49,4 +49,19 @@ class MinifiedClassDetectionTest {
             assertFalse(classNameLooksMinified(it, "com/example/$it"), it)
         }
     }
+
+    @Test
+    fun `does not consider short class names as minified classes`() {
+        val classNames = listOf(
+            Pair("Call", "retrofit2/Call"),
+            Pair("Call", "okhttp3/Call"),
+            Pair("Fill", "androidx/compose/ui/graphics/drawscope/Fill"),
+            Pair("Px", "androidx/annotation/Px"),
+            Pair("Dp", "androidx/annotation/Dp")
+        )
+
+        classNames.forEach { (simpleName, fullName) ->
+            assertFalse(classNameLooksMinified(simpleName, fullName))
+        }
+    }
 }

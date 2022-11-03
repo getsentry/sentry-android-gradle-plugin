@@ -7,9 +7,9 @@ import org.gradle.configurationcache.extensions.serviceOf
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    id("dev.gradleplugins.groovy-gradle-plugin") version BuildPluginsVersion.GROOVY_REDISTRIBUTED
     kotlin("jvm") version BuildPluginsVersion.KOTLIN
     id("distribution")
-    id("groovy")
     id("org.jetbrains.dokka") version BuildPluginsVersion.DOKKA
     id("java-gradle-plugin")
     id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
@@ -30,7 +30,7 @@ val androidSdkPath: String? by extra
 val testImplementationAar by configurations.getting // this converts .aar into .jar dependencies
 
 dependencies {
-    compileOnly(gradleApi())
+    compileOnly(Libs.GRADLE_API)
     compileOnly(Libs.AGP)
     compileOnly(Libs.PROGUARD)
 
@@ -62,9 +62,8 @@ dependencies {
 }
 
 configure<JavaPluginExtension> {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    }
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 // We need to compile Groovy first and let Kotlin depend on it.
