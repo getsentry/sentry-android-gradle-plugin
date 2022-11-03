@@ -1,10 +1,12 @@
 # Changelog
 
-## 3.2.1
+## Unreleased
 
 ### Features
 
 - Populate events with dependencies metadata ([#396](https://github.com/getsentry/sentry-android-gradle-plugin/pull/396))
+
+## 3.2.1
 
 ### Fixes
 

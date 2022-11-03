@@ -2,8 +2,8 @@ name: Benchmark build speed and upload results
 
 on:
   pull_request:
-    paths:
-      - '**/instrumentation/**'
+#    paths:
+#      - '**/instrumentation/**'
 
 jobs:
   benchmark:
@@ -18,7 +18,7 @@ jobs:
         with:
           repository: duckduckgo/Android
           path: scripts/benchmark/Android
-          ref: 635cda1c1e5b7a6f8b5f04703b946663370d6c71
+          ref: 1301996268b2c6c02ea0ae88934eca9da74bf806
           submodules: true
 
       - name: Install SDKMAN, Gradle Profiler and Begin Profiling
@@ -29,6 +29,12 @@ jobs:
           cd scripts/benchmark
           chmod +x benchmark-build-speed.sh
           ./benchmark-build-speed.sh
+
+      - name: Comment results
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-file: ${{ github.workspace }}/scripts/benchmark/results/post-sentry/benchmark.html
 
       - name: Upload results
         uses: actions/upload-artifact@v2

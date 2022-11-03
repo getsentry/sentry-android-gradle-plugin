@@ -1,8 +1,28 @@
+diff --git a/app/build.gradle b/app/build.gradle
+index e314d454e..344ebf9b6 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android'
+ apply plugin: 'kotlin-android-extensions'
+ apply plugin: 'kotlin-kapt'
+ apply plugin: 'com.squareup.anvil'
++apply plugin: 'io.sentry.android.gradle'
+ apply from: '../versioning.gradle'
+ apply from: "$rootDir/spotless.gradle"
+
+@@ -388,3 +389,7 @@ tasks.register('jvm_tests') {
+ tasks.register('androidTestsBuild') {
+     dependsOn 'assemblePlayDebug', 'assemblePlayDebugAndroidTest'
+ }
++
++sentry {
++    autoUploadProguardMapping = false
++}
 diff --git a/build.gradle b/build.gradle
-index 94382bad..3fda7c99 100644
+index f3c90e69d..c722aa82c 100644
 --- a/build.gradle
 +++ b/build.gradle
-@@ -21,6 +21,7 @@ buildscript {
+@@ -23,6 +23,7 @@ buildscript {
          classpath "com.diffplug.spotless:spotless-plugin-gradle:$spotless"
          classpath "com.squareup.anvil:gradle-plugin:$anvil_version"
          classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -10,79 +30,52 @@ index 94382bad..3fda7c99 100644
 
          // NOTE: Do not place your application dependencies here; they belong
          // in the individual module build.gradle files
-@@ -37,8 +38,20 @@ allprojects {
+@@ -120,4 +121,4 @@ fladle {
      }
- }
-
-+subprojects {
-+    apply plugin: 'io.sentry.android.gradle'
-+    sentry {
-+        autoUploadProguardMapping = false
-+    }
-+    plugins.withId('com.android.application') {
-+        dependencies {
-+            implementation 'io.sentry:sentry-android:5.+'
-+        }
-+    }
-+}
-+
- task clean(type: Delete) {
-     delete rootProject.buildDir
  }
 
 -apply plugin: 'android-reporting'
 \ No newline at end of file
 +apply plugin: 'android-reporting'
-diff --git a/buildSrc/build.gradle.kts b/buildSrc/build.gradle.kts
-index 69260faa..85a90a48 100644
---- a/buildSrc/build.gradle.kts
-+++ b/buildSrc/build.gradle.kts
-@@ -25,7 +25,7 @@ repositories {
-
- dependencies {
-     /* Depend on the android gradle plugin, since we want to access it in our plugin */
--    implementation("com.android.tools.build:gradle:4.1.3")
-+    implementation("com.android.tools.build:gradle:7.0.3")
-
-     /* Depend on the default Gradle API's since we want to build a custom plugin */
-     implementation(gradleApi())
-diff --git a/gradle.properties b/gradle.properties
-index 5773597d..288a82b1 100644
---- a/gradle.properties
-+++ b/gradle.properties
-@@ -11,7 +11,7 @@
- # The setting is particularly useful for tweaking memory settings.
- android.useAndroidX=true
- android.uniquePackageNames = true
--android.nonTransitiveRClass=true
-+android.nonTransitiveRClass=false
- org.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=2048m -XX:+UseParallelGC
- org.gradle.caching=true
-
-diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
-index 35022c85..4f3e5389 100644
---- a/gradle/wrapper/gradle-wrapper.properties
-+++ b/gradle/wrapper/gradle-wrapper.properties
-@@ -3,4 +3,4 @@ distributionBase=GRADLE_USER_HOME
- distributionPath=wrapper/dists
- zipStoreBase=GRADLE_USER_HOME
- zipStorePath=wrapper/dists
--distributionUrl=https\://services.gradle.org/distributions/gradle-7.0.2-bin.zip
-+distributionUrl=https\://services.gradle.org/distributions/gradle-7.1-bin.zip
 diff --git a/settings.gradle b/settings.gradle
-index 98cd4fc7..0b3e76d7 100644
+index 62bd6be24..852660810 100644
 --- a/settings.gradle
 +++ b/settings.gradle
-@@ -45,6 +45,12 @@ project(':anrs-api').projectDir = new File('anrs/anrs-api')
- project(':anrs-impl').projectDir = new File('anrs/anrs-impl')
- project(':anrs-store').projectDir = new File('anrs/anrs-store')
+@@ -16,7 +16,8 @@ rootDir.eachFile(groovy.io.FileType.DIRECTORIES) { File parent ->
+         if (shouldAddProject) {
+             include ":${parent.name}"
+         } else {
+-            parent.eachFile(groovy.io.FileType.DIRECTORIES) { child -> // We only one level deep
++            parent.eachFile(groovy.io.FileType.DIRECTORIES) { child ->
++                // We only one level deep
+                 Boolean shouldAddSubProject = false
+                 child.eachFile {
+                     if (it.name.contains("build.gradle")) {
+@@ -25,7 +26,8 @@ rootDir.eachFile(groovy.io.FileType.DIRECTORIES) { File parent ->
+                     }
+                 }
+                 if (shouldAddSubProject) {
+-                    include ":${child.name}"; project(":${child.name}").projectDir = new File("${parent.name}/${child.name}")
++                    include ":${child.name}";
++                    project(":${child.name}").projectDir = new File("${parent.name}/${child.name}")
+                 }
+             }
+         }
+@@ -39,7 +41,6 @@ rootProject.children.each { subproject ->
+     }
+ }
 
+-
+ buildCache {
+
+     def getFile = { dir, filename ->
+@@ -70,3 +71,9 @@ buildCache {
+         removeUnusedEntriesAfterDays = 7
+     }
+ }
++
 +includeBuild('../../../plugin-build') {
 +    dependencySubstitution {
 +        substitute(module('io.sentry:sentry-android-gradle-plugin')).using(project(':'))
 +    }
 +}
-+
- rootProject.children.each { subproject ->
-
-     if (subproject.name == "vpn") {
