@@ -51,7 +51,7 @@ dependencies {
     testImplementationAar(Libs.SQLITE)
     testImplementationAar(Libs.SQLITE_FRAMEWORK)
     testRuntimeOnly(files(androidSdkPath))
-    testRuntimeOnly(Libs.SENTRY_ANDROID)
+    testImplementationAar(Libs.SENTRY_ANDROID)
 
     testRuntimeOnly(
         files(
