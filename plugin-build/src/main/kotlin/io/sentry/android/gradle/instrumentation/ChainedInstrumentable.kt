@@ -40,4 +40,9 @@ class ChainedInstrumentable(
 
     override fun isInstrumentable(data: ClassContext): Boolean =
         instrumentables.any { it.isInstrumentable(data) }
+
+    override fun toString(): String {
+        return "ChainedInstrumentable(instrumentables=" +
+            "${instrumentables.joinToString(", ") { it.javaClass.simpleName }})"
+    }
 }

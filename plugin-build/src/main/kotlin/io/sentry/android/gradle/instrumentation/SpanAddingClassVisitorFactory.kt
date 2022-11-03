@@ -20,7 +20,6 @@ import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryVersions
-import io.sentry.android.gradle.util.debug
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.provider.Property
@@ -65,8 +64,8 @@ abstract class SpanAddingClassVisitorFactory :
         get() {
             val memoized = parameters.get()._instrumentable
             if (memoized != null) {
-                SentryPlugin.logger.debug {
-                    "Memoized: $memoized"
+                SentryPlugin.logger.info {
+                    "Instrumentable: $memoized [Memoized]"
                 }
                 return memoized
             }

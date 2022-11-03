@@ -181,12 +181,12 @@ class SentryPluginTest(
         applyTracingInstrumentation(features = setOf(InstrumentationFeature.DATABASE))
 
         val build = runner
-            .appendArguments(":app:assembleDebug", "--debug")
+            .appendArguments(":app:assembleDebug", "--info")
             .build()
 
         assertTrue {
-            "[sentry] Instrumentables: AndroidXSQLiteDatabase, AndroidXSQLiteStatement," +
-                " AndroidXRoomDao" in build.output
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "AndroidXSQLiteDatabase, AndroidXSQLiteStatement, AndroidXRoomDao)" in build.output
         }
     }
 
@@ -195,27 +195,71 @@ class SentryPluginTest(
         applyTracingInstrumentation(features = setOf(InstrumentationFeature.FILE_IO))
 
         val build = runner
-            .appendArguments(":app:assembleDebug", "--debug")
+            .appendArguments(":app:assembleDebug", "--info")
             .build()
 
         assertTrue {
-            "[sentry] Instrumentables: ChainedInstrumentable" in build.output
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "WrappingInstrumentable, RemappingInstrumentable)" in build.output
         }
     }
 
     @Test
-    fun `applies all instrumentables when all features enabled`() {
+    fun `applies only Compose instrumentable when only Compose feature enabled`() {
         applyTracingInstrumentation(
-            features = setOf(InstrumentationFeature.DATABASE, InstrumentationFeature.FILE_IO)
+            features = setOf(InstrumentationFeature.COMPOSE),
+            dependencies = setOf(
+                "androidx.compose.runtime:runtime:1.1.0"
+            )
         )
 
         val build = runner
-            .appendArguments(":app:assembleDebug", "--debug")
+            .appendArguments(":app:assembleDebug", "--info")
+            .build()
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "ComposeNavigation)" in build.output
+        }
+    }
+
+    @Test
+    fun `does not apply Compose instrumentable when app does not depend on compose (runtime)`() {
+        applyTracingInstrumentation(
+            features = setOf(InstrumentationFeature.COMPOSE)
+        )
+
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--info")
+            .build()
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=)" in build.output
+        }
+    }
+
+    @Test
+    fun `applies all instrumentables when all features are enabled`() {
+        applyTracingInstrumentation(
+            features = setOf(
+                InstrumentationFeature.DATABASE,
+                InstrumentationFeature.FILE_IO,
+                InstrumentationFeature.OKHTTP,
+                InstrumentationFeature.COMPOSE
+            ),
+            dependencies = setOf(
+                "com.squareup.okhttp3:okhttp:3.14.9",
+                "io.sentry:sentry-android-okhttp:6.6.0",
+                "androidx.compose.runtime:runtime:1.0.0"
+            )
+        )
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--info")
             .build()
 
         assertTrue {
-            "[sentry] Instrumentables: AndroidXSQLiteDatabase, AndroidXSQLiteStatement," +
-                " AndroidXRoomDao, ChainedInstrumentable" in build.output
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "AndroidXSQLiteDatabase, AndroidXSQLiteStatement, AndroidXRoomDao, OkHttp, " +
+                "WrappingInstrumentable, RemappingInstrumentable, " +
+                "ComposeNavigation)" in build.output
         }
     }
 
@@ -228,7 +272,7 @@ class SentryPluginTest(
 
             dependencies {
               implementation 'com.squareup.okhttp3:okhttp:3.14.9'
-              implementation 'io.sentry:sentry-android-okhttp:5.5.0'
+              implementation 'io.sentry:sentry-android-okhttp:6.6.0'
             }
             """.trimIndent()
         )
@@ -276,14 +320,16 @@ class SentryPluginTest(
 
     private fun applyTracingInstrumentation(
         tracingInstrumentation: Boolean = true,
-        features: Set<InstrumentationFeature> = setOf(),
+        features: Set<InstrumentationFeature> = emptySet(),
+        dependencies: Set<String> = emptySet(),
         debug: Boolean = false
     ) {
         appBuildFile.appendText(
             // language=Groovy
             """
                 dependencies {
-                  implementation 'io.sentry:sentry-android:5.5.0'
+                  implementation 'io.sentry:sentry-android:6.6.0'
+                  ${dependencies.joinToString("\n") { "implementation '$it'" }}
                 }
 
                 sentry {
@@ -292,12 +338,7 @@ class SentryPluginTest(
                     forceInstrumentDependencies = true
                     enabled = $tracingInstrumentation
                     debug = $debug
-                    features = ${
-            features.joinToString(
-                prefix = "[",
-                postfix = "]"
-            ) { "${it::class.java.canonicalName}.${it.name}" }
-            }
+                    features = [${features.joinToString { "${it::class.java.canonicalName}.${it.name}" }}]
                   }
                 }
             """.trimIndent()
