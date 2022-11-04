@@ -20,11 +20,11 @@ abstract class TimberInstallStrategy : AbstractInstallStrategy {
     @Inject // inject is needed to avoid Gradle error
     constructor() : this(SentryPlugin.logger)
 
-    override val moduleId: String get() = SENTRY_TIMBER_ID
+    override val sentryModuleId: String get() = SENTRY_TIMBER_ID
 
     override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installTimber
 
-    override val minSupportedVersion: SemVer get() = MIN_SUPPORTED_VERSION
+    override val minSupportedThirdPartyVersion: SemVer get() = MIN_SUPPORTED_VERSION
 
     companion object Registrar : InstallStrategyRegistrar {
         private const val TIMBER_GROUP = "com.jakewharton.timber"

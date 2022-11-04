@@ -11,25 +11,36 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
 
     protected lateinit var logger: Logger
 
-    protected abstract val moduleId: String
+    protected abstract val sentryModuleId: String
 
     protected abstract val shouldInstallModule: Boolean
 
-    protected open val minSupportedVersion: SemVer = SemVer(0, 0, 0)
+    protected open val minSupportedThirdPartyVersion: SemVer = SemVer(0, 0, 0)
+
+    protected open val minSupportedSentryVersion: SemVer = SemVer(0, 0, 0)
 
     override fun execute(context: ComponentMetadataContext) {
         val autoInstallState = AutoInstallState.getInstance()
         if (!shouldInstallModule) {
             logger.info {
-                "$moduleId won't be installed because it was already installed directly"
+                "$sentryModuleId won't be installed because it was already installed directly"
             }
             return
         }
-        val semVer = SemVer.parse(context.details.id.version)
-        if (semVer < minSupportedVersion) {
+        val thirdPartySemVersion = SemVer.parse(context.details.id.version)
+        if (thirdPartySemVersion < minSupportedThirdPartyVersion) {
             logger.warn {
-                "$moduleId won't be installed because the current version is " +
-                    "lower than the minimum supported version ($minSupportedVersion)"
+                "$sentryModuleId won't be installed because the current version is " +
+                    "lower than the minimum supported version ($minSupportedThirdPartyVersion)"
+            }
+            return
+        }
+
+        val sentrySemVersion = SemVer.parse(autoInstallState.sentryVersion)
+        if (sentrySemVersion < minSupportedSentryVersion) {
+            logger.warn {
+                "$sentryModuleId won't be installed because the current version is lower than " +
+                    "the minimum supported sentry version ($autoInstallState.sentryVersion)"
             }
             return
         }
@@ -37,10 +48,10 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
         context.details.allVariants { metadata ->
             metadata.withDependencies { dependencies ->
                 val sentryVersion = autoInstallState.sentryVersion
-                dependencies.add("$SENTRY_GROUP:$moduleId:$sentryVersion")
+                dependencies.add("$SENTRY_GROUP:$sentryModuleId:$sentryVersion")
 
                 logger.info {
-                    "$moduleId was successfully installed with version: $sentryVersion"
+                    "$sentryModuleId was successfully installed with version: $sentryVersion"
                 }
             }
         }

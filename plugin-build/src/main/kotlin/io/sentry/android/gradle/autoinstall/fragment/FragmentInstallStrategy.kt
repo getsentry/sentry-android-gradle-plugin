@@ -19,7 +19,7 @@ abstract class FragmentInstallStrategy : AbstractInstallStrategy {
     @Inject // inject is needed to avoid Gradle error
     constructor() : this(SentryPlugin.logger)
 
-    override val moduleId: String get() = SENTRY_FRAGMENT_ID
+    override val sentryModuleId: String get() = SENTRY_FRAGMENT_ID
 
     override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installFragment
 

@@ -20,11 +20,13 @@ abstract class OkHttpInstallStrategy : AbstractInstallStrategy {
     @Inject // inject is needed to avoid Gradle error
     constructor() : this(SentryPlugin.logger)
 
-    override val moduleId: String get() = SENTRY_OKHTTP_ID
+    override val sentryModuleId: String get() = SENTRY_OKHTTP_ID
 
     override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installOkHttp
 
-    override val minSupportedVersion: SemVer get() = MIN_SUPPORTED_VERSION
+    override val minSupportedThirdPartyVersion: SemVer get() = MIN_SUPPORTED_VERSION
+
+    override val minSupportedSentryVersion: SemVer get() = SemVer(4, 4, 0)
 
     companion object Registrar : InstallStrategyRegistrar {
         private const val OKHTTP_GROUP = "com.squareup.okhttp3"
