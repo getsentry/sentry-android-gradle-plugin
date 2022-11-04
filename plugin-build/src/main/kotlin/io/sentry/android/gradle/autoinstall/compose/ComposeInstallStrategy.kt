@@ -23,9 +23,8 @@ abstract class ComposeInstallStrategy : AbstractInstallStrategy {
 
     override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installCompose
 
-    // TODO switch to 6.7.0 once released
     override val minSupportedSentryVersion: SemVer
-        get() = SemVer(6, 6, 0)
+        get() = SemVer(6, 7, 0)
 
     override val minSupportedThirdPartyVersion: SemVer
         get() = SemVer(1, 0, 0)

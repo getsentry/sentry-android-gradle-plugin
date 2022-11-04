@@ -129,20 +129,19 @@ class SentryPluginAutoInstallTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.5.0"
+            sentry.autoInstallation.sentryVersion = "6.6.0"
             sentry.includeProguardMapping = false
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertFalse { "io.sentry:sentry-compose-android:6.5.0" in result.output }
+        assertFalse { "io.sentry:sentry-compose-android:6.6.0" in result.output }
         assertFalse { "FAILED" in result.output }
     }
 
     @Test
-    fun `compose is added with when compose and sentry versions match`() {
-        // TODO switch to 6.7.0 once released
+    fun `compose is added with when sentry version 6_7_0 or above is used`() {
         appBuildFile.appendText(
             // language=Groovy
             """
@@ -151,14 +150,14 @@ class SentryPluginAutoInstallTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.6.0"
+            sentry.autoInstallation.sentryVersion = "6.7.0"
             sentry.includeProguardMapping = false
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry-compose-android:6.6.0" in result.output }
+        assertTrue { "io.sentry:sentry-compose-android:6.7.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }

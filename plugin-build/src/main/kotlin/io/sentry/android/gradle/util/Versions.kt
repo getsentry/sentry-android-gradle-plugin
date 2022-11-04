@@ -21,7 +21,7 @@ internal object SentryVersions {
     internal val VERSION_PERFORMANCE = SemVer(4, 0, 0)
     internal val VERSION_OKHTTP = SemVer(5, 0, 0)
     internal val VERSION_FILE_IO = SemVer(5, 5, 0)
-    internal val VERSION_COMPOSE = SemVer(6, 6, 0)
+    internal val VERSION_COMPOSE = SemVer(6, 7, 0)
 }
 
 internal object SentryModules {
