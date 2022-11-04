@@ -18,7 +18,7 @@ jobs:
         with:
           repository: duckduckgo/Android
           path: scripts/benchmark/Android
-          ref: 635cda1c1e5b7a6f8b5f04703b946663370d6c71
+          ref: 1301996268b2c6c02ea0ae88934eca9da74bf806
           submodules: true
 
       - name: Install SDKMAN, Gradle Profiler and Begin Profiling
