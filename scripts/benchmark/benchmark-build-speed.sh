@@ -13,7 +13,7 @@ cd $SCRIPT_DIR
 if [ ! -d Android ]; then
     git clone git@github.com:duckduckgo/Android.git
     cd Android
-    git checkout 635cda1c1e5b7a6f8b5f04703b946663370d6c71
+    git checkout 1301996268b2c6c02ea0ae88934eca9da74bf806
     git submodule update --init --recursive
     cd ..
 fi
