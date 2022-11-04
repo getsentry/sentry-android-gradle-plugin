@@ -4,6 +4,7 @@ import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.AbstractInstallStrategy
 import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.autoinstall.InstallStrategyRegistrar
+import io.sentry.android.gradle.util.SemVer
 import javax.inject.Inject
 import org.gradle.api.artifacts.dsl.ComponentMetadataHandler
 import org.slf4j.Logger
@@ -22,6 +23,8 @@ abstract class FragmentInstallStrategy : AbstractInstallStrategy {
     override val sentryModuleId: String get() = SENTRY_FRAGMENT_ID
 
     override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installFragment
+
+    override val minSupportedSentryVersion: SemVer get() = SemVer(5, 1, 0)
 
     companion object Registrar : InstallStrategyRegistrar {
         private const val FRAGMENT_GROUP = "androidx.fragment"

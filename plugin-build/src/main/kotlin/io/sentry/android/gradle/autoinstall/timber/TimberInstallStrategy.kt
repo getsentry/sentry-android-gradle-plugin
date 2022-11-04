@@ -26,6 +26,8 @@ abstract class TimberInstallStrategy : AbstractInstallStrategy {
 
     override val minSupportedThirdPartyVersion: SemVer get() = MIN_SUPPORTED_VERSION
 
+    override val minSupportedSentryVersion: SemVer get() = SemVer(3, 0, 0)
+
     companion object Registrar : InstallStrategyRegistrar {
         private const val TIMBER_GROUP = "com.jakewharton.timber"
         private const val TIMBER_ID = "timber"
