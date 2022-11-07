@@ -50,7 +50,7 @@ class ComposeInstallStrategyTest {
 
             with(AutoInstallState.getInstance()) {
                 this.installCompose = installCompose
-                this.sentryVersion = "5.6.1"
+                this.sentryVersion = "6.7.0"
             }
             return ComposeInstallStrategyImpl(logger)
         }
@@ -91,11 +91,11 @@ class ComposeInstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-compose-android was successfully installed with version: 5.6.1"
+                "[sentry] sentry-compose-android was successfully installed with version: 6.7.0"
         }
         verify(fixture.dependencies).add(
             check<String> {
-                assertEquals("io.sentry:sentry-compose-android:5.6.1", it)
+                assertEquals("io.sentry:sentry-compose-android:6.7.0", it)
             }
         )
     }
