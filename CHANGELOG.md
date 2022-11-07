@@ -6,6 +6,12 @@
 
 - Add auto-instrumentation for compose navigation ([#392](https://github.com/getsentry/sentry-android-gradle-plugin/pull/392))
 
+### Dependencies
+
+- Bump Android SDK from v6.6.0 to v6.7.0 ([#402](https://github.com/getsentry/sentry-android-gradle-plugin/pull/402))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#670)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.6.0...6.7.0)
+
 ## 3.2.1
 
 ### Features
