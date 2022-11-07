@@ -36,13 +36,25 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
             return
         }
 
-        val sentrySemVersion = SemVer.parse(autoInstallState.sentryVersion)
-        if (sentrySemVersion < minSupportedSentryVersion) {
-            logger.warn {
-                "$sentryModuleId won't be installed because the current version is lower than " +
-                    "the minimum supported sentry version ($autoInstallState.sentryVersion)"
+        if (minSupportedSentryVersion.major > 0) {
+            try {
+                val sentrySemVersion = SemVer.parse(autoInstallState.sentryVersion)
+                if (sentrySemVersion < minSupportedSentryVersion) {
+                    logger.warn {
+                        "$sentryModuleId won't be installed because the current version is " +
+                            "lower than the minimum supported sentry version " +
+                            "($autoInstallState.sentryVersion)"
+                    }
+                    return
+                }
+            } catch (ex: IllegalArgumentException) {
+                logger.warn {
+                    "$sentryModuleId won't be installed because the provided " +
+                        "sentry version($autoInstallState.sentryVersion) could not be processed " +
+                        "as a semantic version."
+                }
+                return
             }
-            return
         }
 
         context.details.allVariants { metadata ->
