@@ -4,6 +4,7 @@
 
 ### Features
 
+- Populate events with dependencies metadata ([#396](https://github.com/getsentry/sentry-android-gradle-plugin/pull/396))
 - Add auto-instrumentation for compose navigation ([#392](https://github.com/getsentry/sentry-android-gradle-plugin/pull/392))
 
 ### Dependencies
@@ -13,10 +14,6 @@
   - [diff](https://github.com/getsentry/sentry-java/compare/6.6.0...6.7.0)
 
 ## 3.2.1
-
-### Features
-
-- Populate events with dependencies metadata ([#396](https://github.com/getsentry/sentry-android-gradle-plugin/pull/396))
 
 ### Fixes
 
