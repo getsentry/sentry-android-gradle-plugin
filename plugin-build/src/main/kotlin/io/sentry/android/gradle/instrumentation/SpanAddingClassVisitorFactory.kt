@@ -6,6 +6,7 @@ import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.extensions.InstrumentationFeature
+import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
@@ -19,9 +20,7 @@ import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryVersions
-import io.sentry.android.gradle.util.debug
 import io.sentry.android.gradle.util.info
-import io.sentry.android.gradle.util.warn
 import java.io.File
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
@@ -58,15 +57,15 @@ abstract class SpanAddingClassVisitorFactory :
         val tmpDir: Property<File>
 
         @get:Internal
-        var _instrumentables: List<ClassInstrumentable>?
+        var _instrumentable: ClassInstrumentable?
     }
 
-    private val instrumentables: List<ClassInstrumentable>
+    private val instrumentable: ClassInstrumentable
         get() {
-            val memoized = parameters.get()._instrumentables
+            val memoized = parameters.get()._instrumentable
             if (memoized != null) {
-                SentryPlugin.logger.debug {
-                    "Memoized: ${memoized.joinToString { it::class.java.simpleName }}"
+                SentryPlugin.logger.info {
+                    "Instrumentable: $memoized [Memoized]"
                 }
                 return memoized
             }
@@ -78,26 +77,41 @@ abstract class SpanAddingClassVisitorFactory :
              * version to [SentryVersions] if it involves runtime classes
              * from the sentry-android SDK.
              */
-            val instrumentables = listOfNotNull(
-                AndroidXSQLiteDatabase().takeIf {
-                    isDatabaseInstrEnabled(sentryModules, parameters.get())
-                },
-                AndroidXSQLiteStatement().takeIf {
-                    isDatabaseInstrEnabled(sentryModules, parameters.get())
-                },
-                AndroidXRoomDao().takeIf {
-                    isDatabaseInstrEnabled(sentryModules, parameters.get())
-                },
-                OkHttp().takeIf { isOkHttpInstrEnabled(sentryModules, parameters.get()) },
-                ChainedInstrumentable(
-                    listOf(WrappingInstrumentable(), RemappingInstrumentable())
-                ).takeIf { isFileIOInstrEnabled(sentryModules, parameters.get()) }
+            val instrumentable = ChainedInstrumentable(
+                listOfNotNull(
+                    AndroidXSQLiteDatabase().takeIf {
+                        isDatabaseInstrEnabled(sentryModules, parameters.get())
+                    },
+                    AndroidXSQLiteStatement().takeIf {
+                        isDatabaseInstrEnabled(sentryModules, parameters.get())
+                    },
+                    AndroidXRoomDao().takeIf {
+                        isDatabaseInstrEnabled(sentryModules, parameters.get())
+                    },
+                    OkHttp().takeIf { isOkHttpInstrEnabled(sentryModules, parameters.get()) },
+                    WrappingInstrumentable().takeIf {
+                        isFileIOInstrEnabled(
+                            sentryModules,
+                            parameters.get()
+                        )
+                    },
+                    RemappingInstrumentable().takeIf {
+                        isFileIOInstrEnabled(
+                            sentryModules,
+                            parameters.get()
+                        )
+                    },
+                    ComposeNavigation().takeIf {
+                        isComposeInstrEnabled(sentryModules, parameters.get())
+                    },
+                )
             )
+
             SentryPlugin.logger.info {
-                "Instrumentables: ${instrumentables.joinToString { it::class.java.simpleName }}"
+                "Instrumentable: $instrumentable"
             }
-            parameters.get()._instrumentables = ArrayList(instrumentables)
-            return instrumentables
+            parameters.get()._instrumentable = instrumentable
+            return instrumentable
         }
 
     private fun isDatabaseInstrEnabled(
@@ -126,6 +140,15 @@ abstract class SpanAddingClassVisitorFactory :
         SentryVersions.VERSION_OKHTTP
     ) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
 
+    private fun isComposeInstrEnabled(
+        sentryModules: Map<String, SemVer>,
+        parameters: SpanAddingParameters
+    ): Boolean =
+        sentryModules.isAtLeast(
+            SentryModules.SENTRY_ANDROID_COMPOSE,
+            SentryVersions.VERSION_COMPOSE
+        ) && parameters.features.get().contains(InstrumentationFeature.COMPOSE)
+
     private fun Map<String, SemVer>.isAtLeast(module: String, minVersion: SemVer): Boolean =
         getOrDefault(module, SentryVersions.VERSION_DEFAULT) >= minVersion
 
@@ -144,23 +167,14 @@ abstract class SpanAddingClassVisitorFactory :
             return nextClassVisitor
         }
 
-        return instrumentables.find { it.isInstrumentable(classContext) }
-            ?.getVisitor(
-                classContext,
-                instrumentationContext.apiVersion.get(),
-                nextClassVisitor,
-                parameters = parameters.get()
-            )
-            ?: nextClassVisitor.also {
-                SentryPlugin.logger.warn {
-                    """
-                    $className is not supported for instrumentation.
-                    This is likely a bug, please file an issue at https://github.com/getsentry/sentry-android-gradle-plugin/issues
-                    """.trimIndent()
-                }
-            }
+        return instrumentable.getVisitor(
+            classContext,
+            instrumentationContext.apiVersion.get(),
+            nextClassVisitor,
+            parameters = parameters.get()
+        )
     }
 
     override fun isInstrumentable(classData: ClassData): Boolean =
-        instrumentables.any { it.isInstrumentable(classData.toClassContext()) }
+        instrumentable.isInstrumentable(classData.toClassContext())
 }

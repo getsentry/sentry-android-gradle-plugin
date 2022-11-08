@@ -53,6 +53,10 @@ class MainActivity : ComponentActivity() {
                 startActivity(Intent(this, EditActivity::class.java))
                 return@setOnMenuItemClickListener true
             }
+            if (it.itemId == R.id.action_compose) {
+                startActivity(Intent(this, ComposeActivity::class.java))
+                return@setOnMenuItemClickListener true
+            }
             return@setOnMenuItemClickListener false
         }
     }

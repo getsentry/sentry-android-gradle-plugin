@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.autoinstall.fragment
+package io.sentry.android.gradle.autoinstall.compose
 
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.AbstractInstallStrategy
@@ -9,8 +9,7 @@ import javax.inject.Inject
 import org.gradle.api.artifacts.dsl.ComponentMetadataHandler
 import org.slf4j.Logger
 
-// @CacheableRule // TODO: make it cacheable somehow (probably depends on parameters)
-abstract class FragmentInstallStrategy : AbstractInstallStrategy {
+abstract class ComposeInstallStrategy : AbstractInstallStrategy {
 
     constructor(logger: Logger) : super() {
         this.logger = logger
@@ -20,21 +19,24 @@ abstract class FragmentInstallStrategy : AbstractInstallStrategy {
     @Inject // inject is needed to avoid Gradle error
     constructor() : this(SentryPlugin.logger)
 
-    override val sentryModuleId: String get() = SENTRY_FRAGMENT_ID
+    override val sentryModuleId: String get() = SENTRY_COMPOSE_ID
 
-    override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installFragment
+    override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installCompose
 
-    override val minSupportedSentryVersion: SemVer get() = SemVer(5, 1, 0)
+    override val minSupportedSentryVersion: SemVer
+        get() = SemVer(6, 7, 0)
+
+    override val minSupportedThirdPartyVersion: SemVer
+        get() = SemVer(1, 0, 0)
 
     companion object Registrar : InstallStrategyRegistrar {
-        private const val FRAGMENT_GROUP = "androidx.fragment"
-        private const val FRAGMENT_ID = "fragment"
-        internal const val SENTRY_FRAGMENT_ID = "sentry-android-fragment"
+
+        internal const val SENTRY_COMPOSE_ID = "sentry-compose-android"
 
         override fun register(component: ComponentMetadataHandler) {
             component.withModule(
-                "$FRAGMENT_GROUP:$FRAGMENT_ID",
-                FragmentInstallStrategy::class.java
+                "androidx.compose.runtime:runtime",
+                ComposeInstallStrategy::class.java
             ) {}
         }
     }

@@ -27,7 +27,7 @@ object LibsVersion {
     const val JUNIT = "4.13.2"
     const val ASM = "7.0" // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
     const val SQLITE = "2.1.0"
-    const val SENTRY = "5.5.0"
+    const val SENTRY = "6.6.0"
 }
 
 object Libs {
@@ -62,6 +62,12 @@ object Samples {
         const val recyclerView = "androidx.recyclerview:recyclerview:1.2.0"
         const val lifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
         const val appcompat = "androidx.appcompat:appcompat:1.2.0"
+
+        const val composeRuntime = "androidx.compose.runtime:runtime:1.1.1"
+        const val composeNavigation = "androidx.navigation:navigation-compose:2.5.2"
+        const val composeActivity = "androidx.activity:activity-compose:1.4.0"
+        const val composeFoundation = "androidx.compose.foundation:foundation:1.2.1"
+        const val composeFoundationLayout = "androidx.compose.foundation:foundation-layout:1.2.1"
     }
 
     object Coroutines {

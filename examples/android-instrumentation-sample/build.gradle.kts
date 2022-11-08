@@ -42,6 +42,14 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
     namespace = "io.sentry.samples.instrumentation"
+
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.1.1"
+    }
 }
 
 // useful, when we want to modify room-generated classes, and then compile them into .class files
@@ -54,6 +62,12 @@ dependencies {
     implementation(Samples.AndroidX.recyclerView)
     implementation(Samples.AndroidX.lifecycle)
     implementation(Samples.AndroidX.appcompat)
+
+    implementation(Samples.AndroidX.composeRuntime)
+    implementation(Samples.AndroidX.composeActivity)
+    implementation(Samples.AndroidX.composeFoundation)
+    implementation(Samples.AndroidX.composeFoundationLayout)
+    implementation(Samples.AndroidX.composeNavigation)
 
     implementation(Samples.Coroutines.core)
     implementation(Samples.Coroutines.android)
