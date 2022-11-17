@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump Android SDK from v6.7.0 to v6.7.1 ([#406](https://github.com/getsentry/sentry-android-gradle-plugin/pull/406))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#671)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.7.0...6.7.1)
+
 ## 3.3.0
 
 ### Features
