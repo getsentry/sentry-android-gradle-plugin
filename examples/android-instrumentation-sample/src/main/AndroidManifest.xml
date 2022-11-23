@@ -38,8 +38,12 @@
             android:value="1.0" />
 
         <meta-data
+            android:name="io.sentry.traces.user-interaction.enable"
+            android:value="true" />
+
+        <meta-data
             android:name="io.sentry.traces.activity.auto-finish.enable"
-            android:value="false" />
+            android:value="true" />
     </application>
 
 </manifest>

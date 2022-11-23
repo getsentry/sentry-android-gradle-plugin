@@ -6,6 +6,7 @@ import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.extensions.InstrumentationFeature
+import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeClickable
 import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
@@ -102,7 +103,10 @@ abstract class SpanAddingClassVisitorFactory :
                         )
                     },
                     ComposeNavigation().takeIf {
-                        isComposeInstrEnabled(sentryModules, parameters.get())
+                        isComposeNavInstrEnabled(sentryModules, parameters.get())
+                    },
+                    ComposeClickable().takeIf {
+                        isComposeClickableInstrEnabled(sentryModules, parameters.get())
                     },
                 )
             )
@@ -140,13 +144,22 @@ abstract class SpanAddingClassVisitorFactory :
         SentryVersions.VERSION_OKHTTP
     ) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
 
-    private fun isComposeInstrEnabled(
+    private fun isComposeNavInstrEnabled(
         sentryModules: Map<String, SemVer>,
         parameters: SpanAddingParameters
     ): Boolean =
         sentryModules.isAtLeast(
             SentryModules.SENTRY_ANDROID_COMPOSE,
-            SentryVersions.VERSION_COMPOSE
+            SentryVersions.VERSION_COMPOSE_NAVIGATION
+        ) && parameters.features.get().contains(InstrumentationFeature.COMPOSE)
+
+    private fun isComposeClickableInstrEnabled(
+        sentryModules: Map<String, SemVer>,
+        parameters: SpanAddingParameters
+    ): Boolean =
+        sentryModules.isAtLeast(
+            SentryModules.SENTRY_ANDROID_COMPOSE,
+            SentryVersions.VERSION_COMPOSE_CLICKABLE
         ) && parameters.features.get().contains(InstrumentationFeature.COMPOSE)
 
     private fun Map<String, SemVer>.isAtLeast(module: String, minVersion: SemVer): Boolean =
