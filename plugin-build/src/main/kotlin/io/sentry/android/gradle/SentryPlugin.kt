@@ -426,7 +426,7 @@ class SentryPlugin : Plugin<Project> {
     companion object {
         const val SENTRY_ORG_PARAMETER = "sentryOrg"
         const val SENTRY_PROJECT_PARAMETER = "sentryProject"
-        internal const val SENTRY_SDK_VERSION = "6.9.1"
+        internal const val SENTRY_SDK_VERSION = "6.9.2"
         internal const val SENTRY_DEPENDENCIES_REPORT_OUTPUT = "sentry-external-modules.txt"
 
         internal val sep = File.separator
