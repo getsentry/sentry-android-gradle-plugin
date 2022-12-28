@@ -24,6 +24,7 @@ import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.tasks.SentryExternalDependenciesReportTask
+import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
@@ -42,6 +43,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.RegularFile
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Provider
@@ -340,6 +342,23 @@ class SentryPlugin : Plugin<Project> {
                 } else {
                     project.logger.info { "uploadSentryNativeSymbols won't be executed" }
                 }
+
+                val generateIntegrationListTask = project.tasks.register(
+                    "generateIntegrationListTask$taskSuffix",
+                    SentryGenerateIntegrationListTask::class.java
+                ) {
+                    it.output.set(
+                        sentryAssetDir.flatMap { dir ->
+                            dir.file(project.provider { "ssentry-gradle-plugin-integrations.txt" })
+                        }
+                    )
+                    it.integrations.set(project.objects.listProperty(String::class.java).apply {
+                        addAll(extension.tracingInstrumentation.features.get().map { it.instrumentationName })
+                    })
+                }
+
+                reportDependenciesTask.configure { it.dependsOn(generateIntegrationListTask) }
+
             }
 
             project.installDependencies(extension)

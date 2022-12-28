@@ -1,3 +1,6 @@
+import io.sentry.android.gradle.extensions.InstrumentationFeature
+import io.sentry.android.gradle.extensions.TracingInstrumentationExtension
+
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -86,7 +89,9 @@ dependencies {
 sentry {
     autoUploadProguardMapping.set(false)
 
+
     tracingInstrumentation {
-        forceInstrumentDependencies.set(true)
+        enabled.set(true)
+        features.set(setOf(InstrumentationFeature.DATABASE))
     }
 }
