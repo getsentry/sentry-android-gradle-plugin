@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Ensure clean state before generating a new uuid by deleting the old `sentry-debug-meta.properties` file ([#420](https://github.com/getsentry/sentry-android-gradle-plugin/pull/420))
+
 ### Dependencies
 
 - Bump Android SDK from v6.7.0 to v6.9.2 ([#406](https://github.com/getsentry/sentry-android-gradle-plugin/pull/406), [#408](https://github.com/getsentry/sentry-android-gradle-plugin/pull/408), [#411](https://github.com/getsentry/sentry-android-gradle-plugin/pull/411), [#414](https://github.com/getsentry/sentry-android-gradle-plugin/pull/414))
