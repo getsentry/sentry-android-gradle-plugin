@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.util.SentryPluginUtils
 import io.sentry.android.gradle.util.info
 import java.util.UUID
 import org.gradle.api.DefaultTask
@@ -20,13 +21,14 @@ abstract class SentryGenerateProguardUuidTask : DefaultTask() {
 
     @TaskAction
     fun generateProperties() {
-        logger.info {
-            "SentryGenerateProguardUuidTask - outputFile: ${output.get()}"
-        }
+        val outputFile = SentryPluginUtils.getAndDeleteFile(output)
+        outputFile.parentFile.mkdirs()
 
-        UUID.randomUUID().also {
-            output.get().asFile.parentFile.mkdirs()
-            output.get().asFile.writeText("io.sentry.ProguardUuids=$it")
+        val uuid = UUID.randomUUID()
+        outputFile.writeText("io.sentry.ProguardUuids=$uuid")
+
+        logger.info {
+            "SentryGenerateProguardUuidTask - outputFile: $outputFile, uuid: $uuid"
         }
     }
 }

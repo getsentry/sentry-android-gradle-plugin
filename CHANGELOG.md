@@ -5,6 +5,7 @@
 ### Fixes
 
 - Do not register dependencies report task if it's disabled ([#422](https://github.com/getsentry/sentry-android-gradle-plugin/pull/422))
+- Ensure clean state before generating a new uuid by deleting the old `sentry-debug-meta.properties` file ([#420](https://github.com/getsentry/sentry-android-gradle-plugin/pull/420))
 
 ### Dependencies
 
