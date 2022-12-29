@@ -227,16 +227,18 @@ class SentryPlugin : Plugin<Project> {
                     )
                 androidExtension.sourceSets.getByName(variant.name).assets.srcDir(sentryAssetDir)
 
-                val reportDependenciesTask = project.registerDependenciesTask(
-                    configurationName = "${variant.name}RuntimeClasspath",
-                    attributeValueJar = "android-classes",
-                    includeReport = extension.includeDependenciesReport,
-                    output = sentryAssetDir.flatMap { dir ->
-                        dir.file(project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT })
-                    },
-                    taskSuffix = taskSuffix
-                )
-                reportDependenciesTask.setupMergeAssetsDependencies(mergeAssetsDependants)
+                if (extension.includeDependenciesReport.get()) {
+                    val reportDependenciesTask = project.registerDependenciesTask(
+                        configurationName = "${variant.name}RuntimeClasspath",
+                        attributeValueJar = "android-classes",
+                        includeReport = extension.includeDependenciesReport,
+                        output = sentryAssetDir.flatMap { dir ->
+                            dir.file(project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT })
+                        },
+                        taskSuffix = taskSuffix
+                    )
+                    reportDependenciesTask.setupMergeAssetsDependencies(mergeAssetsDependants)
+                }
 
                 if (isMinificationEnabled && extension.includeProguardMapping.get()) {
                     // Setup the task to generate a UUID asset file
