@@ -11,8 +11,11 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @Suppress("FunctionName")
-//@RunWith(Parameterized::class)
-class SentryPluginTest : BaseSentryPluginTest("7.3.0", "7.5") {
+@RunWith(Parameterized::class)
+class SentryPluginTest(
+    androidGradlePluginVersion: String,
+    gradleVersion: String
+) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
 
     @Test
     fun `plugin can be applied`() {
