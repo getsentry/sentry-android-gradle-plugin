@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Do not register dependencies report task if it's disabled ([#422](https://github.com/getsentry/sentry-android-gradle-plugin/pull/422))
+
 ### Dependencies
 
 - Bump Android SDK from v6.7.0 to v6.9.2 ([#406](https://github.com/getsentry/sentry-android-gradle-plugin/pull/406), [#408](https://github.com/getsentry/sentry-android-gradle-plugin/pull/408), [#411](https://github.com/getsentry/sentry-android-gradle-plugin/pull/411), [#414](https://github.com/getsentry/sentry-android-gradle-plugin/pull/414))
