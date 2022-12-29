@@ -11,11 +11,8 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @Suppress("FunctionName")
-@RunWith(Parameterized::class)
-class SentryPluginTest(
-    androidGradlePluginVersion: String,
-    gradleVersion: String
-) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
+//@RunWith(Parameterized::class)
+class SentryPluginTest : BaseSentryPluginTest("7.3.0", "7.5") {
 
     @Test
     fun `plugin can be applied`() {
@@ -382,7 +379,7 @@ class SentryPluginTest(
             .build()
             .output
 
-        assertTrue { "> Task :app:collectExternalDebugDependenciesForSentry SKIPPED" in output }
+        assertTrue { "collectExternalDebugDependenciesForSentry" !in output }
         assertThrows(AssertionError::class.java) {
             verifyDependenciesReportAndroid(testProjectDir.root)
         }
