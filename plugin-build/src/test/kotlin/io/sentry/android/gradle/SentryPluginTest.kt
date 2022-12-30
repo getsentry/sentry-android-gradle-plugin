@@ -382,7 +382,7 @@ class SentryPluginTest(
             .build()
             .output
 
-        assertTrue { "> Task :app:collectExternalDebugDependenciesForSentry SKIPPED" in output }
+        assertTrue { "collectExternalDebugDependenciesForSentry" !in output }
         assertThrows(AssertionError::class.java) {
             verifyDependenciesReportAndroid(testProjectDir.root)
         }
