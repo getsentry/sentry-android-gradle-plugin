@@ -23,10 +23,10 @@ import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
-import io.sentry.android.gradle.tasks.SentryExternalDependenciesReportTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
+import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.transforms.MetaInfStripTransform.Companion.metaInfStripped
 import io.sentry.android.gradle.util.AgpVersions
@@ -41,10 +41,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.RegularFile
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.StopExecutionException
 import org.gradle.api.tasks.TaskProvider
 import org.slf4j.LoggerFactory
@@ -227,15 +225,17 @@ class SentryPlugin : Plugin<Project> {
                     )
                 androidExtension.sourceSets.getByName(variant.name).assets.srcDir(sentryAssetDir)
 
-                val reportDependenciesTask = project.registerDependenciesTask(
-                    configurationName = "${variant.name}RuntimeClasspath",
-                    attributeValueJar = "android-classes",
-                    includeReport = extension.includeDependenciesReport,
-                    output = sentryAssetDir.flatMap { dir ->
-                        dir.file(project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT })
-                    },
-                    taskSuffix = taskSuffix
-                )
+                val reportDependenciesTask =
+                    SentryExternalDependenciesReportTaskFactory.register(
+                        project = project,
+                        configurationName = "${variant.name}RuntimeClasspath",
+                        attributeValueJar = "android-classes",
+                        includeReport = extension.includeDependenciesReport,
+                        output = sentryAssetDir.flatMap { dir ->
+                            dir.file(project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT })
+                        },
+                        taskSuffix = taskSuffix
+                    )
                 reportDependenciesTask.setupMergeAssetsDependencies(mergeAssetsDependants)
 
                 if (isMinificationEnabled && extension.includeProguardMapping.get()) {
@@ -364,14 +364,13 @@ class SentryPlugin : Plugin<Project> {
                 sourceSet.srcDir(sentryResDir)
             }
 
-            val reportDependenciesTask = project.registerDependenciesTask(
+            val reportDependenciesTask = SentryExternalDependenciesReportTaskFactory.register(
+                project = project,
                 configurationName = "runtimeClasspath",
                 attributeValueJar = "jar",
                 includeReport = extension.includeDependenciesReport,
                 output = sentryResDir.flatMap { dir ->
-                    dir.file(
-                        project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT }
-                    )
+                    dir.file(project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT })
                 }
             )
             val resourcesTask = withLogging(project.logger, "processResources") {
@@ -379,27 +378,6 @@ class SentryPlugin : Plugin<Project> {
             }
             resourcesTask?.configure { task -> task.dependsOn(reportDependenciesTask) }
         }
-    }
-
-    private fun Project.registerDependenciesTask(
-        configurationName: String,
-        attributeValueJar: String,
-        output: Provider<RegularFile>,
-        includeReport: Provider<Boolean>,
-        taskSuffix: String = ""
-    ): TaskProvider<out Task> {
-        val reportDependenciesTask = tasks.register(
-            "collectExternal${taskSuffix}DependenciesForSentry",
-            SentryExternalDependenciesReportTask::class.java
-        ) {
-            it.includeReport.set(includeReport)
-            it.attributeValueJar.set(attributeValueJar)
-            it.setRuntimeConfiguration(
-                project.configurations.getByName(configurationName)
-            )
-            it.output.set(output)
-        }
-        return reportDependenciesTask
     }
 
     private fun TaskProvider<out Task>.setupMergeAssetsDependencies(

@@ -1,14 +1,18 @@
-package io.sentry.android.gradle.tasks
+package io.sentry.android.gradle.tasks.dependencies
 
 import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.SentryPluginUtils
 import io.sentry.android.gradle.util.artifactsFor
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.file.FileCollection
+import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
@@ -16,6 +20,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskProvider
 
 @CacheableTask
 abstract class SentryExternalDependenciesReportTask : DefaultTask() {
@@ -49,7 +54,7 @@ abstract class SentryExternalDependenciesReportTask : DefaultTask() {
     @InputFiles
     fun getRuntimeClasspath(): FileCollection = runtimeConfiguration.artifactsFor(
         attributeValueJar.get()
-    )
+    ).artifactFiles
 
     @get:OutputFile
     abstract val output: RegularFileProperty
@@ -71,5 +76,28 @@ abstract class SentryExternalDependenciesReportTask : DefaultTask() {
             .toSortedSet()
 
         outputFile.writeText(dependencies.joinToString("\n"))
+    }
+
+    companion object {
+        fun register(
+            project: Project,
+            configurationName: String,
+            attributeValueJar: String,
+            output: Provider<RegularFile>,
+            includeReport: Provider<Boolean>,
+            taskSuffix: String = ""
+        ): TaskProvider<out Task> {
+            return project.tasks.register(
+                "collectExternal${taskSuffix}DependenciesForSentry",
+                SentryExternalDependenciesReportTask::class.java
+            ) {
+                it.includeReport.set(includeReport)
+                it.attributeValueJar.set(attributeValueJar)
+                it.setRuntimeConfiguration(
+                    project.configurations.getByName(configurationName)
+                )
+                it.output.set(output)
+            }
+        }
     }
 }
