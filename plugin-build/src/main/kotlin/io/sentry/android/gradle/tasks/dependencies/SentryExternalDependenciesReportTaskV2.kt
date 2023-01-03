@@ -50,6 +50,7 @@ abstract class SentryExternalDependenciesReportTaskV2 : DefaultTask() {
         fun register(
             project: Project,
             configurationName: String,
+            attributeValueJar: String,
             output: Provider<RegularFile>,
             includeReport: Provider<Boolean>,
             taskSuffix: String = ""
@@ -59,7 +60,7 @@ abstract class SentryExternalDependenciesReportTaskV2 : DefaultTask() {
                 SentryExternalDependenciesReportTaskV2::class.java
             ) {
                 val configuration = project.configurations.getByName(configurationName)
-                val artifacts = configuration.artifactsFor("android-classes").resolvedArtifacts
+                val artifacts = configuration.artifactsFor(attributeValueJar).resolvedArtifacts
                 val artifactIds = artifacts.map { list ->
                     list.map { artifact -> artifact.id.componentIdentifier }
                         // we're only interested in external deps

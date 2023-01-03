@@ -23,6 +23,7 @@ object SentryExternalDependenciesReportTaskFactory {
             SentryExternalDependenciesReportTaskV2.register(
                 project,
                 configurationName,
+                attributeValueJar,
                 output,
                 includeReport,
                 taskSuffix
