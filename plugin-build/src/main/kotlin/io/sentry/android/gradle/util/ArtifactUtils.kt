@@ -15,7 +15,6 @@ fun Configuration.artifactsFor(
     attrValue: String
 ) = externalArtifactViewOf(attrValue)
     .artifacts
-    .artifactFiles
 
 fun Configuration.externalArtifactViewOf(
     attrValue: String

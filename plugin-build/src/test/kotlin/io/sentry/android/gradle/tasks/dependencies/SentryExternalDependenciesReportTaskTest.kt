@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.tasks
+package io.sentry.android.gradle.tasks.dependencies
 
 import java.io.File
 import kotlin.test.assertEquals
