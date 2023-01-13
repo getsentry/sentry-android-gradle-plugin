@@ -1,12 +1,21 @@
 # Changelog
 
-## Unreleased
+## 3.4.0
+
+### Features
+
+- Support configuration cache in dependencies report task from Gradle `7.5` onwards ([#423](https://github.com/getsentry/sentry-android-gradle-plugin/pull/423))
+
+### Fixes
+
+- Do not register dependencies report task if it's disabled ([#422](https://github.com/getsentry/sentry-android-gradle-plugin/pull/422))
+- Ensure clean state before generating a new uuid by deleting the old `sentry-debug-meta.properties` file ([#420](https://github.com/getsentry/sentry-android-gradle-plugin/pull/420))
 
 ### Dependencies
 
-- Bump Android SDK from v6.7.0 to v6.9.2 ([#406](https://github.com/getsentry/sentry-android-gradle-plugin/pull/406), [#408](https://github.com/getsentry/sentry-android-gradle-plugin/pull/408), [#411](https://github.com/getsentry/sentry-android-gradle-plugin/pull/411), [#414](https://github.com/getsentry/sentry-android-gradle-plugin/pull/414))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#692)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.7.0...6.9.2)
+- Bump Android SDK from v6.7.0 to v6.11.0 ([#406](https://github.com/getsentry/sentry-android-gradle-plugin/pull/406), [#408](https://github.com/getsentry/sentry-android-gradle-plugin/pull/408), [#411](https://github.com/getsentry/sentry-android-gradle-plugin/pull/411), [#414](https://github.com/getsentry/sentry-android-gradle-plugin/pull/414), [#424](https://github.com/getsentry/sentry-android-gradle-plugin/pull/424))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6110)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.7.0...6.11.0)
 - Bump CLI from v2.8.1 to v2.11.0 ([#405](https://github.com/getsentry/sentry-android-gradle-plugin/pull/405), [#413](https://github.com/getsentry/sentry-android-gradle-plugin/pull/413), [#418](https://github.com/getsentry/sentry-android-gradle-plugin/pull/418))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2110)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.8.1...2.11.0)
