@@ -29,9 +29,11 @@ android {
         }
     }
 
+    flavorDimensions += "environment"
     // just a random product flavor for compatibility testing against AGP
     productFlavors {
         create("staging") {
+            dimension = "environment"
             versionNameSuffix = "-staging"
         }
     }
