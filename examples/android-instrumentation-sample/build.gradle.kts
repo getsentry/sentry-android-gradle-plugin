@@ -29,6 +29,13 @@ android {
         }
     }
 
+    // just a random product flavor for compatibility testing against AGP
+    productFlavors {
+        create("staging") {
+            versionNameSuffix = "-staging"
+        }
+    }
+
     signingConfigs {
         getByName("debug") {
             storeFile = file("debug.keystore")
