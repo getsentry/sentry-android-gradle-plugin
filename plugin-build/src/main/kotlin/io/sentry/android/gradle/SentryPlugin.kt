@@ -3,6 +3,7 @@ package io.sentry.android.gradle
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.CanMinifyCode
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
@@ -26,7 +27,10 @@ import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
+import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
+import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
+import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2.Companion.SENTRY_DEPENDENCIES_REPORT_OUTPUT
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.transforms.MetaInfStripTransform.Companion.metaInfStripped
 import io.sentry.android.gradle.util.AgpVersions
@@ -45,6 +49,7 @@ import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.StopExecutionException
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.configurationcache.extensions.capitalized
 import org.slf4j.LoggerFactory
 
 @Suppress("UnstableApiUsage")
@@ -102,6 +107,19 @@ class SentryPlugin : Plugin<Project> {
                         variant.buildType
                     ) && extension.tracingInstrumentation.enabled.get()
                 ) {
+                    val isMinifyEnabled = (variant as? CanMinifyCode)?.isMinifyEnabled == true
+                    val reportDependenciesTask =
+                        SentryExternalDependenciesReportTaskV2.register(
+                            project = project,
+                            configurationName = "${variant.name}RuntimeClasspath",
+                            attributeValueJar = "android-classes",
+                            includeReport = extension.includeDependenciesReport,
+                            taskSuffix = variant.name.capitalized()
+                        )
+                    variant.sources.assets?.addGeneratedSourceDirectory(
+                        reportDependenciesTask,
+                        SentryExternalDependenciesReportTaskV2::output
+                    )
                     /**
                      * We detect sentry-android SDK version using configurations.incoming.afterResolve.
                      * This is guaranteed to be executed BEFORE any of the build tasks/transforms are started.
@@ -225,20 +243,20 @@ class SentryPlugin : Plugin<Project> {
                     )
                 androidExtension.sourceSets.getByName(variant.name).assets.srcDir(sentryAssetDir)
 
-                if (extension.includeDependenciesReport.get()) {
-                    val reportDependenciesTask =
-                        SentryExternalDependenciesReportTaskFactory.register(
-                            project = project,
-                            configurationName = "${variant.name}RuntimeClasspath",
-                            attributeValueJar = "android-classes",
-                            includeReport = extension.includeDependenciesReport,
-                            output = sentryAssetDir.flatMap { dir ->
-                                dir.file(project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT })
-                            },
-                            taskSuffix = taskSuffix
-                        )
-                    reportDependenciesTask.setupMergeAssetsDependencies(mergeAssetsDependants)
-                }
+//                if (extension.includeDependenciesReport.get()) {
+//                    val reportDependenciesTask =
+//                        SentryExternalDependenciesReportTaskFactory.register(
+//                            project = project,
+//                            configurationName = "${variant.name}RuntimeClasspath",
+//                            attributeValueJar = "android-classes",
+//                            includeReport = extension.includeDependenciesReport,
+//                            output = sentryAssetDir.flatMap { dir ->
+//                                dir.file(project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT })
+//                            },
+//                            taskSuffix = taskSuffix
+//                        )
+//                    reportDependenciesTask.setupMergeAssetsDependencies(mergeAssetsDependants)
+//                }
 
                 if (isMinificationEnabled && extension.includeProguardMapping.get()) {
                     // Setup the task to generate a UUID asset file
@@ -407,7 +425,6 @@ class SentryPlugin : Plugin<Project> {
         const val SENTRY_ORG_PARAMETER = "sentryOrg"
         const val SENTRY_PROJECT_PARAMETER = "sentryProject"
         internal const val SENTRY_SDK_VERSION = "6.11.0"
-        internal const val SENTRY_DEPENDENCIES_REPORT_OUTPUT = "sentry-external-modules.txt"
 
         internal val sep = File.separator
 

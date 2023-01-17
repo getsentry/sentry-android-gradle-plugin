@@ -2,10 +2,12 @@ package io.sentry.android.gradle.tasks.dependencies
 
 import io.sentry.android.gradle.util.SentryPluginUtils
 import io.sentry.android.gradle.util.artifactsFor
+import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -13,7 +15,9 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 
@@ -33,28 +37,30 @@ abstract class SentryExternalDependenciesReportTaskV2 : DefaultTask() {
     @get:Input
     abstract val artifactIds: SetProperty<String>
 
-    @get:OutputFile
-    abstract val output: RegularFileProperty
+    @get:OutputDirectory
+    abstract val output: DirectoryProperty
 
     @TaskAction
     fun action() {
-        val outputFile = SentryPluginUtils.getAndDeleteFile(output)
-        outputFile.parentFile.mkdirs()
+        val outputDir = SentryPluginUtils.getAndDeleteDir(output)
+        outputDir.mkdirs()
 
         val dependencies = artifactIds.get().toSortedSet()
 
+        val outputFile = File(outputDir, SENTRY_DEPENDENCIES_REPORT_OUTPUT)
         outputFile.writeText(dependencies.joinToString("\n"))
     }
 
     companion object {
+        internal const val SENTRY_DEPENDENCIES_REPORT_OUTPUT = "sentry-external-modules.txt"
+
         fun register(
             project: Project,
             configurationName: String,
             attributeValueJar: String,
-            output: Provider<RegularFile>,
             includeReport: Provider<Boolean>,
             taskSuffix: String = ""
-        ): TaskProvider<out Task> {
+        ): TaskProvider<SentryExternalDependenciesReportTaskV2> {
             return project.tasks.register(
                 "collectExternal${taskSuffix}DependenciesForSentry",
                 SentryExternalDependenciesReportTaskV2::class.java
@@ -71,7 +77,7 @@ abstract class SentryExternalDependenciesReportTaskV2 : DefaultTask() {
                 }
                 it.artifactIds.set(artifactIds)
                 it.includeReport.set(includeReport)
-                it.output.set(output)
+//                it.output.set(output)
             }
         }
     }

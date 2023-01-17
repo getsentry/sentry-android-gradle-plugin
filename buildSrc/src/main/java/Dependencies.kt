@@ -2,7 +2,7 @@ import BuildPluginsVersion.SPRING_BOOT
 import org.gradle.util.VersionNumber
 
 object BuildPluginsVersion {
-    val AGP = System.getenv("VERSION_AGP") ?: "7.3.0"
+    val AGP = System.getenv("VERSION_AGP") ?: "7.4.0"
     const val DOKKA = "1.6.10"
     const val KOTLIN = "1.6.10"
     const val AAR_2_JAR = "0.6"

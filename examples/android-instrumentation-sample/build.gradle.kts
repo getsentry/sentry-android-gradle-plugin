@@ -29,6 +29,15 @@ android {
         }
     }
 
+    flavorDimensions += "environment"
+    productFlavors {
+        create("staging") {
+            dimension = "environment"
+            applicationIdSuffix = ".staging"
+            versionNameSuffix = "-staging"
+        }
+    }
+
     signingConfigs {
         getByName("debug") {
             storeFile = file("debug.keystore")
@@ -76,7 +85,7 @@ dependencies {
     implementation(Samples.Room.ktx)
     implementation(Samples.Room.rxjava)
 
-    implementation(Samples.Timber.timber)
+//    implementation(Samples.Timber.timber)
     implementation(Samples.Fragment.fragmentKtx)
     implementation(project(":examples:android-room-lib"))
 

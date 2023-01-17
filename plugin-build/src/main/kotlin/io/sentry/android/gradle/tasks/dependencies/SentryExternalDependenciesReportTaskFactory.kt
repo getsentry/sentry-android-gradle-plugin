@@ -24,7 +24,6 @@ object SentryExternalDependenciesReportTaskFactory {
                 project,
                 configurationName,
                 attributeValueJar,
-                output,
                 includeReport,
                 taskSuffix
             )

@@ -6,6 +6,7 @@ import java.io.File
 import java.util.Locale
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.logging.Logger
 import org.gradle.api.provider.Provider
@@ -54,6 +55,12 @@ internal object SentryPluginUtils {
     }
 
     fun getAndDeleteFile(property: Provider<RegularFile>): File {
+        val file = property.get().asFile
+        file.delete()
+        return file
+    }
+
+    fun getAndDeleteDir(property: Provider<Directory>): File {
         val file = property.get().asFile
         file.delete()
         return file
