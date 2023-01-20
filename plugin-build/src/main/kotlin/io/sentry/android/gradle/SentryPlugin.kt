@@ -3,7 +3,6 @@ package io.sentry.android.gradle
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
-import com.android.build.api.variant.CanMinifyCode
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
@@ -13,7 +12,6 @@ import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalAnalyzeProvider
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalReportProvider
-import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
@@ -27,16 +25,13 @@ import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
-import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
-import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
-import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2.Companion.SENTRY_DEPENDENCIES_REPORT_OUTPUT
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.transforms.MetaInfStripTransform.Companion.metaInfStripped
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.GroovyCompat
-import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
+import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
 import io.sentry.android.gradle.util.detectSentryAndroidSdk
 import io.sentry.android.gradle.util.info
@@ -49,7 +44,6 @@ import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.StopExecutionException
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.configurationcache.extensions.capitalized
 import org.slf4j.LoggerFactory
 
 @Suppress("UnstableApiUsage")
@@ -95,272 +89,193 @@ class SentryPlugin : Plugin<Project> {
                 extraProperties.get(SENTRY_PROJECT_PARAMETER).toString()
             }.getOrNull()
 
-            // temp folder for sentry-related stuff
-            val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
-            tmpDir.mkdirs()
-
-            androidComponentsExtension.onVariants { variant ->
-                if (isVariantAllowed(
-                        extension,
-                        variant.name,
-                        variant.flavorName,
-                        variant.buildType
-                    ) && extension.tracingInstrumentation.enabled.get()
-                ) {
-                    val isMinifyEnabled = (variant as? CanMinifyCode)?.isMinifyEnabled == true
-                    val reportDependenciesTask =
-                        SentryExternalDependenciesReportTaskV2.register(
-                            project = project,
-                            configurationName = "${variant.name}RuntimeClasspath",
-                            attributeValueJar = "android-classes",
-                            includeReport = extension.includeDependenciesReport,
-                            taskSuffix = variant.name.capitalized()
-                        )
-                    variant.sources.assets?.addGeneratedSourceDirectory(
-                        reportDependenciesTask,
-                        SentryExternalDependenciesReportTaskV2::output
-                    )
-                    /**
-                     * We detect sentry-android SDK version using configurations.incoming.afterResolve.
-                     * This is guaranteed to be executed BEFORE any of the build tasks/transforms are started.
-                     *
-                     * After detecting the sdk state, we use Gradle's shared build service to persist
-                     * the state between builds and also during a single build, because transforms
-                     * are run in parallel.
-                     */
-                    val sentryModulesService = SentryModulesService.register(project)
-                    project.detectSentryAndroidSdk(
-                        "${variant.name}RuntimeClasspath",
-                        variant.name,
-                        sentryModulesService
-                    )
-
-                    variant.transformClassesWith(
-                        SpanAddingClassVisitorFactory::class.java,
-                        InstrumentationScope.ALL
-                    ) { params ->
-                        if (extension.tracingInstrumentation.forceInstrumentDependencies.get()) {
-                            params.invalidate.setDisallowChanges(System.currentTimeMillis())
-                        }
-                        params.debug.setDisallowChanges(
-                            extension.tracingInstrumentation.debug.get()
-                        )
-                        params.features.setDisallowChanges(
-                            extension.tracingInstrumentation.features.get()
-                        )
-                        params.sentryModulesService.setDisallowChanges(sentryModulesService)
-                        params.tmpDir.set(tmpDir)
-                    }
-                    variant.setAsmFramesComputationMode(
-                        FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
-                    )
-
-                    /**
-                     * This necessary to address the issue when target app uses a multi-release jar
-                     * (MR-JAR) as a dependency. https://github.com/getsentry/sentry-android-gradle-plugin/issues/256
-                     *
-                     * We register a transform (https://docs.gradle.org/current/userguide/artifact_transforms.html)
-                     * that will strip-out unnecessary files from the MR-JAR, so the AGP transforms
-                     * will consume corrected artifacts. We only do this when auto-instrumentation is
-                     * enabled (otherwise there's no need in this fix) AND when AGP version
-                     * is below 7.1.2, where this issue has been fixed.
-                     * (https://androidstudio.googleblog.com/2022/02/android-studio-bumblebee-202111-patch-2.html)
-                     */
-                    if (extension.tracingInstrumentation.enabled.get() &&
-                        AgpVersions.CURRENT < AgpVersions.VERSION_7_1_2
-                    ) {
-                        // we are only interested in runtime configuration (as ASM transform is
-                        // also run just for the runtime configuration)
-                        project.configurations.named("${variant.name}RuntimeClasspath")
-                            .configure {
-                                it.attributes.attribute(metaInfStripped, true)
-                            }
-                        MetaInfStripTransform.register(
-                            project.dependencies,
-                            extension.tracingInstrumentation.forceInstrumentDependencies.get()
-                        )
-                    }
-                }
-            }
+            androidComponentsExtension.configure(
+                project,
+                extension,
+                cliExecutable,
+                sentryOrgParameter,
+                sentryProjectParameter
+            )
 
             androidExtension.applicationVariants.matching {
                 isVariantAllowed(extension, it.name, it.flavorName, it.buildType.name)
             }.configureEach { variant ->
-                val bundleTask = withLogging(project.logger, "bundleTask") {
-                    getBundleTask(project, variant.name)
-                }
 
-                val sentryProperties = getPropertiesFilePath(project, variant)
-
-                val isMinificationEnabled = isMinificationEnabled(
-                    project,
-                    variant,
-                    extension.experimentalGuardsquareSupport.get()
-                )
-                val isDebuggable = variant.buildType.isDebuggable
-
-                var preBundleTaskProvider: TaskProvider<Task>? = null
-                var transformerTaskProvider: TaskProvider<Task>? = null
-                var packageBundleTaskProvider: TaskProvider<Task>? = null
-
-                val mergeAssetsDependants = setOf(
-                    getMergeAssetsProvider(variant),
-                    // lint vital tasks scan the entire "build" folder; since we're writing our
-                    // generated stuff in there, we put explicit dependency on them to avoid
-                    // warnings about implicit dependency
-                    withLogging(project.logger, "lintVitalAnalyzeTask") {
-                        getLintVitalAnalyzeProvider(project, variant.name)
-                    },
-                    withLogging(project.logger, "lintVitalReportTask") {
-                        getLintVitalReportProvider(project, variant.name)
-                    }
-                )
-
-                if (isMinificationEnabled) {
-                    preBundleTaskProvider = withLogging(project.logger, "preBundleTask") {
-                        getPreBundleTask(project, variant.name)
-                    }
-                    transformerTaskProvider = withLogging(project.logger, "transformerTask") {
-                        getTransformerTask(
-                            project,
-                            variant.name,
-                            extension.experimentalGuardsquareSupport.get()
-                        )
-                    }
-                    packageBundleTaskProvider = withLogging(project.logger, "packageBundleTask") {
-                        getPackageBundleTask(project, variant.name)
-                    }
-                } else {
-                    project.logger.info {
-                        "Minification is not enabled for variant ${variant.name}."
-                    }
-                }
-
-                val taskSuffix = variant.name.capitalizeUS()
-                val sentryAssetDir =
-                    project.layout.buildDirectory.dir(
-                        "generated${sep}assets${sep}sentry${sep}${variant.name}"
-                    )
-                androidExtension.sourceSets.getByName(variant.name).assets.srcDir(sentryAssetDir)
-
-//                if (extension.includeDependenciesReport.get()) {
-//                    val reportDependenciesTask =
-//                        SentryExternalDependenciesReportTaskFactory.register(
-//                            project = project,
-//                            configurationName = "${variant.name}RuntimeClasspath",
-//                            attributeValueJar = "android-classes",
-//                            includeReport = extension.includeDependenciesReport,
-//                            output = sentryAssetDir.flatMap { dir ->
-//                                dir.file(project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT })
-//                            },
-//                            taskSuffix = taskSuffix
-//                        )
-//                    reportDependenciesTask.setupMergeAssetsDependencies(mergeAssetsDependants)
-//                }
-
-                if (isMinificationEnabled && extension.includeProguardMapping.get()) {
-                    // Setup the task to generate a UUID asset file
-                    val generateUuidTask = project.tasks.register(
-                        "generateSentryProguardUuid$taskSuffix",
-                        SentryGenerateProguardUuidTask::class.java
-                    ) {
-                        it.output.set(
-                            sentryAssetDir.flatMap { dir ->
-                                dir.file(project.provider { "sentry-debug-meta.properties" })
-                            }
-                        )
-                    }
-                    generateUuidTask.setupMergeAssetsDependencies(mergeAssetsDependants)
-
-                    // Setup the task that uploads the proguard mapping and UUIDs
-                    val uploadSentryProguardMappingsTask = project.tasks.register(
-                        "uploadSentryProguardMappings$taskSuffix",
-                        SentryUploadProguardMappingsTask::class.java
-                    ) { task ->
-                        task.dependsOn(generateUuidTask)
-                        task.workingDir(project.rootDir)
-                        task.cliExecutable.set(cliExecutable)
-                        task.sentryProperties.set(
-                            sentryProperties?.let { file -> project.file(file) }
-                        )
-                        task.uuidFile.set(generateUuidTask.flatMap { it.output })
-                        task.mappingsFiles = getMappingFileProvider(
-                            project,
-                            variant,
-                            extension.experimentalGuardsquareSupport.get()
-                        )
-                        task.autoUploadProguardMapping.set(extension.autoUploadProguardMapping)
-                        task.sentryOrganization.set(sentryOrgParameter)
-                        task.sentryProject.set(sentryProjectParameter)
-                    }
-
-                    if (extension.experimentalGuardsquareSupport.get() &&
-                        GroovyCompat.isDexguardEnabledForVariant(project, variant.name)
-                    ) {
-                        // If Dexguard is enabled, we will have to wait for the project to be evaluated
-                        // to be able to let the uploadSentryProguardMappings run after them.
-                        project.afterEvaluate {
-                            project.tasks.named(
-                                "dexguardApk${variant.name.capitalized}"
-                            ).configure { it.finalizedBy(uploadSentryProguardMappingsTask) }
-                            project.tasks.named(
-                                "dexguardAab${variant.name.capitalized}"
-                            ).configure { it.finalizedBy(uploadSentryProguardMappingsTask) }
-                        }
-                    } else {
-                        // we just hack ourselves into the Proguard/R8 task's doLast.
-                        transformerTaskProvider?.configure {
-                            it.finalizedBy(uploadSentryProguardMappingsTask)
-                        }
-                    }
-
-                    // To include proguard uuid file into aab, run before bundle task.
-                    preBundleTaskProvider?.configure { task ->
-                        task.dependsOn(generateUuidTask)
-                    }
-                    // The package task will only be executed if the generateUuidTask has already been executed.
-                    getPackageProvider(variant)?.configure { task ->
-                        task.dependsOn(generateUuidTask)
-                    }
-                    // App bundle has different package task
-                    packageBundleTaskProvider?.configure { task ->
-                        task.dependsOn(generateUuidTask)
-                    }
-                }
-
-                // only debug symbols of non debuggable code should be uploaded (aka release builds).
-                // uploadSentryNativeSymbols task will only be executed after the assemble task
-                // and also only if `uploadNativeSymbols` is enabled, as this is an opt-in feature.
-                if (!isDebuggable && extension.uploadNativeSymbols.get()) {
-                    // Setup the task to upload native symbols task after the assembling task
-                    val uploadSentryNativeSymbolsTask = project.tasks.register(
-                        "uploadSentryNativeSymbolsFor$taskSuffix",
-                        SentryUploadNativeSymbolsTask::class.java
-                    ) {
-                        it.workingDir(project.rootDir)
-                        it.buildDir.set(project.buildDir)
-                        it.autoUploadNativeSymbol.set(extension.autoUploadNativeSymbols)
-                        it.cliExecutable.set(cliExecutable)
-                        it.sentryProperties.set(
-                            sentryProperties?.let { file -> project.file(file) }
-                        )
-                        it.includeNativeSources.set(extension.includeNativeSources)
-                        it.variantName.set(variant.name)
-                        it.sentryOrganization.set(sentryOrgParameter)
-                        it.sentryProject.set(sentryProjectParameter)
-                    }
-
-                    getAssembleTaskProvider(variant)?.configure {
-                        it.finalizedBy(
-                            uploadSentryNativeSymbolsTask
-                        )
-                    }
-                    // if its a bundle aab, assemble might not be executed, so we hook into bundle task
-                    bundleTask?.configure { it.finalizedBy(uploadSentryNativeSymbolsTask) }
-                } else {
-                    project.logger.info { "uploadSentryNativeSymbols won't be executed" }
-                }
             }
+
+//            androidExtension.applicationVariants.matching {
+//                isVariantAllowed(extension, it.name, it.flavorName, it.buildType.name)
+//            }.configureEach { variant ->
+//                val bundleTask = withLogging(project.logger, "bundleTask") {
+//                    getBundleTask(project, variant.name)
+//                }
+//
+//                val sentryProperties = getPropertiesFilePath(project, variant)
+//
+//                val isMinificationEnabled = isMinificationEnabled(
+//                    project,
+//                    variant,
+//                    extension.experimentalGuardsquareSupport.get()
+//                )
+//                val isDebuggable = variant.buildType.isDebuggable
+//
+//                var preBundleTaskProvider: TaskProvider<Task>? = null
+//                var transformerTaskProvider: TaskProvider<Task>? = null
+//                var packageBundleTaskProvider: TaskProvider<Task>? = null
+//
+//                val mergeAssetsDependants = setOf(
+//                    getMergeAssetsProvider(variant),
+//                    // lint vital tasks scan the entire "build" folder; since we're writing our
+//                    // generated stuff in there, we put explicit dependency on them to avoid
+//                    // warnings about implicit dependency
+//                    withLogging(project.logger, "lintVitalAnalyzeTask") {
+//                        getLintVitalAnalyzeProvider(project, variant.name)
+//                    },
+//                    withLogging(project.logger, "lintVitalReportTask") {
+//                        getLintVitalReportProvider(project, variant.name)
+//                    }
+//                )
+//
+//                if (isMinificationEnabled) {
+//                    preBundleTaskProvider = withLogging(project.logger, "preBundleTask") {
+//                        getPreBundleTask(project, variant.name)
+//                    }
+//                    transformerTaskProvider = withLogging(project.logger, "transformerTask") {
+//                        getTransformerTask(
+//                            project,
+//                            variant.name,
+//                            extension.experimentalGuardsquareSupport.get()
+//                        )
+//                    }
+//                    packageBundleTaskProvider = withLogging(project.logger, "packageBundleTask") {
+//                        getPackageBundleTask(project, variant.name)
+//                    }
+//                } else {
+//                    project.logger.info {
+//                        "Minification is not enabled for variant ${variant.name}."
+//                    }
+//                }
+//
+//                val taskSuffix = variant.name.capitalized
+//                val sentryAssetDir =
+//                    project.layout.buildDirectory.dir(
+//                        "generated${sep}assets${sep}sentry${sep}${variant.name}"
+//                    )
+//                androidExtension.sourceSets.getByName(variant.name).assets.srcDir(sentryAssetDir)
+//
+////                if (extension.includeDependenciesReport.get()) {
+////                    val reportDependenciesTask =
+////                        SentryExternalDependenciesReportTaskFactory.register(
+////                            project = project,
+////                            configurationName = "${variant.name}RuntimeClasspath",
+////                            attributeValueJar = "android-classes",
+////                            includeReport = extension.includeDependenciesReport,
+////                            output = sentryAssetDir.flatMap { dir ->
+////                                dir.file(project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT })
+////                            },
+////                            taskSuffix = taskSuffix
+////                        )
+////                    reportDependenciesTask.setupMergeAssetsDependencies(mergeAssetsDependants)
+////                }
+//
+//                if (isMinificationEnabled && extension.includeProguardMapping.get()) {
+//                    // Setup the task to generate a UUID asset file
+//                    val generateUuidTask = SentryGenerateProguardUuidTask.register(
+//                        project = project,
+//                        output = sentryAssetDir,
+//                        taskSuffix = taskSuffix
+//                    )
+//                    generateUuidTask.setupMergeAssetsDependencies(mergeAssetsDependants)
+//
+//                    // Setup the task that uploads the proguard mapping and UUIDs
+//                    val uploadSentryProguardMappingsTask = project.tasks.register(
+//                        "uploadSentryProguardMappings$taskSuffix",
+//                        SentryUploadProguardMappingsTask::class.java
+//                    ) { task ->
+//                        task.dependsOn(generateUuidTask)
+//                        task.workingDir(project.rootDir)
+//                        task.cliExecutable.set(cliExecutable)
+//                        task.sentryProperties.set(
+//                            sentryProperties?.let { file -> project.file(file) }
+//                        )
+//                        task.uuidFile.set(generateUuidTask.flatMap { it.outputFile })
+////                        task.mappingsFiles = maybeGetGuardsquareMappings(
+////                            project,
+////                            variant,
+////                            extension.experimentalGuardsquareSupport.get()
+////                        )
+//                        task.autoUploadProguardMapping.set(extension.autoUploadProguardMapping)
+//                        task.sentryOrganization.set(sentryOrgParameter)
+//                        task.sentryProject.set(sentryProjectParameter)
+//                    }
+//
+//                    if (extension.experimentalGuardsquareSupport.get() &&
+//                        GroovyCompat.isDexguardEnabledForVariant(project, variant.name)
+//                    ) {
+//                        // If Dexguard is enabled, we will have to wait for the project to be evaluated
+//                        // to be able to let the uploadSentryProguardMappings run after them.
+//                        project.afterEvaluate {
+//                            project.tasks.named(
+//                                "dexguardApk${variant.name.capitalized}"
+//                            ).configure { it.finalizedBy(uploadSentryProguardMappingsTask) }
+//                            project.tasks.named(
+//                                "dexguardAab${variant.name.capitalized}"
+//                            ).configure { it.finalizedBy(uploadSentryProguardMappingsTask) }
+//                        }
+//                    } else {
+//                        // we just hack ourselves into the Proguard/R8 task's doLast.
+//                        transformerTaskProvider?.configure {
+//                            it.finalizedBy(uploadSentryProguardMappingsTask)
+//                        }
+//                    }
+//
+//                    // To include proguard uuid file into aab, run before bundle task.
+//                    preBundleTaskProvider?.configure { task ->
+//                        task.dependsOn(generateUuidTask)
+//                    }
+//                    // The package task will only be executed if the generateUuidTask has already been executed.
+//                    getPackageProvider(variant)?.configure { task ->
+//                        task.dependsOn(generateUuidTask)
+//                    }
+//                    // App bundle has different package task
+//                    packageBundleTaskProvider?.configure { task ->
+//                        task.dependsOn(generateUuidTask)
+//                    }
+//                }
+//
+//                // only debug symbols of non debuggable code should be uploaded (aka release builds).
+//                // uploadSentryNativeSymbols task will only be executed after the assemble task
+//                // and also only if `uploadNativeSymbols` is enabled, as this is an opt-in feature.
+//                if (!isDebuggable && extension.uploadNativeSymbols.get()) {
+//                    // Setup the task to upload native symbols task after the assembling task
+//                    val uploadSentryNativeSymbolsTask = project.tasks.register(
+//                        "uploadSentryNativeSymbolsFor$taskSuffix",
+//                        SentryUploadNativeSymbolsTask::class.java
+//                    ) {
+//                        it.workingDir(project.rootDir)
+//                        it.buildDir.set(project.buildDir)
+//                        it.autoUploadNativeSymbol.set(extension.autoUploadNativeSymbols)
+//                        it.cliExecutable.set(cliExecutable)
+//                        it.sentryProperties.set(
+//                            sentryProperties?.let { file -> project.file(file) }
+//                        )
+//                        it.includeNativeSources.set(extension.includeNativeSources)
+//                        it.variantName.set(variant.name)
+//                        it.sentryOrganization.set(sentryOrgParameter)
+//                        it.sentryProject.set(sentryProjectParameter)
+//                    }
+//
+//                    getAssembleTaskProvider(variant)?.configure {
+//                        it.finalizedBy(
+//                            uploadSentryNativeSymbolsTask
+//                        )
+//                    }
+//                    // if its a bundle aab, assemble might not be executed, so we hook into bundle task
+//                    bundleTask?.configure { it.finalizedBy(uploadSentryNativeSymbolsTask) }
+//                } else {
+//                    project.logger.info { "uploadSentryNativeSymbols won't be executed" }
+//                }
+//            }
 
             project.installDependencies(extension)
         }
@@ -389,9 +304,7 @@ class SentryPlugin : Plugin<Project> {
                 configurationName = "runtimeClasspath",
                 attributeValueJar = "jar",
                 includeReport = extension.includeDependenciesReport,
-                output = sentryResDir.flatMap { dir ->
-                    dir.file(project.provider { SENTRY_DEPENDENCIES_REPORT_OUTPUT })
-                }
+                output = sentryResDir
             )
             val resourcesTask = withLogging(project.logger, "processResources") {
                 getProcessResourcesProvider(project)
@@ -408,17 +321,6 @@ class SentryPlugin : Plugin<Project> {
                 task.dependsOn(this)
             }
         }
-    }
-
-    private fun isVariantAllowed(
-        extension: SentryPluginExtension,
-        variantName: String,
-        flavorName: String?,
-        buildType: String?
-    ): Boolean {
-        return variantName !in extension.ignoredVariants.get() &&
-            flavorName !in extension.ignoredFlavors.get() &&
-            buildType !in extension.ignoredBuildTypes.get()
     }
 
     companion object {

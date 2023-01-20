@@ -1,5 +1,7 @@
 package io.sentry.android.gradle.tasks.dependencies
 
+import io.sentry.android.gradle.tasks.DirectoryOutputTask
+import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory.SENTRY_DEPENDENCIES_REPORT_OUTPUT
 import io.sentry.android.gradle.util.SentryPluginUtils
 import io.sentry.android.gradle.util.artifactsFor
 import java.io.File
@@ -7,6 +9,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
@@ -22,7 +25,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 
 @CacheableTask
-abstract class SentryExternalDependenciesReportTaskV2 : DefaultTask() {
+abstract class SentryExternalDependenciesReportTaskV2 : DirectoryOutputTask() {
 
     @get:Input
     abstract val includeReport: Property<Boolean>
@@ -37,12 +40,9 @@ abstract class SentryExternalDependenciesReportTaskV2 : DefaultTask() {
     @get:Input
     abstract val artifactIds: SetProperty<String>
 
-    @get:OutputDirectory
-    abstract val output: DirectoryProperty
-
     @TaskAction
     fun action() {
-        val outputDir = SentryPluginUtils.getAndDeleteDir(output)
+        val outputDir = output.get().asFile
         outputDir.mkdirs()
 
         val dependencies = artifactIds.get().toSortedSet()
@@ -52,19 +52,18 @@ abstract class SentryExternalDependenciesReportTaskV2 : DefaultTask() {
     }
 
     companion object {
-        internal const val SENTRY_DEPENDENCIES_REPORT_OUTPUT = "sentry-external-modules.txt"
-
         fun register(
             project: Project,
             configurationName: String,
             attributeValueJar: String,
+            output: Provider<Directory>?,
             includeReport: Provider<Boolean>,
             taskSuffix: String = ""
         ): TaskProvider<SentryExternalDependenciesReportTaskV2> {
             return project.tasks.register(
                 "collectExternal${taskSuffix}DependenciesForSentry",
                 SentryExternalDependenciesReportTaskV2::class.java
-            ) {
+            ) { task ->
                 val configuration = project.configurations.getByName(configurationName)
                 val artifacts = configuration.artifactsFor(attributeValueJar).resolvedArtifacts
                 val artifactIds = artifacts.map { list ->
@@ -75,9 +74,9 @@ abstract class SentryExternalDependenciesReportTaskV2 : DefaultTask() {
                         .filter { id -> id.version.isNotEmpty() }
                         .map { id -> id.displayName }
                 }
-                it.artifactIds.set(artifactIds)
-                it.includeReport.set(includeReport)
-//                it.output.set(output)
+                task.artifactIds.set(artifactIds)
+                task.includeReport.set(includeReport)
+                output?.let { task.output.set(it) }
             }
         }
     }

@@ -9,6 +9,7 @@ internal object AgpVersions {
     val CURRENT: SemVer = SemVer.parse(Version.ANDROID_GRADLE_PLUGIN_VERSION)
     val VERSION_7_1_2: SemVer = SemVer.parse("7.1.2")
     val VERSION_7_0_0: SemVer = SemVer.parse("7.0.0")
+    val VERSION_7_4_0: SemVer = SemVer.parse("7.4.0")
 }
 
 internal object GradleVersions {

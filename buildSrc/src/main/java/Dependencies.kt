@@ -31,6 +31,7 @@ object LibsVersion {
 }
 
 object Libs {
+    fun agp(version: String) = "com.android.tools.build:gradle:$version"
     val AGP = "com.android.tools.build:gradle:${BuildPluginsVersion.AGP}"
     const val JUNIT = "junit:junit:${LibsVersion.JUNIT}"
     const val PROGUARD = "com.guardsquare:proguard-gradle:${BuildPluginsVersion.PROGUARD}"

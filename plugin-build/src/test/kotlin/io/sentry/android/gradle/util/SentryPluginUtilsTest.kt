@@ -4,7 +4,7 @@ import io.sentry.android.gradle.testutil.createTestAndroidProject
 import io.sentry.android.gradle.testutil.createTestProguardProject
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.android.gradle.util.SentryPluginUtils.getAndDeleteFile
-import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
+import io.sentry.android.gradle.util.SentryPluginUtils.isGuardsquareMinified
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -40,7 +40,7 @@ class SentryPluginUtilsTest {
 
         assertEquals(
             false,
-            isMinificationEnabled(project, debug, experimentalGuardsquareSupport = true)
+            isGuardsquareMinified(project, debug, experimentalGuardsquareSupport = true)
         )
     }
 
@@ -56,7 +56,7 @@ class SentryPluginUtilsTest {
 
         assertEquals(
             true,
-            isMinificationEnabled(project, debug, experimentalGuardsquareSupport = true)
+            isGuardsquareMinified(project, debug, experimentalGuardsquareSupport = true)
         )
     }
 
@@ -72,7 +72,7 @@ class SentryPluginUtilsTest {
 
         assertEquals(
             false,
-            isMinificationEnabled(project, debug, experimentalGuardsquareSupport = false)
+            isGuardsquareMinified(project, debug, experimentalGuardsquareSupport = false)
         )
     }
 
@@ -81,7 +81,7 @@ class SentryPluginUtilsTest {
         val (project, android) = createTestAndroidProject()
         val debug = android.applicationVariants.first { it.name == "debug" }
 
-        assertEquals(false, isMinificationEnabled(project, debug))
+        assertEquals(false, isGuardsquareMinified(project, debug))
     }
 
     @Test
