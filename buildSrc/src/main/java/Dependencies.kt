@@ -7,6 +7,7 @@ object BuildPluginsVersion {
     const val KOTLIN = "1.6.10"
     const val AAR_2_JAR = "0.6"
     const val KTLINT = "10.2.1"
+    const val SHADOW = "7.1.2"
     // do not upgrade to 0.18.0, it does not generate the pom-default.xml and module.json under
     // build/publications/maven
     const val MAVEN_PUBLISH = "0.17.0"

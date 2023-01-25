@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.vanniktech.maven.publish.MavenPublishPluginExtension
 import io.sentry.android.gradle.internal.ASMifyTask
 import io.sentry.android.gradle.internal.BootstrapAndroidSdk
@@ -16,6 +17,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
     // we need this plugin in order to include .aar dependencies into a pure java project, which the gradle plugin is
     id("com.stepango.aar2jar") version BuildPluginsVersion.AAR_2_JAR
+    id("com.github.johnrengelman.shadow") version BuildPluginsVersion.SHADOW
 }
 
 allprojects {
@@ -33,6 +35,11 @@ val testImplementationAar by configurations.getting // this converts .aar into .
 
 val agp70: SourceSet by sourceSets.creating
 val agp74: SourceSet by sourceSets.creating
+
+val shade: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+}
 
 dependencies {
     agp70.compileOnlyConfigurationName(Libs.GRADLE_API)
@@ -52,7 +59,10 @@ dependencies {
     compileOnly(Libs.ASM)
     compileOnly(Libs.ASM_COMMONS)
 
-    implementation(project(":common"))
+    // compileOnly since we'll be shading the common dependency into the final jar
+    // but we still need to be able to compile it (this also excludes it from .pom)
+    compileOnly(project(":common"))
+    shade(project(":common"))
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
@@ -125,6 +135,25 @@ gradlePlugin {
     }
 }
 
+tasks.withType<Jar> {
+    from(agp70.output)
+    from(agp74.output)
+}
+
+tasks.withType<ShadowJar> {
+    archiveClassifier.set("")
+    configurations = listOf(project.configurations.getByName("shade"))
+
+    exclude("/kotlin/**")
+    exclude("/groovy**")
+    exclude("/org/**")
+}
+
+artifacts {
+    runtimeOnly(tasks.named("shadowJar"))
+    archives(tasks.named("shadowJar"))
+}
+
 ktlint {
     debug.set(false)
     verbose.set(true)
@@ -170,11 +199,6 @@ tasks.named("distZip") {
             require(it) { "No distribution to zip." }
         }
     }
-}
-
-tasks.withType<Jar> {
-    from(agp70.output)
-    from(agp74.output)
 }
 
 tasks.withType<Test> {
