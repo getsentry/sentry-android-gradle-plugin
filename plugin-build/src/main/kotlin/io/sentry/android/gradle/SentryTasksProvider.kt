@@ -2,7 +2,6 @@ package io.sentry.android.gradle
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
-import com.android.build.gradle.tasks.PackageAndroidArtifact
 import io.sentry.android.gradle.util.GroovyCompat.isDexguardAvailable
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.gradle.common.AndroidVariant

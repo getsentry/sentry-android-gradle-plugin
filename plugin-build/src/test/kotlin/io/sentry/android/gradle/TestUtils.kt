@@ -89,7 +89,6 @@ private fun readZippedContent(zipInputStream: ZipInputStream): String {
     return stringContent
 }
 
-
 fun Project.retrieveAndroidVariant(agpVersion: SemVer, variantName: String): AndroidVariant {
     return if (AgpVersions.isAGP74(agpVersion)) {
         var debug: Variant? = null

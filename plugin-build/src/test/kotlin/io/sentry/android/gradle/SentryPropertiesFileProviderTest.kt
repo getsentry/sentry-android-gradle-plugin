@@ -20,7 +20,9 @@ class SentryPropertiesFileProviderTest(
 
     @Test
     fun `getPropertiesFilePath finds file inside debug folder`() {
-        val (project, _) = createTestAndroidProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
+        val (project, _) = createTestAndroidProject(
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        )
         createTestFile(project.projectDir, "src${sep}debug${sep}sentry.properties")
 
         val variant = project.retrieveAndroidVariant(agpVersion, "debug")
@@ -30,7 +32,9 @@ class SentryPropertiesFileProviderTest(
 
     @Test
     fun `getPropertiesFilePath finds file inside project folder`() {
-        val (project, _) = createTestAndroidProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
+        val (project, _) = createTestAndroidProject(
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        )
         createTestFile(project.projectDir, "sentry.properties")
 
         val variant = project.retrieveAndroidVariant(agpVersion, "release")
@@ -40,7 +44,9 @@ class SentryPropertiesFileProviderTest(
 
     @Test
     fun `getPropertiesFilePath finds file inside flavorName folder`() {
-        val (project, _) = createTestAndroidProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion)) {
+        val (project, _) = createTestAndroidProject(
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        ) {
             flavorDimensions("version")
             productFlavors.create("lite")
             productFlavors.create("full")
@@ -54,7 +60,9 @@ class SentryPropertiesFileProviderTest(
 
     @Test
     fun `getPropertiesFilePath finds file inside flavorName-buildType folder`() {
-        val (project, _) = createTestAndroidProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion)) {
+        val (project, _) = createTestAndroidProject(
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        ) {
             flavorDimensions("version")
             productFlavors.create("lite")
             productFlavors.create("full")
@@ -68,7 +76,9 @@ class SentryPropertiesFileProviderTest(
 
     @Test
     fun `getPropertiesFilePath finds file inside buildType-flavorName folder`() {
-        val (project, _) = createTestAndroidProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion)) {
+        val (project, _) = createTestAndroidProject(
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        ) {
             flavorDimensions("version")
             productFlavors.create("lite")
             productFlavors.create("full")
@@ -82,7 +92,9 @@ class SentryPropertiesFileProviderTest(
 
     @Test
     fun `getPropertiesFilePath with multiple flavorDimensions finds file inside flavor folder`() {
-        val (project, _) = createTestAndroidProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion)) {
+        val (project, _) = createTestAndroidProject(
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        ) {
             flavorDimensions("version", "api")
             productFlavors.create("lite") {
                 it.dimension("version")
@@ -100,7 +112,9 @@ class SentryPropertiesFileProviderTest(
 
     @Test
     fun `getPropertiesFilePath finds file inside other productFlavor folders`() {
-        val (project, _) = createTestAndroidProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion)) {
+        val (project, _) = createTestAndroidProject(
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        ) {
             flavorDimensions("version", "api")
             productFlavors.create("lite") {
                 it.dimension("version")
@@ -119,7 +133,10 @@ class SentryPropertiesFileProviderTest(
     @Test
     fun `getPropertiesFilePath finds file inside root project folder`() {
         val rootProject = ProjectBuilder.builder().build()
-        val (project, _) = createTestAndroidProject(parent = rootProject, forceEvaluate = !AgpVersions.isAGP74(agpVersion))
+        val (project, _) = createTestAndroidProject(
+            parent = rootProject,
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        )
         createTestFile(rootProject.projectDir, "sentry.properties")
 
         val variant = project.retrieveAndroidVariant(agpVersion, "release")
@@ -130,7 +147,10 @@ class SentryPropertiesFileProviderTest(
     @Test
     fun `getPropertiesFilePath finds file inside root buildType folder`() {
         val rootProject = ProjectBuilder.builder().build()
-        val (project, _) = createTestAndroidProject(parent = rootProject, forceEvaluate = !AgpVersions.isAGP74(agpVersion))
+        val (project, _) = createTestAndroidProject(
+            parent = rootProject,
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        )
         createTestFile(rootProject.projectDir, "src${sep}debug${sep}sentry.properties")
 
         val variant = project.retrieveAndroidVariant(agpVersion, "debug")
@@ -141,7 +161,10 @@ class SentryPropertiesFileProviderTest(
     @Test
     fun `getPropertiesFilePath finds file inside root flavor folder`() {
         val rootProject = ProjectBuilder.builder().build()
-        val (project, _) = createTestAndroidProject(parent = rootProject, forceEvaluate = !AgpVersions.isAGP74(agpVersion)) {
+        val (project, _) = createTestAndroidProject(
+            parent = rootProject,
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        ) {
             flavorDimensions("version")
             productFlavors.create("lite")
         }
@@ -155,7 +178,10 @@ class SentryPropertiesFileProviderTest(
     @Test
     fun `getPropertiesFilePath finds file inside root flavor buildType folder`() {
         val rootProject = ProjectBuilder.builder().build()
-        val (project, _) = createTestAndroidProject(parent = rootProject, forceEvaluate = !AgpVersions.isAGP74(agpVersion)) {
+        val (project, _) = createTestAndroidProject(
+            parent = rootProject,
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        ) {
             flavorDimensions("version")
             productFlavors.create("lite")
         }
@@ -169,7 +195,10 @@ class SentryPropertiesFileProviderTest(
     @Test
     fun `getPropertiesFilePath finds file inside root buildType flavor folder`() {
         val rootProject = ProjectBuilder.builder().build()
-        val (project, _) = createTestAndroidProject(parent = rootProject, forceEvaluate = !AgpVersions.isAGP74(agpVersion)) {
+        val (project, _) = createTestAndroidProject(
+            parent = rootProject,
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        ) {
             flavorDimensions("version")
             productFlavors.create("lite")
         }

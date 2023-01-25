@@ -20,13 +20,11 @@ import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
 import io.sentry.android.gradle.util.hookWithAssembleTasks
-import io.sentry.android.gradle.util.hookWithPackageTasks
 import io.sentry.android.gradle.util.hookWithMinifyTasks
+import io.sentry.android.gradle.util.hookWithPackageTasks
 import io.sentry.android.gradle.util.info
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.Directory
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
 fun AppExtension.configure(
@@ -88,7 +86,7 @@ private fun BaseVariant.configureDependenciesTask(
         }
     } else if (extension.includeDependenciesReport.get()) {
         val outputDir = project.layout.buildDirectory.dir(
-            "generated${sep}assets${sep}sentry${sep}dependencies${sep}${name}"
+            "generated${sep}assets${sep}sentry${sep}dependencies${sep}$name"
         )
 
         val reportDependenciesTask =
@@ -127,7 +125,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
         val guardsquareEnabled = extension.experimentalGuardsquareSupport.get()
         val isMinifyEnabled = isMinificationEnabled(project, variant, guardsquareEnabled)
         val outputDir = project.layout.buildDirectory.dir(
-            "generated${sep}assets${sep}sentry${sep}proguard${sep}${name}"
+            "generated${sep}assets${sep}sentry${sep}proguard${sep}$name"
         )
 
         if (isMinifyEnabled && extension.includeProguardMapping.get()) {

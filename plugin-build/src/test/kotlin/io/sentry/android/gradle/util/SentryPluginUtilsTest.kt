@@ -41,7 +41,9 @@ class SentryPluginUtilsTest(
 
     @Test
     fun `isMinificationEnabled returns false for standalone Proguard`() {
-        val (project, _) = createTestProguardProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
+        val (project, _) = createTestProguardProject(
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        )
         val variant = project.retrieveAndroidVariant(agpVersion, "debug")
 
         assertEquals(
@@ -52,7 +54,9 @@ class SentryPluginUtilsTest(
 
     @Test
     fun `isMinificationEnabled returns true for standalone Proguard and valid config`() {
-        val (project, _) = createTestProguardProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
+        val (project, _) = createTestProguardProject(
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        )
         project.extensions.getByType(ProGuardAndroidExtension::class.java).apply {
             configurations.create("debug") {
                 it.defaultConfiguration("proguard-android-optimize.txt")
@@ -68,7 +72,9 @@ class SentryPluginUtilsTest(
 
     @Test
     fun `isMinificationEnabled returns false for standalone Proguard without opt-in`() {
-        val (project, _) = createTestProguardProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
+        val (project, _) = createTestProguardProject(
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        )
         project.extensions.getByType(ProGuardAndroidExtension::class.java).apply {
             configurations.create("debug") {
                 it.defaultConfiguration("proguard-android-optimize.txt")
@@ -84,7 +90,9 @@ class SentryPluginUtilsTest(
 
     @Test
     fun `isMinificationEnabled returns false for debug builds`() {
-        val (project, _) = createTestAndroidProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
+        val (project, _) = createTestAndroidProject(
+            forceEvaluate = !AgpVersions.isAGP74(agpVersion)
+        )
         val variant = project.retrieveAndroidVariant(agpVersion, "debug")
 
         assertEquals(false, isMinificationEnabled(project, variant))

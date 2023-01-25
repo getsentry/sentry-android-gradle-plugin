@@ -14,11 +14,9 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.StopExecutionException
-import org.gradle.api.tasks.TaskProvider
 import org.slf4j.LoggerFactory
 
 @Suppress("UnstableApiUsage")
