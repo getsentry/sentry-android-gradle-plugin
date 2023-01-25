@@ -7,6 +7,7 @@ import proguard.gradle.plugin.android.dsl.ProGuardAndroidExtension
 
 fun createTestAndroidProject(
     parent: Project? = null,
+    forceEvaluate: Boolean = true,
     block: AppExtension.() -> Unit = {}
 ): Pair<Project, AppExtension> {
     val project = ProjectBuilder
@@ -18,13 +19,15 @@ fun createTestAndroidProject(
         compileSdkVersion(30)
         this.block()
     }
-    // This will force the project to be evaluated
-    project.getTasksByName("assembleDebug", false)
+    if (forceEvaluate) {
+        project.forceEvaluate()
+    }
     return project to appExtension
 }
 
 fun createTestProguardProject(
     parent: Project? = null,
+    forceEvaluate: Boolean = true,
     block: AppExtension.() -> Unit = {}
 ): Pair<Project, AppExtension> {
     val project = ProjectBuilder
@@ -42,7 +45,12 @@ fun createTestProguardProject(
             it.defaultConfiguration("proguard-android-optimize.txt")
         }
     }
-    // This will force the project to be evaluated
-    project.getTasksByName("assembleDebug", false)
+    if (forceEvaluate) {
+        project.forceEvaluate()
+    }
     return project to appExtension
+}
+
+fun Project.forceEvaluate() {
+    getTasksByName("assembleDebug", false)
 }

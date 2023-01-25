@@ -57,6 +57,8 @@ dependencies {
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(Libs.AGP)
+    testImplementation(agp70.output)
+    testImplementation(agp74.output)
     testImplementation(Libs.PROGUARD)
     testImplementation(Libs.JUNIT)
     testImplementation(Libs.MOCKITO_KOTLIN)

@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks.dependencies
 
+import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory.SENTRY_DEPENDENCIES_REPORT_OUTPUT
 import java.io.File
 import kotlin.test.assertEquals
 import org.gradle.api.Project
@@ -17,7 +18,7 @@ class SentryExternalDependenciesReportTaskTest {
     @Test
     fun `flattens transitive dependencies into a single sorted list`() {
         val project = createRegularProject()
-        val output = tempDir.newFile("deps.txt")
+        val output = tempDir.newFolder("dependencies")
 
         val task: TaskProvider<SentryExternalDependenciesReportTask> = project.tasks.register(
             "testDependenciesReport",
@@ -25,7 +26,7 @@ class SentryExternalDependenciesReportTaskTest {
         ) {
             it.includeReport.set(true)
             it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
-            it.output.set(project.layout.file(project.provider { output }))
+            it.output.set(project.layout.dir(project.provider { output }))
         }
 
         task.get().action()
@@ -36,7 +37,7 @@ class SentryExternalDependenciesReportTaskTest {
     @Test
     fun `skips flat jars`() {
         val project = createProjectWithFlatJars()
-        val output = tempDir.newFile("deps.txt")
+        val output = tempDir.newFolder("dependencies")
 
         val task: TaskProvider<SentryExternalDependenciesReportTask> = project.tasks.register(
             "testDependenciesReport",
@@ -44,7 +45,7 @@ class SentryExternalDependenciesReportTaskTest {
         ) {
             it.includeReport.set(true)
             it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
-            it.output.set(project.layout.file(project.provider { output }))
+            it.output.set(project.layout.dir(project.provider { output }))
         }
 
         task.get().action()
@@ -55,7 +56,7 @@ class SentryExternalDependenciesReportTaskTest {
     @Test
     fun `skips local modules and projects`() {
         val project = createMultiModuleProject()
-        val output = tempDir.newFile("deps.txt")
+        val output = tempDir.newFolder("dependencies")
 
         val task: TaskProvider<SentryExternalDependenciesReportTask> = project.tasks.register(
             "testDependenciesReport",
@@ -63,7 +64,7 @@ class SentryExternalDependenciesReportTaskTest {
         ) {
             it.includeReport.set(true)
             it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
-            it.output.set(project.layout.file(project.provider { output }))
+            it.output.set(project.layout.dir(project.provider { output }))
         }
 
         task.get().action()
@@ -86,7 +87,7 @@ class SentryExternalDependenciesReportTaskTest {
             io.sentry:sentry-android-core:6.5.0
             io.sentry:sentry:6.5.0
             """.trimIndent(),
-            readText()
+            File(this, SENTRY_DEPENDENCIES_REPORT_OUTPUT).readText()
         )
     }
 

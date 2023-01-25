@@ -1,5 +1,12 @@
 package io.sentry.android.gradle
 
+import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.Variant
+import com.android.build.gradle.AppExtension
+import io.sentry.android.gradle.testutil.forceEvaluate
+import io.sentry.android.gradle.util.AgpVersions
+import io.sentry.android.gradle.util.SemVer
+import io.sentry.gradle.common.AndroidVariant
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
@@ -8,6 +15,7 @@ import java.util.UUID
 import java.util.zip.ZipInputStream
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.gradle.api.Project
 
 /* ktlint-disable max-line-length */
 private val ASSET_PATTERN =
@@ -79,4 +87,24 @@ private fun readZippedContent(zipInputStream: ZipInputStream): String {
     val stringContent = baos.toString(Charset.defaultCharset().name())
     baos.close()
     return stringContent
+}
+
+
+fun Project.retrieveAndroidVariant(agpVersion: SemVer, variantName: String): AndroidVariant {
+    return if (AgpVersions.isAGP74(agpVersion)) {
+        var debug: Variant? = null
+        val extension = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        extension.onVariants(extension.selector().withName(variantName)) {
+            debug = it
+        }
+        project.forceEvaluate()
+
+        return AndroidVariant74(debug!!)
+    } else {
+        val variant = project
+            .extensions
+            .getByType(AppExtension::class.java)
+            .applicationVariants.first { it.name == variantName }
+        AndroidVariant70(variant)
+    }
 }
