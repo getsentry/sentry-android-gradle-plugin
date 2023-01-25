@@ -10,6 +10,7 @@ internal object AgpVersions {
     val VERSION_7_1_2: SemVer = SemVer.parse("7.1.2")
     val VERSION_7_0_0: SemVer = SemVer.parse("7.0.0")
     val VERSION_7_4_0: SemVer = SemVer.parse("7.4.0")
+    val isAGP74: Boolean get() = CURRENT >= VERSION_7_4_0
 }
 
 internal object GradleVersions {

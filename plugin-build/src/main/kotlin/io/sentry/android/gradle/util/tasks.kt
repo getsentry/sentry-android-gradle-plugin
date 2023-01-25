@@ -1,8 +1,14 @@
 package io.sentry.android.gradle.util
 
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
+import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
+import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
+import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
+import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
+import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
+import io.sentry.gradle.common.AndroidVariant
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
@@ -39,4 +45,45 @@ fun TaskProvider<out Task>.hookWithMinifyTasks(
             }
         }
     }
+}
+
+fun TaskProvider<out Task>.hookWithPackageTasks(
+    project: Project,
+    variant: AndroidVariant
+) {
+    val variantName = variant.name
+    val preBundleTaskProvider = withLogging(project.logger, "preBundleTask") {
+        getPreBundleTask(project, variantName)
+    }
+    val packageBundleTaskProvider = withLogging(project.logger, "packageBundleTask") {
+        getPackageBundleTask(project, variantName)
+    }
+
+    // To include proguard uuid file into aab, run before bundle task.
+    preBundleTaskProvider?.configure { task ->
+        task.dependsOn(this)
+    }
+    // The package task will only be executed if the generateUuidTask has already been executed.
+    getPackageProvider(variant)?.configure { task ->
+        task.dependsOn(this)
+    }
+
+    // App bundle has different package task
+    packageBundleTaskProvider?.configure { task ->
+        task.dependsOn(this)
+    }
+}
+
+fun TaskProvider<out Task>.hookWithAssembleTasks(
+    project: Project,
+    variant: AndroidVariant
+) {
+    val bundleTask = withLogging(project.logger, "bundleTask") {
+        getBundleTask(project, variant.name)
+    }
+    getAssembleTaskProvider(variant)?.configure {
+        it.finalizedBy(this)
+    }
+    // if its a bundle aab, assemble might not be executed, so we hook into bundle task
+    bundleTask?.configure { it.finalizedBy(this) }
 }

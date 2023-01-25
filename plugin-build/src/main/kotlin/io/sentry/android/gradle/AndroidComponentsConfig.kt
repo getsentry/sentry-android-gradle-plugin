@@ -22,6 +22,7 @@ import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.util.AgpVersions
+import io.sentry.android.gradle.util.AgpVersions.isAGP74
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.detectSentryAndroidSdk
@@ -29,8 +30,6 @@ import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Project
-
-private val isAGP74: Boolean get() = AgpVersions.CURRENT >= AgpVersions.VERSION_7_4_0
 
 fun AndroidComponentsExtension<*, *, *>.configure(
     project: Project,
@@ -119,18 +118,20 @@ fun AndroidComponentsExtension<*, *, *>.configure(
 
 private fun Variant.configureDependenciesTask(project: Project, extension: SentryPluginExtension) {
     if (isAGP74) {
-        val reportDependenciesTask =
-            SentryExternalDependenciesReportTaskFactory.register(
-                project = project,
-                configurationName = "${name}RuntimeClasspath",
-                attributeValueJar = "android-classes",
-                includeReport = extension.includeDependenciesReport,
-                taskSuffix = name.capitalized
+        if (extension.includeDependenciesReport.get()) {
+            val reportDependenciesTask =
+                SentryExternalDependenciesReportTaskFactory.register(
+                    project = project,
+                    configurationName = "${name}RuntimeClasspath",
+                    attributeValueJar = "android-classes",
+                    includeReport = extension.includeDependenciesReport,
+                    taskSuffix = name.capitalized
+                )
+            configureGeneratedSourcesFor74(
+                variant = this,
+                reportDependenciesTask to DirectoryOutputTask::output
             )
-        configureGeneratedSourcesFor74(
-            variant = this,
-            reportDependenciesTask to DirectoryOutputTask::output
-        )
+        }
     } else {
         project.logger.info {
             "Not configuring AndroidComponentsExtension for ${AgpVersions.CURRENT}, since it does" +

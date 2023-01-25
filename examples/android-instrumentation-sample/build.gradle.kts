@@ -33,7 +33,6 @@ android {
     productFlavors {
         create("staging") {
             dimension = "environment"
-            applicationIdSuffix = ".staging"
             versionNameSuffix = "-staging"
         }
     }
@@ -85,7 +84,7 @@ dependencies {
     implementation(Samples.Room.ktx)
     implementation(Samples.Room.rxjava)
 
-//    implementation(Samples.Timber.timber)
+    implementation(Samples.Timber.timber)
     implementation(Samples.Fragment.fragmentKtx)
     implementation(project(":examples:android-room-lib"))
 

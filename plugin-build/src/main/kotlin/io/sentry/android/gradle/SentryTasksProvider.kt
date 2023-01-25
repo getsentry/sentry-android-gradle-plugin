@@ -75,7 +75,7 @@ internal object SentryTasksProvider {
      * @return the provider if found or null otherwise
      */
     @JvmStatic
-    fun getAssembleTaskProvider(variant: ApplicationVariant): TaskProvider<Task>? =
+    fun getAssembleTaskProvider(variant: AndroidVariant): TaskProvider<out Task>? =
         variant.assembleProvider
 
     /**
@@ -135,9 +135,9 @@ internal object SentryTasksProvider {
      * @return the provider if found or null otherwise
      */
     @JvmStatic
-    fun getPackageProvider(variant: ApplicationVariant): TaskProvider<PackageAndroidArtifact>? =
+    fun getPackageProvider(variant: AndroidVariant): TaskProvider<out Task>? =
         // for App Bundle it uses getPackageBundleTask
-        variant.packageApplicationProvider
+        variant.packageProvider
 
     /**
      * Returns the lintVitalAnalyze task provider
