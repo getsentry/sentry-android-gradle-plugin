@@ -25,7 +25,7 @@ object BootstrapAndroidSdk {
             val platforms = File(sdkPath, "platforms")
             val latest = platforms.listFiles()
                 ?.filter { it.isDirectory }
-                ?.maxOf { it.name.substringAfter("-").toInt() }
+                ?.maxOf { it.name.substringAfter("-").take(2).toInt() }
             if (latest != null) {
                 extra["androidSdkPath"] = "$sdkPath/platforms/android-${latest}/android.jar"
             } else {
