@@ -50,7 +50,6 @@ fun AppExtension.configure(
             }
         )
 
-        // TODO: tests update, shadowjar
         variant.configureDependenciesTask(project, extension, this, mergeAssetsDependants)
 
         variant.configureProguardMappingsTasks(

@@ -6,6 +6,10 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
+/**
+ * Common interface to be used from the main source set to access Android variants.
+ * Its implementations live within the compatibility source sets.
+ */
 interface AndroidVariant {
     val name: String
     val flavorName: String?

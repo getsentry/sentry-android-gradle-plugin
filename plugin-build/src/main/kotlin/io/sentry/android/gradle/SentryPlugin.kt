@@ -48,7 +48,7 @@ class SentryPlugin : Plugin<Project> {
         )
         project.pluginManager.withPlugin("com.android.application") {
             val oldAGPExtension = project.extensions.getByType(AppExtension::class.java)
-            val newAGPExtension =
+            val androidComponentsExt =
                 project.extensions.getByType(AndroidComponentsExtension::class.java)
             val cliExecutable = getSentryCliPath(project)
 
@@ -63,7 +63,7 @@ class SentryPlugin : Plugin<Project> {
             }.getOrNull()
 
             // new API configuration
-            newAGPExtension.configure(
+            androidComponentsExt.configure(
                 project,
                 extension,
                 cliExecutable,

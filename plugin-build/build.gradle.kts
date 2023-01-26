@@ -41,6 +41,8 @@ val shade: Configuration by configurations.creating {
     isCanBeResolved = true
 }
 
+val fixtureClasspath: Configuration by configurations.creating
+
 dependencies {
     agp70.compileOnlyConfigurationName(Libs.GRADLE_API)
     agp70.compileOnlyConfigurationName(Libs.agp("7.0.4"))
@@ -69,6 +71,10 @@ dependencies {
     testImplementation(Libs.AGP)
     testImplementation(agp70.output)
     testImplementation(agp74.output)
+    testImplementation(project(":common"))
+    fixtureClasspath(agp70.output)
+    fixtureClasspath(agp74.output)
+    fixtureClasspath(project(":common"))
     testImplementation(Libs.PROGUARD)
     testImplementation(Libs.JUNIT)
     testImplementation(Libs.MOCKITO_KOTLIN)
@@ -120,6 +126,13 @@ tasks.withType<KotlinCompile>().configureEach {
         languageVersion = "1.4"
         apiVersion = "1.4"
     }
+}
+
+// Append any extra dependencies to the test fixtures via a custom configuration classpath. This
+// allows us to apply additional plugins in a fixture while still leveraging dependency resolution
+// and de-duplication semantics.
+tasks.named("pluginUnderTestMetadata").configure {
+    (this as PluginUnderTestMetadata).pluginClasspath.from(fixtureClasspath)
 }
 
 tasks.withType<Test>().configureEach {

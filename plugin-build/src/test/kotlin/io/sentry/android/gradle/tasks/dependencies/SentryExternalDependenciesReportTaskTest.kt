@@ -50,7 +50,8 @@ class SentryExternalDependenciesReportTaskTest {
 
         task.get().action()
 
-        assertEquals("", output.readText())
+        val outputFile = File(output, SENTRY_DEPENDENCIES_REPORT_OUTPUT)
+        assertEquals("", outputFile.readText())
     }
 
     @Test
@@ -69,7 +70,8 @@ class SentryExternalDependenciesReportTaskTest {
 
         task.get().action()
 
-        assertEquals("", output.readText())
+        val outputFile = File(output, SENTRY_DEPENDENCIES_REPORT_OUTPUT)
+        assertEquals("", outputFile.readText())
     }
 
     private fun File.verifyContents() {
