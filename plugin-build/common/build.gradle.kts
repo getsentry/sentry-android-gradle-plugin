@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version BuildPluginsVersion.KOTLIN
-    id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
+    kotlin("jvm")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 dependencies {
