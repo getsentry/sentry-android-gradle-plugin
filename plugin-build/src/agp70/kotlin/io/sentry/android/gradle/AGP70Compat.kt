@@ -44,3 +44,10 @@ fun <T : InstrumentationParameters> configureInstrumentationFor70(
     )
     variant.setAsmFramesComputationMode(mode)
 }
+
+fun onVariants70(
+    androidComponentsExt: AndroidComponentsExtension<*, *, *>,
+    callback: (Variant) -> Unit
+) {
+    androidComponentsExt.onVariants(callback = callback)
+}

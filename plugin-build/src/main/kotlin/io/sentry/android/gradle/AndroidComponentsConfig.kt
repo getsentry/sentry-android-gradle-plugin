@@ -42,7 +42,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
     val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
     tmpDir.mkdirs()
 
-    onVariants { variant ->
+    configureVariants { variant ->
         if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
             variant.configureDependenciesTask(project, extension)
 
@@ -207,5 +207,17 @@ private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
             mode,
             instrumentationParamsConfig
         )
+    }
+}
+
+/**
+ * onVariants method in AGP 7.4.0 has a binary incompatibility with the prior versions, hence we
+ * have to distinguish here, although the compatibility sources would look exactly the same.
+ */
+private fun AndroidComponentsExtension<*, *, *>.configureVariants(callback: (Variant) -> Unit) {
+    if (isAGP74) {
+        onVariants74(this, callback)
+    } else {
+        onVariants70(this, callback)
     }
 }
