@@ -18,12 +18,12 @@ class SentryGenerateProguardUuidTaskTest {
                 "testGenerateProguardUuid",
                 SentryGenerateProguardUuidTask::class.java
             ) {
-                it.output.set(project.file("dummy/folder/sentry-debug-meta.properties"))
+                it.output.set(project.layout.buildDirectory.dir("dummy/folder/"))
             }
 
         task.get().generateProperties()
 
-        val expectedFile = File(project.projectDir, "dummy/folder/sentry-debug-meta.properties")
+        val expectedFile = File(project.buildDir, "dummy/folder/sentry-debug-meta.properties")
         assertTrue(expectedFile.exists())
         assertTrue(expectedFile.readText().startsWith("io.sentry.ProguardUuids="))
     }
@@ -36,9 +36,9 @@ class SentryGenerateProguardUuidTaskTest {
                 "testGenerateProguardUuid",
                 SentryGenerateProguardUuidTask::class.java
             ) {
-                it.output.set(project.file("dummy/folder/sentry-debug-meta.properties"))
+                it.output.set(project.layout.buildDirectory.dir("dummy/folder/"))
             }
-        val expectedFile = File(project.projectDir, "dummy/folder/sentry-debug-meta.properties")
+        val expectedFile = File(project.buildDir, "dummy/folder/sentry-debug-meta.properties")
 
         task.get().generateProperties()
 

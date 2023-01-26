@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.vanniktech.maven.publish.MavenPublishPluginExtension
 import io.sentry.android.gradle.internal.ASMifyTask
 import io.sentry.android.gradle.internal.BootstrapAndroidSdk
@@ -16,12 +17,15 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
     // we need this plugin in order to include .aar dependencies into a pure java project, which the gradle plugin is
     id("com.stepango.aar2jar") version BuildPluginsVersion.AAR_2_JAR
+    id("com.github.johnrengelman.shadow") version BuildPluginsVersion.SHADOW
 }
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-    google()
+allprojects {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        google()
+    }
 }
 
 BootstrapAndroidSdk.locateAndroidSdk(project, extra)
@@ -29,17 +33,48 @@ BootstrapAndroidSdk.locateAndroidSdk(project, extra)
 val androidSdkPath: String? by extra
 val testImplementationAar by configurations.getting // this converts .aar into .jar dependencies
 
+val agp70: SourceSet by sourceSets.creating
+val agp74: SourceSet by sourceSets.creating
+
+val shade: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+}
+
+val fixtureClasspath: Configuration by configurations.creating
+
 dependencies {
+    agp70.compileOnlyConfigurationName(Libs.GRADLE_API)
+    agp70.compileOnlyConfigurationName(Libs.agp("7.0.4"))
+    agp70.compileOnlyConfigurationName(project(":common"))
+
+    agp74.compileOnlyConfigurationName(Libs.GRADLE_API)
+    agp74.compileOnlyConfigurationName(Libs.agp("7.4.0"))
+    agp74.compileOnlyConfigurationName(project(":common"))
+
     compileOnly(Libs.GRADLE_API)
     compileOnly(Libs.AGP)
+    compileOnly(agp70.output)
+    compileOnly(agp74.output)
     compileOnly(Libs.PROGUARD)
 
     compileOnly(Libs.ASM)
     compileOnly(Libs.ASM_COMMONS)
 
+    // compileOnly since we'll be shading the common dependency into the final jar
+    // but we still need to be able to compile it (this also excludes it from .pom)
+    compileOnly(project(":common"))
+    shade(project(":common"))
+
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(Libs.AGP)
+    testImplementation(agp70.output)
+    testImplementation(agp74.output)
+    testImplementation(project(":common"))
+    fixtureClasspath(agp70.output)
+    fixtureClasspath(agp74.output)
+    fixtureClasspath(project(":common"))
     testImplementation(Libs.PROGUARD)
     testImplementation(Libs.JUNIT)
     testImplementation(Libs.MOCKITO_KOTLIN)
@@ -71,11 +106,19 @@ configure<JavaPluginExtension> {
 tasks.withType<GroovyCompile>().configureEach {
     sourceCompatibility = JavaVersion.VERSION_11.toString()
     targetCompatibility = JavaVersion.VERSION_11.toString()
-    classpath = sourceSets["main"].compileClasspath
+
+    // we don't need the groovy compile task for compatibility source sets
+    val ignoreTask = name.contains("agp", ignoreCase = true)
+    isEnabled = !ignoreTask
+    if (!ignoreTask) {
+        classpath = sourceSets["main"].compileClasspath
+    }
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-    classpath += files(sourceSets["main"].groovy.classesDirectory)
+    if (!name.contains("agp", ignoreCase = true)) {
+        classpath += files(sourceSets["main"].groovy.classesDirectory)
+    }
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
@@ -83,6 +126,13 @@ tasks.withType<KotlinCompile>().configureEach {
         languageVersion = "1.4"
         apiVersion = "1.4"
     }
+}
+
+// Append any extra dependencies to the test fixtures via a custom configuration classpath. This
+// allows us to apply additional plugins in a fixture while still leveraging dependency resolution
+// and de-duplication semantics.
+tasks.named("pluginUnderTestMetadata").configure {
+    (this as PluginUnderTestMetadata).pluginClasspath.from(fixtureClasspath)
 }
 
 tasks.withType<Test>().configureEach {
@@ -96,6 +146,25 @@ gradlePlugin {
             implementationClass = "io.sentry.android.gradle.SentryPlugin"
         }
     }
+}
+
+tasks.withType<Jar> {
+    from(agp70.output)
+    from(agp74.output)
+}
+
+tasks.withType<ShadowJar> {
+    archiveClassifier.set("")
+    configurations = listOf(project.configurations.getByName("shade"))
+
+    exclude("/kotlin/**")
+    exclude("/groovy**")
+    exclude("/org/**")
+}
+
+artifacts {
+    runtimeOnly(tasks.named("shadowJar"))
+    archives(tasks.named("shadowJar"))
 }
 
 ktlint {
@@ -187,14 +256,17 @@ fun shouldDownloadSentryCli(): Boolean {
             logger.lifecycle("Sentry CLI is missing")
             true
         }
+
         !actualSpec.exists() -> {
             logger.lifecycle("Sentry CLI version specification is missing")
             true
         }
+
         expectedSpec.readText() != actualSpec.readText() -> {
             logger.lifecycle("Downloaded Sentry CLI version specification doesn't match")
             true
         }
+
         else -> false
     }
 }

@@ -3,6 +3,7 @@ package io.sentry.android.gradle.tasks
 import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
+import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -12,6 +13,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.TaskProvider
 
 abstract class SentryUploadProguardMappingsTask : Exec() {
 
@@ -119,6 +121,36 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
                 "io.sentry.ProguardUuids property is missing"
             }
             return content.removePrefix(PROPERTY_PREFIX)
+        }
+
+        fun register(
+            project: Project,
+            cliExecutable: String,
+            sentryProperties: String?,
+            generateUuidTask: Provider<SentryGenerateProguardUuidTask>,
+            mappingFiles: Provider<FileCollection>,
+            sentryOrg: String?,
+            sentryProject: String?,
+            autoUploadProguardMapping: Property<Boolean>,
+            taskSuffix: String = ""
+        ): TaskProvider<SentryUploadProguardMappingsTask> {
+            val uploadSentryProguardMappingsTask = project.tasks.register(
+                "uploadSentryProguardMappings$taskSuffix",
+                SentryUploadProguardMappingsTask::class.java
+            ) { task ->
+                task.dependsOn(generateUuidTask)
+                task.workingDir(project.rootDir)
+                task.cliExecutable.set(cliExecutable)
+                task.sentryProperties.set(
+                    sentryProperties?.let { file -> project.file(file) }
+                )
+                task.uuidFile.set(generateUuidTask.flatMap { it.outputFile })
+                task.mappingsFiles = mappingFiles
+                task.autoUploadProguardMapping.set(autoUploadProguardMapping)
+                task.sentryOrganization.set(sentryOrg)
+                task.sentryProject.set(sentryProject)
+            }
+            return uploadSentryProguardMappingsTask
         }
     }
 }

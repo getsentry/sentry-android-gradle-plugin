@@ -1,7 +1,8 @@
 package io.sentry.android.gradle.util
 
-import com.android.build.gradle.api.ApplicationVariant
+import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.util.GroovyCompat.isDexguardEnabledForVariant
+import io.sentry.gradle.common.AndroidVariant
 import java.io.File
 import java.util.Locale
 import org.gradle.api.Project
@@ -30,7 +31,7 @@ internal object SentryPluginUtils {
 
     fun isMinificationEnabled(
         project: Project,
-        variant: ApplicationVariant,
+        variant: AndroidVariant,
         experimentalGuardsquareSupport: Boolean = false
     ): Boolean {
         if (experimentalGuardsquareSupport) {
@@ -50,12 +51,23 @@ internal object SentryPluginUtils {
                 return true
             }
         }
-        return variant.buildType.isMinifyEnabled
+        return variant.isMinifyEnabled
     }
 
     fun getAndDeleteFile(property: Provider<RegularFile>): File {
         val file = property.get().asFile
         file.delete()
         return file
+    }
+
+    fun isVariantAllowed(
+        extension: SentryPluginExtension,
+        variantName: String,
+        flavorName: String?,
+        buildType: String?
+    ): Boolean {
+        return variantName !in extension.ignoredVariants.get() &&
+            flavorName !in extension.ignoredFlavors.get() &&
+            buildType !in extension.ignoredBuildTypes.get()
     }
 }

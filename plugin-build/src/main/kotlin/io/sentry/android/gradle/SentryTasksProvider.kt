@@ -2,10 +2,9 @@ package io.sentry.android.gradle
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
-import com.android.build.gradle.tasks.PackageAndroidArtifact
-import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.util.GroovyCompat.isDexguardAvailable
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
+import io.sentry.gradle.common.AndroidVariant
 import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -75,7 +74,7 @@ internal object SentryTasksProvider {
      * @return the provider if found or null otherwise
      */
     @JvmStatic
-    fun getAssembleTaskProvider(variant: ApplicationVariant): TaskProvider<Task>? =
+    fun getAssembleTaskProvider(variant: AndroidVariant): TaskProvider<out Task>? =
         variant.assembleProvider
 
     /**
@@ -95,7 +94,7 @@ internal object SentryTasksProvider {
     @JvmStatic
     fun getMappingFileProvider(
         project: Project,
-        variant: ApplicationVariant,
+        variant: AndroidVariant,
         experimentalGuardsquareSupport: Boolean = false
     ): Provider<FileCollection> {
         if (experimentalGuardsquareSupport) {
@@ -126,7 +125,7 @@ internal object SentryTasksProvider {
                 return project.provider { fileCollection }
             }
         }
-        return variant.mappingFileProvider
+        return variant.mappingFileProvider(project)
     }
 
     /**
@@ -135,9 +134,9 @@ internal object SentryTasksProvider {
      * @return the provider if found or null otherwise
      */
     @JvmStatic
-    fun getPackageProvider(variant: ApplicationVariant): TaskProvider<PackageAndroidArtifact>? =
+    fun getPackageProvider(variant: AndroidVariant): TaskProvider<out Task>? =
         // for App Bundle it uses getPackageBundleTask
-        variant.packageApplicationProvider
+        variant.packageProvider
 
     /**
      * Returns the lintVitalAnalyze task provider
