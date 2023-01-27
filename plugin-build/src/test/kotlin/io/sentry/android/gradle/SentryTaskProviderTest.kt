@@ -150,14 +150,20 @@ class SentryTaskProviderTest {
     }
 
     @Test
-    fun `getAssembleTaskProvider works correctly for all the variants`() {
+    fun `getAssembleTaskProvider works correctly for all the variants AGP70`() {
         val android = getAndroidExtFromProject()
 
         android.applicationVariants.configureEach {
             if (it.name == "debug") {
-                assertEquals("assembleDebug", getAssembleTaskProvider(it)?.get()?.name)
+                assertEquals(
+                    "assembleDebug",
+                    getAssembleTaskProvider(AndroidVariant70(it))?.get()?.name
+                )
             } else {
-                assertEquals("assembleRelease", getAssembleTaskProvider(it)?.get()?.name)
+                assertEquals(
+                    "assembleRelease",
+                    getAssembleTaskProvider(AndroidVariant70(it))?.get()?.name
+                )
             }
         }
     }
@@ -181,9 +187,9 @@ class SentryTaskProviderTest {
 
         android.applicationVariants.configureEach {
             if (it.name == "debug") {
-                assertEquals("packageDebug", getPackageProvider(it)?.name)
+                assertEquals("packageDebug", getPackageProvider(AndroidVariant70(it))?.name)
             } else {
-                assertEquals("packageRelease", getPackageProvider(it)?.name)
+                assertEquals("packageRelease", getPackageProvider(AndroidVariant70(it))?.name)
             }
         }
     }

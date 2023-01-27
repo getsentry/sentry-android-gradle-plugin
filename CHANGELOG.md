@@ -2,11 +2,15 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fix AGP 7.4.0 incompatibility when merging assets ([#431](https://github.com/getsentry/sentry-android-gradle-plugin/pull/431))
+
 ### Dependencies
 
-- Bump Android SDK from v6.11.0 to v6.12.0 ([#427](https://github.com/getsentry/sentry-android-gradle-plugin/pull/427))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6120)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.11.0...6.12.0)
+- Bump Android SDK from v6.11.0 to v6.13.0 ([#427](https://github.com/getsentry/sentry-android-gradle-plugin/pull/427), [#432](https://github.com/getsentry/sentry-android-gradle-plugin/pull/432))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6130)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.11.0...6.13.0)
 
 ## 3.4.0
 
