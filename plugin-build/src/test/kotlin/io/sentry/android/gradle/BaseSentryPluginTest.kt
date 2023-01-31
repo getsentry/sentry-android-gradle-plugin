@@ -104,8 +104,8 @@ abstract class BaseSentryPluginTest(
             arrayOf("7.3.0", "7.5"),
             arrayOf("7.4.0", "7.5"),
             arrayOf("7.4.0", "7.6"),
-            arrayOf("8.0.0-beta01", "7.6"),
-            arrayOf("8.1.0-alpha02", "7.6")
+            arrayOf("8.0.0-beta01", "8.0-rc-1"),
+            arrayOf("8.1.0-alpha02", "8.0-rc-1")
         )
 
         internal fun GradleRunner.appendArguments(vararg arguments: String) =

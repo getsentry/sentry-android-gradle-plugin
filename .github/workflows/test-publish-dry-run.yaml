@@ -39,10 +39,10 @@ jobs:
             gradle: "7.6"
             java: "11"
           - agp: "8.0.0-beta01"
-            gradle: "7.6"
+            gradle: "8.0-rc-1"
             java: "17"
           - agp: "8.1.0-alpha02"
-            gradle: "7.6"
+            gradle: "8.0-rc-1"
             java: "17"
 
     name: Publish Dry Run - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
