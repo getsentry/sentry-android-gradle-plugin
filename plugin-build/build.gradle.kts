@@ -16,7 +16,7 @@ plugins {
     id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
     // we need this plugin in order to include .aar dependencies into a pure java project, which the gradle plugin is
-    id("com.stepango.aar2jar") version BuildPluginsVersion.AAR_2_JAR
+    id("io.sentry.android.gradle.aar2jar")
     id("com.github.johnrengelman.shadow") version BuildPluginsVersion.SHADOW
 }
 
@@ -86,7 +86,7 @@ dependencies {
     testImplementationAar(Libs.SQLITE)
     testImplementationAar(Libs.SQLITE_FRAMEWORK)
     testRuntimeOnly(files(androidSdkPath))
-    testImplementationAar(Libs.SENTRY_ANDROID)
+    testRuntimeOnlyAar(Libs.SENTRY_ANDROID)
 
     testRuntimeOnly(
         files(
