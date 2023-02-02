@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fix failing room 2.5.0 instrumentation ([#435](https://github.com/getsentry/sentry-android-gradle-plugin/pull/435))
+
 ### Dependencies
 
 - Bump CLI from v2.11.0 to v2.12.0 ([#433](https://github.com/getsentry/sentry-android-gradle-plugin/pull/433))
