@@ -74,8 +74,14 @@ abstract class SpanAddingClassVisitorFactory :
 
             val sentryModules = parameters.get().sentryModulesService.get().sentryModules
             val externalModules = parameters.get().sentryModulesService.get().externalModules
-            val androidXSqliteFrameWorkModule = DefaultModuleIdentifier.newId("androidx.sqlite", "sqlite-framework")
-            val androidXSqliteFrameWorkVersion = externalModules.getOrDefault(androidXSqliteFrameWorkModule, SemVer())
+            val androidXSqliteFrameWorkModule = DefaultModuleIdentifier.newId(
+                "androidx.sqlite",
+                "sqlite-framework"
+            )
+            val androidXSqliteFrameWorkVersion = externalModules.getOrDefault(
+                androidXSqliteFrameWorkModule,
+                SemVer()
+            )
 
             SentryPlugin.logger.info { "Read sentry modules: $sentryModules" }
             /**
