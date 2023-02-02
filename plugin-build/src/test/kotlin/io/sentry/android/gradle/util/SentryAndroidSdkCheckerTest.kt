@@ -65,7 +65,7 @@ class SentryAndroidSdkCheckerTest {
             return project
         }
 
-        fun getModules() = sentryModulesServiceProvider.get().modules
+        fun getModules() = sentryModulesServiceProvider.get().sentryModules
     }
 
     @get:Rule

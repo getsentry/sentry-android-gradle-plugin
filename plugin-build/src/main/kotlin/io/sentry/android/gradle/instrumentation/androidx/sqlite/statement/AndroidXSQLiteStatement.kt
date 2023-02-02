@@ -10,10 +10,11 @@ import io.sentry.android.gradle.instrumentation.MethodInstrumentable
 import io.sentry.android.gradle.instrumentation.ReturnType
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.visitor.ExecuteStatementMethodVisitor
+import io.sentry.android.gradle.util.SemVer
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 
-class AndroidXSQLiteStatement : ClassInstrumentable {
+class AndroidXSQLiteStatement(private val androidXSqliteVersion: SemVer) : ClassInstrumentable {
 
     override val fqName: String get() = "androidx.sqlite.db.framework.FrameworkSQLiteStatement"
 
@@ -26,12 +27,15 @@ class AndroidXSQLiteStatement : ClassInstrumentable {
         apiVersion = apiVersion,
         classVisitor = originalVisitor,
         className = fqName.substringAfterLast('.'),
-        methodInstrumentables = listOf(ExecuteInsert(), ExecuteUpdateDelete()),
+        methodInstrumentables = listOf(
+            ExecuteInsert(androidXSqliteVersion),
+            ExecuteUpdateDelete(androidXSqliteVersion)
+        ),
         parameters = parameters
     )
 }
 
-class ExecuteInsert : MethodInstrumentable {
+class ExecuteInsert(private val androidXSqliteVersion: SemVer) : MethodInstrumentable {
     override val fqName: String get() = "executeInsert"
 
     override fun getVisitor(
@@ -44,11 +48,12 @@ class ExecuteInsert : MethodInstrumentable {
         apiVersion,
         originalVisitor,
         instrumentableContext.access,
-        instrumentableContext.descriptor
+        instrumentableContext.descriptor,
+        androidXSqliteVersion
     )
 }
 
-class ExecuteUpdateDelete : MethodInstrumentable {
+class ExecuteUpdateDelete(private val androidXSqliteVersion: SemVer) : MethodInstrumentable {
     override val fqName: String get() = "executeUpdateDelete"
 
     override fun getVisitor(
@@ -61,6 +66,7 @@ class ExecuteUpdateDelete : MethodInstrumentable {
         apiVersion,
         originalVisitor,
         instrumentableContext.access,
-        instrumentableContext.descriptor
+        instrumentableContext.descriptor,
+        androidXSqliteVersion
     )
 }

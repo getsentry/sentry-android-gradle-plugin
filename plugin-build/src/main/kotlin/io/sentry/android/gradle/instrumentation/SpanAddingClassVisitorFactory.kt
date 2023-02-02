@@ -22,6 +22,8 @@ import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.util.info
 import java.io.File
+import org.gradle.api.artifacts.ModuleIdentifier
+import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
@@ -70,7 +72,11 @@ abstract class SpanAddingClassVisitorFactory :
                 return memoized
             }
 
-            val sentryModules = parameters.get().sentryModulesService.get().modules
+            val sentryModules = parameters.get().sentryModulesService.get().sentryModules
+            val externalModules = parameters.get().sentryModulesService.get().externalModules
+            val androidXSqliteFrameWorkModule = DefaultModuleIdentifier.newId("androidx.sqlite", "sqlite-framework")
+            val androidXSqliteFrameWorkVersion = externalModules.getOrDefault(androidXSqliteFrameWorkModule, SemVer())
+
             SentryPlugin.logger.info { "Read sentry modules: $sentryModules" }
             /**
              * When adding a new instrumentable to the list below, do not forget to add a new
@@ -82,7 +88,7 @@ abstract class SpanAddingClassVisitorFactory :
                     AndroidXSQLiteDatabase().takeIf {
                         isDatabaseInstrEnabled(sentryModules, parameters.get())
                     },
-                    AndroidXSQLiteStatement().takeIf {
+                    AndroidXSQLiteStatement(androidXSqliteFrameWorkVersion).takeIf {
                         isDatabaseInstrEnabled(sentryModules, parameters.get())
                     },
                     AndroidXRoomDao().takeIf {
@@ -115,7 +121,7 @@ abstract class SpanAddingClassVisitorFactory :
         }
 
     private fun isDatabaseInstrEnabled(
-        sentryModules: Map<String, SemVer>,
+        sentryModules: Map<ModuleIdentifier, SemVer>,
         parameters: SpanAddingParameters
     ): Boolean =
         sentryModules.isAtLeast(
@@ -124,7 +130,7 @@ abstract class SpanAddingClassVisitorFactory :
         ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
 
     private fun isFileIOInstrEnabled(
-        sentryModules: Map<String, SemVer>,
+        sentryModules: Map<ModuleIdentifier, SemVer>,
         parameters: SpanAddingParameters
     ): Boolean =
         sentryModules.isAtLeast(
@@ -133,7 +139,7 @@ abstract class SpanAddingClassVisitorFactory :
         ) && parameters.features.get().contains(InstrumentationFeature.FILE_IO)
 
     private fun isOkHttpInstrEnabled(
-        sentryModules: Map<String, SemVer>,
+        sentryModules: Map<ModuleIdentifier, SemVer>,
         parameters: SpanAddingParameters
     ): Boolean = sentryModules.isAtLeast(
         SentryModules.SENTRY_ANDROID_OKHTTP,
@@ -141,7 +147,7 @@ abstract class SpanAddingClassVisitorFactory :
     ) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
 
     private fun isComposeInstrEnabled(
-        sentryModules: Map<String, SemVer>,
+        sentryModules: Map<ModuleIdentifier, SemVer>,
         parameters: SpanAddingParameters
     ): Boolean =
         sentryModules.isAtLeast(
@@ -149,7 +155,10 @@ abstract class SpanAddingClassVisitorFactory :
             SentryVersions.VERSION_COMPOSE
         ) && parameters.features.get().contains(InstrumentationFeature.COMPOSE)
 
-    private fun Map<String, SemVer>.isAtLeast(module: String, minVersion: SemVer): Boolean =
+    private fun Map<ModuleIdentifier, SemVer>.isAtLeast(
+        module: ModuleIdentifier,
+        minVersion: SemVer
+    ): Boolean =
         getOrDefault(module, SentryVersions.VERSION_DEFAULT) >= minVersion
 
     override fun createClassVisitor(

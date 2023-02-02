@@ -104,7 +104,7 @@ class SentryPluginCheckAndroidSdkTest(
           println(
             "SENTRY MODULES: " + BuildServicesKt
               .getBuildService(project.gradle.sharedServices, SentryModulesService.class)
-              .get().modules
+              .get().sentryModules
           )
         }
         """.trimIndent()
