@@ -12,6 +12,7 @@ import io.sentry.android.gradle.instrumentation.fakes.TestSpanAddingParameters
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
+import io.sentry.android.gradle.util.SemVer
 import java.io.FileInputStream
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -100,7 +101,12 @@ class VisitorTest(
         @JvmStatic
         fun parameters() = listOf(
             arrayOf("androidxSqlite", "FrameworkSQLiteDatabase", AndroidXSQLiteDatabase(), null),
-            arrayOf("androidxSqlite", "FrameworkSQLiteStatement", AndroidXSQLiteStatement(), null),
+            arrayOf(
+                "androidxSqlite",
+                "FrameworkSQLiteStatement",
+                AndroidXSQLiteStatement(SemVer(2, 3, 0)),
+                null
+            ),
             roomDaoTestParameters("DeleteAndReturnUnit"),
             roomDaoTestParameters("InsertAndReturnLong"),
             roomDaoTestParameters("InsertAndReturnUnit"),

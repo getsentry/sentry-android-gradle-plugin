@@ -3,6 +3,7 @@ package io.sentry.android.gradle.util
 import com.android.builder.model.Version
 import io.sentry.android.gradle.util.SemVer.Companion.equals
 import kotlin.math.min
+import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.util.GradleVersion
 
 internal object AgpVersions {
@@ -29,9 +30,18 @@ internal object SentryVersions {
 }
 
 internal object SentryModules {
-    internal const val SENTRY_ANDROID_CORE = "sentry-android-core"
-    internal const val SENTRY_ANDROID_OKHTTP = "sentry-android-okhttp"
-    internal const val SENTRY_ANDROID_COMPOSE = "sentry-compose-android"
+    internal val SENTRY_ANDROID_CORE = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-android-core"
+    )
+    internal val SENTRY_ANDROID_OKHTTP = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-android-okhttp"
+    )
+    internal val SENTRY_ANDROID_COMPOSE = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-compose-android"
+    )
 }
 
 /**

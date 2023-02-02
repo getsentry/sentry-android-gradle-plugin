@@ -4,6 +4,7 @@ import io.sentry.android.gradle.instrumentation.AbstractSpanAddingMethodVisitor
 import io.sentry.android.gradle.instrumentation.ReturnType
 import io.sentry.android.gradle.instrumentation.SpanOperations
 import io.sentry.android.gradle.instrumentation.util.Types
+import io.sentry.android.gradle.util.SemVer
 import kotlin.properties.Delegates
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
@@ -22,7 +23,8 @@ class ExecuteStatementMethodVisitor(
     api: Int,
     private val originalVisitor: MethodVisitor,
     access: Int,
-    descriptor: String?
+    descriptor: String?,
+    private val androidXSqliteVersion: SemVer
 ) : AbstractSpanAddingMethodVisitor(
     api = api,
     originalVisitor = originalVisitor,
@@ -105,16 +107,19 @@ class ExecuteStatementMethodVisitor(
     }
 
     /*
-    String description = mDelegate.toString();
+    String description = delegate.toString();
     int index = description.indexOf(':');
     description = description.substring(index + 2);
      */
     private fun MethodVisitor.visitExtractDescription() {
         visitVarInsn(ALOAD, 0) // this
+
+        // androidx.sqlite changed the name of the variable in version 2.3.0
+        val name = if (androidXSqliteVersion >= SemVer(2, 3, 0)) "delegate" else "mDelegate"
         visitFieldInsn(
             GETFIELD,
             "androidx/sqlite/db/framework/FrameworkSQLiteStatement",
-            "mDelegate",
+            name,
             "Landroid/database/sqlite/SQLiteStatement;"
         )
         visitMethodInsn(

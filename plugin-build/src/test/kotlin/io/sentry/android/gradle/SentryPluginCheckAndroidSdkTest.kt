@@ -90,8 +90,10 @@ class SentryPluginCheckAndroidSdkTest(
             .build()
 
         assertTrue {
-            "SENTRY MODULES: [sentry-android:5.4.0, sentry-android-core:5.4.0, " +
-                "sentry:5.4.0, sentry-android-ndk:5.4.0]" in result.output
+            "SENTRY MODULES: [io.sentry:sentry-android:5.4.0, " +
+                "io.sentry:sentry-android-core:5.4.0, " +
+                "io.sentry:sentry:5.4.0, " +
+                "io.sentry:sentry-android-ndk:5.4.0]" in result.output
         }
     }
 
@@ -104,7 +106,7 @@ class SentryPluginCheckAndroidSdkTest(
           println(
             "SENTRY MODULES: " + BuildServicesKt
               .getBuildService(project.gradle.sharedServices, SentryModulesService.class)
-              .get().modules
+              .get().sentryModules
           )
         }
         """.trimIndent()
