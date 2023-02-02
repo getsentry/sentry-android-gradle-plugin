@@ -15,6 +15,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvableDependencies
 import org.gradle.api.artifacts.result.ResolutionResult
 import org.gradle.api.artifacts.result.ResolvedComponentResult
+import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.internal.artifacts.DefaultModuleVersionIdentifier
 import org.gradle.api.provider.Provider
 import org.gradle.testfixtures.ProjectBuilder
@@ -126,13 +127,14 @@ class SentryAndroidSdkCheckerTest {
             fixture.sentryModulesServiceProvider
         )
 
+        val moduleIdentifier = DefaultModuleIdentifier.newId("io.sentry", "sentry-android-core")
         assertTrue {
             fixture.getModules().size == 1 &&
-                fixture.getModules()["sentry-android-core"] == SemVer()
+                fixture.getModules()[moduleIdentifier] == SemVer()
         }
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] Detected Sentry modules {sentry-android-core=0.0.0} for variant: debug," +
+                "[sentry] Detected Sentry modules {io.sentry:sentry-android-core=0.0.0} for variant: debug," +
                 " config: debugRuntimeClasspath"
         }
     }
@@ -156,13 +158,14 @@ class SentryAndroidSdkCheckerTest {
             fixture.sentryModulesServiceProvider
         )
 
+        val moduleIdentifier = DefaultModuleIdentifier.newId("io.sentry", "sentry-android-core")
         assertTrue {
             fixture.getModules().size == 1 &&
-                fixture.getModules()["sentry-android-core"] == SemVer(4, 1, 0)
+                fixture.getModules()[moduleIdentifier] == SemVer(4, 1, 0)
         }
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] Detected Sentry modules {sentry-android-core=4.1.0} for variant: debug," +
+                "[sentry] Detected Sentry modules {io.sentry:sentry-android-core=4.1.0} for variant: debug," +
                 " config: debugRuntimeClasspath"
         }
     }
@@ -207,17 +210,23 @@ class SentryAndroidSdkCheckerTest {
             fixture.sentryModulesServiceProvider
         )
 
+        val sentryAndroidModule = DefaultModuleIdentifier
+            .newId("io.sentry", "sentry-android")
+        val sentryAndroidCoreModule = DefaultModuleIdentifier
+            .newId("io.sentry", "sentry-android-core")
+        val sentryAndroidOkHttpModule = DefaultModuleIdentifier
+            .newId("io.sentry", "sentry-android-okhttp")
         assertTrue {
             fixture.getModules().size == 3 &&
-                fixture.getModules()["sentry-android"] == SemVer(5, 5, 0) &&
-                fixture.getModules()["sentry-android-core"] == SemVer(5, 5, 0) &&
-                fixture.getModules()["sentry-android-okhttp"] == SemVer(6, 0, 0)
+                fixture.getModules()[sentryAndroidModule] == SemVer(5, 5, 0) &&
+                fixture.getModules()[sentryAndroidCoreModule] == SemVer(5, 5, 0) &&
+                fixture.getModules()[sentryAndroidOkHttpModule] == SemVer(6, 0, 0)
         }
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] Detected Sentry modules {sentry-android=5.5.0, " +
-                "sentry-android-core=5.5.0, sentry-android-okhttp=6.0.0} for variant: debug," +
-                " config: debugRuntimeClasspath"
+                "[sentry] Detected Sentry modules {io.sentry:sentry-android=5.5.0, " +
+                "io.sentry:sentry-android-core=5.5.0, io.sentry:sentry-android-okhttp=6.0.0} " +
+                "for variant: debug, config: debugRuntimeClasspath"
         }
     }
 }
