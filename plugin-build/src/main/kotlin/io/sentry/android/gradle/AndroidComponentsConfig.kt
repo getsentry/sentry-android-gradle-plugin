@@ -25,7 +25,7 @@ import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
-import io.sentry.android.gradle.util.detectSentryAndroidSdk
+import io.sentry.android.gradle.util.collectModules
 import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.info
 import java.io.File
@@ -64,7 +64,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                  * are run in parallel.
                  */
                 val sentryModulesService = SentryModulesService.register(project)
-                project.detectSentryAndroidSdk(
+                project.collectModules(
                     "${variant.name}RuntimeClasspath",
                     variant.name,
                     sentryModulesService

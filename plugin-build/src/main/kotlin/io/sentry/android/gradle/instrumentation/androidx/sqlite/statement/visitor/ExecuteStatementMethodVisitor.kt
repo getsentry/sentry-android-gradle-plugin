@@ -113,6 +113,8 @@ class ExecuteStatementMethodVisitor(
      */
     private fun MethodVisitor.visitExtractDescription() {
         visitVarInsn(ALOAD, 0) // this
+
+        // androidx.sqlite changed the name of the variable in version 2.3.0
         val name = if (androidXSqliteVersion >= SemVer(2, 3, 0)) "delegate" else "mDelegate"
         visitFieldInsn(
             GETFIELD,

@@ -8,7 +8,7 @@ import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.logging.Logger
 import org.gradle.api.provider.Provider
 
-fun Project.detectSentryAndroidSdk(
+fun Project.collectModules(
     configurationName: String,
     variantName: String,
     sentryModulesService: Provider<SentryModulesService>
