@@ -2,6 +2,7 @@
 
 package io.sentry.android.gradle
 
+import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationParameters
@@ -20,6 +21,7 @@ import io.sentry.android.gradle.tasks.DirectoryOutputTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
+import io.sentry.android.gradle.tasks.io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
@@ -87,6 +89,18 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     params.sentryModulesService.setDisallowChanges(sentryModulesService)
                     params.tmpDir.set(tmpDir)
                 }
+
+                val manifestUpdater = project.tasks.register("${variant.name}SentryGenerateIntegrationListTask", SentryGenerateIntegrationListTask::class.java) {
+                    it.integrations.set(project.objects.listProperty(String::class.java).apply {
+                        addAll(extension.tracingInstrumentation.features.get().map { it.name })
+                    })
+                }
+
+                variant.artifacts.use(manifestUpdater)
+                    .wiredWithFiles(
+                        SentryGenerateIntegrationListTask::mergedManifest,
+                        SentryGenerateIntegrationListTask::updatedManifest)
+                    .toTransform(SingleArtifact.MERGED_MANIFEST)
 
                 /**
                  * This necessary to address the issue when target app uses a multi-release jar
