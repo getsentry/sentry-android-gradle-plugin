@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Write enabled instrumentations and proguard uuid to manifest ([#441](https://github.com/getsentry/sentry-android-gradle-plugin/pull/441))
+
 ### Dependencies
 
 - Bump Android SDK from v6.13.0 to v6.13.1 ([#437](https://github.com/getsentry/sentry-android-gradle-plugin/pull/437))
