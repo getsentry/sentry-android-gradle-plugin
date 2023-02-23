@@ -1,14 +1,14 @@
-package io.sentry.android.gradle.tasks
+package io.sentry.android.gradle
 
-import org.w3c.dom.Document
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
+import org.w3c.dom.Document
 
-internal class ManifestModifier {
+internal class ManifestWriter {
 
     companion object {
         private const val TAG_APPLICATION = "application"
@@ -17,7 +17,12 @@ internal class ManifestModifier {
         private const val ATTR_VALUE = "android:value"
     }
 
-    fun writeMetaData(manifestSource: File, manifestTarget: File, name: String, integrationsList: String) {
+    fun writeMetaData(
+        manifestSource: File,
+        manifestTarget: File,
+        name: String,
+        integrationsList: String
+    ) {
         openAndroidManifestXMLDocument(manifestSource) { document ->
             val application = document.getElementsByTagName(TAG_APPLICATION).item(0)
             val metadata = document.createElement(TAG_META_DATA)

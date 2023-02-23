@@ -112,7 +112,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     companion object {
         private const val PROPERTY_PREFIX = "io.sentry.ProguardUuids="
 
-        internal fun readUuidFromFile(file: File): String {
+        fun readUuidFromFile(file: File): String {
             check(file.exists()) {
                 "UUID properties file is missing"
             }

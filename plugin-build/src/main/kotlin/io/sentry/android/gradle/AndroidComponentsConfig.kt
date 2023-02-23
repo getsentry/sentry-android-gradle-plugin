@@ -22,6 +22,7 @@ import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
 import io.sentry.android.gradle.tasks.io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
+import io.sentry.android.gradle.tasks.io.sentry.android.gradle.tasks.SentryWriteProguardUUIDToManifestTask
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
@@ -90,17 +91,21 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     params.tmpDir.set(tmpDir)
                 }
 
-                val manifestUpdater = project.tasks.register("${variant.name}SentryGenerateIntegrationListTask", SentryGenerateIntegrationListTask::class.java) {
-                    it.integrations.set(project.objects.listProperty(String::class.java).apply {
-                        addAll(extension.tracingInstrumentation.features.get().map { it.name })
-                    })
+                val manifestUpdater = project.tasks.register(
+                    "${variant.name}SentryGenerateIntegrationListTask",
+                    SentryGenerateIntegrationListTask::class.java
+                ) {
+                    it.integrations.set(
+                        project.objects.listProperty(String::class.java).apply {
+                            addAll(extension.tracingInstrumentation.features.get().map { it.name })
+                        }
+                    )
                 }
 
-                variant.artifacts.use(manifestUpdater)
-                    .wiredWithFiles(
-                        SentryGenerateIntegrationListTask::mergedManifest,
-                        SentryGenerateIntegrationListTask::updatedManifest)
-                    .toTransform(SingleArtifact.MERGED_MANIFEST)
+                variant.artifacts.use(manifestUpdater).wiredWithFiles(
+                    SentryGenerateIntegrationListTask::mergedManifest,
+                    SentryGenerateIntegrationListTask::updatedManifest
+                ).toTransform(SingleArtifact.MERGED_MANIFEST)
 
                 /**
                  * This necessary to address the issue when target app uses a multi-release jar
@@ -177,6 +182,17 @@ private fun Variant.configureProguardMappingsTasks(
                 variant = this,
                 generateUuidTask to DirectoryOutputTask::output
             )
+
+            val manifestUpdater = project.tasks.register(
+                variant.name + "ManifestUpdater",
+                SentryWriteProguardUUIDToManifestTask::class.java
+            ) {
+                it.gitInfoFile.set(generateUuidTask.flatMap { it.outputFile })
+            }
+            artifacts.use(manifestUpdater).wiredWithFiles(
+                SentryWriteProguardUUIDToManifestTask::mergedManifest,
+                SentryWriteProguardUUIDToManifestTask::updatedManifest
+            ).toTransform(SingleArtifact.MERGED_MANIFEST)
 
             val uploadMappingsTask = SentryUploadProguardMappingsTask.register(
                 project = project,
