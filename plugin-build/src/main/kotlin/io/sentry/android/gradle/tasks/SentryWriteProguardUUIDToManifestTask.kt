@@ -1,7 +1,6 @@
-package io.sentry.android.gradle.tasks.io.sentry.android.gradle.tasks
+package io.sentry.android.gradle.tasks
 
-import io.sentry.android.gradle.tasks.io.sentry.android.gradle.ManifestWriter
-import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
+import io.sentry.android.gradle.ManifestWriter
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
