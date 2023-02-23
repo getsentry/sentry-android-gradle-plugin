@@ -21,8 +21,8 @@ import io.sentry.android.gradle.tasks.DirectoryOutputTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
-import io.sentry.android.gradle.tasks.io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
-import io.sentry.android.gradle.tasks.io.sentry.android.gradle.tasks.SentryWriteProguardUUIDToManifestTask
+import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
+import io.sentry.android.gradle.tasks.SentryWriteProguardUUIDToManifestTask
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
