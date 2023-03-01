@@ -13,7 +13,7 @@ import org.gradle.api.tasks.TaskAction
 abstract class SentryGenerateIntegrationListTask : DefaultTask() {
 
     companion object {
-        private const val TAG_INTEGRATIONS = "io.sentry.integrations"
+        private const val ATTR_INTEGRATIONS = "io.sentry.integrations"
     }
 
     init {
@@ -44,7 +44,7 @@ abstract class SentryGenerateIntegrationListTask : DefaultTask() {
             manifestWriter.writeMetaData(
                 manifestFile,
                 updatedManifestFile,
-                TAG_INTEGRATIONS,
+                ATTR_INTEGRATIONS,
                 integrationsList
             )
         }

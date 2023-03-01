@@ -10,11 +10,11 @@ import org.gradle.api.tasks.TaskAction
 abstract class SentryWriteProguardUUIDToManifestTask : DefaultTask() {
 
     companion object {
-        private const val TAG_PROGUARD_UUID = "io.sentry.ProguardUuids"
+        private const val ATTR_PROGUARD_UUID = "io.sentry.ProguardUuids"
     }
 
     @get:InputFile
-    abstract val gitInfoFile: RegularFileProperty
+    abstract val proguardUUIDFile: RegularFileProperty
 
     @get:InputFile
     abstract val mergedManifest: RegularFileProperty
@@ -24,14 +24,14 @@ abstract class SentryWriteProguardUUIDToManifestTask : DefaultTask() {
 
     @TaskAction
     fun writeProguardUUIDToManifest() {
-        val uuid = SentryUploadProguardMappingsTask.readUuidFromFile(gitInfoFile.get().asFile)
+        val uuid = SentryUploadProguardMappingsTask.readUuidFromFile(proguardUUIDFile.get().asFile)
         val manifestFile = mergedManifest.asFile.get()
         val updatedManifestFile = updatedManifest.asFile.get()
         val manifestWriter = ManifestWriter()
         manifestWriter.writeMetaData(
             manifestFile,
             updatedManifestFile,
-            TAG_PROGUARD_UUID,
+            ATTR_PROGUARD_UUID,
             uuid
         )
     }

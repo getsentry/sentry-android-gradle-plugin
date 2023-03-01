@@ -21,13 +21,13 @@ internal class ManifestWriter {
         manifestSource: File,
         manifestTarget: File,
         name: String,
-        integrationsList: String
+        value: String
     ) {
         openAndroidManifestXMLDocument(manifestSource) { document ->
             val application = document.getElementsByTagName(TAG_APPLICATION).item(0)
             val metadata = document.createElement(TAG_META_DATA)
             metadata.setAttribute(ATTR_NAME, name)
-            metadata.setAttribute(ATTR_VALUE, integrationsList)
+            metadata.setAttribute(ATTR_VALUE, value)
             application.appendChild(metadata)
 
             val factory = TransformerFactory.newInstance()

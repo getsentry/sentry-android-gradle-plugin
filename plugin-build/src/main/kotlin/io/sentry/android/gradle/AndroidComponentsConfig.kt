@@ -97,7 +97,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 ) {
                     it.integrations.set(
                         project.objects.listProperty(String::class.java).apply {
-                            addAll(extension.tracingInstrumentation.features.get().map { it.name })
+                            addAll(extension.tracingInstrumentation.features.get().map { it.integrationName })
                         }
                     )
                 }
@@ -187,7 +187,7 @@ private fun Variant.configureProguardMappingsTasks(
                 variant.name + "ManifestUpdater",
                 SentryWriteProguardUUIDToManifestTask::class.java
             ) {
-                it.gitInfoFile.set(generateUuidTask.flatMap { it.outputFile })
+                it.proguardUUIDFile.set(generateUuidTask.flatMap { it.outputFile })
             }
             artifacts.use(manifestUpdater).wiredWithFiles(
                 SentryWriteProguardUUIDToManifestTask::mergedManifest,
