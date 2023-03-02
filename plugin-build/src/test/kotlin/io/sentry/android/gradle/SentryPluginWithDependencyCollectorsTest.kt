@@ -1,7 +1,7 @@
 package io.sentry.android.gradle
 
-import org.junit.Test
 import kotlin.test.assertTrue
+import org.junit.Test
 
 class SentryPluginWithDependencyCollectorsTest :
     BaseSentryPluginTest(androidGradlePluginVersion = "7.3.0", gradleVersion = "7.6") {
