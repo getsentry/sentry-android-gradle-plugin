@@ -415,6 +415,32 @@ class SentryPluginTest(
         )
     }
 
+    @Test
+    fun `active integrations are written to manifest`() {
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+                import io.sentry.android.gradle.extensions.InstrumentationFeature
+                sentry {
+                  autoUploadProguardMapping = false
+                  tracingInstrumentation {
+                    enabled = true
+                    features = EnumSet.of(InstrumentationFeature.DATABASE, InstrumentationFeature.COMPOSE, InstrumentationFeature.OKHTTP)
+                  }
+                }
+            """.trimIndent()
+        )
+
+        runner.appendArguments(":app:assembleRelease")
+
+        runner.build()
+        val integrations = verifyIntegrationList(testProjectDir.root)
+
+        val expectedIntegrations = listOf(InstrumentationFeature.DATABASE, InstrumentationFeature.COMPOSE, InstrumentationFeature.OKHTTP).map { it.integrationName }
+
+        assertEquals(expectedIntegrations, integrations)
+    }
+
     private fun applyUploadNativeSymbols() {
         appBuildFile.appendText(
             // language=Groovy

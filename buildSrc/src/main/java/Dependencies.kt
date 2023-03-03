@@ -50,6 +50,7 @@ object Libs {
 
     // test
     val MOCKITO_KOTLIN = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
+    const val ARSC_LIB = "io.github.reandroid:ARSCLib:1.1.4"
 }
 
 object CI {

@@ -97,7 +97,10 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 ) {
                     it.integrations.set(
                         project.objects.listProperty(String::class.java).apply {
-                            addAll(extension.tracingInstrumentation.features.get().map { it.integrationName })
+                            addAll(
+                                extension.tracingInstrumentation.features.get()
+                                    .map { it.integrationName }
+                            )
                         }
                     )
                 }

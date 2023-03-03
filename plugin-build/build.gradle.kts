@@ -88,6 +88,9 @@ dependencies {
     testRuntimeOnly(files(androidSdkPath))
     testImplementationAar(Libs.SENTRY_ANDROID)
 
+    // Needed to read manifest from APK
+    testImplementation(Libs.ARSC_LIB)
+
     testRuntimeOnly(
         files(
             serviceOf<ModuleRegistry>().getModule("gradle-tooling-api-builders")
