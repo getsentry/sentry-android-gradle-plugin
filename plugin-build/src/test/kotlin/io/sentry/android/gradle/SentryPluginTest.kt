@@ -434,13 +434,13 @@ class SentryPluginTest(
         runner.appendArguments(":app:assembleRelease")
 
         runner.build()
-        val integrations = verifyIntegrationList(testProjectDir.root)
+        val integrations = verifyIntegrationList(testProjectDir.root).sorted()
 
         val expectedIntegrations = listOf(
             InstrumentationFeature.DATABASE,
             InstrumentationFeature.COMPOSE,
             InstrumentationFeature.OKHTTP
-        ).map { it.integrationName }
+        ).map { it.integrationName }.sorted()
 
         assertEquals(expectedIntegrations, integrations)
     }

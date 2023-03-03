@@ -10,7 +10,7 @@ import org.gradle.api.tasks.TaskAction
 abstract class SentryWriteProguardUUIDToManifestTask : DefaultTask() {
 
     companion object {
-        private const val ATTR_PROGUARD_UUID = "io.sentry.ProguardUuids"
+        const val ATTR_PROGUARD_UUID = "io.sentry.proguard-uuid"
     }
 
     @get:InputFile
