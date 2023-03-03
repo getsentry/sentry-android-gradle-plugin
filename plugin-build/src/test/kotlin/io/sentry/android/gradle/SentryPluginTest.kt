@@ -436,7 +436,11 @@ class SentryPluginTest(
         runner.build()
         val integrations = verifyIntegrationList(testProjectDir.root)
 
-        val expectedIntegrations = listOf(InstrumentationFeature.DATABASE, InstrumentationFeature.COMPOSE, InstrumentationFeature.OKHTTP).map { it.integrationName }
+        val expectedIntegrations = listOf(
+            InstrumentationFeature.DATABASE,
+            InstrumentationFeature.COMPOSE,
+            InstrumentationFeature.OKHTTP
+        ).map { it.integrationName }
 
         assertEquals(expectedIntegrations, integrations)
     }
