@@ -169,6 +169,24 @@ private fun Variant.configureProguardMappingsTasks(
     sentryOrg: String?,
     sentryProject: String?
 ) {
+    val generateUuidTask =
+        SentryGenerateProguardUuidTask.register(
+            project = project,
+            taskSuffix = name.capitalized
+        )
+
+    val manifestUpdater = project.tasks.register(
+        name + "ManifestUpdater",
+        SentryWriteProguardUUIDToManifestTask::class.java
+    ) {
+        it.proguardUUIDFile.set(generateUuidTask.flatMap { it.outputFile })
+    }
+
+    artifacts.use(manifestUpdater).wiredWithFiles(
+        SentryWriteProguardUUIDToManifestTask::mergedManifest,
+        SentryWriteProguardUUIDToManifestTask::updatedManifest
+    ).toTransform(SingleArtifact.MERGED_MANIFEST)
+
     if (isAGP74) {
         val variant = AndroidVariant74(this)
         val sentryProps = getPropertiesFilePath(project, variant)
@@ -176,26 +194,10 @@ private fun Variant.configureProguardMappingsTasks(
         val isMinifyEnabled = isMinificationEnabled(project, variant, guardsquareEnabled)
 
         if (isMinifyEnabled && extension.includeProguardMapping.get()) {
-            val generateUuidTask =
-                SentryGenerateProguardUuidTask.register(
-                    project = project,
-                    taskSuffix = name.capitalized
-                )
             configureGeneratedSourcesFor74(
                 variant = this,
-                generateUuidTask to DirectoryOutputTask::output
+                generateUuidTask to SentryGenerateProguardUuidTask::output
             )
-
-            val manifestUpdater = project.tasks.register(
-                variant.name + "ManifestUpdater",
-                SentryWriteProguardUUIDToManifestTask::class.java
-            ) {
-                it.proguardUUIDFile.set(generateUuidTask.flatMap { it.outputFile })
-            }
-            artifacts.use(manifestUpdater).wiredWithFiles(
-                SentryWriteProguardUUIDToManifestTask::mergedManifest,
-                SentryWriteProguardUUIDToManifestTask::updatedManifest
-            ).toTransform(SingleArtifact.MERGED_MANIFEST)
 
             val uploadMappingsTask = SentryUploadProguardMappingsTask.register(
                 project = project,

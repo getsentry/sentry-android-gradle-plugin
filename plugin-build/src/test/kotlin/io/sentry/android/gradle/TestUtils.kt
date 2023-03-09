@@ -4,6 +4,7 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppExtension
 import com.reandroid.lib.apk.ApkModule
+import io.sentry.android.gradle.tasks.SentryWriteProguardUUIDToManifestTask
 import io.sentry.android.gradle.testutil.forceEvaluate
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SemVer
@@ -47,18 +48,46 @@ internal fun verifyIntegrationList(
     variant: String = "release",
     signed: Boolean = true
 ): List<String> {
+    return retrieveMetaDataFromManifest(
+        rootFile,
+        variant,
+        "io.sentry.integrations",
+        signed
+    )
+        .split(',')
+}
+
+internal fun verifyProguardUuidInManifest(
+    rootFile: File,
+    variant: String = "release",
+    signed: Boolean = true
+): String {
+    return retrieveMetaDataFromManifest(
+        rootFile,
+        variant,
+        SentryWriteProguardUUIDToManifestTask.ATTR_PROGUARD_UUID,
+        signed
+    )
+}
+
+internal fun retrieveMetaDataFromManifest(
+    rootFile: File,
+    variant: String = "release",
+    metaDataName: String,
+    signed: Boolean = true
+): String {
     val signedStr = if (signed) "-unsigned" else ""
     val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant$signedStr.apk")
 
     val apkModule = ApkModule.loadApkFile(apk)
     val attribute = apkModule.androidManifestBlock
 
-    val integrationListString = attribute.applicationElement.listElements()
+    val metaDataValue = attribute.applicationElement.listElements()
         .filter { it.tag == "meta-data" }
-        .filter { it.searchAttributeByName("name").valueAsString == "io.sentry.integrations" }
+        .filter { it.searchAttributeByName("name").valueAsString == metaDataName } // "io.sentry.integrations" }
         .map { it.searchAttributeByName("value").valueAsString }.first()
 
-    return integrationListString.split(',')
+    return metaDataValue
 }
 
 internal fun verifyDependenciesReportAndroid(

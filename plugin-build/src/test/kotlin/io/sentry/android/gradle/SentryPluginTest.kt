@@ -53,6 +53,7 @@ class SentryPluginTest(
 
         // AGP 7.2.x configures the 'clean' task, so ignore it
         configuredTasks.remove(":app:clean")
+        configuredTasks.removeIf { it.startsWith(":app:generateSentryProguardUuid") }
 
         assertTrue(configuredTasks.isEmpty())
     }
@@ -109,6 +110,64 @@ class SentryPluginTest(
         assertThrows(AssertionError::class.java) {
             verifyProguardUuid(testProjectDir.root)
         }
+    }
+
+    @Test
+    fun `writes uuid to AndroidManifest`() {
+        runner.appendArguments(":app:assembleRelease")
+
+        runner.build()
+        val uuid1 = verifyProguardUuidInManifest(testProjectDir.root)
+
+        assertTrue { uuid1.isNotBlank() }
+    }
+
+    @Test
+    fun `does not writes uuid to AndroidManifest if includeProguardMapping is off`() {
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+                sentry {
+                  includeProguardMapping = false
+                }
+            """.trimIndent()
+        )
+
+        runner.appendArguments(":app:assembleRelease")
+
+        runner.build()
+
+        assertThrows(NoSuchElementException::class.java) {
+            verifyProguardUuidInManifest(testProjectDir.root)
+        }
+    }
+
+    @Test
+    fun `does not writes uuid to AndroidManifest in debug`() {
+        runner.appendArguments(":app:assembleDebug")
+
+        runner.build()
+
+        assertThrows(NoSuchElementException::class.java) {
+            verifyProguardUuidInManifest(testProjectDir.root, variant = "debug", signed = false)
+        }
+    }
+
+    @Test
+    fun `uuid in manifest matches uuid in generated file after each build`() {
+        runner.appendArguments(":app:assembleRelease")
+
+        runner.build()
+        val uuid1 = verifyProguardUuid(testProjectDir.root)
+        val uuid1Manifest = verifyProguardUuidInManifest(testProjectDir.root)
+
+        runner.build()
+        val uuid2 = verifyProguardUuid(testProjectDir.root)
+        val uuid2Manifest = verifyProguardUuidInManifest(testProjectDir.root)
+
+        assertNotEquals(uuid1, uuid2)
+        assertEquals(uuid1.toString(), uuid1Manifest)
+        assertEquals(uuid2.toString(), uuid2Manifest)
     }
 
     @Test
