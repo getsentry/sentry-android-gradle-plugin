@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.whenever
+import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import io.sentry.android.gradle.services.SentryModulesService
 import java.io.File
@@ -57,11 +58,12 @@ class SentryModulesCollectorTest {
                 .withProjectDir(tmpDir)
                 .build()
 
+            val featureProvider = fakeProject.provider { emptySet<InstrumentationFeature>() }
+
             val project = spy(fakeProject)
             whenever(project.logger).thenReturn(logger)
             project.configurations.add(configuration)
-
-            sentryModulesServiceProvider = SentryModulesService.register(project)
+            sentryModulesServiceProvider = SentryModulesService.register(project, featureProvider)
 
             return project
         }

@@ -18,14 +18,11 @@ import io.sentry.android.gradle.instrumentation.util.isMinifiedClass
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.util.SemVer
-import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.util.info
 import java.io.File
-import org.gradle.api.artifacts.ModuleIdentifier
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
@@ -48,9 +45,6 @@ abstract class SpanAddingClassVisitorFactory :
 
         @get:Input
         val debug: Property<Boolean>
-
-        @get:Input
-        val features: SetProperty<InstrumentationFeature>
 
         @get:Internal
         val sentryModulesService: Property<SentryModulesService>
@@ -89,32 +83,30 @@ abstract class SpanAddingClassVisitorFactory :
              * version to [SentryVersions] if it involves runtime classes
              * from the sentry-android SDK.
              */
+            val enabledFeatures = parameters.get()
+                .sentryModulesService.get()
+                .retrieveEnabledInstrumentationFeatures()
+
             val instrumentable = ChainedInstrumentable(
                 listOfNotNull(
                     AndroidXSQLiteDatabase().takeIf {
-                        isDatabaseInstrEnabled(sentryModules, parameters.get())
+                        enabledFeatures.contains(InstrumentationFeature.DATABASE)
                     },
                     AndroidXSQLiteStatement(androidXSqliteFrameWorkVersion).takeIf {
-                        isDatabaseInstrEnabled(sentryModules, parameters.get())
+                        enabledFeatures.contains(InstrumentationFeature.DATABASE)
                     },
                     AndroidXRoomDao().takeIf {
-                        isDatabaseInstrEnabled(sentryModules, parameters.get())
+                        enabledFeatures.contains(InstrumentationFeature.DATABASE)
                     },
-                    OkHttp().takeIf { isOkHttpInstrEnabled(sentryModules, parameters.get()) },
+                    OkHttp().takeIf { enabledFeatures.contains(InstrumentationFeature.OKHTTP) },
                     WrappingInstrumentable().takeIf {
-                        isFileIOInstrEnabled(
-                            sentryModules,
-                            parameters.get()
-                        )
+                        enabledFeatures.contains(InstrumentationFeature.FILE_IO)
                     },
                     RemappingInstrumentable().takeIf {
-                        isFileIOInstrEnabled(
-                            sentryModules,
-                            parameters.get()
-                        )
+                        enabledFeatures.contains(InstrumentationFeature.FILE_IO)
                     },
                     ComposeNavigation().takeIf {
-                        isComposeInstrEnabled(sentryModules, parameters.get())
+                        enabledFeatures.contains(InstrumentationFeature.COMPOSE)
                     },
                 )
             )
@@ -125,47 +117,6 @@ abstract class SpanAddingClassVisitorFactory :
             parameters.get()._instrumentable = instrumentable
             return instrumentable
         }
-
-    private fun isDatabaseInstrEnabled(
-        sentryModules: Map<ModuleIdentifier, SemVer>,
-        parameters: SpanAddingParameters
-    ): Boolean =
-        sentryModules.isAtLeast(
-            SentryModules.SENTRY_ANDROID_CORE,
-            SentryVersions.VERSION_PERFORMANCE
-        ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
-
-    private fun isFileIOInstrEnabled(
-        sentryModules: Map<ModuleIdentifier, SemVer>,
-        parameters: SpanAddingParameters
-    ): Boolean =
-        sentryModules.isAtLeast(
-            SentryModules.SENTRY_ANDROID_CORE,
-            SentryVersions.VERSION_FILE_IO
-        ) && parameters.features.get().contains(InstrumentationFeature.FILE_IO)
-
-    private fun isOkHttpInstrEnabled(
-        sentryModules: Map<ModuleIdentifier, SemVer>,
-        parameters: SpanAddingParameters
-    ): Boolean = sentryModules.isAtLeast(
-        SentryModules.SENTRY_ANDROID_OKHTTP,
-        SentryVersions.VERSION_OKHTTP
-    ) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
-
-    private fun isComposeInstrEnabled(
-        sentryModules: Map<ModuleIdentifier, SemVer>,
-        parameters: SpanAddingParameters
-    ): Boolean =
-        sentryModules.isAtLeast(
-            SentryModules.SENTRY_ANDROID_COMPOSE,
-            SentryVersions.VERSION_COMPOSE
-        ) && parameters.features.get().contains(InstrumentationFeature.COMPOSE)
-
-    private fun Map<ModuleIdentifier, SemVer>.isAtLeast(
-        module: ModuleIdentifier,
-        minVersion: SemVer
-    ): Boolean =
-        getOrDefault(module, SentryVersions.VERSION_DEFAULT) >= minVersion
 
     override fun createClassVisitor(
         classContext: ClassContext,

@@ -66,7 +66,10 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                  * the state between builds and also during a single build, because transforms
                  * are run in parallel.
                  */
-                val sentryModulesService = SentryModulesService.register(project)
+                val sentryModulesService = SentryModulesService.register(
+                    project,
+                    extension.tracingInstrumentation.features
+                )
                 project.collectModules(
                     "${variant.name}RuntimeClasspath",
                     variant.name,
@@ -84,9 +87,6 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     params.debug.setDisallowChanges(
                         extension.tracingInstrumentation.debug.get()
                     )
-                    params.features.setDisallowChanges(
-                        extension.tracingInstrumentation.features.get()
-                    )
                     params.sentryModulesService.setDisallowChanges(sentryModulesService)
                     params.tmpDir.set(tmpDir)
                 }
@@ -95,14 +95,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     "${variant.name}SentryGenerateIntegrationListTask",
                     SentryGenerateIntegrationListTask::class.java
                 ) {
-                    it.integrations.set(
-                        project.objects.listProperty(String::class.java).apply {
-                            addAll(
-                                extension.tracingInstrumentation.features.get()
-                                    .map { it.integrationName }
-                            )
-                        }
-                    )
+                    it.sentryModulesService.set(sentryModulesService)
                 }
 
                 variant.artifacts.use(manifestUpdater).wiredWithFiles(
