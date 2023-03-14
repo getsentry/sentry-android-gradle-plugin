@@ -1,5 +1,7 @@
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import io.sentry.android.gradle.sourcecontext.CodeSourceExploderTask
+import io.sentry.android.gradle.sourcecontext.OutputPaths
 
 plugins {
     id(Samples.SpringBoot.springBoot) version
@@ -50,4 +52,13 @@ tasks.withType<KotlinCompile> {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
+}
+
+tasks.register<io.sentry.android.gradle.sourcecontext.CodeSourceExploderTask>("sentrySourceBundle") {
+    javaSourceFiles.setFrom(project.sourceSets["main"].allJava)
+//    groovySourceFiles.setFrom(dependencyAnalyzer.groovySourceFiles)
+//    dependencyAnalyzer.javaSourceFiles?.let { javaSourceFiles.setFrom(it) }
+//    kotlinSourceFiles.setFrom(dependencyAnalyzer.kotlinSourceFiles)
+//    scalaSourceFiles.setFrom(dependencyAnalyzer.scalaSourceFiles)
+    output.set(OutputPaths(project, "var123").explodedSourcePath)
 }

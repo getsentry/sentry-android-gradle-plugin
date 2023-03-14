@@ -1,3 +1,5 @@
+//import io.sentry.android.gradle.sourcecontext.CodeSourceExploderTask
+
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN apply false
     id("com.android.application") version BuildPluginsVersion.AGP apply false
@@ -53,3 +55,11 @@ tasks.getByName("ktlintFormat") {
 tasks.getByName("ktlintCheck") {
     dependsOn(gradle.includedBuild("plugin-build").task(":ktlintCheck"))
 }
+
+//tasks.register<CodeSourceExploderTask>("sentrySourceBundle") {
+//    groovySourceFiles.setFrom(dependencyAnalyzer.groovySourceFiles)
+//    dependencyAnalyzer.javaSourceFiles?.let { javaSourceFiles.setFrom(it) }
+//    kotlinSourceFiles.setFrom(dependencyAnalyzer.kotlinSourceFiles)
+//    scalaSourceFiles.setFrom(dependencyAnalyzer.scalaSourceFiles)
+//    output.set(outputPaths.explodedSourcePath)
+//}

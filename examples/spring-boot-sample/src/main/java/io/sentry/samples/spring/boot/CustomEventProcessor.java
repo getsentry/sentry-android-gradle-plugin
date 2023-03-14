@@ -27,9 +27,16 @@ public class CustomEventProcessor implements EventProcessor {
   @Override
   public @NotNull SentryEvent process(@NotNull SentryEvent event, @NotNull Hint hint) {
     final SentryRuntime runtime = new SentryRuntime();
+    new InnerCustomEventProcessor().hello();
     runtime.setVersion(springBootVersion);
     runtime.setName("Spring Boot");
     event.getContexts().setRuntime(runtime);
     return event;
+  }
+
+  static class InnerCustomEventProcessor {
+      void hello() {
+          System.out.println("hello");
+      }
   }
 }

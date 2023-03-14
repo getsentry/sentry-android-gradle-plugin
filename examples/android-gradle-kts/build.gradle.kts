@@ -1,3 +1,5 @@
+import io.sentry.android.gradle.sourcecontext.CodeSourceExploderTask
+
 plugins {
     id("com.android.application")
     id("io.sentry.android.gradle")
@@ -27,3 +29,12 @@ sentry {
         enabled.set(false)
     }
 }
+
+//tasks.register<CodeSourceExploderTask>("sentrySourceBundle") {
+//    javaSourceFiles.setFrom(project.sourceSets.allJava)
+//    groovySourceFiles.setFrom(dependencyAnalyzer.groovySourceFiles)
+//    dependencyAnalyzer.javaSourceFiles?.let { javaSourceFiles.setFrom(it) }
+//    kotlinSourceFiles.setFrom(dependencyAnalyzer.kotlinSourceFiles)
+//    scalaSourceFiles.setFrom(dependencyAnalyzer.scalaSourceFiles)
+//    output.set(outputPaths.explodedSourcePath)
+//}
