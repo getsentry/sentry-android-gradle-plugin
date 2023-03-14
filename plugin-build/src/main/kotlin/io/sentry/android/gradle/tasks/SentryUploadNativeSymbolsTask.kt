@@ -20,9 +20,6 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
         description = "Uploads native symbols to Sentry"
     }
 
-    @get:InputDirectory
-    abstract val buildDir: DirectoryProperty
-
     @get:Input
     abstract val cliExecutable: Property<String>
 
@@ -91,7 +88,7 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
         // where {variantName} could be debug/release...
         args.add(
             File(
-                buildDir.asFile.get(),
+                project.buildDir,
                 "intermediates${sep}merged_native_libs${sep}${variantName.get()}"
             ).absolutePath
         )
