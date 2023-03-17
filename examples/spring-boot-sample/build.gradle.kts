@@ -3,8 +3,10 @@ import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id(Samples.SpringBoot.springBoot) version BuildPluginsVersion.SPRING_BOOT
-    id(Samples.SpringBoot.springDependencyManagement) version BuildPluginsVersion.SPRING_DEP_MANAGEMENT
+    id(Samples.SpringBoot.springBoot) version
+        BuildPluginsVersion.SPRING_BOOT
+    id(Samples.SpringBoot.springDependencyManagement) version
+        BuildPluginsVersion.SPRING_DEP_MANAGEMENT
     kotlin("jvm")
     kotlin("plugin.spring") version BuildPluginsVersion.KOTLIN
     id("io.sentry.android.gradle")

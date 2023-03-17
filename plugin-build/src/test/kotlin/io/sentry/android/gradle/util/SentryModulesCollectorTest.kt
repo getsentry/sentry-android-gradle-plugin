@@ -15,6 +15,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvableDependencies
 import org.gradle.api.artifacts.result.ResolutionResult
 import org.gradle.api.artifacts.result.ResolvedComponentResult
+import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.internal.artifacts.DefaultModuleVersionIdentifier
 import org.gradle.api.provider.Provider
 import org.gradle.testfixtures.ProjectBuilder
@@ -22,7 +23,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-class SentryAndroidSdkCheckerTest {
+class SentryModulesCollectorTest {
 
     class Fixture {
 
@@ -65,7 +66,9 @@ class SentryAndroidSdkCheckerTest {
             return project
         }
 
-        fun getModules() = sentryModulesServiceProvider.get().modules
+        fun getSentryModules() = sentryModulesServiceProvider.get().sentryModules
+
+        fun getExternalModules() = sentryModulesServiceProvider.get().externalModules
     }
 
     @get:Rule
@@ -76,12 +79,12 @@ class SentryAndroidSdkCheckerTest {
     @Test
     fun `configuration cannot be found - logs a warning and the modules list is empty`() {
         val project = fixture.getSut(testProjectDir.root)
-        project.detectSentryAndroidSdk(
+        project.collectModules(
             "releaseRuntimeClasspath",
             "release",
             fixture.sentryModulesServiceProvider
         )
-        assertTrue { fixture.getModules().isEmpty() }
+        assertTrue { fixture.getSentryModules().isEmpty() }
         assertTrue {
             fixture.logger.capturedMessage ==
                 "[sentry] Unable to find configuration releaseRuntimeClasspath for variant release."
@@ -97,13 +100,13 @@ class SentryAndroidSdkCheckerTest {
         }
 
         val project = fixture.getSut(testProjectDir.root, dependencies = setOf(sqliteDep))
-        project.detectSentryAndroidSdk(
+        project.collectModules(
             fixture.configurationName,
             fixture.variantName,
             fixture.sentryModulesServiceProvider
         )
 
-        assertTrue { fixture.getModules().isEmpty() }
+        assertTrue { fixture.getSentryModules().isEmpty() }
     }
 
     @Test
@@ -120,20 +123,22 @@ class SentryAndroidSdkCheckerTest {
         }
 
         val project = fixture.getSut(testProjectDir.root, dependencies = setOf(sentryAndroidDep))
-        project.detectSentryAndroidSdk(
+        project.collectModules(
             fixture.configurationName,
             fixture.variantName,
             fixture.sentryModulesServiceProvider
         )
 
+        val moduleIdentifier = DefaultModuleIdentifier
+            .newId("io.sentry", "sentry-android-core")
         assertTrue {
-            fixture.getModules().size == 1 &&
-                fixture.getModules()["sentry-android-core"] == SemVer()
+            fixture.getSentryModules().size == 1 &&
+                fixture.getSentryModules()[moduleIdentifier] == SemVer()
         }
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] Detected Sentry modules {sentry-android-core=0.0.0} for variant: debug," +
-                " config: debugRuntimeClasspath"
+                "[sentry] Detected Sentry modules {io.sentry:sentry-android-core=0.0.0} " +
+                "for variant: debug, config: debugRuntimeClasspath"
         }
     }
 
@@ -150,20 +155,47 @@ class SentryAndroidSdkCheckerTest {
         }
 
         val project = fixture.getSut(testProjectDir.root, dependencies = setOf(sentryAndroidDep))
-        project.detectSentryAndroidSdk(
+        project.collectModules(
+            fixture.configurationName,
+            fixture.variantName,
+            fixture.sentryModulesServiceProvider
+        )
+
+        val moduleIdentifier = DefaultModuleIdentifier
+            .newId("io.sentry", "sentry-android-core")
+        assertTrue {
+            fixture.getSentryModules().size == 1 &&
+                fixture.getSentryModules()[moduleIdentifier] == SemVer(4, 1, 0)
+        }
+        assertTrue {
+            fixture.logger.capturedMessage ==
+                "[sentry] Detected Sentry modules {io.sentry:sentry-android-core=4.1.0} " +
+                "for variant: debug, config: debugRuntimeClasspath"
+        }
+    }
+
+    @Test
+    fun `non sentry dependencies are provided via the modules provider`() {
+        val group = "androidx.sqlite"
+        val name = "sqlite-framework"
+        val moduleIdentifier = DefaultModuleIdentifier.newId(group, name)
+        val version = "2.3.0"
+
+        val sqliteDep = mock<ResolvedComponentResult> {
+            whenever(mock.moduleVersion).thenReturn(
+                DefaultModuleVersionIdentifier.newId(group, name, version)
+            )
+        }
+
+        val project = fixture.getSut(testProjectDir.root, dependencies = setOf(sqliteDep))
+        project.collectModules(
             fixture.configurationName,
             fixture.variantName,
             fixture.sentryModulesServiceProvider
         )
 
         assertTrue {
-            fixture.getModules().size == 1 &&
-                fixture.getModules()["sentry-android-core"] == SemVer(4, 1, 0)
-        }
-        assertTrue {
-            fixture.logger.capturedMessage ==
-                "[sentry] Detected Sentry modules {sentry-android-core=4.1.0} for variant: debug," +
-                " config: debugRuntimeClasspath"
+            fixture.getExternalModules()[moduleIdentifier]!! == SemVer.parse(version)
         }
     }
 
@@ -201,23 +233,29 @@ class SentryAndroidSdkCheckerTest {
             testProjectDir.root,
             dependencies = setOf(firstLevelDep, transitiveSentryDep, okHttpDep)
         )
-        project.detectSentryAndroidSdk(
+        project.collectModules(
             fixture.configurationName,
             fixture.variantName,
             fixture.sentryModulesServiceProvider
         )
 
+        val sentryAndroidModule = DefaultModuleIdentifier
+            .newId("io.sentry", "sentry-android")
+        val sentryAndroidCoreModule = DefaultModuleIdentifier
+            .newId("io.sentry", "sentry-android-core")
+        val sentryAndroidOkHttpModule = DefaultModuleIdentifier
+            .newId("io.sentry", "sentry-android-okhttp")
         assertTrue {
-            fixture.getModules().size == 3 &&
-                fixture.getModules()["sentry-android"] == SemVer(5, 5, 0) &&
-                fixture.getModules()["sentry-android-core"] == SemVer(5, 5, 0) &&
-                fixture.getModules()["sentry-android-okhttp"] == SemVer(6, 0, 0)
+            fixture.getSentryModules().size == 3 &&
+                fixture.getSentryModules()[sentryAndroidModule] == SemVer(5, 5, 0) &&
+                fixture.getSentryModules()[sentryAndroidCoreModule] == SemVer(5, 5, 0) &&
+                fixture.getSentryModules()[sentryAndroidOkHttpModule] == SemVer(6, 0, 0)
         }
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] Detected Sentry modules {sentry-android=5.5.0, " +
-                "sentry-android-core=5.5.0, sentry-android-okhttp=6.0.0} for variant: debug," +
-                " config: debugRuntimeClasspath"
+                "[sentry] Detected Sentry modules {io.sentry:sentry-android=5.5.0, " +
+                "io.sentry:sentry-android-core=5.5.0, io.sentry:sentry-android-okhttp=6.0.0} " +
+                "for variant: debug, config: debugRuntimeClasspath"
         }
     }
 }
