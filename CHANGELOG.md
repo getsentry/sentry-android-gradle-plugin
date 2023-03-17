@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixes
+
+- Make plugin Gradle 8 compatible ([#428](https://github.com/getsentry/sentry-android-gradle-plugin/pull/428))
+- Fix `uploadSentryNativeSymbols` task for Gradle 8 ([#447](https://github.com/getsentry/sentry-android-gradle-plugin/pull/447))
+
 ### Dependencies
 
 - Bump Android SDK from v6.13.0 to v6.15.0 ([#442](https://github.com/getsentry/sentry-android-gradle-plugin/pull/442))
