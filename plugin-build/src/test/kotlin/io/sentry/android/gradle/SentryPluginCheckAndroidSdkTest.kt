@@ -98,14 +98,17 @@ class SentryPluginCheckAndroidSdkTest(
     private fun captureSdkState(): String =
         // language=Groovy
         """
+        import io.sentry.android.gradle.autoinstall.BuildFinishedListenerService
         import io.sentry.android.gradle.util.*
         import io.sentry.android.gradle.services.*
-        project.gradle.buildFinished {
-          println(
-            "SENTRY MODULES: " + BuildServicesKt
-              .getBuildService(project.gradle.sharedServices, SentryModulesService.class)
-              .get().modules
-          )
+
+        BuildFinishedListenerService.@Companion.getInstance(project.gradle).onClose {
+            println(
+                "SENTRY MODULES: " +
+                    BuildServicesKt
+                        .getBuildService(project.gradle.sharedServices, SentryModulesService.class)
+                        .get().modules
+            )
         }
         """.trimIndent()
 }
