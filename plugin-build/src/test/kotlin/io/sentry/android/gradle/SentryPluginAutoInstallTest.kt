@@ -166,7 +166,5 @@ class SentryPluginAutoInstallTest(
         .appendArguments("app:dependencies")
         .appendArguments("--configuration")
         .appendArguments("debugRuntimeClasspath")
-        .appendArguments("--console=plain")
-        .forwardOutput()
         .build()
 }
