@@ -9,9 +9,9 @@
 
 ### Dependencies
 
-- Bump Android SDK from v6.13.0 to v6.15.0 ([#442](https://github.com/getsentry/sentry-android-gradle-plugin/pull/442))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6150)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.13.0...6.15.0)
+- Bump Android SDK from v6.13.0 to v6.16.0 ([#442](https://github.com/getsentry/sentry-android-gradle-plugin/pull/442), [#449](https://github.com/getsentry/sentry-android-gradle-plugin/pull/449))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6160)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.13.0...6.16.0)
 - Bump CLI from v2.12.0 to v2.14.4 ([#439](https://github.com/getsentry/sentry-android-gradle-plugin/pull/439), [#443](https://github.com/getsentry/sentry-android-gradle-plugin/pull/443), [#446](https://github.com/getsentry/sentry-android-gradle-plugin/pull/446))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2144)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.12.0...2.14.4)
