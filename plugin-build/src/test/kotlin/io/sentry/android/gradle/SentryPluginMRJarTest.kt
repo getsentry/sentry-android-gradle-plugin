@@ -4,7 +4,7 @@ import kotlin.test.assertTrue
 import org.junit.Test
 
 class SentryPluginMRJarTest :
-    BaseSentryPluginTest(androidGradlePluginVersion = "7.0.4", gradleVersion = "7.1.1") {
+    BaseSentryPluginTest(androidGradlePluginVersion = "7.0.4", gradleVersion = "7.3") {
 
     @Test
     fun `does not break when there is a MR-JAR dependency with unsupported java version`() {
