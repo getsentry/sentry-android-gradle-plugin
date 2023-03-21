@@ -10,6 +10,7 @@ import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigati
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
+import io.sentry.android.gradle.instrumentation.logcat.SentryLogcatInstrumentable
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
 import io.sentry.android.gradle.instrumentation.util.findClassReader
@@ -116,6 +117,9 @@ abstract class SpanAddingClassVisitorFactory :
                     ComposeNavigation().takeIf {
                         isComposeInstrEnabled(sentryModules, parameters.get())
                     },
+                    SentryLogcatInstrumentable().takeIf {
+                        isLogcatInstrEnabled(sentryModules, parameters.get())
+                    }
                 )
             )
 
@@ -160,6 +164,15 @@ abstract class SpanAddingClassVisitorFactory :
             SentryModules.SENTRY_ANDROID_COMPOSE,
             SentryVersions.VERSION_COMPOSE
         ) && parameters.features.get().contains(InstrumentationFeature.COMPOSE)
+
+    private fun isLogcatInstrEnabled(
+        sentryModules: Map<ModuleIdentifier, SemVer>,
+        parameters: SpanAddingParameters
+    ): Boolean =
+        sentryModules.isAtLeast(
+            SentryModules.SENTRY_ANDROID_CORE,
+            SentryVersions.VERSION_LOGCAT
+        ) && parameters.features.get().contains(InstrumentationFeature.LOGCAT)
 
     private fun Map<ModuleIdentifier, SemVer>.isAtLeast(
         module: ModuleIdentifier,

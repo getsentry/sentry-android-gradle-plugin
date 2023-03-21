@@ -77,5 +77,12 @@ enum class InstrumentationFeature {
      * This feature uses bytecode manipulation and adds an OnDestinationChangedListener to all
      * navigation controllers used in Jetpack Compose.
      */
-    COMPOSE
+    COMPOSE,
+
+    /**
+     * When enabled the SDK will create breadcrumbs when using Logcat
+     * This feature uses bytecode manipulation and replaces Logcat
+     * with Sentry-specific implementations.
+     */
+    LOGCAT
 }
