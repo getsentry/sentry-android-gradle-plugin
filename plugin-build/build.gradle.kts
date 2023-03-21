@@ -6,6 +6,7 @@ import org.gradle.api.internal.classpath.ModuleRegistry
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.configurationcache.extensions.serviceOf
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.config.KotlinCompilerVersion
 
 plugins {
     id("dev.gradleplugins.groovy-gradle-plugin") version BuildPluginsVersion.GROOVY_REDISTRIBUTED
@@ -60,6 +61,11 @@ dependencies {
 
     compileOnly(Libs.ASM)
     compileOnly(Libs.ASM_COMMONS)
+
+    implementation(kotlin("gradle-plugin-api"))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:${KotlinCompilerVersion.VERSION}")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:${KotlinCompilerVersion.VERSION}")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:${KotlinCompilerVersion.VERSION}")
 
     // compileOnly since we'll be shading the common dependency into the final jar
     // but we still need to be able to compile it (this also excludes it from .pom)
@@ -144,6 +150,10 @@ gradlePlugin {
         register("sentryPlugin") {
             id = "io.sentry.android.gradle"
             implementationClass = "io.sentry.android.gradle.SentryPlugin"
+        }
+        register("kotlinCompilerPlugin") {
+            id = "io.sentry.sentry-kotlin-compiler-gradle-plugin"
+            implementationClass = "io.sentry.SentryKotlinCompilerGradlePlugin"
         }
     }
 }

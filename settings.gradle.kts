@@ -30,3 +30,4 @@ includeBuild("plugin-build") {
         substitute(module("io.sentry:sentry-android-gradle-plugin")).using(project(":"))
     }
 }
+include(":sentry-kotlin-compiler-plugin")
