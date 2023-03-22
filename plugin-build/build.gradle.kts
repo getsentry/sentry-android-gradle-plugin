@@ -123,7 +123,7 @@ tasks.withType<GroovyCompile>().configureEach {
 
 tasks.withType<KotlinCompile>().configureEach {
     if (!name.contains("agp", ignoreCase = true)) {
-        classpath += files(sourceSets["main"].groovy.classesDirectory)
+        libraries.from.addAll(files(sourceSets["main"].groovy.classesDirectory))
     }
 
     kotlinOptions {
