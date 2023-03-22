@@ -1,17 +1,22 @@
 # Changelog
 
-## Unreleased
+## 3.4.3
+
+### Fixes
+
+- Make plugin Gradle 8 compatible ([#428](https://github.com/getsentry/sentry-android-gradle-plugin/pull/428))
+- Fix `uploadSentryNativeSymbols` task for Gradle 8 ([#447](https://github.com/getsentry/sentry-android-gradle-plugin/pull/447))
 
 - Write enabled instrumentations and proguard uuid to manifest ([#441](https://github.com/getsentry/sentry-android-gradle-plugin/pull/441))
 
 ### Dependencies
 
-- Bump Android SDK from v6.13.0 to v6.15.0 ([#442](https://github.com/getsentry/sentry-android-gradle-plugin/pull/442))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6150)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.13.0...6.15.0)
-- Bump CLI from v2.12.0 to v2.14.0 ([#439](https://github.com/getsentry/sentry-android-gradle-plugin/pull/439), [#443](https://github.com/getsentry/sentry-android-gradle-plugin/pull/443))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2140)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.12.0...2.14.0)
+- Bump Android SDK from v6.13.0 to v6.16.0 ([#442](https://github.com/getsentry/sentry-android-gradle-plugin/pull/442), [#449](https://github.com/getsentry/sentry-android-gradle-plugin/pull/449))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6160)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.13.0...6.16.0)
+- Bump CLI from v2.12.0 to v2.15.2 ([#439](https://github.com/getsentry/sentry-android-gradle-plugin/pull/439), [#443](https://github.com/getsentry/sentry-android-gradle-plugin/pull/443), [#446](https://github.com/getsentry/sentry-android-gradle-plugin/pull/446), [#450](https://github.com/getsentry/sentry-android-gradle-plugin/pull/450))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2152)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.12.0...2.15.2)
 
 ## 3.4.2
 
