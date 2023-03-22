@@ -51,6 +51,8 @@ class KotlinCompilerPluginComposeTest {
             package io.sentry.compose.examples
 
             import androidx.compose.foundation.layout.fillMaxSize
+            import androidx.compose.foundation.layout.padding
+            import androidx.compose.ui.unit.dp
             import androidx.compose.foundation.text.BasicText
             import androidx.compose.runtime.Composable
             import androidx.compose.ui.Modifier
@@ -59,7 +61,34 @@ class KotlinCompilerPluginComposeTest {
                 @Composable
                 fun ExistingModifier() {
                     BasicText(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize().padding(8.dp),
+                        text = "Existing Modifier"
+                    )
+                }
+            }
+            """.trimIndent()
+        )
+        compile(kotlinSource)
+    }
+
+    @Test
+    fun `modifier as param enriched with sentry modifier`() {
+        val kotlinSource = SourceFile.kotlin(
+            name = "Example.kt", contents = """
+            package io.sentry.compose.examples
+
+            import androidx.compose.foundation.layout.fillMaxSize
+            import androidx.compose.foundation.layout.padding
+            import androidx.compose.ui.unit.dp
+            import androidx.compose.foundation.text.BasicText
+            import androidx.compose.runtime.Composable
+            import androidx.compose.ui.Modifier
+
+            class Example {
+                @Composable
+                fun ModifierAsParam(modifier : Modifier = Modifier.Companion) {
+                    BasicText(
+                        modifier = modifier.fillMaxSize().padding(8.dp),
                         text = "Existing Modifier"
                     )
                 }

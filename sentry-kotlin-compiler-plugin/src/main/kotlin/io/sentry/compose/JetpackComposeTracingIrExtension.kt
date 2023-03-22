@@ -15,11 +15,9 @@ import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.builders.irTemporary
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
-import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.expressions.IrGetObjectValue
 import org.jetbrains.kotlin.ir.expressions.IrGetValue
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.util.defaultType
@@ -99,6 +97,11 @@ class JetpackComposeTracingIrExtension(
 
             override fun visitCall(expression: IrCall): IrExpression {
                 val call = super.visitCall(expression) as IrCall
+
+                // Case A: modifier is not supplied
+                // -> simply set our modifier as param
+                // e.g. BasicText(text = "Hello World")
+                // into BasicText(text = "Hello World", modifier = sentryBaseModifier)
                 val modifierArgumentIndex =
                     call.symbol.owner.valueParameters.indexOfFirst {
                         modifierFqName == it.type.classFqName
@@ -106,42 +109,38 @@ class JetpackComposeTracingIrExtension(
                 if (modifierArgumentIndex != -1) {
                     val modifierArgument = call.getValueArgument(modifierArgumentIndex)
                     if (modifierArgument == null) {
-                        // modifier is not supplied, simply get our previously defined one
                         getModifierMap[currentFunction]?.let {
                             call.putValueArgument(modifierArgumentIndex, it)
                         }
-                    } else {
-                        modifierArgument.toString()
-                        // it's already there, add modifier to expression
-                        // TODO implement
                     }
                 }
+
+                // Case B: modifier is defined in-place
+                // -> replace Modifier.Companion with our modifier
+                // e.g. BasicText(text = "Hello World", modifier = Modifier.fillMaxSize())
+                // into BasicText(text = "Hello World", modifier = sentryBaseModifier.fillMaxSize())
+                if (expression.extensionReceiver?.type?.classFqName == modifierCompanionFqName) {
+                    val sentryBaseModifier = getModifierMap[currentFunction]
+                    if (sentryBaseModifier != null) {
+                        expression.extensionReceiver = sentryBaseModifier
+                    }
+                }
+
+                // Case C: modifier is based on function argument
+                // e.g. fun x(modifier: Modifier = Modifier.Companion) {
+                //          BasicText(text = "Hello World", modifier = modifier.fillMaxSize())
+                //      }
+                // TODO implement
+                if (expression.extensionReceiver is IrGetValue) {
+                    val isParam = (expression.extensionReceiver as IrGetValue).symbol is org.jetbrains.kotlin.ir.symbols.IrValueParameterSymbol
+
+                }
+
+                // Case D: modifier is something global
+                // e.g. BasicText(text = "Hello World", modifier = globalModifier.fillMaxSize())
+                // TODO implement
+
                 return call
-            }
-
-            override fun visitVariable(declaration: IrVariable): IrStatement {
-                /**
-                 * Replaces the receiver of any (temp) Modifier variables to be the base `sentryModifier` created inside the method body
-                 *
-                 * E.g. turns
-                 * val tmp0_modifier: Modifier = Modifier.fillMaxSize()
-                 * into
-                 * val tmp0_modifier: Modifier = tmp0_sentryBaseModifier.fillMaxSize()
-                 */
-
-                // only apply to Modifier variables
-                if (declaration.type.classFqName == modifierFqName) {
-                    // which get initialized via Modifier.Companion (aka extension receiver)
-                    val initializer = declaration.initializer as IrCall?
-                    val initExtensionReceiver = initializer?.extensionReceiver as IrGetObjectValue?
-                    if (initExtensionReceiver?.type?.classFqName == modifierCompanionFqName) {
-                        val sentryBaseModifier = getModifierMap[currentFunction]
-                        if (sentryBaseModifier != null) {
-                            initializer?.extensionReceiver = sentryBaseModifier
-                        }
-                    }
-                }
-                return super.visitVariable(declaration)
             }
         }
         moduleFragment.transform(transformer, null)
