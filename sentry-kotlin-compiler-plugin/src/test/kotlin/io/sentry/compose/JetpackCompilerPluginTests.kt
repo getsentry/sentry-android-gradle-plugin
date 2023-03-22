@@ -25,7 +25,7 @@ class KotlinCompilerPluginComposeTest {
     )
 
     @Test
-    fun `test basic example`() {
+    fun `sentry modifier is used when no modifier is present`() {
         val kotlinSource = SourceFile.kotlin(
             name = "Example.kt", contents = """
             package io.sentry.compose.examples
@@ -35,7 +35,7 @@ class KotlinCompilerPluginComposeTest {
                 @Composable
                 fun NoModifier() {
                     BasicText(
-                        text = "Hello World 0"
+                        text = "No Modifier Argument"
                     )
                 }
             }
@@ -45,20 +45,22 @@ class KotlinCompilerPluginComposeTest {
     }
 
     @Test
-    fun `test basic 2 example`() {
+    fun `existing modifier companion is replaced with sentry modifier`() {
         val kotlinSource = SourceFile.kotlin(
             name = "Example.kt", contents = """
             package io.sentry.compose.examples
-            import androidx.compose.runtime.Composable
+
+            import androidx.compose.foundation.layout.fillMaxSize
             import androidx.compose.foundation.text.BasicText
+            import androidx.compose.runtime.Composable
             import androidx.compose.ui.Modifier
+
             class Example {
                 @Composable
                 fun ExistingModifier() {
-                    val x = Modifier
                     BasicText(
-                        text = "Hello World 0",
-                        modifier = x
+                        modifier = Modifier.fillMaxSize(),
+                        text = "Existing Modifier"
                     )
                 }
             }

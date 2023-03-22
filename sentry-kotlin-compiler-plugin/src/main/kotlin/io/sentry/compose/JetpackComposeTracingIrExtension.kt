@@ -15,9 +15,11 @@ import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.builders.irTemporary
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
+import org.jetbrains.kotlin.ir.expressions.IrGetObjectValue
 import org.jetbrains.kotlin.ir.expressions.IrGetValue
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.util.defaultType
@@ -32,10 +34,16 @@ class JetpackComposeTracingIrExtension(
     private val enabled: Boolean
 ) : IrGenerationExtension {
 
+    companion object {
+        private const val SENTRY_BASE_MODIFIER = "sentryBaseModifier"
+    }
+
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
         val composableAnnotation = FqName("androidx.compose.runtime.Composable")
 
         val modifierFqName = FqName("androidx.compose.ui.Modifier")
+        val modifierCompanionFqName = FqName("androidx.compose.ui.Modifier.Companion")
+
         val modifierClass = FqName("androidx.compose.ui")
             .classId("Modifier")
 
@@ -73,16 +81,12 @@ class JetpackComposeTracingIrExtension(
 
             private fun addSentryModifierToMethodBody(function: IrFunction, body: IrBody): IrBody {
                 return DeclarationIrBuilder(pluginContext, function.symbol).irBlockBody {
-                    val sentryTag =
-                        irTemporary(irString(function.name.toString()), nameHint = "sentryTag")
-
-
                     val sentryModifier = irTemporary(
                         irCall(sentryModifierFunctionRef, modifierAsType).also { call ->
                             call.dispatchReceiver = irGetObject(sentryModifierCompanionRef!!)
-                            call.putValueArgument(0, irGet(sentryTag))
+                            call.putValueArgument(0, irString(function.name.toString()))
                         },
-                        nameHint = "sentryModifier"
+                        nameHint = SENTRY_BASE_MODIFIER
                     )
                     // TODO use scopes instead
                     getModifierMap[currentFunction!!] = irGet(sentryModifier)
@@ -107,11 +111,37 @@ class JetpackComposeTracingIrExtension(
                             call.putValueArgument(modifierArgumentIndex, it)
                         }
                     } else {
+                        modifierArgument.toString()
                         // it's already there, add modifier to expression
                         // TODO implement
                     }
                 }
                 return call
+            }
+
+            override fun visitVariable(declaration: IrVariable): IrStatement {
+                /**
+                 * Replaces the receiver of any (temp) Modifier variables to be the base `sentryModifier` created inside the method body
+                 *
+                 * E.g. turns
+                 * val tmp0_modifier: Modifier = Modifier.fillMaxSize()
+                 * into
+                 * val tmp0_modifier: Modifier = tmp0_sentryBaseModifier.fillMaxSize()
+                 */
+
+                // only apply to Modifier variables
+                if (declaration.type.classFqName == modifierFqName) {
+                    // which get initialized via Modifier.Companion (aka extension receiver)
+                    val initializer = declaration.initializer as IrCall?
+                    val initExtensionReceiver = initializer?.extensionReceiver as IrGetObjectValue?
+                    if (initExtensionReceiver?.type?.classFqName == modifierCompanionFqName) {
+                        val sentryBaseModifier = getModifierMap[currentFunction]
+                        if (sentryBaseModifier != null) {
+                            initializer?.extensionReceiver = sentryBaseModifier
+                        }
+                    }
+                }
+                return super.visitVariable(declaration)
             }
         }
         moduleFragment.transform(transformer, null)
@@ -121,10 +151,6 @@ class JetpackComposeTracingIrExtension(
 
 fun FqName.classId(name: String): ClassId {
     return ClassId(this, org.jetbrains.kotlin.name.Name.identifier(name))
-}
-
-fun FqName.callableId(name: String): CallableId {
-    return CallableId(this, org.jetbrains.kotlin.name.Name.identifier(name))
 }
 
 fun ClassId.callableId(name: String): CallableId {
