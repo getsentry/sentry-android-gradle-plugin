@@ -41,7 +41,8 @@ class KotlinCompilerPluginComposeTest {
             }
             """.trimIndent()
         )
-        compile(kotlinSource)
+        val result = compile(kotlinSource)
+        assert(result.exitCode == KotlinCompilation.ExitCode.OK)
     }
 
     @Test
@@ -68,7 +69,8 @@ class KotlinCompilerPluginComposeTest {
             }
             """.trimIndent()
         )
-        compile(kotlinSource)
+        val result = compile(kotlinSource)
+        assert(result.exitCode == KotlinCompilation.ExitCode.OK)
     }
 
     @Test
@@ -95,7 +97,8 @@ class KotlinCompilerPluginComposeTest {
             }
             """.trimIndent()
         )
-        compile(kotlinSource)
+        val result = compile(kotlinSource)
+        assert(result.exitCode == KotlinCompilation.ExitCode.OK)
     }
 
     private fun compile(kotlinSource: SourceFile): KotlinCompilation.Result {

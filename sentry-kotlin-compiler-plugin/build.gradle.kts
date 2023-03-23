@@ -25,6 +25,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
     testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.5.0")
 
+    // TODO we actually only want to depend on some runtime classes for testing our plugin
     implementation(compose.desktop.currentOs)
 }
 
