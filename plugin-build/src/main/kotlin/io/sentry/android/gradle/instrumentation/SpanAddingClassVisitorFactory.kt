@@ -6,10 +6,12 @@ import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.extensions.InstrumentationFeature
+import io.sentry.android.gradle.extensions.LogcatExtension
 import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
+import io.sentry.android.gradle.instrumentation.logcat.LogcatLevel
 import io.sentry.android.gradle.instrumentation.logcat.SentryLogcatInstrumentable
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
@@ -49,6 +51,12 @@ abstract class SpanAddingClassVisitorFactory :
 
         @get:Input
         val debug: Property<Boolean>
+
+        @get:Input
+        val logcatMinLevel: Property<LogcatLevel>
+
+        @get:Input
+        val logcatEnabled: Property<Boolean>
 
         @get:Input
         val features: SetProperty<InstrumentationFeature>
@@ -117,12 +125,9 @@ abstract class SpanAddingClassVisitorFactory :
                     ComposeNavigation().takeIf {
                         isComposeInstrEnabled(sentryModules, parameters.get())
                     },
-                    SentryLogcatInstrumentable().takeIf {
-                        isLogcatInstrEnabled(sentryModules, parameters.get())
-                    }
+                    SentryLogcatInstrumentable(parameters.get().logcatMinLevel.get())
                 )
             )
-
             SentryPlugin.logger.info {
                 "Instrumentable: $instrumentable"
             }
@@ -172,7 +177,9 @@ abstract class SpanAddingClassVisitorFactory :
         sentryModules.isAtLeast(
             SentryModules.SENTRY_ANDROID_CORE,
             SentryVersions.VERSION_LOGCAT
-        ) && parameters.features.get().contains(InstrumentationFeature.LOGCAT)
+        )
+            && parameters.features.get().contains(InstrumentationFeature.LOGCAT)
+            && parameters.logcatEnabled.get()
 
     private fun Map<ModuleIdentifier, SemVer>.isAtLeast(
         module: ModuleIdentifier,

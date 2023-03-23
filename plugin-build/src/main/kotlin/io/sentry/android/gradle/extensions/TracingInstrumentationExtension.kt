@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.extensions
 
+import org.gradle.api.Action
 import javax.inject.Inject
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -44,8 +45,19 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
                 InstrumentationFeature.FILE_IO,
                 InstrumentationFeature.OKHTTP,
                 InstrumentationFeature.COMPOSE,
+                InstrumentationFeature.LOGCAT
             )
         )
+
+    val logcat: LogcatExtension = objects.newInstance(
+        LogcatExtension::class.java
+    )
+
+    fun logcat(
+        logcatAction: Action<LogcatExtension>
+    ) {
+        logcatAction.execute(logcat)
+    }
 }
 
 enum class InstrumentationFeature {
