@@ -51,7 +51,7 @@ internal fun verifyIntegrationList(
     return retrieveMetaDataFromManifest(
         rootFile,
         variant,
-        "io.sentry.integrations",
+        "io.sentry.gradle-plugin-integrations",
         signed
     )
         .split(',')
@@ -84,7 +84,7 @@ internal fun retrieveMetaDataFromManifest(
 
     val metaDataValue = attribute.applicationElement.listElements()
         .filter { it.tag == "meta-data" }
-        .filter { it.searchAttributeByName("name").valueAsString == metaDataName } // "io.sentry.integrations" }
+        .filter { it.searchAttributeByName("name").valueAsString == metaDataName }
         .map { it.searchAttributeByName("value").valueAsString }.first()
 
     return metaDataValue

@@ -16,7 +16,7 @@ import org.gradle.api.tasks.TaskAction
 abstract class SentryGenerateIntegrationListTask : DefaultTask() {
 
     companion object {
-        const val ATTR_INTEGRATIONS = "io.sentry.integrations"
+        const val ATTR_INTEGRATIONS = "io.sentry.gradle-plugin-integrations"
     }
 
     init {
