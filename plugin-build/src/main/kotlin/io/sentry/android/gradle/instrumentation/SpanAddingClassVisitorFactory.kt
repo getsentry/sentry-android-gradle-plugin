@@ -6,7 +6,6 @@ import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.extensions.InstrumentationFeature
-import io.sentry.android.gradle.extensions.LogcatExtension
 import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
@@ -125,7 +124,9 @@ abstract class SpanAddingClassVisitorFactory :
                     ComposeNavigation().takeIf {
                         isComposeInstrEnabled(sentryModules, parameters.get())
                     },
-                    SentryLogcatInstrumentable(parameters.get().logcatMinLevel.get())
+                    SentryLogcatInstrumentable(parameters.get().logcatMinLevel.get()).takeIf {
+                        isLogcatInstrEnabled(sentryModules, parameters.get())
+                    }
                 )
             )
             SentryPlugin.logger.info {
