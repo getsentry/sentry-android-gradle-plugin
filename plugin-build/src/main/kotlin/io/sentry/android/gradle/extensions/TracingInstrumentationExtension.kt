@@ -45,7 +45,6 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
                 InstrumentationFeature.FILE_IO,
                 InstrumentationFeature.OKHTTP,
                 InstrumentationFeature.COMPOSE,
-                InstrumentationFeature.LOGCAT
             )
         )
 
@@ -90,11 +89,4 @@ enum class InstrumentationFeature {
      * navigation controllers used in Jetpack Compose.
      */
     COMPOSE,
-
-    /**
-     * When enabled the SDK will create breadcrumbs when using Logcat
-     * This feature uses bytecode manipulation and replaces Logcat
-     * with Sentry-specific implementations.
-     */
-    LOGCAT
 }

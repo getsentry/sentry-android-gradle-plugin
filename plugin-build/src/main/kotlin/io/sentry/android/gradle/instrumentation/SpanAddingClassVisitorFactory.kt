@@ -178,9 +178,7 @@ abstract class SpanAddingClassVisitorFactory :
         sentryModules.isAtLeast(
             SentryModules.SENTRY_ANDROID_CORE,
             SentryVersions.VERSION_LOGCAT
-        )
-            && parameters.features.get().contains(InstrumentationFeature.LOGCAT)
-            && parameters.logcatEnabled.get()
+        ) && parameters.logcatEnabled.get()
 
     private fun Map<ModuleIdentifier, SemVer>.isAtLeast(
         module: ModuleIdentifier,
