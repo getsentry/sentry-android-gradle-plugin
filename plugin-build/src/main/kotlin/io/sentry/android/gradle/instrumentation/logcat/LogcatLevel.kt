@@ -1,25 +1,27 @@
 package io.sentry.android.gradle.instrumentation.logcat
 
-enum class LogcatLevel {
-    VERBOSE,
-    DEBUG,
-    INFO,
-    WARNING,
-    ERROR;
+enum class LogcatLevel(private val level: Int) {
+    VERBOSE(0),
+    DEBUG(1),
+    INFO(2),
+    WARNING(3),
+    ERROR(4);
 
-    fun allowedLogFunctions(): List<String> {
-        return values()
-            .filter { it.ordinal >= this.ordinal }
-            .flatMap { it.functionNames() }
+    fun supports(other: LogcatLevel) : Boolean {
+        return level >= other.level
     }
 
-    private fun functionNames(): List<String> {
-        return when (this) {
-            VERBOSE -> listOf("v")
-            DEBUG -> listOf("d")
-            INFO -> listOf("i")
-            WARNING -> listOf("w")
-            ERROR -> listOf("e", "wtf")
+    companion object {
+        fun logFunctionToLevel(str: String): LogcatLevel? {
+            return when (str) {
+                "v" -> VERBOSE
+                "d" -> DEBUG
+                "i" -> INFO
+                "w" -> WARNING
+                "e" -> ERROR
+                "wtf" -> ERROR
+                else -> null
+            }
         }
     }
 }

@@ -1,36 +1,44 @@
-package io.sentry.android.gradle.instrumentation.logcat
-
-import org.objectweb.asm.ClassVisitor
+import io.sentry.android.gradle.instrumentation.MethodContext
+import io.sentry.android.gradle.instrumentation.MethodInstrumentable
+import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
+import io.sentry.android.gradle.instrumentation.logcat.LogcatLevel
 import org.objectweb.asm.MethodVisitor
-import org.objectweb.asm.Opcodes
 import org.objectweb.asm.commons.AdviceAdapter
 
-class LogcatClassVisitor(
-    apiVersion: Int,
-    originalVisitor: ClassVisitor,
-    private val minLevel: LogcatLevel
-) :
-    ClassVisitor(apiVersion, originalVisitor) {
-    override fun visitMethod(
-        access: Int,
-        name: String?,
-        descriptor: String?,
-        signature: String?,
-        exceptions: Array<out String>?
+class LogcatMethodInstrumentable : MethodInstrumentable {
+
+    override fun getVisitor(
+        instrumentableContext: MethodContext,
+        apiVersion: Int,
+        originalVisitor: MethodVisitor,
+        parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
     ): MethodVisitor {
-        val mv = super.visitMethod(access, name, descriptor, signature, exceptions)
-        return LogMethodVisitor(mv, access, name, descriptor, minLevel)
+        return LogcatMethodVisitor(
+            apiVersion,
+            originalVisitor,
+            instrumentableContext,
+            parameters.logcatMinLevel.get()
+        )
+    }
+
+    override fun isInstrumentable(data: MethodContext): Boolean {
+        return true
     }
 }
 
-class LogMethodVisitor(
-    mv: MethodVisitor?,
-    access: Int,
-    name: String?,
-    desc: String?,
+class LogcatMethodVisitor(
+    apiVersion: Int,
+    originalVisitor: MethodVisitor,
+    instrumentableContext: MethodContext,
     private val minLevel: LogcatLevel
-) :
-    AdviceAdapter(Opcodes.ASM7, mv, access, name, desc) {
+) : AdviceAdapter(
+    apiVersion,
+    originalVisitor,
+    instrumentableContext.access,
+    instrumentableContext.name,
+    instrumentableContext.descriptor
+) {
+
     override fun visitMethodInsn(
         opcode: Int,
         owner: String,
@@ -38,7 +46,7 @@ class LogMethodVisitor(
         desc: String?,
         itf: Boolean
     ) {
-        if (owner.contains("android/util/Log") && minLevel.allowedLogFunctions().contains(name)) {
+        if (shouldReplaceLogCall(owner, name, minLevel)) {
             // Replace call to Log with call to SentryLogcatAdapter
             mv.visitMethodInsn(
                 INVOKESTATIC,
@@ -51,5 +59,10 @@ class LogMethodVisitor(
             super.visitMethodInsn(opcode, owner, name, desc, itf)
         }
     }
-}
 
+    private fun shouldReplaceLogCall(owner: String, name: String, minLevel: LogcatLevel) =
+        LogcatLevel.logFunctionToLevel(name)
+            ?.takeIf { it.supports(minLevel) }
+            ?.let { owner == "android/util/Log" }
+            ?: false
+}

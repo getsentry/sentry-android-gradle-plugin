@@ -2,36 +2,18 @@ package io.sentry.android.gradle.instrumentation.logcat
 
 import kotlin.test.assertEquals
 import org.junit.Test
+import kotlin.test.assertNull
 
 class LogcatLevelTest {
 
     @Test
-    fun `test allowedLogFunctions for VERBOSE level`() {
-        val allowedFunctions = LogcatLevel.VERBOSE.allowedLogFunctions()
-        assertEquals(listOf("v", "d", "i", "w", "e", "wtf"), allowedFunctions)
-    }
-
-    @Test
-    fun `test allowedLogFunctions for DEBUG level`() {
-        val allowedFunctions = LogcatLevel.DEBUG.allowedLogFunctions()
-        assertEquals(listOf("d", "i", "w", "e", "wtf"), allowedFunctions)
-    }
-
-    @Test
-    fun `test allowedLogFunctions for INFO level`() {
-        val allowedFunctions = LogcatLevel.INFO.allowedLogFunctions()
-        assertEquals(listOf("i", "w", "e", "wtf"), allowedFunctions)
-    }
-
-    @Test
-    fun `test allowedLogFunctions for WARNING level`() {
-        val allowedFunctions = LogcatLevel.WARNING.allowedLogFunctions()
-        assertEquals(listOf("w", "e", "wtf"), allowedFunctions)
-    }
-
-    @Test
-    fun `test allowedLogFunctions for ERROR level`() {
-        val allowedFunctions = LogcatLevel.ERROR.allowedLogFunctions()
-        assertEquals(listOf("e", "wtf"), allowedFunctions)
+    fun `test logFunctionToLevel`() {
+        assertEquals(LogcatLevel.VERBOSE, LogcatLevel.logFunctionToLevel("v"))
+        assertEquals(LogcatLevel.DEBUG, LogcatLevel.logFunctionToLevel("d"))
+        assertEquals(LogcatLevel.INFO, LogcatLevel.logFunctionToLevel("i"))
+        assertEquals(LogcatLevel.WARNING, LogcatLevel.logFunctionToLevel("w"))
+        assertEquals(LogcatLevel.ERROR, LogcatLevel.logFunctionToLevel("e"))
+        assertEquals(LogcatLevel.ERROR, LogcatLevel.logFunctionToLevel("wtf"))
+        assertNull(LogcatLevel.logFunctionToLevel("invalid"))
     }
 }

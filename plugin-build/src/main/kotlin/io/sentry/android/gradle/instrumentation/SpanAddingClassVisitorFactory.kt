@@ -124,7 +124,7 @@ abstract class SpanAddingClassVisitorFactory :
                     ComposeNavigation().takeIf {
                         isComposeInstrEnabled(sentryModules, parameters.get())
                     },
-                    SentryLogcatInstrumentable(parameters.get().logcatMinLevel.get()).takeIf {
+                    SentryLogcatInstrumentable().takeIf {
                         isLogcatInstrEnabled(sentryModules, parameters.get())
                     }
                 )
