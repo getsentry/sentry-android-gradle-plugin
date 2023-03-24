@@ -8,6 +8,9 @@ import javax.inject.Inject
 open class LogcatExtension @Inject constructor(objects: ObjectFactory) {
     /**
      * Enables or disables the Logcat feature.
+     * When enabled and the Log call meets the minimum log level,
+     * it will replace Logcat calls with SentryLogcatAdapter calls and add breadcrumbs.
+     *
      * Defaults to true.
      */
     val enabled: Property<Boolean> = objects.property(Boolean::class.java).convention(true)
