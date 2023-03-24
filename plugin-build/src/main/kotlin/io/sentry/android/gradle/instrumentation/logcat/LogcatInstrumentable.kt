@@ -19,5 +19,5 @@ class SentryLogcatInstrumentable(private val minLevel: LogcatLevel) :
     }
 
     override fun isInstrumentable(data: ClassContext) =
-        !data.isSentryClass() && !data.currentClassData.className.contains("SentryLogcatAdapter\$Companion")
+        !data.isSentryClass()
 }
