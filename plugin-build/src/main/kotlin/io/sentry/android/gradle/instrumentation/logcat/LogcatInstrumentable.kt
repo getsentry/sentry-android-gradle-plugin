@@ -6,7 +6,7 @@ import io.sentry.android.gradle.instrumentation.*
 import io.sentry.android.gradle.instrumentation.util.isSentryClass
 import org.objectweb.asm.ClassVisitor
 
-class SentryLogcatInstrumentable() :
+class LogcatInstrumentable :
     ClassInstrumentable {
 
     companion object {

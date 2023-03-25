@@ -61,8 +61,7 @@ class LogcatMethodVisitor(
     }
 
     private fun shouldReplaceLogCall(owner: String, name: String, minLevel: LogcatLevel) =
-        LogcatLevel.logFunctionToLevel(name)
-            ?.takeIf { it.supports(minLevel) }
-            ?.let { owner == "android/util/Log" }
-            ?: false
+        LogcatLevel.logFunctionToLevel(name)?.let {
+            owner == "android/util/Log" && it.supports(minLevel)
+        } ?: false
 }
