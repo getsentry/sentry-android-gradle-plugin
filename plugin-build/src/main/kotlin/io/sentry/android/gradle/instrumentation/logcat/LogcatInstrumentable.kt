@@ -10,8 +10,7 @@ class LogcatInstrumentable :
     ClassInstrumentable {
 
     companion object {
-        private const val LOG_CLASSNAME =
-            "android/util/Log"
+        private const val LOG_CLASSNAME = "Log"
     }
 
     override fun getVisitor(
