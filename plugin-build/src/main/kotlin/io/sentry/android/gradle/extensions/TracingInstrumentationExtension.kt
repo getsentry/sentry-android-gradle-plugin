@@ -1,7 +1,7 @@
 package io.sentry.android.gradle.extensions
 
-import org.gradle.api.Action
 import javax.inject.Inject
+import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty

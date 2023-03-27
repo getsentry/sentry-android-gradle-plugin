@@ -1,9 +1,9 @@
 package io.sentry.android.gradle.extensions
 
 import io.sentry.android.gradle.instrumentation.logcat.LogcatLevel
+import javax.inject.Inject
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
-import javax.inject.Inject
 
 open class LogcatExtension @Inject constructor(objects: ObjectFactory) {
     /**

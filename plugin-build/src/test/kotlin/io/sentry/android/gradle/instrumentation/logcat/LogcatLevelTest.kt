@@ -1,8 +1,8 @@
 package io.sentry.android.gradle.instrumentation.logcat
 
 import kotlin.test.assertEquals
-import org.junit.Test
 import kotlin.test.assertNull
+import org.junit.Test
 
 class LogcatLevelTest {
 

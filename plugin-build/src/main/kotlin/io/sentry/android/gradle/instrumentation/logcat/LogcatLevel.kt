@@ -7,7 +7,7 @@ enum class LogcatLevel(private val level: Int) {
     WARNING(3),
     ERROR(4);
 
-    fun supports(other: LogcatLevel) : Boolean {
+    fun supports(other: LogcatLevel): Boolean {
         return level >= other.level
     }
 
