@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features 
+
+- Add support for Logcat ([#455](https://github.com/getsentry/sentry-android-gradle-plugin/pull/455))
+
 ### Dependencies
 
 - Bump Android SDK from v6.13.0 to v6.15.0 ([#442](https://github.com/getsentry/sentry-android-gradle-plugin/pull/442))
