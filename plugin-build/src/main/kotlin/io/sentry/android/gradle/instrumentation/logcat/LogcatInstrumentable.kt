@@ -2,7 +2,10 @@ package io.sentry.android.gradle.instrumentation.logcat
 
 import LogcatMethodInstrumentable
 import com.android.build.api.instrumentation.ClassContext
-import io.sentry.android.gradle.instrumentation.*
+import io.sentry.android.gradle.instrumentation.ClassInstrumentable
+import io.sentry.android.gradle.instrumentation.CommonClassVisitor
+import io.sentry.android.gradle.instrumentation.MethodInstrumentable
+import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.util.isSentryClass
 import org.objectweb.asm.ClassVisitor
 
