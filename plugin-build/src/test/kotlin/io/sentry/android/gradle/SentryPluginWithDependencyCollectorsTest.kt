@@ -41,8 +41,6 @@ class SentryPluginWithDependencyCollectorsTest :
 
         val result = runner
             .appendArguments("app:assembleRelease")
-            .appendArguments("--console=plain")
-            .forwardOutput()
             .build()
 
         assertTrue { "BUILD SUCCESSFUL" in result.output }
