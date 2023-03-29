@@ -25,16 +25,12 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
       - name: Run Gradle tasks
         if: runner.os != 'Windows'
-        uses: gradle/gradle-build-action@v2
-        with:
-          gradle-home-cache-includes: |
-            caches
-            notifications
-            jdks
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: preMerge --continue
+        run: ./gradlew preMerge --continue
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v3
@@ -44,21 +40,7 @@ jobs:
         if: always()
 
       - name: Build the Debug variant
-        uses: gradle/gradle-build-action@v2
-        with:
-          gradle-home-cache-includes: |
-            caches
-            notifications
-            jdks
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: assembleDebug
+        run: ./gradlew assembleDebug
 
       - name: Build the Release variant
-        uses: gradle/gradle-build-action@v2
-        with:
-          gradle-home-cache-includes: |
-            caches
-            notifications
-            jdks
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          arguments: assembleRelease
+        run: ./gradlew assembleRelease

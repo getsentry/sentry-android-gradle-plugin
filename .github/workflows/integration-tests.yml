@@ -41,13 +41,8 @@ jobs:
         with:
           java-version: 11
 
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches/modules-*
-            ~/.gradle/caches/jars-*
-            ~/.gradle/caches/build-cache-*
-          key: iosched-gradle-${{ hashFiles('checksum.txt') }}
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
 
       - name: Build project
         run: ./gradlew spotlessCheck assembleDebug --stacktrace
