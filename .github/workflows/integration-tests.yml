@@ -54,7 +54,7 @@ jobs:
 
       - name: Upload build reports
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: build-reports
           path: mobile/build/reports/
@@ -108,14 +108,14 @@ jobs:
 #
 #      - name: Upload device logs
 #        if: always()
-#        uses: actions/upload-artifact@v2
+#        uses: actions/upload-artifact@v3
 #        with:
 #          name: emulator-logs
 #          path: emulator.log
 #
 #      - name: Upload test reports
 #        if: always()
-#        uses: actions/upload-artifact@v2
+#        uses: actions/upload-artifact@v3
 #        with:
 #          name: test-reports
 #          path: mobile/build/reports/

@@ -36,7 +36,7 @@ jobs:
           make all
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ github.sha }}
           path: ${{ github.workspace }}/plugin-build/build/distributions/*.zip
