@@ -10,6 +10,7 @@ import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.util.getBuildServiceName
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ModuleIdentifier
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.services.BuildService
@@ -26,8 +27,16 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
     @set:Synchronized
     var externalModules: Map<ModuleIdentifier, SemVer> = emptyMap()
 
-    fun retrieveEnabledInstrumentationFeatures(): Set<InstrumentationFeature> {
-        return parameters.features.get().filter { isInstrumentationEnabled(it) }.toSet()
+    fun retrieveEnabledInstrumentationFeatures(): Set<String> {
+        val features = parameters.features.get()
+            .filter { isInstrumentationEnabled(it) }
+            .map { it.integrationName }
+            .toMutableSet()
+
+        if (isLogcatInstrEnabled()) {
+            features.add("Logcat Instrumentation")
+        }
+        return features
     }
 
     private fun isInstrumentationEnabled(feature: InstrumentationFeature): Boolean {
@@ -39,24 +48,30 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
         }
     }
 
-    private fun isDatabaseInstrEnabled(): Boolean =
+    fun isLogcatInstrEnabled(): Boolean =
+        sentryModules.isAtLeast(
+            SentryModules.SENTRY_ANDROID_CORE,
+            SentryVersions.VERSION_LOGCAT
+        ) && parameters.logcatEnabled.get()
+
+    fun isDatabaseInstrEnabled(): Boolean =
         sentryModules.isAtLeast(
             SentryModules.SENTRY_ANDROID_CORE,
             SentryVersions.VERSION_PERFORMANCE
         ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
 
-    private fun isFileIOInstrEnabled(): Boolean =
+    fun isFileIOInstrEnabled(): Boolean =
         sentryModules.isAtLeast(
             SentryModules.SENTRY_ANDROID_CORE,
             SentryVersions.VERSION_FILE_IO
         ) && parameters.features.get().contains(InstrumentationFeature.FILE_IO)
 
-    private fun isOkHttpInstrEnabled(): Boolean = sentryModules.isAtLeast(
+    fun isOkHttpInstrEnabled(): Boolean = sentryModules.isAtLeast(
         SentryModules.SENTRY_ANDROID_OKHTTP,
         SentryVersions.VERSION_OKHTTP
     ) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
 
-    private fun isComposeInstrEnabled(): Boolean =
+    fun isComposeInstrEnabled(): Boolean =
         sentryModules.isAtLeast(
             SentryModules.SENTRY_ANDROID_COMPOSE,
             SentryVersions.VERSION_COMPOSE
@@ -71,13 +86,15 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
     companion object {
         fun register(
             project: Project,
-            features: Provider<Set<InstrumentationFeature>>
+            features: Provider<Set<InstrumentationFeature>>,
+            logcatEnabled: Provider<Boolean>
         ): Provider<SentryModulesService> {
             return project.gradle.sharedServices.registerIfAbsent(
                 getBuildServiceName(SentryModulesService::class.java),
                 SentryModulesService::class.java
             ) {
                 it.parameters.features.setDisallowChanges(features)
+                it.parameters.logcatEnabled.setDisallowChanges(logcatEnabled)
             }
         }
     }
@@ -85,5 +102,8 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
     interface Parameters : BuildServiceParameters {
         @get:Input
         val features: SetProperty<InstrumentationFeature>
+
+        @get:Input
+        val logcatEnabled: Property<Boolean>
     }
 }

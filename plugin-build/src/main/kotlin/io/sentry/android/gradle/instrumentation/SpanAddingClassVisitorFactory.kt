@@ -5,11 +5,12 @@ import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.SentryPlugin
-import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
+import io.sentry.android.gradle.instrumentation.logcat.LogcatInstrumentable
+import io.sentry.android.gradle.instrumentation.logcat.LogcatLevel
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
 import io.sentry.android.gradle.instrumentation.util.findClassReader
@@ -18,7 +19,6 @@ import io.sentry.android.gradle.instrumentation.util.isMinifiedClass
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.util.SemVer
-import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
@@ -45,6 +45,9 @@ abstract class SpanAddingClassVisitorFactory :
 
         @get:Input
         val debug: Property<Boolean>
+
+        @get:Input
+        val logcatMinLevel: Property<LogcatLevel>
 
         @get:Internal
         val sentryModulesService: Property<SentryModulesService>
@@ -78,39 +81,36 @@ abstract class SpanAddingClassVisitorFactory :
             )
 
             SentryPlugin.logger.info { "Read sentry modules: $sentryModules" }
-            /**
-             * When adding a new instrumentable to the list below, do not forget to add a new
-             * version to [SentryVersions] if it involves runtime classes
-             * from the sentry-android SDK.
-             */
-            val enabledFeatures = parameters.get()
-                .sentryModulesService.get()
-                .retrieveEnabledInstrumentationFeatures()
 
+            val sentryModulesService = parameters.get().sentryModulesService.get()
             val instrumentable = ChainedInstrumentable(
                 listOfNotNull(
                     AndroidXSQLiteDatabase().takeIf {
-                        enabledFeatures.contains(InstrumentationFeature.DATABASE)
+                        sentryModulesService.isDatabaseInstrEnabled()
                     },
                     AndroidXSQLiteStatement(androidXSqliteFrameWorkVersion).takeIf {
-                        enabledFeatures.contains(InstrumentationFeature.DATABASE)
+                        sentryModulesService.isDatabaseInstrEnabled()
                     },
                     AndroidXRoomDao().takeIf {
-                        enabledFeatures.contains(InstrumentationFeature.DATABASE)
+                        sentryModulesService.isDatabaseInstrEnabled()
                     },
-                    OkHttp().takeIf { enabledFeatures.contains(InstrumentationFeature.OKHTTP) },
+                    OkHttp().takeIf {
+                        sentryModulesService.isOkHttpInstrEnabled()
+                    },
                     WrappingInstrumentable().takeIf {
-                        enabledFeatures.contains(InstrumentationFeature.FILE_IO)
+                        sentryModulesService.isFileIOInstrEnabled()
                     },
                     RemappingInstrumentable().takeIf {
-                        enabledFeatures.contains(InstrumentationFeature.FILE_IO)
+                        sentryModulesService.isFileIOInstrEnabled()
                     },
                     ComposeNavigation().takeIf {
-                        enabledFeatures.contains(InstrumentationFeature.COMPOSE)
+                        sentryModulesService.isComposeInstrEnabled()
                     },
+                    LogcatInstrumentable().takeIf {
+                        sentryModulesService.isLogcatInstrEnabled()
+                    }
                 )
             )
-
             SentryPlugin.logger.info {
                 "Instrumentable: $instrumentable"
             }

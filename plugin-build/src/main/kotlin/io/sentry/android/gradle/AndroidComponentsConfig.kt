@@ -56,7 +56,6 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 sentryOrg,
                 sentryProject
             )
-
             if (extension.tracingInstrumentation.enabled.get()) {
                 /**
                  * We detect sentry-android SDK version using configurations.incoming.afterResolve.
@@ -68,7 +67,8 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                  */
                 val sentryModulesService = SentryModulesService.register(
                     project,
-                    extension.tracingInstrumentation.features
+                    extension.tracingInstrumentation.features,
+                    extension.tracingInstrumentation.logcat.enabled
                 )
                 project.collectModules(
                     "${variant.name}RuntimeClasspath",
@@ -86,6 +86,9 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     }
                     params.debug.setDisallowChanges(
                         extension.tracingInstrumentation.debug.get()
+                    )
+                    params.logcatMinLevel.setDisallowChanges(
+                        extension.tracingInstrumentation.logcat.minLevel
                     )
                     params.sentryModulesService.setDisallowChanges(sentryModulesService)
                     params.tmpDir.set(tmpDir)

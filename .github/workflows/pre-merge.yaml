@@ -22,8 +22,8 @@ jobs:
       - name: Setup Java Version
         uses: actions/setup-java@v2
         with:
-          distribution: 'adopt'
-          java-version: '11'
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Run Gradle tasks
         if: runner.os != 'Windows'

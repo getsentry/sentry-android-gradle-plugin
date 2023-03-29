@@ -4,12 +4,10 @@ import io.sentry.android.gradle.util.info
 import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
@@ -19,9 +17,6 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
     init {
         description = "Uploads native symbols to Sentry"
     }
-
-    @get:InputDirectory
-    abstract val buildDir: DirectoryProperty
 
     @get:Input
     abstract val cliExecutable: Property<String>
@@ -91,7 +86,7 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
         // where {variantName} could be debug/release...
         args.add(
             File(
-                buildDir.asFile.get(),
+                project.buildDir,
                 "intermediates${sep}merged_native_libs${sep}${variantName.get()}"
             ).absolutePath
         )

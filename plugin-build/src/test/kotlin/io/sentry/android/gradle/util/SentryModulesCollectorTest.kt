@@ -59,11 +59,16 @@ class SentryModulesCollectorTest {
                 .build()
 
             val featureProvider = fakeProject.provider { emptySet<InstrumentationFeature>() }
+            val logcatEnabled = fakeProject.provider { true }
 
             val project = spy(fakeProject)
             whenever(project.logger).thenReturn(logger)
             project.configurations.add(configuration)
-            sentryModulesServiceProvider = SentryModulesService.register(project, featureProvider)
+            sentryModulesServiceProvider = SentryModulesService.register(
+                project,
+                featureProvider,
+                logcatEnabled
+            )
 
             return project
         }

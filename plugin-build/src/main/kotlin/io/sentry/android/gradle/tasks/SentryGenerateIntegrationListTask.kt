@@ -37,10 +37,7 @@ abstract class SentryGenerateIntegrationListTask : DefaultTask() {
         logger.info {
             "SentryGenerateIntegrationListTask - outputFile: ${updatedManifest.get()}"
         }
-        val integrations = sentryModulesService.get()
-            .retrieveEnabledInstrumentationFeatures().map {
-                it.integrationName
-            }
+        val integrations = sentryModulesService.get().retrieveEnabledInstrumentationFeatures()
         val manifestFile = mergedManifest.asFile.get()
         val updatedManifestFile = updatedManifest.asFile.get()
 

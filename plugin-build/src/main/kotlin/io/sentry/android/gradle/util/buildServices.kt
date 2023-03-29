@@ -4,23 +4,20 @@ import java.util.UUID
 import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
-import org.gradle.api.services.BuildServiceRegistration
 import org.gradle.api.services.BuildServiceRegistry
 
 /*
  * Adapted from https://cs.android.com/android-studio/platform/tools/base/+/mirror-goog-studio-main:build-system/gradle-core/src/main/java/com/android/build/gradle/internal/services/buildServices.k
  */
 
-fun <ServiceT : BuildService<out BuildServiceParameters>> getBuildService(
+fun <ServiceT : BuildService<ParamsT>, ParamsT : BuildServiceParameters> getBuildService(
     buildServiceRegistry: BuildServiceRegistry,
     buildServiceClass: Class<ServiceT>
 ): Provider<ServiceT> {
-    @Suppress("UNCHECKED_CAST")
-    return (
-        buildServiceRegistry.registrations.getByName(
-            getBuildServiceName(buildServiceClass)
-        ) as BuildServiceRegistration<ServiceT, *>
-        ).getService()
+    val serviceName = getBuildServiceName(buildServiceClass)
+    return buildServiceRegistry.registerIfAbsent(serviceName, buildServiceClass) {
+        throw IllegalStateException("Service $serviceName is not registered.")
+    }
 }
 
 /*
