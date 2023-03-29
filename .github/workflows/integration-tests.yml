@@ -19,14 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           repository: 'google/iosched'
           # We point to a specific ref so a flaky merge to main of iosched doesn't break our CI. We have to update the ref from
           # time to time though.
           ref: '6f96c1528c00d3d89bedb33e5a0a10d67629e8bd'
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           path: 'sentry-android-gradle-plugin'
 
@@ -73,12 +73,12 @@ jobs:
 #        enable-sentry: [true, false]
 #
 #    steps:
-#      - uses: actions/checkout@v2
+#      - uses: actions/checkout@v3
 #        with:
 #          repository: 'google/iosched'
 #          ref: '6f96c1528c00d3d89bedb33e5a0a10d67629e8bd'
 #
-#      - uses: actions/checkout@v2
+#      - uses: actions/checkout@v3
 #        with:
 #          path: 'sentry-android-gradle-plugin'
 #
