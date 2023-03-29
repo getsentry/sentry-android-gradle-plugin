@@ -7,6 +7,10 @@
 - Make plugin Gradle 8 compatible ([#428](https://github.com/getsentry/sentry-android-gradle-plugin/pull/428))
 - Fix `uploadSentryNativeSymbols` task for Gradle 8 ([#447](https://github.com/getsentry/sentry-android-gradle-plugin/pull/447))
 
+### Features 
+
+- Add support for Logcat ([#455](https://github.com/getsentry/sentry-android-gradle-plugin/pull/455))
+
 ### Dependencies
 
 - Bump Android SDK from v6.13.0 to v6.16.0 ([#442](https://github.com/getsentry/sentry-android-gradle-plugin/pull/442), [#449](https://github.com/getsentry/sentry-android-gradle-plugin/pull/449))

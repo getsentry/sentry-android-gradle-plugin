@@ -3,6 +3,7 @@ package io.sentry.android.gradle.instrumentation.fakes
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.ClassInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
+import io.sentry.android.gradle.instrumentation.logcat.LogcatLevel
 import io.sentry.android.gradle.services.SentryModulesService
 import java.io.File
 import org.gradle.api.internal.provider.DefaultProperty
@@ -22,6 +23,14 @@ class TestSpanAddingParameters(
     override val debug: Property<Boolean>
         get() = DefaultProperty(PropertyHost.NO_OP, Boolean::class.javaObjectType)
             .convention(debugOutput)
+
+    override val logcatMinLevel: Property<LogcatLevel>
+        get() = DefaultProperty(PropertyHost.NO_OP, LogcatLevel::class.java)
+            .convention(LogcatLevel.WARNING)
+
+    override val logcatEnabled: Property<Boolean>
+        get() = DefaultProperty(PropertyHost.NO_OP, Boolean::class.javaObjectType)
+            .convention(true)
 
     override val features: SetProperty<InstrumentationFeature>
         get() = DefaultSetProperty(PropertyHost.NO_OP, InstrumentationFeature::class.java)

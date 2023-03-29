@@ -53,7 +53,6 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 sentryOrg,
                 sentryProject
             )
-
             if (extension.tracingInstrumentation.enabled.get()) {
                 /**
                  * We detect sentry-android SDK version using configurations.incoming.afterResolve.
@@ -83,6 +82,12 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     )
                     params.features.setDisallowChanges(
                         extension.tracingInstrumentation.features.get()
+                    )
+                    params.logcatMinLevel.setDisallowChanges(
+                        extension.tracingInstrumentation.logcat.minLevel.get()
+                    )
+                    params.logcatEnabled.setDisallowChanges(
+                        extension.tracingInstrumentation.logcat.enabled.get()
                     )
                     params.sentryModulesService.setDisallowChanges(sentryModulesService)
                     params.tmpDir.set(tmpDir)
