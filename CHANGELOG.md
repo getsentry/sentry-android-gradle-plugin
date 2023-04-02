@@ -6,6 +6,12 @@
 
 - Add support for Logcat ([#455](https://github.com/getsentry/sentry-android-gradle-plugin/pull/455))
 
+### Dependencies
+
+- Bump CLI from v2.15.2 to v2.16.1 ([#458](https://github.com/getsentry/sentry-android-gradle-plugin/pull/458))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2161)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.15.2...2.16.1)
+
 ## 3.4.3
 
 ### Fixes
