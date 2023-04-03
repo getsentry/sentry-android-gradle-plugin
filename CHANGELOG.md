@@ -5,7 +5,7 @@
 ### Features
 
 - Add support for Logcat ([#455](https://github.com/getsentry/sentry-android-gradle-plugin/pull/455))
-- Write enabled instrumentations and proguard uuid to manifest ([#441](https://github.com/getsentry/sentry-android-gradle-plugin/pull/441))
+- Write enabled instrumentations to manifest ([#441](https://github.com/getsentry/sentry-android-gradle-plugin/pull/441))
 
 ## 3.4.3
 
