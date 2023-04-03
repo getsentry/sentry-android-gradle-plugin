@@ -7,6 +7,15 @@
 - Add support for Logcat ([#455](https://github.com/getsentry/sentry-android-gradle-plugin/pull/455))
 - Write enabled instrumentations to manifest ([#441](https://github.com/getsentry/sentry-android-gradle-plugin/pull/441))
 
+### Dependencies
+
+- Bump CLI from v2.15.2 to v2.16.1 ([#458](https://github.com/getsentry/sentry-android-gradle-plugin/pull/458))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2161)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.15.2...2.16.1)
+- Bump Android SDK from v6.16.0 to v6.17.0 ([#462](https://github.com/getsentry/sentry-android-gradle-plugin/pull/462))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6170)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.16.0...6.17.0)
+
 ## 3.4.3
 
 ### Fixes
