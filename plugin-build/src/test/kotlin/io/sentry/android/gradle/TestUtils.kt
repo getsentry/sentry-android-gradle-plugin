@@ -4,7 +4,6 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppExtension
 import com.reandroid.lib.apk.ApkModule
-import io.sentry.android.gradle.tasks.SentryWriteProguardUUIDToManifestTask
 import io.sentry.android.gradle.testutil.forceEvaluate
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SemVer
@@ -55,19 +54,6 @@ internal fun verifyIntegrationList(
         signed
     )
         .split(',')
-}
-
-internal fun verifyProguardUuidInManifest(
-    rootFile: File,
-    variant: String = "release",
-    signed: Boolean = true
-): String {
-    return retrieveMetaDataFromManifest(
-        rootFile,
-        variant,
-        SentryWriteProguardUUIDToManifestTask.ATTR_PROGUARD_UUID,
-        signed
-    )
 }
 
 internal fun retrieveMetaDataFromManifest(

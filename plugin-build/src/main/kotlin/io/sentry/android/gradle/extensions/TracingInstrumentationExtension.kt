@@ -64,7 +64,7 @@ enum class InstrumentationFeature(val integrationName: String) {
      * When enabled the SDK will create spans for any CRUD operation performed by 'androidx.sqlite'
      * and 'androidx.room'. This feature uses bytecode manipulation.
      */
-    DATABASE("Database Instrumentation"),
+    DATABASE("DatabaseInstrumentation"),
 
     /**
      * When enabled the SDK will create spans for [java.io.FileInputStream],
@@ -72,7 +72,7 @@ enum class InstrumentationFeature(val integrationName: String) {
      * This feature uses bytecode manipulation and replaces the above
      * mentioned classes with Sentry-specific implementations.
      */
-    FILE_IO("File_IO Instrumentation"),
+    FILE_IO("FileIOInstrumentation"),
 
     /**
      * When enabled the SDK will create spans for outgoing network requests and attach
@@ -80,7 +80,7 @@ enum class InstrumentationFeature(val integrationName: String) {
      * This feature uses bytecode manipulation and attaches SentryOkHttpInterceptor to all OkHttp
      * clients in the project.
      */
-    OKHTTP("OkHttp Instrumentation"),
+    OKHTTP("OkHttpInstrumentation"),
 
     /**
      * When enabled the SDK will create breadcrumbs when navigating
@@ -88,5 +88,5 @@ enum class InstrumentationFeature(val integrationName: String) {
      * This feature uses bytecode manipulation and adds an OnDestinationChangedListener to all
      * navigation controllers used in Jetpack Compose.
      */
-    COMPOSE("Compose Instrumentation")
+    COMPOSE("ComposeInstrumentation")
 }

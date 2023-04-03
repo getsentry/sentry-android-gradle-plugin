@@ -128,11 +128,12 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
         )
 
         if (isMinifyEnabled && extension.includeProguardMapping.get()) {
-            val generateUuidTask = project.tasks
-                .withType(SentryGenerateProguardUuidTask::class.java)
-                .named(SentryGenerateProguardUuidTask.taskName(name.capitalized))
-
-            generateUuidTask.get().output.set(outputDir)
+            val generateUuidTask =
+                SentryGenerateProguardUuidTask.register(
+                    project = project,
+                    output = outputDir,
+                    taskSuffix = name.capitalized
+                )
             generateUuidTask.setupMergeAssetsDependencies(dependants)
             generateUuidTask.hookWithPackageTasks(project, variant)
             appExtension.sourceSets.getByName(name).assets.srcDir(

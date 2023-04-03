@@ -34,7 +34,7 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
             .toMutableSet()
 
         if (isLogcatInstrEnabled()) {
-            features.add("Logcat Instrumentation")
+            features.add("LogcatInstrumentation")
         }
         return features
     }
