@@ -2,9 +2,10 @@
 
 ## Unreleased
 
-### Features 
+### Features
 
 - Add support for Logcat ([#455](https://github.com/getsentry/sentry-android-gradle-plugin/pull/455))
+- Write enabled instrumentations to manifest ([#441](https://github.com/getsentry/sentry-android-gradle-plugin/pull/441))
 
 ### Dependencies
 
