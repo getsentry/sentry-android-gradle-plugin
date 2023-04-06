@@ -21,6 +21,7 @@ import io.sentry.android.gradle.tasks.DirectoryOutputTask
 import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
+import io.sentry.android.gradle.tasks.SentryWriteProguardUUIDToManifestTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.util.AgpVersions
@@ -164,6 +165,24 @@ private fun Variant.configureProguardMappingsTasks(
     sentryOrg: String?,
     sentryProject: String?
 ) {
+    val generateUuidTask =
+        SentryGenerateProguardUuidTask.register(
+            project = project,
+            taskSuffix = name.capitalized
+        )
+
+    val manifestUpdater = project.tasks.register(
+        name + "ManifestUpdater",
+        SentryWriteProguardUUIDToManifestTask::class.java
+    ) {
+        it.proguardUUIDFile.set(generateUuidTask.flatMap { it.outputFile })
+    }
+
+    artifacts.use(manifestUpdater).wiredWithFiles(
+        SentryWriteProguardUUIDToManifestTask::mergedManifest,
+        SentryWriteProguardUUIDToManifestTask::updatedManifest
+    ).toTransform(SingleArtifact.MERGED_MANIFEST)
+
     if (isAGP74) {
         val variant = AndroidVariant74(this)
         val sentryProps = getPropertiesFilePath(project, variant)
@@ -171,14 +190,9 @@ private fun Variant.configureProguardMappingsTasks(
         val isMinifyEnabled = isMinificationEnabled(project, variant, guardsquareEnabled)
 
         if (isMinifyEnabled && extension.includeProguardMapping.get()) {
-            val generateUuidTask =
-                SentryGenerateProguardUuidTask.register(
-                    project = project,
-                    taskSuffix = name.capitalized
-                )
             configureGeneratedSourcesFor74(
                 variant = this,
-                generateUuidTask to DirectoryOutputTask::output
+                generateUuidTask to SentryGenerateProguardUuidTask::output
             )
 
             val uploadMappingsTask = SentryUploadProguardMappingsTask.register(
