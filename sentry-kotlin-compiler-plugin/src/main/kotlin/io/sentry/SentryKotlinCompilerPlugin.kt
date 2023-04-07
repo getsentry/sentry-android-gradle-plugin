@@ -16,7 +16,6 @@ class SentryKotlinCompilerPlugin : CompilerPluginRegistrar() {
     override val supportsK2: Boolean
         get() = false
 
-
     override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
         val messageCollector = configuration.get(
             CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY,

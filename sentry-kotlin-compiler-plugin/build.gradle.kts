@@ -28,4 +28,3 @@ dependencies {
     // TODO we actually only want to depend on some runtime classes for testing our plugin
     implementation(compose.desktop.currentOs)
 }
-

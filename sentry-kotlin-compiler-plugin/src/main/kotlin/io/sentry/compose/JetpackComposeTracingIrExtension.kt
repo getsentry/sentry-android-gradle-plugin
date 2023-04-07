@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.backend.common.ScopeWithIr
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.irBlockBody
@@ -24,6 +25,7 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrCallImpl
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.defaultType
+import org.jetbrains.kotlin.ir.util.getPackageFragment
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.statements
 import org.jetbrains.kotlin.name.CallableId
@@ -43,12 +45,28 @@ class JetpackComposeTracingIrExtension(
         val composableAnnotation = FqName("androidx.compose.runtime.Composable")
 
         val modifierClassFqName = FqName("androidx.compose.ui.Modifier")
-        val modifierClassId = FqName("androidx.compose.ui")
-            .classId("Modifier")
+        val modifierClassId = FqName("androidx.compose.ui").classId("Modifier")
         val modifierType = pluginContext.referenceClass(modifierClassId)!!.owner.defaultType
-        val modifierThen =
-            pluginContext.referenceFunctions(modifierClassId.callableId("then")).single()
-
+        val modifierThenRefs = pluginContext.referenceFunctions(modifierClassId.callableId("then"))
+        if (modifierThenRefs.isEmpty()) {
+            messageCollector.report(
+                CompilerMessageSeverity.WARNING,
+                "No definition of androidx.compose.ui.Modifier.then() found, " +
+                    "Sentry Kotlin Compiler plugin won't run. " +
+                    "Please ensure you're applying to plugin to a compose-enabled project."
+            )
+            return
+        } else if (modifierThenRefs.size != 1) {
+            messageCollector.report(
+                CompilerMessageSeverity.WARNING,
+                "Multiple definitions androidx.compose.ui.Modifier.then() found, " +
+                    "which is not supported by Sentry Kotlin Compiler plugin won't run. " +
+                    "Please file an issue under " +
+                    "https://github.com/getsentry/sentry-android-gradle-plugin"
+            )
+            return
+        }
+        val modifierThen = modifierThenRefs.single()
 
         val sentryModifierClassCompanion = FqName("io.sentry.compose.Modifier")
             .classId("Companion")
@@ -58,8 +76,29 @@ class JetpackComposeTracingIrExtension(
             .callableId("sentryModifier")
 
         val sentryModifierCompanionRef = pluginContext.referenceClass(sentryModifierClassCompanion)
-        val sentryModifierFunctionRef =
-            pluginContext.referenceFunctions(sentryModifierFunction).single()
+        val sentryModifierFunctionRefs = pluginContext.referenceFunctions(sentryModifierFunction)
+
+        if (sentryModifierFunctionRefs.isEmpty()) {
+            messageCollector.report(
+                CompilerMessageSeverity.WARNING,
+                "io.sentry.compose.Modifier.sentryModifier() not found, " +
+                    "Sentry Kotlin Compiler plugin won't run. " +
+                    "Please ensure you're using the " +
+                    "'io.sentry:sentry-compose-android' is defined as a dependency."
+            )
+            return
+        } else if (sentryModifierFunctionRefs.size != 1) {
+            messageCollector.report(
+                CompilerMessageSeverity.WARNING,
+                "Multiple definitions io.sentry.compose.Modifier.sentryModifier() found, " +
+                    "Sentry Kotlin Compiler plugin won't run. " +
+                    "Please ensure your versions of 'io.sentry:sentry-compose-android' " +
+                    "and the sentry Android Gradle plugin match."
+            )
+            return
+        }
+
+        val sentryModifierFunctionRef = sentryModifierFunctionRefs.single()
 
         // keeps track of sentryBaseModifier per function
         val getModifierMap = mutableMapOf<ScopeWithIr, IrGetValue>()
@@ -68,10 +107,14 @@ class JetpackComposeTracingIrExtension(
 
             override fun visitFunctionNew(declaration: IrFunction): IrStatement {
                 val isComposable = declaration.symbol.owner.hasAnnotation(composableAnnotation)
-                val isAndroidXPackage = currentClass?.let {
-                    it.javaClass.packageName.startsWith("androidx")
-                } ?: false
-                if (isComposable && !isAndroidXPackage) {
+
+                val isAndroidXPackage = declaration.getPackageFragment().fqName.asString()
+                    .startsWith("androidx")
+
+                val isSentryPackage = declaration.getPackageFragment().fqName.asString()
+                    .startsWith("io.sentry.compose")
+
+                if (isComposable && !isAndroidXPackage && !isSentryPackage) {
                     val body = declaration.body
                     if (body != null) {
                         declaration.body = addSentryModifierToMethodBody(declaration, body)
@@ -139,7 +182,8 @@ class JetpackComposeTracingIrExtension(
                                 SYNTHETIC_OFFSET,
                                 modifierType,
                                 modifierThen,
-                                0, 1,
+                                0,
+                                1,
                                 null,
                                 null
                             )
@@ -156,7 +200,6 @@ class JetpackComposeTracingIrExtension(
         moduleFragment.transform(transformer, null)
     }
 }
-
 
 fun FqName.classId(name: String): ClassId {
     return ClassId(this, org.jetbrains.kotlin.name.Name.identifier(name))
