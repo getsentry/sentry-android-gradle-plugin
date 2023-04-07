@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Features
+- Add Kotlin Compiler plugin to enrich Composable functions ([#452](https://github.com/getsentry/sentry-android-gradle-plugin/pull/452))
+
 ### Dependencies
 
 - Bump Android SDK from v6.13.0 to v6.13.1 ([#437](https://github.com/getsentry/sentry-android-gradle-plugin/pull/437))
