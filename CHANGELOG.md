@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Write proguard uuid to manifest ([#466](https://github.com/getsentry/sentry-android-gradle-plugin/pull/466))
+
 ## 3.5.0
 
 ### Features
