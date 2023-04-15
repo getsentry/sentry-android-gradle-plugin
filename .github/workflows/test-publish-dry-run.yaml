@@ -38,11 +38,11 @@ jobs:
           - agp: "7.4.0"
             gradle: "7.6"
             java: "11"
-          - agp: "8.0.0-beta05"
-            gradle: "8.0.2"
+          - agp: "8.0.0"
+            gradle: "8.1.0"
             java: "17"
-          - agp: "8.1.0-alpha08"
-            gradle: "8.0.2"
+          - agp: "8.1.0-alpha11"
+            gradle: "8.1.0"
             java: "17"
 
     name: Publish Dry Run - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
