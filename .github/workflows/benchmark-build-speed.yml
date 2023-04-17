@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Checkout Duckduckgo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: duckduckgo/Android
           path: scripts/benchmark/Android
@@ -31,7 +31,7 @@ jobs:
           ./benchmark-build-speed.sh
 
       - name: Upload results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ github.sha }}
           path: ${{ github.workspace }}/scripts/benchmark/results/

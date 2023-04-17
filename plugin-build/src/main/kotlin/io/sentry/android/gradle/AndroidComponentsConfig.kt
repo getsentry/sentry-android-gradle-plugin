@@ -2,6 +2,7 @@
 
 package io.sentry.android.gradle
 
+import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationParameters
@@ -17,6 +18,7 @@ import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
+import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
@@ -53,7 +55,6 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 sentryOrg,
                 sentryProject
             )
-
             if (extension.tracingInstrumentation.enabled.get()) {
                 /**
                  * We detect sentry-android SDK version using configurations.incoming.afterResolve.
@@ -63,7 +64,11 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                  * the state between builds and also during a single build, because transforms
                  * are run in parallel.
                  */
-                val sentryModulesService = SentryModulesService.register(project)
+                val sentryModulesService = SentryModulesService.register(
+                    project,
+                    extension.tracingInstrumentation.features,
+                    extension.tracingInstrumentation.logcat.enabled
+                )
                 project.collectModules(
                     "${variant.name}RuntimeClasspath",
                     variant.name,
@@ -81,12 +86,24 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     params.debug.setDisallowChanges(
                         extension.tracingInstrumentation.debug.get()
                     )
-                    params.features.setDisallowChanges(
-                        extension.tracingInstrumentation.features.get()
+                    params.logcatMinLevel.setDisallowChanges(
+                        extension.tracingInstrumentation.logcat.minLevel
                     )
                     params.sentryModulesService.setDisallowChanges(sentryModulesService)
                     params.tmpDir.set(tmpDir)
                 }
+
+                val manifestUpdater = project.tasks.register(
+                    "${variant.name}SentryGenerateIntegrationListTask",
+                    SentryGenerateIntegrationListTask::class.java
+                ) {
+                    it.sentryModulesService.set(sentryModulesService)
+                }
+
+                variant.artifacts.use(manifestUpdater).wiredWithFiles(
+                    SentryGenerateIntegrationListTask::mergedManifest,
+                    SentryGenerateIntegrationListTask::updatedManifest
+                ).toTransform(SingleArtifact.MERGED_MANIFEST)
 
                 /**
                  * This necessary to address the issue when target app uses a multi-release jar

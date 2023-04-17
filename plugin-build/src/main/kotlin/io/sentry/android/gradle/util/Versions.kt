@@ -2,6 +2,7 @@ package io.sentry.android.gradle.util
 
 import com.android.builder.model.Version
 import io.sentry.android.gradle.util.SemVer.Companion.equals
+import java.io.Serializable
 import kotlin.math.min
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.util.GradleVersion
@@ -27,6 +28,7 @@ internal object SentryVersions {
     internal val VERSION_OKHTTP = SemVer(5, 0, 0)
     internal val VERSION_FILE_IO = SemVer(5, 5, 0)
     internal val VERSION_COMPOSE = SemVer(6, 7, 0)
+    internal val VERSION_LOGCAT = SemVer(6, 17, 0)
 }
 
 internal object SentryModules {
@@ -53,7 +55,7 @@ data class SemVer(
     val patch: Int = 0,
     val preRelease: String? = null,
     val buildMetadata: String? = null
-) : Comparable<SemVer> {
+) : Comparable<SemVer>, Serializable {
 
     companion object {
         /* ktlint-disable max-line-length */
