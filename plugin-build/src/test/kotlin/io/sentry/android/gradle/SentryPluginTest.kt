@@ -306,7 +306,7 @@ class SentryPluginTest(
         )
         runner.appendArguments(":app:assembleDebug")
 
-        val result = runner.build()
+        runner.build()
         val deps = verifyDependenciesReportAndroid(testProjectDir.root)
         assertEquals(
             """
@@ -413,6 +413,107 @@ class SentryPluginTest(
             """.trimIndent(),
             deps
         )
+    }
+
+    @Test
+    fun `all integrations are written to manifest`() {
+        applyTracingInstrumentation(
+            features = setOf(
+                InstrumentationFeature.DATABASE,
+                InstrumentationFeature.FILE_IO,
+                InstrumentationFeature.OKHTTP,
+                InstrumentationFeature.COMPOSE
+            ),
+            dependencies = setOf(
+                "com.squareup.okhttp3:okhttp:3.14.9",
+                "io.sentry:sentry-android-okhttp:6.6.0",
+                "androidx.compose.runtime:runtime:1.1.0",
+                "io.sentry:sentry-compose-android:6.7.0"
+            )
+        )
+
+        runner.appendArguments(":app:assembleRelease")
+        runner.build()
+
+        val integrations = verifyIntegrationList(testProjectDir.root).sorted()
+
+        val expectedIntegrations = listOf(
+            InstrumentationFeature.DATABASE,
+            InstrumentationFeature.FILE_IO,
+            InstrumentationFeature.COMPOSE,
+            InstrumentationFeature.OKHTTP
+        ).map { it.integrationName }.sorted()
+
+        assertEquals(expectedIntegrations, integrations)
+    }
+
+    @Test
+    fun `only active integrations are written to manifest`() {
+        applyTracingInstrumentation(
+            features = setOf(
+                InstrumentationFeature.DATABASE,
+                InstrumentationFeature.FILE_IO,
+                InstrumentationFeature.OKHTTP,
+                InstrumentationFeature.COMPOSE
+            ),
+            dependencies = setOf(
+                "androidx.compose.runtime:runtime:1.1.0",
+                "io.sentry:sentry-compose-android:6.7.0"
+            )
+        )
+
+        runner.appendArguments(":app:assembleRelease")
+
+        runner.build()
+        val integrations = verifyIntegrationList(testProjectDir.root).sorted()
+
+        val expectedIntegrations = listOf(
+            InstrumentationFeature.DATABASE,
+            InstrumentationFeature.COMPOSE,
+            InstrumentationFeature.FILE_IO
+        ).map { it.integrationName }.sorted()
+
+        assertEquals(expectedIntegrations, integrations)
+    }
+
+    @Test
+    fun `no integrations are written to manifest if not configured`() {
+        applyTracingInstrumentation(
+            dependencies = setOf(
+                "com.squareup.okhttp3:okhttp:3.14.9",
+                "androidx.compose.runtime:runtime:1.1.0",
+                "io.sentry:sentry-compose-android:6.7.0"
+            )
+        )
+
+        runner.appendArguments(":app:assembleRelease")
+
+        runner.build()
+
+        assertThrows(NoSuchElementException::class.java) {
+            verifyIntegrationList(testProjectDir.root)
+        }
+    }
+
+    @Test
+    fun `no integrations are written to manifest if instrumentation is disabled`() {
+        applyTracingInstrumentation(
+            tracingInstrumentation = false,
+            features = setOf(
+                InstrumentationFeature.DATABASE,
+                InstrumentationFeature.FILE_IO,
+                InstrumentationFeature.OKHTTP,
+                InstrumentationFeature.COMPOSE
+            ),
+        )
+
+        runner.appendArguments(":app:assembleRelease")
+
+        runner.build()
+
+        assertThrows(NoSuchElementException::class.java) {
+            verifyIntegrationList(testProjectDir.root)
+        }
     }
 
     private fun applyUploadNativeSymbols() {

@@ -9,6 +9,7 @@ import io.sentry.android.gradle.instrumentation.classloader.GeneratingMissingCla
 import io.sentry.android.gradle.instrumentation.fakes.TestClassContext
 import io.sentry.android.gradle.instrumentation.fakes.TestClassData
 import io.sentry.android.gradle.instrumentation.fakes.TestSpanAddingParameters
+import io.sentry.android.gradle.instrumentation.logcat.LogcatInstrumentable
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
@@ -145,7 +146,8 @@ class VisitorTest(
             ),
             arrayOf("okhttp/v3", "RealCall", OkHttp(), null),
             arrayOf("okhttp/v4", "RealCall", OkHttp(), null),
-            arrayOf("androidxCompose", "NavHostControllerKt", ComposeNavigation(), null)
+            arrayOf("androidxCompose", "NavHostControllerKt", ComposeNavigation(), null),
+            arrayOf("logcat", "LogcatTest", LogcatInstrumentable(), null)
         )
 
         private fun roomDaoTestParameters(suffix: String = "") = arrayOf(

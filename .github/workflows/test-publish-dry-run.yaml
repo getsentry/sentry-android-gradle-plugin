@@ -13,9 +13,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        agp: ["7.0.4"]
-        gradle: ["7.1.1"]
-        java: ["11"]
+        agp: [ "7.0.4" ]
+        gradle: [ "7.1.1" ]
+        java: [ "11" ]
         include:
           - agp: "7.0.4"
             gradle: "7.2"
@@ -29,21 +29,21 @@ jobs:
           - agp: "7.2.1"
             gradle: "7.4"
             java: "11"
-          - agp: "7.2.1"
-            gradle: "7.5"
-            java: "11"
           - agp: "7.3.0"
             gradle: "7.5"
             java: "11"
-          - agp: "7.3.0"
+          - agp: "7.4.0"
+            gradle: "7.5"
+            java: "11"
+          - agp: "7.4.0"
             gradle: "7.6"
             java: "11"
-          - agp: "7.4.0-rc01"
-            gradle: "7.5"
-            java: "11"
-          - agp: "8.0.0-alpha09"
-            gradle: "7.5"
-            java: "11"
+          - agp: "8.0.0-beta05"
+            gradle: "8.0.2"
+            java: "17"
+          - agp: "8.1.0-alpha08"
+            gradle: "8.0.2"
+            java: "17"
 
     name: Publish Dry Run - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
     env:
@@ -51,12 +51,12 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Java Version
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: ${{ matrix.java }}
 
       - name: Build the Release variant

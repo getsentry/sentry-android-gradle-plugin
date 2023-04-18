@@ -5,11 +5,12 @@ import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.SentryPlugin
-import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
+import io.sentry.android.gradle.instrumentation.logcat.LogcatInstrumentable
+import io.sentry.android.gradle.instrumentation.logcat.LogcatLevel
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
 import io.sentry.android.gradle.instrumentation.util.findClassReader
@@ -18,14 +19,10 @@ import io.sentry.android.gradle.instrumentation.util.isMinifiedClass
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.util.SemVer
-import io.sentry.android.gradle.util.SentryModules
-import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.util.info
 import java.io.File
-import org.gradle.api.artifacts.ModuleIdentifier
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
@@ -50,7 +47,7 @@ abstract class SpanAddingClassVisitorFactory :
         val debug: Property<Boolean>
 
         @get:Input
-        val features: SetProperty<InstrumentationFeature>
+        val logcatMinLevel: Property<LogcatLevel>
 
         @get:Internal
         val sentryModulesService: Property<SentryModulesService>
@@ -84,88 +81,42 @@ abstract class SpanAddingClassVisitorFactory :
             )
 
             SentryPlugin.logger.info { "Read sentry modules: $sentryModules" }
-            /**
-             * When adding a new instrumentable to the list below, do not forget to add a new
-             * version to [SentryVersions] if it involves runtime classes
-             * from the sentry-android SDK.
-             */
+
+            val sentryModulesService = parameters.get().sentryModulesService.get()
             val instrumentable = ChainedInstrumentable(
                 listOfNotNull(
                     AndroidXSQLiteDatabase().takeIf {
-                        isDatabaseInstrEnabled(sentryModules, parameters.get())
+                        sentryModulesService.isDatabaseInstrEnabled()
                     },
                     AndroidXSQLiteStatement(androidXSqliteFrameWorkVersion).takeIf {
-                        isDatabaseInstrEnabled(sentryModules, parameters.get())
+                        sentryModulesService.isDatabaseInstrEnabled()
                     },
                     AndroidXRoomDao().takeIf {
-                        isDatabaseInstrEnabled(sentryModules, parameters.get())
+                        sentryModulesService.isDatabaseInstrEnabled()
                     },
-                    OkHttp().takeIf { isOkHttpInstrEnabled(sentryModules, parameters.get()) },
+                    OkHttp().takeIf {
+                        sentryModulesService.isOkHttpInstrEnabled()
+                    },
                     WrappingInstrumentable().takeIf {
-                        isFileIOInstrEnabled(
-                            sentryModules,
-                            parameters.get()
-                        )
+                        sentryModulesService.isFileIOInstrEnabled()
                     },
                     RemappingInstrumentable().takeIf {
-                        isFileIOInstrEnabled(
-                            sentryModules,
-                            parameters.get()
-                        )
+                        sentryModulesService.isFileIOInstrEnabled()
                     },
                     ComposeNavigation().takeIf {
-                        isComposeInstrEnabled(sentryModules, parameters.get())
+                        sentryModulesService.isComposeInstrEnabled()
                     },
+                    LogcatInstrumentable().takeIf {
+                        sentryModulesService.isLogcatInstrEnabled()
+                    }
                 )
             )
-
             SentryPlugin.logger.info {
                 "Instrumentable: $instrumentable"
             }
             parameters.get()._instrumentable = instrumentable
             return instrumentable
         }
-
-    private fun isDatabaseInstrEnabled(
-        sentryModules: Map<ModuleIdentifier, SemVer>,
-        parameters: SpanAddingParameters
-    ): Boolean =
-        sentryModules.isAtLeast(
-            SentryModules.SENTRY_ANDROID_CORE,
-            SentryVersions.VERSION_PERFORMANCE
-        ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
-
-    private fun isFileIOInstrEnabled(
-        sentryModules: Map<ModuleIdentifier, SemVer>,
-        parameters: SpanAddingParameters
-    ): Boolean =
-        sentryModules.isAtLeast(
-            SentryModules.SENTRY_ANDROID_CORE,
-            SentryVersions.VERSION_FILE_IO
-        ) && parameters.features.get().contains(InstrumentationFeature.FILE_IO)
-
-    private fun isOkHttpInstrEnabled(
-        sentryModules: Map<ModuleIdentifier, SemVer>,
-        parameters: SpanAddingParameters
-    ): Boolean = sentryModules.isAtLeast(
-        SentryModules.SENTRY_ANDROID_OKHTTP,
-        SentryVersions.VERSION_OKHTTP
-    ) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
-
-    private fun isComposeInstrEnabled(
-        sentryModules: Map<ModuleIdentifier, SemVer>,
-        parameters: SpanAddingParameters
-    ): Boolean =
-        sentryModules.isAtLeast(
-            SentryModules.SENTRY_ANDROID_COMPOSE,
-            SentryVersions.VERSION_COMPOSE
-        ) && parameters.features.get().contains(InstrumentationFeature.COMPOSE)
-
-    private fun Map<ModuleIdentifier, SemVer>.isAtLeast(
-        module: ModuleIdentifier,
-        minVersion: SemVer
-    ): Boolean =
-        getOrDefault(module, SentryVersions.VERSION_DEFAULT) >= minVersion
 
     override fun createClassVisitor(
         classContext: ClassContext,

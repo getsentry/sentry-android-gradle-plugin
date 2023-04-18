@@ -3,6 +3,7 @@ package io.sentry.android.gradle
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppExtension
+import com.reandroid.lib.apk.ApkModule
 import io.sentry.android.gradle.testutil.forceEvaluate
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SemVer
@@ -39,6 +40,40 @@ internal fun verifyProguardUuid(
     assertNotNull(matcher, "$sentryProperties does not match pattern $ASSET_PATTERN")
 
     return UUID.fromString(matcher.groupValues[1])
+}
+
+internal fun verifyIntegrationList(
+    rootFile: File,
+    variant: String = "release",
+    signed: Boolean = true
+): List<String> {
+    return retrieveMetaDataFromManifest(
+        rootFile,
+        variant,
+        "io.sentry.gradle-plugin-integrations",
+        signed
+    )
+        .split(',')
+}
+
+internal fun retrieveMetaDataFromManifest(
+    rootFile: File,
+    variant: String = "release",
+    metaDataName: String,
+    signed: Boolean = true
+): String {
+    val signedStr = if (signed) "-unsigned" else ""
+    val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant$signedStr.apk")
+
+    val apkModule = ApkModule.loadApkFile(apk)
+    val attribute = apkModule.androidManifestBlock
+
+    val metaDataValue = attribute.applicationElement.listElements()
+        .filter { it.tag == "meta-data" }
+        .filter { it.searchAttributeByName("name").valueAsString == metaDataName }
+        .map { it.searchAttributeByName("value").valueAsString }.first()
+
+    return metaDataValue
 }
 
 internal fun verifyDependenciesReportAndroid(

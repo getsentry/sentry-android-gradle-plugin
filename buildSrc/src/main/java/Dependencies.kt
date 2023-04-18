@@ -40,7 +40,7 @@ object Libs {
     // this allows us to develop against a fixed version of Gradle, as opposed to depending on the
     // locally available version. kotlin-gradle-plugin follows the same approach.
     // More info: https://docs.nokee.dev/manual/gradle-plugin-development-plugin.html
-    const val GRADLE_API = "dev.gradleplugins:gradle-api:7.5"
+    const val GRADLE_API = "dev.gradleplugins:gradle-api:7.6"
 
     // bytecode instrumentation
     const val ANTLR = "org.antlr:antlr4:${LibsVersion.ANTLR}"
@@ -52,6 +52,7 @@ object Libs {
 
     // test
     val MOCKITO_KOTLIN = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
+    const val ARSC_LIB = "io.github.reandroid:ARSCLib:1.1.4"
 }
 
 object CI {

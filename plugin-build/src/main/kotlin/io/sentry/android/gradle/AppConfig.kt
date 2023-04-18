@@ -202,7 +202,6 @@ private fun ApplicationVariant.configureNativeSymbolsTask(
             SentryUploadNativeSymbolsTask::class.java
         ) {
             it.workingDir(project.rootDir)
-            it.buildDir.set(project.buildDir)
             it.autoUploadNativeSymbol.set(extension.autoUploadNativeSymbols)
             it.cliExecutable.set(cliExecutable)
             it.sentryProperties.set(sentryProps?.let { file -> project.file(file) })

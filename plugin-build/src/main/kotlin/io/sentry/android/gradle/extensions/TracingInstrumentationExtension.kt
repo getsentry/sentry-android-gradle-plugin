@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.extensions
 
 import javax.inject.Inject
+import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
@@ -46,14 +47,24 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
                 InstrumentationFeature.COMPOSE,
             )
         )
+
+    val logcat: LogcatExtension = objects.newInstance(
+        LogcatExtension::class.java
+    )
+
+    fun logcat(
+        logcatAction: Action<LogcatExtension>
+    ) {
+        logcatAction.execute(logcat)
+    }
 }
 
-enum class InstrumentationFeature {
+enum class InstrumentationFeature(val integrationName: String) {
     /**
      * When enabled the SDK will create spans for any CRUD operation performed by 'androidx.sqlite'
      * and 'androidx.room'. This feature uses bytecode manipulation.
      */
-    DATABASE,
+    DATABASE("DatabaseInstrumentation"),
 
     /**
      * When enabled the SDK will create spans for [java.io.FileInputStream],
@@ -61,7 +72,7 @@ enum class InstrumentationFeature {
      * This feature uses bytecode manipulation and replaces the above
      * mentioned classes with Sentry-specific implementations.
      */
-    FILE_IO,
+    FILE_IO("FileIOInstrumentation"),
 
     /**
      * When enabled the SDK will create spans for outgoing network requests and attach
@@ -69,7 +80,7 @@ enum class InstrumentationFeature {
      * This feature uses bytecode manipulation and attaches SentryOkHttpInterceptor to all OkHttp
      * clients in the project.
      */
-    OKHTTP,
+    OKHTTP("OkHttpInstrumentation"),
 
     /**
      * When enabled the SDK will create breadcrumbs when navigating
@@ -77,5 +88,5 @@ enum class InstrumentationFeature {
      * This feature uses bytecode manipulation and adds an OnDestinationChangedListener to all
      * navigation controllers used in Jetpack Compose.
      */
-    COMPOSE
+    COMPOSE("ComposeInstrumentation")
 }
