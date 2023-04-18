@@ -1,5 +1,3 @@
-import io.sentry.android.gradle.sourcecontext.CodeSourceExploderTask
-
 plugins {
     id("com.android.application")
     id("io.sentry.android.gradle")

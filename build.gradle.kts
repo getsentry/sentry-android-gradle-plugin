@@ -55,11 +55,3 @@ tasks.getByName("ktlintFormat") {
 tasks.getByName("ktlintCheck") {
     dependsOn(gradle.includedBuild("plugin-build").task(":ktlintCheck"))
 }
-
-//tasks.register<CodeSourceExploderTask>("sentrySourceBundle") {
-//    groovySourceFiles.setFrom(dependencyAnalyzer.groovySourceFiles)
-//    dependencyAnalyzer.javaSourceFiles?.let { javaSourceFiles.setFrom(it) }
-//    kotlinSourceFiles.setFrom(dependencyAnalyzer.kotlinSourceFiles)
-//    scalaSourceFiles.setFrom(dependencyAnalyzer.scalaSourceFiles)
-//    output.set(outputPaths.explodedSourcePath)
-//}

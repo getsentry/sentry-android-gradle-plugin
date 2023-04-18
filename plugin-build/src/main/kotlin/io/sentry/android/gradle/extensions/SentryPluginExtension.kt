@@ -130,4 +130,24 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      */
     val includeDependenciesReport: Property<Boolean> = objects.property(Boolean::class.java)
         .convention(true)
+
+    /**
+     * Disables or enables the handling of source bundles for Sentry.
+     * If enabled the plugin will generate a UUID and will take care of
+     * uploading the source bundle to Sentry. If disabled, all the logic
+     * related to source bundles will be excluded.
+     * Default is disabled.
+     *
+     * @see [autoUploadSourceBundle]
+     */
+    val includeSourceBundle: Property<Boolean> = objects
+        .property(Boolean::class.java).convention(true) // TODO change default
+
+    /**
+     * Whether the plugin should attempt to auto-upload the source bundle to Sentry or not.
+     * If disabled the plugin will run a dry-run.
+     * Default is enabled.
+     */
+    val autoUploadSourceBundle: Property<Boolean> = objects
+        .property(Boolean::class.java).convention(true)
 }

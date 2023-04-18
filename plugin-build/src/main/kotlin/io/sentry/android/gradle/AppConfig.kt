@@ -10,6 +10,8 @@ import io.sentry.android.gradle.SentryTasksProvider.getLintVitalAnalyzeProvider
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalReportProvider
 import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.sourcecontext.OutputPaths
+import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
@@ -50,6 +52,8 @@ fun AppExtension.configure(
             }
         )
 
+        variant.configureSourceBundleTasks(project, extension, cliExecutable)
+
         variant.configureDependenciesTask(project, extension, this, mergeAssetsDependants)
 
         variant.configureProguardMappingsTasks(
@@ -69,6 +73,24 @@ fun AppExtension.configure(
             sentryOrg,
             sentryProject
         )
+    }
+}
+
+private fun ApplicationVariant.configureSourceBundleTasks(project: Project, extension: SentryPluginExtension, cliExecutable: String) {
+    if (isAGP74) {
+        project.logger.info {
+            "Not configuring deprecated AppExtension for ${AgpVersions.CURRENT}, " +
+                "new AppComponentsExtension will be configured"
+        }
+        project.logger.error("not hello 70 ${AgpVersions.CURRENT}")
+    } else if (extension.includeSourceBundle.get()) {
+        project.logger.error("hello 70 ${AgpVersions.CURRENT}")
+        val paths = OutputPaths(project, name)
+        val variant = AndroidVariant70(this)
+        val taskSuffix = name.capitalized
+        val sourceFiles = this.sourceSets.flatMap { it.javaDirectories.flatMap { project.fileTree(it) } }
+
+        SourceContext.register(project, extension, variant, paths, sourceFiles, cliExecutable, taskSuffix)
     }
 }
 

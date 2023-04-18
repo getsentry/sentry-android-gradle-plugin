@@ -8,6 +8,7 @@ import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
+import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
@@ -16,6 +17,8 @@ import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
+import io.sentry.android.gradle.sourcecontext.OutputPaths
+import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
@@ -53,6 +56,8 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 sentryOrg,
                 sentryProject
             )
+
+            variant.configureSourceBundleTasks(project, extension, cliExecutable)
 
             if (extension.tracingInstrumentation.enabled.get()) {
                 /**
@@ -112,6 +117,36 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     )
                 }
             }
+        }
+    }
+}
+
+private fun Variant.configureSourceBundleTasks(project: Project, extension: SentryPluginExtension, cliExecutable: String) {
+    if (isAGP74) {
+        if (extension.includeSourceBundle.get()) {
+            project.logger.error("hello 74 ${AgpVersions.CURRENT}")
+            val androidAppExtension = project.extensions.getByType(AppExtension::class.java)
+            // TODO needs flag to opt in
+            val paths = OutputPaths(project, name)
+            val variant = AndroidVariant74(this)
+            val taskSuffix = name.capitalized
+            val sourceFiles = androidAppExtension.sourceSets.flatMap {
+                it.java.srcDirs.flatMap {
+                    project.fileTree(it)
+                }
+            }
+
+            // this doesn't work as it sometimes returns an empty list
+            // val sourceFiles = androidAppExtension.sourceSets.flatMap { it.java.getSourceFiles() }
+            project.logger.error("source files: ${sourceFiles}")
+
+            SourceContext.register(project, extension, variant, paths, sourceFiles, cliExecutable, taskSuffix)
+        }
+    } else {
+        project.logger.error("not hello 74 ${AgpVersions.CURRENT}")
+        project.logger.info {
+            "Not configuring AndroidComponentsExtension for ${AgpVersions.CURRENT}, since it does" +
+                "not have new addGeneratedSourceDirectory API"
         }
     }
 }
