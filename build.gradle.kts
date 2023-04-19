@@ -1,5 +1,3 @@
-//import io.sentry.android.gradle.sourcecontext.CodeSourceExploderTask
-
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN apply false
     id("com.android.application") version BuildPluginsVersion.AGP apply false

@@ -16,23 +16,19 @@ android {
             isMinifyEnabled = true
             proguardFiles.add(getDefaultProguardFile("proguard-android-optimize.txt"))
         }
+        getByName("debug") {
+            isMinifyEnabled = true
+            proguardFiles.add(getDefaultProguardFile("proguard-android-optimize.txt"))
+        }
     }
     namespace = "com.example.sampleapp"
 }
 
 sentry {
-    autoUploadProguardMapping.set(CI.canAutoUpload())
+//    autoUploadProguardMapping.set(CI.canAutoUpload())
+    autoUploadProguardMapping.set(true)
 
     tracingInstrumentation {
         enabled.set(false)
     }
 }
-
-//tasks.register<CodeSourceExploderTask>("sentrySourceBundle") {
-//    javaSourceFiles.setFrom(project.sourceSets.allJava)
-//    groovySourceFiles.setFrom(dependencyAnalyzer.groovySourceFiles)
-//    dependencyAnalyzer.javaSourceFiles?.let { javaSourceFiles.setFrom(it) }
-//    kotlinSourceFiles.setFrom(dependencyAnalyzer.kotlinSourceFiles)
-//    scalaSourceFiles.setFrom(dependencyAnalyzer.scalaSourceFiles)
-//    output.set(outputPaths.explodedSourcePath)
-//}

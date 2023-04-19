@@ -26,7 +26,6 @@ object LibsVersion {
     const val MIN_SDK_VERSION = 21
 
     const val JUNIT = "4.13.2"
-    const val ANTLR = "4.12.0"
     const val ASM = "7.0" // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
     const val SQLITE = "2.1.0"
     const val SENTRY = "6.6.0"
@@ -43,7 +42,6 @@ object Libs {
     const val GRADLE_API = "dev.gradleplugins:gradle-api:7.6"
 
     // bytecode instrumentation
-    const val ANTLR = "org.antlr:antlr4:${LibsVersion.ANTLR}"
     const val ASM = "org.ow2.asm:asm-util:${LibsVersion.ASM}"
     const val ASM_COMMONS = "org.ow2.asm:asm-commons:${LibsVersion.ASM}"
     const val SQLITE = "androidx.sqlite:sqlite:${LibsVersion.SQLITE}"

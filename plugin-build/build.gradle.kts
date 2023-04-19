@@ -58,7 +58,6 @@ dependencies {
     compileOnly(agp74.output)
     compileOnly(Libs.PROGUARD)
 
-    compileOnly(Libs.ANTLR)
     compileOnly(Libs.ASM)
     compileOnly(Libs.ASM_COMMONS)
 
