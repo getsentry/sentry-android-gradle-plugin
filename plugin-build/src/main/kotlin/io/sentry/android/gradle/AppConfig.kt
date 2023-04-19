@@ -52,7 +52,7 @@ fun AppExtension.configure(
             }
         )
 
-        variant.configureSourceBundleTasks(project, extension, cliExecutable)
+        variant.configureSourceBundleTasks(project, extension, this, cliExecutable, mergeAssetsDependants)
 
         variant.configureDependenciesTask(project, extension, this, mergeAssetsDependants)
 
@@ -76,7 +76,7 @@ fun AppExtension.configure(
     }
 }
 
-private fun ApplicationVariant.configureSourceBundleTasks(project: Project, extension: SentryPluginExtension, cliExecutable: String) {
+private fun ApplicationVariant.configureSourceBundleTasks(project: Project, extension: SentryPluginExtension, appExtension: AppExtension, cliExecutable: String, dependants: Set<TaskProvider<out Task>?>) {
     if (isAGP74) {
         project.logger.info {
             "Not configuring deprecated AppExtension for ${AgpVersions.CURRENT}, " +
@@ -90,7 +90,24 @@ private fun ApplicationVariant.configureSourceBundleTasks(project: Project, exte
         val taskSuffix = name.capitalized
         val sourceFiles = this.sourceSets.flatMap { it.javaDirectories.flatMap { project.fileTree(it) } }
 
-        SourceContext.register(project, extension, variant, paths, sourceFiles, cliExecutable, taskSuffix)
+        val sourceContextTasks = SourceContext.register(
+            project,
+            extension,
+            variant,
+            paths,
+            sourceFiles,
+            cliExecutable,
+            taskSuffix
+        )
+
+//        sourceContextTasks.generateBundleIdTask.setupMergeAssetsDependencies(dependants)
+//        sourceContextTasks.generateBundleIdTask.hookWithPackageTasks(project, variant)
+//        appExtension.sourceSets.getByName(name).assets.srcDir(
+//            sourceContextTasks.generateBundleIdTask.flatMap { it.output }
+//        )
+
+        // TODO test if this works
+        sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, variant)
     }
 }
 

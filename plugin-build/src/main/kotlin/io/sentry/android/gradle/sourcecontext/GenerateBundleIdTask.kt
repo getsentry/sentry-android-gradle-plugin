@@ -45,12 +45,14 @@ abstract class GenerateBundleIdTask : DirectoryOutputTask() {
             taskSuffix: String = ""
         ): TaskProvider<GenerateBundleIdTask> {
             val generateBundleIdTask = project.tasks.register(
-                "generateSentryBundleId$taskSuffix",
+                taskName(taskSuffix),
                 GenerateBundleIdTask::class.java
             ) { task ->
                 output?.let { task.output.set(it) }
             }
             return generateBundleIdTask
         }
+
+        fun taskName(taskSuffix: String) = "generateSentryBundleId$taskSuffix"
     }
 }

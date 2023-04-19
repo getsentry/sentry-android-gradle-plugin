@@ -1,16 +1,12 @@
 package io.sentry.android.gradle.sourcecontext
 
 import io.sentry.android.gradle.ManifestWriter
-import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.util.info
-import io.sentry.gradle.common.AndroidVariant
-import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile

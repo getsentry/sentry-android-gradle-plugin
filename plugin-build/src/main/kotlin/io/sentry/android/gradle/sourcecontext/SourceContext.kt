@@ -4,15 +4,12 @@ import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.gradle.common.AndroidVariant
 import java.io.File
 import org.gradle.api.Project
+import org.gradle.api.tasks.TaskProvider
 
 class SourceContext {
     companion object {
-        fun register(project: Project, extension: SentryPluginExtension, variant: AndroidVariant, paths: OutputPaths, sourceFiles: List<File>, cliExecutable: String, taskSuffix: String) {
-            val generateBundleIdTask = GenerateBundleIdTask.register(
-                project,
-                output = paths.bundleIdDir,
-                taskSuffix
-            )
+        fun register(project: Project, extension: SentryPluginExtension, variant: AndroidVariant, paths: OutputPaths, sourceFiles: List<File>, cliExecutable: String, taskSuffix: String): SourceContextTasks {
+            val generateBundleIdTask = project.tasks.named(GenerateBundleIdTask.taskName(taskSuffix)) as TaskProvider<GenerateBundleIdTask>
 
             val collectSourcesTask = CollectSourcesTask.register(
                 project,
@@ -32,7 +29,7 @@ class SourceContext {
                 taskSuffix
             )
 
-            UploadSourceBundleTask.register(
+            val uploadSourceBundleTask = UploadSourceBundleTask.register(
                 project,
                 variant,
                 bundleSourcesTask,
@@ -41,11 +38,21 @@ class SourceContext {
                 taskSuffix
             )
 
-            WriteBundleIdToManifestTask.register(
-                project,
+            return SourceContextTasks(
                 generateBundleIdTask,
-                taskSuffix
+                collectSourcesTask,
+                bundleSourcesTask,
+                uploadSourceBundleTask
+//                writeBundleIdToManifestTask
             )
         }
     }
+
+    class SourceContextTasks(
+        val generateBundleIdTask: TaskProvider<GenerateBundleIdTask>,
+        val collectSourcesTask: TaskProvider<CollectSourcesTask>,
+        val bundleSourcesTask: TaskProvider<BundleSourcesTask>,
+        val uploadSourceBundleTask: TaskProvider<UploadSourceBundleTask>
+//        val writeBundleIdToManifestTask: TaskProvider<WriteBundleIdToManifestTask>
+    )
 }
