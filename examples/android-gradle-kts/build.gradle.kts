@@ -16,17 +16,12 @@ android {
             isMinifyEnabled = true
             proguardFiles.add(getDefaultProguardFile("proguard-android-optimize.txt"))
         }
-        getByName("debug") {
-            isMinifyEnabled = true
-            proguardFiles.add(getDefaultProguardFile("proguard-android-optimize.txt"))
-        }
     }
     namespace = "com.example.sampleapp"
 }
 
 sentry {
-//    autoUploadProguardMapping.set(CI.canAutoUpload())
-    autoUploadProguardMapping.set(true)
+    autoUploadProguardMapping.set(CI.canAutoUpload())
 
     tracingInstrumentation {
         enabled.set(false)
