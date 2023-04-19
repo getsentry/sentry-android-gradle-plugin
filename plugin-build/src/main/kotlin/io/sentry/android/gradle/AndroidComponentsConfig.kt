@@ -18,11 +18,10 @@ import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
-import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
-import io.sentry.android.gradle.sourcecontext.WriteBundleIdToManifestTask
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
+import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
 import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
@@ -33,11 +32,11 @@ import io.sentry.android.gradle.util.AgpVersions.isAGP74
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.collectModules
-import io.sentry.android.gradle.util.hookWithAssembleTasks
 import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Project
+import org.gradle.api.tasks.TaskProvider
 
 fun AndroidComponentsExtension<*, *, *>.configure(
     project: Project,
@@ -54,15 +53,20 @@ fun AndroidComponentsExtension<*, *, *>.configure(
         if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
             variant.configureDependenciesTask(project, extension)
 
-            variant.configureProguardMappingsTasks(
+            val tasksGeneratingProperties = mutableListOf<TaskProvider<*>>()
+            val sourceContextTasks = variant.configureSourceBundleTasks(project, extension, cliExecutable)
+            sourceContextTasks?.let { tasksGeneratingProperties.add(it.generateBundleIdTask) }
+
+            val generateProguardUuidTask = variant.configureProguardMappingsTasks(
                 project,
                 extension,
                 cliExecutable,
                 sentryOrg,
                 sentryProject
             )
+            generateProguardUuidTask?.let { tasksGeneratingProperties.add(it) }
 
-            variant.configureSourceBundleTasks(project, extension, cliExecutable)
+            variant.configureDebugMetaPropertiesTask(project, tasksGeneratingProperties)
 
             if (extension.tracingInstrumentation.enabled.get()) {
                 /**
@@ -142,42 +146,47 @@ fun AndroidComponentsExtension<*, *, *>.configure(
     }
 }
 
-private fun Variant.configureSourceBundleTasks(project: Project, extension: SentryPluginExtension, cliExecutable: String) {
-    if (extension.includeSourceBundle.get()) {
-        val paths = OutputPaths(project, name)
+private fun Variant.configureDebugMetaPropertiesTask(
+    project: Project,
+    tasksGeneratingProperties: List<TaskProvider<*>>
+) {
+    if (isAGP74) {
+        project.logger.error("hello 74 ${AgpVersions.CURRENT}")
         val taskSuffix = name.capitalized
-
-        // NOTE: these tasks are also used for AppConfig
-        val generateBundleIdTask = GenerateBundleIdTask.register(
+        val outputDir = project.layout.buildDirectory.dir(
+            "generated${sep}assets${sep}sentry${sep}debug-meta-properties$sep$name")
+        val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
             project,
-            output = paths.bundleIdDir,
+            tasksGeneratingProperties,
+            outputDir,
             taskSuffix
         )
 
-        val writeBundleIdToManifestTask = WriteBundleIdToManifestTask.register(
-            project,
-            generateBundleIdTask,
-            taskSuffix
+        configureGeneratedSourcesFor74(
+            this,
+            generateDebugMetaPropertiesTask to DirectoryOutputTask::output
         )
+    } else {
+        project.logger.error("not hello 74 ${AgpVersions.CURRENT}")
+        project.logger.info {
+            "Not configuring AndroidComponentsExtension for ${AgpVersions.CURRENT}, since it does" +
+                "not have new addGeneratedSourceDirectory API"
+        }
+    }
+}
 
-        artifacts.use(writeBundleIdToManifestTask).wiredWithFiles(
-            WriteBundleIdToManifestTask::mergedManifest,
-            WriteBundleIdToManifestTask::updatedManifest
-        ).toTransform(SingleArtifact.MERGED_MANIFEST)
-
+private fun Variant.configureSourceBundleTasks(project: Project, extension: SentryPluginExtension, cliExecutable: String): SourceContext.SourceContextTasks? {
+    if (extension.includeSourceBundle.get()) {
         if (isAGP74) {
-            project.logger.error("hello 74 ${AgpVersions.CURRENT}")
             val androidAppExtension = project.extensions.getByType(AppExtension::class.java)
+            val paths = OutputPaths(project, name)
+            val taskSuffix = name.capitalized
             val variant = AndroidVariant74(this)
             val sourceFiles = androidAppExtension.sourceSets.flatMap {
                 it.java.srcDirs.flatMap {
                     project.fileTree(it)
                 }
             }
-
-            // this doesn't work as it sometimes returns an empty list
-            // val sourceFiles = androidAppExtension.sourceSets.flatMap { it.java.getSourceFiles() }
-            project.logger.error("source files: ${sourceFiles}")
 
             val sourceContextTasks = SourceContext.register(
                 project,
@@ -189,12 +198,6 @@ private fun Variant.configureSourceBundleTasks(project: Project, extension: Sent
                 taskSuffix
             )
 
-//            configureGeneratedSourcesFor74(
-//                this,
-//                sourceContextTasks.generateBundleIdTask to DirectoryOutputTask::output
-//            )
-
-            // doesn't work?
             val guardsquareEnabled = extension.experimentalGuardsquareSupport.get()
             sourceContextTasks.uploadSourceBundleTask.hookWithMinifyTasks(
                 project,
@@ -204,13 +207,16 @@ private fun Variant.configureSourceBundleTasks(project: Project, extension: Sent
 //            sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, variant)
 //            project.tasks.findByName("assemble")?.dependsOn(sourceContextTasks.uploadSourceBundleTask)
 
+            return sourceContextTasks
         } else {
-            project.logger.error("not hello 74 ${AgpVersions.CURRENT}")
             project.logger.info {
                 "Not configuring AndroidComponentsExtension for ${AgpVersions.CURRENT}, since it does" +
                     "not have new addGeneratedSourceDirectory API"
             }
+            return null
         }
+    } else {
+        return null
     }
 }
 
@@ -244,7 +250,7 @@ private fun Variant.configureProguardMappingsTasks(
     cliExecutable: String,
     sentryOrg: String?,
     sentryProject: String?
-) {
+): TaskProvider<SentryGenerateProguardUuidTask>? {
     if (isAGP74) {
         val variant = AndroidVariant74(this)
         val sentryProps = getPropertiesFilePath(project, variant)
@@ -257,8 +263,9 @@ private fun Variant.configureProguardMappingsTasks(
                     project = project,
                     taskSuffix = name.capitalized
                 )
+
             configureGeneratedSourcesFor74(
-                variant = this,
+                this,
                 generateUuidTask to DirectoryOutputTask::output
             )
 
@@ -274,12 +281,17 @@ private fun Variant.configureProguardMappingsTasks(
                 taskSuffix = name.capitalized
             )
             uploadMappingsTask.hookWithMinifyTasks(project, name, guardsquareEnabled)
+
+            return generateUuidTask
+        } else {
+            return null
         }
     } else {
         project.logger.info {
             "Not configuring AndroidComponentsExtension for ${AgpVersions.CURRENT}, since it does" +
                 "not have new addGeneratedSourceDirectory API"
         }
+        return null
     }
 }
 

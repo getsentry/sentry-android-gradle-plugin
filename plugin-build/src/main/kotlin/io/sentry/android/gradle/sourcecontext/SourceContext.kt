@@ -9,7 +9,11 @@ import org.gradle.api.tasks.TaskProvider
 class SourceContext {
     companion object {
         fun register(project: Project, extension: SentryPluginExtension, variant: AndroidVariant, paths: OutputPaths, sourceFiles: List<File>, cliExecutable: String, taskSuffix: String): SourceContextTasks {
-            val generateBundleIdTask = project.tasks.named(GenerateBundleIdTask.taskName(taskSuffix)) as TaskProvider<GenerateBundleIdTask>
+            val generateBundleIdTask = GenerateBundleIdTask.register(
+                project,
+                output = paths.bundleIdDir,
+                taskSuffix
+            )
 
             val collectSourcesTask = CollectSourcesTask.register(
                 project,
@@ -43,7 +47,6 @@ class SourceContext {
                 collectSourcesTask,
                 bundleSourcesTask,
                 uploadSourceBundleTask
-//                writeBundleIdToManifestTask
             )
         }
     }
@@ -53,6 +56,5 @@ class SourceContext {
         val collectSourcesTask: TaskProvider<CollectSourcesTask>,
         val bundleSourcesTask: TaskProvider<BundleSourcesTask>,
         val uploadSourceBundleTask: TaskProvider<UploadSourceBundleTask>
-//        val writeBundleIdToManifestTask: TaskProvider<WriteBundleIdToManifestTask>
     )
 }

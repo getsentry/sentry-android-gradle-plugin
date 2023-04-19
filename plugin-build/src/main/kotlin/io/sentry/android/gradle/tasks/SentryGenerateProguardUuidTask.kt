@@ -10,7 +10,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 
-abstract class SentryGenerateProguardUuidTask : DirectoryOutputTask() {
+abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
 
     init {
         outputs.upToDateWhen { false }
@@ -19,7 +19,7 @@ abstract class SentryGenerateProguardUuidTask : DirectoryOutputTask() {
     }
 
     @get:Internal
-    val outputFile: Provider<RegularFile> get() = output.file(SENTRY_UUID_OUTPUT)
+    override val outputFile: Provider<RegularFile> get() = output.file(SENTRY_UUID_OUTPUT)
 
     @TaskAction
     fun generateProperties() {
@@ -35,7 +35,7 @@ abstract class SentryGenerateProguardUuidTask : DirectoryOutputTask() {
     }
 
     companion object {
-        internal const val SENTRY_UUID_OUTPUT = "sentry-debug-meta.properties"
+        internal const val SENTRY_UUID_OUTPUT = "sentry-proguard-uuid.properties"
 
         fun register(
             project: Project,

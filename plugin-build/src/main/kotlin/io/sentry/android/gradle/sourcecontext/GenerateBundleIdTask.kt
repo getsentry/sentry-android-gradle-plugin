@@ -1,6 +1,6 @@
 package io.sentry.android.gradle.sourcecontext
 
-import io.sentry.android.gradle.tasks.DirectoryOutputTask
+import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
 import io.sentry.android.gradle.util.info
 import java.util.UUID
 import org.gradle.api.Project
@@ -11,7 +11,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 
-abstract class GenerateBundleIdTask : DirectoryOutputTask() {
+abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
 
     init {
         outputs.upToDateWhen { false }
@@ -20,7 +20,7 @@ abstract class GenerateBundleIdTask : DirectoryOutputTask() {
     }
 
     @get:Internal
-    val outputFile: Provider<RegularFile> get() = output.file(SENTRY_BUNDLE_ID_OUTPUT)
+    override val outputFile: Provider<RegularFile> get() = output.file(SENTRY_BUNDLE_ID_OUTPUT)
 
     @TaskAction
     fun generateProperties() {
@@ -37,7 +37,7 @@ abstract class GenerateBundleIdTask : DirectoryOutputTask() {
 
     companion object {
         internal const val SENTRY_BUNDLE_ID_OUTPUT = "sentry-debug-meta.properties"
-        const val SENTRY_BUNDLE_ID_PROPERTY = "sentry-debug-meta.properties"
+        const val SENTRY_BUNDLE_ID_PROPERTY = "io.sentry.bundle-ids"
 
         fun register(
             project: Project,
