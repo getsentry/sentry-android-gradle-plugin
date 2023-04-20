@@ -92,7 +92,6 @@ class SentryUploadProguardMappingTaskTest {
         assertTrue(releaseInfo.versionName in args)
         assertFalse("--version-code" in args)
         assertFalse("--no-upload" in args)
-
     }
 
     @Test

@@ -232,14 +232,15 @@ private fun AndroidComponentsExtension<*, *, *>.configureVariants(callback: (Var
 
 private fun getReleaseInfo(project: Project, variant: Variant): ReleaseInfo {
     val appExtension = project.extensions.getByType(AppExtension::class.java)
-    var applicationId = appExtension.defaultConfig.applicationId ?: appExtension.namespace.toString()
+    var applicationId =
+        appExtension.defaultConfig.applicationId ?: appExtension.namespace.toString()
     var versionName = appExtension.defaultConfig.versionName ?: "1.0.0"
     var versionCode = appExtension.defaultConfig.versionCode
     appExtension.productFlavors.all { flavor ->
         if (variant.flavorName == flavor.name) {
             flavor.applicationId?.let { applicationId = it }
             flavor.versionName?.let { versionName = it }
-            flavor.versionCode?.let { versionCode = it}
+            flavor.versionCode?.let { versionCode = it }
             flavor.applicationIdSuffix?.let { applicationId += it }
             flavor.versionNameSuffix?.let { versionName += it }
         }
