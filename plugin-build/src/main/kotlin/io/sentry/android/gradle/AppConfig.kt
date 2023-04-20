@@ -16,6 +16,7 @@ import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
+import io.sentry.android.gradle.util.ReleaseInfo
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
@@ -140,6 +141,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                 generateUuidTask.flatMap { it.output }
             )
 
+            val releaseInfo = ReleaseInfo(applicationId, versionName, versionCode)
             val uploadMappingsTask = SentryUploadProguardMappingsTask.register(
                 project = project,
                 cliExecutable = cliExecutable,
@@ -153,7 +155,8 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                 autoUploadProguardMapping = extension.autoUploadProguardMapping,
                 sentryOrg = sentryOrg,
                 sentryProject = sentryProject,
-                taskSuffix = name.capitalized
+                taskSuffix = name.capitalized,
+                releaseInfo = releaseInfo,
             )
             uploadMappingsTask.hookWithMinifyTasks(project, name, guardsquareEnabled)
         }

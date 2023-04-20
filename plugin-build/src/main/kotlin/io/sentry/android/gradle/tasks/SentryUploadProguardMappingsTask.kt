@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.util.ReleaseInfo
 import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
@@ -44,6 +45,9 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
 
     @get:Input
     abstract val autoUploadProguardMapping: Property<Boolean>
+
+    @get:Input
+    abstract  val releaseInfo: Property<ReleaseInfo>
 
     override fun exec() {
         if (!mappingsFiles.isPresent || mappingsFiles.get().isEmpty) {
@@ -102,6 +106,17 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             args.add(it)
         }
 
+        releaseInfo.get().let {
+            it.versionCode?.let { versionCode ->
+                args.add("--version-code")
+                args.add("$versionCode")
+            }
+            args.add("--app-id")
+            args.add(it.applicationId)
+            args.add("--version")
+            args.add(it.versionName)
+        }
+
         if (Os.isFamily(FAMILY_WINDOWS)) {
             args.add(0, "cmd")
             args.add(1, "/c")
@@ -132,7 +147,8 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             sentryOrg: String?,
             sentryProject: String?,
             autoUploadProguardMapping: Property<Boolean>,
-            taskSuffix: String = ""
+            taskSuffix: String = "",
+            releaseInfo: ReleaseInfo
         ): TaskProvider<SentryUploadProguardMappingsTask> {
             val uploadSentryProguardMappingsTask = project.tasks.register(
                 "uploadSentryProguardMappings$taskSuffix",
@@ -149,6 +165,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
                 task.autoUploadProguardMapping.set(autoUploadProguardMapping)
                 task.sentryOrganization.set(sentryOrg)
                 task.sentryProject.set(sentryProject)
+                task.releaseInfo.set(releaseInfo)
             }
             return uploadSentryProguardMappingsTask
         }

@@ -8,6 +8,7 @@ import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
+import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
@@ -23,6 +24,7 @@ import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesRep
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
+import io.sentry.android.gradle.util.ReleaseInfo
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.collectModules
@@ -45,7 +47,6 @@ fun AndroidComponentsExtension<*, *, *>.configure(
     configureVariants { variant ->
         if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
             variant.configureDependenciesTask(project, extension)
-
             variant.configureProguardMappingsTasks(
                 project,
                 extension,
@@ -150,7 +151,7 @@ private fun Variant.configureProguardMappingsTasks(
     extension: SentryPluginExtension,
     cliExecutable: String,
     sentryOrg: String?,
-    sentryProject: String?
+    sentryProject: String?,
 ) {
     if (isAGP74) {
         val variant = AndroidVariant74(this)
@@ -169,6 +170,7 @@ private fun Variant.configureProguardMappingsTasks(
                 generateUuidTask to DirectoryOutputTask::output
             )
 
+            val releaseInfo = getReleaseInfo(project, this)
             val uploadMappingsTask = SentryUploadProguardMappingsTask.register(
                 project = project,
                 cliExecutable = cliExecutable,
@@ -178,7 +180,8 @@ private fun Variant.configureProguardMappingsTasks(
                 autoUploadProguardMapping = extension.autoUploadProguardMapping,
                 sentryOrg = sentryOrg,
                 sentryProject = sentryProject,
-                taskSuffix = name.capitalized
+                taskSuffix = name.capitalized,
+                releaseInfo = releaseInfo
             )
             uploadMappingsTask.hookWithMinifyTasks(project, name, guardsquareEnabled)
         }
@@ -225,4 +228,21 @@ private fun AndroidComponentsExtension<*, *, *>.configureVariants(callback: (Var
     } else {
         onVariants70(this, callback)
     }
+}
+
+private fun getReleaseInfo(project: Project, variant: Variant): ReleaseInfo {
+    val appExtension = project.extensions.getByType(AppExtension::class.java)
+    var applicationId = appExtension.defaultConfig.applicationId ?: appExtension.namespace.toString()
+    var versionName = appExtension.defaultConfig.versionName ?: "1.0.0"
+    var versionCode = appExtension.defaultConfig.versionCode
+    appExtension.productFlavors.all { flavor ->
+        if (variant.flavorName == flavor.name) {
+            flavor.applicationId?.let { applicationId = it }
+            flavor.versionName?.let { versionName = it }
+            flavor.versionCode?.let { versionCode = it}
+            flavor.applicationIdSuffix?.let { applicationId += it }
+            flavor.versionNameSuffix?.let { versionName += it }
+        }
+    }
+    return ReleaseInfo(applicationId, versionName, versionCode)
 }
