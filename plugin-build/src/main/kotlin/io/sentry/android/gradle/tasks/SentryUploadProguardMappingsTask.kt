@@ -47,7 +47,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     abstract val autoUploadProguardMapping: Property<Boolean>
 
     @get:Input
-    abstract  val releaseInfo: Property<ReleaseInfo>
+    abstract val releaseInfo: Property<ReleaseInfo>
 
     override fun exec() {
         if (!mappingsFiles.isPresent || mappingsFiles.get().isEmpty) {
