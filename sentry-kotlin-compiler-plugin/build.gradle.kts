@@ -1,8 +1,8 @@
 plugins {
-    kotlin("jvm") version "1.8.10"
+    kotlin("jvm") version "1.8.20"
     kotlin("kapt")
     id("com.vanniktech.maven.publish") version "0.24.0"
-    id("org.jetbrains.compose") version "1.3.1"
+    id("org.jetbrains.compose") version "1.4.0"
 }
 
 repositories {
@@ -12,7 +12,7 @@ repositories {
 
 mavenPublishing {
     // needs to match plugin-build/src/main/kotlin/io/sentry/SentryKotlinCompilerGradlePlugin.kt
-    coordinates("io.sentry", "sentry-kotlin-compiler-plugin", "1.0.0-SNAPSHOT")
+    coordinates("io.sentry", "sentry-kotlin-compiler-plugin", "1.0.0-mah-dev-026")
 }
 
 dependencies {
@@ -27,4 +27,15 @@ dependencies {
 
     // TODO we actually only want to depend on some runtime classes for testing our plugin
     implementation(compose.desktop.currentOs)
+}
+
+plugins.withId("com.vanniktech.maven.publish.base") {
+    configure<PublishingExtension> {
+        repositories {
+            maven {
+                name = "mavenTestRepo"
+                url = file("${rootProject.buildDir}/mavenTestRepo").toURI()
+            }
+        }
+    }
 }

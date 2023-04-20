@@ -1,6 +1,5 @@
 package io.sentry
 
-import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
@@ -8,16 +7,6 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 
 class SentryKotlinCompilerGradlePlugin : KotlinCompilerPluginSupportPlugin {
-
-    override fun apply(target: Project) {
-        super.apply(target)
-        with(target) {
-            extensions.create(
-                "sentryKotlinCompiler",
-                SentryKotlinCompilerPluginExtension::class.java
-            )
-        }
-    }
 
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
 
@@ -38,13 +27,8 @@ class SentryKotlinCompilerGradlePlugin : KotlinCompilerPluginSupportPlugin {
         kotlinCompilation: KotlinCompilation<*>
     ): Provider<List<SubpluginOption>> {
         val project = kotlinCompilation.target.project
-        val extension =
-            project.extensions.getByType(SentryKotlinCompilerPluginExtension::class.java)
-
         return project.provider {
-            listOf(
-                SubpluginOption(key = "enabled", value = extension.enabled.get().toString()),
-            )
+            emptyList()
         }
     }
 }

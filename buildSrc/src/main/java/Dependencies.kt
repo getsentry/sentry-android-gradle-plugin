@@ -4,7 +4,7 @@ import org.gradle.util.VersionNumber
 object BuildPluginsVersion {
     val AGP = System.getenv("VERSION_AGP") ?: "7.4.0"
     const val DOKKA = "1.8.10"
-    const val KOTLIN = "1.8.10"
+    const val KOTLIN = "1.8.20"
     const val AAR_2_JAR = "0.6"
     const val KTLINT = "10.2.1"
     const val SHADOW = "7.1.2"
@@ -12,7 +12,7 @@ object BuildPluginsVersion {
     // build/publications/maven
     const val MAVEN_PUBLISH = "0.17.0"
     const val PROGUARD = "7.1.0"
-    const val GROOVY_REDISTRIBUTED = "1.6.9"
+    const val GROOVY_REDISTRIBUTED = "1.2"
 
     const val SPRING_BOOT = "2.7.4"
     const val SPRING_DEP_MANAGEMENT = "1.0.11.RELEASE"

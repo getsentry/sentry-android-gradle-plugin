@@ -15,30 +15,45 @@ class JetpackComposeInstrumentationTest {
     class Fixture {
 
         // A Fake modifier, which provides hooks so we can not only verify that our code compiles,
-        // but also execute it and ensure our tags are set correctly
+        // but also execute it and ensure our tags are set correctly.
         private val fakeSentryModifier = SourceFile.kotlin(
-            name = "Modifier.kt",
-            contents = """
+            name = "SentryModifierKt.kt",
+            contents =
+            // language=kotlin
+            """
             package io.sentry.compose
+
             import androidx.compose.ui.Modifier
-            import androidx.compose.ui.platform.testTag
-            import androidx.compose.runtime.Composable
+            import androidx.compose.ui.semantics.SemanticsPropertyKey
+            import androidx.compose.ui.semantics.semantics
 
-            class Modifier {
-                companion object {
+            // Based on TestTag
+            // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui/src/commonMain/kotlin/androidx/compose/ui/semantics/SemanticsProperties.kt;l=166;drc=76bc6975d1b520c545b6f8786ff5c9f0bc22bd1f
+            private val SentryTag = SemanticsPropertyKey<String>(
+                name = "SentryTag",
+                mergePolicy = { parentValue, _ ->
+                    // Never merge SentryTags, to avoid leaking internal test tags to parents.
+                    parentValue
+                }
+            )
 
-                    private var callback: (tag: String) -> Unit = {}
+            object SentryModifierKt {
 
-                    @JvmStatic
-                    fun setCallback(c: (tag: String) -> Unit) {
-                        callback = c
-                    }
+                private var callback: (tag: String) -> Unit = {}
 
-                    @JvmStatic
-                    fun sentryModifier(tag: String) : Modifier {
-                        callback(tag)
-                        return Modifier.testTag(tag)
-                    }
+                @JvmStatic
+                public fun setCallback(c: (tag: String) -> Unit) {
+                    callback = c
+                }
+
+                @JvmStatic
+                public fun Modifier.sentryModifier(tag: String): Modifier {
+                    callback(tag)
+                    return semantics(
+                        properties = {
+                            this[SentryTag] = tag
+                        }
+                    )
                 }
             }
             """.trimIndent()
@@ -95,7 +110,7 @@ class JetpackComposeInstrumentationTest {
             val tags = mutableListOf<String>()
             try {
                 val fakeModifierClass =
-                    compilation.classLoader.loadClass("io.sentry.compose.Modifier")
+                    compilation.classLoader.loadClass("io.sentry.compose.SentryModifierKt")
                 val setCallbackMethod =
                     fakeModifierClass.getMethod("setCallback", Function1::class.java)
                 setCallbackMethod.invoke(fakeModifierClass, { tag: String ->

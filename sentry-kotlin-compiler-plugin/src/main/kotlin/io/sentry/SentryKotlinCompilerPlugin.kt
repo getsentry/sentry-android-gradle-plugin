@@ -21,11 +21,8 @@ class SentryKotlinCompilerPlugin : CompilerPluginRegistrar() {
             CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY,
             MessageCollector.NONE
         )
-        val enabled =
-            configuration.get(SentryKotlinCompilerPluginCommandLineProcessor.ARG_ENABLED) ?: false
-
         IrGenerationExtension.registerExtension(
-            extension = JetpackComposeTracingIrExtension(messageCollector, enabled)
+            extension = JetpackComposeTracingIrExtension(messageCollector)
         )
     }
 }
