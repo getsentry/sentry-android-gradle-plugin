@@ -109,7 +109,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
         releaseInfo.get().let {
             it.versionCode?.let { versionCode ->
                 args.add("--version-code")
-                args.add("$versionCode")
+                args.add(versionCode.toString())
             }
             args.add("--app-id")
             args.add(it.applicationId)
