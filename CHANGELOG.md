@@ -2,9 +2,18 @@
 
 ## Unreleased
 
-### Features 
+### Dependencies
+
+- Bump CLI from v2.16.1 to v2.17.2 ([#469](https://github.com/getsentry/sentry-android-gradle-plugin/pull/469))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2172)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.16.1...2.17.2)
+
+## 3.5.0
+
+### Features
 
 - Add support for Logcat ([#455](https://github.com/getsentry/sentry-android-gradle-plugin/pull/455))
+- Write enabled instrumentations to manifest ([#441](https://github.com/getsentry/sentry-android-gradle-plugin/pull/441))
 
 ### Dependencies
 

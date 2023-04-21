@@ -2,6 +2,7 @@ package io.sentry.android.gradle.util
 
 import com.android.builder.model.Version
 import io.sentry.android.gradle.util.SemVer.Companion.equals
+import java.io.Serializable
 import kotlin.math.min
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.util.GradleVersion
@@ -54,7 +55,7 @@ data class SemVer(
     val patch: Int = 0,
     val preRelease: String? = null,
     val buildMetadata: String? = null
-) : Comparable<SemVer> {
+) : Comparable<SemVer>, Serializable {
 
     companion object {
         /* ktlint-disable max-line-length */
