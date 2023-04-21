@@ -236,14 +236,23 @@ private fun getReleaseInfo(project: Project, variant: Variant): ReleaseInfo {
         appExtension.defaultConfig.applicationId ?: appExtension.namespace.toString()
     var versionName = appExtension.defaultConfig.versionName ?: "1.0.0"
     var versionCode = appExtension.defaultConfig.versionCode
-    appExtension.productFlavors.all { flavor ->
-        if (variant.flavorName == flavor.name) {
-            flavor.applicationId?.let { applicationId = it }
-            flavor.versionName?.let { versionName = it }
-            flavor.versionCode?.let { versionCode = it }
-            flavor.applicationIdSuffix?.let { applicationId += it }
-            flavor.versionNameSuffix?.let { versionName += it }
-        }
-    }
+    val flavor = appExtension.productFlavors.find { it.name == variant.flavorName }
+    flavor?.applicationId?.let { applicationId = it }
+    flavor?.versionName?.let { versionName = it }
+    flavor?.versionCode?.let { versionCode = it }
+    flavor?.applicationIdSuffix?.let { applicationId += it }
+    flavor?.versionNameSuffix?.let { versionName += it }
     return ReleaseInfo(applicationId, versionName, versionCode)
+}
+
+private fun getReleaseInfo2(project: Project, variant: Variant): ReleaseInfo {
+    val appExtension = project.extensions.getByType(AppExtension::class.java)
+    val flavor = appExtension.productFlavors.find { it.name == variant.flavorName }
+    return ReleaseInfo(
+        flavor?.applicationId?.let { it + (flavor.applicationIdSuffix ?: "") }
+            ?: appExtension.defaultConfig.applicationId ?: appExtension.namespace.toString(),
+        flavor?.versionName?.let { it + (flavor.versionNameSuffix ?: "") }
+            ?: appExtension.defaultConfig.versionName ?: "1.0.0",
+        flavor?.versionCode ?: appExtension.defaultConfig.versionCode
+    )
 }
