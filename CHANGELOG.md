@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add release information args to proguard mapping upload task ([#476](https://github.com/getsentry/sentry-android-gradle-plugin/pull/476))
+
 ### Dependencies
 
 - Bump CLI from v2.16.1 to v2.17.2 ([#469](https://github.com/getsentry/sentry-android-gradle-plugin/pull/469))
