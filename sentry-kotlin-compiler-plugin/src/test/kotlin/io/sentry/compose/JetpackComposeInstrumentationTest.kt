@@ -17,7 +17,7 @@ class JetpackComposeInstrumentationTest {
         // A Fake modifier, which provides hooks so we can not only verify that our code compiles,
         // but also execute it and ensure our tags are set correctly.
         private val fakeSentryModifier = SourceFile.kotlin(
-            name = "SentryModifierKt.kt",
+            name = "SentryModifier.kt",
             contents =
             // language=kotlin
             """
@@ -37,7 +37,7 @@ class JetpackComposeInstrumentationTest {
                 }
             )
 
-            object SentryModifierKt {
+            object SentryModifier {
 
                 private var callback: (tag: String) -> Unit = {}
 
@@ -110,7 +110,7 @@ class JetpackComposeInstrumentationTest {
             val tags = mutableListOf<String>()
             try {
                 val fakeModifierClass =
-                    compilation.classLoader.loadClass("io.sentry.compose.SentryModifierKt")
+                    compilation.classLoader.loadClass("io.sentry.compose.SentryModifier")
                 val setCallbackMethod =
                     fakeModifierClass.getMethod("setCallback", Function1::class.java)
                 setCallbackMethod.invoke(fakeModifierClass, { tag: String ->

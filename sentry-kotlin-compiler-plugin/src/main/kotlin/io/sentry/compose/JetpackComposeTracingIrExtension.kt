@@ -88,7 +88,7 @@ class JetpackComposeTracingIrExtension(
         val modifierThen = modifierThenRefs.single()
 
         val sentryModifierFunction = FqName("io.sentry.compose")
-            .classId("SentryModifierKt")
+            .classId("SentryModifier")
             .callableId("sentryModifier")
 
         val sentryModifierFunctionRefs = pluginContext.referenceFunctions(sentryModifierFunction)
