@@ -1,18 +1,20 @@
 plugins {
-    kotlin("jvm")
+    kotlin("jvm") version BuildPluginsVersion.KOTLIN
     kotlin("kapt")
     // can't use BuildPluginsVersion.MAVEN_PUBLISH here, as coordinates is not available in this version
-    id("com.vanniktech.maven.publish") version "0.24.0"
+    id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH
 }
+
+val publish = extensions.getByType(
+    com.vanniktech.maven.publish.MavenPublishPluginExtension::class.java
+)
+// signing is done when uploading files to MC
+// via gpg:sign-and-deploy-file (release.kts)
+publish.releaseSigningEnabled = false
 
 repositories {
     google()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-}
-
-mavenPublishing {
-    // needs to match plugin-build/src/main/kotlin/io/sentry/SentryKotlinCompilerGradlePlugin.kt
-    coordinates("io.sentry", "sentry-kotlin-compiler-plugin", "${rootProject.version}")
 }
 
 dependencies {
