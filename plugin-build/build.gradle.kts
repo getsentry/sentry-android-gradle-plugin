@@ -188,6 +188,10 @@ ktlint {
     filter {
         exclude("**/generated/**")
         include("**/kotlin/**")
+        // see https://github.com/JLLeitschuh/ktlint-gradle/issues/522#issuecomment-958756817
+        exclude { entry ->
+            entry.file.toString().contains("generated")
+        }
     }
 }
 
