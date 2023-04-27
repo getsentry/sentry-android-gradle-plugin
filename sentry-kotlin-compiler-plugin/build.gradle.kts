@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version BuildPluginsVersion.KOTLIN
+    kotlin("jvm")
     kotlin("kapt")
     // can't use BuildPluginsVersion.MAVEN_PUBLISH here, as coordinates is not available in this version
     id("com.vanniktech.maven.publish") version "0.24.0"
