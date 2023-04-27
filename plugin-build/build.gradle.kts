@@ -19,6 +19,7 @@ plugins {
     // we need this plugin in order to include .aar dependencies into a pure java project, which the gradle plugin is
     id("io.sentry.android.gradle.aar2jar")
     id("com.github.johnrengelman.shadow") version BuildPluginsVersion.SHADOW
+    id("com.github.gmazzo.buildconfig") version BuildPluginsVersion.BUILDCONFIG
 }
 
 allprojects {
@@ -62,10 +63,7 @@ dependencies {
     compileOnly(Libs.ASM)
     compileOnly(Libs.ASM_COMMONS)
 
-    implementation(kotlin("gradle-plugin-api"))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:${KotlinCompilerVersion.VERSION}")
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:${KotlinCompilerVersion.VERSION}")
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:${KotlinCompilerVersion.VERSION}")
+    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:${KotlinCompilerVersion.VERSION}")
 
     // compileOnly since we'll be shading the common dependency into the final jar
     // but we still need to be able to compile it (this also excludes it from .pom)
@@ -155,8 +153,8 @@ gradlePlugin {
             implementationClass = "io.sentry.android.gradle.SentryPlugin"
         }
         register("kotlinCompilerPlugin") {
-            id = "io.sentry.sentry-kotlin-compiler-gradle-plugin"
-            implementationClass = "io.sentry.SentryKotlinCompilerGradlePlugin"
+            id = "io.sentry.kotlin.compiler.gradle"
+            implementationClass = "io.sentry.kotlin.gradle.SentryKotlinCompilerGradlePlugin"
         }
     }
 }
@@ -282,6 +280,15 @@ fun shouldDownloadSentryCli(): Boolean {
 
         else -> false
     }
+}
+
+buildConfig {
+    useKotlinOutput()
+    packageName("io.sentry")
+    className("BuildConfig")
+
+    buildConfigField("String", "Version", provider { "\"${project.version}\"" })
+    buildConfigField("String", "SdkVersion", provider { "\"${project.property("sdk_version")}\"" })
 }
 
 tasks.register<ASMifyTask>("asmify")

@@ -1,5 +1,6 @@
-package io.sentry
+package io.sentry.kotlin.gradle
 
+import io.sentry.BuildConfig
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
@@ -11,7 +12,7 @@ class SentryKotlinCompilerGradlePlugin : KotlinCompilerPluginSupportPlugin {
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
 
     override fun getCompilerPluginId(): String = getPluginArtifact().let {
-        "${it.groupId}.${it.artifactId}"
+        "io.sentry.kotlin.compiler"
     }
 
     override fun getPluginArtifact(): SubpluginArtifact {
@@ -19,7 +20,7 @@ class SentryKotlinCompilerGradlePlugin : KotlinCompilerPluginSupportPlugin {
         return SubpluginArtifact(
             groupId = "io.sentry",
             artifactId = "sentry-kotlin-compiler-plugin",
-            version = "1.0.0-SNAPSHOT"
+            version = BuildConfig.Version
         )
     }
 

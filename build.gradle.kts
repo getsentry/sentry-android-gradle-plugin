@@ -2,7 +2,6 @@ plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN apply false
     id("com.android.application") version BuildPluginsVersion.AGP apply false
     id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
-    id("org.jetbrains.kotlin.android") version "1.8.20" apply false
 }
 
 allprojects {

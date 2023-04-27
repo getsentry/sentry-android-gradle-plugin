@@ -1,8 +1,8 @@
 plugins {
-    kotlin("jvm") version "1.8.20"
+    kotlin("jvm") version BuildPluginsVersion.KOTLIN
     kotlin("kapt")
+    // can't use BuildPluginsVersion.MAVEN_PUBLISH here, as coordinates is not available in this version
     id("com.vanniktech.maven.publish") version "0.24.0"
-    id("org.jetbrains.compose") version "1.4.0"
 }
 
 repositories {
@@ -12,21 +12,19 @@ repositories {
 
 mavenPublishing {
     // needs to match plugin-build/src/main/kotlin/io/sentry/SentryKotlinCompilerGradlePlugin.kt
-    coordinates("io.sentry", "sentry-kotlin-compiler-plugin", "1.0.0-mah-dev-026")
+    coordinates("io.sentry", "sentry-kotlin-compiler-plugin", "${rootProject.version}")
 }
 
 dependencies {
-    compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable")
+    compileOnly(Libs.KOTLIN_COMPILE_EMBEDDABLE)
 
-    kapt("com.google.auto.service:auto-service:1.0.1")
-    compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")
+    kapt(Libs.AUTO_SERVICE)
+    compileOnly(Libs.AUTO_SERVICE_ANNOTATIONS)
 
     testImplementation(kotlin("test-junit"))
-    testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
-    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.5.0")
-
-    // TODO we actually only want to depend on some runtime classes for testing our plugin
-    implementation(compose.desktop.currentOs)
+    testImplementation(Libs.KOTLIN_COMPILE_EMBEDDABLE)
+    testImplementation(Libs.KOTLIN_COMPILE_TESTING)
+    testImplementation(Libs.COMPOSE_DESKTOP_RUNTIME)
 }
 
 plugins.withId("com.vanniktech.maven.publish.base") {

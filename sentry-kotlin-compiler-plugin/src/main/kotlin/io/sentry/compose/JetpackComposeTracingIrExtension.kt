@@ -98,8 +98,8 @@ class JetpackComposeTracingIrExtension(
                 CompilerMessageSeverity.WARNING,
                 "io.sentry.compose.Modifier.sentryModifier() not found, " +
                     "Sentry Kotlin Compiler plugin won't run. " +
-                    "Please ensure you're using the " +
-                    "'io.sentry:sentry-compose-android' is defined as a dependency."
+                    "Please ensure you're using " +
+                    "'io.sentry:sentry-compose-android' as a dependency."
             )
             return
         } else if (sentryModifierFunctionRefs.size != 1) {
@@ -193,6 +193,7 @@ class JetpackComposeTracingIrExtension(
                     // but in case the Jetpack Compose Compiler plugin runs before us,
                     // it will inject all default value parameters as actual parameters using IrComposite
                     // hence we need to cover this case and overwrite the composite default/null value with sentryModifier
+                    // see https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/compiler/compiler-hosted/src/main/java/androidx/compose/compiler/plugins/kotlin/lower/ComposerParamTransformer.kt;l=287-298;drc=f0b820e062ac34044b43144a87617e90d74657f3
                     val setModifier = (
                         modifierArgument == null ||
                             (

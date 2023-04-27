@@ -1,16 +1,17 @@
 package io.sentry.android.gradle
 
+import io.sentry.BuildConfig
 import java.io.File
 import kotlin.test.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
-class SentryKotlinCompilerPluginTest :
-    BaseSentryPluginTest(androidGradlePluginVersion = "7.4.0", gradleVersion = "8.0") {
-
-    override val additionalRootProjectConfig: String
-        get() = """
-
-        """.trimIndent()
+@RunWith(Parameterized::class)
+class SentryKotlinCompilerPluginTest(
+    androidGradlePluginVersion: String,
+    gradleVersion: String
+) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
 
     override val additionalBuildClasspath: String =
         """
@@ -26,7 +27,7 @@ class SentryKotlinCompilerPluginTest :
               id "com.android.application"
               id "kotlin-android"
               id "io.sentry.android.gradle"
-              id "io.sentry.sentry-kotlin-compiler-gradle-plugin"
+              id "io.sentry.kotlin.compiler.gradle"
             }
 
             android {
@@ -40,7 +41,7 @@ class SentryKotlinCompilerPluginTest :
                 compose true
               }
               composeOptions {
-                kotlinCompilerExtensionVersion = "1.4.4"
+                kotlinCompilerExtensionVersion = "1.4.6"
               }
               kotlinOptions {
                 jvmTarget = "1.8"
@@ -48,7 +49,7 @@ class SentryKotlinCompilerPluginTest :
             }
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.20"
-                implementation "io.sentry:sentry-compose-android:6.18.0-mah-dev-026"
+                implementation "io.sentry:sentry-compose-android:${BuildConfig.SdkVersion}"
 
                 implementation 'androidx.compose.ui:ui:1.4.0'
                 implementation 'androidx.compose.ui:ui-tooling:1.4.0'
@@ -58,10 +59,6 @@ class SentryKotlinCompilerPluginTest :
 
             sentry {
               autoUploadProguardMapping = false
-            }
-
-            sentryKotlinCompiler {
-              enabled = true
             }
             """.trimIndent()
         )

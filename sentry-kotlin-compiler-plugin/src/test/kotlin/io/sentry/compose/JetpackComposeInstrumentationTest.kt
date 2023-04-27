@@ -99,6 +99,12 @@ class JetpackComposeInstrumentationTest {
             return result
         }
 
+        /**
+         * Executes the compiled code.
+         * Also registers a hook in our fake SentryModifier and collects all calls to it.
+         * This way we can ensure the Compiler Plugin actually added the correct .sentryModifier
+         * calls, and they don't fail during execution
+         */
         fun execute(
             compilation: KotlinCompilation.Result,
             className: String = "io.sentry.samples.Example",
@@ -144,6 +150,9 @@ class JetpackComposeInstrumentationTest {
             class Example {
                 @Composable
                 fun NoModifier() {
+                    // expected:
+                    // val sentryModifier = Modifier.sentryModifier("NoModifier")
+                    // ComposableFunction(modifier = sentryModifier, text = ..
                     ComposableFunction(
                         text = "No Modifier Argument"
                     )
@@ -180,6 +189,9 @@ class JetpackComposeInstrumentationTest {
                 @Composable
                 fun ExistingModifier() {
                     ComposableFunction(
+                        // expected:
+                        // val sentryModifier = Modifier.sentryModifier("ComposableFunction")
+                        // val modifier = sentryModifier.then(Modifier.fillMaxSize().padding(8.dp))
                         modifier = Modifier.fillMaxSize().padding(8.dp),
                         text = "Existing Modifier"
                     )
@@ -217,6 +229,9 @@ class JetpackComposeInstrumentationTest {
                 @Composable
                 fun ModifierAsParam(modifier : Modifier = Modifier.Companion) {
                     ComposableFunction(
+                        // expected:
+                        // val sentryModifier = Modifier.sentryModifier("ComposableFunction")
+                        // val modifier = sentryModifier.then(modifier.fillMaxSize().padding(8.dp))
                         modifier = modifier.fillMaxSize().padding(8.dp),
                         text = "ModifierAsParam"
                     )
