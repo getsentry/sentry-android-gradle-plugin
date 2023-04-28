@@ -87,32 +87,32 @@ class JetpackComposeTracingIrExtension(
         }
         val modifierThen = modifierThenRefs.single()
 
-        val sentryModifierFunction = FqName("io.sentry.compose")
+        val sentryModifierTagFunction = FqName("io.sentry.compose")
             .classId("SentryModifier")
-            .callableId("sentryModifier")
+            .callableId("sentryTag")
 
-        val sentryModifierFunctionRefs = pluginContext.referenceFunctions(sentryModifierFunction)
+        val sentryModifierTagFunctionRefs = pluginContext.referenceFunctions(sentryModifierTagFunction)
 
-        if (sentryModifierFunctionRefs.isEmpty()) {
+        if (sentryModifierTagFunctionRefs.isEmpty()) {
             messageCollector.report(
                 CompilerMessageSeverity.WARNING,
-                "io.sentry.compose.Modifier.sentryModifier() not found, " +
+                "io.sentry.compose.Modifier.sentryTag() not found, " +
                     "Sentry Kotlin Compiler plugin won't run. " +
                     "Please ensure you're using " +
                     "'io.sentry:sentry-compose-android' as a dependency."
             )
             return
-        } else if (sentryModifierFunctionRefs.size != 1) {
+        } else if (sentryModifierTagFunctionRefs.size != 1) {
             messageCollector.report(
                 CompilerMessageSeverity.WARNING,
-                "Multiple definitions io.sentry.compose.Modifier.sentryModifier() found, " +
+                "Multiple definitions io.sentry.compose.Modifier.sentryTag() found, " +
                     "Sentry Kotlin Compiler plugin won't run. " +
                     "Please ensure your versions of 'io.sentry:sentry-compose-android' " +
                     "and the sentry Android Gradle plugin match."
             )
             return
         }
-        val sentryModifierFunctionRef = sentryModifierFunctionRefs.single()
+        val sentryModifierTagFunctionRef = sentryModifierTagFunctionRefs.single()
 
         val transformer = object : IrElementTransformerVoidWithContext() {
 
@@ -145,7 +145,7 @@ class JetpackComposeTracingIrExtension(
                         declaration.body =
                             DeclarationIrBuilder(pluginContext, declaration.symbol).irBlockBody {
                                 val sentryModifier = irTemporary(
-                                    irCall(sentryModifierFunctionRef, modifierType).also { call ->
+                                    irCall(sentryModifierTagFunctionRef, modifierType).also { call ->
                                         call.extensionReceiver =
                                             irGetObject(modifierCompanionClassRef)
                                         call.putValueArgument(0, irString(name))
