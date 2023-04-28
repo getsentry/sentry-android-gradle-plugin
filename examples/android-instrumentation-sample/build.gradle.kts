@@ -47,8 +47,12 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
     namespace = "io.sentry.samples.instrumentation"
 
@@ -59,6 +63,10 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.6"
     }
+}
+
+kotlin {
+    jvmToolchain(11)
 }
 
 // useful, when we want to modify room-generated classes, and then compile them into .class files
