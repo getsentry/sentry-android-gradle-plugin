@@ -91,7 +91,8 @@ class JetpackComposeTracingIrExtension(
             .classId("SentryModifier")
             .callableId("sentryTag")
 
-        val sentryModifierTagFunctionRefs = pluginContext.referenceFunctions(sentryModifierTagFunction)
+        val sentryModifierTagFunctionRefs = pluginContext
+            .referenceFunctions(sentryModifierTagFunction)
 
         if (sentryModifierTagFunctionRefs.isEmpty()) {
             messageCollector.report(
@@ -143,24 +144,28 @@ class JetpackComposeTracingIrExtension(
                     val body = declaration.body
                     if (body != null) {
                         declaration.body =
-                            DeclarationIrBuilder(pluginContext, declaration.symbol).irBlockBody {
-                                val sentryModifier = irTemporary(
-                                    irCall(sentryModifierTagFunctionRef, modifierType).also { call ->
-                                        call.extensionReceiver =
-                                            irGetObject(modifierCompanionClassRef)
-                                        call.putValueArgument(0, irString(name))
-                                    },
-                                    nameHint = SENTRY_BASE_MODIFIER
-                                )
+                            DeclarationIrBuilder(pluginContext, declaration.symbol)
+                                .irBlockBody {
+                                    val sentryModifier = irTemporary(
+                                        irCall(
+                                            sentryModifierTagFunctionRef,
+                                            modifierType
+                                        ).also { call ->
+                                            call.extensionReceiver =
+                                                irGetObject(modifierCompanionClassRef)
+                                            call.putValueArgument(0, irString(name))
+                                        },
+                                        nameHint = SENTRY_BASE_MODIFIER
+                                    )
 
-                                visitingFunctionSentryModifier.add(irGet(sentryModifier))
-                                visitingFunctionNames.add(name)
-                                modifierAdded = true
+                                    visitingFunctionSentryModifier.add(irGet(sentryModifier))
+                                    visitingFunctionNames.add(name)
+                                    modifierAdded = true
 
-                                for (statement in body.statements) {
-                                    +statement
+                                    for (statement in body.statements) {
+                                        +statement
+                                    }
                                 }
-                            }
                     }
                 }
                 // in case we didn't add a modifier, add an empty modifier to keep the stack in sync
