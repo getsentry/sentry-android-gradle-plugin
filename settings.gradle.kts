@@ -7,6 +7,9 @@ pluginManagement {
             if (requested.id.id == "io.sentry.android.gradle") {
                 useModule("io.sentry:sentry-android-gradle-plugin:${requested.version}")
             }
+            if (requested.id.id == "io.sentry.kotlin.compiler.gradle") {
+                useModule("io.sentry:sentry-android-gradle-plugin:${requested.version}")
+            }
         }
     }
     repositories {
@@ -30,3 +33,4 @@ includeBuild("plugin-build") {
         substitute(module("io.sentry:sentry-android-gradle-plugin")).using(project(":"))
     }
 }
+includeBuild("sentry-kotlin-compiler-plugin")

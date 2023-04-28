@@ -3,8 +3,8 @@ import org.gradle.util.VersionNumber
 
 object BuildPluginsVersion {
     val AGP = System.getenv("VERSION_AGP") ?: "7.4.0"
-    const val DOKKA = "1.6.10"
-    const val KOTLIN = "1.6.10"
+    const val DOKKA = "1.8.10"
+    const val KOTLIN = "1.8.20"
     const val AAR_2_JAR = "0.6"
     const val KTLINT = "10.2.1"
     const val SHADOW = "7.1.2"
@@ -13,6 +13,7 @@ object BuildPluginsVersion {
     const val MAVEN_PUBLISH = "0.17.0"
     const val PROGUARD = "7.1.0"
     const val GROOVY_REDISTRIBUTED = "1.2"
+    const val BUILDCONFIG = "3.1.0"
 
     const val SPRING_BOOT = "2.7.4"
     const val SPRING_DEP_MANAGEMENT = "1.0.11.RELEASE"
@@ -47,6 +48,13 @@ object Libs {
     const val SQLITE = "androidx.sqlite:sqlite:${LibsVersion.SQLITE}"
     const val SQLITE_FRAMEWORK = "androidx.sqlite:sqlite-framework:${LibsVersion.SQLITE}"
     const val SENTRY_ANDROID = "io.sentry:sentry-android:${LibsVersion.SENTRY}"
+
+    const val AUTO_SERVICE = "com.google.auto.service:auto-service:1.0.1"
+    const val AUTO_SERVICE_ANNOTATIONS = "com.google.auto.service:auto-service-annotations:1.0.1"
+
+    const val KOTLIN_COMPILE_EMBEDDABLE = "org.jetbrains.kotlin:kotlin-compiler-embeddable"
+    const val KOTLIN_COMPILE_TESTING = "com.github.tschuchortdev:kotlin-compile-testing:1.5.0"
+    const val COMPOSE_DESKTOP_RUNTIME = "org.jetbrains.compose.desktop:desktop:1.4.0"
 
     // test
     val MOCKITO_KOTLIN = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"

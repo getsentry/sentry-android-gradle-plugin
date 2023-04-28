@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Features
+- Add Kotlin Compiler plugin to enrich Composable functions ([#452](https://github.com/getsentry/sentry-android-gradle-plugin/pull/452))
+
 ### Dependencies
 
 - Bump CLI from v2.16.1 to v2.17.4 ([#469](https://github.com/getsentry/sentry-android-gradle-plugin/pull/469), [#475](https://github.com/getsentry/sentry-android-gradle-plugin/pull/475))
