@@ -1,8 +1,28 @@
 plugins {
-    kotlin("jvm") version BuildPluginsVersion.KOTLIN
-    kotlin("kapt")
-    // can't use BuildPluginsVersion.MAVEN_PUBLISH here, as coordinates is not available in this version
-    id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH
+    kotlin("jvm") version "1.8.20"
+    kotlin("kapt") version "1.8.20"
+    id("com.vanniktech.maven.publish") version "0.17.0"
+    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+ktlint {
+    debug.set(false)
+    verbose.set(true)
+    android.set(true)
+    outputToConsole.set(true)
+    ignoreFailures.set(false)
+    enableExperimentalRules.set(true)
+    filter {
+        exclude("**/generated/**")
+        include("**/kotlin/**")
+    }
 }
 
 val publish = extensions.getByType(
@@ -18,15 +38,15 @@ repositories {
 }
 
 dependencies {
-    compileOnly(Libs.KOTLIN_COMPILE_EMBEDDABLE)
+    compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable")
 
-    kapt(Libs.AUTO_SERVICE)
-    compileOnly(Libs.AUTO_SERVICE_ANNOTATIONS)
+    kapt("com.google.auto.service:auto-service:1.0.1")
+    compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")
 
     testImplementation(kotlin("test-junit"))
-    testImplementation(Libs.KOTLIN_COMPILE_EMBEDDABLE)
-    testImplementation(Libs.KOTLIN_COMPILE_TESTING)
-    testImplementation(Libs.COMPOSE_DESKTOP_RUNTIME)
+    testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.5.0")
+    testImplementation("org.jetbrains.compose.desktop:desktop:1.4.0")
 }
 
 plugins.withId("com.vanniktech.maven.publish.base") {
@@ -34,7 +54,7 @@ plugins.withId("com.vanniktech.maven.publish.base") {
         repositories {
             maven {
                 name = "mavenTestRepo"
-                url = file("${rootProject.buildDir}/mavenTestRepo").toURI()
+                url = file("${rootProject.projectDir}/../build/mavenTestRepo").toURI()
             }
         }
     }
