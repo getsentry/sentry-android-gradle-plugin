@@ -24,16 +24,23 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build distribution artifacts
+      - name: Build Gradle Plugin distribution artifacts
         run: |
           cd plugin-build
+          make all
+
+      - name: Build Kotlin Compiler artifacts
+        run: |
+          cd sentry-kotlin-compiler-plugin
           make all
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ${{ github.sha }}
-          path: ${{ github.workspace }}/plugin-build/build/distributions/*.zip
+          path: |
+            ${{ github.workspace }}/plugin-build/build/distributions/*.zip
+            ${{ github.workspace }}/sentry-kotlin-compiler-plugin/build/distributions/*.zip
 
       - name: Verifies Sentry CLI is bundled
         shell: bash

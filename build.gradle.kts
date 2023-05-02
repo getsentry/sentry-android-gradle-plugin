@@ -33,6 +33,7 @@ subprojects {
 tasks.register("clean", Delete::class.java) {
     delete(rootProject.buildDir)
     dependsOn(gradle.includedBuild("plugin-build").task(":clean"))
+    dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":clean"))
 }
 
 tasks.register("preMerge") {
