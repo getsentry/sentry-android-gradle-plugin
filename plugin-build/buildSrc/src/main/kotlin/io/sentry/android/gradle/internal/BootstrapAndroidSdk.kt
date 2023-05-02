@@ -25,9 +25,9 @@ object BootstrapAndroidSdk {
             val platforms = File(sdkPath, "platforms")
             val latest = platforms.listFiles()
                 ?.filter { it.isDirectory }
-                ?.maxOf { it.name.substringAfter("-").take(2).toInt() }
+                ?.maxOf { it.name.substringAfter("-") }
             if (latest != null) {
-                extra["androidSdkPath"] = "$sdkPath/platforms/android-${latest}/android.jar"
+                extra["androidSdkPath"] = "$sdkPath/platforms/android-$latest/android.jar"
             } else {
                 project.logger.warn("No available android sdks. The tests in plugin-build might not work")
             }

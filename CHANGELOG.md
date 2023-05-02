@@ -3,7 +3,12 @@
 ## Unreleased
 
 ### Features
+
 - Add Kotlin Compiler plugin to enrich Composable functions ([#452](https://github.com/getsentry/sentry-android-gradle-plugin/pull/452))
+
+### Fixes
+
+- Do not transform the sdk name to Int in BootstrapAndroidSdk ([#478](https://github.com/getsentry/sentry-android-gradle-plugin/pull/478))
 
 ### Dependencies
 
