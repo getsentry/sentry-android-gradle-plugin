@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Parse the sdk name in BootstrapAndroidSdk ([#478](https://github.com/getsentry/sentry-android-gradle-plugin/pull/478))
+- Do not transform the sdk name to Int in BootstrapAndroidSdk ([#478](https://github.com/getsentry/sentry-android-gradle-plugin/pull/478))
 
 ### Dependencies
 
