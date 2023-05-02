@@ -25,7 +25,7 @@ object BootstrapAndroidSdk {
             val platforms = File(sdkPath, "platforms")
             val latest = platforms.listFiles()
                 ?.filter { it.isDirectory }
-                ?.maxOf { sdkNameToVersionNumber(it.name.substringAfter("-")) }
+                ?.maxOf { it.name.substringAfter("-") }
             if (latest != null) {
                 extra["androidSdkPath"] = "$sdkPath/platforms/android-$latest/android.jar"
             } else {
@@ -33,16 +33,6 @@ object BootstrapAndroidSdk {
             }
         } else {
             project.logger.warn("Unable to detect the android sdk path. The tests in plugin-build might not work")
-        }
-    }
-
-    private fun sdkNameToVersionNumber(sdkName: String): Int {
-        return when {
-            sdkName.toIntOrNull() != null -> sdkName.toInt()
-            sdkName.equals("UpsideDownCake", true) -> 34
-            sdkName.equals("Tiramisu", true) -> 33
-            sdkName.equals("TiramisuPrivacySandbox", true) -> 33
-            else -> 0
         }
     }
 }
