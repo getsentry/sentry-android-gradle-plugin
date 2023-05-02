@@ -6,10 +6,6 @@ repositories {
     mavenCentral()
 }
 
-kotlin {
-    jvmToolchain(11)
-}
-
 sourceSets {
     main {
         java.srcDir("../../buildSrc/src/main/java")
