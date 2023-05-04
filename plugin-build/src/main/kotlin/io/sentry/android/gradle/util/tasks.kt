@@ -78,12 +78,16 @@ fun TaskProvider<out Task>.hookWithAssembleTasks(
     project: Project,
     variant: AndroidVariant
 ) {
-    val bundleTask = withLogging(project.logger, "bundleTask") {
-        getBundleTask(project, variant.name)
+    // we need to wait for project evaluation to have all tasks available, otherwise the new
+    // AndroidComponentsExtension is configured too early to look up for the tasks
+    project.afterEvaluate {
+        val bundleTask = withLogging(project.logger, "bundleTask") {
+            getBundleTask(project, variant.name)
+        }
+        getAssembleTaskProvider(variant)?.configure {
+            it.finalizedBy(this)
+        }
+        // if its a bundle aab, assemble might not be executed, so we hook into bundle task
+        bundleTask?.configure { it.finalizedBy(this) }
     }
-    getAssembleTaskProvider(variant)?.configure {
-        it.finalizedBy(this)
-    }
-    // if its a bundle aab, assemble might not be executed, so we hook into bundle task
-    bundleTask?.configure { it.finalizedBy(this) }
 }
