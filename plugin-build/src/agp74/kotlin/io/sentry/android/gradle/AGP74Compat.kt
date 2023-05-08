@@ -10,6 +10,7 @@ import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.CanMinifyCode
 import com.android.build.api.variant.Variant
+import com.android.build.api.variant.impl.VariantImpl
 import io.sentry.gradle.common.AndroidVariant
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -26,6 +27,11 @@ data class AndroidVariant74(
     override val buildTypeName: String? = variant.buildType
     override val productFlavors: List<String> = variant.productFlavors.map { it.second }
     override val isMinifyEnabled: Boolean = (variant as? CanMinifyCode)?.isMinifyEnabled == true
+
+    // internal APIs are a bit dirty, but our plugin would need a lot of rework to make proper
+    // dependencies via artifacts API.
+    override val assembleProvider: TaskProvider<out Task>?
+        get() = (variant as? VariantImpl<*>)?.taskContainer?.assembleTask
     override fun mappingFileProvider(project: Project): Provider<FileCollection> =
         project.provider {
             project.files(variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE))
