@@ -58,15 +58,15 @@ repositories {
 }
 
 dependencies {
-    compileOnly(Libs.KOTLIN_COMPILE_EMBEDDABLE)
+    compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable")
 
-    kapt(Libs.AUTO_SERVICE)
-    compileOnly(Libs.AUTO_SERVICE_ANNOTATIONS)
+    kapt("com.google.auto.service:auto-service:1.0.1")
+    compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")
 
     testImplementation(kotlin("test-junit"))
-    testImplementation(Libs.KOTLIN_COMPILE_EMBEDDABLE)
-    testImplementation(Libs.KOTLIN_COMPILE_TESTING)
-    testImplementation(Libs.COMPOSE_DESKTOP_RUNTIME)
+    testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.5.0")
+    testImplementation("org.jetbrains.compose.desktop:desktop:1.4.0")
 }
 
 plugins.withId("com.vanniktech.maven.publish.base") {
