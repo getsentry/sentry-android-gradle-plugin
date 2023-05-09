@@ -37,6 +37,7 @@ import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
 fun AndroidComponentsExtension<*, *, *>.configure(
@@ -55,7 +56,13 @@ fun AndroidComponentsExtension<*, *, *>.configure(
             variant.configureDependenciesTask(project, extension)
 
             val tasksGeneratingProperties = mutableListOf<TaskProvider<*>>()
-            val sourceContextTasks = variant.configureSourceBundleTasks(project, extension, cliExecutable)
+            val sourceContextTasks = variant.configureSourceBundleTasks(
+                project,
+                extension,
+                cliExecutable,
+                sentryOrg,
+                sentryProject
+            )
             sourceContextTasks?.let { tasksGeneratingProperties.add(it.generateBundleIdTask) }
 
             val generateProguardUuidTask = variant.configureProguardMappingsTasks(
@@ -154,12 +161,10 @@ private fun Variant.configureDebugMetaPropertiesTask(
     if (isAGP74) {
         project.logger.error("hello 74 ${AgpVersions.CURRENT}")
         val taskSuffix = name.capitalized
-        val outputDir = project.layout.buildDirectory.dir(
-            "generated${sep}assets${sep}sentry${sep}debug-meta-properties$sep$name")
         val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
             project,
             tasksGeneratingProperties,
-            outputDir,
+            null,
             taskSuffix
         )
 
@@ -176,18 +181,25 @@ private fun Variant.configureDebugMetaPropertiesTask(
     }
 }
 
-private fun Variant.configureSourceBundleTasks(project: Project, extension: SentryPluginExtension, cliExecutable: String): SourceContext.SourceContextTasks? {
+private fun Variant.configureSourceBundleTasks(
+    project: Project,
+    extension: SentryPluginExtension,
+    cliExecutable: String,
+    sentryOrg: String?,
+    sentryProject: String?
+): SourceContext.SourceContextTasks? {
     if (extension.includeSourceBundle.get()) {
         if (isAGP74) {
-            val androidAppExtension = project.extensions.getByType(AppExtension::class.java)
             val paths = OutputPaths(project, name)
             val taskSuffix = name.capitalized
             val variant = AndroidVariant74(this)
-            val sourceFiles = androidAppExtension.sourceSets.flatMap {
-                it.java.srcDirs.flatMap {
-                    project.fileTree(it)
-                }
-            }
+
+            // TODO only one of those is used
+            val sourceFiles = project.files(
+//                extension.additionalSourceDirsToBundle.getOrElse(emptySet()),
+                this.sources.java?.all,
+//                this.sources.kotlin?.all
+            )
 
             val sourceContextTasks = SourceContext.register(
                 project,
@@ -196,17 +208,14 @@ private fun Variant.configureSourceBundleTasks(project: Project, extension: Sent
                 paths,
                 sourceFiles,
                 cliExecutable,
+                sentryOrg,
+                sentryProject,
                 taskSuffix
             )
 
-//            val guardsquareEnabled = extension.experimentalGuardsquareSupport.get()
-//            sourceContextTasks.uploadSourceBundleTask.hookWithMinifyTasks(
-//                project,
-//                name,
-//                guardsquareEnabled
-//            )
-            sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, variant)
-//            project.tasks.findByName("assemble")?.dependsOn(sourceContextTasks.uploadSourceBundleTask)
+            if (variant.buildTypeName == "release") {
+                sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, variant)
+            }
 
             return sourceContextTasks
         } else {
@@ -272,6 +281,7 @@ private fun Variant.configureProguardMappingsTasks(
 
             val uploadMappingsTask = SentryUploadProguardMappingsTask.register(
                 project = project,
+                debug = extension.debug,
                 cliExecutable = cliExecutable,
                 generateUuidTask = generateUuidTask,
                 sentryProperties = sentryProps,

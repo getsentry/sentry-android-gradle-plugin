@@ -23,6 +23,9 @@ abstract class UploadSourceBundleTask : Exec() {
     abstract val sourceBundleDir: DirectoryProperty
 
     @get:Input
+    abstract val debug: Property<Boolean>
+
+    @get:Input
     abstract val cliExecutable: Property<String>
 
     @get:InputFile
@@ -31,6 +34,14 @@ abstract class UploadSourceBundleTask : Exec() {
 
     @get:Input
     abstract val autoUploadSourceBundle: Property<Boolean>
+
+    @get:Input
+    @get:Optional
+    abstract val sentryOrganization: Property<String>
+
+    @get:Input
+    @get:Optional
+    abstract val sentryProject: Property<String>
 
     override fun exec() {
         computeCommandLineArgs().let {
@@ -51,19 +62,32 @@ abstract class UploadSourceBundleTask : Exec() {
     }
 
     internal fun computeCommandLineArgs(): List<String> {
-        val args = mutableListOf(
-            cliExecutable.get(),
-            "--log-level=debug",
-            "debug-files",
-            "upload"
-        )
+        val args = mutableListOf(cliExecutable.get())
+
+        if (debug.get()) {
+            args.add("--log-level=debug")
+        }
+
+        args.add("debug-files")
+        args.add("upload")
         args.add("--type=jvm")
+
+        sentryOrganization.orNull?.let {
+            args.add("--org")
+            args.add(it)
+        }
+
+        sentryProject.orNull?.let {
+            args.add("--project")
+            args.add(it)
+        }
 
         if (!autoUploadSourceBundle.get()) {
             args.add("--no-upload")
         }
 
         args.add(sourceBundleDir.get().asFile.absolutePath)
+
         return args
     }
 
@@ -72,13 +96,17 @@ abstract class UploadSourceBundleTask : Exec() {
             project: Project,
             variant: AndroidVariant,
             bundleSourcesTask: TaskProvider<BundleSourcesTask>,
+            debug: Property<Boolean>,
             cliExecutable: String,
             autoUploadSourceBundle: Property<Boolean>,
-            taskSuffix: String
+            sentryOrg: String?,
+            sentryProject: String?,
+            taskSuffix: String = ""
         ): TaskProvider<UploadSourceBundleTask> {
             return project.tasks.register("sentryUploadSourceBundle${taskSuffix}", UploadSourceBundleTask::class.java) { task ->
-                task.dependsOn(bundleSourcesTask)
-
+                task.debug.set(debug)
+                task.sentryOrganization.set(sentryOrg)
+                task.sentryProject.set(sentryProject)
                 task.sourceBundleDir.set(bundleSourcesTask.flatMap { it.output })
                 task.cliExecutable.set(cliExecutable)
                 task.autoUploadSourceBundle.set(autoUploadSourceBundle)

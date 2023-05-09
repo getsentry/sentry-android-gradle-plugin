@@ -1,10 +1,14 @@
 package io.sentry.android.gradle.extensions
 
+import io.sentry.android.gradle.tasks.DirectoryOutputTask
 import javax.inject.Inject
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
+import org.gradle.api.tasks.TaskProvider
 
 abstract class SentryPluginExtension @Inject constructor(project: Project) {
 
@@ -141,7 +145,7 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      * @see [autoUploadSourceBundle]
      */
     val includeSourceBundle: Property<Boolean> = objects
-        .property(Boolean::class.java).convention(true) // TODO change default
+        .property(Boolean::class.java).convention(false)
 
     /**
      * Whether the plugin should attempt to auto-upload the source bundle to Sentry or not.
@@ -150,4 +154,20 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      */
     val autoUploadSourceBundle: Property<Boolean> = objects
         .property(Boolean::class.java).convention(true)
+
+    /**
+     * Configure additional directories to be included in the source bundle which is used for
+     * source context.
+     */
+//    val additionalSourceDirsToBundle: SetProperty<String> = objects.setProperty(String::class.java).convention(
+//        emptySet()
+//    )
+
+    /**
+     * Disables or enables debug log output, e.g. for for sentry-cli.
+     *
+     * Default is disabled.
+     */
+    val debug: Property<Boolean> = objects.property<Boolean?>(Boolean::class.java)
+        .convention(false)
 }

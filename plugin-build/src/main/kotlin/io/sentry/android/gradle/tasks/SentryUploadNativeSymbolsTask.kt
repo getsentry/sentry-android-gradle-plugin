@@ -19,6 +19,9 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
     }
 
     @get:Input
+    abstract val debug: Property<Boolean>
+
+    @get:Input
     abstract val cliExecutable: Property<String>
 
     @get:Input
@@ -62,9 +65,14 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
 
     internal fun computeCommandLineArgs(): List<String> {
         val args = mutableListOf(
-            cliExecutable.get(),
-            "upload-dif"
+            cliExecutable.get()
         )
+
+        if (debug.get()) {
+            args.add("--log-level=debug")
+        }
+
+        args.add("upload-dif")
 
         if (!autoUploadNativeSymbol.get()) {
             args.add("--no-upload")

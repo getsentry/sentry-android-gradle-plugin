@@ -4,11 +4,25 @@ import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.gradle.common.AndroidVariant
 import java.io.File
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.ConfigurableFileTree
+import org.gradle.api.file.Directory
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
 class SourceContext {
     companion object {
-        fun register(project: Project, extension: SentryPluginExtension, variant: AndroidVariant, paths: OutputPaths, sourceFiles: List<File>, cliExecutable: String, taskSuffix: String): SourceContextTasks {
+        fun register(
+            project: Project,
+            extension: SentryPluginExtension,
+            variant: AndroidVariant,
+            paths: OutputPaths,
+            sourceFiles: ConfigurableFileCollection,
+            cliExecutable: String,
+            sentryOrg: String?,
+            sentryProject: String?,
+            taskSuffix: String
+        ): SourceContextTasks {
             val generateBundleIdTask = GenerateBundleIdTask.register(
                 project,
                 output = paths.bundleIdDir,
@@ -27,9 +41,11 @@ class SourceContext {
                 variant,
                 generateBundleIdTask,
                 collectSourcesTask,
-                input = paths.sourceDir,
                 output = paths.bundleDir,
+                extension.debug,
                 cliExecutable,
+                sentryOrg,
+                sentryProject,
                 taskSuffix
             )
 
@@ -37,8 +53,11 @@ class SourceContext {
                 project,
                 variant,
                 bundleSourcesTask,
+                extension.debug,
                 cliExecutable,
                 extension.autoUploadSourceBundle,
+                sentryOrg,
+                sentryProject,
                 taskSuffix
             )
 

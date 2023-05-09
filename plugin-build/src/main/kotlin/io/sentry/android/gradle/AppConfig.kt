@@ -55,7 +55,15 @@ fun AppExtension.configure(
         )
 
         val tasksGeneratingProperties = mutableListOf<TaskProvider<*>>()
-        val sourceContextTasks = variant.configureSourceBundleTasks(project, extension, this, cliExecutable, mergeAssetsDependants)
+        val sourceContextTasks = variant.configureSourceBundleTasks(
+            project,
+            extension,
+            this,
+            cliExecutable,
+            mergeAssetsDependants,
+            sentryOrg,
+            sentryProject
+        )
         sourceContextTasks?.let { tasksGeneratingProperties.add(it.generateBundleIdTask) }
 
         variant.configureDependenciesTask(project, extension, this, mergeAssetsDependants)
@@ -117,20 +125,31 @@ private fun ApplicationVariant.configureDebugMetaPropertiesTask(project: Project
     }
 }
 
-private fun ApplicationVariant.configureSourceBundleTasks(project: Project, extension: SentryPluginExtension, appExtension: AppExtension, cliExecutable: String, dependants: Set<TaskProvider<out Task>?>): SourceContext.SourceContextTasks? {
+private fun ApplicationVariant.configureSourceBundleTasks(
+    project: Project,
+    extension: SentryPluginExtension,
+    appExtension: AppExtension,
+    cliExecutable: String,
+    dependants: Set<TaskProvider<out Task>?>,
+    sentryOrg: String?,
+    sentryProject: String?
+): SourceContext.SourceContextTasks? {
     if (isAGP74) {
         project.logger.info {
             "Not configuring deprecated AppExtension for ${AgpVersions.CURRENT}, " +
                 "new AppComponentsExtension will be configured"
         }
-        project.logger.error("not hello 70 ${AgpVersions.CURRENT}")
         return null
     } else if (extension.includeSourceBundle.get()) {
-        project.logger.error("hello 70 ${AgpVersions.CURRENT}")
         val paths = OutputPaths(project, name)
         val variant = AndroidVariant70(this)
         val taskSuffix = name.capitalized
-        val sourceFiles = this.sourceSets.flatMap { it.javaDirectories.flatMap { project.fileTree(it) } }
+        val sourceFiles = project.files(
+            this.sourceSets.flatMap { it.javaDirectories },
+//            this.sourceSets.flatMap { it.kotlinDirectories },
+//            this.sourceSets.flatMap { it.customDirectories },
+//            extension.additionalSourceDirsToBundle
+        )
 
         val sourceContextTasks = SourceContext.register(
             project,
@@ -139,11 +158,14 @@ private fun ApplicationVariant.configureSourceBundleTasks(project: Project, exte
             paths,
             sourceFiles,
             cliExecutable,
+            sentryOrg,
+            sentryProject,
             taskSuffix
         )
 
-        // TODO test if this works
-        sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, variant)
+        if (variant.buildTypeName == "release") {
+            sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, variant)
+        }
 
         return sourceContextTasks
     } else {
@@ -217,6 +239,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
 
             val uploadMappingsTask = SentryUploadProguardMappingsTask.register(
                 project = project,
+                debug = extension.debug,
                 cliExecutable = cliExecutable,
                 generateUuidTask = generateUuidTask,
                 sentryProperties = sentryProps,
@@ -259,6 +282,7 @@ private fun ApplicationVariant.configureNativeSymbolsTask(
             SentryUploadNativeSymbolsTask::class.java
         ) {
             it.workingDir(project.rootDir)
+            it.debug.set(extension.debug)
             it.autoUploadNativeSymbol.set(extension.autoUploadNativeSymbols)
             it.cliExecutable.set(cliExecutable)
             it.sentryProperties.set(sentryProps?.let { file -> project.file(file) })

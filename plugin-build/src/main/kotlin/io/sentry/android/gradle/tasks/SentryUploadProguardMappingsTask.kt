@@ -1,5 +1,7 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask.Companion.SENTRY_PROGUARD_MAPPING_UUID_PROPERTY
+import io.sentry.android.gradle.util.PropertiesUtil
 import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
@@ -20,6 +22,9 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     init {
         description = "Uploads the proguard mappings file to Sentry"
     }
+
+    @get:Input
+    abstract val debug: Property<Boolean>
 
     @get:Input
     abstract val cliExecutable: Property<String>
@@ -80,13 +85,16 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             firstExistingFile
         }
 
-        val args = mutableListOf(
-            cliExecutable.get(),
-            "upload-proguard",
-            "--uuid",
-            uuid,
-            mappingFile.toString()
-        )
+        val args = mutableListOf(cliExecutable.get())
+
+        if (debug.get()) {
+            args.add("--log-level=debug")
+        }
+
+        args.add("upload-proguard")
+        args.add("--uuid")
+        args.add(uuid)
+        args.add(mappingFile.toString())
 
         if (!autoUploadProguardMapping.get()) {
             args.add("--no-upload")
@@ -110,21 +118,18 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     }
 
     companion object {
-        private const val PROPERTY_PREFIX = "io.sentry.ProguardUuids="
-
         internal fun readUuidFromFile(file: File): String {
-            check(file.exists()) {
-                "UUID properties file is missing"
+            val props = PropertiesUtil.load(file)
+            val uuid: String? = props.getProperty(SENTRY_PROGUARD_MAPPING_UUID_PROPERTY)
+            check(uuid != null) {
+                "${SENTRY_PROGUARD_MAPPING_UUID_PROPERTY} property is missing"
             }
-            val content = file.readText().trim()
-            check(content.startsWith(PROPERTY_PREFIX)) {
-                "io.sentry.ProguardUuids property is missing"
-            }
-            return content.removePrefix(PROPERTY_PREFIX)
+            return uuid
         }
 
         fun register(
             project: Project,
+            debug: Property<Boolean>,
             cliExecutable: String,
             sentryProperties: String?,
             generateUuidTask: Provider<SentryGenerateProguardUuidTask>,
@@ -140,6 +145,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             ) { task ->
                 task.dependsOn(generateUuidTask)
                 task.workingDir(project.rootDir)
+                task.debug.set(debug)
                 task.cliExecutable.set(cliExecutable)
                 task.sentryProperties.set(
                     sentryProperties?.let { file -> project.file(file) }

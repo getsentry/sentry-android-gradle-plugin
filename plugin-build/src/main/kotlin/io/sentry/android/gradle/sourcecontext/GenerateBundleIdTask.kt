@@ -2,6 +2,7 @@ package io.sentry.android.gradle.sourcecontext
 
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
 import io.sentry.android.gradle.util.info
+import java.util.Properties
 import java.util.UUID
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
@@ -28,7 +29,14 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
         outputDir.mkdirs()
 
         val debugId = UUID.randomUUID()
-        outputFile.get().asFile.writeText("${SENTRY_BUNDLE_ID_PROPERTY}=$debugId")
+
+        val props = Properties().also {
+            it.setProperty(SENTRY_BUNDLE_ID_PROPERTY, debugId.toString())
+        }
+
+        outputFile.get().asFile.writer().use { writer ->
+            props.store(writer, "")
+        }
 
         logger.info {
             "GenerateSourceBundleIdTask - outputFile: $outputFile, debugId: $debugId"
@@ -36,7 +44,7 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
     }
 
     companion object {
-        internal const val SENTRY_BUNDLE_ID_OUTPUT = "sentry-debug-meta.properties"
+        internal const val SENTRY_BUNDLE_ID_OUTPUT = "sentry-bundle-id.properties"
         const val SENTRY_BUNDLE_ID_PROPERTY = "io.sentry.bundle-ids"
 
         fun register(

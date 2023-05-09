@@ -3,9 +3,11 @@ package io.sentry.android.gradle.sourcecontext
 import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
+import io.sentry.android.gradle.util.PropertiesUtil
 import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.AndroidVariant
 import java.io.File
+import java.util.Properties
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
@@ -21,10 +23,12 @@ abstract class BundleSourcesTask : Exec() {
         description = "Creates a Sentry source bundle file."
     }
 
-    /** The Groovy source of the current project. */
-//    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
     abstract val sourceDir: DirectoryProperty
+
+    @get:Input
+    abstract val debug: Property<Boolean>
 
     @get:Input
     abstract val cliExecutable: Property<String>
@@ -38,6 +42,14 @@ abstract class BundleSourcesTask : Exec() {
 
     @get:OutputDirectory
     abstract val output: DirectoryProperty
+
+    @get:Input
+    @get:Optional
+    abstract val sentryOrganization: Property<String>
+
+    @get:Input
+    @get:Optional
+    abstract val sentryProject: Property<String>
 
     override fun exec() {
         computeCommandLineArgs().let {
@@ -59,30 +71,40 @@ abstract class BundleSourcesTask : Exec() {
 
     internal fun computeCommandLineArgs(): List<String> {
         val bundleId = readBundleIdFromFile(bundleIdFile.get().asFile)
-        val args = mutableListOf(
-            cliExecutable.get(),
-            "--log-level=debug",
-            "debug-files",
-            "bundle-jvm"
-        )
+        val args = mutableListOf(cliExecutable.get())
+
+        if (debug.get()) {
+            args.add("--log-level=debug")
+         }
+
+        args.add("debug-files")
+        args.add("bundle-jvm")
         args.add("--output=${output.asFile.get().absolutePath}")
         args.add("--debug-id=${bundleId}")
+
+        sentryOrganization.orNull?.let {
+            args.add("--org")
+            args.add(it)
+        }
+
+        sentryProject.orNull?.let {
+            args.add("--project")
+            args.add(it)
+        }
+
         args.add(sourceDir.get().asFile.absolutePath)
+
         return args
     }
 
     companion object {
-        private const val PROPERTY_PREFIX = "${SENTRY_BUNDLE_ID_PROPERTY}="
-
         internal fun readBundleIdFromFile(file: File): String {
-            check(file.exists()) {
-                "Bundle ID properties file is missing"
-            }
-            val content = file.readText().trim()
-            check(content.startsWith(PROPERTY_PREFIX)) {
+            val props = PropertiesUtil.load(file)
+            val bundleId: String? = props.getProperty(SENTRY_BUNDLE_ID_PROPERTY)
+            check(bundleId != null) {
                 "${SENTRY_BUNDLE_ID_PROPERTY} property is missing"
             }
-            return content.removePrefix(PROPERTY_PREFIX)
+            return bundleId
         }
 
         fun register(
@@ -90,19 +112,21 @@ abstract class BundleSourcesTask : Exec() {
             variant: AndroidVariant,
             generateDebugIdTask: TaskProvider<GenerateBundleIdTask>,
             collectSourcesTask: TaskProvider<CollectSourcesTask>,
-            input: Provider<Directory>,
             output: Provider<Directory>,
+            debug: Property<Boolean>,
             cliExecutable: String,
+            sentryOrg: String?,
+            sentryProject: String?,
             taskSuffix: String = ""
         ): TaskProvider<BundleSourcesTask> {
             return project.tasks.register(
                 "sentryBundleSources${taskSuffix}",
                 BundleSourcesTask::class.java
             ) { task ->
-                task.dependsOn(generateDebugIdTask)
-                task.dependsOn(collectSourcesTask)
-
-                task.sourceDir.set(input)
+                task.debug.set(debug)
+                task.sentryOrganization.set(sentryOrg)
+                task.sentryProject.set(sentryProject)
+                task.sourceDir.set(collectSourcesTask.flatMap { it.output })
                 task.cliExecutable.set(cliExecutable)
                 SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)?.let {
                     task.sentryProperties.set(File(it))

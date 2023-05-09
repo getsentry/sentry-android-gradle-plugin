@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.tasks
 
 import io.sentry.android.gradle.util.info
+import java.util.Properties
 import java.util.UUID
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
@@ -27,7 +28,14 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
         outputDir.mkdirs()
 
         val uuid = UUID.randomUUID()
-        outputFile.get().asFile.writeText("io.sentry.ProguardUuids=$uuid")
+
+        val props = Properties().also {
+            it.setProperty(SENTRY_PROGUARD_MAPPING_UUID_PROPERTY, uuid.toString())
+        }
+
+        outputFile.get().asFile.writer().use { writer ->
+            props.store(writer, "")
+        }
 
         logger.info {
             "SentryGenerateProguardUuidTask - outputFile: $outputFile, uuid: $uuid"
@@ -36,6 +44,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
 
     companion object {
         internal const val SENTRY_UUID_OUTPUT = "sentry-proguard-uuid.properties"
+        const val SENTRY_PROGUARD_MAPPING_UUID_PROPERTY = "io.sentry.ProguardUuids"
 
         fun register(
             project: Project,

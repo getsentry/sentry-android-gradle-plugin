@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Features
+- Bundle Java Sources and upload to Sentry ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
+  - Set `includeSourceBundle` to `true`
+- New `debug` option to enable debug logging for sentry-cli ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
+
 ### Dependencies
 
 - Bump CLI from v2.16.1 to v2.17.2 ([#469](https://github.com/getsentry/sentry-android-gradle-plugin/pull/469))

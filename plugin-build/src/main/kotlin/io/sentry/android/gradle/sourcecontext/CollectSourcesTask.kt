@@ -1,6 +1,6 @@
 package io.sentry.android.gradle.sourcecontext
 
-import io.sentry.android.gradle.SentryTasksProvider.capitalized
+import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
 import org.gradle.api.file.ConfigurableFileCollection
@@ -15,7 +15,9 @@ import java.io.File
 import java.nio.file.Paths
 import javax.inject.Inject
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.file.Directory
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 
 @CacheableTask
@@ -29,7 +31,6 @@ abstract class CollectSourcesTask @Inject constructor(
         description = "Collects sources into a single directory so they can be bundled together."
     }
 
-    /** The Groovy source of the current project. */
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     abstract val sourceFiles: ConfigurableFileCollection
@@ -53,17 +54,25 @@ abstract class CollectSourcesTask @Inject constructor(
         override fun execute() {
             val outDir = parameters.output.getAndDelete()
 
-            println(parameters.sourceFiles.asFileTree.map { it.absolutePath })
-
             val collectedSources = SourceCollector(
                 projectDir = parameters.projectDir.get().asFile,
                 sourceFiles = parameters.sourceFiles
             ).collect()
 
             collectedSources.forEach { collectedSource ->
-                println(collectedSource)
-                val targetFile = outDir.resolve(File(collectedSource.relativePath))
-                collectedSource.file.copyTo(targetFile, true)
+                if (collectedSource.file.exists()) {
+                    SentryPlugin.logger.debug("Collecting sources in ${collectedSource.file.absolutePath}")
+                    collectedSource.file.walk().forEach { file ->
+                        val relativePath = file.absolutePath.removePrefix(collectedSource.file.absolutePath).removePrefix("/")
+                        val targetFile = outDir.resolve(File(relativePath))
+                        if (file.isFile) {
+                            SentryPlugin.logger.debug("Copying file ${file.absolutePath} to ${targetFile.absolutePath}")
+                            file.copyTo(targetFile, true)
+                        }
+                    }
+                } else {
+                    SentryPlugin.logger.debug("Skipping source collection in ${collectedSource.file.absolutePath} as it doesn't exist.")
+                }
             }
         }
     }
@@ -71,13 +80,11 @@ abstract class CollectSourcesTask @Inject constructor(
     companion object {
         fun register(
             project: Project,
-            sourceFiles: List<File>,
+            sourceFiles: ConfigurableFileCollection,
             output: Provider<Directory>,
             taskSuffix: String = ""
         ): TaskProvider<CollectSourcesTask> {
-//        val oldAGPExtension = project.extensions.getByType(AppExtension::class.java)
             return project.tasks.register("sentryCollectSources${taskSuffix}", CollectSourcesTask::class.java) { task ->
-//            task.sourceFiles.setFrom(oldAGPExtension.sourceSets.flatMap { it.java.getSourceFiles() })
                 task.sourceFiles.setFrom(sourceFiles)
                 task.output.set(output)
             }
@@ -94,7 +101,6 @@ private class SourceCollector(
         val destination = sortedSetOf<SourceFile>()
         sourceFiles.mapTo(destination) {
             val rel = relativePathInSrcDir(relativize(it))
-            println("flattening ${it.absolutePath}")
             SourceFile(
                 file = it,
                 relativePath = rel
