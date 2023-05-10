@@ -17,12 +17,12 @@ class SourceContext {
             extension: SentryPluginExtension,
             variant: AndroidVariant,
             paths: OutputPaths,
-            sourceFiles: Provider<List<ConfigurableFileCollection>>,
             cliExecutable: String,
             sentryOrg: String?,
             sentryProject: String?,
             taskSuffix: String
         ): SourceContextTasks {
+            val sourceFiles = variant.sources(project, extension.additionalSourceDirsToBundle)
             val generateBundleIdTask = GenerateBundleIdTask.register(
                 project,
                 output = paths.bundleIdDir,

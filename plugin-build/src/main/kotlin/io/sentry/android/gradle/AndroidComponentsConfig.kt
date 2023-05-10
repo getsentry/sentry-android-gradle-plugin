@@ -195,21 +195,11 @@ private fun Variant.configureSourceBundleTasks(
             val taskSuffix = name.capitalized
             val variant = AndroidVariant74(this)
 
-            val sourceFiles = project.provider {
-                mutableListOf(
-                    project.files(this.sources.java?.all),
-                    project.files(this.sources.kotlin?.all),
-                ).also {
-                    it.addAll(extension.additionalSourceDirsToBundle.getOrElse(emptySet()).map { project.files(it) })
-                }.toList()
-            }
-
             val sourceContextTasks = SourceContext.register(
                 project,
                 extension,
                 variant,
                 paths,
-                sourceFiles,
                 cliExecutable,
                 sentryOrg,
                 sentryProject,

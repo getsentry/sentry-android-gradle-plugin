@@ -51,24 +51,7 @@ abstract class CollectSourcesTask @Inject constructor(
 
         override fun execute() {
             val outDir = parameters.output.getAndDelete()
-
-            parameters.sourceDirs.get().forEach { sourceDirCollection ->
-                sourceDirCollection.forEach { sourceDir ->
-                    if (sourceDir.exists()) {
-                        SentryPlugin.logger.debug("Collecting sources in ${sourceDir.absolutePath}")
-                        sourceDir.walk().forEach { sourceFile ->
-                            val relativePath = sourceFile.absolutePath.removePrefix(sourceDir.absolutePath).removePrefix("/")
-                            val targetFile = outDir.resolve(File(relativePath))
-                            if (sourceFile.isFile) {
-                                SentryPlugin.logger.debug("Copying file ${sourceFile.absolutePath} to ${targetFile.absolutePath}")
-                                sourceFile.copyTo(targetFile, true)
-                            }
-                        }
-                    } else {
-                        SentryPlugin.logger.debug("Skipping source collection in ${sourceDir.absolutePath} as it doesn't exist.")
-                    }
-                }
-            }
+            SourceCollector().collectSources(outDir, parameters.sourceDirs.get())
         }
     }
 
@@ -82,6 +65,31 @@ abstract class CollectSourcesTask @Inject constructor(
             return project.tasks.register("sentryCollectSources${taskSuffix}", CollectSourcesTask::class.java) { task ->
                 task.sourceDirs.set(sourceDirs)
                 task.output.set(output)
+            }
+        }
+    }
+}
+
+internal class SourceCollector {
+
+    fun collectSources(outDir: File, sourceDirs: List<ConfigurableFileCollection>) {
+        sourceDirs.forEach { sourceDirCollection ->
+            sourceDirCollection.forEach { sourceDir ->
+                if (sourceDir.exists()) {
+                    SentryPlugin.logger.debug("Collecting sources in ${sourceDir.absolutePath}")
+                    sourceDir.walk().forEach { sourceFile ->
+                        val relativePath =
+                            sourceFile.absolutePath.removePrefix(sourceDir.absolutePath)
+                                .removePrefix("/")
+                        val targetFile = outDir.resolve(File(relativePath))
+                        if (sourceFile.isFile) {
+                            SentryPlugin.logger.debug("Copying file ${sourceFile.absolutePath} to ${targetFile.absolutePath}")
+                            sourceFile.copyTo(targetFile, true)
+                        }
+                    }
+                } else {
+                    SentryPlugin.logger.debug("Skipping source collection in ${sourceDir.absolutePath} as it doesn't exist.")
+                }
             }
         }
     }
