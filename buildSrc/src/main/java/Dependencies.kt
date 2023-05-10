@@ -49,13 +49,6 @@ object Libs {
     const val SQLITE_FRAMEWORK = "androidx.sqlite:sqlite-framework:${LibsVersion.SQLITE}"
     const val SENTRY_ANDROID = "io.sentry:sentry-android:${LibsVersion.SENTRY}"
 
-    const val AUTO_SERVICE = "com.google.auto.service:auto-service:1.0.1"
-    const val AUTO_SERVICE_ANNOTATIONS = "com.google.auto.service:auto-service-annotations:1.0.1"
-
-    const val KOTLIN_COMPILE_EMBEDDABLE = "org.jetbrains.kotlin:kotlin-compiler-embeddable"
-    const val KOTLIN_COMPILE_TESTING = "com.github.tschuchortdev:kotlin-compile-testing:1.5.0"
-    const val COMPOSE_DESKTOP_RUNTIME = "org.jetbrains.compose.desktop:desktop:1.4.0"
-
     // test
     val MOCKITO_KOTLIN = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     const val ARSC_LIB = "io.github.reandroid:ARSCLib:1.1.4"

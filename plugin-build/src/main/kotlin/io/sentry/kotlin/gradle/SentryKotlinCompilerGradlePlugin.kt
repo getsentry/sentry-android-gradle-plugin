@@ -11,9 +11,7 @@ class SentryKotlinCompilerGradlePlugin : KotlinCompilerPluginSupportPlugin {
 
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
 
-    override fun getCompilerPluginId(): String = getPluginArtifact().let {
-        "io.sentry.kotlin.compiler"
-    }
+    override fun getCompilerPluginId(): String = "io.sentry.kotlin.compiler"
 
     override fun getPluginArtifact(): SubpluginArtifact {
         // needs to match sentry-kotlin-compiler-plugin/build.gradle.kts
