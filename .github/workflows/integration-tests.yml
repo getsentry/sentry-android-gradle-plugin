@@ -47,7 +47,7 @@ jobs:
 
       - name: Run ./gradlew (Fixes Gradle issues < 7.4)
         continue-on-error: true
-        run: ./gradlew spotlessCheck assembleDebug --stacktrace
+        run: ./gradlew
 
       - name: Build project
         run: ./gradlew spotlessCheck assembleDebug --stacktrace
