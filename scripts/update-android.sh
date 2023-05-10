@@ -2,9 +2,10 @@
 set -euo pipefail
 
 cd $(dirname "$0")/../
-file='plugin-build/src/main/kotlin/io/sentry/android/gradle/SentryPlugin.kt'
+file='plugin-build/gradle.properties'
 content=$(cat $file)
-regex='(SENTRY_SDK_VERSION *= *)"([0-9\.]+)"'
+
+regex='(sdk_version = *)([0-9\.]+)'
 if ! [[ $content =~ $regex ]]; then
     echo "Failed to find the Android SDK version in $file"
     exit 1
@@ -18,7 +19,7 @@ get-repo)
     echo "https://github.com/getsentry/sentry-java.git"
     ;;
 set-version)
-    newValue="${BASH_REMATCH[1]}\"$2\""
+    newValue="${BASH_REMATCH[1]}$2"
     echo "${content/${BASH_REMATCH[0]}/$newValue}" >$file
     ;;
 *)

@@ -2,6 +2,7 @@ package io.sentry.android.gradle
 
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AppExtension
+import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.SentryTasksProvider.getProcessResourcesProvider
 import io.sentry.android.gradle.autoinstall.installDependencies
@@ -119,7 +120,7 @@ class SentryPlugin : Plugin<Project> {
     companion object {
         const val SENTRY_ORG_PARAMETER = "sentryOrg"
         const val SENTRY_PROJECT_PARAMETER = "sentryProject"
-        internal const val SENTRY_SDK_VERSION = "6.17.0"
+        internal const val SENTRY_SDK_VERSION = BuildConfig.SdkVersion
 
         internal val sep = File.separator
 

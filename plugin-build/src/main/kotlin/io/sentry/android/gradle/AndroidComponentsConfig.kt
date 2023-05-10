@@ -119,6 +119,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     SentryGenerateIntegrationListTask::class.java
                 ) {
                     it.sentryModulesService.set(sentryModulesService)
+                    it.usesService(sentryModulesService)
                 }
 
                 variant.artifacts.use(manifestUpdater).wiredWithFiles(

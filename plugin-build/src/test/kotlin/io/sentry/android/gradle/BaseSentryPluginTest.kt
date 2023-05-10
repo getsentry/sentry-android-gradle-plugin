@@ -17,6 +17,7 @@ abstract class BaseSentryPluginTest(
     val testProjectDir = TemporaryFolder()
 
     private val projectTemplateFolder = File("src/test/resources/testFixtures/appTestProject")
+    private val mavenTestRepoPath = File("./../build/mavenTestRepo")
 
     private lateinit var rootBuildFile: File
     protected lateinit var appBuildFile: File
@@ -43,20 +44,25 @@ abstract class BaseSentryPluginTest(
               repositories {
                 google()
                 gradlePluginPortal()
+                mavenCentral()
               }
               dependencies {
                 classpath 'com.android.tools.build:gradle:$androidGradlePluginVersion'
                 // This is needed to populate the plugin classpath instead of using
                 // withPluginClasspath on the Gradle Runner.
-                classpath files($pluginClasspath)
                 $additionalBuildClasspath
+                classpath files($pluginClasspath)
               }
             }
 
             allprojects {
               repositories {
+                maven {
+                  url = "${mavenTestRepoPath.absoluteFile.toURI()}"
+                }
                 google()
                 mavenCentral()
+                mavenLocal()
                 maven { url 'https://appboy.github.io/appboy-android-sdk/sdk' }
                 maven { url 'https://pkgs.dev.azure.com/Synerise/AndroidSDK/_packaging/prod/maven/v1' }
               }
@@ -104,8 +110,8 @@ abstract class BaseSentryPluginTest(
             arrayOf("7.3.0", "7.5"),
             arrayOf("7.4.0", "7.5"),
             arrayOf("7.4.0", "7.6"),
-            arrayOf("8.0.0-beta05", "8.0.2"),
-            arrayOf("8.1.0-alpha08", "8.0.2")
+            arrayOf("8.0.0", "8.0.2"),
+            arrayOf("8.1.0-alpha11", "8.0.2")
         )
 
         internal fun GradleRunner.appendArguments(vararg arguments: String) =

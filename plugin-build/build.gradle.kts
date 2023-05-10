@@ -5,6 +5,7 @@ import io.sentry.android.gradle.internal.BootstrapAndroidSdk
 import org.gradle.api.internal.classpath.ModuleRegistry
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.configurationcache.extensions.serviceOf
+import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -18,6 +19,7 @@ plugins {
     // we need this plugin in order to include .aar dependencies into a pure java project, which the gradle plugin is
     id("io.sentry.android.gradle.aar2jar")
     id("com.github.johnrengelman.shadow") version BuildPluginsVersion.SHADOW
+    id("com.github.gmazzo.buildconfig") version BuildPluginsVersion.BUILDCONFIG
 }
 
 allprojects {
@@ -60,6 +62,8 @@ dependencies {
 
     compileOnly(Libs.ASM)
     compileOnly(Libs.ASM_COMMONS)
+
+    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:${KotlinCompilerVersion.VERSION}")
 
     // compileOnly since we'll be shading the common dependency into the final jar
     // but we still need to be able to compile it (this also excludes it from .pom)
@@ -120,7 +124,7 @@ tasks.withType<GroovyCompile>().configureEach {
 
 tasks.withType<KotlinCompile>().configureEach {
     if (!name.contains("agp", ignoreCase = true)) {
-        classpath += files(sourceSets["main"].groovy.classesDirectory)
+        libraries.from.addAll(files(sourceSets["main"].groovy.classesDirectory))
     }
 
     kotlinOptions {
@@ -147,6 +151,10 @@ gradlePlugin {
         register("sentryPlugin") {
             id = "io.sentry.android.gradle"
             implementationClass = "io.sentry.android.gradle.SentryPlugin"
+        }
+        register("kotlinCompilerPlugin") {
+            id = "io.sentry.kotlin.compiler.gradle"
+            implementationClass = "io.sentry.kotlin.gradle.SentryKotlinCompilerGradlePlugin"
         }
     }
 }
@@ -180,6 +188,10 @@ ktlint {
     filter {
         exclude("**/generated/**")
         include("**/kotlin/**")
+        // see https://github.com/JLLeitschuh/ktlint-gradle/issues/522#issuecomment-958756817
+        exclude { entry ->
+            entry.file.toString().contains("generated")
+        }
     }
 }
 
@@ -272,6 +284,15 @@ fun shouldDownloadSentryCli(): Boolean {
 
         else -> false
     }
+}
+
+buildConfig {
+    useKotlinOutput()
+    packageName("io.sentry")
+    className("BuildConfig")
+
+    buildConfigField("String", "Version", provider { "\"${project.version}\"" })
+    buildConfigField("String", "SdkVersion", provider { "\"${project.property("sdk_version")}\"" })
 }
 
 tasks.register<ASMifyTask>("asmify")

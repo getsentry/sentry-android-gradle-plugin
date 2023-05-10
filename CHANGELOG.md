@@ -6,12 +6,20 @@
 - Bundle Java Sources and upload to Sentry ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
   - Set `includeSourceBundle` to `true`
 - New `debug` option to enable debug logging for sentry-cli ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
+- Add Kotlin Compiler plugin to enrich Composable functions ([#452](https://github.com/getsentry/sentry-android-gradle-plugin/pull/452))
+
+### Fixes
+
+- Do not transform the sdk name to Int in BootstrapAndroidSdk ([#478](https://github.com/getsentry/sentry-android-gradle-plugin/pull/478))
 
 ### Dependencies
 
-- Bump CLI from v2.16.1 to v2.17.2 ([#469](https://github.com/getsentry/sentry-android-gradle-plugin/pull/469))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2172)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.16.1...2.17.2)
+- Bump CLI from v2.16.1 to v2.17.5 ([#469](https://github.com/getsentry/sentry-android-gradle-plugin/pull/469), [#475](https://github.com/getsentry/sentry-android-gradle-plugin/pull/475), [#480](https://github.com/getsentry/sentry-android-gradle-plugin/pull/480))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2175)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.16.1...2.17.5)
+- Bump Android SDK from v6.17.0 to v6.18.1 ([#481](https://github.com/getsentry/sentry-android-gradle-plugin/pull/481))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6181)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.17.0...6.18.1)
 
 ## 3.5.0
 
