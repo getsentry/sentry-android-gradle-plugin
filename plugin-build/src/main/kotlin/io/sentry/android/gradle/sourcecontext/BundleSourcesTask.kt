@@ -28,6 +28,7 @@ abstract class BundleSourcesTask : Exec() {
     abstract val sourceDir: DirectoryProperty
 
     @get:Input
+    @get:Optional
     abstract val debug: Property<Boolean>
 
     @get:Input
@@ -73,7 +74,7 @@ abstract class BundleSourcesTask : Exec() {
         val bundleId = readBundleIdFromFile(bundleIdFile.get().asFile)
         val args = mutableListOf(cliExecutable.get())
 
-        if (debug.get()) {
+        if (debug.getOrElse(false)) {
             args.add("--log-level=debug")
          }
 

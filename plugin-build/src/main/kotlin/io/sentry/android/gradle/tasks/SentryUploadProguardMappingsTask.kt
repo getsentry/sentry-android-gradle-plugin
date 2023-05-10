@@ -24,6 +24,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     }
 
     @get:Input
+    @get:Optional
     abstract val debug: Property<Boolean>
 
     @get:Input
@@ -87,7 +88,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
 
         val args = mutableListOf(cliExecutable.get())
 
-        if (debug.get()) {
+        if (debug.getOrElse(false)) {
             args.add("--log-level=debug")
         }
 

@@ -23,6 +23,7 @@ abstract class UploadSourceBundleTask : Exec() {
     abstract val sourceBundleDir: DirectoryProperty
 
     @get:Input
+    @get:Optional
     abstract val debug: Property<Boolean>
 
     @get:Input
@@ -64,7 +65,7 @@ abstract class UploadSourceBundleTask : Exec() {
     internal fun computeCommandLineArgs(): List<String> {
         val args = mutableListOf(cliExecutable.get())
 
-        if (debug.get()) {
+        if (debug.getOrElse(false)) {
             args.add("--log-level=debug")
         }
 

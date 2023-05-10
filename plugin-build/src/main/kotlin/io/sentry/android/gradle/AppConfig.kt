@@ -102,10 +102,7 @@ private fun ApplicationVariant.configureDebugMetaPropertiesTask(project: Project
             "Not configuring deprecated AppExtension for ${AgpVersions.CURRENT}, " +
                 "new AppComponentsExtension will be configured"
         }
-        project.logger.error("not hello 70 ${AgpVersions.CURRENT}")
     } else {
-        project.logger.error("hello 70 ${AgpVersions.CURRENT}")
-        val paths = OutputPaths(project, name)
         val variant = AndroidVariant70(this)
         val taskSuffix = name.capitalized
         val outputDir = project.layout.buildDirectory.dir(

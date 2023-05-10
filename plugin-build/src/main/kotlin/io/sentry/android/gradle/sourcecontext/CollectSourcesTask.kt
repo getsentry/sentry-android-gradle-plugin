@@ -22,8 +22,7 @@ import org.gradle.api.provider.Provider
 
 @CacheableTask
 abstract class CollectSourcesTask @Inject constructor(
-    private val workerExecutor: WorkerExecutor,
-    private val layout: ProjectLayout
+    private val workerExecutor: WorkerExecutor
 ) : DirectoryOutputTask() {
 
     init {
@@ -33,19 +32,17 @@ abstract class CollectSourcesTask @Inject constructor(
 
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
-    abstract val sourceFiles: ConfigurableFileCollection
+    abstract val sourceDirs: ConfigurableFileCollection
 
     @TaskAction fun action() {
         workerExecutor.noIsolation().submit(CollectSourcesWorkAction::class.java) {
-            it.projectDir.set(layout.projectDirectory)
-            it.sourceFiles.from(this@CollectSourcesTask.sourceFiles)
+            it.sourceDirs.from(this@CollectSourcesTask.sourceDirs)
             it.output.set(this@CollectSourcesTask.output)
         }
     }
 
     interface CollectSourcesParameters : WorkParameters {
-        val projectDir: DirectoryProperty
-        val sourceFiles: ConfigurableFileCollection
+        val sourceDirs: ConfigurableFileCollection
         val output: DirectoryProperty
     }
 
@@ -54,24 +51,19 @@ abstract class CollectSourcesTask @Inject constructor(
         override fun execute() {
             val outDir = parameters.output.getAndDelete()
 
-            val collectedSources = SourceCollector(
-                projectDir = parameters.projectDir.get().asFile,
-                sourceFiles = parameters.sourceFiles
-            ).collect()
-
-            collectedSources.forEach { collectedSource ->
-                if (collectedSource.file.exists()) {
-                    SentryPlugin.logger.debug("Collecting sources in ${collectedSource.file.absolutePath}")
-                    collectedSource.file.walk().forEach { file ->
-                        val relativePath = file.absolutePath.removePrefix(collectedSource.file.absolutePath).removePrefix("/")
+            parameters.sourceDirs.forEach { sourceDir ->
+                if (sourceDir.exists()) {
+                    SentryPlugin.logger.debug("Collecting sources in ${sourceDir.absolutePath}")
+                    sourceDir.walk().forEach { sourceFile ->
+                        val relativePath = sourceFile.absolutePath.removePrefix(sourceDir.absolutePath).removePrefix("/")
                         val targetFile = outDir.resolve(File(relativePath))
-                        if (file.isFile) {
-                            SentryPlugin.logger.debug("Copying file ${file.absolutePath} to ${targetFile.absolutePath}")
-                            file.copyTo(targetFile, true)
+                        if (sourceFile.isFile) {
+                            SentryPlugin.logger.debug("Copying file ${sourceFile.absolutePath} to ${targetFile.absolutePath}")
+                            sourceFile.copyTo(targetFile, true)
                         }
                     }
                 } else {
-                    SentryPlugin.logger.debug("Skipping source collection in ${collectedSource.file.absolutePath} as it doesn't exist.")
+                    SentryPlugin.logger.debug("Skipping source collection in ${sourceDir.absolutePath} as it doesn't exist.")
                 }
             }
         }
@@ -80,51 +72,16 @@ abstract class CollectSourcesTask @Inject constructor(
     companion object {
         fun register(
             project: Project,
-            sourceFiles: ConfigurableFileCollection,
+            sourceDirs: ConfigurableFileCollection,
             output: Provider<Directory>,
             taskSuffix: String = ""
         ): TaskProvider<CollectSourcesTask> {
             return project.tasks.register("sentryCollectSources${taskSuffix}", CollectSourcesTask::class.java) { task ->
-                task.sourceFiles.setFrom(sourceFiles)
+                task.sourceDirs.setFrom(sourceDirs)
                 task.output.set(output)
             }
         }
     }
-}
-
-private class SourceCollector(
-    private val projectDir: File,
-    private val sourceFiles: ConfigurableFileCollection
-) {
-
-    fun collect(): Set<SourceFile> {
-        val destination = sortedSetOf<SourceFile>()
-        sourceFiles.mapTo(destination) {
-            val rel = relativePathInSrcDir(relativize(it))
-            SourceFile(
-                file = it,
-                relativePath = rel
-            )
-        }
-        return destination
-    }
-
-    private fun relativize(file: File) = file.toRelativeString(projectDir)
-
-    private fun relativePathInSrcDir(relativePath: String): String {
-        return Paths.get(relativePath)
-            // Hack to drop e.g. `src/main/java`. Would be better if a FileTree exposed that info.
-            .drop(3)
-            .joinToString(separator = File.separator)
-    }
-}
-
-internal data class SourceFile(
-    val file: File,
-    val relativePath: String
-) : Comparable<SourceFile> {
-
-    override fun compareTo(other: SourceFile): Int = relativePath.compareTo(other.relativePath)
 }
 
 internal fun DirectoryProperty.getAndDelete(): File {

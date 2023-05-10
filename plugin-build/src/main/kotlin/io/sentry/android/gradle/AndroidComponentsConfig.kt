@@ -159,7 +159,6 @@ private fun Variant.configureDebugMetaPropertiesTask(
     tasksGeneratingProperties: List<TaskProvider<*>>
 ) {
     if (isAGP74) {
-        project.logger.error("hello 74 ${AgpVersions.CURRENT}")
         val taskSuffix = name.capitalized
         val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
             project,
@@ -173,7 +172,6 @@ private fun Variant.configureDebugMetaPropertiesTask(
             generateDebugMetaPropertiesTask to DirectoryOutputTask::output
         )
     } else {
-        project.logger.error("not hello 74 ${AgpVersions.CURRENT}")
         project.logger.info {
             "Not configuring AndroidComponentsExtension for ${AgpVersions.CURRENT}, since it does" +
                 "not have new addGeneratedSourceDirectory API"

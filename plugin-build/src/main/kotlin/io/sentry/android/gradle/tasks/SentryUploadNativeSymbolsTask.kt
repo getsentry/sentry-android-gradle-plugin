@@ -19,6 +19,7 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
     }
 
     @get:Input
+    @get:Optional
     abstract val debug: Property<Boolean>
 
     @get:Input
@@ -68,7 +69,7 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
             cliExecutable.get()
         )
 
-        if (debug.get()) {
+        if (debug.getOrElse(false)) {
             args.add("--log-level=debug")
         }
 
