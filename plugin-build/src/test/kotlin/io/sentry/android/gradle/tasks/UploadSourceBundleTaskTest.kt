@@ -37,7 +37,7 @@ class UploadSourceBundleTaskTest {
             ) {
                 it.cliExecutable.set("sentry-cli")
                 it.sourceBundleDir.set(sourceBundleDir)
-                it.autoUploadSourceBundle.set(true)
+                it.autoUploadSourceContext.set(true)
             }
 
         val args = task.get().computeCommandLineArgs()
@@ -66,7 +66,7 @@ class UploadSourceBundleTaskTest {
             ) {
                 it.cliExecutable.set("sentry-cli")
                 it.sourceBundleDir.set(sourceBundleDir)
-                it.autoUploadSourceBundle.set(false)
+                it.autoUploadSourceContext.set(false)
             }
 
         val args = task.get().computeCommandLineArgs()
@@ -86,7 +86,7 @@ class UploadSourceBundleTaskTest {
             ) {
                 it.cliExecutable.set("sentry-cli")
                 it.sourceBundleDir.set(sourceBundleDir)
-                it.autoUploadSourceBundle.set(true)
+                it.autoUploadSourceContext.set(true)
                 it.debug.set(true)
             }
 
@@ -108,7 +108,7 @@ class UploadSourceBundleTaskTest {
             ) {
                 it.cliExecutable.set("sentry-cli")
                 it.sourceBundleDir.set(sourceBundleDir)
-                it.autoUploadSourceBundle.set(true)
+                it.autoUploadSourceContext.set(true)
                 it.sentryProperties.set(propertiesFile)
             }
 
@@ -132,7 +132,7 @@ class UploadSourceBundleTaskTest {
             ) {
                 it.cliExecutable.set("sentry-cli")
                 it.sourceBundleDir.set(sourceBundleDir)
-                it.autoUploadSourceBundle.set(true)
+                it.autoUploadSourceContext.set(true)
             }
 
         task.get().setSentryPropertiesEnv()
@@ -152,7 +152,7 @@ class UploadSourceBundleTaskTest {
             ) {
                 it.cliExecutable.set("sentry-cli")
                 it.sourceBundleDir.set(sourceBundleDir)
-                it.autoUploadSourceBundle.set(true)
+                it.autoUploadSourceContext.set(true)
                 it.sentryOrganization.set("dummy-org")
             }
 
@@ -174,7 +174,7 @@ class UploadSourceBundleTaskTest {
             ) {
                 it.cliExecutable.set("sentry-cli")
                 it.sourceBundleDir.set(sourceBundleDir)
-                it.autoUploadSourceBundle.set(true)
+                it.autoUploadSourceContext.set(true)
                 it.sentryProject.set("dummy-proj")
             }
 

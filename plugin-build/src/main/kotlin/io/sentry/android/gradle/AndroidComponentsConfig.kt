@@ -37,6 +37,7 @@ import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
@@ -88,7 +89,8 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 val sentryModulesService = SentryModulesService.register(
                     project,
                     extension.tracingInstrumentation.features,
-                    extension.tracingInstrumentation.logcat.enabled
+                    extension.tracingInstrumentation.logcat.enabled,
+                    extension.includeSourceContext
                 )
                 project.collectModules(
                     "${variant.name}RuntimeClasspath",
@@ -187,18 +189,20 @@ private fun Variant.configureSourceBundleTasks(
     sentryOrg: String?,
     sentryProject: String?
 ): SourceContext.SourceContextTasks? {
-    if (extension.includeSourceBundle.get()) {
+    if (extension.includeSourceContext.get()) {
         if (isAGP74) {
             val paths = OutputPaths(project, name)
             val taskSuffix = name.capitalized
             val variant = AndroidVariant74(this)
 
-            // TODO only one of those is used
-            val sourceFiles = project.files(
-//                extension.additionalSourceDirsToBundle.getOrElse(emptySet()),
-                this.sources.java?.all,
-//                this.sources.kotlin?.all
-            )
+            val sourceFiles = project.provider {
+                mutableListOf(
+                    project.files(this.sources.java?.all),
+                    project.files(this.sources.kotlin?.all),
+                ).also {
+                    it.addAll(extension.additionalSourceDirsToBundle.getOrElse(emptySet()).map { project.files(it) })
+                }.toList()
+            }
 
             val sourceContextTasks = SourceContext.register(
                 project,

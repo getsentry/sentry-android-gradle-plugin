@@ -136,32 +136,32 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
         .convention(true)
 
     /**
-     * Disables or enables the handling of source bundles for Sentry.
+     * Disables or enables the handling of source context for Sentry.
      * If enabled the plugin will generate a UUID and will take care of
-     * uploading the source bundle to Sentry. If disabled, all the logic
-     * related to source bundles will be excluded.
+     * uploading the source context to Sentry. If disabled, all the logic
+     * related to source context will be excluded.
      * Default is disabled.
      *
-     * @see [autoUploadSourceBundle]
+     * @see [autoUploadSourceContext]
      */
-    val includeSourceBundle: Property<Boolean> = objects
+    val includeSourceContext: Property<Boolean> = objects
         .property(Boolean::class.java).convention(false)
 
     /**
-     * Whether the plugin should attempt to auto-upload the source bundle to Sentry or not.
+     * Whether the plugin should attempt to auto-upload the source context to Sentry or not.
      * If disabled the plugin will run a dry-run.
      * Default is enabled.
      */
-    val autoUploadSourceBundle: Property<Boolean> = objects
+    val autoUploadSourceContext: Property<Boolean> = objects
         .property(Boolean::class.java).convention(true)
 
     /**
      * Configure additional directories to be included in the source bundle which is used for
      * source context.
      */
-//    val additionalSourceDirsToBundle: SetProperty<String> = objects.setProperty(String::class.java).convention(
-//        emptySet()
-//    )
+    val additionalSourceDirsToBundle: SetProperty<String> = objects.setProperty(String::class.java).convention(
+        emptySet()
+    )
 
     /**
      * Disables or enables debug log output, e.g. for for sentry-cli.

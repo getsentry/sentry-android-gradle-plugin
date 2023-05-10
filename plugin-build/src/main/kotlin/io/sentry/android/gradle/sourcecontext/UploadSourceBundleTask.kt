@@ -34,7 +34,7 @@ abstract class UploadSourceBundleTask : Exec() {
     abstract val sentryProperties: RegularFileProperty
 
     @get:Input
-    abstract val autoUploadSourceBundle: Property<Boolean>
+    abstract val autoUploadSourceContext: Property<Boolean>
 
     @get:Input
     @get:Optional
@@ -83,7 +83,7 @@ abstract class UploadSourceBundleTask : Exec() {
             args.add(it)
         }
 
-        if (!autoUploadSourceBundle.get()) {
+        if (!autoUploadSourceContext.get()) {
             args.add("--no-upload")
         }
 
@@ -99,7 +99,7 @@ abstract class UploadSourceBundleTask : Exec() {
             bundleSourcesTask: TaskProvider<BundleSourcesTask>,
             debug: Property<Boolean>,
             cliExecutable: String,
-            autoUploadSourceBundle: Property<Boolean>,
+            autoUploadSourceContext: Property<Boolean>,
             sentryOrg: String?,
             sentryProject: String?,
             taskSuffix: String = ""
@@ -110,7 +110,7 @@ abstract class UploadSourceBundleTask : Exec() {
                 task.sentryProject.set(sentryProject)
                 task.sourceBundleDir.set(bundleSourcesTask.flatMap { it.output })
                 task.cliExecutable.set(cliExecutable)
-                task.autoUploadSourceBundle.set(autoUploadSourceBundle)
+                task.autoUploadSourceContext.set(autoUploadSourceContext)
                 SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)?.let {
                     task.sentryProperties.set(File(it))
                 }

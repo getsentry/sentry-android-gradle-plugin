@@ -36,6 +36,11 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
         if (isLogcatInstrEnabled()) {
             features.add("LogcatInstrumentation")
         }
+
+        if (parameters.sourceContextEnabled.getOrElse(false)) {
+            features.add("SourceContext")
+        }
+
         return features
     }
 
@@ -87,7 +92,8 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
         fun register(
             project: Project,
             features: Provider<Set<InstrumentationFeature>>,
-            logcatEnabled: Provider<Boolean>
+            logcatEnabled: Provider<Boolean>,
+            sourceContextEnabled: Provider<Boolean>
         ): Provider<SentryModulesService> {
             return project.gradle.sharedServices.registerIfAbsent(
                 getBuildServiceName(SentryModulesService::class.java),
@@ -95,6 +101,7 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
             ) {
                 it.parameters.features.setDisallowChanges(features)
                 it.parameters.logcatEnabled.setDisallowChanges(logcatEnabled)
+                it.parameters.sourceContextEnabled.setDisallowChanges(sourceContextEnabled)
             }
         }
     }
@@ -105,5 +112,8 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
 
         @get:Input
         val logcatEnabled: Property<Boolean>
+
+        @get:Input
+        val sourceContextEnabled: Property<Boolean>
     }
 }

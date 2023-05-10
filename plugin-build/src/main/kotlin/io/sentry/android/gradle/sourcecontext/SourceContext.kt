@@ -17,7 +17,7 @@ class SourceContext {
             extension: SentryPluginExtension,
             variant: AndroidVariant,
             paths: OutputPaths,
-            sourceFiles: ConfigurableFileCollection,
+            sourceFiles: Provider<List<ConfigurableFileCollection>>,
             cliExecutable: String,
             sentryOrg: String?,
             sentryProject: String?,
@@ -55,7 +55,7 @@ class SourceContext {
                 bundleSourcesTask,
                 extension.debug,
                 cliExecutable,
-                extension.autoUploadSourceBundle,
+                extension.autoUploadSourceContext,
                 sentryOrg,
                 sentryProject,
                 taskSuffix

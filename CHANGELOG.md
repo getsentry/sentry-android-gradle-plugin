@@ -4,7 +4,7 @@
 
 ### Features
 - Bundle Java Sources and upload to Sentry ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
-  - Set `includeSourceBundle` to `true`
+  - Set `includeSourceContext` to `true`
 - New `debug` option to enable debug logging for sentry-cli ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
 - Add Kotlin Compiler plugin to enrich Composable functions ([#452](https://github.com/getsentry/sentry-android-gradle-plugin/pull/452))
 

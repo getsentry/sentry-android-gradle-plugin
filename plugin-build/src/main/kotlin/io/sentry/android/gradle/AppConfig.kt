@@ -137,16 +137,20 @@ private fun ApplicationVariant.configureSourceBundleTasks(
                 "new AppComponentsExtension will be configured"
         }
         return null
-    } else if (extension.includeSourceBundle.get()) {
+    } else if (extension.includeSourceContext.get()) {
         val paths = OutputPaths(project, name)
         val variant = AndroidVariant70(this)
         val taskSuffix = name.capitalized
-        val sourceFiles = project.files(
-            this.sourceSets.flatMap { it.javaDirectories },
-//            this.sourceSets.flatMap { it.kotlinDirectories },
-//            this.sourceSets.flatMap { it.customDirectories },
-//            extension.additionalSourceDirsToBundle
-        )
+
+        val sourceFiles = project.provider {
+            mutableListOf(
+                project.files(this.sourceSets.flatMap { it.javaDirectories }),
+                project.files(this.sourceSets.flatMap { it.kotlinDirectories }),
+                project.files(this.sourceSets.flatMap { it.customDirectories }),
+            ).also {
+                it.addAll(extension.additionalSourceDirsToBundle.getOrElse(emptySet()).map { project.files(it) })
+            }.toList()
+        }
 
         val sourceContextTasks = SourceContext.register(
             project,
