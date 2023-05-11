@@ -102,6 +102,8 @@ dependencies {
 
 sentry {
     autoUploadProguardMapping.set(false)
+    includeSourceContext.set(true)
+    autoUploadSourceContext.set(CI.canAutoUpload())
 
     tracingInstrumentation {
         forceInstrumentDependencies.set(true)

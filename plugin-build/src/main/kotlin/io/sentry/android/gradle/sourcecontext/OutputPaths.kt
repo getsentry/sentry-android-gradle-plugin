@@ -13,6 +13,7 @@ class OutputPaths(
 
     private val variantDirectory = "$ROOT_DIR/$variantName"
 
+    val proguardUuidDir = dir("$variantDirectory/proguard-uuid")
     val bundleIdDir = dir("$variantDirectory/bundle-id")
     val sourceDir = dir("$variantDirectory/source-to-bundle")
     val bundleDir = dir("$variantDirectory/source-bundle")

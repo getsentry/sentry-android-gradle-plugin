@@ -52,12 +52,15 @@ fun AndroidComponentsExtension<*, *, *>.configure(
 
     configureVariants { variant ->
         if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
+            val paths = OutputPaths(project, variant.name)
+
             variant.configureDependenciesTask(project, extension)
 
             val tasksGeneratingProperties = mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
             val sourceContextTasks = variant.configureSourceBundleTasks(
                 project,
                 extension,
+                paths,
                 cliExecutable,
                 sentryOrg,
                 sentryProject
@@ -67,6 +70,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
             val generateProguardUuidTask = variant.configureProguardMappingsTasks(
                 project,
                 extension,
+                paths,
                 cliExecutable,
                 sentryOrg,
                 sentryProject
@@ -183,13 +187,13 @@ private fun Variant.configureDebugMetaPropertiesTask(
 private fun Variant.configureSourceBundleTasks(
     project: Project,
     extension: SentryPluginExtension,
+    paths: OutputPaths,
     cliExecutable: String,
     sentryOrg: String?,
     sentryProject: String?
 ): SourceContext.SourceContextTasks? {
     if (extension.includeSourceContext.get()) {
         if (isAGP74) {
-            val paths = OutputPaths(project, name)
             val taskSuffix = name.capitalized
             val variant = AndroidVariant74(this)
 
@@ -248,6 +252,7 @@ private fun Variant.configureDependenciesTask(project: Project, extension: Sentr
 private fun Variant.configureProguardMappingsTasks(
     project: Project,
     extension: SentryPluginExtension,
+    paths: OutputPaths,
     cliExecutable: String,
     sentryOrg: String?,
     sentryProject: String?
@@ -262,13 +267,9 @@ private fun Variant.configureProguardMappingsTasks(
             val generateUuidTask =
                 SentryGenerateProguardUuidTask.register(
                     project = project,
-                    taskSuffix = name.capitalized
+                    taskSuffix = name.capitalized,
+                    output = paths.proguardUuidDir
                 )
-
-            configureGeneratedSourcesFor74(
-                this,
-                generateUuidTask to DirectoryOutputTask::output
-            )
 
             val uploadMappingsTask = SentryUploadProguardMappingsTask.register(
                 project = project,

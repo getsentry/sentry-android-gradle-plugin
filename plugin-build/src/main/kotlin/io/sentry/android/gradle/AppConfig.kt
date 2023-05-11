@@ -58,9 +58,7 @@ fun AppExtension.configure(
         val sourceContextTasks = variant.configureSourceBundleTasks(
             project,
             extension,
-            this,
             cliExecutable,
-            mergeAssetsDependants,
             sentryOrg,
             sentryProject
         )
@@ -76,8 +74,6 @@ fun AppExtension.configure(
         val generateProguardUuidTask = variant.configureProguardMappingsTasks(
             project,
             extension,
-            this,
-            mergeAssetsDependants,
             cliExecutable,
             sentryOrg,
             sentryProject
@@ -136,9 +132,7 @@ private fun ApplicationVariant.configureDebugMetaPropertiesTask(
 private fun ApplicationVariant.configureSourceBundleTasks(
     project: Project,
     extension: SentryPluginExtension,
-    appExtension: AppExtension,
     cliExecutable: String,
-    dependants: Set<TaskProvider<out Task>?>,
     sentryOrg: String?,
     sentryProject: String?
 ): SourceContext.SourceContextTasks? {
@@ -209,8 +203,6 @@ private fun BaseVariant.configureDependenciesTask(
 private fun ApplicationVariant.configureProguardMappingsTasks(
     project: Project,
     extension: SentryPluginExtension,
-    appExtension: AppExtension,
-    dependants: Set<TaskProvider<out Task>?>,
     cliExecutable: String,
     sentryOrg: String?,
     sentryProject: String?
