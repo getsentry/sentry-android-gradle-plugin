@@ -2,12 +2,7 @@ package io.sentry.android.gradle.sourcecontext
 
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.gradle.common.AndroidVariant
-import java.io.File
 import org.gradle.api.Project
-import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.ConfigurableFileTree
-import org.gradle.api.file.Directory
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
 class SourceContext {
@@ -22,7 +17,10 @@ class SourceContext {
             sentryProject: String?,
             taskSuffix: String
         ): SourceContextTasks {
-            val sourceFiles = variant.sources(project, extension.additionalSourceDirsForSourceContext)
+            val sourceFiles = variant.sources(
+                project,
+                extension.additionalSourceDirsForSourceContext
+            )
             val generateBundleIdTask = GenerateBundleIdTask.register(
                 project,
                 output = paths.bundleIdDir,

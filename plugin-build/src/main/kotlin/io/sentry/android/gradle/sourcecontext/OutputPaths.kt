@@ -13,7 +13,7 @@ class OutputPaths(
 
     private val variantDirectory = "$ROOT_DIR/$variantName"
 
-    val bundleIdDir = dir("${variantDirectory}/bundle-id")
-    val sourceDir = dir("${variantDirectory}/source-to-bundle")
-    val bundleDir = dir("${variantDirectory}/source-bundle")
+    val bundleIdDir = dir("$variantDirectory/bundle-id")
+    val sourceDir = dir("$variantDirectory/source-to-bundle")
+    val bundleDir = dir("$variantDirectory/source-bundle")
 }

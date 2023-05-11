@@ -1,26 +1,11 @@
 package io.sentry.android.gradle.tasks
 
-import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
-import io.sentry.android.gradle.sourcecontext.BundleSourcesTask
-import io.sentry.android.gradle.sourcecontext.CollectSourcesTask
 import io.sentry.android.gradle.sourcecontext.SourceCollector
 import java.io.File
-import java.util.Properties
-import java.util.UUID
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.gradle.api.Project
-import org.gradle.api.file.FileCollection
-import org.gradle.api.file.RegularFile
-import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.TaskProvider
 import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Assert.assertThrows
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TemporaryFolder
 
 class CollectSourcesTaskTest {
 

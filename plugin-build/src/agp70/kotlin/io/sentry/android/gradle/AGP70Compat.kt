@@ -30,12 +30,16 @@ data class AndroidVariant70(
     override val assembleProvider: TaskProvider<out Task>? = variant.assembleProvider
     override fun mappingFileProvider(project: Project): Provider<FileCollection> =
         variant.mappingFileProvider
-    override fun sources(project: Project, additionalSources: SetProperty<String>): Provider<List<ConfigurableFileCollection>> =
+    override fun sources(
+        project: Project,
+        additionalSources: SetProperty<String>
+    ): Provider<List<ConfigurableFileCollection>> =
         project.provider {
             mutableListOf(
                 project.files(variant.sourceSets.flatMap { it.javaDirectories }),
                 project.files(variant.sourceSets.flatMap { it.kotlinDirectories })
-            ).also { it.addAll(additionalSources.getOrElse(emptySet()).map { project.files(it) }) }.toList()
+            ).also { it.addAll(additionalSources.getOrElse(emptySet()).map { project.files(it) }) }
+                .toList()
         }
 }
 

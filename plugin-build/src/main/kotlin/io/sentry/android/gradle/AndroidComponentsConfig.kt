@@ -9,7 +9,6 @@ import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
-import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
@@ -37,8 +36,6 @@ import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Project
-import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
 fun AndroidComponentsExtension<*, *, *>.configure(
@@ -213,8 +210,8 @@ private fun Variant.configureSourceBundleTasks(
             return sourceContextTasks
         } else {
             project.logger.info {
-                "Not configuring AndroidComponentsExtension for ${AgpVersions.CURRENT}, since it does" +
-                    "not have new addGeneratedSourceDirectory API"
+                "Not configuring AndroidComponentsExtension for ${AgpVersions.CURRENT}, since it " +
+                    "does not have new addGeneratedSourceDirectory API"
             }
             return null
         }

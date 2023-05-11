@@ -123,7 +123,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             val props = PropertiesUtil.load(file)
             val uuid: String? = props.getProperty(SENTRY_PROGUARD_MAPPING_UUID_PROPERTY)
             check(uuid != null) {
-                "${SENTRY_PROGUARD_MAPPING_UUID_PROPERTY} property is missing"
+                "$SENTRY_PROGUARD_MAPPING_UUID_PROPERTY property is missing"
             }
             return uuid
         }

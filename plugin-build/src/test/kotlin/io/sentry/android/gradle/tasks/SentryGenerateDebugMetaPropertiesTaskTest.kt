@@ -5,7 +5,6 @@ import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SEN
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask.Companion.SENTRY_PROGUARD_MAPPING_UUID_PROPERTY
 import io.sentry.android.gradle.util.PropertiesUtil
 import java.io.File
-import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.gradle.api.Project

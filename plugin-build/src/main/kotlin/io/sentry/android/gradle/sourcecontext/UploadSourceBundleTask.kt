@@ -1,7 +1,6 @@
 package io.sentry.android.gradle.sourcecontext
 
 import io.sentry.android.gradle.SentryPropertiesFileProvider
-import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
 import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.AndroidVariant
@@ -9,8 +8,13 @@ import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.*
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.TaskProvider
 
 abstract class UploadSourceBundleTask : Exec() {
 
@@ -104,7 +108,10 @@ abstract class UploadSourceBundleTask : Exec() {
             sentryProject: String?,
             taskSuffix: String = ""
         ): TaskProvider<UploadSourceBundleTask> {
-            return project.tasks.register("sentryUploadSourceBundle${taskSuffix}", UploadSourceBundleTask::class.java) { task ->
+            return project.tasks.register(
+                "sentryUploadSourceBundle$taskSuffix",
+                UploadSourceBundleTask::class.java
+            ) { task ->
                 task.debug.set(debug)
                 task.sentryOrganization.set(sentryOrg)
                 task.sentryProject.set(sentryProject)

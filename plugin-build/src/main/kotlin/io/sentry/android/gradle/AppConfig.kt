@@ -10,7 +10,6 @@ import io.sentry.android.gradle.SentryTasksProvider.getLintVitalAnalyzeProvider
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalReportProvider
 import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
-import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
@@ -66,7 +65,12 @@ fun AppExtension.configure(
         )
         sourceContextTasks?.let { tasksGeneratingProperties.add(it.generateBundleIdTask) }
 
-        variant.configureDependenciesTask(project, extension, this, mergeAssetsDependants)
+        variant.configureDependenciesTask(
+            project,
+            extension,
+            this,
+            mergeAssetsDependants
+        )
 
         val generateProguardUuidTask = variant.configureProguardMappingsTasks(
             project,
@@ -96,7 +100,12 @@ fun AppExtension.configure(
     }
 }
 
-private fun ApplicationVariant.configureDebugMetaPropertiesTask(project: Project, appExtension: AppExtension, dependants: Set<TaskProvider<out Task>?>, tasksGeneratingProperties: List<TaskProvider<*>>) {
+private fun ApplicationVariant.configureDebugMetaPropertiesTask(
+    project: Project,
+    appExtension: AppExtension,
+    dependants: Set<TaskProvider<out Task>?>,
+    tasksGeneratingProperties: List<TaskProvider<*>>
+) {
     if (isAGP74) {
         project.logger.info {
             "Not configuring deprecated AppExtension for ${AgpVersions.CURRENT}, " +
@@ -106,7 +115,8 @@ private fun ApplicationVariant.configureDebugMetaPropertiesTask(project: Project
         val variant = AndroidVariant70(this)
         val taskSuffix = name.capitalized
         val outputDir = project.layout.buildDirectory.dir(
-            "generated${sep}assets${sep}sentry${sep}debug-meta-properties${sep}$name")
+            "generated${sep}assets${sep}sentry${sep}debug-meta-properties${sep}$name"
+        )
         val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
             project,
             tasksGeneratingProperties,

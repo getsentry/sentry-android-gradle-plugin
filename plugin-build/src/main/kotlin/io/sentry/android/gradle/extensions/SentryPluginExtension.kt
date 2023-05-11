@@ -1,14 +1,10 @@
 package io.sentry.android.gradle.extensions
 
-import io.sentry.android.gradle.tasks.DirectoryOutputTask
 import javax.inject.Inject
 import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.Task
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
-import org.gradle.api.tasks.TaskProvider
 
 abstract class SentryPluginExtension @Inject constructor(project: Project) {
 
@@ -159,7 +155,9 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      * Configure additional directories to be included in the source bundle which is used for
      * source context.
      */
-    val additionalSourceDirsForSourceContext: SetProperty<String> = objects.setProperty(String::class.java).convention(
+    val additionalSourceDirsForSourceContext: SetProperty<String> = objects.setProperty(
+        String::class.java
+    ).convention(
         emptySet()
     )
 

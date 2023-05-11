@@ -1,7 +1,7 @@
 package io.sentry.android.gradle.tasks
 
-import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
 import io.sentry.android.gradle.sourcecontext.BundleSourcesTask
+import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
 import java.io.File
 import java.util.Properties
 import java.util.UUID
@@ -10,7 +10,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.gradle.api.Project
-import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
@@ -184,7 +183,7 @@ class BundleSourcesTaskTest {
     @Test
     fun `readBundleIdFromFile works correctly`() {
         val expected = "8c776014-bb25-11eb-8529-0242ac130003"
-        val input = tempDir.newFile().apply { writeText("${SENTRY_BUNDLE_ID_PROPERTY}=$expected") }
+        val input = tempDir.newFile().apply { writeText("$SENTRY_BUNDLE_ID_PROPERTY=$expected") }
         val actual = BundleSourcesTask.readBundleIdFromFile(input)
         assertEquals(expected, actual)
     }
@@ -192,7 +191,7 @@ class BundleSourcesTaskTest {
     @Test
     fun `readBundleIdFromFile works correctly with whitespaces`() {
         val expected = "8c776014-bb25-11eb-8529-0242ac130003"
-        val input = tempDir.newFile().apply { writeText(" ${SENTRY_BUNDLE_ID_PROPERTY}=$expected\n") }
+        val input = tempDir.newFile().apply { writeText(" $SENTRY_BUNDLE_ID_PROPERTY=$expected\n") }
         val actual = BundleSourcesTask.readBundleIdFromFile(input)
         assertEquals(expected, actual)
     }

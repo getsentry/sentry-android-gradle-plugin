@@ -7,14 +7,21 @@ import io.sentry.android.gradle.util.PropertiesUtil
 import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.AndroidVariant
 import java.io.File
-import java.util.Properties
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.*
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.TaskProvider
 
 abstract class BundleSourcesTask : Exec() {
 
@@ -76,12 +83,12 @@ abstract class BundleSourcesTask : Exec() {
 
         if (debug.getOrElse(false)) {
             args.add("--log-level=debug")
-         }
+        }
 
         args.add("debug-files")
         args.add("bundle-jvm")
         args.add("--output=${output.asFile.get().absolutePath}")
-        args.add("--debug-id=${bundleId}")
+        args.add("--debug-id=$bundleId")
 
         sentryOrganization.orNull?.let {
             args.add("--org")
@@ -103,7 +110,7 @@ abstract class BundleSourcesTask : Exec() {
             val props = PropertiesUtil.load(file)
             val bundleId: String? = props.getProperty(SENTRY_BUNDLE_ID_PROPERTY)
             check(bundleId != null) {
-                "${SENTRY_BUNDLE_ID_PROPERTY} property is missing"
+                "$SENTRY_BUNDLE_ID_PROPERTY property is missing"
             }
             return bundleId
         }
@@ -121,7 +128,7 @@ abstract class BundleSourcesTask : Exec() {
             taskSuffix: String = ""
         ): TaskProvider<BundleSourcesTask> {
             return project.tasks.register(
-                "sentryBundleSources${taskSuffix}",
+                "sentryBundleSources$taskSuffix",
                 BundleSourcesTask::class.java
             ) { task ->
                 task.debug.set(debug)

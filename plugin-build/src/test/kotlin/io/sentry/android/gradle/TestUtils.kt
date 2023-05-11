@@ -34,7 +34,9 @@ internal fun verifyProguardUuid(
     val signedStr = if (signed) "-unsigned" else ""
     val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant$signedStr.apk")
     val sentryProperties = extractZip(apk, "assets/sentry-debug-meta.properties")
-    val matcher = ASSET_PATTERN.matchEntire(sentryProperties)
+    val matcher = sentryProperties.lines().mapNotNull { line ->
+        ASSET_PATTERN.matchEntire(line)
+    }.firstOrNull()
 
     assertTrue("Properties file is missing from the APK") { sentryProperties.isNotBlank() }
     assertNotNull(matcher, "$sentryProperties does not match pattern $ASSET_PATTERN")

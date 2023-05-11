@@ -38,12 +38,16 @@ data class AndroidVariant74(
         project.provider {
             project.files(variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE))
         }
-    override fun sources(project: Project, additionalSources: SetProperty<String>): Provider<List<ConfigurableFileCollection>> =
+    override fun sources(
+        project: Project,
+        additionalSources: SetProperty<String>
+    ): Provider<List<ConfigurableFileCollection>> =
         project.provider {
             mutableListOf(
                 project.files(variant.sources.java?.all),
                 project.files(variant.sources.kotlin?.all)
-            ).also { it.addAll(additionalSources.getOrElse(emptySet()).map { project.files(it) }) }.toList()
+            ).also { it.addAll(additionalSources.getOrElse(emptySet()).map { project.files(it) }) }
+                .toList()
         }
 }
 

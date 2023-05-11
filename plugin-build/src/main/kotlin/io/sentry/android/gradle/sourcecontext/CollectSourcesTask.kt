@@ -3,23 +3,24 @@ package io.sentry.android.gradle.sourcecontext
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
+import java.io.File
+import javax.inject.Inject
+import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.*
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
-import java.io.File
-import java.nio.file.Paths
-import javax.inject.Inject
-import org.gradle.api.Project
-import org.gradle.api.file.ConfigurableFileTree
-import org.gradle.api.file.Directory
-import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 
 @CacheableTask
 abstract class CollectSourcesTask @Inject constructor(
@@ -35,7 +36,8 @@ abstract class CollectSourcesTask @Inject constructor(
     @get:InputFiles
     abstract val sourceDirs: ListProperty<ConfigurableFileCollection>
 
-    @TaskAction fun action() {
+    @TaskAction
+    fun action() {
         workerExecutor.noIsolation().submit(CollectSourcesWorkAction::class.java) {
             it.sourceDirs.set(this@CollectSourcesTask.sourceDirs)
             it.output.set(this@CollectSourcesTask.output)
@@ -62,7 +64,10 @@ abstract class CollectSourcesTask @Inject constructor(
             output: Provider<Directory>,
             taskSuffix: String = ""
         ): TaskProvider<CollectSourcesTask> {
-            return project.tasks.register("sentryCollectSources${taskSuffix}", CollectSourcesTask::class.java) { task ->
+            return project.tasks.register(
+                "sentryCollectSources$taskSuffix",
+                CollectSourcesTask::class.java
+            ) { task ->
                 task.sourceDirs.set(sourceDirs)
                 task.output.set(output)
             }
@@ -83,12 +88,18 @@ internal class SourceCollector {
                                 .removePrefix("/")
                         val targetFile = outDir.resolve(File(relativePath))
                         if (sourceFile.isFile) {
-                            SentryPlugin.logger.debug("Copying file ${sourceFile.absolutePath} to ${targetFile.absolutePath}")
+                            SentryPlugin.logger.debug(
+                                "Copying file ${sourceFile.absolutePath} " +
+                                    "to ${targetFile.absolutePath}"
+                            )
                             sourceFile.copyTo(targetFile, true)
                         }
                     }
                 } else {
-                    SentryPlugin.logger.debug("Skipping source collection in ${sourceDir.absolutePath} as it doesn't exist.")
+                    SentryPlugin.logger.debug(
+                        "Skipping source collection in ${sourceDir.absolutePath} as it doesn't " +
+                            "exist."
+                    )
                 }
             }
         }
