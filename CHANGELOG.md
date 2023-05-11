@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Add missing Kotlin Compiler Plugin Marker config ([#488](https://github.com/getsentry/sentry-android-gradle-plugin/pull/488))
+
 ## 3.6.0
 
 ### Features
