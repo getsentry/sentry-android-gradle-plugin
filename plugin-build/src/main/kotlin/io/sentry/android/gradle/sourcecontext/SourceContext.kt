@@ -22,7 +22,7 @@ class SourceContext {
             sentryProject: String?,
             taskSuffix: String
         ): SourceContextTasks {
-            val sourceFiles = variant.sources(project, extension.additionalSourceDirsToBundle)
+            val sourceFiles = variant.sources(project, extension.additionalSourceDirsForSourceContext)
             val generateBundleIdTask = GenerateBundleIdTask.register(
                 project,
                 output = paths.bundleIdDir,

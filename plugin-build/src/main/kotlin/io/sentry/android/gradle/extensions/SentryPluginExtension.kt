@@ -159,7 +159,7 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      * Configure additional directories to be included in the source bundle which is used for
      * source context.
      */
-    val additionalSourceDirsToBundle: SetProperty<String> = objects.setProperty(String::class.java).convention(
+    val additionalSourceDirsForSourceContext: SetProperty<String> = objects.setProperty(String::class.java).convention(
         emptySet()
     )
 
