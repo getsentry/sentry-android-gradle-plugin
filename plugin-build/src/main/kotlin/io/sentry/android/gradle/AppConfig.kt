@@ -12,6 +12,7 @@ import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
+import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
 import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
@@ -53,7 +54,7 @@ fun AppExtension.configure(
             }
         )
 
-        val tasksGeneratingProperties = mutableListOf<TaskProvider<*>>()
+        val tasksGeneratingProperties = mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
         val sourceContextTasks = variant.configureSourceBundleTasks(
             project,
             extension,
@@ -104,7 +105,7 @@ private fun ApplicationVariant.configureDebugMetaPropertiesTask(
     project: Project,
     appExtension: AppExtension,
     dependants: Set<TaskProvider<out Task>?>,
-    tasksGeneratingProperties: List<TaskProvider<*>>
+    tasksGeneratingProperties: List<TaskProvider<out PropertiesFileOutputTask>>
 ) {
     if (isAGP74) {
         project.logger.info {

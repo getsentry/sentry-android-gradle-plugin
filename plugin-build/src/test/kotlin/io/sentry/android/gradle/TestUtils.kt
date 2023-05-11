@@ -4,6 +4,7 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppExtension
 import com.reandroid.lib.apk.ApkModule
+import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
 import io.sentry.android.gradle.testutil.forceEvaluate
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SemVer
@@ -19,9 +20,15 @@ import kotlin.test.assertTrue
 import org.gradle.api.Project
 
 /* ktlint-disable max-line-length */
-private val ASSET_PATTERN =
+private val ASSET_PATTERN_PROGUARD =
     Regex(
         """^io\.sentry\.ProguardUuids=([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$"""
+            .trimMargin()
+    )
+
+private val ASSET_PATTERN_SOURCE_CONTEXT =
+    Regex(
+        """^$SENTRY_BUNDLE_ID_PROPERTY=([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$"""
             .trimMargin()
     )
 /* ktlint-enable max-line-length */
@@ -35,11 +42,29 @@ internal fun verifyProguardUuid(
     val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant$signedStr.apk")
     val sentryProperties = extractZip(apk, "assets/sentry-debug-meta.properties")
     val matcher = sentryProperties.lines().mapNotNull { line ->
-        ASSET_PATTERN.matchEntire(line)
+        ASSET_PATTERN_PROGUARD.matchEntire(line)
     }.firstOrNull()
 
     assertTrue("Properties file is missing from the APK") { sentryProperties.isNotBlank() }
-    assertNotNull(matcher, "$sentryProperties does not match pattern $ASSET_PATTERN")
+    assertNotNull(matcher, "$sentryProperties does not match pattern $ASSET_PATTERN_PROGUARD")
+
+    return UUID.fromString(matcher.groupValues[1])
+}
+
+internal fun verifySourceContextId(
+    rootFile: File,
+    variant: String = "release",
+    signed: Boolean = true
+): UUID {
+    val signedStr = if (signed) "-unsigned" else ""
+    val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant$signedStr.apk")
+    val sentryProperties = extractZip(apk, "assets/sentry-debug-meta.properties")
+    val matcher = sentryProperties.lines().mapNotNull { line ->
+        ASSET_PATTERN_SOURCE_CONTEXT.matchEntire(line)
+    }.firstOrNull()
+
+    assertTrue("Properties file is missing from the APK") { sentryProperties.isNotBlank() }
+    assertNotNull(matcher, "$sentryProperties does not match pattern $ASSET_PATTERN_SOURCE_CONTEXT")
 
     return UUID.fromString(matcher.groupValues[1])
 }

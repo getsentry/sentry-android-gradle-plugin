@@ -49,13 +49,12 @@ abstract class SentryGenerateDebugMetaPropertiesTask : DirectoryOutputTask() {
 
         fun register(
             project: Project,
-            tasksGeneratingProperties: List<TaskProvider<*>>,
+            tasksGeneratingProperties: List<TaskProvider<out PropertiesFileOutputTask>>,
             output: Provider<Directory>? = null,
             taskSuffix: String = ""
         ): TaskProvider<SentryGenerateDebugMetaPropertiesTask> {
             val inputFiles: List<Provider<RegularFile>> = tasksGeneratingProperties.mapNotNull {
-                val propertiesProducingTask = it as? TaskProvider<PropertiesFileOutputTask>
-                propertiesProducingTask?.flatMap { it.outputFile }
+                it.flatMap { task -> task.outputFile }
             }
             return project.tasks.register(
                 "generateSentryDebugMetaProperties$taskSuffix",

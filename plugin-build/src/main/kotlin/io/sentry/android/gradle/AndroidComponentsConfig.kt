@@ -20,6 +20,7 @@ import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
+import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
 import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
 import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
@@ -53,7 +54,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
         if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
             variant.configureDependenciesTask(project, extension)
 
-            val tasksGeneratingProperties = mutableListOf<TaskProvider<*>>()
+            val tasksGeneratingProperties = mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
             val sourceContextTasks = variant.configureSourceBundleTasks(
                 project,
                 extension,
@@ -156,7 +157,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
 
 private fun Variant.configureDebugMetaPropertiesTask(
     project: Project,
-    tasksGeneratingProperties: List<TaskProvider<*>>
+    tasksGeneratingProperties: List<TaskProvider<out PropertiesFileOutputTask>>
 ) {
     if (isAGP74) {
         val taskSuffix = name.capitalized
