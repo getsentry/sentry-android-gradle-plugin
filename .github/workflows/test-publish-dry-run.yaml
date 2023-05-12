@@ -48,6 +48,7 @@ jobs:
     name: Publish Dry Run - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
     env:
       VERSION_AGP: ${{ matrix.agp }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
     steps:
       - name: Checkout Repo
