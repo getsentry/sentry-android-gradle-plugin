@@ -104,14 +104,12 @@ abstract class BaseSentryPluginTest(
             // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
             // The pair is [AGP Version, Gradle Version]
             arrayOf("7.0.4", "7.2"),
-            arrayOf("7.1.3", "7.2"),
-            arrayOf("7.2.1", "7.3.3"),
+            arrayOf("7.1.3", "7.3.3"),
             arrayOf("7.2.1", "7.4"),
             arrayOf("7.3.0", "7.5"),
-            arrayOf("7.4.0", "7.5"),
             arrayOf("7.4.0", "7.6"),
             arrayOf("8.0.0", "8.0.2"),
-            arrayOf("8.1.0-alpha11", "8.0.2")
+            arrayOf("8.1.0-alpha11", "8.1")
         )
 
         internal fun GradleRunner.appendArguments(vararg arguments: String) =

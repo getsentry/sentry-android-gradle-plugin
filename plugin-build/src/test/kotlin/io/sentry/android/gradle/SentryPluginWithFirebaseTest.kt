@@ -42,8 +42,6 @@ class SentryPluginWithFirebaseTest :
             .appendArguments("app:assembleRelease")
             .build()
 
-        print(result.output)
-
         assertTrue { "BUILD SUCCESSFUL" in result.output }
     }
 
