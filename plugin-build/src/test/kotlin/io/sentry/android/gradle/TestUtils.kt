@@ -18,6 +18,7 @@ import java.util.zip.ZipInputStream
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.gradle.api.Project
+import org.junit.rules.TemporaryFolder
 
 /* ktlint-disable max-line-length */
 private val ASSET_PATTERN_PROGUARD =
@@ -168,4 +169,24 @@ fun Project.retrieveAndroidVariant(agpVersion: SemVer, variantName: String): And
             .applicationVariants.first { it.name == variantName }
         AndroidVariant70(variant)
     }
+}
+
+fun TemporaryFolder.withDummySourceFile() {
+    val sourceFile =
+        File(newFolder("app/src/main/java/com/example/"), "Example.kt")
+
+    sourceFile.writeText(
+        // language=kotlin
+        """
+            package com.example
+
+            import androidx.compose.runtime.Composable
+            import androidx.compose.foundation.text.BasicText
+
+            @Composable
+            fun FancyButton() {
+                BasicText("Hello World")
+            }
+            """.trimIndent()
+    )
 }

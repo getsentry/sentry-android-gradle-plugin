@@ -121,6 +121,7 @@ abstract class UploadSourceBundleTask : Exec() {
                 SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)?.let {
                     task.sentryProperties.set(File(it))
                 }
+                task.onlyIf { !task.sourceBundleDir.asFileTree.isEmpty }
             }
         }
     }

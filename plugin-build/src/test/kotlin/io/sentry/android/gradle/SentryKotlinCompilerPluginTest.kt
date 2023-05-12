@@ -63,23 +63,7 @@ class SentryKotlinCompilerPluginTest(
             """.trimIndent()
         )
 
-        val sourceFile =
-            File(testProjectDir.newFolder("app/src/main/java/com/example/"), "Example.kt")
-
-        sourceFile.writeText(
-            // language=kotlin
-            """
-            package com.example
-
-            import androidx.compose.runtime.Composable
-            import androidx.compose.foundation.text.BasicText
-
-            @Composable
-            fun FancyButton() {
-                BasicText("Hello World")
-            }
-            """.trimIndent()
-        )
+        testProjectDir.withDummySourceFile()
 
         val result = runner
             .appendArguments("app:assembleRelease")

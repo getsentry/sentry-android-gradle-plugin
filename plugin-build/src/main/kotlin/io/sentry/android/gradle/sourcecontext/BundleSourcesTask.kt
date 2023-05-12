@@ -141,6 +141,7 @@ abstract class BundleSourcesTask : Exec() {
                 }
                 task.bundleIdFile.set(generateDebugIdTask.flatMap { it.outputFile })
                 task.output.set(output)
+                task.onlyIf { !task.sourceDir.asFileTree.isEmpty }
             }
         }
     }

@@ -54,6 +54,7 @@ class SentryPluginIntegrationTest(
         }
         applyUploadSourceContexts()
 
+        testProjectDir.withDummySourceFile()
         val uploadedIdRegex = """\w+":\{"state":"ok","missingChunks":\[],"uploaded_id":"(\w+-\w+-\w+-\w+-\w+)""".toRegex()
 
         val build = runner
