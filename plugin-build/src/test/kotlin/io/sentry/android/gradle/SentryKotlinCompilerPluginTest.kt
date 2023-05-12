@@ -1,7 +1,6 @@
 package io.sentry.android.gradle
 
 import io.sentry.BuildConfig
-import java.io.File
 import kotlin.test.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith

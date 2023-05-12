@@ -51,9 +51,10 @@ data class AndroidVariant74(
             kotlinProvider == null -> javaProvider.zip(additionalSources) { java, other ->
                 (java + other).toSet()
             }
-            else -> javaProvider
-                .zip(kotlinProvider) { java, kotlin -> (java + kotlin).toSet() }
-                .zip(additionalSources) { javaKotlin, other -> (javaKotlin + other).toSet()}
+            else ->
+                javaProvider
+                    .zip(kotlinProvider) { java, kotlin -> (java + kotlin).toSet() }
+                    .zip(additionalSources) { javaKotlin, other -> (javaKotlin + other).toSet() }
         }
     }
 }

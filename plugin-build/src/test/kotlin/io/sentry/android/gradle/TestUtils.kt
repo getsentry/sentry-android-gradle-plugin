@@ -187,6 +187,6 @@ fun TemporaryFolder.withDummySourceFile() {
             fun FancyButton() {
                 BasicText("Hello World")
             }
-            """.trimIndent()
+        """.trimIndent()
     )
 }

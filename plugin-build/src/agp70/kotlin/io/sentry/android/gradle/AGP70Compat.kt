@@ -42,7 +42,7 @@ data class AndroidVariant70(
                 it.kotlinDirectories.map { kotlinDir -> projectDir.dir(kotlinDir.absolutePath) }
             }
             (kotlinDirs + javaDirs).toSet()
-        }.zip(additionalSources) { javaKotlin, other -> javaKotlin + other}
+        }.zip(additionalSources) { javaKotlin, other -> javaKotlin + other }
     }
 }
 
