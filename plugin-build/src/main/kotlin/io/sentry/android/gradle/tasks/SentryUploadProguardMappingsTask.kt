@@ -2,6 +2,7 @@ package io.sentry.android.gradle.tasks
 
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask.Companion.SENTRY_PROGUARD_MAPPING_UUID_PROPERTY
 import io.sentry.android.gradle.util.PropertiesUtil
+import io.sentry.android.gradle.util.info
 import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
@@ -57,7 +58,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
         }
         computeCommandLineArgs().let {
             commandLine(it)
-            logger.info("cli args: $it")
+            logger.info { "cli args: $it" }
         }
         setSentryPropertiesEnv()
         super.exec()
@@ -68,7 +69,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
         if (sentryProperties != null) {
             environment("SENTRY_PROPERTIES", sentryProperties)
         } else {
-            logger.info("propsFile is null")
+            logger.info { "propsFile is null" }
         }
     }
 

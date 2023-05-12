@@ -51,7 +51,7 @@ abstract class UploadSourceBundleTask : Exec() {
     override fun exec() {
         computeCommandLineArgs().let {
             commandLine(it)
-            logger.error("cli args: $it")
+            logger.info { "cli args: $it" }
         }
         setSentryPropertiesEnv()
         super.exec()

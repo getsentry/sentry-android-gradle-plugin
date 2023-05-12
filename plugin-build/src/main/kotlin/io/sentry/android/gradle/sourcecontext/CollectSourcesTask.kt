@@ -3,6 +3,7 @@ package io.sentry.android.gradle.sourcecontext
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
+import io.sentry.android.gradle.util.debug
 import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
@@ -62,25 +63,25 @@ internal class SourceCollector {
     fun collectSources(outDir: File, sourceDirs: ConfigurableFileCollection) {
         sourceDirs.forEach { sourceDir ->
             if (sourceDir.exists()) {
-                SentryPlugin.logger.debug("Collecting sources in ${sourceDir.absolutePath}")
+                SentryPlugin.logger.debug { "Collecting sources in ${sourceDir.absolutePath}" }
                 sourceDir.walk().forEach { sourceFile ->
                     val relativePath =
                         sourceFile.absolutePath.removePrefix(sourceDir.absolutePath)
                             .removePrefix("/")
                     val targetFile = outDir.resolve(File(relativePath))
                     if (sourceFile.isFile) {
-                        SentryPlugin.logger.debug(
+                        SentryPlugin.logger.debug {
                             "Copying file ${sourceFile.absolutePath} " +
                                 "to ${targetFile.absolutePath}"
-                        )
+                        }
                         sourceFile.copyTo(targetFile, true)
                     }
                 }
             } else {
-                SentryPlugin.logger.debug(
+                SentryPlugin.logger.debug {
                     "Skipping source collection in ${sourceDir.absolutePath} as it doesn't " +
                         "exist."
-                )
+                }
             }
         }
     }

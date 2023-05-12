@@ -49,7 +49,7 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
     override fun exec() {
         computeCommandLineArgs().let {
             commandLine(it)
-            logger.info("cli args: $it")
+            logger.info { "cli args: $it" }
         }
         setSentryPropertiesEnv()
         super.exec()
