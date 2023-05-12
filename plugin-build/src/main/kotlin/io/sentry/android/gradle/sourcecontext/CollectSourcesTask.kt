@@ -64,7 +64,7 @@ internal class SourceCollector {
                 sourceDir.walk().forEach { sourceFile ->
                     val relativePath =
                         sourceFile.absolutePath.removePrefix(sourceDir.absolutePath)
-                            .removePrefix("/")
+                            .removePrefix(File.separator)
                     val targetFile = outDir.resolve(File(relativePath))
                     if (sourceFile.isFile) {
                         SentryPlugin.logger.debug {
