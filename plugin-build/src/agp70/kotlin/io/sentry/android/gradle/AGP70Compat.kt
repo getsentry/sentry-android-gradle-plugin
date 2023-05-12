@@ -12,10 +12,9 @@ import com.android.build.gradle.api.ApplicationVariant
 import io.sentry.gradle.common.AndroidVariant
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
-import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
 
 data class AndroidVariant70(
@@ -32,15 +31,19 @@ data class AndroidVariant70(
         variant.mappingFileProvider
     override fun sources(
         project: Project,
-        additionalSources: SetProperty<String>
-    ): Provider<List<ConfigurableFileCollection>> =
-        project.provider {
-            mutableListOf(
-                project.files(variant.sourceSets.flatMap { it.javaDirectories }),
-                project.files(variant.sourceSets.flatMap { it.kotlinDirectories })
-            ).also { it.addAll(additionalSources.getOrElse(emptySet()).map { project.files(it) }) }
-                .toList()
-        }
+        additionalSources: Provider<out Collection<Directory>>
+    ): Provider<out Collection<Directory>> {
+        val projectDir = project.layout.projectDirectory
+        return project.provider {
+            val javaDirs = variant.sourceSets.flatMap {
+                it.javaDirectories.map { javaDir -> projectDir.dir(javaDir.absolutePath) }
+            }
+            val kotlinDirs = variant.sourceSets.flatMap {
+                it.kotlinDirectories.map { kotlinDir -> projectDir.dir(kotlinDir.absolutePath) }
+            }
+            (kotlinDirs + javaDirs).toSet()
+        }.zip(additionalSources) { javaKotlin, other -> javaKotlin + other}
+    }
 }
 
 fun <T : InstrumentationParameters> configureInstrumentationFor70(

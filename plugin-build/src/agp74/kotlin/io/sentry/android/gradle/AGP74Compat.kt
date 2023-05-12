@@ -14,11 +14,10 @@ import com.android.build.api.variant.impl.VariantImpl
 import io.sentry.gradle.common.AndroidVariant
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
-import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
 
 data class AndroidVariant74(
@@ -40,15 +39,23 @@ data class AndroidVariant74(
         }
     override fun sources(
         project: Project,
-        additionalSources: SetProperty<String>
-    ): Provider<List<ConfigurableFileCollection>> =
-        project.provider {
-            mutableListOf(
-                project.files(variant.sources.java?.all),
-                project.files(variant.sources.kotlin?.all)
-            ).also { it.addAll(additionalSources.getOrElse(emptySet()).map { project.files(it) }) }
-                .toList()
+        additionalSources: Provider<out Collection<Directory>>
+    ): Provider<out Collection<Directory>> {
+        val javaProvider = variant.sources.java?.all
+        val kotlinProvider = variant.sources.kotlin?.all
+        return when {
+            javaProvider == null && kotlinProvider == null -> additionalSources
+            javaProvider == null -> kotlinProvider!!.zip(additionalSources) { kotlin, other ->
+                (kotlin + other).toSet()
+            }
+            kotlinProvider == null -> javaProvider.zip(additionalSources) { java, other ->
+                (java + other).toSet()
+            }
+            else -> javaProvider
+                .zip(kotlinProvider) { java, kotlin -> (java + kotlin).toSet() }
+                .zip(additionalSources) { javaKotlin, other -> (javaKotlin + other).toSet()}
         }
+    }
 }
 
 fun <T : Task> configureGeneratedSourcesFor74(

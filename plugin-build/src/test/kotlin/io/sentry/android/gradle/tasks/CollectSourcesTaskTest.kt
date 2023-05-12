@@ -26,10 +26,9 @@ class CollectSourcesTaskTest {
             it.writeText("TestFile3")
         }
 
-        val sourceDirs = listOf(
-            project.files("dummy/src/a"),
-            project.files("dummy/src/b")
-        )
+        val sourceDirs = project.files()
+        sourceDirs.from("dummy/src/a")
+        sourceDirs.from("dummy/src/b")
 
         val outDir = File(project.buildDir, "dummy/out")
 

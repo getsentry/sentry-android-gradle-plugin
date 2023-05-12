@@ -17,9 +17,13 @@ class SourceContext {
             sentryProject: String?,
             taskSuffix: String
         ): SourceContextTasks {
+            val additionalSourcesProvider = project.provider {
+                extension.additionalSourceDirsForSourceContext.getOrElse(emptySet())
+                    .map { project.layout.projectDirectory.dir(it) }
+            }
             val sourceFiles = variant.sources(
                 project,
-                extension.additionalSourceDirsForSourceContext
+                additionalSourcesProvider
             )
             val generateBundleIdTask = GenerateBundleIdTask.register(
                 project,
