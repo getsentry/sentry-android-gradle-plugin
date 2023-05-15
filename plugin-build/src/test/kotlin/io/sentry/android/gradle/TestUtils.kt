@@ -9,19 +9,18 @@ import io.sentry.android.gradle.testutil.forceEvaluate
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SemVer
 import io.sentry.gradle.common.AndroidVariant
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.nio.charset.Charset
+import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.exception.ZipException
 import net.lingala.zip4j.io.inputstream.ZipInputStream
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileInputStream
-import java.nio.charset.Charset
-import java.util.UUID
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 import org.gradle.api.Project
 import org.junit.rules.TemporaryFolder
-import kotlin.test.assertEquals
 
 /* ktlint-disable max-line-length */
 private val ASSET_PATTERN_PROGUARD =
@@ -243,7 +242,9 @@ internal fun verifySourceBundleContents(
     val sourceBundleId = matcher.groupValues[1]
 
     // then, extract the source bundle zip file contents and verify them against expected contents
-    val sourceBundle = rootFile.resolve("app/build/intermediates/sentry/$variant/source-bundle/$sourceBundleId.zip")
+    val sourceBundle = rootFile.resolve(
+        "app/build/intermediates/sentry/$variant/source-bundle/$sourceBundleId.zip"
+    )
     val sourceFileContents = extractZip(sourceBundle, sourceFilePath)
 
     assertEquals(contents, sourceFileContents, "$sourceFilePath contents do not match $contents")

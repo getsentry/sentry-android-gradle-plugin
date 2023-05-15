@@ -1,13 +1,11 @@
 package io.sentry.android.gradle
 
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome.SKIPPED
-import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import java.io.File
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @RunWith(Parameterized::class)
 class SentrySourceContextTest(

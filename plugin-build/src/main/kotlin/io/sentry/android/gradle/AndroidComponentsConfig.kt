@@ -56,7 +56,8 @@ fun AndroidComponentsExtension<*, *, *>.configure(
 
             variant.configureDependenciesTask(project, extension)
 
-            val tasksGeneratingProperties = mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
+            val tasksGeneratingProperties =
+                mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
             val sourceContextTasks = variant.configureSourceBundleTasks(
                 project,
                 extension,
