@@ -153,7 +153,9 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
 
     /**
      * Configure additional directories to be included in the source bundle which is used for
-     * source context.
+     * source context. The directories should be specified relative to the Gradle module/project's
+     * root. For example, if you have a custom source set alongside 'main', the parameter would be
+     * 'src/custom/java'.
      */
     val additionalSourceDirsForSourceContext: SetProperty<String> = objects.setProperty(
         String::class.java
