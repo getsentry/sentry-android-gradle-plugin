@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "1.8.20"
     kotlin("kapt") version "1.8.20"
+    id("distribution")
     id("com.vanniktech.maven.publish") version "0.17.0"
     id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
 }
@@ -25,12 +26,31 @@ ktlint {
     }
 }
 
+val sep = File.separator
+distributions {
+    main {
+        contents {
+            from("build${sep}libs")
+            from("build${sep}publications${sep}maven")
+        }
+    }
+}
+
 val publish = extensions.getByType(
     com.vanniktech.maven.publish.MavenPublishPluginExtension::class.java
 )
 // signing is done when uploading files to MC
 // via gpg:sign-and-deploy-file (release.kts)
 publish.releaseSigningEnabled = false
+
+tasks.named("distZip") {
+    dependsOn("publishToMavenLocal")
+    onlyIf {
+        inputs.sourceFiles.isEmpty.not().also {
+            require(it) { "No distribution to zip." }
+        }
+    }
+}
 
 repositories {
     google()

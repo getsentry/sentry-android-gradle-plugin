@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Fixes
+
+- Add missing Kotlin Compiler Plugin Marker config ([#488](https://github.com/getsentry/sentry-android-gradle-plugin/pull/488))
+
+## 3.6.0
+
 ### Features
 - Bundle Java Sources and upload to Sentry ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
   - Set `includeSourceContext` to `true`

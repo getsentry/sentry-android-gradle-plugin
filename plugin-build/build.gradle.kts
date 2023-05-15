@@ -210,6 +210,11 @@ distributions {
             from("build${sep}publications${sep}sentryPluginPluginMarkerMaven")
         }
     }
+    create("sentryKotlinCompilerPluginMarker") {
+        contents {
+            from("build${sep}publications${sep}kotlinCompilerPluginPluginMarkerMaven")
+        }
+    }
 }
 
 apply {
