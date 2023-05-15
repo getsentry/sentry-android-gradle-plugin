@@ -47,6 +47,32 @@ class SentryPluginIntegrationTest(
         )
     }
 
+    @Test
+    fun uploadSourceContexts() {
+        if (System.getenv("SENTRY_URL").isNullOrBlank()) {
+            return // Don't run test if local test server endpoint is not set
+        }
+        applyUploadSourceContexts()
+
+        testProjectDir.withDummyKtFile()
+        /* ktlint-disable max-line-length */
+        val uploadedIdRegex = """\w+":\{"state":"ok","missingChunks":\[],"uploaded_id":"(\w+-\w+-\w+-\w+-\w+)""".toRegex()
+        /* ktlint-enable max-line-length */
+
+        val build = runner
+            .appendArguments(":app:assembleRelease")
+            .build()
+
+        assertEquals(
+            build.task(":app:sentryUploadSourceBundleRelease")?.outcome,
+            TaskOutcome.SUCCESS
+        )
+
+        val uploadedId = uploadedIdRegex.find(build.output)?.groupValues?.get(1)
+        val bundledId = verifySourceContextId(testProjectDir.root).toString()
+        assertEquals(uploadedId, bundledId)
+    }
+
     private fun applyAutoUploadProguardMapping() {
         appBuildFile.appendText(
             // language=Groovy
@@ -70,6 +96,22 @@ class SentryPluginIntegrationTest(
                 sentry {
                   autoUploadProguardMapping = false
                   uploadNativeSymbols = true
+                  tracingInstrumentation {
+                    enabled = false
+                  }
+                }
+            """.trimIndent()
+        )
+    }
+
+    private fun applyUploadSourceContexts() {
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+                sentry {
+                  debug = true
+                  includeSourceContext = true
+                  includeProguardMapping = false
                   tracingInstrumentation {
                     enabled = false
                   }

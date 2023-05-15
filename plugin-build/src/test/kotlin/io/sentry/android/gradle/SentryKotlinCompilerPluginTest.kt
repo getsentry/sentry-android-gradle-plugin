@@ -1,7 +1,6 @@
 package io.sentry.android.gradle
 
 import io.sentry.BuildConfig
-import java.io.File
 import kotlin.test.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -63,23 +62,7 @@ class SentryKotlinCompilerPluginTest(
             """.trimIndent()
         )
 
-        val sourceFile =
-            File(testProjectDir.newFolder("app/src/main/java/com/example/"), "Example.kt")
-
-        sourceFile.writeText(
-            // language=kotlin
-            """
-            package com.example
-
-            import androidx.compose.runtime.Composable
-            import androidx.compose.foundation.text.BasicText
-
-            @Composable
-            fun FancyButton() {
-                BasicText("Hello World")
-            }
-            """.trimIndent()
-        )
+        testProjectDir.withDummyKtFile()
 
         val result = runner
             .appendArguments("app:assembleRelease")

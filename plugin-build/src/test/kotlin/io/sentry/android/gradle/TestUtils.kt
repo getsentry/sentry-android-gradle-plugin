@@ -4,24 +4,34 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppExtension
 import com.reandroid.lib.apk.ApkModule
+import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
 import io.sentry.android.gradle.testutil.forceEvaluate
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SemVer
 import io.sentry.gradle.common.AndroidVariant
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileInputStream
 import java.nio.charset.Charset
 import java.util.UUID
-import java.util.zip.ZipInputStream
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import net.lingala.zip4j.ZipFile
+import net.lingala.zip4j.exception.ZipException
+import net.lingala.zip4j.io.inputstream.ZipInputStream
 import org.gradle.api.Project
+import org.junit.rules.TemporaryFolder
 
 /* ktlint-disable max-line-length */
-private val ASSET_PATTERN =
+private val ASSET_PATTERN_PROGUARD =
     Regex(
         """^io\.sentry\.ProguardUuids=([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$"""
+            .trimMargin()
+    )
+
+private val ASSET_PATTERN_SOURCE_CONTEXT =
+    Regex(
+        """^$SENTRY_BUNDLE_ID_PROPERTY=([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$"""
             .trimMargin()
     )
 /* ktlint-enable max-line-length */
@@ -34,10 +44,30 @@ internal fun verifyProguardUuid(
     val signedStr = if (signed) "-unsigned" else ""
     val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant$signedStr.apk")
     val sentryProperties = extractZip(apk, "assets/sentry-debug-meta.properties")
-    val matcher = ASSET_PATTERN.matchEntire(sentryProperties)
+    val matcher = sentryProperties.lines().mapNotNull { line ->
+        ASSET_PATTERN_PROGUARD.matchEntire(line)
+    }.firstOrNull()
 
     assertTrue("Properties file is missing from the APK") { sentryProperties.isNotBlank() }
-    assertNotNull(matcher, "$sentryProperties does not match pattern $ASSET_PATTERN")
+    assertNotNull(matcher, "$sentryProperties does not match pattern $ASSET_PATTERN_PROGUARD")
+
+    return UUID.fromString(matcher.groupValues[1])
+}
+
+internal fun verifySourceContextId(
+    rootFile: File,
+    variant: String = "release",
+    signed: Boolean = true
+): UUID {
+    val signedStr = if (signed) "-unsigned" else ""
+    val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant$signedStr.apk")
+    val sentryProperties = extractZip(apk, "assets/sentry-debug-meta.properties")
+    val matcher = sentryProperties.lines().mapNotNull { line ->
+        ASSET_PATTERN_SOURCE_CONTEXT.matchEntire(line)
+    }.firstOrNull()
+
+    assertTrue("Properties file is missing from the APK") { sentryProperties.isNotBlank() }
+    assertNotNull(matcher, "$sentryProperties does not match pattern $ASSET_PATTERN_SOURCE_CONTEXT")
 
     return UUID.fromString(matcher.groupValues[1])
 }
@@ -98,15 +128,13 @@ internal fun verifyDependenciesReportJava(
 }
 
 private fun extractZip(zipFile: File, fileToExtract: String): String {
-    ZipInputStream(FileInputStream(zipFile)).use { zis ->
-        var entry = zis.nextEntry
-        while (entry != null) {
-            if (entry.name == fileToExtract) {
-                return readZippedContent(zis)
-            }
-            zis.closeEntry()
-            entry = zis.nextEntry
+    val zip = ZipFile(zipFile)
+    try {
+        zip.getInputStream(zip.getFileHeader(fileToExtract)).use { zis ->
+            return readZippedContent(zis)
         }
+    } catch (e: ZipException) {
+        println("No entry $fileToExtract in $zipFile")
     }
     return ""
 }
@@ -141,4 +169,83 @@ fun Project.retrieveAndroidVariant(agpVersion: SemVer, variantName: String): And
             .applicationVariants.first { it.name == variantName }
         AndroidVariant70(variant)
     }
+}
+
+fun TemporaryFolder.withDummyKtFile(): String {
+    val contents =
+        // language=kotlin
+        """
+            package com.example
+
+            import androidx.compose.runtime.Composable
+            import androidx.compose.foundation.text.BasicText
+
+            @Composable
+            fun FancyButton() {
+                BasicText("Hello World")
+            }
+        """.trimIndent()
+    val sourceFile =
+        File(newFolder("app/src/main/kotlin/com/example/"), "Example.kt")
+
+    sourceFile.writeText(contents)
+    return contents
+}
+
+fun TemporaryFolder.withDummyJavaFile(): String {
+    val contents =
+        // language=java
+        """
+            package com.example;
+
+            public class TestJava {
+            }
+        """.trimIndent()
+    val sourceFile =
+        File(newFolder("app/src/main/java/com/example/"), "TestJava.java")
+
+    sourceFile.writeText(contents)
+    return contents
+}
+
+fun TemporaryFolder.withDummyCustomFile(): String {
+    val contents =
+        // language=kotlin
+        """
+            package io.other
+
+            class TestKotlin {
+              fun math(a: Int) = a * 2
+            }
+        """.trimIndent()
+    val sourceFile =
+        File(newFolder("app/src/custom/kotlin/io/other/"), "TestCustom.kt")
+
+    sourceFile.writeText(contents)
+    return contents
+}
+
+internal fun verifySourceBundleContents(
+    rootFile: File,
+    sourceFilePath: String,
+    contents: String,
+    variant: String = "release"
+) {
+    // first, extract the bundle-id to find the source bundle later in "/intermediates/sentry/"
+    val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant-unsigned.apk")
+    val sentryProperties = extractZip(apk, "assets/sentry-debug-meta.properties")
+    val matcher = sentryProperties.lines().mapNotNull { line ->
+        ASSET_PATTERN_SOURCE_CONTEXT.matchEntire(line)
+    }.firstOrNull()
+    assertTrue("Properties file is missing from the APK") { sentryProperties.isNotBlank() }
+    assertNotNull(matcher, "$sentryProperties does not match pattern $ASSET_PATTERN_SOURCE_CONTEXT")
+    val sourceBundleId = matcher.groupValues[1]
+
+    // then, extract the source bundle zip file contents and verify them against expected contents
+    val sourceBundle = rootFile.resolve(
+        "app/build/intermediates/sentry/$variant/source-bundle/$sourceBundleId.zip"
+    )
+    val sourceFileContents = extractZip(sourceBundle, sourceFilePath)
+
+    assertEquals(contents, sourceFileContents, "$sourceFilePath contents do not match $contents")
 }

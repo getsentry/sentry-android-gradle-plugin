@@ -14,15 +14,9 @@ jobs:
       fail-fast: false
       matrix:
         agp: [ "7.0.4" ]
-        gradle: [ "7.1.1" ]
+        gradle: [ "7.2" ]
         java: [ "11" ]
         include:
-          - agp: "7.0.4"
-            gradle: "7.2"
-            java: "11"
-          - agp: "7.1.3"
-            gradle: "7.2"
-            java: "11"
           - agp: "7.1.3"
             gradle: "7.3.3"
             java: "11"
@@ -33,21 +27,19 @@ jobs:
             gradle: "7.5"
             java: "11"
           - agp: "7.4.0"
-            gradle: "7.5"
-            java: "11"
-          - agp: "7.4.0"
             gradle: "7.6"
             java: "11"
           - agp: "8.0.0"
             gradle: "8.0.2"
             java: "17"
           - agp: "8.1.0-alpha11"
-            gradle: "8.0.2"
+            gradle: "8.1"
             java: "17"
 
     name: Publish Dry Run - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
     env:
       VERSION_AGP: ${{ matrix.agp }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
     steps:
       - name: Checkout Repo

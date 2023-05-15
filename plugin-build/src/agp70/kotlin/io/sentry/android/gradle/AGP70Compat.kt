@@ -12,6 +12,7 @@ import com.android.build.gradle.api.ApplicationVariant
 import io.sentry.gradle.common.AndroidVariant
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
@@ -28,6 +29,21 @@ data class AndroidVariant70(
     override val assembleProvider: TaskProvider<out Task>? = variant.assembleProvider
     override fun mappingFileProvider(project: Project): Provider<FileCollection> =
         variant.mappingFileProvider
+    override fun sources(
+        project: Project,
+        additionalSources: Provider<out Collection<Directory>>
+    ): Provider<out Collection<Directory>> {
+        val projectDir = project.layout.projectDirectory
+        return project.provider {
+            val javaDirs = variant.sourceSets.flatMap {
+                it.javaDirectories.map { javaDir -> projectDir.dir(javaDir.absolutePath) }
+            }
+            val kotlinDirs = variant.sourceSets.flatMap {
+                it.kotlinDirectories.map { kotlinDir -> projectDir.dir(kotlinDir.absolutePath) }
+            }
+            (kotlinDirs + javaDirs).toSet()
+        }.zip(additionalSources) { javaKotlin, other -> javaKotlin + other }
+    }
 }
 
 fun <T : InstrumentationParameters> configureInstrumentationFor70(

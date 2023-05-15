@@ -1,5 +1,6 @@
-package io.sentry.android.gradle.tasks
+package io.sentry.android.gradle.sourcecontext
 
+import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
 import io.sentry.android.gradle.util.info
 import java.util.Properties
 import java.util.UUID
@@ -11,26 +12,26 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 
-abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
+abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
 
     init {
         outputs.upToDateWhen { false }
         description = "Generates a unique build ID to be used " +
-            "when uploading the Sentry mapping file"
+            "when bundling sources for upload to Sentry"
     }
 
     @get:Internal
-    override val outputFile: Provider<RegularFile> get() = output.file(SENTRY_UUID_OUTPUT)
+    override val outputFile: Provider<RegularFile> get() = output.file(SENTRY_BUNDLE_ID_OUTPUT)
 
     @TaskAction
     fun generateProperties() {
         val outputDir = output.get().asFile
         outputDir.mkdirs()
 
-        val uuid = UUID.randomUUID()
+        val debugId = UUID.randomUUID()
 
         val props = Properties().also {
-            it.setProperty(SENTRY_PROGUARD_MAPPING_UUID_PROPERTY, uuid.toString())
+            it.setProperty(SENTRY_BUNDLE_ID_PROPERTY, debugId.toString())
         }
 
         outputFile.get().asFile.writer().use { writer ->
@@ -38,26 +39,28 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
         }
 
         logger.info {
-            "SentryGenerateProguardUuidTask - outputFile: $outputFile, uuid: $uuid"
+            "GenerateSourceBundleIdTask - outputFile: $outputFile, debugId: $debugId"
         }
     }
 
     companion object {
-        internal const val SENTRY_UUID_OUTPUT = "sentry-proguard-uuid.properties"
-        const val SENTRY_PROGUARD_MAPPING_UUID_PROPERTY = "io.sentry.ProguardUuids"
+        internal const val SENTRY_BUNDLE_ID_OUTPUT = "sentry-bundle-id.properties"
+        const val SENTRY_BUNDLE_ID_PROPERTY = "io.sentry.bundle-ids"
 
         fun register(
             project: Project,
             output: Provider<Directory>? = null,
             taskSuffix: String = ""
-        ): TaskProvider<SentryGenerateProguardUuidTask> {
-            val generateUuidTask = project.tasks.register(
-                "generateSentryProguardUuid$taskSuffix",
-                SentryGenerateProguardUuidTask::class.java
+        ): TaskProvider<GenerateBundleIdTask> {
+            val generateBundleIdTask = project.tasks.register(
+                taskName(taskSuffix),
+                GenerateBundleIdTask::class.java
             ) { task ->
                 output?.let { task.output.set(it) }
             }
-            return generateUuidTask
+            return generateBundleIdTask
         }
+
+        fun taskName(taskSuffix: String) = "generateSentryBundleId$taskSuffix"
     }
 }

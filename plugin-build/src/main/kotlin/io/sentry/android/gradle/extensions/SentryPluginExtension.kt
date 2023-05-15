@@ -130,4 +130,44 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      */
     val includeDependenciesReport: Property<Boolean> = objects.property(Boolean::class.java)
         .convention(true)
+
+    /**
+     * Disables or enables the handling of source context for Sentry.
+     * If enabled the plugin will generate a UUID and will take care of
+     * uploading the source context to Sentry. If disabled, all the logic
+     * related to source context will be excluded.
+     * Default is disabled.
+     *
+     * @see [autoUploadSourceContext]
+     */
+    val includeSourceContext: Property<Boolean> = objects
+        .property(Boolean::class.java).convention(false)
+
+    /**
+     * Whether the plugin should attempt to auto-upload the source context to Sentry or not.
+     * If disabled the plugin will run a dry-run.
+     * Default is enabled.
+     */
+    val autoUploadSourceContext: Property<Boolean> = objects
+        .property(Boolean::class.java).convention(true)
+
+    /**
+     * Configure additional directories to be included in the source bundle which is used for
+     * source context. The directories should be specified relative to the Gradle module/project's
+     * root. For example, if you have a custom source set alongside 'main', the parameter would be
+     * 'src/custom/java'.
+     */
+    val additionalSourceDirsForSourceContext: SetProperty<String> = objects.setProperty(
+        String::class.java
+    ).convention(
+        emptySet()
+    )
+
+    /**
+     * Disables or enables debug log output, e.g. for for sentry-cli.
+     *
+     * Default is disabled.
+     */
+    val debug: Property<Boolean> = objects.property<Boolean?>(Boolean::class.java)
+        .convention(false)
 }

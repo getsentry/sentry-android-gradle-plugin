@@ -19,7 +19,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self.start_response(HTTPStatus.OK)
-        
+
         if self.path == "/STOP":
             print("HTTP server stopping!")
             threading.Thread(target=self.server.shutdown).start()
@@ -58,8 +58,8 @@ class Handler(BaseHTTPRequestHandler):
             jsonRequest = json.loads(self.body)
             jsonResponse = '{'
             for key, value in jsonRequest.items():
-                jsonResponse += '"{}":{{"state":"ok","missingChunks":[]}},'.format(
-                    key)
+                jsonResponse += '"{}":{{"state":"ok","missingChunks":[],"uploaded_id":"{}"}},'.format(
+                    key, value['debug_id'])
                 self.log_message('Received: %40s %40s %s', key,
                                  value['debug_id'], value['name'])
             jsonResponse = jsonResponse.rstrip(',') + '}'

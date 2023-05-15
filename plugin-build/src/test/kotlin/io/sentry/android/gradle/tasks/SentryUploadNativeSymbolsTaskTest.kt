@@ -30,6 +30,7 @@ class SentryUploadNativeSymbolsTaskTest {
             "${sep}merged_native_libs${sep}debug"
         assertTrue(path in args)
         assertFalse("--include-sources" in args)
+        assertFalse("--log-level=debug" in args)
     }
 
     @Test
@@ -45,6 +46,22 @@ class SentryUploadNativeSymbolsTaskTest {
         val args = task.computeCommandLineArgs()
 
         assertTrue("--no-upload" in args)
+    }
+
+    @Test
+    fun `--log-level=debug is set correctly`() {
+        val project = createProject()
+        val task = createTestTask(project) {
+            it.cliExecutable.set("sentry-cli")
+            it.includeNativeSources.set(false)
+            it.variantName.set("debug")
+            it.autoUploadNativeSymbol.set(false)
+            it.debug.set(true)
+        }
+
+        val args = task.computeCommandLineArgs()
+
+        assertTrue("--log-level=debug" in args)
     }
 
     @Test

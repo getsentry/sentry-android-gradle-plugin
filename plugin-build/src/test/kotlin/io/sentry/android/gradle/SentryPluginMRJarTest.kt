@@ -23,8 +23,6 @@ class SentryPluginMRJarTest :
             .appendArguments("app:assembleDebug")
             .build()
 
-        print(result.output)
-
         assertTrue { "BUILD SUCCESSFUL" in result.output }
     }
 
@@ -44,8 +42,6 @@ class SentryPluginMRJarTest :
         val result = runner
             .appendArguments("app:assembleDebug")
             .build()
-
-        print(result.output)
 
         assertTrue { "Please update to AGP >= 7.1.2" in result.output }
         assertTrue { "BUILD SUCCESSFUL" in result.output }
