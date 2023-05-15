@@ -62,7 +62,7 @@ class SentryKotlinCompilerPluginTest(
             """.trimIndent()
         )
 
-        testProjectDir.withDummySourceFile()
+        testProjectDir.withDummyKtFile()
 
         val result = runner
             .appendArguments("app:assembleRelease")

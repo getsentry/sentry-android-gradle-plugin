@@ -92,8 +92,9 @@ dependencies {
     testRuntimeOnly(files(androidSdkPath))
     testRuntimeOnlyAar(Libs.SENTRY_ANDROID)
 
-    // Needed to read manifest from APK
+    // Needed to read contents from APK/Source Bundles
     testImplementation(Libs.ARSC_LIB)
+    testImplementation(Libs.ZIP4J)
 
     testRuntimeOnly(
         files(

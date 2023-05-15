@@ -9,16 +9,19 @@ import io.sentry.android.gradle.testutil.forceEvaluate
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SemVer
 import io.sentry.gradle.common.AndroidVariant
+import net.lingala.zip4j.ZipFile
+import net.lingala.zip4j.exception.ZipException
+import net.lingala.zip4j.io.inputstream.ZipInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.nio.charset.Charset
 import java.util.UUID
-import java.util.zip.ZipInputStream
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.gradle.api.Project
 import org.junit.rules.TemporaryFolder
+import kotlin.test.assertEquals
 
 /* ktlint-disable max-line-length */
 private val ASSET_PATTERN_PROGUARD =
@@ -126,15 +129,13 @@ internal fun verifyDependenciesReportJava(
 }
 
 private fun extractZip(zipFile: File, fileToExtract: String): String {
-    ZipInputStream(FileInputStream(zipFile)).use { zis ->
-        var entry = zis.nextEntry
-        while (entry != null) {
-            if (entry.name == fileToExtract) {
-                return readZippedContent(zis)
-            }
-            zis.closeEntry()
-            entry = zis.nextEntry
+    val zip = ZipFile(zipFile)
+    try {
+        zip.getInputStream(zip.getFileHeader(fileToExtract)).use { zis ->
+            return readZippedContent(zis)
         }
+    } catch (e: ZipException) {
+        println("No entry $fileToExtract in $zipFile")
     }
     return ""
 }
@@ -171,11 +172,8 @@ fun Project.retrieveAndroidVariant(agpVersion: SemVer, variantName: String): And
     }
 }
 
-fun TemporaryFolder.withDummySourceFile() {
-    val sourceFile =
-        File(newFolder("app/src/main/java/com/example/"), "Example.kt")
-
-    sourceFile.writeText(
+fun TemporaryFolder.withDummyKtFile(): String {
+    val contents =
         // language=kotlin
         """
             package com.example
@@ -188,5 +186,65 @@ fun TemporaryFolder.withDummySourceFile() {
                 BasicText("Hello World")
             }
         """.trimIndent()
-    )
+    val sourceFile =
+        File(newFolder("app/src/main/kotlin/com/example/"), "Example.kt")
+
+    sourceFile.writeText(contents)
+    return contents
+}
+
+fun TemporaryFolder.withDummyJavaFile(): String {
+    val contents =
+        // language=java
+        """
+            package com.example;
+
+            public class TestJava {
+            }
+        """.trimIndent()
+    val sourceFile =
+        File(newFolder("app/src/main/java/com/example/"), "TestJava.java")
+
+    sourceFile.writeText(contents)
+    return contents
+}
+
+fun TemporaryFolder.withDummyCustomFile(): String {
+    val contents =
+        // language=kotlin
+        """
+            package io.other
+
+            class TestKotlin {
+              fun math(a: Int) = a * 2
+            }
+        """.trimIndent()
+    val sourceFile =
+        File(newFolder("app/src/custom/kotlin/io/other/"), "TestCustom.kt")
+
+    sourceFile.writeText(contents)
+    return contents
+}
+
+internal fun verifySourceBundleContents(
+    rootFile: File,
+    sourceFilePath: String,
+    contents: String,
+    variant: String = "release"
+) {
+    // first, extract the bundle-id to find the source bundle later in "/intermediates/sentry/"
+    val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant-unsigned.apk")
+    val sentryProperties = extractZip(apk, "assets/sentry-debug-meta.properties")
+    val matcher = sentryProperties.lines().mapNotNull { line ->
+        ASSET_PATTERN_SOURCE_CONTEXT.matchEntire(line)
+    }.firstOrNull()
+    assertTrue("Properties file is missing from the APK") { sentryProperties.isNotBlank() }
+    assertNotNull(matcher, "$sentryProperties does not match pattern $ASSET_PATTERN_SOURCE_CONTEXT")
+    val sourceBundleId = matcher.groupValues[1]
+
+    // then, extract the source bundle zip file contents and verify them against expected contents
+    val sourceBundle = rootFile.resolve("app/build/intermediates/sentry/$variant/source-bundle/$sourceBundleId.zip")
+    val sourceFileContents = extractZip(sourceBundle, sourceFilePath)
+
+    assertEquals(contents, sourceFileContents, "$sourceFilePath contents do not match $contents")
 }

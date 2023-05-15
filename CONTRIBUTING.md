@@ -7,6 +7,16 @@ We suggest opening an issue to discuss bigger changes before investing on a big 
 
 The project currently requires you run JDK version `17` and the Android SDK.
 
+# Tests
+
+When running tests locally, some tests might fail due to failed upload of proguard mappings/source
+contexts. This is because of the missing auth token, make sure to export a new env variable containing
+your token:
+
+```bash
+export SENTRY_AUTH_TOKEN=<your_token>
+```
+
 # CI
 
 Build and tests are automatically run against branches and pull requests
