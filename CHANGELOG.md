@@ -12,6 +12,12 @@
 
 - Add missing Kotlin Compiler Plugin Marker config ([#488](https://github.com/getsentry/sentry-android-gradle-plugin/pull/488))
 
+### Dependencies
+
+- Bump Android SDK from v6.18.1 to v6.19.0 ([#490](https://github.com/getsentry/sentry-android-gradle-plugin/pull/490))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6190)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.18.1...6.19.0)
+
 ## 3.6.0
 
 ### Features
