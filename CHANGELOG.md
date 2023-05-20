@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump CLI from v2.17.5 to v2.18.0 ([#491](https://github.com/getsentry/sentry-android-gradle-plugin/pull/491))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2180)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.17.5...2.18.0)
+
 ## 3.7.0
 
 ### Features
