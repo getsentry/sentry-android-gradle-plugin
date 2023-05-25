@@ -52,3 +52,9 @@ tasks.withType<KotlinCompile> {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 }
+
+sentry {
+    debug.set(true)
+    includeSourceContext.set(true)
+    additionalSourceDirsForSourceContext.set(setOf("testsrc"))
+}

@@ -67,11 +67,15 @@ internal class SourceCollector {
                             .removePrefix(File.separator)
                     val targetFile = outDir.resolve(File(relativePath))
                     if (sourceFile.isFile) {
-                        SentryPlugin.logger.debug {
-                            "Copying file ${sourceFile.absolutePath} " +
-                                "to ${targetFile.absolutePath}"
+                        if (relativePath.isBlank()) {
+                            SentryPlugin.logger.debug("Skipping ${sourceFile.absolutePath} as the plugin was unable to determine a relative path for it.")
+                        } else {
+                            SentryPlugin.logger.debug {
+                                "Copying file ${sourceFile.absolutePath} " +
+                                    "to ${targetFile.absolutePath}"
+                            }
+                            sourceFile.copyTo(targetFile, true)
                         }
-                        sourceFile.copyTo(targetFile, true)
                     }
                 }
             } else {
