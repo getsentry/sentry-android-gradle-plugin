@@ -395,7 +395,7 @@ class SentryPluginTest(
             """
             plugins {
                 id 'java'
-                id 'io.sentry.android.gradle'
+                id 'io.sentry.jvm.gradle'
             }
 
             dependencies {
