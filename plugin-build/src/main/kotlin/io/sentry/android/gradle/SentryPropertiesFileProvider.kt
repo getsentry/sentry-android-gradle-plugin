@@ -1,7 +1,7 @@
 package io.sentry.android.gradle
 
 import io.sentry.android.gradle.util.info
-import io.sentry.gradle.common.AndroidVariant
+import io.sentry.gradle.common.SentryVariant
 import java.io.File
 import org.gradle.api.Project
 
@@ -16,7 +16,7 @@ internal object SentryPropertiesFileProvider {
      * @return A [String] for the path if sentry.properties is found or null otherwise
      */
     @JvmStatic
-    fun getPropertiesFilePath(project: Project, variant: AndroidVariant): String? {
+    fun getPropertiesFilePath(project: Project, variant: SentryVariant): String? {
         val flavorName = variant.flavorName.orEmpty()
         val buildTypeName = variant.buildTypeName.orEmpty()
 

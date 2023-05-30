@@ -2,7 +2,7 @@ package io.sentry.android.gradle.util
 
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.util.GroovyCompat.isDexguardEnabledForVariant
-import io.sentry.gradle.common.AndroidVariant
+import io.sentry.gradle.common.SentryVariant
 import java.io.File
 import java.util.Locale
 import org.gradle.api.Project
@@ -31,7 +31,7 @@ internal object SentryPluginUtils {
 
     fun isMinificationEnabled(
         project: Project,
-        variant: AndroidVariant,
+        variant: SentryVariant,
         experimentalGuardsquareSupport: Boolean = false
     ): Boolean {
         if (experimentalGuardsquareSupport) {

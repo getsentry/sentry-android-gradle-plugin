@@ -4,36 +4,18 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AppExtension
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
-import io.sentry.android.gradle.SentryTasksProvider.getProcessResourcesProvider
 import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
-import io.sentry.android.gradle.sourcecontext.OutputPaths
-import io.sentry.android.gradle.sourcecontext.SourceContext
-import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
-import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
 import io.sentry.android.gradle.util.AgpVersions
-import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
-import io.sentry.android.gradle.util.hookWithAssembleTasks
-import io.sentry.android.gradle.util.info
-import io.sentry.gradle.common.JavaVariant
 import java.io.File
-import java.util.concurrent.atomic.AtomicBoolean
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtraPropertiesExtension
-import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.StopExecutionException
 import org.slf4j.LoggerFactory
 
 @Suppress("UnstableApiUsage")
 class SentryPlugin : Plugin<Project> {
-
-    /**
-     * Since we're listening for the JavaBasePlugin, there may be multiple plugins inherting from it
-     * applied to the same project, e.g. Spring Boot + Kotlin Jvm, hence we only want our plugin to
-     * be configured only once.
-     */
-    private val configuredForJavaProject = AtomicBoolean(false)
 
     override fun apply(project: Project) {
         if (AgpVersions.CURRENT < AgpVersions.VERSION_7_0_0) {
@@ -87,76 +69,6 @@ class SentryPlugin : Plugin<Project> {
             )
 
             project.installDependencies(extension)
-        }
-
-        project.pluginManager.withPlugin("org.gradle.java") {
-            if (project.pluginManager.hasPlugin("com.android.application")) {
-                // AGP also applies JavaBasePlugin, but since we have a separate setup for it,
-                // we just bail here
-                logger.info { "The Sentry Gradle plugin was already configured for AGP" }
-                return@withPlugin
-            }
-            if (configuredForJavaProject.getAndSet(true)) {
-                logger.info { "The Sentry Gradle plugin was already configured" }
-                return@withPlugin
-            }
-
-            val javaExtension = project.extensions.getByType(JavaPluginExtension::class.java)
-
-            val sentryResDir = project.layout.buildDirectory.dir("generated${sep}sentry")
-
-            val javaVariant = JavaVariant(project, javaExtension)
-            val outputPaths = OutputPaths(project, "java")
-            val cliExecutable = getSentryCliPath(project)
-
-            val extraProperties = project.extensions.getByName("ext")
-                as ExtraPropertiesExtension
-
-            val sentryOrgParameter = runCatching {
-                extraProperties.get(SENTRY_ORG_PARAMETER).toString()
-            }.getOrNull()
-            val sentryProjectParameter = runCatching {
-                extraProperties.get(SENTRY_PROJECT_PARAMETER).toString()
-            }.getOrNull()
-
-            val sourceContextTasks = SourceContext.register(
-                project,
-                extension,
-                javaVariant,
-                outputPaths,
-                cliExecutable,
-                sentryOrgParameter,
-                sentryProjectParameter,
-                "Java"
-            )
-
-            sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, javaVariant)
-
-            javaExtension.sourceSets.getByName("main").resources { sourceSet ->
-                sourceSet.srcDir(sentryResDir)
-            }
-
-            val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
-                project,
-                listOf(sourceContextTasks.generateBundleIdTask),
-                sentryResDir,
-                "java"
-            )
-
-            val reportDependenciesTask = SentryExternalDependenciesReportTaskFactory.register(
-                project = project,
-                configurationName = "runtimeClasspath",
-                attributeValueJar = "jar",
-                includeReport = extension.includeDependenciesReport,
-                output = sentryResDir
-            )
-            val resourcesTask = withLogging(project.logger, "processResources") {
-                getProcessResourcesProvider(project)
-            }
-            resourcesTask?.configure { task ->
-                task.dependsOn(reportDependenciesTask)
-                task.dependsOn(generateDebugMetaPropertiesTask)
-            }
         }
     }
 

@@ -54,7 +54,7 @@ class SentryPluginIntegrationTest(
         }
         applyUploadSourceContexts()
 
-        testProjectDir.withDummyKtFile()
+        testProjectDir.withDummyComposeFile()
         /* ktlint-disable max-line-length */
         val uploadedIdRegex = """\w+":\{"state":"ok","missingChunks":\[],"uploaded_id":"(\w+-\w+-\w+-\w+-\w+)""".toRegex()
         /* ktlint-enable max-line-length */

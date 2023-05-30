@@ -4,7 +4,7 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
 import io.sentry.android.gradle.util.GroovyCompat.isDexguardAvailable
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
-import io.sentry.gradle.common.AndroidVariant
+import io.sentry.gradle.common.SentryVariant
 import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -74,7 +74,7 @@ internal object SentryTasksProvider {
      * @return the provider if found or null otherwise
      */
     @JvmStatic
-    fun getAssembleTaskProvider(variant: AndroidVariant): TaskProvider<out Task>? =
+    fun getAssembleTaskProvider(variant: SentryVariant): TaskProvider<out Task>? =
         variant.assembleProvider
 
     /**
@@ -94,7 +94,7 @@ internal object SentryTasksProvider {
     @JvmStatic
     fun getMappingFileProvider(
         project: Project,
-        variant: AndroidVariant,
+        variant: SentryVariant,
         experimentalGuardsquareSupport: Boolean = false
     ): Provider<FileCollection> {
         if (experimentalGuardsquareSupport) {
@@ -134,7 +134,7 @@ internal object SentryTasksProvider {
      * @return the provider if found or null otherwise
      */
     @JvmStatic
-    fun getPackageProvider(variant: AndroidVariant): TaskProvider<out Task>? =
+    fun getPackageProvider(variant: SentryVariant): TaskProvider<out Task>? =
         // for App Bundle it uses getPackageBundleTask
         variant.packageProvider
 

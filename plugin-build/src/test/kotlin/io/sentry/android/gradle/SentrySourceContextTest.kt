@@ -78,13 +78,12 @@ class SentrySourceContextTest(
             """.trimIndent()
         )
 
-        val ktContents = testProjectDir.withDummyKtFile()
+        val ktContents = testProjectDir.withDummyComposeFile()
         val javaContents = testProjectDir.withDummyJavaFile()
         val customContents = testProjectDir.withDummyCustomFile()
 
         val result = runner
             .appendArguments("app:assembleRelease")
-            .forwardOutput()
             .build()
 
         assertTrue { "BUILD SUCCESSFUL" in result.output }

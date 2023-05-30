@@ -18,7 +18,8 @@ class SentrySourceContextNonAndroidTest(
             // language=Groovy
             """
             plugins {
-              id "io.sentry.android.gradle"
+              id "org.jetbrains.kotlin.jvm"
+              id "io.sentry.jvm.gradle"
             }
 
             sentry {
@@ -31,11 +32,11 @@ class SentrySourceContextNonAndroidTest(
             .build()
 
         assertEquals(
-            result.task(":app:sentryUploadSourceBundleRelease")?.outcome,
+            result.task(":app:sentryUploadSourceBundleJava")?.outcome,
             SKIPPED
         )
         assertEquals(
-            result.task(":app:sentryBundleSourcesRelease")?.outcome,
+            result.task(":app:sentryBundleSourcesJava")?.outcome,
             SKIPPED
         )
         assertTrue { "BUILD SUCCESSFUL" in result.output }
@@ -47,7 +48,8 @@ class SentrySourceContextNonAndroidTest(
             // language=Groovy
             """
             plugins {
-              id "io.sentry.android.gradle"
+              id "org.jetbrains.kotlin.jvm"
+              id "io.sentry.jvm.gradle"
             }
 
             sentry {
@@ -65,7 +67,6 @@ class SentrySourceContextNonAndroidTest(
 
         val result = runner
             .appendArguments("app:assemble")
-            .forwardOutput()
             .build()
 
         assertTrue { "BUILD SUCCESSFUL" in result.output }
@@ -73,17 +74,23 @@ class SentrySourceContextNonAndroidTest(
         verifySourceBundleContents(
             testProjectDir.root,
             "files/_/_/com/example/Example.jvm",
-            ktContents
+            ktContents,
+            variant = "java",
+            archivePath = "app/build/libs/app.jar"
         )
         verifySourceBundleContents(
             testProjectDir.root,
             "files/_/_/com/example/TestJava.jvm",
-            javaContents
+            javaContents,
+            variant = "java",
+            archivePath = "app/build/libs/app.jar"
         )
         verifySourceBundleContents(
             testProjectDir.root,
             "files/_/_/io/other/TestCustom.jvm",
-            customContents
+            customContents,
+            variant = "java",
+            archivePath = "app/build/libs/app.jar"
         )
     }
 }

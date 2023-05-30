@@ -9,7 +9,7 @@ plugins {
         BuildPluginsVersion.SPRING_DEP_MANAGEMENT
     kotlin("jvm")
     kotlin("plugin.spring") version BuildPluginsVersion.KOTLIN
-    id("io.sentry.android.gradle")
+    id("io.sentry.jvm.gradle")
 }
 
 group = "io.sentry.samples.spring-boot"

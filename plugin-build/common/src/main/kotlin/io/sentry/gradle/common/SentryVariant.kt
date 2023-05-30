@@ -2,18 +2,16 @@ package io.sentry.gradle.common
 
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
-import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
 
 /**
- * Common interface to be used from the main source set to access Android variants.
+ * Common interface to be used from the main source set to access Android/JVM variants.
  * Its implementations live within the compatibility source sets.
  */
-interface AndroidVariant {
+interface SentryVariant {
     val name: String
     val flavorName: String?
     val buildTypeName: String?

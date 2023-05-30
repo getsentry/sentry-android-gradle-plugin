@@ -12,7 +12,7 @@ import org.gradle.api.tasks.TaskProvider
 data class JavaVariant(
     val project: Project,
     val javaExtension: JavaPluginExtension
-) : AndroidVariant {
+) : SentryVariant {
     override val name: String = "java"
     override val flavorName = null
     override val buildTypeName = null

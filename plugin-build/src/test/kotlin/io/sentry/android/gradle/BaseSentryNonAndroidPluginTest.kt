@@ -46,6 +46,7 @@ abstract class BaseSentryNonAndroidPluginTest(
                 mavenCentral()
               }
               dependencies {
+                classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0'
                 // This is needed to populate the plugin classpath instead of using
                 // withPluginClasspath on the Gradle Runner.
                 $additionalBuildClasspath
@@ -61,8 +62,6 @@ abstract class BaseSentryNonAndroidPluginTest(
                 google()
                 mavenCentral()
                 mavenLocal()
-                maven { url 'https://appboy.github.io/appboy-android-sdk/sdk' }
-                maven { url 'https://pkgs.dev.azure.com/Synerise/AndroidSDK/_packaging/prod/maven/v1' }
               }
             }
             """.trimIndent()
@@ -82,7 +81,6 @@ abstract class BaseSentryNonAndroidPluginTest(
         fun parameters() = listOf(
             // The supported Gradle version can be found here:
             // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
-            // The pair is [AGP Version, Gradle Version]
             arrayOf("7.2"),
             arrayOf("7.3.3"),
             arrayOf("7.4"),

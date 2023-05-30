@@ -9,7 +9,7 @@ import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.api.ApplicationVariant
-import io.sentry.gradle.common.AndroidVariant
+import io.sentry.gradle.common.SentryVariant
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
@@ -19,7 +19,7 @@ import org.gradle.api.tasks.TaskProvider
 
 data class AndroidVariant70(
     private val variant: ApplicationVariant
-) : AndroidVariant {
+) : SentryVariant {
     override val name: String = variant.name
     override val flavorName: String? = variant.flavorName
     override val buildTypeName: String = variant.buildType.name
