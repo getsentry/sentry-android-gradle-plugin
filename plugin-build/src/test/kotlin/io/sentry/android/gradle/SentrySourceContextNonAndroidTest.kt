@@ -8,10 +8,9 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
-class SentrySourceContextTest(
-    androidGradlePluginVersion: String,
+class SentrySourceContextNonAndroidTest(
     gradleVersion: String
-) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
+) : BaseSentryNonAndroidPluginTest(gradleVersion) {
 
     @Test
     fun `skips bundle and upload tasks if no sources`() {
@@ -19,16 +18,8 @@ class SentrySourceContextTest(
             // language=Groovy
             """
             plugins {
-              id "com.android.application"
-              id "io.sentry.android.gradle"
-            }
-
-            android {
-              namespace 'com.example'
-
-              buildFeatures {
-                buildConfig false
-              }
+              id "org.jetbrains.kotlin.jvm"
+              id "io.sentry.jvm.gradle"
             }
 
             sentry {
@@ -37,15 +28,15 @@ class SentrySourceContextTest(
             """.trimIndent()
         )
         val result = runner
-            .appendArguments("app:assembleRelease")
+            .appendArguments("app:assemble")
             .build()
 
         assertEquals(
-            result.task(":app:sentryUploadSourceBundleRelease")?.outcome,
+            result.task(":app:sentryUploadSourceBundleJava")?.outcome,
             SKIPPED
         )
         assertEquals(
-            result.task(":app:sentryBundleSourcesRelease")?.outcome,
+            result.task(":app:sentryBundleSourcesJava")?.outcome,
             SKIPPED
         )
         assertTrue { "BUILD SUCCESSFUL" in result.output }
@@ -57,16 +48,8 @@ class SentrySourceContextTest(
             // language=Groovy
             """
             plugins {
-              id "com.android.application"
-              id "io.sentry.android.gradle"
-            }
-
-            android {
-              namespace 'com.example'
-
-              buildFeatures {
-                buildConfig false
-              }
+              id "org.jetbrains.kotlin.jvm"
+              id "io.sentry.jvm.gradle"
             }
 
             sentry {
@@ -78,12 +61,12 @@ class SentrySourceContextTest(
             """.trimIndent()
         )
 
-        val ktContents = testProjectDir.withDummyComposeFile()
+        val ktContents = testProjectDir.withDummyKtFile()
         val javaContents = testProjectDir.withDummyJavaFile()
         val customContents = testProjectDir.withDummyCustomFile()
 
         val result = runner
-            .appendArguments("app:assembleRelease")
+            .appendArguments("app:assemble")
             .build()
 
         assertTrue { "BUILD SUCCESSFUL" in result.output }
@@ -91,17 +74,23 @@ class SentrySourceContextTest(
         verifySourceBundleContents(
             testProjectDir.root,
             "files/_/_/com/example/Example.jvm",
-            ktContents
+            ktContents,
+            variant = "java",
+            archivePath = "app/build/libs/app.jar"
         )
         verifySourceBundleContents(
             testProjectDir.root,
             "files/_/_/com/example/TestJava.jvm",
-            javaContents
+            javaContents,
+            variant = "java",
+            archivePath = "app/build/libs/app.jar"
         )
         verifySourceBundleContents(
             testProjectDir.root,
             "files/_/_/io/other/TestCustom.jvm",
-            customContents
+            customContents,
+            variant = "java",
+            archivePath = "app/build/libs/app.jar"
         )
     }
 }

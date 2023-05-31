@@ -1,7 +1,7 @@
 package io.sentry.android.gradle.sourcecontext
 
 import io.sentry.android.gradle.extensions.SentryPluginExtension
-import io.sentry.gradle.common.AndroidVariant
+import io.sentry.gradle.common.SentryVariant
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
 
@@ -10,7 +10,7 @@ class SourceContext {
         fun register(
             project: Project,
             extension: SentryPluginExtension,
-            variant: AndroidVariant,
+            variant: SentryVariant,
             paths: OutputPaths,
             cliExecutable: String,
             sentryOrg: String?,

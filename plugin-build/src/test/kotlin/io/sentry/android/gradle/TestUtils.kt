@@ -8,7 +8,7 @@ import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SEN
 import io.sentry.android.gradle.testutil.forceEvaluate
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SemVer
-import io.sentry.gradle.common.AndroidVariant
+import io.sentry.gradle.common.SentryVariant
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.charset.Charset
@@ -152,7 +152,7 @@ private fun readZippedContent(zipInputStream: ZipInputStream): String {
     return stringContent
 }
 
-fun Project.retrieveAndroidVariant(agpVersion: SemVer, variantName: String): AndroidVariant {
+fun Project.retrieveAndroidVariant(agpVersion: SemVer, variantName: String): SentryVariant {
     return if (AgpVersions.isAGP74(agpVersion)) {
         var debug: Variant? = null
         val extension = project.extensions.getByType(AndroidComponentsExtension::class.java)
@@ -171,7 +171,7 @@ fun Project.retrieveAndroidVariant(agpVersion: SemVer, variantName: String): And
     }
 }
 
-fun TemporaryFolder.withDummyKtFile(): String {
+fun TemporaryFolder.withDummyComposeFile(): String {
     val contents =
         // language=kotlin
         """
@@ -184,6 +184,21 @@ fun TemporaryFolder.withDummyKtFile(): String {
             fun FancyButton() {
                 BasicText("Hello World")
             }
+        """.trimIndent()
+    val sourceFile =
+        File(newFolder("app/src/main/kotlin/com/example/"), "Example.kt")
+
+    sourceFile.writeText(contents)
+    return contents
+}
+
+fun TemporaryFolder.withDummyKtFile(): String {
+    val contents =
+        // language=kotlin
+        """
+            package com.example
+
+            fun math(a: Int) = a * 2
         """.trimIndent()
     val sourceFile =
         File(newFolder("app/src/main/kotlin/com/example/"), "Example.kt")
@@ -229,15 +244,19 @@ internal fun verifySourceBundleContents(
     rootFile: File,
     sourceFilePath: String,
     contents: String,
-    variant: String = "release"
+    variant: String = "release",
+    archivePath: String = "app/build/outputs/apk/$variant/app-$variant-unsigned.apk"
 ) {
     // first, extract the bundle-id to find the source bundle later in "/intermediates/sentry/"
-    val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant-unsigned.apk")
-    val sentryProperties = extractZip(apk, "assets/sentry-debug-meta.properties")
+    val apk = rootFile.resolve(archivePath)
+    val sentryProperties = extractZip(
+        apk,
+        "${if (variant == "java") "" else "assets/"}sentry-debug-meta.properties"
+    )
     val matcher = sentryProperties.lines().mapNotNull { line ->
         ASSET_PATTERN_SOURCE_CONTEXT.matchEntire(line)
     }.firstOrNull()
-    assertTrue("Properties file is missing from the APK") { sentryProperties.isNotBlank() }
+    assertTrue("Properties file is missing from the archive") { sentryProperties.isNotBlank() }
     assertNotNull(matcher, "$sentryProperties does not match pattern $ASSET_PATTERN_SOURCE_CONTEXT")
     val sourceBundleId = matcher.groupValues[1]
 
