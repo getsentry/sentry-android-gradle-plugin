@@ -1,6 +1,7 @@
 package io.sentry.android.gradle
 
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -12,6 +13,25 @@ class SentryPluginIntegrationTest(
     androidGradlePluginVersion: String,
     gradleVersion: String
 ) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
+
+    @Test
+    fun uploadWithoutSentryCliProperties() {
+        if (System.getenv("SENTRY_URL").isNullOrBlank()) {
+            return // Don't run test if local test server endpoint is not set
+        }
+        sentryPropertiesFile.writeText("")
+        applyAutoUploadProguardMappingWithCredentials()
+
+        val build = runner
+            .appendArguments(":app:assembleRelease")
+            .build()
+
+        assertEquals(
+            build.task(":app:uploadSentryProguardMappingsRelease")?.outcome,
+            TaskOutcome.SUCCESS
+        )
+        assertTrue { "> Authorization: Bearer <token>" in build.output }
+    }
 
     @Test
     fun uploadSentryProguardMappingsIntegration() {
@@ -81,6 +101,26 @@ class SentryPluginIntegrationTest(
                   includeProguardMapping = true
                   autoUploadProguardMapping = true
                   uploadNativeSymbols = false
+                  tracingInstrumentation {
+                    enabled = false
+                  }
+                }
+            """.trimIndent()
+        )
+    }
+
+    private fun applyAutoUploadProguardMappingWithCredentials() {
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+                sentry {
+                  debug = true
+                  includeProguardMapping = true
+                  autoUploadProguardMapping = true
+                  uploadNativeSymbols = false
+                  org = 'sentry-sdks'
+                  project = 'sentry-android'
+                  authToken = '<token>'
                   tracingInstrumentation {
                     enabled = false
                   }

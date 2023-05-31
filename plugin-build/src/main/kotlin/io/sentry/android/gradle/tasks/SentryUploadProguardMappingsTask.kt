@@ -52,6 +52,10 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     @get:Input
     abstract val autoUploadProguardMapping: Property<Boolean>
 
+    @get:Input
+    @get:Optional
+    abstract val sentryAuthToken: Property<String>
+
     override fun exec() {
         if (!mappingsFiles.isPresent || mappingsFiles.get().isEmpty) {
             error("[sentry] Mapping files are missing!")
@@ -61,6 +65,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             logger.info { "cli args: $it" }
         }
         setSentryPropertiesEnv()
+        setSentryAuthTokenEnv()
         super.exec()
     }
 
@@ -70,6 +75,15 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             environment("SENTRY_PROPERTIES", sentryProperties)
         } else {
             logger.info { "propsFile is null" }
+        }
+    }
+
+    internal fun setSentryAuthTokenEnv() {
+        val sentryAuthToken = sentryAuthToken.orNull
+        if (sentryAuthToken != null) {
+            environment("SENTRY_AUTH_TOKEN", sentryAuthToken)
+        } else {
+            logger.info { "sentryAuthToken is null" }
         }
     }
 
@@ -138,6 +152,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             mappingFiles: Provider<FileCollection>,
             sentryOrg: String?,
             sentryProject: String?,
+            sentryAuthToken: Property<String>,
             autoUploadProguardMapping: Property<Boolean>,
             taskSuffix: String = ""
         ): TaskProvider<SentryUploadProguardMappingsTask> {
@@ -157,6 +172,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
                 task.autoUploadProguardMapping.set(autoUploadProguardMapping)
                 task.sentryOrganization.set(sentryOrg)
                 task.sentryProject.set(sentryProject)
+                task.sentryAuthToken.set(sentryAuthToken)
             }
             return uploadSentryProguardMappingsTask
         }

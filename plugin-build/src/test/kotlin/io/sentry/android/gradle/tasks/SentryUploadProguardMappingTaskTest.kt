@@ -163,6 +163,25 @@ class SentryUploadProguardMappingTaskTest {
     }
 
     @Test
+    fun `with sentryAuthToken env variable is set correctly`() {
+        val project = createProject()
+        val task: TaskProvider<SentryUploadProguardMappingsTask> =
+            project.tasks.register(
+                "testUploadProguardMapping",
+                SentryUploadProguardMappingsTask::class.java
+            ) {
+                it.sentryAuthToken.set("<token>")
+            }
+
+        task.get().setSentryAuthTokenEnv()
+
+        assertEquals(
+            "<token>",
+            task.get().environment["SENTRY_AUTH_TOKEN"].toString()
+        )
+    }
+
+    @Test
     fun `with sentryOrganization adds --org`() {
         val project = createProject()
         val uuidFileProvider = createFakeUuid(project)

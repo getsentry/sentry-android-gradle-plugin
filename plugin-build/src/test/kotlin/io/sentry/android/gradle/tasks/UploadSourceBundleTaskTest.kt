@@ -114,6 +114,30 @@ class UploadSourceBundleTaskTest {
     }
 
     @Test
+    fun `with sentryAuthToken env variable is set correctly`() {
+        val project = createProject()
+        val sourceBundleDir = File(project.buildDir, "dummy/folder")
+
+        val task: TaskProvider<UploadSourceBundleTask> =
+            project.tasks.register(
+                "testUploadSourceBundle",
+                UploadSourceBundleTask::class.java
+            ) {
+                it.cliExecutable.set("sentry-cli")
+                it.sourceBundleDir.set(sourceBundleDir)
+                it.autoUploadSourceContext.set(true)
+                it.sentryAuthToken.set("<token>")
+            }
+
+        task.get().setSentryAuthTokenEnv()
+
+        assertEquals(
+            "<token>",
+            task.get().environment["SENTRY_AUTH_TOKEN"].toString()
+        )
+    }
+
+    @Test
     fun `without sentryProperties file SENTRY_PROPERTIES is not set`() {
         val project = createProject()
         val sourceBundleDir = File(project.buildDir, "dummy/folder")

@@ -108,6 +108,33 @@ class BundleSourcesTaskTest {
     }
 
     @Test
+    fun `with sentryAuthToken env variable is set correctly`() {
+        val project = createProject()
+        val debugMetaPropertiesFile = createDebugMetaProperties(project)
+
+        val sourceDir = File(project.buildDir, "dummy/source")
+        val outDir = File(project.buildDir, "dummy/out")
+        val task: TaskProvider<BundleSourcesTask> =
+            project.tasks.register(
+                "testBundleSources",
+                BundleSourcesTask::class.java
+            ) {
+                it.cliExecutable.set("sentry-cli")
+                it.sourceDir.set(sourceDir)
+                it.bundleIdFile.set(debugMetaPropertiesFile)
+                it.output.set(outDir)
+                it.sentryAuthToken.set("<token>")
+            }
+
+        task.get().setSentryAuthTokenEnv()
+
+        assertEquals(
+            "<token>",
+            task.get().environment["SENTRY_AUTH_TOKEN"].toString()
+        )
+    }
+
+    @Test
     fun `without sentryProperties file SENTRY_PROPERTIES is not set`() {
         val project = createProject()
         val debugMetaPropertiesFile = createDebugMetaProperties(project)

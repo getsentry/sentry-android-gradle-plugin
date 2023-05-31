@@ -46,8 +46,9 @@ class SourceContext {
                 output = paths.bundleDir,
                 extension.debug,
                 cliExecutable,
-                sentryOrg,
-                sentryProject,
+                sentryOrg ?: extension.org.orNull,
+                sentryProject ?: extension.project.orNull,
+                extension.authToken,
                 taskSuffix
             )
 
@@ -58,8 +59,9 @@ class SourceContext {
                 extension.debug,
                 cliExecutable,
                 extension.autoUploadSourceContext,
-                sentryOrg,
-                sentryProject,
+                sentryOrg ?: extension.org.orNull,
+                sentryProject ?: extension.project.orNull,
+                extension.authToken,
                 taskSuffix
             )
 
