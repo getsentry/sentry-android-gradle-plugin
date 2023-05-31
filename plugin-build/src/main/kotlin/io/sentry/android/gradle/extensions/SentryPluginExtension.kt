@@ -189,6 +189,8 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
 
     /**
      * The authentication token to use for uploading proguard mappings/source contexts.
+     * WARNING: Do not expose this token in your build.gradle files, but rather set an environment
+     * variable and read it into this property.
      *
      * Default is null.
      */
