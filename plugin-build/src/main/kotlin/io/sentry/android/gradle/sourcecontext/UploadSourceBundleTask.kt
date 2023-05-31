@@ -48,12 +48,17 @@ abstract class UploadSourceBundleTask : Exec() {
     @get:Optional
     abstract val sentryProject: Property<String>
 
+    @get:Input
+    @get:Optional
+    abstract val sentryAuthToken: Property<String>
+
     override fun exec() {
         computeCommandLineArgs().let {
             commandLine(it)
             logger.info { "cli args: $it" }
         }
         setSentryPropertiesEnv()
+        setSentryAuthTokenEnv()
         super.exec()
     }
 
@@ -63,6 +68,15 @@ abstract class UploadSourceBundleTask : Exec() {
             environment("SENTRY_PROPERTIES", sentryProperties)
         } else {
             logger.info { "sentryProperties is null" }
+        }
+    }
+
+    internal fun setSentryAuthTokenEnv() {
+        val sentryAuthToken = sentryAuthToken.orNull
+        if (sentryAuthToken != null) {
+            environment("SENTRY_AUTH_TOKEN", sentryAuthToken)
+        } else {
+            logger.info { "sentryAuthToken is null" }
         }
     }
 
@@ -106,6 +120,7 @@ abstract class UploadSourceBundleTask : Exec() {
             autoUploadSourceContext: Property<Boolean>,
             sentryOrg: String?,
             sentryProject: String?,
+            sentryAuthToken: Property<String>,
             taskSuffix: String = ""
         ): TaskProvider<UploadSourceBundleTask> {
             return project.tasks.register(
@@ -115,6 +130,7 @@ abstract class UploadSourceBundleTask : Exec() {
                 task.debug.set(debug)
                 task.sentryOrganization.set(sentryOrg)
                 task.sentryProject.set(sentryProject)
+                task.sentryAuthToken.set(sentryAuthToken)
                 task.sourceBundleDir.set(bundleSourcesTask.flatMap { it.output })
                 task.cliExecutable.set(cliExecutable)
                 task.autoUploadSourceContext.set(autoUploadSourceContext)

@@ -170,4 +170,28 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      */
     val debug: Property<Boolean> = objects.property<Boolean?>(Boolean::class.java)
         .convention(false)
+
+    /**
+     * The slug of the Sentry organization to use for uploading proguard mappings/source contexts.
+     *
+     * Default is null.
+     */
+    val org: Property<String> = objects.property(String::class.java)
+        .convention(null as String?)
+
+    /**
+     * The slug of the Sentry project to use for uploading proguard mappings/source contexts.
+     *
+     * Default is null.
+     */
+    val project: Property<String> = objects.property(String::class.java)
+        .convention(null as String?)
+
+    /**
+     * The authentication token to use for uploading proguard mappings/source contexts.
+     *
+     * Default is null.
+     */
+    val authToken: Property<String> = objects.property(String::class.java)
+        .convention(null as String?)
 }

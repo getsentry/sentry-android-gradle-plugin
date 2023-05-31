@@ -242,8 +242,9 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                     guardsquareEnabled
                 ),
                 autoUploadProguardMapping = extension.autoUploadProguardMapping,
-                sentryOrg = sentryOrg,
-                sentryProject = sentryProject,
+                sentryOrg = sentryOrg ?: extension.org.orNull,
+                sentryProject = sentryProject ?: extension.project.orNull,
+                sentryAuthToken = extension.authToken,
                 taskSuffix = name.capitalized
             )
             uploadMappingsTask.hookWithMinifyTasks(project, name, guardsquareEnabled)
