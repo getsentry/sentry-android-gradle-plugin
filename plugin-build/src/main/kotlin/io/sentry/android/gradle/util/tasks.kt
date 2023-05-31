@@ -8,7 +8,7 @@ import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
-import io.sentry.gradle.common.AndroidVariant
+import io.sentry.gradle.common.SentryVariant
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
@@ -49,7 +49,7 @@ fun TaskProvider<out Task>.hookWithMinifyTasks(
 
 fun TaskProvider<out Task>.hookWithPackageTasks(
     project: Project,
-    variant: AndroidVariant
+    variant: SentryVariant
 ) {
     val variantName = variant.name
     val preBundleTaskProvider = withLogging(project.logger, "preBundleTask") {
@@ -76,7 +76,7 @@ fun TaskProvider<out Task>.hookWithPackageTasks(
 
 fun TaskProvider<out Task>.hookWithAssembleTasks(
     project: Project,
-    variant: AndroidVariant
+    variant: SentryVariant
 ) {
     // we need to wait for project evaluation to have all tasks available, otherwise the new
     // AndroidComponentsExtension is configured too early to look up for the tasks

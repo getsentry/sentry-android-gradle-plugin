@@ -3,7 +3,7 @@ package io.sentry.android.gradle.sourcecontext
 import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
 import io.sentry.android.gradle.util.info
-import io.sentry.gradle.common.AndroidVariant
+import io.sentry.gradle.common.SentryVariant
 import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
@@ -113,7 +113,7 @@ abstract class UploadSourceBundleTask : Exec() {
     companion object {
         fun register(
             project: Project,
-            variant: AndroidVariant,
+            variant: SentryVariant,
             bundleSourcesTask: TaskProvider<BundleSourcesTask>,
             debug: Property<Boolean>,
             cliExecutable: String,

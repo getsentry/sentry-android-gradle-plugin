@@ -5,7 +5,7 @@ import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
 import io.sentry.android.gradle.util.PropertiesUtil
 import io.sentry.android.gradle.util.info
-import io.sentry.gradle.common.AndroidVariant
+import io.sentry.gradle.common.SentryVariant
 import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
@@ -131,7 +131,7 @@ abstract class BundleSourcesTask : Exec() {
 
         fun register(
             project: Project,
-            variant: AndroidVariant,
+            variant: SentryVariant,
             generateDebugIdTask: TaskProvider<GenerateBundleIdTask>,
             collectSourcesTask: TaskProvider<CollectSourcesTask>,
             output: Provider<Directory>,

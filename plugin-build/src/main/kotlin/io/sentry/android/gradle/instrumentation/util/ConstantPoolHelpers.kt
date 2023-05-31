@@ -98,20 +98,3 @@ fun classNameLooksMinified(simpleClassName: String, fullClassName: String): Bool
                 MINIFIED_CLASSNAME_SENTRY_REGEX.matches(fullClassName)
             )
 }
-
-/**
- * Gets all fields of the given class and its parents (if any).
- *
- * Adapted from https://github.com/apache/commons-lang/blob/master/src/main/java/org/apache/commons/lang3/reflect/FieldUtils.java
- */
-private val Class<*>.allFields: List<Field>
-    get() {
-        val allFields = mutableListOf<Field>()
-        var currentClass: Class<*>? = this
-        while (currentClass != null) {
-            val declaredFields = currentClass.declaredFields
-            allFields += declaredFields
-            currentClass = currentClass.superclass
-        }
-        return allFields
-    }

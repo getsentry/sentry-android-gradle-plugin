@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Features
+
+- Create a new Sentry Gradle plugin with ID `io.sentry.jvm.gradle` for Java Backend, Desktop etc. ([#495](https://github.com/getsentry/sentry-android-gradle-plugin/pull/495)) 
+- Source Context for Java ([#495](https://github.com/getsentry/sentry-android-gradle-plugin/pull/495))
+  - To enable it apply the `io.sentry.jvm.gradle` plugin and set `includeSourceContext` to `true`
+  - For more information on how to enable source context, please refer to [#633](https://github.com/getsentry/sentry-java/issues/633#issuecomment-1465599120)
+
 ### Dependencies
 
 - Bump CLI from v2.17.5 to v2.18.1 ([#493](https://github.com/getsentry/sentry-android-gradle-plugin/pull/493))

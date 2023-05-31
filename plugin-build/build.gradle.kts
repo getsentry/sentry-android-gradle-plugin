@@ -157,6 +157,10 @@ gradlePlugin {
             id = "io.sentry.kotlin.compiler.gradle"
             implementationClass = "io.sentry.kotlin.gradle.SentryKotlinCompilerGradlePlugin"
         }
+        register("sentryJvmPlugin") {
+            id = "io.sentry.jvm.gradle"
+            implementationClass = "io.sentry.jvm.gradle.SentryJvmPlugin"
+        }
     }
 }
 
@@ -213,6 +217,11 @@ distributions {
     create("sentryKotlinCompilerPluginMarker") {
         contents {
             from("build${sep}publications${sep}kotlinCompilerPluginPluginMarkerMaven")
+        }
+    }
+    create("sentryJvmPluginMarker") {
+        contents {
+            from("build${sep}publications${sep}sentryJvmPluginPluginMarkerMaven")
         }
     }
 }
