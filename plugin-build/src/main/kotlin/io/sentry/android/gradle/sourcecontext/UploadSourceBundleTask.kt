@@ -9,6 +9,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
@@ -118,8 +119,8 @@ abstract class UploadSourceBundleTask : Exec() {
             debug: Property<Boolean>,
             cliExecutable: String,
             autoUploadSourceContext: Property<Boolean>,
-            sentryOrg: String?,
-            sentryProject: String?,
+            sentryOrg: Provider<String>,
+            sentryProject: Provider<String>,
             sentryAuthToken: Property<String>,
             taskSuffix: String = ""
         ): TaskProvider<UploadSourceBundleTask> {

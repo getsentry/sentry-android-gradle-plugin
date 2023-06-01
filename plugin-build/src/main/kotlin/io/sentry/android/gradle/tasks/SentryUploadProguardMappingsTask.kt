@@ -150,8 +150,8 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             sentryProperties: String?,
             generateUuidTask: Provider<SentryGenerateProguardUuidTask>,
             mappingFiles: Provider<FileCollection>,
-            sentryOrg: String?,
-            sentryProject: String?,
+            sentryOrg: Provider<String>,
+            sentryProject: Provider<String>,
             sentryAuthToken: Property<String>,
             autoUploadProguardMapping: Property<Boolean>,
             taskSuffix: String = ""
