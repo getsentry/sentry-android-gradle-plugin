@@ -36,6 +36,9 @@ class SentrySourceContextTest(
             }
             """.trimIndent()
         )
+
+        sentryPropertiesFile.writeText("")
+
         val result = runner
             .appendArguments("app:assembleRelease")
             .build()
