@@ -3,8 +3,6 @@ package io.sentry.android.gradle.instrumentation
 import com.android.build.api.instrumentation.ClassContext
 import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
-import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
-import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import io.sentry.android.gradle.instrumentation.classloader.GeneratingMissingClassesClassLoader
 import io.sentry.android.gradle.instrumentation.fakes.TestClassContext
 import io.sentry.android.gradle.instrumentation.fakes.TestClassData
@@ -101,13 +99,6 @@ class VisitorTest(
         @Parameterized.Parameters(name = "{0}/{1}")
         @JvmStatic
         fun parameters() = listOf(
-            arrayOf("androidxSqlite", "FrameworkSQLiteDatabase", AndroidXSQLiteDatabase(), null),
-            arrayOf(
-                "androidxSqlite",
-                "FrameworkSQLiteStatement",
-                AndroidXSQLiteStatement(SemVer(2, 3, 0)),
-                null
-            ),
             roomDaoTestParameters("DeleteAndReturnUnit"),
             roomDaoTestParameters("InsertAndReturnLong"),
             roomDaoTestParameters("InsertAndReturnUnit"),

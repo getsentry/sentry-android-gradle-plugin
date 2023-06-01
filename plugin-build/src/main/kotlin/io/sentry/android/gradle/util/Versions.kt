@@ -26,12 +26,17 @@ internal object SentryVersions {
     internal val VERSION_FILE_IO = SemVer(5, 5, 0)
     internal val VERSION_COMPOSE = SemVer(6, 7, 0)
     internal val VERSION_LOGCAT = SemVer(6, 17, 0)
+    internal val VERSION_SQLITE = SemVer(6, 21, 0)
 }
 
 internal object SentryModules {
     internal val SENTRY_ANDROID_CORE = DefaultModuleIdentifier.newId(
         "io.sentry",
         "sentry-android-core"
+    )
+    internal val SENTRY_ANDROID_SQLITE = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-android-sqlite"
     )
     internal val SENTRY_ANDROID_OKHTTP = DefaultModuleIdentifier.newId(
         "io.sentry",

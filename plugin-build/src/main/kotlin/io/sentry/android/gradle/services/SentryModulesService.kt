@@ -61,8 +61,8 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
 
     fun isDatabaseInstrEnabled(): Boolean =
         sentryModules.isAtLeast(
-            SentryModules.SENTRY_ANDROID_CORE,
-            SentryVersions.VERSION_PERFORMANCE
+            SentryModules.SENTRY_ANDROID_SQLITE,
+            SentryVersions.VERSION_SQLITE
         ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
 
     fun isFileIOInstrEnabled(): Boolean =

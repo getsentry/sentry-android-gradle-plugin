@@ -7,8 +7,8 @@ import org.gradle.api.provider.Property
 
 open class AutoInstallExtension @Inject constructor(objects: ObjectFactory) {
     /**
-     * Enable auto-installation of Sentry components (sentry-android SDK and okhttp, timber and
-     * fragment integrations).
+     * Enable auto-installation of Sentry components (sentry-android SDK and okhttp, timber,
+     * fragment and sqlite integrations).
      * Defaults to true.
      */
     val enabled: Property<Boolean> = objects.property(Boolean::class.java)

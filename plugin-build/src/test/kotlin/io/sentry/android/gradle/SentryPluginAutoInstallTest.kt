@@ -43,6 +43,8 @@ class SentryPluginAutoInstallTest(
               implementation 'androidx.fragment:fragment:1.3.5'
               // our plugin shouldn't install okhttp, since it's a direct dep
               implementation 'io.sentry:sentry-android-okhttp:5.4.0'
+              // our plugin shouldn't install sqlite, since it's a direct dep
+              implementation 'io.sentry:sentry-android-sqlite:6.21.0'
             }
 
             sentry {
@@ -58,6 +60,8 @@ class SentryPluginAutoInstallTest(
         assertTrue { "io.sentry:sentry-android-fragment:5.1.0" in result.output }
         assertFalse { "io.sentry:sentry-android-okhttp:5.1.0" in result.output }
         assertTrue { "io.sentry:sentry-android-okhttp:5.4.0" in result.output }
+        assertFalse { "io.sentry:sentry-android-sqlite:5.1.0" in result.output }
+        assertTrue { "io.sentry:sentry-android-sqlite:6.21.0" in result.output }
         assertFalse { "io.sentry:sentry-compose-android:5.1.0" in result.output }
 
         // ensure all dependencies could be resolved
