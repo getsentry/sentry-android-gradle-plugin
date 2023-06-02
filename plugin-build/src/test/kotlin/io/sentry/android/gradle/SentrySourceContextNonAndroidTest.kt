@@ -27,9 +27,6 @@ class SentrySourceContextNonAndroidTest(
             }
             """.trimIndent()
         )
-
-        sentryPropertiesFile.writeText("")
-
         val result = runner
             .appendArguments("app:assemble")
             .build()
@@ -62,7 +59,7 @@ class SentrySourceContextNonAndroidTest(
               autoUploadProguardMapping = false
               additionalSourceDirsForSourceContext = ["src/custom/kotlin"]
               org = "sentry-sdks"
-              project = "sentry-java"
+              project = "sentry-android"
             }
             """.trimIndent()
         )

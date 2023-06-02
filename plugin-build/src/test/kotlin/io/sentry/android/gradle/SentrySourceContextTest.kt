@@ -36,9 +36,6 @@ class SentrySourceContextTest(
             }
             """.trimIndent()
         )
-
-        sentryPropertiesFile.writeText("")
-
         val result = runner
             .appendArguments("app:assembleRelease")
             .build()
@@ -79,10 +76,12 @@ class SentrySourceContextTest(
               autoUploadProguardMapping = false
               additionalSourceDirsForSourceContext = ["src/custom/kotlin"]
               org = "sentry-sdks"
-              project = "sentry-java"
+              project = "sentry-android"
             }
             """.trimIndent()
         )
+
+        sentryPropertiesFile.writeText("")
 
         val ktContents = testProjectDir.withDummyComposeFile()
         val javaContents = testProjectDir.withDummyJavaFile()
