@@ -75,7 +75,7 @@ class SentrySourceContextNonAndroidTest(
             .build()
 
         assertTrue { "--org=sentry-sdks" in result.output }
-        assertTrue { "--project=sentry-java" in result.output }
+        assertTrue { "--project=sentry-android" in result.output }
         assertTrue { "BUILD SUCCESSFUL" in result.output }
 
         verifySourceBundleContents(
