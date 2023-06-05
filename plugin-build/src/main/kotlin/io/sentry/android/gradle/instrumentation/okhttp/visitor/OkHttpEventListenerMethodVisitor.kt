@@ -19,7 +19,7 @@ class OkHttpEventListenerMethodVisitor(
 
     override fun onMethodEnter() {
         super.onMethodEnter()
-        // We want to add the following call at the beginning of the constructor with the Builder parameter:
+        // Add the following call at the beginning of the constructor with the Builder parameter:
         // builder.eventListener(new SentryOkHttpEventListener(builder.eventListenerFactory));
 
         // OkHttpClient.Builder is the parameter, retrieved here
@@ -35,12 +35,29 @@ class OkHttpEventListenerMethodVisitor(
         visitVarInsn(Opcodes.ALOAD, 1)
 
         // Read the "eventListenerFactory" field from OkHttpClient.Builder
-        visitFieldInsn(Opcodes.GETFIELD, "okhttp3/OkHttpClient\$Builder", "eventListenerFactory", "Lokhttp3/EventListener\$Factory;")
+        visitFieldInsn(
+            Opcodes.GETFIELD,
+            "okhttp3/OkHttpClient\$Builder",
+            "eventListenerFactory",
+            "Lokhttp3/EventListener\$Factory;"
+        )
 
-        // Let's call the SentryOkHttpEventListener constructor passing the "eventListenerFactory" as parameter
-        visitMethodInsn(Opcodes.INVOKESPECIAL, "io/sentry/android/okhttp/SentryOkHttpEventListener", "<init>", "(Lokhttp3/EventListener\$Factory;)V", false)
+        // Call SentryOkHttpEventListener constructor passing "eventListenerFactory" as parameter
+        visitMethodInsn(
+            Opcodes.INVOKESPECIAL,
+            "io/sentry/android/okhttp/SentryOkHttpEventListener",
+            "<init>",
+            "(Lokhttp3/EventListener\$Factory;)V",
+            false
+        )
 
-        // Let's call the "eventListener" function of OkHttpClient.Builder passing the SentryOkHttpEventListener as parameter
-        visitMethodInsn(Opcodes.INVOKEVIRTUAL, "okhttp3/OkHttpClient\$Builder", "eventListener", "(Lokhttp3/EventListener;)Lokhttp3/OkHttpClient\$Builder;", false)
+        // Call "eventListener" function of OkHttpClient.Builder passing SentryOkHttpEventListener
+        visitMethodInsn(
+            Opcodes.INVOKEVIRTUAL,
+            "okhttp3/OkHttpClient\$Builder",
+            "eventListener",
+            "(Lokhttp3/EventListener;)Lokhttp3/OkHttpClient\$Builder;",
+            false
+        )
     }
 }

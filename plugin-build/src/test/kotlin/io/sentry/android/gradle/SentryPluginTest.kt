@@ -261,7 +261,7 @@ class SentryPluginTest(
         assertTrue {
             "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
                 "AndroidXSQLiteDatabase, AndroidXSQLiteStatement, AndroidXRoomDao, OkHttp, " +
-                "WrappingInstrumentable, RemappingInstrumentable, " +
+                "OkHttpEventListener, WrappingInstrumentable, RemappingInstrumentable, " +
                 "ComposeNavigation)" in build.output
         }
     }
