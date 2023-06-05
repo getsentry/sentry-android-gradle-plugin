@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add OkHttpEventListener automatically ([#504](https://github.com/getsentry/sentry-android-gradle-plugin/pull/504))
+
 ## 3.8.0
 
 ### Features
