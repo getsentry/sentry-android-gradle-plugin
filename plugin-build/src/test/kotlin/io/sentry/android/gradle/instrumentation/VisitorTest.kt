@@ -11,7 +11,6 @@ import io.sentry.android.gradle.instrumentation.logcat.LogcatInstrumentable
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
-import io.sentry.android.gradle.util.SemVer
 import java.io.FileInputStream
 import java.io.PrintWriter
 import java.io.StringWriter

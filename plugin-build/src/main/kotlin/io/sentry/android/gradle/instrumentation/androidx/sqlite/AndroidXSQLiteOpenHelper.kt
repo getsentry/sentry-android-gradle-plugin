@@ -31,9 +31,11 @@ class AndroidXSQLiteOpenHelper : ClassInstrumentable {
         )
     }
 
-    // We want to instrument any class implementing the androidx.sqlite.db.SupportSQLiteOpenHelper$Factory
+    // Instrument any class implementing androidx.sqlite.db.SupportSQLiteOpenHelper$Factory
     override fun isInstrumentable(data: ClassContext) =
-        data.currentClassData.interfaces.contains("androidx.sqlite.db.SupportSQLiteOpenHelper\$Factory")
+        data.currentClassData.interfaces.contains(
+            "androidx.sqlite.db.SupportSQLiteOpenHelper\$Factory"
+        )
 }
 
 class SQLiteOpenHelperMethodInstrumentable : MethodInstrumentable {
@@ -52,8 +54,9 @@ class SQLiteOpenHelperMethodInstrumentable : MethodInstrumentable {
     }
 
     // We want to instrument only the SupportSQLiteOpenHelper.Factory method
-    //  fun create(delegate: SupportSQLiteOpenHelper): SupportSQLiteOpenHelper {...}
+    //  fun create(config: SupportSQLiteOpenHelper.Configuration): SupportSQLiteOpenHelper {...}
     override fun isInstrumentable(data: MethodContext) =
-        data.descriptor == "(Landroidx/sqlite/db/SupportSQLiteOpenHelper\$Configuration;)Landroidx/sqlite/db/SupportSQLiteOpenHelper;" &&
-            data.name == "create"
+        data.name == "create" &&
+            data.descriptor == "(Landroidx/sqlite/db/SupportSQLiteOpenHelper\$Configuration;)" +
+            "Landroidx/sqlite/db/SupportSQLiteOpenHelper;"
 }

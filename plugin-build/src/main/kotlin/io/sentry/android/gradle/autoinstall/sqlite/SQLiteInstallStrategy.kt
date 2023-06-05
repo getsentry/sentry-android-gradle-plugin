@@ -5,9 +5,9 @@ import io.sentry.android.gradle.autoinstall.AbstractInstallStrategy
 import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.autoinstall.InstallStrategyRegistrar
 import io.sentry.android.gradle.util.SemVer
+import javax.inject.Inject
 import org.gradle.api.artifacts.dsl.ComponentMetadataHandler
 import org.slf4j.Logger
-import javax.inject.Inject
 
 abstract class SQLiteInstallStrategy : AbstractInstallStrategy {
 

@@ -34,10 +34,11 @@ class SQLiteOpenHelperMethodVisitor(
         descriptor: String?,
         isInterface: Boolean
     ) {
-        if(
+        if (
             name == "create" &&
-                owner == "androidx/sqlite/db/SupportSQLiteOpenHelper\$Factory" &&
-                descriptor == "(Landroidx/sqlite/db/SupportSQLiteOpenHelper\$Configuration;)Landroidx/sqlite/db/SupportSQLiteOpenHelper;"
+            owner == "androidx/sqlite/db/SupportSQLiteOpenHelper\$Factory" &&
+            descriptor == "(Landroidx/sqlite/db/SupportSQLiteOpenHelper\$Configuration;)" +
+            "Landroidx/sqlite/db/SupportSQLiteOpenHelper;"
         ) {
             // We can skip any method which contains a call to
             // SupportSQLiteOpenHelper$Factory.create (SupportSQLiteOpenHelper.Configuration): SupportSQLiteOpenHelper
