@@ -6,6 +6,10 @@
 
 - New Sqlite instrumentation ([#502](https://github.com/getsentry/sentry-android-gradle-plugin/pull/502))
 
+### Fixes
+
+- No longer ignore `org` and `project` in `sentry` config block ([#501](https://github.com/getsentry/sentry-android-gradle-plugin/pull/501))
+
 ## 3.8.0
 
 ### Features

@@ -137,8 +137,8 @@ abstract class BundleSourcesTask : Exec() {
             output: Provider<Directory>,
             debug: Property<Boolean>,
             cliExecutable: String,
-            sentryOrg: String?,
-            sentryProject: String?,
+            sentryOrg: Provider<String>,
+            sentryProject: Provider<String>,
             sentryAuthToken: Property<String>,
             taskSuffix: String = ""
         ): TaskProvider<BundleSourcesTask> {
