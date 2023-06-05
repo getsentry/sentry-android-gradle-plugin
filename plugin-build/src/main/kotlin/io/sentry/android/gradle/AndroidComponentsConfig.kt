@@ -280,8 +280,8 @@ private fun Variant.configureProguardMappingsTasks(
                 sentryProperties = sentryProps,
                 mappingFiles = getMappingFileProvider(project, variant, guardsquareEnabled),
                 autoUploadProguardMapping = extension.autoUploadProguardMapping,
-                sentryOrg = sentryOrg ?: extension.org.orNull,
-                sentryProject = sentryProject ?: extension.project.orNull,
+                sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
+                sentryProject = sentryProject?.let { project.provider { it } } ?: extension.project,
                 sentryAuthToken = extension.authToken,
                 taskSuffix = name.capitalized
             )

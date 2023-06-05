@@ -70,13 +70,18 @@ class SentrySourceContextTest(
             }
 
             sentry {
+              debug = true
               includeSourceContext = true
               autoUploadSourceContext = false
               autoUploadProguardMapping = false
               additionalSourceDirsForSourceContext = ["src/custom/kotlin"]
+              org = "sentry-sdks"
+              project = "sentry-android"
             }
             """.trimIndent()
         )
+
+        sentryPropertiesFile.writeText("")
 
         val ktContents = testProjectDir.withDummyComposeFile()
         val javaContents = testProjectDir.withDummyJavaFile()
@@ -86,6 +91,8 @@ class SentrySourceContextTest(
             .appendArguments("app:assembleRelease")
             .build()
 
+        assertTrue { "\"--org\" \"sentry-sdks\"" in result.output }
+        assertTrue { "\"--project\" \"sentry-android\"" in result.output }
         assertTrue { "BUILD SUCCESSFUL" in result.output }
 
         verifySourceBundleContents(
