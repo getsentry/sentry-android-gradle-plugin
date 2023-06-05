@@ -12,6 +12,7 @@ import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.Androi
 import io.sentry.android.gradle.instrumentation.logcat.LogcatInstrumentable
 import io.sentry.android.gradle.instrumentation.logcat.LogcatLevel
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
+import io.sentry.android.gradle.instrumentation.okhttp.OkHttpEventListener
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
 import io.sentry.android.gradle.instrumentation.util.findClassReader
 import io.sentry.android.gradle.instrumentation.util.findClassWriter
@@ -93,6 +94,9 @@ abstract class SpanAddingClassVisitorFactory :
                     },
                     AndroidXRoomDao().takeIf {
                         sentryModulesService.isDatabaseInstrEnabled()
+                    },
+                    OkHttpEventListener().takeIf {
+                        sentryModulesService.isOkHttpInstrEnabled()
                     },
                     OkHttp().takeIf {
                         sentryModulesService.isOkHttpInstrEnabled()
