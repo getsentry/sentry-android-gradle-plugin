@@ -172,6 +172,10 @@ class SentryPluginAutoInstallTest(
         appBuildFile.appendText(
             // language=Groovy
             """
+            dependencies {
+              implementation 'androidx.sqlite:sqlite:2.0.0'
+            }
+
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.20.0"
             sentry.includeProguardMapping = false
@@ -189,6 +193,10 @@ class SentryPluginAutoInstallTest(
         appBuildFile.appendText(
             // language=Groovy
             """
+            dependencies {
+              implementation 'androidx.sqlite:sqlite:2.0.0'
+            }
+
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.21.0"
             sentry.includeProguardMapping = false
