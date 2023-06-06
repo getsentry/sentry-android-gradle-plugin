@@ -184,7 +184,7 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      *
      * Default is null.
      */
-    val project: Property<String> = objects.property(String::class.java)
+    val projectName: Property<String> = objects.property(String::class.java)
         .convention(null as String?)
 
     /**

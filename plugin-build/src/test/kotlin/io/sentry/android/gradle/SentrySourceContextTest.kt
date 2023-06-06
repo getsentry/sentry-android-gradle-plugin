@@ -76,7 +76,7 @@ class SentrySourceContextTest(
               autoUploadProguardMapping = false
               additionalSourceDirsForSourceContext = ["src/custom/kotlin"]
               org = "sentry-sdks"
-              project = "sentry-android"
+              projectName = "sentry-android"
             }
             """.trimIndent()
         )
