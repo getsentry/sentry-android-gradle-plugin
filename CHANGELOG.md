@@ -4,7 +4,8 @@
 
 ### Fixes
 
-- No longer ignore `org` and `project` in `sentry` config block ([#501](https://github.com/getsentry/sentry-android-gradle-plugin/pull/501))
+- Rename `project` to `projectName` in SentryPluginExtension ([#505](https://github.com/getsentry/sentry-android-gradle-plugin/pull/505))
+- No longer ignore `org` and `projectName` in `sentry` config block ([#501](https://github.com/getsentry/sentry-android-gradle-plugin/pull/501))
 
 ## 3.8.0
 
