@@ -245,7 +245,7 @@ class SentryPluginTest(
     }
 
     @Test
-    fun `does not apply Database instrumentable when app does not depend on androidx sqlite`() {
+    fun `apply old Database instrumentable when app does not depend on sentry-android-sqlite`() {
         applyTracingInstrumentation(
             features = setOf(InstrumentationFeature.DATABASE)
         )
@@ -254,7 +254,8 @@ class SentryPluginTest(
             .appendArguments(":app:assembleDebug", "--info")
             .build()
         assertTrue {
-            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=)" in build.output
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "AndroidXSQLiteDatabase, AndroidXSQLiteStatement, AndroidXRoomDao)" in build.output
         }
     }
 
@@ -450,9 +451,7 @@ class SentryPluginTest(
                 "com.squareup.okhttp3:okhttp:3.14.9",
                 "io.sentry:sentry-android-okhttp:6.6.0",
                 "androidx.compose.runtime:runtime:1.1.0",
-                "io.sentry:sentry-compose-android:6.7.0",
-                "androidx.sqlite:sqlite:2.0.0",
-                "io.sentry:sentry-android-sqlite:6.21.0"
+                "io.sentry:sentry-compose-android:6.7.0"
             )
         )
 
@@ -492,6 +491,7 @@ class SentryPluginTest(
         val integrations = verifyIntegrationList(testProjectDir.root).sorted()
 
         val expectedIntegrations = listOf(
+            InstrumentationFeature.DATABASE,
             InstrumentationFeature.COMPOSE,
             InstrumentationFeature.FILE_IO
         ).map { it.integrationName }.sorted()

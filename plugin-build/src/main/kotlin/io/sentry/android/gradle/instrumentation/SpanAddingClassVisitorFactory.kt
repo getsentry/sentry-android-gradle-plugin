@@ -8,6 +8,8 @@ import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import io.sentry.android.gradle.instrumentation.logcat.LogcatInstrumentable
 import io.sentry.android.gradle.instrumentation.logcat.LogcatLevel
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
@@ -17,8 +19,10 @@ import io.sentry.android.gradle.instrumentation.util.findClassWriter
 import io.sentry.android.gradle.instrumentation.util.isMinifiedClass
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.services.SentryModulesService
+import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.info
 import java.io.File
+import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
@@ -67,16 +71,33 @@ abstract class SpanAddingClassVisitorFactory :
             }
 
             val sentryModules = parameters.get().sentryModulesService.get().sentryModules
+            val externalModules = parameters.get().sentryModulesService.get().externalModules
+            val androidXSqliteFrameWorkModule = DefaultModuleIdentifier.newId(
+                "androidx.sqlite",
+                "sqlite-framework"
+            )
+            val androidXSqliteFrameWorkVersion = externalModules.getOrDefault(
+                androidXSqliteFrameWorkModule,
+                SemVer()
+            )
+
             SentryPlugin.logger.info { "Read sentry modules: $sentryModules" }
 
             val sentryModulesService = parameters.get().sentryModulesService.get()
             val instrumentable = ChainedInstrumentable(
                 listOfNotNull(
                     AndroidXSQLiteOpenHelper().takeIf {
-                        sentryModulesService.isDatabaseInstrEnabled()
+                        sentryModulesService.isNewDatabaseInstrEnabled()
+                    },
+                    AndroidXSQLiteDatabase().takeIf {
+                        sentryModulesService.isOldDatabaseInstrEnabled()
+                    },
+                    AndroidXSQLiteStatement(androidXSqliteFrameWorkVersion).takeIf {
+                        sentryModulesService.isOldDatabaseInstrEnabled()
                     },
                     AndroidXRoomDao().takeIf {
-                        sentryModulesService.isDatabaseInstrEnabled()
+                        sentryModulesService.isNewDatabaseInstrEnabled() ||
+                            sentryModulesService.isOldDatabaseInstrEnabled()
                     },
                     OkHttp().takeIf {
                         sentryModulesService.isOkHttpInstrEnabled()

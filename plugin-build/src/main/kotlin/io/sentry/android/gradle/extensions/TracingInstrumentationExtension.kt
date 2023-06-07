@@ -62,7 +62,7 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
 enum class InstrumentationFeature(val integrationName: String) {
     /**
      * When enabled the SDK will create spans for any CRUD operation performed by
-     * 'androidx.sqlite.db.SupportSQLiteOpenHelper'. This feature uses bytecode manipulation.
+     * 'androidx.sqlite.db.SupportSQLiteOpenHelper' and 'androidx.room'. This feature uses bytecode manipulation.
      */
     DATABASE("DatabaseInstrumentation"),
 

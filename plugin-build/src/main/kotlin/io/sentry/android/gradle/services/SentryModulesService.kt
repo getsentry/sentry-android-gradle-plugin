@@ -46,7 +46,7 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
 
     private fun isInstrumentationEnabled(feature: InstrumentationFeature): Boolean {
         return when (feature) {
-            InstrumentationFeature.DATABASE -> isDatabaseInstrEnabled()
+            InstrumentationFeature.DATABASE -> isOldDatabaseInstrEnabled() || isNewDatabaseInstrEnabled()
             InstrumentationFeature.FILE_IO -> isFileIOInstrEnabled()
             InstrumentationFeature.OKHTTP -> isOkHttpInstrEnabled()
             InstrumentationFeature.COMPOSE -> isComposeInstrEnabled()
@@ -59,11 +59,18 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
             SentryVersions.VERSION_LOGCAT
         ) && parameters.logcatEnabled.get()
 
-    fun isDatabaseInstrEnabled(): Boolean =
+    fun isNewDatabaseInstrEnabled(): Boolean =
         sentryModules.isAtLeast(
             SentryModules.SENTRY_ANDROID_SQLITE,
             SentryVersions.VERSION_SQLITE
         ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
+
+    fun isOldDatabaseInstrEnabled(): Boolean =
+        !isNewDatabaseInstrEnabled() &&
+            sentryModules.isAtLeast(
+                SentryModules.SENTRY_ANDROID_CORE,
+                SentryVersions.VERSION_PERFORMANCE
+            ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
 
     fun isFileIOInstrEnabled(): Boolean =
         sentryModules.isAtLeast(
