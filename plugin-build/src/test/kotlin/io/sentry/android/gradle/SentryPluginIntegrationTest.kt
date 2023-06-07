@@ -119,7 +119,7 @@ class SentryPluginIntegrationTest(
                   autoUploadProguardMapping = true
                   uploadNativeSymbols = false
                   org = 'sentry-sdks'
-                  project = 'sentry-android'
+                  projectName = 'sentry-android'
                   authToken = '<token>'
                   tracingInstrumentation {
                     enabled = false

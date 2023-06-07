@@ -243,7 +243,8 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                 ),
                 autoUploadProguardMapping = extension.autoUploadProguardMapping,
                 sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
-                sentryProject = sentryProject?.let { project.provider { it } } ?: extension.project,
+                sentryProject = sentryProject?.let { project.provider { it } }
+                    ?: extension.projectName,
                 sentryAuthToken = extension.authToken,
                 taskSuffix = name.capitalized
             )
