@@ -102,7 +102,12 @@ class VisitorTest(
         @Parameterized.Parameters(name = "{0}/{1}")
         @JvmStatic
         fun parameters() = listOf(
-            arrayOf("androidxSqlite", "FrameworkSQLiteOpenHelperFactory", AndroidXSQLiteOpenHelper(), null),
+            arrayOf(
+                "androidxSqlite",
+                "FrameworkSQLiteOpenHelperFactory",
+                AndroidXSQLiteOpenHelper(),
+                null
+            ),
             arrayOf("androidxSqlite", "FrameworkSQLiteDatabase", AndroidXSQLiteDatabase(), null),
             arrayOf(
                 "androidxSqlite",

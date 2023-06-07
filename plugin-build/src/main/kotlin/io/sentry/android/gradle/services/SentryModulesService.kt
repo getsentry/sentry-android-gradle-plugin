@@ -46,7 +46,8 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
 
     private fun isInstrumentationEnabled(feature: InstrumentationFeature): Boolean {
         return when (feature) {
-            InstrumentationFeature.DATABASE -> isOldDatabaseInstrEnabled() || isNewDatabaseInstrEnabled()
+            InstrumentationFeature.DATABASE ->
+                isOldDatabaseInstrEnabled() || isNewDatabaseInstrEnabled()
             InstrumentationFeature.FILE_IO -> isFileIOInstrEnabled()
             InstrumentationFeature.OKHTTP -> isOkHttpInstrEnabled()
             InstrumentationFeature.COMPOSE -> isComposeInstrEnabled()
