@@ -2,6 +2,12 @@
 
 ## 3.10.0
 
+### Features
+
+- New Sqlite instrumentation ([#502](https://github.com/getsentry/sentry-android-gradle-plugin/pull/502))
+    - This integration replaces the old database instrumentation with the `sentry-android-sqlite` integration
+    - Any implementation of SupportSQLiteOpenHelper.Factory is now supported
+
 ### Dependencies
 
 - Bump Android SDK from v6.21.0 to v6.22.0 ([#506](https://github.com/getsentry/sentry-android-gradle-plugin/pull/506))

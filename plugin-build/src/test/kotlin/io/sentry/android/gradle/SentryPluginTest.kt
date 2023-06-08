@@ -179,7 +179,13 @@ class SentryPluginTest(
 
     @Test
     fun `applies only DB instrumentables when only DATABASE feature enabled`() {
-        applyTracingInstrumentation(features = setOf(InstrumentationFeature.DATABASE))
+        applyTracingInstrumentation(
+            features = setOf(InstrumentationFeature.DATABASE),
+            dependencies = setOf(
+                "androidx.sqlite:sqlite:2.0.0",
+                "io.sentry:sentry-android-sqlite:6.21.0"
+            )
+        )
 
         val build = runner
             .appendArguments(":app:assembleDebug", "--info")
@@ -187,7 +193,7 @@ class SentryPluginTest(
 
         assertTrue {
             "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
-                "AndroidXSQLiteDatabase, AndroidXSQLiteStatement, AndroidXRoomDao)" in build.output
+                "AndroidXSQLiteOpenHelper, AndroidXRoomDao)" in build.output
         }
     }
 
@@ -239,6 +245,21 @@ class SentryPluginTest(
     }
 
     @Test
+    fun `apply old Database instrumentable when app does not depend on sentry-android-sqlite`() {
+        applyTracingInstrumentation(
+            features = setOf(InstrumentationFeature.DATABASE)
+        )
+
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--info")
+            .build()
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "AndroidXSQLiteDatabase, AndroidXSQLiteStatement, AndroidXRoomDao)" in build.output
+        }
+    }
+
+    @Test
     fun `applies all instrumentables when all features are enabled`() {
         applyTracingInstrumentation(
             features = setOf(
@@ -248,10 +269,12 @@ class SentryPluginTest(
                 InstrumentationFeature.COMPOSE
             ),
             dependencies = setOf(
+                "androidx.sqlite:sqlite:2.0.0",
                 "com.squareup.okhttp3:okhttp:3.14.9",
                 "io.sentry:sentry-android-okhttp:6.6.0",
                 "androidx.compose.runtime:runtime:1.1.0",
-                "io.sentry:sentry-compose-android:6.7.0"
+                "io.sentry:sentry-compose-android:6.7.0",
+                "io.sentry:sentry-android-sqlite:6.21.0"
             )
         )
         val build = runner
@@ -260,7 +283,7 @@ class SentryPluginTest(
 
         assertTrue {
             "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
-                "AndroidXSQLiteDatabase, AndroidXSQLiteStatement, AndroidXRoomDao, OkHttp, " +
+                "AndroidXSQLiteOpenHelper, AndroidXRoomDao, OkHttp, " +
                 "WrappingInstrumentable, RemappingInstrumentable, " +
                 "ComposeNavigation)" in build.output
         }
