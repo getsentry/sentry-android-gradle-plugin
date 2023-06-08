@@ -1,12 +1,15 @@
 # Changelog
 
-## 3.10.0
+## Unreleased
 
 ### Features
 
+- Add OkHttpEventListener automatically ([#504](https://github.com/getsentry/sentry-android-gradle-plugin/pull/504))
 - New Sqlite instrumentation ([#502](https://github.com/getsentry/sentry-android-gradle-plugin/pull/502))
     - This integration replaces the old database instrumentation with the `sentry-android-sqlite` integration
     - Any implementation of SupportSQLiteOpenHelper.Factory is now supported
+
+## 3.10.0
 
 ### Dependencies
 
@@ -15,10 +18,6 @@
   - [diff](https://github.com/getsentry/sentry-java/compare/6.21.0...6.22.0)
 
 ## 3.9.0
-
-### Features
-
-- Add OkHttpEventListener automatically ([#504](https://github.com/getsentry/sentry-android-gradle-plugin/pull/504))
 
 ### Fixes
 
