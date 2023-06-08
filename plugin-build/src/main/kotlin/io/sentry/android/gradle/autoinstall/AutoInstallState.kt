@@ -16,6 +16,10 @@ class AutoInstallState private constructor() : Serializable {
 
     @get:Synchronized
     @set:Synchronized
+    var installSqlite: Boolean = false
+
+    @get:Synchronized
+    @set:Synchronized
     var installFragment: Boolean = false
 
     @get:Synchronized
@@ -29,6 +33,7 @@ class AutoInstallState private constructor() : Serializable {
     override fun toString(): String {
         return "AutoInstallState(sentryVersion='$sentryVersion', " +
             "installOkHttp=$installOkHttp, " +
+            "installSqlite=$installSqlite, " +
             "installFragment=$installFragment, " +
             "installTimber=$installTimber," +
             "installCompose=$installCompose)"
@@ -42,6 +47,7 @@ class AutoInstallState private constructor() : Serializable {
 
         if (sentryVersion != other.sentryVersion) return false
         if (installOkHttp != other.installOkHttp) return false
+        if (installSqlite != other.installSqlite) return false
         if (installFragment != other.installFragment) return false
         if (installTimber != other.installTimber) return false
         if (installCompose != other.installCompose) return false
@@ -52,6 +58,7 @@ class AutoInstallState private constructor() : Serializable {
     override fun hashCode(): Int {
         var result = sentryVersion.hashCode()
         result = 31 * result + installOkHttp.hashCode()
+        result = 31 * result + installSqlite.hashCode()
         result = 31 * result + installFragment.hashCode()
         result = 31 * result + installTimber.hashCode()
         result = 31 * result + installCompose.hashCode()

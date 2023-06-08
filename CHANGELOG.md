@@ -1,6 +1,20 @@
 # Changelog
 
-## Unreleased
+## 3.10.0
+
+### Features
+
+- New Sqlite instrumentation ([#502](https://github.com/getsentry/sentry-android-gradle-plugin/pull/502))
+    - This integration replaces the old database instrumentation with the `sentry-android-sqlite` integration
+    - Any implementation of SupportSQLiteOpenHelper.Factory is now supported
+
+### Dependencies
+
+- Bump Android SDK from v6.21.0 to v6.22.0 ([#506](https://github.com/getsentry/sentry-android-gradle-plugin/pull/506))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6220)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.21.0...6.22.0)
+
+## 3.9.0
 
 ### Features
 
@@ -8,7 +22,8 @@
 
 ### Fixes
 
-- No longer ignore `org` and `project` in `sentry` config block ([#501](https://github.com/getsentry/sentry-android-gradle-plugin/pull/501))
+- Rename `project` to `projectName` in SentryPluginExtension ([#505](https://github.com/getsentry/sentry-android-gradle-plugin/pull/505))
+- No longer ignore `org` and `projectName` in `sentry` config block ([#501](https://github.com/getsentry/sentry-android-gradle-plugin/pull/501))
 
 ## 3.8.0
 

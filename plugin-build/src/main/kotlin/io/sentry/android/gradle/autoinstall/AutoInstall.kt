@@ -6,6 +6,8 @@ import io.sentry.android.gradle.autoinstall.fragment.FragmentInstallStrategy
 import io.sentry.android.gradle.autoinstall.fragment.FragmentInstallStrategy.Registrar.SENTRY_FRAGMENT_ID
 import io.sentry.android.gradle.autoinstall.okhttp.OkHttpInstallStrategy
 import io.sentry.android.gradle.autoinstall.okhttp.OkHttpInstallStrategy.Registrar.SENTRY_OKHTTP_ID
+import io.sentry.android.gradle.autoinstall.sqlite.SQLiteInstallStrategy
+import io.sentry.android.gradle.autoinstall.sqlite.SQLiteInstallStrategy.Registrar.SENTRY_SQLITE_ID
 import io.sentry.android.gradle.autoinstall.timber.TimberInstallStrategy
 import io.sentry.android.gradle.autoinstall.timber.TimberInstallStrategy.Registrar.SENTRY_TIMBER_ID
 import io.sentry.android.gradle.extensions.SentryPluginExtension
@@ -19,6 +21,7 @@ private const val SENTRY_ANDROID_CORE_ID = "sentry-android-core"
 
 private val strategies = listOf(
     OkHttpInstallStrategy.Registrar,
+    SQLiteInstallStrategy.Registrar,
     TimberInstallStrategy.Registrar,
     FragmentInstallStrategy.Registrar,
     ComposeInstallStrategy.Registrar
@@ -35,6 +38,7 @@ fun Project.installDependencies(extension: SentryPluginExtension) {
                     this.sentryVersion = installSentrySdk(sentryVersion, dependencies, extension)
 
                     installOkHttp = !dependencies.isModuleAvailable(SENTRY_OKHTTP_ID)
+                    installSqlite = !dependencies.isModuleAvailable(SENTRY_SQLITE_ID)
                     installTimber = !dependencies.isModuleAvailable(SENTRY_TIMBER_ID)
                     installFragment = !dependencies.isModuleAvailable(SENTRY_FRAGMENT_ID)
                     installCompose = !dependencies.isModuleAvailable(SENTRY_COMPOSE_ID)

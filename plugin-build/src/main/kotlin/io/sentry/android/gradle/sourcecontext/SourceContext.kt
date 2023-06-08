@@ -47,7 +47,7 @@ class SourceContext {
                 extension.debug,
                 cliExecutable,
                 sentryOrg?.let { project.provider { it } } ?: extension.org,
-                sentryProject?.let { project.provider { it } } ?: extension.project,
+                sentryProject?.let { project.provider { it } } ?: extension.projectName,
                 extension.authToken,
                 taskSuffix
             )
@@ -60,7 +60,7 @@ class SourceContext {
                 cliExecutable,
                 extension.autoUploadSourceContext,
                 sentryOrg?.let { project.provider { it } } ?: extension.org,
-                sentryProject?.let { project.provider { it } } ?: extension.project,
+                sentryProject?.let { project.provider { it } } ?: extension.projectName,
                 extension.authToken,
                 taskSuffix
             )
