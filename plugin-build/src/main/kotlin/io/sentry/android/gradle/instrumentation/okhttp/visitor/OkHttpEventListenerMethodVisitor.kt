@@ -28,7 +28,9 @@ class OkHttpEventListenerMethodVisitor(
         // Let's declare the SentryOkHttpEventListener variable
         visitTypeInsn(Opcodes.NEW, "io/sentry/android/okhttp/SentryOkHttpEventListener")
 
-        // Than we just copy it - I don't really know why it's needed, i just know it's needed
+        // The SentryOkHttpEventListener constructor, which is called later, will consume the
+        //  element without pushing anything back to the stack (<init> returns void).
+        // Dup will give a reference to the SentryOkHttpEventListener after the constructor call
         visitInsn(Opcodes.DUP)
 
         // Puts parameter OkHttpClient.Builder on top of the stack.
