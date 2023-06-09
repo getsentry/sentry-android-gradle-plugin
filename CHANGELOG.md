@@ -5,11 +5,14 @@
 ### Features
 
 - Add OkHttpEventListener automatically ([#504](https://github.com/getsentry/sentry-android-gradle-plugin/pull/504))
+
+## 3.10.0
+
+### Features
+
 - New Sqlite instrumentation ([#502](https://github.com/getsentry/sentry-android-gradle-plugin/pull/502))
     - This integration replaces the old database instrumentation with the `sentry-android-sqlite` integration
     - Any implementation of SupportSQLiteOpenHelper.Factory is now supported
-
-## 3.10.0
 
 ### Dependencies
 
