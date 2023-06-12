@@ -27,6 +27,7 @@ internal object SentryVersions {
     internal val VERSION_COMPOSE = SemVer(6, 7, 0)
     internal val VERSION_LOGCAT = SemVer(6, 17, 0)
     internal val VERSION_SQLITE = SemVer(6, 21, 0)
+    internal val VERSION_OKHTTP_LISTENER = SemVer(6, 20, 0)
 }
 
 internal object SentryModules {

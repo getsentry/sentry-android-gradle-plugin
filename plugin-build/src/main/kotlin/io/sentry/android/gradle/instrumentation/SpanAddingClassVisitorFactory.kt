@@ -101,7 +101,7 @@ abstract class SpanAddingClassVisitorFactory :
                             sentryModulesService.isOldDatabaseInstrEnabled()
                     },
                     OkHttpEventListener().takeIf {
-                        sentryModulesService.isOkHttpInstrEnabled()
+                        sentryModulesService.isOkHttpListenerInstrEnabled()
                     },
                     OkHttp().takeIf {
                         sentryModulesService.isOkHttpInstrEnabled()

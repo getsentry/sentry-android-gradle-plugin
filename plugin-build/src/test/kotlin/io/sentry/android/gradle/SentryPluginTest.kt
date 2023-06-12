@@ -260,6 +260,43 @@ class SentryPluginTest(
     }
 
     @Test
+    fun `does not apply okhttp listener on older version of sentry-android-okhttp`() {
+        applyTracingInstrumentation(
+            features = setOf(InstrumentationFeature.OKHTTP),
+            dependencies = setOf(
+                "com.squareup.okhttp3:okhttp:3.14.9",
+                "io.sentry:sentry-android-okhttp:6.19.0"
+            )
+        )
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--info")
+            .build()
+
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=OkHttp)" in build.output
+        }
+    }
+
+    @Test
+    fun `apply okhttp listener on sentry-android-okhttp 6_20`() {
+        applyTracingInstrumentation(
+            features = setOf(InstrumentationFeature.OKHTTP),
+            dependencies = setOf(
+                "com.squareup.okhttp3:okhttp:3.14.9",
+                "io.sentry:sentry-android-okhttp:6.20.0"
+            )
+        )
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--info")
+            .build()
+
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "OkHttpEventListener, OkHttp)" in build.output
+        }
+    }
+
+    @Test
     fun `applies all instrumentables when all features are enabled`() {
         applyTracingInstrumentation(
             features = setOf(
@@ -271,7 +308,7 @@ class SentryPluginTest(
             dependencies = setOf(
                 "androidx.sqlite:sqlite:2.0.0",
                 "com.squareup.okhttp3:okhttp:3.14.9",
-                "io.sentry:sentry-android-okhttp:6.6.0",
+                "io.sentry:sentry-android-okhttp:6.20.0",
                 "androidx.compose.runtime:runtime:1.1.0",
                 "io.sentry:sentry-compose-android:6.7.0",
                 "io.sentry:sentry-android-sqlite:6.21.0"
