@@ -79,6 +79,11 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
             SentryVersions.VERSION_FILE_IO
         ) && parameters.features.get().contains(InstrumentationFeature.FILE_IO)
 
+    fun isOkHttpListenerInstrEnabled(): Boolean = sentryModules.isAtLeast(
+        SentryModules.SENTRY_ANDROID_OKHTTP,
+        SentryVersions.VERSION_OKHTTP_LISTENER
+    ) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
+
     fun isOkHttpInstrEnabled(): Boolean = sentryModules.isAtLeast(
         SentryModules.SENTRY_ANDROID_OKHTTP,
         SentryVersions.VERSION_OKHTTP
