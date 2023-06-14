@@ -63,10 +63,14 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
         objects.property(Boolean::class.java).convention(true)
 
     /**
-     * Includes or not the source code of native code for Sentry.
+     * Includes or not the source code of native code when uploading native symbols for Sentry.
      * This executes sentry-cli with the --include-sources param. automatically so
      * you don't need to do it manually.
-     * Default is disabled.
+     *
+     * This only works with [uploadNativeSymbols] enabled.
+     * @see [uploadNativeSymbols]
+     *
+     * Default is disabled. 
      */
     val includeNativeSources: Property<Boolean> = objects.property(Boolean::class.java).convention(
         false
