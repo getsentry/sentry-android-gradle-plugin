@@ -9,6 +9,12 @@
     - This integration replaces the old database instrumentation with the `sentry-android-sqlite` integration
     - Any implementation of SupportSQLiteOpenHelper.Factory is now supported
 
+### Dependencies
+
+- Bump CLI from v2.18.1 to v2.19.0 ([#510](https://github.com/getsentry/sentry-android-gradle-plugin/pull/510))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2190)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.18.1...2.19.0)
+
 ## 3.10.0
 
 ### Dependencies
