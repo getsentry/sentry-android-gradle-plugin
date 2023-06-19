@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fixed OkHttpEventListener crash at compile time with OkHttp4 ([#514](https://github.com/getsentry/sentry-android-gradle-plugin/pull/514))
+
 ### Dependencies
 
 - Bump CLI from v2.18.1 to v2.19.1 ([#512](https://github.com/getsentry/sentry-android-gradle-plugin/pull/512))
