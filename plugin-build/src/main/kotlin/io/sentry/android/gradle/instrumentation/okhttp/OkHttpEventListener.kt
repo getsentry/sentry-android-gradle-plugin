@@ -7,10 +7,11 @@ import io.sentry.android.gradle.instrumentation.MethodContext
 import io.sentry.android.gradle.instrumentation.MethodInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.okhttp.visitor.OkHttpEventListenerMethodVisitor
+import io.sentry.android.gradle.util.SemVer
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 
-class OkHttpEventListener : ClassInstrumentable {
+class OkHttpEventListener(private val okHttpVersion: SemVer) : ClassInstrumentable {
     override val fqName: String get() = "okhttp3.OkHttpClient"
 
     override fun getVisitor(
@@ -22,12 +23,12 @@ class OkHttpEventListener : ClassInstrumentable {
         apiVersion = apiVersion,
         classVisitor = originalVisitor,
         className = fqName.substringAfterLast('.'),
-        methodInstrumentables = listOf(OkHttpEventListenerMethodInstrumentable()),
+        methodInstrumentables = listOf(OkHttpEventListenerMethodInstrumentable(okHttpVersion)),
         parameters = parameters
     )
 }
 
-class OkHttpEventListenerMethodInstrumentable : MethodInstrumentable {
+class OkHttpEventListenerMethodInstrumentable(private val okHttpVersion: SemVer) : MethodInstrumentable {
     override val fqName: String get() = "<init>"
 
     override fun getVisitor(
@@ -38,7 +39,8 @@ class OkHttpEventListenerMethodInstrumentable : MethodInstrumentable {
     ): MethodVisitor = OkHttpEventListenerMethodVisitor(
         apiVersion = apiVersion,
         originalVisitor = originalVisitor,
-        instrumentableContext = instrumentableContext
+        instrumentableContext = instrumentableContext,
+        okHttpVersion = okHttpVersion
     )
 
     override fun isInstrumentable(data: MethodContext): Boolean {
