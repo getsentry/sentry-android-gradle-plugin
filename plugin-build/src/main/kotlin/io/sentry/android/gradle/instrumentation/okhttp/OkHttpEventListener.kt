@@ -28,7 +28,9 @@ class OkHttpEventListener(private val okHttpVersion: SemVer) : ClassInstrumentab
     )
 }
 
-class OkHttpEventListenerMethodInstrumentable(private val okHttpVersion: SemVer) : MethodInstrumentable {
+class OkHttpEventListenerMethodInstrumentable(
+    private val okHttpVersion: SemVer
+) : MethodInstrumentable {
     override val fqName: String get() = "<init>"
 
     override fun getVisitor(
