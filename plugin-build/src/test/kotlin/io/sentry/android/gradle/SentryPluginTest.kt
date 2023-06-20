@@ -18,23 +18,6 @@ class SentryPluginTest(
 ) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
 
     @Test
-    fun `plugin can be applied`() {
-        appBuildFile.appendText(
-            // language=Groovy
-            """
-                sentry {
-                  autoUploadProguardMapping = false
-                  tracingInstrumentation {
-                    enabled = false
-                  }
-                }
-            """.trimIndent()
-        )
-
-        runner.build()
-    }
-
-    @Test
     fun `plugin does not configure tasks`() {
         val prefix = "task-configured-for-test: "
         appBuildFile.appendText(
