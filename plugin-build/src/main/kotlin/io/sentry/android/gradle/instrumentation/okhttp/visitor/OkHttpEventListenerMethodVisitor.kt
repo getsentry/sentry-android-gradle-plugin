@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.instrumentation.okhttp.visitor
 
 import io.sentry.android.gradle.instrumentation.MethodContext
+import io.sentry.android.gradle.util.SemVer
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.commons.AdviceAdapter
@@ -8,7 +9,8 @@ import org.objectweb.asm.commons.AdviceAdapter
 class OkHttpEventListenerMethodVisitor(
     apiVersion: Int,
     originalVisitor: MethodVisitor,
-    instrumentableContext: MethodContext
+    instrumentableContext: MethodContext,
+    private val okHttpVersion: SemVer
 ) : AdviceAdapter(
     apiVersion,
     originalVisitor,
@@ -37,12 +39,25 @@ class OkHttpEventListenerMethodVisitor(
         visitVarInsn(Opcodes.ALOAD, 1)
 
         // Read the "eventListenerFactory" field from OkHttpClient.Builder
-        visitFieldInsn(
-            Opcodes.GETFIELD,
-            "okhttp3/OkHttpClient\$Builder",
-            "eventListenerFactory",
-            "Lokhttp3/EventListener\$Factory;"
-        )
+        // Implementation changed in v4 (including 4.0.0-RCx)
+        if (okHttpVersion.major >= 4) {
+            // Call the getter
+            visitMethodInsn(
+                Opcodes.INVOKEVIRTUAL,
+                "okhttp3/OkHttpClient\$Builder",
+                "getEventListenerFactory\$okhttp",
+                "()Lokhttp3/EventListener\$Factory;",
+                false
+            )
+        } else {
+            // Read the field
+            visitFieldInsn(
+                Opcodes.GETFIELD,
+                "okhttp3/OkHttpClient\$Builder",
+                "eventListenerFactory",
+                "Lokhttp3/EventListener\$Factory;"
+            )
+        }
 
         // Call SentryOkHttpEventListener constructor passing "eventListenerFactory" as parameter
         visitMethodInsn(

@@ -81,6 +81,11 @@ abstract class SpanAddingClassVisitorFactory :
                 androidXSqliteFrameWorkModule,
                 SemVer()
             )
+            val okHttpModule = DefaultModuleIdentifier.newId(
+                "com.squareup.okhttp3",
+                "okhttp"
+            )
+            val okHttpVersion = externalModules.getOrDefault(okHttpModule, SemVer())
 
             SentryPlugin.logger.info { "Read sentry modules: $sentryModules" }
 
@@ -100,7 +105,7 @@ abstract class SpanAddingClassVisitorFactory :
                         sentryModulesService.isNewDatabaseInstrEnabled() ||
                             sentryModulesService.isOldDatabaseInstrEnabled()
                     },
-                    OkHttpEventListener().takeIf {
+                    OkHttpEventListener(okHttpVersion).takeIf {
                         sentryModulesService.isOkHttpListenerInstrEnabled()
                     },
                     OkHttp().takeIf {
