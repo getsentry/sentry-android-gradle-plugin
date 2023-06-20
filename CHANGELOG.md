@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Fixed OkHttpEventListener crash at compile time with OkHttp4 ([#514](https://github.com/getsentry/sentry-android-gradle-plugin/pull/514))
+- Fixed OkHttpEventListener crash at runtime with OkHttp4 ([#514](https://github.com/getsentry/sentry-android-gradle-plugin/pull/514))
 
 ### Dependencies
 
