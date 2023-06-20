@@ -313,6 +313,7 @@ buildConfig {
 
     buildConfigField("String", "Version", provider { "\"${project.version}\"" })
     buildConfigField("String", "SdkVersion", provider { "\"${project.property("sdk_version")}\"" })
+    buildConfigField("String", "AgpVersion", provider { "\"${BuildPluginsVersion.AGP}\"" })
 }
 
 tasks.register<ASMifyTask>("asmify")

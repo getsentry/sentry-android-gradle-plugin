@@ -1,16 +1,12 @@
 package io.sentry.android.gradle
 
 import io.sentry.BuildConfig
+import org.gradle.util.GradleVersion
 import kotlin.test.assertTrue
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@RunWith(Parameterized::class)
-class SentryKotlinCompilerPluginTest(
-    androidGradlePluginVersion: String,
-    gradleVersion: String
-) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
+class SentryKotlinCompilerPluginTest :
+    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
     override val additionalBuildClasspath: String =
         """
