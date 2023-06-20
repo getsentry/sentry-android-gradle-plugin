@@ -70,7 +70,7 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      * This only works with [uploadNativeSymbols] enabled.
      * @see [uploadNativeSymbols]
      *
-     * Default is disabled. 
+     * Default is disabled.
      */
     val includeNativeSources: Property<Boolean> = objects.property(Boolean::class.java).convention(
         false
