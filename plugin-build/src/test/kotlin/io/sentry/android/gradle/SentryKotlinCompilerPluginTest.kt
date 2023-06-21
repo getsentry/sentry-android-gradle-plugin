@@ -1,8 +1,8 @@
 package io.sentry.android.gradle
 
 import io.sentry.BuildConfig
-import org.gradle.util.GradleVersion
 import kotlin.test.assertTrue
+import org.gradle.util.GradleVersion
 import org.junit.Test
 
 class SentryKotlinCompilerPluginTest :
