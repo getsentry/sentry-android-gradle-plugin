@@ -469,7 +469,11 @@ class SentryPluginTest(
         runner.appendArguments(":app:assembleDebug")
         runner.build()
 
-        val integrations = verifyIntegrationList(testProjectDir.root, variant = "debug").sorted()
+        val integrations = verifyIntegrationList(
+            testProjectDir.root,
+            variant = "debug",
+            signed = false
+        ).sorted()
 
         val expectedIntegrations = listOf(
             InstrumentationFeature.DATABASE,
@@ -499,7 +503,11 @@ class SentryPluginTest(
         runner.appendArguments(":app:assembleDebug")
 
         runner.build()
-        val integrations = verifyIntegrationList(testProjectDir.root, variant = "debug").sorted()
+        val integrations = verifyIntegrationList(
+            testProjectDir.root,
+            variant = "debug",
+            signed = false
+        ).sorted()
 
         val expectedIntegrations = listOf(
             InstrumentationFeature.DATABASE,
@@ -525,7 +533,7 @@ class SentryPluginTest(
         runner.build()
 
         assertThrows(NoSuchElementException::class.java) {
-            verifyIntegrationList(testProjectDir.root)
+            verifyIntegrationList(testProjectDir.root, variant = "debug", signed = false)
         }
     }
 
