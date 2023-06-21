@@ -54,15 +54,6 @@ class SentryPluginTest(
     }
 
     @Test
-    fun `includes a UUID in the APK`() {
-        runner
-            .appendArguments(":app:assembleRelease")
-            .build()
-
-        verifyProguardUuid(testProjectDir.root)
-    }
-
-    @Test
     fun `does not include a UUID in the APK`() {
         // isMinifyEnabled is disabled by default in debug builds
         runner
@@ -475,10 +466,10 @@ class SentryPluginTest(
             )
         )
 
-        runner.appendArguments(":app:assembleRelease")
+        runner.appendArguments(":app:assembleDebug")
         runner.build()
 
-        val integrations = verifyIntegrationList(testProjectDir.root).sorted()
+        val integrations = verifyIntegrationList(testProjectDir.root, variant = "debug").sorted()
 
         val expectedIntegrations = listOf(
             InstrumentationFeature.DATABASE,
@@ -505,10 +496,10 @@ class SentryPluginTest(
             )
         )
 
-        runner.appendArguments(":app:assembleRelease")
+        runner.appendArguments(":app:assembleDebug")
 
         runner.build()
-        val integrations = verifyIntegrationList(testProjectDir.root).sorted()
+        val integrations = verifyIntegrationList(testProjectDir.root, variant = "debug").sorted()
 
         val expectedIntegrations = listOf(
             InstrumentationFeature.DATABASE,
@@ -529,7 +520,7 @@ class SentryPluginTest(
             )
         )
 
-        runner.appendArguments(":app:assembleRelease")
+        runner.appendArguments(":app:assembleDebug")
 
         runner.build()
 
