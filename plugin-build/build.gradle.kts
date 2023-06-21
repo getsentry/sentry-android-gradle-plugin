@@ -150,6 +150,8 @@ tasks.withType<Test>().configureEach {
     // Cap JVM args per test
     minHeapSize = "128m"
     maxHeapSize = "1g"
+
+    setForkEvery(100)
 }
 
 gradlePlugin {
