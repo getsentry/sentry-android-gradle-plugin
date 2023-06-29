@@ -31,11 +31,7 @@ dependencies {
     implementation(Samples.SpringBoot.kotlinReflect)
     implementation(Samples.SpringBoot.springBootStarterJdbc)
     implementation(kotlin(Samples.SpringBoot.kotlinStdLib, KotlinCompilerVersion.VERSION))
-    implementation("io.sentry:sentry-spring-boot-starter:6.5.0")
-    implementation("io.sentry:sentry-logback:6.5.0")
 
-    // database query tracing
-    implementation("io.sentry:sentry-jdbc:6.5.0")
     runtimeOnly(Samples.SpringBoot.hsqldb)
     testImplementation(Samples.SpringBoot.springBootStarterTest) {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")

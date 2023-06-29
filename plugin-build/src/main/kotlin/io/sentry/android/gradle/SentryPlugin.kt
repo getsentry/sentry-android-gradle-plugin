@@ -68,7 +68,7 @@ class SentryPlugin : Plugin<Project> {
                 sentryProjectParameter
             )
 
-            project.installDependencies(extension)
+            project.installDependencies(extension, true)
         }
     }
 

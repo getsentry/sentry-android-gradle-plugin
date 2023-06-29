@@ -17,6 +17,8 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
 
     protected open val minSupportedThirdPartyVersion: SemVer = SemVer(0, 0, 0)
 
+    protected open val maxSupportedThirdPartyVersion: SemVer? = null
+
     protected open val minSupportedSentryVersion: SemVer = SemVer(0, 0, 0)
 
     override fun execute(context: ComponentMetadataContext) {
@@ -34,6 +36,15 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
                     "lower than the minimum supported version ($minSupportedThirdPartyVersion)"
             }
             return
+        }
+        maxSupportedThirdPartyVersion?.let {
+            if (thirdPartySemVersion > it) {
+                logger.warn {
+                    "$sentryModuleId won't be installed because the current version is " +
+                        "higher than the maximum supported version ($it)"
+                }
+                return
+            }
         }
 
         if (minSupportedSentryVersion.major > 0) {
