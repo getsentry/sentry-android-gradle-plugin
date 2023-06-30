@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Auto install Sentry integrations for Java Backend, Desktop, etc. ([#521](https://github.com/getsentry/sentry-android-gradle-plugin/pull/521))
+
 ## 3.11.1
 
 ### Fixes
