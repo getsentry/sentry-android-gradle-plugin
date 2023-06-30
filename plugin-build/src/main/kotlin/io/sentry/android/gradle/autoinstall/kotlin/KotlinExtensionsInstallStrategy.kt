@@ -22,7 +22,8 @@ abstract class KotlinExtensionsInstallStrategy : AbstractInstallStrategy {
 
     override val sentryModuleId: String get() = SENTRY_KOTLIN_EXTENSIONS_ID
 
-    override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installKotlinExtensions
+    override val shouldInstallModule: Boolean get() =
+        AutoInstallState.getInstance().installKotlinExtensions
 
     override val minSupportedThirdPartyVersion: SemVer get() = MIN_SUPPORTED_VERSION
 

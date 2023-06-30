@@ -61,7 +61,12 @@ fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boo
                 val sentryVersion = dependencies.findSentryVersion(isAndroid)
                 with(AutoInstallState.getInstance(gradle)) {
                     val sentryArtifactId = if (isAndroid) SENTRY_ANDROID_ID else SENTRY_JAVA_ID
-                    this.sentryVersion = installSentrySdk(sentryVersion, dependencies, sentryArtifactId, extension)
+                    this.sentryVersion = installSentrySdk(
+                        sentryVersion,
+                        dependencies,
+                        sentryArtifactId,
+                        extension
+                    )
 
                     installOkHttp = !dependencies.isModuleAvailable(SENTRY_OKHTTP_ID)
                     installSqlite = !dependencies.isModuleAvailable(SENTRY_SQLITE_ID)
@@ -69,15 +74,17 @@ fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boo
                     installFragment = !dependencies.isModuleAvailable(SENTRY_FRAGMENT_ID)
                     installCompose = !dependencies.isModuleAvailable(SENTRY_COMPOSE_ID)
                     installSpring = !(
-                        dependencies.isModuleAvailable(SENTRY_SPRING_BOOT_2_ID)
-                            && dependencies.isModuleAvailable(SENTRY_SPRING_BOOT_3_ID)
-                            && dependencies.isModuleAvailable(SENTRY_SPRING_5_ID)
-                            && dependencies.isModuleAvailable(SENTRY_SPRING_6_ID)
+                        dependencies.isModuleAvailable(SENTRY_SPRING_BOOT_2_ID) &&
+                            dependencies.isModuleAvailable(SENTRY_SPRING_BOOT_3_ID) &&
+                            dependencies.isModuleAvailable(SENTRY_SPRING_5_ID) &&
+                            dependencies.isModuleAvailable(SENTRY_SPRING_6_ID)
                         )
                     installLogback = !dependencies.isModuleAvailable(SENTRY_LOGBACK_ID)
                     installLog4j2 = !dependencies.isModuleAvailable(SENTRY_LOG4J2_ID)
                     installJdbc = !dependencies.isModuleAvailable(SENTRY_JDBC_ID)
-                    installKotlinExtensions = !dependencies.isModuleAvailable(SENTRY_KOTLIN_EXTENSIONS_ID)
+                    installKotlinExtensions = !dependencies.isModuleAvailable(
+                        SENTRY_KOTLIN_EXTENSIONS_ID
+                    )
                 }
             }
         }

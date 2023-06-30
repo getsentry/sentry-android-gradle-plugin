@@ -75,8 +75,6 @@ abstract class JdbcInstallStrategy : AbstractInstallStrategy {
             ) {}
 
             (5..14).forEach {
-                println("$ORACLE_GROUP:$ORACLE_OJDBC_ID_PREFIX$it")
-
                 component.withModule(
                     "$ORACLE_GROUP:$ORACLE_OJDBC_ID_PREFIX$it",
                     JdbcInstallStrategy::class.java
@@ -87,6 +85,6 @@ abstract class JdbcInstallStrategy : AbstractInstallStrategy {
                     JdbcInstallStrategy::class.java
                 ) {}
             }
-            }
+        }
     }
 }
