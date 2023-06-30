@@ -26,7 +26,7 @@ abstract class Log4j2InstallStrategy : AbstractInstallStrategy {
 
     override val minSupportedThirdPartyVersion: SemVer get() = MIN_SUPPORTED_VERSION
 
-    override val minSupportedSentryVersion: SemVer get() = SemVer(4, 4, 0)
+    override val minSupportedSentryVersion: SemVer get() = SemVer(4, 1, 0)
 
     companion object Registrar : InstallStrategyRegistrar {
         private const val LOG4J2_GROUP = "org.apache.logging.log4j"

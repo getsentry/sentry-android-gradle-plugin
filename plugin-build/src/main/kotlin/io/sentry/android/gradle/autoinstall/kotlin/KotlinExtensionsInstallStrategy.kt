@@ -26,7 +26,7 @@ abstract class KotlinExtensionsInstallStrategy : AbstractInstallStrategy {
 
     override val minSupportedThirdPartyVersion: SemVer get() = MIN_SUPPORTED_VERSION
 
-    override val minSupportedSentryVersion: SemVer get() = SemVer(4, 4, 0)
+    override val minSupportedSentryVersion: SemVer get() = SemVer(5, 0, 0)
 
     companion object Registrar : InstallStrategyRegistrar {
         private const val KOTLINX_GROUP = "org.jetbrains.kotlinx"

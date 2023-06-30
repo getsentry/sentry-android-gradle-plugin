@@ -26,7 +26,7 @@ abstract class Spring6InstallStrategy : AbstractInstallStrategy {
 
     override val minSupportedThirdPartyVersion: SemVer get() = MIN_SUPPORTED_VERSION
 
-    override val minSupportedSentryVersion: SemVer get() = SemVer(4, 4, 0)
+    override val minSupportedSentryVersion: SemVer get() = SemVer(6, 7, 0)
 
     companion object Registrar : InstallStrategyRegistrar {
         private const val SPRING_GROUP = "org.springframework"

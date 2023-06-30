@@ -28,7 +28,7 @@ abstract class SpringBoot2InstallStrategy : AbstractInstallStrategy {
 
     override val maxSupportedThirdPartyVersion: SemVer get() = MAX_SUPPORTED_VERSION
 
-    override val minSupportedSentryVersion: SemVer get() = SemVer(4, 4, 0)
+    override val minSupportedSentryVersion: SemVer get() = SemVer(4, 1, 0)
 
     companion object Registrar : InstallStrategyRegistrar {
         private const val SPRING_GROUP = "org.springframework.boot"
