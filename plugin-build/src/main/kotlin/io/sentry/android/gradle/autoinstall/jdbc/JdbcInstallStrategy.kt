@@ -24,8 +24,6 @@ abstract class JdbcInstallStrategy : AbstractInstallStrategy {
 
     override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installJdbc
 
-    override val minSupportedThirdPartyVersion: SemVer get() = MIN_SUPPORTED_VERSION
-
     override val minSupportedSentryVersion: SemVer get() = SemVer(5, 3, 0)
 
     companion object Registrar : InstallStrategyRegistrar {
@@ -45,12 +43,10 @@ abstract class JdbcInstallStrategy : AbstractInstallStrategy {
         private const val POSTGRES_ID = "postgresql"
 
         private const val ORACLE_GROUP = "com.oracle.jdbc"
-        private const val ORACLE_DATABASE_GROUP = "com.oracle.datqbase.jdbc"
+        private const val ORACLE_DATABASE_GROUP = "com.oracle.database.jdbc"
         private const val ORACLE_OJDBC_ID_PREFIX = "ojdbc"
 
         internal const val SENTRY_JDBC_ID = "sentry-jdbc"
-
-        private val MIN_SUPPORTED_VERSION = SemVer(1, 0, 0)
 
         override fun register(component: ComponentMetadataHandler) {
             component.withModule(
