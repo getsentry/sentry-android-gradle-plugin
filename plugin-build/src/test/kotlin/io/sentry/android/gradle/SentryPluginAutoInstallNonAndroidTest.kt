@@ -59,7 +59,9 @@ class SentryPluginAutoInstallNonAndroidTest(
         assertFalse { "io.sentry:sentry-spring:$SENTRY_SDK_VERSION" in result.output }
         assertFalse { "io.sentry:sentry-spring-jakarta:$SENTRY_SDK_VERSION" in result.output }
         assertFalse { "io.sentry:sentry-spring-boot-starter:$SENTRY_SDK_VERSION" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot-starter-jakarta:$SENTRY_SDK_VERSION" in result.output }
+        assertFalse {
+            "io.sentry:sentry-spring-boot-starter-jakarta:$SENTRY_SDK_VERSION" in result.output
+        }
         assertFalse { "io.sentry:sentry-logback:$SENTRY_SDK_VERSION" in result.output }
         assertFalse { "io.sentry:sentry-log4j2:$SENTRY_SDK_VERSION" in result.output }
 
