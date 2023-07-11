@@ -86,12 +86,8 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
     }
 
     private fun parseVersion(version: String): SemVer? {
-        val semVer = parseVersionSafely(version)
-        if (semVer == null && version.endsWith(".RELEASE")) {
-            // workaround for Spring versions ending in .RELEASE
-            return parseVersionSafely(version.removeSuffix(".RELEASE"))
-        }
-        return semVer
+        // older Spring versions ended in .RELEASE
+        return parseVersionSafely(version.removeSuffix(".RELEASE"))
     }
 
     private fun parseVersionSafely(version: String): SemVer? {
