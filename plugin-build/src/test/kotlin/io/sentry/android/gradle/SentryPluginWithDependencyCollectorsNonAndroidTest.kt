@@ -23,6 +23,7 @@ class SentryPluginWithDependencyCollectorsNonAndroidTest :
               implementation 'org.apache.logging.log4j:log4j-api:2.0'
               implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2'
               implementation 'org.postgresql:postgresql:42.6.0'
+              implementation 'com.graphql-java:graphql-java:17.3'
             }
 
             sentry {

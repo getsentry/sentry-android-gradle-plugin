@@ -8,7 +8,7 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import io.sentry.android.gradle.autoinstall.AutoInstallState
-import io.sentry.android.gradle.autoinstall.logback.GraphqlInstallStrategy
+import io.sentry.android.gradle.autoinstall.logback.LogbackInstallStrategy
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -42,7 +42,7 @@ class LogbackInstallStrategyTest {
         fun getSut(
             installLogback: Boolean = true,
             logbackVersion: String = "2.0.0"
-        ): GraphqlInstallStrategy {
+        ): LogbackInstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
                 whenever(it.version).doReturn(logbackVersion)
             }
@@ -100,5 +100,5 @@ class LogbackInstallStrategyTest {
         )
     }
 
-    private class LogbackInstallStrategyImpl(logger: Logger) : GraphqlInstallStrategy(logger)
+    private class LogbackInstallStrategyImpl(logger: Logger) : LogbackInstallStrategy(logger)
 }
