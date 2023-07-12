@@ -34,7 +34,7 @@ class SentryPluginWithDependencyCollectorsNonAndroidTest :
         )
 
         val result = runner
-            .appendArguments("app:build")
+            .appendArguments("app:collectDependencies")
             .build()
 
         assertTrue { "BUILD SUCCESSFUL" in result.output }

@@ -49,7 +49,7 @@ class GraphqlInstallStrategyTest {
 
             with(AutoInstallState.getInstance()) {
                 this.installGraphql = installGraphql
-                this.sentryVersion = "6.21.0"
+                this.sentryVersion = "6.25.2"
             }
             return GraphqlInstallStrategyImpl(logger)
         }
@@ -77,11 +77,11 @@ class GraphqlInstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-graphql was successfully installed with version: 6.21.0"
+                "[sentry] sentry-graphql was successfully installed with version: 6.25.2"
         }
         verify(fixture.dependencies).add(
             com.nhaarman.mockitokotlin2.check<String> {
-                assertEquals("io.sentry:sentry-graphql:6.21.0", it)
+                assertEquals("io.sentry:sentry-graphql:6.25.2", it)
             }
         )
     }

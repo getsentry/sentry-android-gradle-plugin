@@ -49,7 +49,7 @@ class KotlinExtensionsInstallStrategyTest {
 
             with(AutoInstallState.getInstance()) {
                 this.installKotlinExtensions = installKotlinExtensions
-                this.sentryVersion = "6.21.0"
+                this.sentryVersion = "6.25.2"
             }
             return KotlinExtensionsInstallStrategyImpl(logger)
         }
@@ -90,11 +90,11 @@ class KotlinExtensionsInstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-kotlin-extensions was successfully installed with version: 6.21.0"
+                "[sentry] sentry-kotlin-extensions was successfully installed with version: 6.25.2"
         }
         verify(fixture.dependencies).add(
             com.nhaarman.mockitokotlin2.check<String> {
-                assertEquals("io.sentry:sentry-kotlin-extensions:6.21.0", it)
+                assertEquals("io.sentry:sentry-kotlin-extensions:6.25.2", it)
             }
         )
     }
