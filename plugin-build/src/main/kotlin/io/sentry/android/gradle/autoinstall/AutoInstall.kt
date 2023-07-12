@@ -10,6 +10,8 @@ import io.sentry.android.gradle.autoinstall.kotlin.KotlinExtensionsInstallStrate
 import io.sentry.android.gradle.autoinstall.kotlin.KotlinExtensionsInstallStrategy.Registrar.SENTRY_KOTLIN_EXTENSIONS_ID
 import io.sentry.android.gradle.autoinstall.log4j2.Log4j2InstallStrategy
 import io.sentry.android.gradle.autoinstall.log4j2.Log4j2InstallStrategy.Registrar.SENTRY_LOG4J2_ID
+import io.sentry.android.gradle.autoinstall.graphql.GraphqlInstallStrategy
+import io.sentry.android.gradle.autoinstall.graphql.GraphqlInstallStrategy.Registrar.SENTRY_GRAPHQL_ID
 import io.sentry.android.gradle.autoinstall.logback.LogbackInstallStrategy
 import io.sentry.android.gradle.autoinstall.logback.LogbackInstallStrategy.Registrar.SENTRY_LOGBACK_ID
 import io.sentry.android.gradle.autoinstall.okhttp.OkHttpInstallStrategy
@@ -49,6 +51,7 @@ private val strategies = listOf(
     LogbackInstallStrategy.Registrar,
     Log4j2InstallStrategy.Registrar,
     JdbcInstallStrategy.Registrar,
+    GraphqlInstallStrategy.Registrar,
     KotlinExtensionsInstallStrategy.Registrar
 )
 
@@ -82,6 +85,7 @@ fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boo
                     installLogback = !dependencies.isModuleAvailable(SENTRY_LOGBACK_ID)
                     installLog4j2 = !dependencies.isModuleAvailable(SENTRY_LOG4J2_ID)
                     installJdbc = !dependencies.isModuleAvailable(SENTRY_JDBC_ID)
+                    installGraphql = !dependencies.isModuleAvailable(SENTRY_GRAPHQL_ID)
                     installKotlinExtensions = !dependencies.isModuleAvailable(
                         SENTRY_KOTLIN_EXTENSIONS_ID
                     )

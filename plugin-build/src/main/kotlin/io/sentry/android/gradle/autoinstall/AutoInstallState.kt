@@ -48,6 +48,10 @@ class AutoInstallState private constructor() : Serializable {
 
     @get:Synchronized
     @set:Synchronized
+    var installGraphql: Boolean = false
+
+    @get:Synchronized
+    @set:Synchronized
     var installKotlinExtensions: Boolean = false
 
     override fun toString(): String {
@@ -61,6 +65,7 @@ class AutoInstallState private constructor() : Serializable {
             "installLogback=$installLogback, " +
             "installLog4j2=$installLog4j2, " +
             "installJdbc=$installJdbc), " +
+            "installGraphql=$installGraphql), " +
             "installKotlinExtensions=$installKotlinExtensions)"
     }
 
@@ -80,6 +85,7 @@ class AutoInstallState private constructor() : Serializable {
         if (installLogback != other.installLogback) return false
         if (installLog4j2 != other.installLog4j2) return false
         if (installJdbc != other.installJdbc) return false
+        if (installGraphql != other.installGraphql) return false
         if (installKotlinExtensions != other.installKotlinExtensions) return false
 
         return true
@@ -96,6 +102,7 @@ class AutoInstallState private constructor() : Serializable {
         result = 31 * result + installLogback.hashCode()
         result = 31 * result + installLog4j2.hashCode()
         result = 31 * result + installJdbc.hashCode()
+        result = 31 * result + installGraphql.hashCode()
         result = 31 * result + installKotlinExtensions.hashCode()
         return result
     }
