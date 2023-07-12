@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.autoinstall.sqlite
+package io.sentry.android.gradle.autoinstall.spring
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doAnswer
@@ -8,7 +8,6 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import io.sentry.android.gradle.autoinstall.AutoInstallState
-import io.sentry.android.gradle.autoinstall.spring.SpringBoot3InstallStrategy
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -59,14 +58,14 @@ class SpringBoot3InstallStrategyTest {
     private val fixture = Fixture()
 
     @Test
-    fun `when sentry-spring-boot-starter-jakarta is a direct dependency logs a message and does nothing`() {
+    fun `when sentry-spring-boot-starter-jakarta is direct dependency logs and does nothing`() {
         val sut = fixture.getSut(installSpring = false)
         sut.execute(fixture.metadataContext)
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-spring-boot-starter-jakarta won't be installed because it was already " +
-                "installed directly"
+                "[sentry] sentry-spring-boot-starter-jakarta won't be installed because it was " +
+                "already installed directly"
         }
         verify(fixture.metadataContext, never()).details
     }
@@ -78,8 +77,8 @@ class SpringBoot3InstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-spring-boot-starter-jakarta won't be installed because the current " +
-                "version is lower than the minimum supported version (3.0.0)"
+                "[sentry] sentry-spring-boot-starter-jakarta won't be installed because the " +
+                "current version is lower than the minimum supported version (3.0.0)"
         }
         verify(fixture.metadataDetails, never()).allVariants(any())
     }
@@ -91,7 +90,8 @@ class SpringBoot3InstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-spring-boot-starter-jakarta was successfully installed with version: 6.21.0"
+                "[sentry] sentry-spring-boot-starter-jakarta was successfully installed with " +
+                "version: 6.21.0"
         }
         verify(fixture.dependencies).add(
             com.nhaarman.mockitokotlin2.check<String> {
@@ -100,5 +100,7 @@ class SpringBoot3InstallStrategyTest {
         )
     }
 
-    private class SpringBoot3InstallStrategyImpl(logger: Logger) : SpringBoot3InstallStrategy(logger)
+    private class SpringBoot3InstallStrategyImpl(logger: Logger) : SpringBoot3InstallStrategy(
+        logger
+    )
 }

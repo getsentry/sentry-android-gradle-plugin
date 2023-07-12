@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.autoinstall.sqlite
+package io.sentry.android.gradle.autoinstall.spring
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doAnswer
@@ -8,7 +8,6 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import io.sentry.android.gradle.autoinstall.AutoInstallState
-import io.sentry.android.gradle.autoinstall.spring.SpringBoot2InstallStrategy
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -104,7 +103,8 @@ class SpringBoot2InstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-spring-boot-starter was successfully installed with version: 6.21.0"
+                "[sentry] sentry-spring-boot-starter was successfully installed with version: " +
+                "6.21.0"
         }
         verify(fixture.dependencies).add(
             com.nhaarman.mockitokotlin2.check<String> {
@@ -113,5 +113,7 @@ class SpringBoot2InstallStrategyTest {
         )
     }
 
-    private class SpringBoot2InstallStrategyImpl(logger: Logger) : SpringBoot2InstallStrategy(logger)
+    private class SpringBoot2InstallStrategyImpl(logger: Logger) : SpringBoot2InstallStrategy(
+        logger
+    )
 }

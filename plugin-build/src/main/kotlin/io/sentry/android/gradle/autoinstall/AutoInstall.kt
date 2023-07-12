@@ -4,14 +4,14 @@ import io.sentry.android.gradle.autoinstall.compose.ComposeInstallStrategy
 import io.sentry.android.gradle.autoinstall.compose.ComposeInstallStrategy.Registrar.SENTRY_COMPOSE_ID
 import io.sentry.android.gradle.autoinstall.fragment.FragmentInstallStrategy
 import io.sentry.android.gradle.autoinstall.fragment.FragmentInstallStrategy.Registrar.SENTRY_FRAGMENT_ID
+import io.sentry.android.gradle.autoinstall.graphql.GraphqlInstallStrategy
+import io.sentry.android.gradle.autoinstall.graphql.GraphqlInstallStrategy.Registrar.SENTRY_GRAPHQL_ID
 import io.sentry.android.gradle.autoinstall.jdbc.JdbcInstallStrategy
 import io.sentry.android.gradle.autoinstall.jdbc.JdbcInstallStrategy.Registrar.SENTRY_JDBC_ID
 import io.sentry.android.gradle.autoinstall.kotlin.KotlinExtensionsInstallStrategy
 import io.sentry.android.gradle.autoinstall.kotlin.KotlinExtensionsInstallStrategy.Registrar.SENTRY_KOTLIN_EXTENSIONS_ID
 import io.sentry.android.gradle.autoinstall.log4j2.Log4j2InstallStrategy
 import io.sentry.android.gradle.autoinstall.log4j2.Log4j2InstallStrategy.Registrar.SENTRY_LOG4J2_ID
-import io.sentry.android.gradle.autoinstall.graphql.GraphqlInstallStrategy
-import io.sentry.android.gradle.autoinstall.graphql.GraphqlInstallStrategy.Registrar.SENTRY_GRAPHQL_ID
 import io.sentry.android.gradle.autoinstall.logback.LogbackInstallStrategy
 import io.sentry.android.gradle.autoinstall.logback.LogbackInstallStrategy.Registrar.SENTRY_LOGBACK_ID
 import io.sentry.android.gradle.autoinstall.okhttp.OkHttpInstallStrategy
