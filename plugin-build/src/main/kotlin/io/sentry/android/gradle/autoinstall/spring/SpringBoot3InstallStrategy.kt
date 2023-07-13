@@ -26,7 +26,7 @@ abstract class SpringBoot3InstallStrategy : AbstractInstallStrategy {
 
     override val minSupportedThirdPartyVersion: SemVer get() = MIN_SUPPORTED_VERSION
 
-    override val minSupportedSentryVersion: SemVer get() = SemVer(6, 7, 0)
+    override val minSupportedSentryVersion: SemVer get() = SemVer(6, 25, 2)
 
     companion object Registrar : InstallStrategyRegistrar {
         private const val SPRING_GROUP = "org.springframework.boot"

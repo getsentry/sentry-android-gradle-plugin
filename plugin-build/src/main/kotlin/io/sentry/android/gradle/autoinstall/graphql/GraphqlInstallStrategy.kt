@@ -24,7 +24,7 @@ abstract class GraphqlInstallStrategy : AbstractInstallStrategy {
 
     override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installGraphql
 
-    // prior versions would cause circular dependencies
+    // prior versions could cause circular dependencies
     // due to having graphql as implementation dependency
     override val minSupportedSentryVersion: SemVer get() = SemVer(6, 25, 2)
 

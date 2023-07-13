@@ -49,7 +49,7 @@ class LogbackInstallStrategyTest {
 
             with(AutoInstallState.getInstance()) {
                 this.installLogback = installLogback
-                this.sentryVersion = "6.21.0"
+                this.sentryVersion = "6.25.2"
             }
             return LogbackInstallStrategyImpl(logger)
         }
@@ -90,11 +90,11 @@ class LogbackInstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-logback was successfully installed with version: 6.21.0"
+                "[sentry] sentry-logback was successfully installed with version: 6.25.2"
         }
         verify(fixture.dependencies).add(
             com.nhaarman.mockitokotlin2.check<String> {
-                assertEquals("io.sentry:sentry-logback:6.21.0", it)
+                assertEquals("io.sentry:sentry-logback:6.25.2", it)
             }
         )
     }

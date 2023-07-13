@@ -49,7 +49,7 @@ class Log4j2InstallStrategyTest {
 
             with(AutoInstallState.getInstance()) {
                 this.installLog4j2 = installLog4j2
-                this.sentryVersion = "6.21.0"
+                this.sentryVersion = "6.25.2"
             }
             return Log4j2InstallStrategyImpl(logger)
         }
@@ -90,11 +90,11 @@ class Log4j2InstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-log4j2 was successfully installed with version: 6.21.0"
+                "[sentry] sentry-log4j2 was successfully installed with version: 6.25.2"
         }
         verify(fixture.dependencies).add(
             com.nhaarman.mockitokotlin2.check<String> {
-                assertEquals("io.sentry:sentry-log4j2:6.21.0", it)
+                assertEquals("io.sentry:sentry-log4j2:6.25.2", it)
             }
         )
     }

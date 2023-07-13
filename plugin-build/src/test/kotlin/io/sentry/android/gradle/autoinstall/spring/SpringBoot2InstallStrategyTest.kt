@@ -49,7 +49,7 @@ class SpringBoot2InstallStrategyTest {
 
             with(AutoInstallState.getInstance()) {
                 this.installSpring = installSpring
-                this.sentryVersion = "6.21.0"
+                this.sentryVersion = "6.25.2"
             }
             return SpringBoot2InstallStrategyImpl(logger)
         }
@@ -104,11 +104,11 @@ class SpringBoot2InstallStrategyTest {
         assertTrue {
             fixture.logger.capturedMessage ==
                 "[sentry] sentry-spring-boot-starter was successfully installed with version: " +
-                "6.21.0"
+                "6.25.2"
         }
         verify(fixture.dependencies).add(
             com.nhaarman.mockitokotlin2.check<String> {
-                assertEquals("io.sentry:sentry-spring-boot-starter:6.21.0", it)
+                assertEquals("io.sentry:sentry-spring-boot-starter:6.25.2", it)
             }
         )
     }
