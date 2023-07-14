@@ -40,7 +40,7 @@ class KotlinExtensionsInstallStrategyTest {
 
         fun getSut(
             installKotlinExtensions: Boolean = true,
-            kotlinExtensionsVersion: String = "2.0.0"
+            kotlinExtensionsVersion: String = "1.6.1"
         ): KotlinExtensionsInstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
                 whenever(it.version).doReturn(kotlinExtensionsVersion)
@@ -72,13 +72,13 @@ class KotlinExtensionsInstallStrategyTest {
 
     @Test
     fun `when kotlinExtensions version is unsupported logs a message and does nothing`() {
-        val sut = fixture.getSut(kotlinExtensionsVersion = "0.0.1")
+        val sut = fixture.getSut(kotlinExtensionsVersion = "1.6.0")
         sut.execute(fixture.metadataContext)
 
         assertTrue {
             fixture.logger.capturedMessage ==
                 "[sentry] sentry-kotlin-extensions won't be installed because the current " +
-                "version is lower than the minimum supported version (1.0.0)"
+                "version is lower than the minimum supported version (1.6.1)"
         }
         verify(fixture.metadataDetails, never()).allVariants(any())
     }

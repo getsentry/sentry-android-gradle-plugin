@@ -36,7 +36,7 @@ abstract class KotlinExtensionsInstallStrategy : AbstractInstallStrategy {
         private const val KOTLIN_COROUTINES_ID = "kotlinx-coroutines-core"
         internal const val SENTRY_KOTLIN_EXTENSIONS_ID = "sentry-kotlin-extensions"
 
-        private val MIN_SUPPORTED_VERSION = SemVer(1, 0, 0)
+        private val MIN_SUPPORTED_VERSION = SemVer(1, 6, 1)
 
         override fun register(component: ComponentMetadataHandler) {
             component.withModule(
