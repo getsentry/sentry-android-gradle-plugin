@@ -88,17 +88,17 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.22.0"
+            sentry.autoInstallation.sentryVersion = "6.25.2"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry:6.22.0" in result.output }
-        assertTrue { "io.sentry:sentry-spring-jakarta:6.22.0" in result.output }
-        assertTrue { "io.sentry:sentry-spring-boot-starter-jakarta:6.22.0" in result.output }
-        assertTrue { "io.sentry:sentry-logback:6.22.0" in result.output }
-        assertTrue { "io.sentry:sentry-log4j2:6.22.0" in result.output }
+        assertTrue { "io.sentry:sentry:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-spring-jakarta:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-spring-boot-starter-jakarta:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-logback:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-log4j2:6.25.2" in result.output }
         assertTrue { "io.sentry:sentry-jdbc:6.10.0" in result.output }
 
         // ensure all dependencies could be resolved
