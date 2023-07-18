@@ -463,7 +463,7 @@ class SentryPluginTest(
               implementation 'ch.qos.logback:logback-classic:1.4.8'
             }
 
-            sentry.autoInstallation.sentryVersion = "6.24.0"
+            sentry.autoInstallation.sentryVersion = "6.25.2"
             """.trimIndent()
         )
 
@@ -473,8 +473,8 @@ class SentryPluginTest(
             """
             ch.qos.logback:logback-classic:1.4.8
             ch.qos.logback:logback-core:1.4.8
-            io.sentry:sentry-logback:6.24.0
-            io.sentry:sentry:6.24.0
+            io.sentry:sentry-logback:6.25.2
+            io.sentry:sentry:6.25.2
             org.slf4j:slf4j-api:2.0.7
             """.trimIndent(),
             deps
