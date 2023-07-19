@@ -3,6 +3,7 @@ package io.sentry.jvm.gradle
 import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.SentryTasksProvider
+import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
@@ -96,6 +97,8 @@ class SentryJvmPlugin : Plugin<Project> {
                 task.dependsOn(reportDependenciesTask)
                 task.dependsOn(generateDebugMetaPropertiesTask)
             }
+
+            project.installDependencies(extension, false)
         }
     }
 

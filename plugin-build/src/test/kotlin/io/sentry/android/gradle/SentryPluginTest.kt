@@ -272,8 +272,9 @@ class SentryPluginTest(
             .appendArguments(":app:assembleDebug", "--info")
             .build()
 
+        val instr = "OkHttpEventListener, OkHttp"
         assertTrue {
-            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=OkHttp)" in build.output
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=$instr)" in build.output
         }
     }
 
@@ -459,8 +460,10 @@ class SentryPluginTest(
             }
 
             dependencies {
-              implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+              implementation 'ch.qos.logback:logback-classic:1.4.8'
             }
+
+            sentry.autoInstallation.sentryVersion = "6.25.2"
             """.trimIndent()
         )
 
@@ -468,8 +471,11 @@ class SentryPluginTest(
         val deps = verifyDependenciesReportJava(testProjectDir.root)
         assertEquals(
             """
-            com.squareup.okhttp3:okhttp:3.14.9
-            com.squareup.okio:okio:1.17.2
+            ch.qos.logback:logback-classic:1.4.8
+            ch.qos.logback:logback-core:1.4.8
+            io.sentry:sentry-logback:6.25.2
+            io.sentry:sentry:6.25.2
+            org.slf4j:slf4j-api:2.0.7
             """.trimIndent(),
             deps
         )

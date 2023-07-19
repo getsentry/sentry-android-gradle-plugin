@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Auto install Sentry integrations for Java Backend, Desktop, etc. ([#521](https://github.com/getsentry/sentry-android-gradle-plugin/pull/521))
+
 ### Dependencies
 
 - Bump CLI from v2.19.1 to v2.19.4 ([#520](https://github.com/getsentry/sentry-android-gradle-plugin/pull/520))
