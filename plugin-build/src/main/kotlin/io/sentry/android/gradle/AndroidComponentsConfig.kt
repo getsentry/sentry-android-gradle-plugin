@@ -346,7 +346,7 @@ private fun getReleaseInfo(project: Project, variant: Variant): ReleaseInfo {
     val appExtension = project.extensions.getByType(AppExtension::class.java)
     var applicationId =
         appExtension.defaultConfig.applicationId ?: appExtension.namespace.toString()
-    var versionName = appExtension.defaultConfig.versionName ?: "1.0.0"
+    var versionName = appExtension.defaultConfig.versionName ?: "undefined"
     var versionCode = appExtension.defaultConfig.versionCode
     val flavor = appExtension.productFlavors.find { it.name == variant.flavorName }
     flavor?.applicationId?.let { applicationId = it }
