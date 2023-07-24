@@ -258,7 +258,7 @@ private fun Variant.configureProguardMappingsTasks(
     paths: OutputPaths,
     cliExecutable: String,
     sentryOrg: String?,
-    sentryProject: String?,
+    sentryProject: String?
 ): TaskProvider<SentryGenerateProguardUuidTask>? {
     if (isAGP74) {
         val variant = AndroidVariant74(this)
