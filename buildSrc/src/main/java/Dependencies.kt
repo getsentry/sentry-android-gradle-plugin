@@ -3,8 +3,8 @@ import org.gradle.util.VersionNumber
 
 object BuildPluginsVersion {
     val AGP = System.getenv("VERSION_AGP") ?: "7.4.0"
-    const val DOKKA = "1.6.10"
-    const val KOTLIN = "1.6.10"
+    const val DOKKA = "1.8.10"
+    const val KOTLIN = "1.8.20"
     const val AAR_2_JAR = "0.6"
     const val KTLINT = "10.2.1"
     const val SHADOW = "7.1.2"
@@ -13,6 +13,7 @@ object BuildPluginsVersion {
     const val MAVEN_PUBLISH = "0.17.0"
     const val PROGUARD = "7.1.0"
     const val GROOVY_REDISTRIBUTED = "1.2"
+    const val BUILDCONFIG = "3.1.0"
 
     const val SPRING_BOOT = "2.7.4"
     const val SPRING_DEP_MANAGEMENT = "1.0.11.RELEASE"
@@ -28,7 +29,7 @@ object LibsVersion {
     const val JUNIT = "4.13.2"
     const val ASM = "7.0" // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
     const val SQLITE = "2.1.0"
-    const val SENTRY = "6.6.0"
+    const val SENTRY = "6.23.0"
 }
 
 object Libs {
@@ -47,10 +48,12 @@ object Libs {
     const val SQLITE = "androidx.sqlite:sqlite:${LibsVersion.SQLITE}"
     const val SQLITE_FRAMEWORK = "androidx.sqlite:sqlite-framework:${LibsVersion.SQLITE}"
     const val SENTRY_ANDROID = "io.sentry:sentry-android:${LibsVersion.SENTRY}"
+    const val SENTRY_ANDROID_OKHTTP = "io.sentry:sentry-android-okhttp:${LibsVersion.SENTRY}"
 
     // test
     val MOCKITO_KOTLIN = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     const val ARSC_LIB = "io.github.reandroid:ARSCLib:1.1.4"
+    const val ZIP4J = "net.lingala.zip4j:zip4j:2.11.5"
 }
 
 object CI {

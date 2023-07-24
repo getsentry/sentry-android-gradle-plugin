@@ -10,6 +10,10 @@ import io.sentry.android.gradle.SentryTasksProvider.getLintVitalAnalyzeProvider
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalReportProvider
 import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.sourcecontext.OutputPaths
+import io.sentry.android.gradle.sourcecontext.SourceContext
+import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
+import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
@@ -51,17 +55,31 @@ fun AppExtension.configure(
             }
         )
 
-        variant.configureDependenciesTask(project, extension, this, mergeAssetsDependants)
-
-        variant.configureProguardMappingsTasks(
+        val tasksGeneratingProperties = mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
+        val sourceContextTasks = variant.configureSourceBundleTasks(
             project,
             extension,
-            this,
-            mergeAssetsDependants,
             cliExecutable,
             sentryOrg,
             sentryProject
         )
+        sourceContextTasks?.let { tasksGeneratingProperties.add(it.generateBundleIdTask) }
+
+        variant.configureDependenciesTask(
+            project,
+            extension,
+            this,
+            mergeAssetsDependants
+        )
+
+        val generateProguardUuidTask = variant.configureProguardMappingsTasks(
+            project,
+            extension,
+            cliExecutable,
+            sentryOrg,
+            sentryProject
+        )
+        generateProguardUuidTask?.let { tasksGeneratingProperties.add(it) }
 
         variant.configureNativeSymbolsTask(
             project,
@@ -70,6 +88,84 @@ fun AppExtension.configure(
             sentryOrg,
             sentryProject
         )
+
+        variant.configureDebugMetaPropertiesTask(
+            project,
+            this,
+            mergeAssetsDependants,
+            tasksGeneratingProperties
+        )
+    }
+}
+
+private fun ApplicationVariant.configureDebugMetaPropertiesTask(
+    project: Project,
+    appExtension: AppExtension,
+    dependants: Set<TaskProvider<out Task>?>,
+    tasksGeneratingProperties: List<TaskProvider<out PropertiesFileOutputTask>>
+) {
+    if (isAGP74) {
+        project.logger.info {
+            "Not configuring deprecated AppExtension for ${AgpVersions.CURRENT}, " +
+                "new AppComponentsExtension will be configured"
+        }
+    } else {
+        val variant = AndroidVariant70(this)
+        val taskSuffix = name.capitalized
+        val outputDir = project.layout.buildDirectory.dir(
+            "generated${sep}assets${sep}sentry${sep}debug-meta-properties${sep}$name"
+        )
+        val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
+            project,
+            tasksGeneratingProperties,
+            outputDir,
+            taskSuffix
+        )
+
+        generateDebugMetaPropertiesTask.setupMergeAssetsDependencies(dependants)
+        generateDebugMetaPropertiesTask.hookWithPackageTasks(project, variant)
+        appExtension.sourceSets.getByName(name).assets.srcDir(
+            generateDebugMetaPropertiesTask.flatMap { it.output }
+        )
+    }
+}
+
+private fun ApplicationVariant.configureSourceBundleTasks(
+    project: Project,
+    extension: SentryPluginExtension,
+    cliExecutable: String,
+    sentryOrg: String?,
+    sentryProject: String?
+): SourceContext.SourceContextTasks? {
+    if (isAGP74) {
+        project.logger.info {
+            "Not configuring deprecated AppExtension for ${AgpVersions.CURRENT}, " +
+                "new AppComponentsExtension will be configured"
+        }
+        return null
+    } else if (extension.includeSourceContext.get()) {
+        val paths = OutputPaths(project, name)
+        val variant = AndroidVariant70(this)
+        val taskSuffix = name.capitalized
+
+        val sourceContextTasks = SourceContext.register(
+            project,
+            extension,
+            variant,
+            paths,
+            cliExecutable,
+            sentryOrg,
+            sentryProject,
+            taskSuffix
+        )
+
+        if (variant.buildTypeName == "release") {
+            sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, variant)
+        }
+
+        return sourceContextTasks
+    } else {
+        return null
     }
 }
 
@@ -108,17 +204,16 @@ private fun BaseVariant.configureDependenciesTask(
 private fun ApplicationVariant.configureProguardMappingsTasks(
     project: Project,
     extension: SentryPluginExtension,
-    appExtension: AppExtension,
-    dependants: Set<TaskProvider<out Task>?>,
     cliExecutable: String,
     sentryOrg: String?,
     sentryProject: String?
-) {
+): TaskProvider<SentryGenerateProguardUuidTask>? {
     if (isAGP74) {
         project.logger.info {
             "Not configuring deprecated AppExtension for ${AgpVersions.CURRENT}, " +
                 "new AppComponentsExtension will be configured"
         }
+        return null
     } else {
         val variant = AndroidVariant70(this)
         val sentryProps = getPropertiesFilePath(project, variant)
@@ -135,15 +230,11 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                     output = outputDir,
                     taskSuffix = name.capitalized
                 )
-            generateUuidTask.setupMergeAssetsDependencies(dependants)
-            generateUuidTask.hookWithPackageTasks(project, variant)
-            appExtension.sourceSets.getByName(name).assets.srcDir(
-                generateUuidTask.flatMap { it.output }
-            )
 
             val releaseInfo = ReleaseInfo(applicationId, versionName, versionCode)
             val uploadMappingsTask = SentryUploadProguardMappingsTask.register(
                 project = project,
+                debug = extension.debug,
                 cliExecutable = cliExecutable,
                 generateUuidTask = generateUuidTask,
                 sentryProperties = sentryProps,
@@ -153,12 +244,18 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                     guardsquareEnabled
                 ),
                 autoUploadProguardMapping = extension.autoUploadProguardMapping,
-                sentryOrg = sentryOrg,
-                sentryProject = sentryProject,
+                sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
+                sentryProject = sentryProject?.let { project.provider { it } }
+                    ?: extension.projectName,
+                sentryAuthToken = extension.authToken,
                 taskSuffix = name.capitalized,
-                releaseInfo = releaseInfo,
+                releaseInfo = releaseInfo
             )
             uploadMappingsTask.hookWithMinifyTasks(project, name, guardsquareEnabled)
+
+            return generateUuidTask
+        } else {
+            return null
         }
     }
 }
@@ -183,6 +280,7 @@ private fun ApplicationVariant.configureNativeSymbolsTask(
             SentryUploadNativeSymbolsTask::class.java
         ) {
             it.workingDir(project.rootDir)
+            it.debug.set(extension.debug)
             it.autoUploadNativeSymbol.set(extension.autoUploadNativeSymbols)
             it.cliExecutable.set(cliExecutable)
             it.sentryProperties.set(sentryProps?.let { file -> project.file(file) })

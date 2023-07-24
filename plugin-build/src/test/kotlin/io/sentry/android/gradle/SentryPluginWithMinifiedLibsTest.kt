@@ -28,8 +28,6 @@ class SentryPluginWithMinifiedLibsTest :
             .appendArguments("app:assembleDebug")
             .build()
 
-        print(result.output)
-
         assertTrue { "BUILD SUCCESSFUL" in result.output }
     }
 

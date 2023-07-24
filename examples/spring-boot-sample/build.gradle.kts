@@ -9,7 +9,7 @@ plugins {
         BuildPluginsVersion.SPRING_DEP_MANAGEMENT
     kotlin("jvm")
     kotlin("plugin.spring") version BuildPluginsVersion.KOTLIN
-    id("io.sentry.android.gradle")
+    id("io.sentry.jvm.gradle")
 }
 
 group = "io.sentry.samples.spring-boot"
@@ -31,11 +31,7 @@ dependencies {
     implementation(Samples.SpringBoot.kotlinReflect)
     implementation(Samples.SpringBoot.springBootStarterJdbc)
     implementation(kotlin(Samples.SpringBoot.kotlinStdLib, KotlinCompilerVersion.VERSION))
-    implementation("io.sentry:sentry-spring-boot-starter:6.5.0")
-    implementation("io.sentry:sentry-logback:6.5.0")
 
-    // database query tracing
-    implementation("io.sentry:sentry-jdbc:6.5.0")
     runtimeOnly(Samples.SpringBoot.hsqldb)
     testImplementation(Samples.SpringBoot.springBootStarterTest) {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
@@ -51,4 +47,10 @@ tasks.withType<KotlinCompile> {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
+}
+
+sentry {
+    debug.set(true)
+    includeSourceContext.set(true)
+    additionalSourceDirsForSourceContext.set(setOf("testsrc"))
 }

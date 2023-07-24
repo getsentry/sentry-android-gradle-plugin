@@ -179,7 +179,13 @@ class SentryPluginTest(
 
     @Test
     fun `applies only DB instrumentables when only DATABASE feature enabled`() {
-        applyTracingInstrumentation(features = setOf(InstrumentationFeature.DATABASE))
+        applyTracingInstrumentation(
+            features = setOf(InstrumentationFeature.DATABASE),
+            dependencies = setOf(
+                "androidx.sqlite:sqlite:2.0.0",
+                "io.sentry:sentry-android-sqlite:6.21.0"
+            )
+        )
 
         val build = runner
             .appendArguments(":app:assembleDebug", "--info")
@@ -187,7 +193,7 @@ class SentryPluginTest(
 
         assertTrue {
             "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
-                "AndroidXSQLiteDatabase, AndroidXSQLiteStatement, AndroidXRoomDao)" in build.output
+                "AndroidXSQLiteOpenHelper, AndroidXRoomDao)" in build.output
         }
     }
 
@@ -239,6 +245,59 @@ class SentryPluginTest(
     }
 
     @Test
+    fun `apply old Database instrumentable when app does not depend on sentry-android-sqlite`() {
+        applyTracingInstrumentation(
+            features = setOf(InstrumentationFeature.DATABASE)
+        )
+
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--info")
+            .build()
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "AndroidXSQLiteDatabase, AndroidXSQLiteStatement, AndroidXRoomDao)" in build.output
+        }
+    }
+
+    @Test
+    fun `does not apply okhttp listener on older version of sentry-android-okhttp`() {
+        applyTracingInstrumentation(
+            features = setOf(InstrumentationFeature.OKHTTP),
+            dependencies = setOf(
+                "com.squareup.okhttp3:okhttp:3.14.9",
+                "io.sentry:sentry-android-okhttp:6.19.0"
+            )
+        )
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--info")
+            .build()
+
+        val instr = "OkHttpEventListener, OkHttp"
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=$instr)" in build.output
+        }
+    }
+
+    @Test
+    fun `apply okhttp listener on sentry-android-okhttp 6_20`() {
+        applyTracingInstrumentation(
+            features = setOf(InstrumentationFeature.OKHTTP),
+            dependencies = setOf(
+                "com.squareup.okhttp3:okhttp:3.14.9",
+                "io.sentry:sentry-android-okhttp:6.20.0"
+            )
+        )
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--info")
+            .build()
+
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "OkHttpEventListener, OkHttp)" in build.output
+        }
+    }
+
+    @Test
     fun `applies all instrumentables when all features are enabled`() {
         applyTracingInstrumentation(
             features = setOf(
@@ -248,10 +307,12 @@ class SentryPluginTest(
                 InstrumentationFeature.COMPOSE
             ),
             dependencies = setOf(
+                "androidx.sqlite:sqlite:2.0.0",
                 "com.squareup.okhttp3:okhttp:3.14.9",
-                "io.sentry:sentry-android-okhttp:6.6.0",
+                "io.sentry:sentry-android-okhttp:6.20.0",
                 "androidx.compose.runtime:runtime:1.1.0",
-                "io.sentry:sentry-compose-android:6.7.0"
+                "io.sentry:sentry-compose-android:6.7.0",
+                "io.sentry:sentry-android-sqlite:6.21.0"
             )
         )
         val build = runner
@@ -260,8 +321,8 @@ class SentryPluginTest(
 
         assertTrue {
             "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
-                "AndroidXSQLiteDatabase, AndroidXSQLiteStatement, AndroidXRoomDao, OkHttp, " +
-                "WrappingInstrumentable, RemappingInstrumentable, " +
+                "AndroidXSQLiteOpenHelper, AndroidXRoomDao, OkHttpEventListener, " +
+                "OkHttp, WrappingInstrumentable, RemappingInstrumentable, " +
                 "ComposeNavigation)" in build.output
         }
     }
@@ -395,12 +456,14 @@ class SentryPluginTest(
             """
             plugins {
                 id 'java'
-                id 'io.sentry.android.gradle'
+                id 'io.sentry.jvm.gradle'
             }
 
             dependencies {
-              implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+              implementation 'ch.qos.logback:logback-classic:1.4.8'
             }
+
+            sentry.autoInstallation.sentryVersion = "6.25.2"
             """.trimIndent()
         )
 
@@ -408,8 +471,11 @@ class SentryPluginTest(
         val deps = verifyDependenciesReportJava(testProjectDir.root)
         assertEquals(
             """
-            com.squareup.okhttp3:okhttp:3.14.9
-            com.squareup.okio:okio:1.17.2
+            ch.qos.logback:logback-classic:1.4.8
+            ch.qos.logback:logback-core:1.4.8
+            io.sentry:sentry-logback:6.25.2
+            io.sentry:sentry:6.25.2
+            org.slf4j:slf4j-api:2.0.7
             """.trimIndent(),
             deps
         )

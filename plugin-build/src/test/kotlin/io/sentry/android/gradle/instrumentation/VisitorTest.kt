@@ -3,6 +3,7 @@ package io.sentry.android.gradle.instrumentation
 import com.android.build.api.instrumentation.ClassContext
 import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import io.sentry.android.gradle.instrumentation.classloader.GeneratingMissingClassesClassLoader
@@ -11,6 +12,7 @@ import io.sentry.android.gradle.instrumentation.fakes.TestClassData
 import io.sentry.android.gradle.instrumentation.fakes.TestSpanAddingParameters
 import io.sentry.android.gradle.instrumentation.logcat.LogcatInstrumentable
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
+import io.sentry.android.gradle.instrumentation.okhttp.OkHttpEventListener
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.util.SemVer
@@ -101,6 +103,12 @@ class VisitorTest(
         @Parameterized.Parameters(name = "{0}/{1}")
         @JvmStatic
         fun parameters() = listOf(
+            arrayOf(
+                "androidxSqlite",
+                "FrameworkSQLiteOpenHelperFactory",
+                AndroidXSQLiteOpenHelper(),
+                null
+            ),
             arrayOf("androidxSqlite", "FrameworkSQLiteDatabase", AndroidXSQLiteDatabase(), null),
             arrayOf(
                 "androidxSqlite",
@@ -146,6 +154,8 @@ class VisitorTest(
             ),
             arrayOf("okhttp/v3", "RealCall", OkHttp(), null),
             arrayOf("okhttp/v4", "RealCall", OkHttp(), null),
+            arrayOf("okhttp/v3", "OkHttpClient", OkHttpEventListener(SemVer(3, 0, 0)), null),
+            arrayOf("okhttp/v4", "OkHttpClient", OkHttpEventListener(SemVer(4, 0, 0)), null),
             arrayOf("androidxCompose", "NavHostControllerKt", ComposeNavigation(), null),
             arrayOf("logcat", "LogcatTest", LogcatInstrumentable(), null)
         )

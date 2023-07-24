@@ -36,12 +36,18 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
         if (isLogcatInstrEnabled()) {
             features.add("LogcatInstrumentation")
         }
+
+        if (parameters.sourceContextEnabled.getOrElse(false)) {
+            features.add("SourceContext")
+        }
+
         return features
     }
 
     private fun isInstrumentationEnabled(feature: InstrumentationFeature): Boolean {
         return when (feature) {
-            InstrumentationFeature.DATABASE -> isDatabaseInstrEnabled()
+            InstrumentationFeature.DATABASE ->
+                isOldDatabaseInstrEnabled() || isNewDatabaseInstrEnabled()
             InstrumentationFeature.FILE_IO -> isFileIOInstrEnabled()
             InstrumentationFeature.OKHTTP -> isOkHttpInstrEnabled()
             InstrumentationFeature.COMPOSE -> isComposeInstrEnabled()
@@ -54,17 +60,29 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
             SentryVersions.VERSION_LOGCAT
         ) && parameters.logcatEnabled.get()
 
-    fun isDatabaseInstrEnabled(): Boolean =
+    fun isNewDatabaseInstrEnabled(): Boolean =
         sentryModules.isAtLeast(
-            SentryModules.SENTRY_ANDROID_CORE,
-            SentryVersions.VERSION_PERFORMANCE
+            SentryModules.SENTRY_ANDROID_SQLITE,
+            SentryVersions.VERSION_SQLITE
         ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
+
+    fun isOldDatabaseInstrEnabled(): Boolean =
+        !isNewDatabaseInstrEnabled() &&
+            sentryModules.isAtLeast(
+                SentryModules.SENTRY_ANDROID_CORE,
+                SentryVersions.VERSION_PERFORMANCE
+            ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
 
     fun isFileIOInstrEnabled(): Boolean =
         sentryModules.isAtLeast(
             SentryModules.SENTRY_ANDROID_CORE,
             SentryVersions.VERSION_FILE_IO
         ) && parameters.features.get().contains(InstrumentationFeature.FILE_IO)
+
+    fun isOkHttpListenerInstrEnabled(): Boolean = sentryModules.isAtLeast(
+        SentryModules.SENTRY_ANDROID_OKHTTP,
+        SentryVersions.VERSION_OKHTTP_LISTENER
+    ) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
 
     fun isOkHttpInstrEnabled(): Boolean = sentryModules.isAtLeast(
         SentryModules.SENTRY_ANDROID_OKHTTP,
@@ -87,7 +105,8 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
         fun register(
             project: Project,
             features: Provider<Set<InstrumentationFeature>>,
-            logcatEnabled: Provider<Boolean>
+            logcatEnabled: Provider<Boolean>,
+            sourceContextEnabled: Provider<Boolean>
         ): Provider<SentryModulesService> {
             return project.gradle.sharedServices.registerIfAbsent(
                 getBuildServiceName(SentryModulesService::class.java),
@@ -95,6 +114,7 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
             ) {
                 it.parameters.features.setDisallowChanges(features)
                 it.parameters.logcatEnabled.setDisallowChanges(logcatEnabled)
+                it.parameters.sourceContextEnabled.setDisallowChanges(sourceContextEnabled)
             }
         }
     }
@@ -105,5 +125,8 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
 
         @get:Input
         val logcatEnabled: Property<Boolean>
+
+        @get:Input
+        val sourceContextEnabled: Property<Boolean>
     }
 }

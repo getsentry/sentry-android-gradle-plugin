@@ -5,12 +5,108 @@
 ### Features
 
 - Add release information args to proguard mapping upload task ([#476](https://github.com/getsentry/sentry-android-gradle-plugin/pull/476))
+- Auto install Sentry integrations for Java Backend, Desktop, etc. ([#521](https://github.com/getsentry/sentry-android-gradle-plugin/pull/521))
 
 ### Dependencies
 
-- Bump CLI from v2.16.1 to v2.17.2 ([#469](https://github.com/getsentry/sentry-android-gradle-plugin/pull/469))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2172)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.16.1...2.17.2)
+- Bump CLI from v2.19.1 to v2.19.4 ([#520](https://github.com/getsentry/sentry-android-gradle-plugin/pull/520))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2194)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.19.1...2.19.4)
+- Bump Android SDK from v6.22.0 to v6.26.0 ([#527](https://github.com/getsentry/sentry-android-gradle-plugin/pull/527), [#528](https://github.com/getsentry/sentry-android-gradle-plugin/pull/528))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6260)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.22.0...6.26.0)
+
+## 3.11.1
+
+### Fixes
+
+- Fixed OkHttpEventListener crash at runtime with OkHttp4 ([#514](https://github.com/getsentry/sentry-android-gradle-plugin/pull/514))
+
+### Dependencies
+
+- Bump CLI from v2.18.1 to v2.19.1 ([#512](https://github.com/getsentry/sentry-android-gradle-plugin/pull/512))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2191)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.18.1...2.19.1)
+
+## 3.11.0
+
+### Features
+
+- Add OkHttpEventListener automatically ([#504](https://github.com/getsentry/sentry-android-gradle-plugin/pull/504))
+- New Sqlite instrumentation ([#502](https://github.com/getsentry/sentry-android-gradle-plugin/pull/502))
+    - This integration replaces the old database instrumentation with the `sentry-android-sqlite` integration
+    - Any implementation of SupportSQLiteOpenHelper.Factory is now supported
+
+## 3.10.0
+
+### Dependencies
+
+- Bump Android SDK from v6.21.0 to v6.22.0 ([#506](https://github.com/getsentry/sentry-android-gradle-plugin/pull/506))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6220)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.21.0...6.22.0)
+
+## 3.9.0
+
+### Fixes
+
+- Rename `project` to `projectName` in SentryPluginExtension ([#505](https://github.com/getsentry/sentry-android-gradle-plugin/pull/505))
+- No longer ignore `org` and `projectName` in `sentry` config block ([#501](https://github.com/getsentry/sentry-android-gradle-plugin/pull/501))
+
+## 3.8.0
+
+### Features
+
+- Create a new Sentry Gradle plugin with ID `io.sentry.jvm.gradle` for Java Backend, Desktop etc. ([#495](https://github.com/getsentry/sentry-android-gradle-plugin/pull/495)) 
+- Source Context for Java ([#495](https://github.com/getsentry/sentry-android-gradle-plugin/pull/495))
+  - To enable it apply the `io.sentry.jvm.gradle` plugin and set `includeSourceContext` to `true`
+  - For more information on how to enable source context, please refer to [#633](https://github.com/getsentry/sentry-java/issues/633#issuecomment-1465599120)
+- Allow setting sentry properties via the `sentry` plugin extension ([#500](https://github.com/getsentry/sentry-android-gradle-plugin/pull/500))
+
+### Dependencies
+
+- Bump CLI from v2.17.5 to v2.18.1 ([#493](https://github.com/getsentry/sentry-android-gradle-plugin/pull/493))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2181)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.17.5...2.18.1)
+- Bump Android SDK from v6.19.0 to v6.21.0 ([#499](https://github.com/getsentry/sentry-android-gradle-plugin/pull/499))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6210)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.19.0...6.21.0)
+
+## 3.7.0
+
+### Features
+
+- Bundle Java Sources and upload to Sentry ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
+    - For more information on how to enable source context, please refer to [#633](https://github.com/getsentry/sentry-java/issues/633#issuecomment-1465599120)
+- New `debug` option to enable debug logging for sentry-cli ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
+
+### Fixes
+
+- Add missing Kotlin Compiler Plugin Marker config ([#488](https://github.com/getsentry/sentry-android-gradle-plugin/pull/488))
+
+### Dependencies
+
+- Bump Android SDK from v6.18.1 to v6.19.0 ([#490](https://github.com/getsentry/sentry-android-gradle-plugin/pull/490))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6190)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.18.1...6.19.0)
+
+## 3.6.0
+
+### Features
+
+- Add Kotlin Compiler plugin to enrich Composable functions ([#452](https://github.com/getsentry/sentry-android-gradle-plugin/pull/452))
+
+### Fixes
+
+- Do not transform the sdk name to Int in BootstrapAndroidSdk ([#478](https://github.com/getsentry/sentry-android-gradle-plugin/pull/478))
+
+### Dependencies
+
+- Bump CLI from v2.16.1 to v2.17.5 ([#469](https://github.com/getsentry/sentry-android-gradle-plugin/pull/469), [#475](https://github.com/getsentry/sentry-android-gradle-plugin/pull/475), [#480](https://github.com/getsentry/sentry-android-gradle-plugin/pull/480))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2175)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.16.1...2.17.5)
+- Bump Android SDK from v6.17.0 to v6.18.1 ([#481](https://github.com/getsentry/sentry-android-gradle-plugin/pull/481))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6181)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.17.0...6.18.1)
 
 ## 3.5.0
 

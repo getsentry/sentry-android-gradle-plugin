@@ -10,9 +10,11 @@ import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.CanMinifyCode
 import com.android.build.api.variant.Variant
-import io.sentry.gradle.common.AndroidVariant
+import com.android.build.api.variant.impl.VariantImpl
+import io.sentry.gradle.common.SentryVariant
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
@@ -20,16 +22,41 @@ import org.gradle.api.tasks.TaskProvider
 
 data class AndroidVariant74(
     private val variant: Variant
-) : AndroidVariant {
+) : SentryVariant {
     override val name: String = variant.name
     override val flavorName: String? = variant.flavorName
     override val buildTypeName: String? = variant.buildType
     override val productFlavors: List<String> = variant.productFlavors.map { it.second }
     override val isMinifyEnabled: Boolean = (variant as? CanMinifyCode)?.isMinifyEnabled == true
+
+    // internal APIs are a bit dirty, but our plugin would need a lot of rework to make proper
+    // dependencies via artifacts API.
+    override val assembleProvider: TaskProvider<out Task>?
+        get() = (variant as? VariantImpl<*>)?.taskContainer?.assembleTask
     override fun mappingFileProvider(project: Project): Provider<FileCollection> =
         project.provider {
             project.files(variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE))
         }
+    override fun sources(
+        project: Project,
+        additionalSources: Provider<out Collection<Directory>>
+    ): Provider<out Collection<Directory>> {
+        val javaProvider = variant.sources.java?.all
+        val kotlinProvider = variant.sources.kotlin?.all
+        return when {
+            javaProvider == null && kotlinProvider == null -> additionalSources
+            javaProvider == null -> kotlinProvider!!.zip(additionalSources) { kotlin, other ->
+                (kotlin + other).toSet()
+            }
+            kotlinProvider == null -> javaProvider.zip(additionalSources) { java, other ->
+                (java + other).toSet()
+            }
+            else ->
+                javaProvider
+                    .zip(kotlinProvider) { java, kotlin -> (java + kotlin).toSet() }
+                    .zip(additionalSources) { javaKotlin, other -> (javaKotlin + other).toSet() }
+        }
+    }
 }
 
 fun <T : Task> configureGeneratedSourcesFor74(

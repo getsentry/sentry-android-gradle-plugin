@@ -1,7 +1,10 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask.Companion.SENTRY_PROGUARD_MAPPING_UUID_PROPERTY
+import io.sentry.android.gradle.util.PropertiesUtil
 import java.io.File
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
@@ -23,9 +26,12 @@ class SentryGenerateProguardUuidTaskTest {
 
         task.get().generateProperties()
 
-        val expectedFile = File(project.buildDir, "dummy/folder/sentry-debug-meta.properties")
+        val expectedFile = File(project.buildDir, "dummy/folder/sentry-proguard-uuid.properties")
         assertTrue(expectedFile.exists())
-        assertTrue(expectedFile.readText().startsWith("io.sentry.ProguardUuids="))
+
+        val props = PropertiesUtil.load(expectedFile)
+        val uuid = props.getProperty(SENTRY_PROGUARD_MAPPING_UUID_PROPERTY)
+        assertNotNull(uuid)
     }
 
     @Test
@@ -38,18 +44,20 @@ class SentryGenerateProguardUuidTaskTest {
             ) {
                 it.output.set(project.layout.buildDirectory.dir("dummy/folder/"))
             }
-        val expectedFile = File(project.buildDir, "dummy/folder/sentry-debug-meta.properties")
+        val expectedFile = File(project.buildDir, "dummy/folder/sentry-proguard-uuid.properties")
 
         task.get().generateProperties()
 
-        val uuid1 = expectedFile.readText()
+        val props1 = PropertiesUtil.load(expectedFile)
+        val uuid1 = props1.getProperty(SENTRY_PROGUARD_MAPPING_UUID_PROPERTY)
+        assertNotNull(uuid1)
 
         task.get().generateProperties()
 
-        val uuid2 = expectedFile.readText()
+        val props2 = PropertiesUtil.load(expectedFile)
+        val uuid2 = props2.getProperty(SENTRY_PROGUARD_MAPPING_UUID_PROPERTY)
+        assertNotNull(uuid2)
 
-        assertTrue(uuid1.startsWith("io.sentry.ProguardUuids="))
-        assertTrue(uuid2.startsWith("io.sentry.ProguardUuids="))
         assertNotEquals(uuid1, uuid2)
     }
 

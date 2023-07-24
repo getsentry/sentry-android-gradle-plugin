@@ -92,6 +92,7 @@ class SentryUploadProguardMappingTaskTest {
         assertTrue(releaseInfo.versionName in args)
         assertFalse("--version-code" in args)
         assertFalse("--no-upload" in args)
+        assertFalse("--log-level=debug" in args)
     }
 
     @Test
@@ -153,6 +154,29 @@ class SentryUploadProguardMappingTaskTest {
     }
 
     @Test
+    fun `--log-level=debug is set correctly`() {
+        val project = createProject()
+        val uuidFileProvider = createFakeUuid(project)
+
+        val mappingFile = createMappingFileProvider(project, "dummy/folder/mapping.txt")
+        val task: TaskProvider<SentryUploadProguardMappingsTask> =
+            project.tasks.register(
+                "testUploadProguardMapping",
+                SentryUploadProguardMappingsTask::class.java
+            ) {
+                it.cliExecutable.set("sentry-cli")
+                it.uuidFile.set(uuidFileProvider)
+                it.mappingsFiles = mappingFile
+                it.autoUploadProguardMapping.set(false)
+                it.debug.set(true)
+            }
+
+        val args = task.get().computeCommandLineArgs()
+
+        assertTrue("--log-level=debug" in args)
+    }
+
+    @Test
     fun `with sentryProperties file SENTRY_PROPERTIES is set correctly`() {
         val project = createProject()
         val propertiesFile = project.file("dummy/folder/sentry.properties")
@@ -184,6 +208,25 @@ class SentryUploadProguardMappingTaskTest {
         task.get().setSentryPropertiesEnv()
 
         assertNull(task.get().environment["SENTRY_PROPERTIES"])
+    }
+
+    @Test
+    fun `with sentryAuthToken env variable is set correctly`() {
+        val project = createProject()
+        val task: TaskProvider<SentryUploadProguardMappingsTask> =
+            project.tasks.register(
+                "testUploadProguardMapping",
+                SentryUploadProguardMappingsTask::class.java
+            ) {
+                it.sentryAuthToken.set("<token>")
+            }
+
+        task.get().setSentryAuthTokenEnv()
+
+        assertEquals(
+            "<token>",
+            task.get().environment["SENTRY_AUTH_TOKEN"].toString()
+        )
     }
 
     @Test
