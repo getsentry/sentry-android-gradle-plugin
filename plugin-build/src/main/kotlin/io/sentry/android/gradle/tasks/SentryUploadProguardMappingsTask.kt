@@ -56,6 +56,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     @get:Input
     abstract val releaseInfo: Property<ReleaseInfo>
 
+    @get:Input
     @get:Optional
     abstract val sentryAuthToken: Property<String>
 
