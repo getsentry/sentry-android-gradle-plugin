@@ -231,6 +231,12 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                     taskSuffix = name.capitalized
                 )
 
+            val versionName = versionName ?: "undefined"
+            val versionCode = if (versionCode == -1) {
+                null
+            } else {
+                versionCode
+            }
             val releaseInfo = ReleaseInfo(applicationId, versionName, versionCode)
             val uploadMappingsTask = SentryUploadProguardMappingsTask.register(
                 project = project,
