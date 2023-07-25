@@ -1,8 +1,8 @@
 package io.sentry.android.gradle.tasks
 
-import io.sentry.android.gradle.util.ReleaseInfo
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask.Companion.SENTRY_PROGUARD_MAPPING_UUID_PROPERTY
 import io.sentry.android.gradle.util.PropertiesUtil
+import io.sentry.android.gradle.util.ReleaseInfo
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
