@@ -169,6 +169,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.mappingsFiles = mappingFile
                 it.autoUploadProguardMapping.set(false)
                 it.debug.set(true)
+                it.releaseInfo.set(ReleaseInfo("com.test", "1.0.0"))
             }
 
         val args = task.get().computeCommandLineArgs()
