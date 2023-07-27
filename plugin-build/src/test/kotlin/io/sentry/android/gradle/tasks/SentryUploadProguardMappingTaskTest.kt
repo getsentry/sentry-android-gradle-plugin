@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.util.ReleaseInfo
 import java.io.File
 import java.util.UUID
 import kotlin.test.assertEquals
@@ -27,6 +28,7 @@ class SentryUploadProguardMappingTaskTest {
         val randomUuid = UUID.randomUUID()
         val project = createProject()
         val uuidFileProvider = createFakeUuid(project, randomUuid)
+        val releaseInfo = ReleaseInfo("com.test", "1.0.0", 1)
 
         val mappingFile = createMappingFileProvider(project, "dummy/folder/mapping.txt")
         val task: TaskProvider<SentryUploadProguardMappingsTask> =
@@ -38,6 +40,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.uuidFile.set(uuidFileProvider)
                 it.mappingsFiles = mappingFile
                 it.autoUploadProguardMapping.set(true)
+                it.releaseInfo.set(releaseInfo)
             }
 
         val args = task.get().computeCommandLineArgs()
@@ -47,6 +50,47 @@ class SentryUploadProguardMappingTaskTest {
         assertTrue("--uuid" in args)
         assertTrue(randomUuid.toString() in args)
         assertTrue(mappingFile.get().first().toString() in args)
+        assertTrue("--app-id" in args)
+        assertTrue(releaseInfo.applicationId in args)
+        assertTrue("--version" in args)
+        assertTrue(releaseInfo.versionName in args)
+        assertTrue("--version-code" in args)
+        assertTrue(releaseInfo.versionCode.toString() in args)
+        assertFalse("--no-upload" in args)
+    }
+
+    @Test
+    fun `with no version code cli-executable is set correctly`() {
+        val randomUuid = UUID.randomUUID()
+        val project = createProject()
+        val uuidFileProvider = createFakeUuid(project, randomUuid)
+        val releaseInfo = ReleaseInfo("com.test", "1.0.0")
+
+        val mappingFile = createMappingFileProvider(project, "dummy/folder/mapping.txt")
+        val task: TaskProvider<SentryUploadProguardMappingsTask> =
+            project.tasks.register(
+                "testUploadProguardMapping",
+                SentryUploadProguardMappingsTask::class.java
+            ) {
+                it.cliExecutable.set("sentry-cli")
+                it.uuidFile.set(uuidFileProvider)
+                it.mappingsFiles = mappingFile
+                it.autoUploadProguardMapping.set(true)
+                it.releaseInfo.set(releaseInfo)
+            }
+
+        val args = task.get().computeCommandLineArgs()
+
+        assertTrue("sentry-cli" in args)
+        assertTrue("upload-proguard" in args)
+        assertTrue("--uuid" in args)
+        assertTrue(randomUuid.toString() in args)
+        assertTrue(mappingFile.get().first().toString() in args)
+        assertTrue("--app-id" in args)
+        assertTrue(releaseInfo.applicationId in args)
+        assertTrue("--version" in args)
+        assertTrue(releaseInfo.versionName in args)
+        assertFalse("--version-code" in args)
         assertFalse("--no-upload" in args)
         assertFalse("--log-level=debug" in args)
     }
@@ -56,6 +100,7 @@ class SentryUploadProguardMappingTaskTest {
         val randomUuid = UUID.randomUUID()
         val project = createProject()
         val uuidFileProvider = createFakeUuid(project, randomUuid)
+        val releaseInfo = ReleaseInfo("com.test", "1.0.0")
 
         val mappingFiles = createMappingFileProvider(
             project,
@@ -76,6 +121,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.uuidFile.set(uuidFileProvider)
                 it.mappingsFiles = mappingFiles
                 it.autoUploadProguardMapping.set(true)
+                it.releaseInfo.set(releaseInfo)
             }
 
         val args = task.get().computeCommandLineArgs()
@@ -87,6 +133,7 @@ class SentryUploadProguardMappingTaskTest {
     fun `--auto-upload is set correctly`() {
         val project = createProject()
         val uuidFileProvider = createFakeUuid(project)
+        val releaseInfo = ReleaseInfo("com.test", "1.0.0")
 
         val mappingFile = createMappingFileProvider(project, "dummy/folder/mapping.txt")
         val task: TaskProvider<SentryUploadProguardMappingsTask> =
@@ -98,6 +145,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.uuidFile.set(uuidFileProvider)
                 it.mappingsFiles = mappingFile
                 it.autoUploadProguardMapping.set(false)
+                it.releaseInfo.set(releaseInfo)
             }
 
         val args = task.get().computeCommandLineArgs()
@@ -121,6 +169,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.mappingsFiles = mappingFile
                 it.autoUploadProguardMapping.set(false)
                 it.debug.set(true)
+                it.releaseInfo.set(ReleaseInfo("com.test", "1.0.0"))
             }
 
         val args = task.get().computeCommandLineArgs()
@@ -197,6 +246,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.mappingsFiles = mappingFile
                 it.autoUploadProguardMapping.set(false)
                 it.sentryOrganization.set("dummy-org")
+                it.releaseInfo.set(ReleaseInfo("com.test", "1.0.0", 1))
             }
 
         val args = task.get().computeCommandLineArgs()
@@ -221,6 +271,7 @@ class SentryUploadProguardMappingTaskTest {
                 it.mappingsFiles = mappingFile
                 it.autoUploadProguardMapping.set(false)
                 it.sentryProject.set("dummy-proj")
+                it.releaseInfo.set(ReleaseInfo("com.test", "1.0.0", 1))
             }
 
         val args = task.get().computeCommandLineArgs()

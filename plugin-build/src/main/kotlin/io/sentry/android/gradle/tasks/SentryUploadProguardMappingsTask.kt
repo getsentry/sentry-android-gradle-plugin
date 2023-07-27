@@ -2,6 +2,7 @@ package io.sentry.android.gradle.tasks
 
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask.Companion.SENTRY_PROGUARD_MAPPING_UUID_PROPERTY
 import io.sentry.android.gradle.util.PropertiesUtil
+import io.sentry.android.gradle.util.ReleaseInfo
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -51,6 +52,9 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
 
     @get:Input
     abstract val autoUploadProguardMapping: Property<Boolean>
+
+    @get:Input
+    abstract val releaseInfo: Property<ReleaseInfo>
 
     @get:Input
     @get:Optional
@@ -126,6 +130,17 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             args.add(it)
         }
 
+        releaseInfo.get().let {
+            it.versionCode?.let { versionCode ->
+                args.add("--version-code")
+                args.add(versionCode.toString())
+            }
+            args.add("--app-id")
+            args.add(it.applicationId)
+            args.add("--version")
+            args.add(it.versionName)
+        }
+
         if (Os.isFamily(FAMILY_WINDOWS)) {
             args.add(0, "cmd")
             args.add(1, "/c")
@@ -154,7 +169,8 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             sentryProject: Provider<String>,
             sentryAuthToken: Property<String>,
             autoUploadProguardMapping: Property<Boolean>,
-            taskSuffix: String = ""
+            taskSuffix: String = "",
+            releaseInfo: ReleaseInfo
         ): TaskProvider<SentryUploadProguardMappingsTask> {
             val uploadSentryProguardMappingsTask = project.tasks.register(
                 "uploadSentryProguardMappings$taskSuffix",
@@ -172,6 +188,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
                 task.autoUploadProguardMapping.set(autoUploadProguardMapping)
                 task.sentryOrganization.set(sentryOrg)
                 task.sentryProject.set(sentryProject)
+                task.releaseInfo.set(releaseInfo)
                 task.sentryAuthToken.set(sentryAuthToken)
             }
             return uploadSentryProguardMappingsTask
