@@ -41,23 +41,45 @@ abstract class AbstractSpanAddingMethodVisitor(
     }
 
     /*
-    ISpan span = Sentry.getSpan()
+    IHub hub = HubAdapter.getInstance();
+    ISpan span = hub.getTransaction() ||  hub.getSpan();
     ISpan child = null;
     if (span != null) {
       child = span.startChild("db", <description>);
     }
     */
     protected fun MethodVisitor.visitStartSpan(
+        attachToRoot: Boolean,
         gotoIfNull: Label,
         descriptionVisitor: MethodVisitor.() -> Unit
     ) {
         visitMethodInsn(
             Opcodes.INVOKESTATIC,
-            "io/sentry/Sentry",
-            "getSpan",
+            "io/sentry/HubAdapter",
+            "getInstance",
+            "()Lio/sentry/HubAdapter;",
+            /* isInterface = */ false
+        )
+        val hubIdx = newLocal(Types.HUB)
+        visitVarInsn(Opcodes.ASTORE, hubIdx) // hub
+        visitVarInsn(Opcodes.ALOAD, hubIdx) // hub
+
+        visitMethodInsn(
+            Opcodes.INVOKEINTERFACE,
+            "io/sentry/IHub",
+            // TODO use getRoot/getSpan if available
+            if (attachToRoot) "getSpan" else "getSpan",
             "()Lio/sentry/ISpan;",
             /* isInterface = */ false
         )
+
+//        visitMethodInsn(
+//            Opcodes.INVOKESTATIC,
+//            "io/sentry/Sentry",
+//            "getSpan",
+//            "()Lio/sentry/ISpan;",
+//            /* isInterface = */ false
+//        )
         val spanIndex = newLocal(Types.SPAN)
         childIndex = newLocal(Types.SPAN)
         visitVarInsn(Opcodes.ASTORE, spanIndex) // span

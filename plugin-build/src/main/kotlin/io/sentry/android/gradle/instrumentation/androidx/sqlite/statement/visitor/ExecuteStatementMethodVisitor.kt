@@ -48,7 +48,7 @@ class ExecuteStatementMethodVisitor(
         // extract query description from the toString() method
         originalVisitor.visitExtractDescription()
 
-        originalVisitor.visitStartSpan(gotoIfNull = label0) {
+        originalVisitor.visitStartSpan(false, gotoIfNull = label0) {
             visitLdcInsn(SpanOperations.DB_SQL_QUERY)
             visitVarInsn(ALOAD, descriptionIndex) // description
         }

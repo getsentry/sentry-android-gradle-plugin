@@ -35,7 +35,7 @@ abstract class AbstractRoomVisitor(
         instrumenting.set(true)
         originalVisitor.visitTryCatchBlocks("java/lang/Exception")
 
-        originalVisitor.visitStartSpan(startSpanIfNull) {
+        originalVisitor.visitStartSpan(true, startSpanIfNull) {
             visitLdcInsn(SpanOperations.DB)
             visitLdcInsn(className)
         }

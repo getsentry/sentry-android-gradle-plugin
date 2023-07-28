@@ -12,6 +12,8 @@ object Types {
     val ITERATOR = Type.getType("Ljava/util/Iterator;")
     val COLLECTION = Type.getType("Ljava/util/Collection;")
 
+    val HUB = Type.getType("Lio/sentry/IHub;")
+
     // DB
     val SQL_EXCEPTION = Type.getType("Landroid/database/SQLException;")
     val CURSOR = Type.getType("Landroid/database/Cursor;")
