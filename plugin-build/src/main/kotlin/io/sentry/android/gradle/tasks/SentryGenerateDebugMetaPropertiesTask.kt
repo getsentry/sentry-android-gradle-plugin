@@ -34,7 +34,7 @@ abstract class SentryGenerateDebugMetaPropertiesTask : DirectoryOutputTask() {
         val props = Properties()
         props.setProperty("io.sentry.build-tool", "gradle")
         inputFiles.forEach { inputFile ->
-            props.putAll(PropertiesUtil.load(inputFile))
+            PropertiesUtil.loadMaybe(inputFile)?.let { props.putAll(it) }
         }
         debugMetaPropertiesFile.writer().use {
             props.store(

@@ -16,5 +16,13 @@ class PropertiesUtil {
                 }
             }
         }
+
+        fun loadMaybe(file: File): Properties? {
+            if (!file.exists()) {
+                return null
+            }
+
+            return load(file)
+        }
     }
 }

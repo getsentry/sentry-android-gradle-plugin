@@ -65,6 +65,21 @@ class SourceContext {
                 taskSuffix
             )
 
+            project.afterEvaluate {
+                generateBundleIdTask.configure {
+                    it.enabled = extension.includeSourceContext.get()
+                }
+                collectSourcesTask.configure {
+                    it.enabled = extension.includeSourceContext.get()
+                }
+                bundleSourcesTask.configure {
+                    it.enabled = extension.includeSourceContext.get()
+                }
+                uploadSourceBundleTask.configure {
+                    it.enabled = extension.includeSourceContext.get()
+                }
+            }
+
             return SourceContextTasks(
                 generateBundleIdTask,
                 collectSourcesTask,
