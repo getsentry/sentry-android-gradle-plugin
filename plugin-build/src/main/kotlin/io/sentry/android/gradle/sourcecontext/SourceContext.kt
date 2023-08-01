@@ -28,6 +28,7 @@ class SourceContext {
             val generateBundleIdTask = GenerateBundleIdTask.register(
                 project,
                 output = paths.bundleIdDir,
+                extension.includeSourceContext,
                 taskSuffix
             )
 
@@ -35,6 +36,7 @@ class SourceContext {
                 project,
                 sourceFiles,
                 output = paths.sourceDir,
+                extension.includeSourceContext,
                 taskSuffix
             )
 
@@ -49,6 +51,7 @@ class SourceContext {
                 sentryOrg?.let { project.provider { it } } ?: extension.org,
                 sentryProject?.let { project.provider { it } } ?: extension.projectName,
                 extension.authToken,
+                extension.includeSourceContext,
                 taskSuffix
             )
 
@@ -62,23 +65,9 @@ class SourceContext {
                 sentryOrg?.let { project.provider { it } } ?: extension.org,
                 sentryProject?.let { project.provider { it } } ?: extension.projectName,
                 extension.authToken,
+                extension.includeSourceContext,
                 taskSuffix
             )
-
-            project.afterEvaluate {
-                generateBundleIdTask.configure {
-                    it.enabled = extension.includeSourceContext.get()
-                }
-                collectSourcesTask.configure {
-                    it.enabled = extension.includeSourceContext.get()
-                }
-                bundleSourcesTask.configure {
-                    it.enabled = extension.includeSourceContext.get()
-                }
-                uploadSourceBundleTask.configure {
-                    it.enabled = extension.includeSourceContext.get()
-                }
-            }
 
             return SourceContextTasks(
                 generateBundleIdTask,

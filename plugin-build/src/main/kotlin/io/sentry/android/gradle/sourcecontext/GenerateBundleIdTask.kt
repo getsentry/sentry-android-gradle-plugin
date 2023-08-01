@@ -7,6 +7,7 @@ import java.util.UUID
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
@@ -50,6 +51,7 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
         fun register(
             project: Project,
             output: Provider<Directory>? = null,
+            includeSourceContext: Property<Boolean>,
             taskSuffix: String = ""
         ): TaskProvider<GenerateBundleIdTask> {
             val generateBundleIdTask = project.tasks.register(
@@ -57,6 +59,7 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
                 GenerateBundleIdTask::class.java
             ) { task ->
                 output?.let { task.output.set(it) }
+                task.onlyIf { includeSourceContext.getOrElse(false) }
             }
             return generateBundleIdTask
         }

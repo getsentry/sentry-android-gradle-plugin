@@ -10,6 +10,7 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
@@ -42,6 +43,7 @@ abstract class CollectSourcesTask : DirectoryOutputTask() {
             project: Project,
             sourceDirs: Provider<out Collection<Directory>>,
             output: Provider<Directory>,
+            includeSourceContext: Property<Boolean>,
             taskSuffix: String = ""
         ): TaskProvider<CollectSourcesTask> {
             return project.tasks.register(
@@ -50,6 +52,7 @@ abstract class CollectSourcesTask : DirectoryOutputTask() {
             ) { task ->
                 task.sourceDirs.setFrom(sourceDirs)
                 task.output.set(output)
+                task.onlyIf { includeSourceContext.getOrElse(false) }
             }
         }
     }
