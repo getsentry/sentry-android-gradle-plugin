@@ -43,6 +43,42 @@ class SentrySourceContextNonAndroidTest(
     }
 
     @Test
+    fun `skips bundle and upload tasks if disabled`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+              id "org.jetbrains.kotlin.jvm"
+              id "io.sentry.jvm.gradle"
+            }
+
+            sentry {
+              includeSourceContext = false
+            }
+            """.trimIndent()
+        )
+
+        sentryPropertiesFile.writeText("")
+
+        testProjectDir.withDummyKtFile()
+        testProjectDir.withDummyJavaFile()
+
+        val result = runner
+            .appendArguments("app:assemble")
+            .build()
+
+        assertEquals(
+            result.task(":app:sentryUploadSourceBundleJava")?.outcome,
+            SKIPPED
+        )
+        assertEquals(
+            result.task(":app:sentryBundleSourcesJava")?.outcome,
+            SKIPPED
+        )
+        assertTrue { "BUILD SUCCESSFUL" in result.output }
+    }
+
+    @Test
     fun `bundles source context`() {
         appBuildFile.writeText(
             // language=Groovy

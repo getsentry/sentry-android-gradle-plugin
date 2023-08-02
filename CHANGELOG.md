@@ -7,6 +7,10 @@
 - Add release information args to proguard mapping upload task ([#476](https://github.com/getsentry/sentry-android-gradle-plugin/pull/476))
 - Auto install Sentry integrations for Java Backend, Desktop, etc. ([#521](https://github.com/getsentry/sentry-android-gradle-plugin/pull/521))
 
+### Fixes
+
+- Disable source context tasks if not enabled ([#536](https://github.com/getsentry/sentry-android-gradle-plugin/pull/536))
+
 ### Dependencies
 
 - Bump CLI from v2.19.1 to v2.20.3 ([#520](https://github.com/getsentry/sentry-android-gradle-plugin/pull/520), [#531](https://github.com/getsentry/sentry-android-gradle-plugin/pull/531), [#537](https://github.com/getsentry/sentry-android-gradle-plugin/pull/537))

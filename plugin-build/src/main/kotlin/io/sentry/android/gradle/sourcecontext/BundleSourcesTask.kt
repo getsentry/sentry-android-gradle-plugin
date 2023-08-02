@@ -140,6 +140,7 @@ abstract class BundleSourcesTask : Exec() {
             sentryOrg: Provider<String>,
             sentryProject: Provider<String>,
             sentryAuthToken: Property<String>,
+            includeSourceContext: Property<Boolean>,
             taskSuffix: String = ""
         ): TaskProvider<BundleSourcesTask> {
             return project.tasks.register(
@@ -157,7 +158,10 @@ abstract class BundleSourcesTask : Exec() {
                 }
                 task.bundleIdFile.set(generateDebugIdTask.flatMap { it.outputFile })
                 task.output.set(output)
-                task.onlyIf { !task.sourceDir.asFileTree.isEmpty }
+                task.onlyIf {
+                    includeSourceContext.getOrElse(false) &&
+                        !task.sourceDir.asFileTree.isEmpty
+                }
             }
         }
     }

@@ -122,6 +122,7 @@ abstract class UploadSourceBundleTask : Exec() {
             sentryOrg: Provider<String>,
             sentryProject: Provider<String>,
             sentryAuthToken: Property<String>,
+            includeSourceContext: Property<Boolean>,
             taskSuffix: String = ""
         ): TaskProvider<UploadSourceBundleTask> {
             return project.tasks.register(
@@ -138,7 +139,10 @@ abstract class UploadSourceBundleTask : Exec() {
                 SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)?.let {
                     task.sentryProperties.set(File(it))
                 }
-                task.onlyIf { !task.sourceBundleDir.asFileTree.isEmpty }
+                task.onlyIf {
+                    includeSourceContext.getOrElse(false) &&
+                        !task.sourceBundleDir.asFileTree.isEmpty
+                }
             }
         }
     }

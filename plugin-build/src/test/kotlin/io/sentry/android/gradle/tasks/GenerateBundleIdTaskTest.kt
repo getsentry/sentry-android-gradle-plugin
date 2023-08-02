@@ -21,6 +21,7 @@ class GenerateBundleIdTaskTest {
             GenerateBundleIdTask.register(
                 project,
                 project.layout.buildDirectory.dir("dummy/folder/"),
+                project.objects.property(Boolean::class.java).convention(true),
                 "test"
             )
 
@@ -41,6 +42,7 @@ class GenerateBundleIdTaskTest {
             GenerateBundleIdTask.register(
                 project,
                 project.layout.buildDirectory.dir("dummy/folder/"),
+                project.objects.property(Boolean::class.java).convention(true),
                 "test"
             )
         val expectedFile = File(project.buildDir, "dummy/folder/sentry-bundle-id.properties")
