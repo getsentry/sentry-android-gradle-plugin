@@ -49,7 +49,7 @@ class SpringBoot3InstallStrategyTest {
 
             with(AutoInstallState.getInstance()) {
                 this.installSpring = installSpring
-                this.sentryVersion = "6.25.2"
+                this.sentryVersion = "6.28.0"
             }
             return SpringBoot3InstallStrategyImpl(logger)
         }
@@ -58,13 +58,13 @@ class SpringBoot3InstallStrategyTest {
     private val fixture = Fixture()
 
     @Test
-    fun `when sentry-spring-boot-starter-jakarta is direct dependency logs and does nothing`() {
+    fun `when sentry-spring-boot-jakarta is direct dependency logs and does nothing`() {
         val sut = fixture.getSut(installSpring = false)
         sut.execute(fixture.metadataContext)
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-spring-boot-starter-jakarta won't be installed because it was " +
+                "[sentry] sentry-spring-boot-jakarta won't be installed because it was " +
                 "already installed directly"
         }
         verify(fixture.metadataContext, never()).details
@@ -77,25 +77,25 @@ class SpringBoot3InstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-spring-boot-starter-jakarta won't be installed because the " +
+                "[sentry] sentry-spring-boot-jakarta won't be installed because the " +
                 "current version is lower than the minimum supported version (3.0.0)"
         }
         verify(fixture.metadataDetails, never()).allVariants(any())
     }
 
     @Test
-    fun `installs sentry-spring-boot-starter-jakarta with info message`() {
+    fun `installs sentry-spring-boot-jakarta with info message`() {
         val sut = fixture.getSut()
         sut.execute(fixture.metadataContext)
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-spring-boot-starter-jakarta was successfully installed with " +
-                "version: 6.25.2"
+                "[sentry] sentry-spring-boot-jakarta was successfully installed with " +
+                "version: 6.28.0"
         }
         verify(fixture.dependencies).add(
             com.nhaarman.mockitokotlin2.check<String> {
-                assertEquals("io.sentry:sentry-spring-boot-starter-jakarta:6.25.2", it)
+                assertEquals("io.sentry:sentry-spring-boot-jakarta:6.28.0", it)
             }
         )
     }

@@ -28,12 +28,12 @@ abstract class SpringBoot2InstallStrategy : AbstractInstallStrategy {
 
     override val maxSupportedThirdPartyVersion: SemVer get() = MAX_SUPPORTED_VERSION
 
-    override val minSupportedSentryVersion: SemVer get() = SemVer(6, 25, 2)
+    override val minSupportedSentryVersion: SemVer get() = SemVer(6, 28, 0)
 
     companion object Registrar : InstallStrategyRegistrar {
         private const val SPRING_GROUP = "org.springframework.boot"
         private const val SPRING_BOOT_2_ID = "spring-boot-starter"
-        internal const val SENTRY_SPRING_BOOT_2_ID = "sentry-spring-boot-starter"
+        internal const val SENTRY_SPRING_BOOT_2_ID = "sentry-spring-boot"
 
         private val MIN_SUPPORTED_VERSION = SemVer(2, 1, 0)
         private val MAX_SUPPORTED_VERSION = SemVer(2, 9999, 9999)
