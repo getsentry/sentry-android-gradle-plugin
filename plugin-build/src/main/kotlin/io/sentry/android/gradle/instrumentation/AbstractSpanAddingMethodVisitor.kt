@@ -42,14 +42,13 @@ abstract class AbstractSpanAddingMethodVisitor(
 
     /*
     IHub hub = HubAdapter.getInstance();
-    ISpan span = hub.getTransaction() ||  hub.getSpan();
+    ISpan span = hub.getSpan();
     ISpan child = null;
     if (span != null) {
       child = span.startChild("db", <description>);
     }
     */
     protected fun MethodVisitor.visitStartSpan(
-        attachToRoot: Boolean,
         gotoIfNull: Label,
         descriptionVisitor: MethodVisitor.() -> Unit
     ) {
@@ -67,8 +66,7 @@ abstract class AbstractSpanAddingMethodVisitor(
         visitMethodInsn(
             Opcodes.INVOKEINTERFACE,
             "io/sentry/IHub",
-            // TODO use getRoot/getSpan if available
-            if (attachToRoot) "getSpan" else "getSpan",
+            "getSpan",
             "()Lio/sentry/ISpan;",
             /* isInterface = */ false
         )
