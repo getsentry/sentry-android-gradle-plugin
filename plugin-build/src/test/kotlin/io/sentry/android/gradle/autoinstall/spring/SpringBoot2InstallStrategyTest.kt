@@ -49,7 +49,7 @@ class SpringBoot2InstallStrategyTest {
 
             with(AutoInstallState.getInstance()) {
                 this.installSpring = installSpring
-                this.sentryVersion = "6.25.2"
+                this.sentryVersion = "6.28.0"
             }
             return SpringBoot2InstallStrategyImpl(logger)
         }
@@ -58,13 +58,13 @@ class SpringBoot2InstallStrategyTest {
     private val fixture = Fixture()
 
     @Test
-    fun `when sentry-spring-boot-starter is a direct dependency logs a message and does nothing`() {
+    fun `when sentry-spring-boot is a direct dependency logs a message and does nothing`() {
         val sut = fixture.getSut(installSpring = false)
         sut.execute(fixture.metadataContext)
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-spring-boot-starter won't be installed because it was already " +
+                "[sentry] sentry-spring-boot won't be installed because it was already " +
                 "installed directly"
         }
         verify(fixture.metadataContext, never()).details
@@ -77,7 +77,7 @@ class SpringBoot2InstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-spring-boot-starter won't be installed because the current " +
+                "[sentry] sentry-spring-boot won't be installed because the current " +
                 "version is lower than the minimum supported version (2.1.0)"
         }
         verify(fixture.metadataDetails, never()).allVariants(any())
@@ -90,25 +90,25 @@ class SpringBoot2InstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-spring-boot-starter won't be installed because the current " +
+                "[sentry] sentry-spring-boot won't be installed because the current " +
                 "version is higher than the maximum supported version (2.9999.9999)"
         }
         verify(fixture.metadataDetails, never()).allVariants(any())
     }
 
     @Test
-    fun `installs sentry-spring-boot-starter with info message`() {
+    fun `installs sentry-spring-boot with info message`() {
         val sut = fixture.getSut()
         sut.execute(fixture.metadataContext)
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-spring-boot-starter was successfully installed with version: " +
-                "6.25.2"
+                "[sentry] sentry-spring-boot was successfully installed with version: " +
+                "6.28.0"
         }
         verify(fixture.dependencies).add(
             com.nhaarman.mockitokotlin2.check<String> {
-                assertEquals("io.sentry:sentry-spring-boot-starter:6.25.2", it)
+                assertEquals("io.sentry:sentry-spring-boot:6.28.0", it)
             }
         )
     }

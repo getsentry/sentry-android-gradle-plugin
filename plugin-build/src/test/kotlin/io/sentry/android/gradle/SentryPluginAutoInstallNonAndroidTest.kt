@@ -58,9 +58,9 @@ class SentryPluginAutoInstallNonAndroidTest(
         assertFalse { "io.sentry:sentry:$SENTRY_SDK_VERSION" in result.output }
         assertFalse { "io.sentry:sentry-spring:$SENTRY_SDK_VERSION" in result.output }
         assertFalse { "io.sentry:sentry-spring-jakarta:$SENTRY_SDK_VERSION" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot-starter:$SENTRY_SDK_VERSION" in result.output }
+        assertFalse { "io.sentry:sentry-spring-boot:$SENTRY_SDK_VERSION" in result.output }
         assertFalse {
-            "io.sentry:sentry-spring-boot-starter-jakarta:$SENTRY_SDK_VERSION" in result.output
+            "io.sentry:sentry-spring-boot-jakarta:$SENTRY_SDK_VERSION" in result.output
         }
         assertFalse { "io.sentry:sentry-logback:$SENTRY_SDK_VERSION" in result.output }
         assertFalse { "io.sentry:sentry-log4j2:$SENTRY_SDK_VERSION" in result.output }
@@ -88,17 +88,17 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry:6.25.2" in result.output }
-        assertTrue { "io.sentry:sentry-spring-jakarta:6.25.2" in result.output }
-        assertTrue { "io.sentry:sentry-spring-boot-starter-jakarta:6.25.2" in result.output }
-        assertTrue { "io.sentry:sentry-logback:6.25.2" in result.output }
-        assertTrue { "io.sentry:sentry-log4j2:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry:6.28.0" in result.output }
+        assertTrue { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
+        assertTrue { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
+        assertTrue { "io.sentry:sentry-logback:6.28.0" in result.output }
+        assertTrue { "io.sentry:sentry-log4j2:6.28.0" in result.output }
         assertTrue { "io.sentry:sentry-jdbc:6.10.0" in result.output }
 
         // ensure all dependencies could be resolved
@@ -119,13 +119,13 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry-logback:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-logback:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }
@@ -144,13 +144,13 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry-log4j2:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-log4j2:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }
@@ -169,13 +169,13 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry-jdbc:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }
@@ -194,7 +194,7 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
@@ -202,7 +202,7 @@ class SentryPluginAutoInstallNonAndroidTest(
 
         println(result.output)
 
-        assertTrue { "io.sentry:sentry-jdbc:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }
@@ -221,13 +221,13 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry-jdbc:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }
@@ -246,13 +246,13 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry-jdbc:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }
@@ -271,13 +271,13 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry-jdbc:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }
@@ -296,13 +296,13 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry-jdbc:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }
@@ -321,13 +321,13 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry-jdbc:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }
@@ -346,13 +346,13 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry-kotlin-extensions:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-kotlin-extensions:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }
@@ -371,16 +371,16 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry-spring:6.25.2" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot-starter:6.25.2" in result.output }
-        assertFalse { "io.sentry:sentry-spring-jakarta:6.25.2" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot-starter-jakarta:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-spring:6.28.0" in result.output }
+        assertFalse { "io.sentry:sentry-spring-boot:6.28.0" in result.output }
+        assertFalse { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
+        assertFalse { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }
@@ -399,16 +399,16 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertFalse { "io.sentry:sentry-spring:6.25.2" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot-starter:6.25.2" in result.output }
-        assertTrue { "io.sentry:sentry-spring-jakarta:6.25.2" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot-starter-jakarta:6.25.2" in result.output }
+        assertFalse { "io.sentry:sentry-spring:6.28.0" in result.output }
+        assertFalse { "io.sentry:sentry-spring-boot:6.28.0" in result.output }
+        assertTrue { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
+        assertFalse { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }
@@ -427,16 +427,16 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry-spring:6.25.2" in result.output }
-        assertTrue { "io.sentry:sentry-spring-boot-starter:6.25.2" in result.output }
-        assertFalse { "io.sentry:sentry-spring-jakarta:6.25.2" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot-starter-jakarta:6.25.2" in result.output }
+        assertTrue { "io.sentry:sentry-spring:6.28.0" in result.output }
+        assertTrue { "io.sentry:sentry-spring-boot:6.28.0" in result.output }
+        assertFalse { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
+        assertFalse { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }
@@ -455,16 +455,16 @@ class SentryPluginAutoInstallNonAndroidTest(
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.25.2"
+            sentry.autoInstallation.sentryVersion = "6.28.0"
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertFalse { "io.sentry:sentry-spring:6.25.2" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot-starter:6.25.2" in result.output }
-        assertTrue { "io.sentry:sentry-spring-jakarta:6.25.2" in result.output }
-        assertTrue { "io.sentry:sentry-spring-boot-starter-jakarta:6.25.2" in result.output }
+        assertFalse { "io.sentry:sentry-spring:6.28.0" in result.output }
+        assertFalse { "io.sentry:sentry-spring-boot:6.28.0" in result.output }
+        assertTrue { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
+        assertTrue { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
     }
