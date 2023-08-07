@@ -64,20 +64,13 @@ abstract class AbstractSpanAddingMethodVisitor(
         visitVarInsn(Opcodes.ALOAD, hubIdx) // hub
 
         visitMethodInsn(
-            Opcodes.INVOKEINTERFACE,
+            Opcodes.INVOKEVIRTUAL,
             "io/sentry/IHub",
             "getSpan",
             "()Lio/sentry/ISpan;",
             /* isInterface = */ false
         )
 
-//        visitMethodInsn(
-//            Opcodes.INVOKESTATIC,
-//            "io/sentry/Sentry",
-//            "getSpan",
-//            "()Lio/sentry/ISpan;",
-//            /* isInterface = */ false
-//        )
         val spanIndex = newLocal(Types.SPAN)
         childIndex = newLocal(Types.SPAN)
         visitVarInsn(Opcodes.ASTORE, spanIndex) // span
