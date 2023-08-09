@@ -21,6 +21,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version BuildPluginsVersion.SHADOW
     id("com.github.gmazzo.buildconfig") version BuildPluginsVersion.BUILDCONFIG
     jacoco
+    id("org.jetbrains.kotlinx.kover") version "0.7.3"
 }
 
 jacoco {
