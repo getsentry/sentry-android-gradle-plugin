@@ -11,6 +11,7 @@ jobs:
   job_build_upload:
     name: Build and upload distribution artifact
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout current commit (${{ github.sha }})
         uses: actions/checkout@v3

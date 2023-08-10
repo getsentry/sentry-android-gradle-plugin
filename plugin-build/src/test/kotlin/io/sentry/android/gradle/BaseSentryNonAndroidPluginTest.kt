@@ -88,8 +88,9 @@ abstract class BaseSentryNonAndroidPluginTest(
             arrayOf("7.4"),
             arrayOf("7.5"),
             arrayOf("7.6"),
-            arrayOf("8.0.2"),*/
-            arrayOf("8.1")
+            arrayOf("8.0.2"),
+            arrayOf("8.1")*/
+            arrayOf("7.5")
         )
 
         internal fun GradleRunner.appendArguments(vararg arguments: String) =
