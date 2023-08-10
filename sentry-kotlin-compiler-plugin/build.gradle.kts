@@ -20,7 +20,6 @@ tasks.jacocoTestReport {
     }
 }
 
-
 ktlint {
     debug.set(false)
     verbose.set(true)

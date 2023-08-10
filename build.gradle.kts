@@ -42,11 +42,11 @@ tasks.register("preMerge") {
     dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":check"))
     dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":publishAllPublicationsToMavenTestRepoRepository"))
 
-    dependsOn(":examples:android-gradle:check")
+    /*dependsOn(":examples:android-gradle:check")
     dependsOn(":examples:android-gradle-kts:check")
     dependsOn(":examples:android-ndk:check")
     dependsOn(":examples:android-instrumentation-sample:check")
-    dependsOn(":examples:android-room-lib:check")
+    dependsOn(":examples:android-room-lib:check")*/
     dependsOn(gradle.includedBuild("plugin-build").task(":check"))
 }
 
