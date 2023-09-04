@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixes
+
+- Reduce log level from warn to info for some auto install messages ([#553](https://github.com/getsentry/sentry-android-gradle-plugin/pull/553))
+  - There was some confusion especially around our Spring and Spring Boot integrations where we offer a different set of dependencies for Spring 5 (`sentry-spring`), Spring 6 (`sentry-spring-jakarta`), Spring Boot 2 (`sentry-spring-boot`) and Spring Boot 3 (`sentry-spring-boot-jakarta`) where there's always going to be one that's installed and one that's not installed.
+
 ### Dependencies
 
 - Bump CLI from v2.20.3 to v2.20.5 ([#540](https://github.com/getsentry/sentry-android-gradle-plugin/pull/540), [#545](https://github.com/getsentry/sentry-android-gradle-plugin/pull/545))
