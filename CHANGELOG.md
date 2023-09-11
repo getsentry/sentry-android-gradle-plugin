@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Internal
+
+- Change room span op name to `db.sql.room` ([#557](https://github.com/getsentry/sentry-android-gradle-plugin/pull/557))
+
 ### Fixes
 
 - Reduce log level from warn to info for some auto install messages ([#553](https://github.com/getsentry/sentry-android-gradle-plugin/pull/553))
