@@ -63,7 +63,7 @@ jobs:
 
       - name: Run ./gradlew (Fixes Gradle < 7.4)
         continue-on-error: true
-        run: ./gradlew --version
+        run: ./gradlew wrapper --gradle-version ${{ matrix.gradle }}
 
       - name: Build the Release variant
         run: ./gradlew assembleRelease
