@@ -63,7 +63,7 @@ jobs:
 
       - name: Run ./gradlew (Fixes Gradle < 7.4)
         continue-on-error: true
-        run: ./gradlew tasks
+        run: ./gradlew --version
 
       - name: Build the Release variant
         run: ./gradlew assembleRelease
