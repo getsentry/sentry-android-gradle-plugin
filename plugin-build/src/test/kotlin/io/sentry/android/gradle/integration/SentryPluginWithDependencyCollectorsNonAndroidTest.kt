@@ -1,4 +1,4 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
 import kotlin.test.assertTrue
 import org.junit.Test

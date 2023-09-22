@@ -1,4 +1,4 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
 import java.io.File
 import org.gradle.testkit.runner.GradleRunner
@@ -94,7 +94,6 @@ abstract class BaseSentryPluginTest(
             .withArguments("--stacktrace")
             .withPluginClasspath()
             .withGradleVersion(gradleVersion)
-            .forwardOutput()
     }
 
     companion object {

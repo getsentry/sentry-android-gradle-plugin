@@ -153,7 +153,7 @@ tasks.named("test").configure {
     maxHeapSize = "1g"
 
     filter {
-        excludeTestsMatching("*SentryPlugin*")
+        excludeTestsMatching("io.sentry.android.gradle.integration.*")
     }
 }
 
@@ -168,7 +168,7 @@ tasks.register<Test>("integrationTest").configure {
     maxHeapSize = "1g"
 
     filter {
-        includeTestsMatching("*SentryPlugin*")
+        includeTestsMatching("io.sentry.android.gradle.integration.*")
     }
 }
 

@@ -1,6 +1,7 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
+import io.sentry.android.gradle.withDummyComposeFile
 import kotlin.test.assertTrue
 import org.gradle.util.GradleVersion
 import org.junit.Test

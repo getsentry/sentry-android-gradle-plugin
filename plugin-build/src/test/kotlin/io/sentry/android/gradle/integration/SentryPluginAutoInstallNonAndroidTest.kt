@@ -1,16 +1,13 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
 import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.gradle.util.GradleVersion
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@RunWith(Parameterized::class)
-class SentryPluginAutoInstallNonAndroidTest(
-    gradleVersion: String
-) : BaseSentryNonAndroidPluginTest(gradleVersion) {
+class SentryPluginAutoInstallNonAndroidTest :
+    BaseSentryNonAndroidPluginTest(GradleVersion.current().version) {
 
     @Test
     fun `adds sentry dependency`() {

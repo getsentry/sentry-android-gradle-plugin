@@ -1,5 +1,6 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
+import io.sentry.android.gradle.verifyDependenciesReportAndroid
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.junit.Test

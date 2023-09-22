@@ -1,4 +1,4 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
 import org.gradle.util.GradleVersion

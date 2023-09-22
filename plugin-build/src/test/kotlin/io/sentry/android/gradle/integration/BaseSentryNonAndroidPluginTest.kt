@@ -1,4 +1,4 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
 import java.io.File
 import org.gradle.testkit.runner.GradleRunner

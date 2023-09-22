@@ -1,7 +1,11 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
+import io.sentry.android.gradle.verifyDependenciesReportAndroid
+import io.sentry.android.gradle.verifyDependenciesReportJava
+import io.sentry.android.gradle.verifyIntegrationList
+import io.sentry.android.gradle.verifyProguardUuid
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
