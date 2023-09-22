@@ -95,6 +95,6 @@ jobs:
       - name: Upload Test Results
         uses: actions/upload-artifact@v3
         with:
-          name: test-results-${{ matrix.os }}
+          name: test-results-AGP${{ matrix.agp }}-Gradle${{ matrix.gradle }}
           path: plugin-build/build/reports/tests/
         if: always()
