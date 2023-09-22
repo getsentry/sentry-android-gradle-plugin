@@ -6,7 +6,6 @@ import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import org.junit.runners.Parameterized
 
 @Suppress("FunctionName")
 abstract class BaseSentryNonAndroidPluginTest(

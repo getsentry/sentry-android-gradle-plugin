@@ -2,12 +2,10 @@ package io.sentry.android.gradle
 
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
-import org.gradle.util.GradleVersion
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.gradle.util.GradleVersion
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
 class SentryPluginAutoInstallTest :
     BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {

@@ -6,8 +6,6 @@ import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome
 import org.gradle.util.GradleVersion
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
 class SentryPluginIntegrationTest :
     BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {

@@ -2,15 +2,13 @@ package io.sentry.android.gradle
 
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
-import org.gradle.util.GradleVersion
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.gradle.util.GradleVersion
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
 class SentryPluginTest :
     BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
