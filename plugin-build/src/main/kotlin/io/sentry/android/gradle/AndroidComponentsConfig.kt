@@ -9,6 +9,7 @@ import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
+import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
@@ -29,6 +30,7 @@ import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesRep
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
+import io.sentry.android.gradle.util.ReleaseInfo
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.collectModules
@@ -272,6 +274,7 @@ private fun Variant.configureProguardMappingsTasks(
                     output = paths.proguardUuidDir
                 )
 
+            val releaseInfo = getReleaseInfo(project, this)
             val uploadMappingsTask = SentryUploadProguardMappingsTask.register(
                 project = project,
                 debug = extension.debug,
@@ -284,7 +287,8 @@ private fun Variant.configureProguardMappingsTasks(
                 sentryProject = sentryProject?.let { project.provider { it } }
                     ?: extension.projectName,
                 sentryAuthToken = extension.authToken,
-                taskSuffix = name.capitalized
+                taskSuffix = name.capitalized,
+                releaseInfo = releaseInfo
             )
             uploadMappingsTask.hookWithMinifyTasks(project, name, guardsquareEnabled)
 
@@ -336,4 +340,19 @@ private fun AndroidComponentsExtension<*, *, *>.configureVariants(callback: (Var
     } else {
         onVariants70(this, callback)
     }
+}
+
+private fun getReleaseInfo(project: Project, variant: Variant): ReleaseInfo {
+    val appExtension = project.extensions.getByType(AppExtension::class.java)
+    var applicationId =
+        appExtension.defaultConfig.applicationId ?: appExtension.namespace.toString()
+    var versionName = appExtension.defaultConfig.versionName ?: "undefined"
+    var versionCode = appExtension.defaultConfig.versionCode
+    val flavor = appExtension.productFlavors.find { it.name == variant.flavorName }
+    flavor?.applicationId?.let { applicationId = it }
+    flavor?.versionName?.let { versionName = it }
+    flavor?.versionCode?.let { versionCode = it }
+    flavor?.applicationIdSuffix?.let { applicationId += it }
+    flavor?.versionNameSuffix?.let { versionName += it }
+    return ReleaseInfo(applicationId, versionName, versionCode)
 }

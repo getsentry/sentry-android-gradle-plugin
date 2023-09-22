@@ -36,7 +36,7 @@ abstract class AbstractRoomVisitor(
         originalVisitor.visitTryCatchBlocks("java/lang/Exception")
 
         originalVisitor.visitStartSpan(startSpanIfNull) {
-            visitLdcInsn(SpanOperations.DB)
+            visitLdcInsn(SpanOperations.DB_SQL_ROOM)
             visitLdcInsn(className)
         }
 

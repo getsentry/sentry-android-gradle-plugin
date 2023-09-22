@@ -2,6 +2,47 @@
 
 ## Unreleased
 
+### Internal
+
+- Change room span op name to `db.sql.room` ([#557](https://github.com/getsentry/sentry-android-gradle-plugin/pull/557))
+
+### Fixes
+
+- Reduce log level from warn to info for some auto install messages ([#553](https://github.com/getsentry/sentry-android-gradle-plugin/pull/553))
+  - There was some confusion especially around our Spring and Spring Boot integrations where we offer a different set of dependencies for Spring 5 (`sentry-spring`), Spring 6 (`sentry-spring-jakarta`), Spring Boot 2 (`sentry-spring-boot`) and Spring Boot 3 (`sentry-spring-boot-jakarta`) where there's always going to be one that's installed and one that's not installed.
+
+### Dependencies
+
+- Bump CLI from v2.20.3 to v2.20.7 ([#540](https://github.com/getsentry/sentry-android-gradle-plugin/pull/540), [#545](https://github.com/getsentry/sentry-android-gradle-plugin/pull/545), [#550](https://github.com/getsentry/sentry-android-gradle-plugin/pull/550), [#556](https://github.com/getsentry/sentry-android-gradle-plugin/pull/556))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2207)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.3...2.20.7)
+- Bump Android SDK from v6.28.0 to v6.29.0 ([#555](https://github.com/getsentry/sentry-android-gradle-plugin/pull/555))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6290)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.28.0...6.29.0)
+
+## 3.12.0
+
+### Features
+
+- Add release information args to proguard mapping upload task ([#476](https://github.com/getsentry/sentry-android-gradle-plugin/pull/476))
+- Auto install Sentry integrations for Java Backend, Desktop, etc. ([#521](https://github.com/getsentry/sentry-android-gradle-plugin/pull/521))
+- Use Spring Boot autoconfigure modules (`sentry-spring-boot` and `sentry-spring-boot-jakarta`) for auto install ([#542](https://github.com/getsentry/sentry-android-gradle-plugin/pull/542))
+
+### Fixes
+
+- Disable source context tasks if not enabled ([#536](https://github.com/getsentry/sentry-android-gradle-plugin/pull/536))
+
+### Dependencies
+
+- Bump CLI from v2.19.1 to v2.20.3 ([#520](https://github.com/getsentry/sentry-android-gradle-plugin/pull/520), [#531](https://github.com/getsentry/sentry-android-gradle-plugin/pull/531), [#537](https://github.com/getsentry/sentry-android-gradle-plugin/pull/537))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2203)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.19.1...2.20.3)
+- Bump Android SDK from v6.22.0 to v6.28.0 ([#527](https://github.com/getsentry/sentry-android-gradle-plugin/pull/527), [#528](https://github.com/getsentry/sentry-android-gradle-plugin/pull/528), [#532](https://github.com/getsentry/sentry-android-gradle-plugin/pull/532), [#541](https://github.com/getsentry/sentry-android-gradle-plugin/pull/541))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6280)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.22.0...6.28.0)
+
+## 3.11.1
+
 ### Fixes
 
 - Fixed OkHttpEventListener crash at runtime with OkHttp4 ([#514](https://github.com/getsentry/sentry-android-gradle-plugin/pull/514))
