@@ -144,12 +144,32 @@ tasks.named("pluginUnderTestMetadata").configure {
     (this as PluginUnderTestMetadata).pluginClasspath.from(fixtureClasspath)
 }
 
-tasks.withType<Test>().configureEach {
+tasks.named("test").configure {
+    require(this is Test)
     maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
 
     // Cap JVM args per test
     minHeapSize = "128m"
     maxHeapSize = "1g"
+
+    filter {
+        excludeTestsMatching("*SentryPlugin*")
+    }
+}
+
+tasks.create<Test>("integrationTest") {
+    group = "verification"
+    description = "Runs the integration tests"
+
+    maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+
+    // Cap JVM args per test
+    minHeapSize = "128m"
+    maxHeapSize = "1g"
+
+    filter {
+        includeTestsMatching("*SentryPlugin*")
+    }
 }
 
 gradlePlugin {

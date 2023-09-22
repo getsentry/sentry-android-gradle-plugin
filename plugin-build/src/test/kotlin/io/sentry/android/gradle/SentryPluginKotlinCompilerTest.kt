@@ -5,7 +5,7 @@ import kotlin.test.assertTrue
 import org.gradle.util.GradleVersion
 import org.junit.Test
 
-class SentryKotlinCompilerPluginTest :
+class SentryPluginKotlinCompilerTest :
     BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
     override val additionalBuildClasspath: String =

@@ -78,20 +78,6 @@ abstract class BaseSentryNonAndroidPluginTest(
 
     companion object {
 
-        @Parameterized.Parameters(name = "Gradle {0}")
-        @JvmStatic
-        fun parameters() = listOf(
-            // The supported Gradle version can be found here:
-            // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
-            arrayOf("7.2"),
-            arrayOf("7.3.3"),
-            arrayOf("7.4"),
-            arrayOf("7.5"),
-            arrayOf("7.6"),
-            arrayOf("8.0.2"),
-            arrayOf("8.1")
-        )
-
         internal fun GradleRunner.appendArguments(vararg arguments: String) =
             withArguments(this.arguments + arguments)
 

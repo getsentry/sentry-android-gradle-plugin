@@ -1,18 +1,16 @@
 package io.sentry.android.gradle
 
+import io.sentry.BuildConfig
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.util.GradleVersion
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
-@Suppress("FunctionName")
-@RunWith(Parameterized::class)
-class SentryPluginIntegrationTest(
-    androidGradlePluginVersion: String,
-    gradleVersion: String
-) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
+class SentryPluginIntegrationTest :
+    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
     @Test
     fun uploadWithoutSentryCliProperties() {

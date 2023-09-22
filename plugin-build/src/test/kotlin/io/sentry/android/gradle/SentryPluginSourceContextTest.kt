@@ -8,9 +8,10 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
-class SentrySourceContextNonAndroidTest(
+class SentryPluginSourceContextTest(
+    androidGradlePluginVersion: String,
     gradleVersion: String
-) : BaseSentryNonAndroidPluginTest(gradleVersion) {
+) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
 
     @Test
     fun `skips bundle and upload tasks if no sources`() {
@@ -18,8 +19,16 @@ class SentrySourceContextNonAndroidTest(
             // language=Groovy
             """
             plugins {
-              id "org.jetbrains.kotlin.jvm"
-              id "io.sentry.jvm.gradle"
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+
+              buildFeatures {
+                buildConfig false
+              }
             }
 
             sentry {
@@ -28,15 +37,15 @@ class SentrySourceContextNonAndroidTest(
             """.trimIndent()
         )
         val result = runner
-            .appendArguments("app:assemble")
+            .appendArguments("app:assembleRelease")
             .build()
 
         assertEquals(
-            result.task(":app:sentryUploadSourceBundleJava")?.outcome,
+            result.task(":app:sentryUploadSourceBundleRelease")?.outcome,
             SKIPPED
         )
         assertEquals(
-            result.task(":app:sentryBundleSourcesJava")?.outcome,
+            result.task(":app:sentryBundleSourcesRelease")?.outcome,
             SKIPPED
         )
         assertTrue { "BUILD SUCCESSFUL" in result.output }
@@ -48,8 +57,16 @@ class SentrySourceContextNonAndroidTest(
             // language=Groovy
             """
             plugins {
-              id "org.jetbrains.kotlin.jvm"
-              id "io.sentry.jvm.gradle"
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+
+              buildFeatures {
+                buildConfig false
+              }
             }
 
             sentry {
@@ -66,13 +83,14 @@ class SentrySourceContextNonAndroidTest(
 
         sentryPropertiesFile.writeText("")
 
-        val ktContents = testProjectDir.withDummyKtFile()
+        val ktContents = testProjectDir.withDummyComposeFile()
         val javaContents = testProjectDir.withDummyJavaFile()
         val customContents = testProjectDir.withDummyCustomFile()
 
         val result = runner
-            .appendArguments("app:assemble")
+            .appendArguments("app:assembleRelease")
             .build()
+
         assertTrue { "\"--org\" \"sentry-sdks\"" in result.output }
         assertTrue { "\"--project\" \"sentry-android\"" in result.output }
         assertTrue { "BUILD SUCCESSFUL" in result.output }
@@ -80,23 +98,17 @@ class SentrySourceContextNonAndroidTest(
         verifySourceBundleContents(
             testProjectDir.root,
             "files/_/_/com/example/Example.jvm",
-            ktContents,
-            variant = "java",
-            archivePath = "app/build/libs/app.jar"
+            ktContents
         )
         verifySourceBundleContents(
             testProjectDir.root,
             "files/_/_/com/example/TestJava.jvm",
-            javaContents,
-            variant = "java",
-            archivePath = "app/build/libs/app.jar"
+            javaContents
         )
         verifySourceBundleContents(
             testProjectDir.root,
             "files/_/_/io/other/TestCustom.jvm",
-            customContents,
-            variant = "java",
-            archivePath = "app/build/libs/app.jar"
+            customContents
         )
     }
 }
