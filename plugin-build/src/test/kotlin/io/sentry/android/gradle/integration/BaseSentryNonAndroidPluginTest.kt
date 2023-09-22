@@ -7,7 +7,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 
-@Suppress("FunctionName")
 abstract class BaseSentryNonAndroidPluginTest(
     private val gradleVersion: String
 ) {
@@ -73,6 +72,7 @@ abstract class BaseSentryNonAndroidPluginTest(
             .withArguments("--stacktrace")
             .withPluginClasspath()
             .withGradleVersion(gradleVersion)
+            .forwardOutput()
     }
 
     companion object {
