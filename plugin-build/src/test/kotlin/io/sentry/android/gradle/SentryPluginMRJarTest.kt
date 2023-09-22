@@ -1,5 +1,6 @@
-package io.sentry.android.gradle.integration
+package io.sentry.android.gradle
 
+import io.sentry.android.gradle.integration.BaseSentryPluginTest
 import kotlin.test.assertTrue
 import org.junit.Test
 
