@@ -28,9 +28,9 @@ class WrappingVisitorTest {
             ),
             classContext: ClassData = TestClassData("io/sentry/RandomClass"),
             replacements: Map<Replacement, Replacement> = mapOf(),
-            firstPassVisitor: MethodNode = MethodNode(Opcodes.ASM9)
+            firstPassVisitor: MethodNode = MethodNode(Opcodes.ASM7)
         ) = WrappingVisitor(
-            Opcodes.ASM9,
+            Opcodes.ASM7,
             visitor,
             firstPassVisitor,
             classContext,
@@ -224,7 +224,7 @@ class WrappingVisitorTest {
             descriptor = "(Ljava/lang/String;)V",
             isInterface = false
         )
-        val firstPassVisitor = MethodNode(Opcodes.ASM9).apply {
+        val firstPassVisitor = MethodNode(Opcodes.ASM7).apply {
             visitTypeInsn(Opcodes.NEW, "java/io/FileInputStream")
             visitInsn(Opcodes.DUP)
         }
@@ -258,7 +258,7 @@ class WrappingVisitorTest {
             descriptor = "(Ljava/lang/String;)V",
             isInterface = false
         )
-        val firstPassVisitor = MethodNode(Opcodes.ASM9).apply {
+        val firstPassVisitor = MethodNode(Opcodes.ASM7).apply {
             visitTypeInsn(Opcodes.NEW, "java/io/FileInputStream")
             visitVarInsn(Opcodes.ASTORE, 1)
         }
@@ -292,7 +292,7 @@ class WrappingVisitorTest {
 
     @Test
     fun `multiple NEW insns`() {
-        val firstPassVisitor = MethodNode(Opcodes.ASM9).apply {
+        val firstPassVisitor = MethodNode(Opcodes.ASM7).apply {
             visitTypeInsn(Opcodes.NEW, "java/io/FileInputStream")
             visitVarInsn(Opcodes.ASTORE, 1)
 
@@ -329,7 +329,7 @@ class WrappingVisitorTest {
             descriptor = "(Ljava/lang/String;)V",
             isInterface = false
         )
-        val firstPassVisitor = MethodNode(Opcodes.ASM9).apply {
+        val firstPassVisitor = MethodNode(Opcodes.ASM7).apply {
             visitTypeInsn(Opcodes.NEW, "java/io/FileInputStream")
             visitInsn(Opcodes.DUP)
             visitVarInsn(Opcodes.ASTORE, 1)
@@ -381,7 +381,7 @@ data class InsnVisit(
     val opcode: Int
 )
 
-class CapturingMethodVisitor : MethodVisitor(Opcodes.ASM9) {
+class CapturingMethodVisitor : MethodVisitor(Opcodes.ASM7) {
 
     val methodVisits = mutableListOf<MethodVisit>()
     val varVisits = mutableListOf<VarVisit>()
