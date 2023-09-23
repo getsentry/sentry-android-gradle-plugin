@@ -4,12 +4,19 @@ plugins {
     id("distribution")
     id("com.vanniktech.maven.publish") version "0.17.0"
     id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
+    jacoco
 }
 
 allprojects {
     repositories {
         google()
         mavenCentral()
+    }
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(true)
     }
 }
 

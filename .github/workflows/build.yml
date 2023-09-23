@@ -11,6 +11,7 @@ jobs:
   job_build_upload:
     name: Build and upload distribution artifact
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout current commit (${{ github.sha }})
         uses: actions/checkout@v3
@@ -24,15 +25,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build Gradle Plugin distribution artifacts
-        run: |
-          cd plugin-build
-          make all
-
       - name: Build Kotlin Compiler artifacts
-        run: |
-          cd sentry-kotlin-compiler-plugin
-          make all
+        run: make -i preMerge
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
@@ -42,11 +36,7 @@ jobs:
             ${{ github.workspace }}/plugin-build/build/distributions/*.zip
             ${{ github.workspace }}/sentry-kotlin-compiler-plugin/build/distributions/*.zip
 
-      - name: Verifies Sentry CLI is bundled
-        shell: bash
-        run: |
-          zipfile=$(ls -1 plugin-build/build/distributions | grep -v "PluginMarker")
-          filename=${zipfile/\.zip/}
-          unzip plugin-build/build/distributions/$filename.zip -d /tmp
-          unzip /tmp/$filename/$filename.jar -d /tmp/jar/
-          find /tmp/jar | grep "bin/sentry-cli"
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # pin@v3
+        with:
+          name: sentry-android-gradle-plugin

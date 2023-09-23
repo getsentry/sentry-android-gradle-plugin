@@ -20,6 +20,25 @@ plugins {
     id("io.sentry.android.gradle.aar2jar")
     id("com.github.johnrengelman.shadow") version BuildPluginsVersion.SHADOW
     id("com.github.gmazzo.buildconfig") version BuildPluginsVersion.BUILDCONFIG
+    jacoco
+    id("org.jetbrains.kotlinx.kover") version "0.7.3"
+}
+
+jacoco {
+    toolVersion = "0.8.10"
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(true)
+    }
+}
+
+tasks.withType<Test> {
+    configure<JacocoTaskExtension> {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
 }
 
 allprojects {
