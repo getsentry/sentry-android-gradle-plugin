@@ -39,6 +39,8 @@ class SentryPluginAutoInstallNonAndroidTest :
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
+                id 'org.springframework.boot' version '3.0.0'
+                id 'io.spring.dependency-management' version '1.1.3'
             }
 
             dependencies {
@@ -74,6 +76,8 @@ class SentryPluginAutoInstallNonAndroidTest :
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
+                id 'org.springframework.boot' version '3.0.0'
+                id 'io.spring.dependency-management' version '1.1.3'
             }
             dependencies {
               implementation 'org.springframework.boot:spring-boot-starter:3.0.0'
@@ -160,6 +164,8 @@ class SentryPluginAutoInstallNonAndroidTest :
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
+                id 'org.springframework.boot' version '3.0.0'
+                id 'io.spring.dependency-management' version '1.1.3'
             }
             dependencies {
               implementation 'org.springframework:spring-jdbc:6.0.0'
@@ -390,6 +396,8 @@ class SentryPluginAutoInstallNonAndroidTest :
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
+                id 'org.springframework.boot' version '3.0.0'
+                id 'io.spring.dependency-management' version '1.1.3'
             }
             dependencies {
               implementation 'org.springframework:spring-core:6.0.0'
@@ -446,6 +454,8 @@ class SentryPluginAutoInstallNonAndroidTest :
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
+                id 'org.springframework.boot' version '3.0.0'
+                id 'io.spring.dependency-management' version '1.1.3'
             }
             dependencies {
               implementation 'org.springframework.boot:spring-boot-starter:3.0.0'
