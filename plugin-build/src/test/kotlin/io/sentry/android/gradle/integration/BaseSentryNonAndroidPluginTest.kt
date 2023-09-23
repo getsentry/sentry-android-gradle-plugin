@@ -14,7 +14,6 @@ abstract class BaseSentryNonAndroidPluginTest(
     val testProjectDir = TemporaryFolder()
 
     private val projectTemplateFolder = File("src/test/resources/testFixtures/appTestProject")
-    private val mavenTestRepoPath = File("./../build/mavenTestRepo")
 
     private lateinit var rootBuildFile: File
     protected lateinit var appBuildFile: File
@@ -56,9 +55,6 @@ abstract class BaseSentryNonAndroidPluginTest(
 
             allprojects {
               repositories {
-                maven {
-                  url = "${mavenTestRepoPath.absoluteFile.toURI()}"
-                }
                 google()
                 mavenCentral()
                 mavenLocal()
