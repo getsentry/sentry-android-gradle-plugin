@@ -1,12 +1,12 @@
 package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
-import org.gradle.util.GradleVersion
 import kotlin.test.assertTrue
+import org.gradle.util.GradleVersion
 import org.junit.Test
 
 class SentryPluginWithFirebaseTest :
-    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
+    BaseSentryPluginTest("8.0.0", "8.0.2") {
 
     @Test
     fun `does not break when there is a firebase-perf plugin applied`() {
@@ -24,6 +24,7 @@ class SentryPluginWithFirebaseTest :
 
               buildTypes {
                 release {
+                  proguardFiles 'proguard-rules.pro'
                   minifyEnabled = true
                 }
               }
@@ -32,6 +33,7 @@ class SentryPluginWithFirebaseTest :
             dependencies {
               implementation 'io.sentry:sentry-android-core:5.6.0'
               implementation 'androidx.work:work-runtime:2.5.0'
+              implementation 'com.google.firebase:firebase-perf-ktx:20.4.1'
             }
 
             sentry {
@@ -49,6 +51,6 @@ class SentryPluginWithFirebaseTest :
 
     override val additionalBuildClasspath: String =
         """
-        classpath 'com.google.firebase:perf-plugin:1.4.1'
+        classpath 'com.google.firebase:perf-plugin:1.4.2'
         """.trimIndent()
 }
