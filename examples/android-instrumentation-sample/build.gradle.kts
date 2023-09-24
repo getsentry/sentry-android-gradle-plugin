@@ -52,7 +52,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
     namespace = "io.sentry.samples.instrumentation"
 
@@ -66,7 +66,11 @@ android {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(11)
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.internal.KaptGenerateStubsTask>().configureEach {
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
 }
 
 // useful, when we want to modify room-generated classes, and then compile them into .class files
