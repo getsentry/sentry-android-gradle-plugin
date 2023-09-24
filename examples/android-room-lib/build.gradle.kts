@@ -16,10 +16,6 @@ android {
     namespace = "io.sentry.android.instrumentation.lib"
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.internal.KaptGenerateStubsTask>().configureEach {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
-}
-
 dependencies {
     implementation(Samples.Coroutines.core)
     implementation(Samples.Coroutines.android)

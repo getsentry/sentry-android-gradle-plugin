@@ -69,10 +69,6 @@ kotlin {
     jvmToolchain(11)
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.internal.KaptGenerateStubsTask>().configureEach {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
-}
-
 // useful, when we want to modify room-generated classes, and then compile them into .class files
 // so room does not re-generate and overwrite our changes
 // afterEvaluate {

@@ -68,7 +68,6 @@ abstract class BaseSentryNonAndroidPluginTest(
             .withArguments("--stacktrace")
             .withPluginClasspath()
             .withGradleVersion(gradleVersion)
-            .forwardOutput()
     }
 
     companion object {
