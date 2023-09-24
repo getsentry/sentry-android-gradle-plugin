@@ -1,10 +1,12 @@
 package io.sentry.android.gradle.integration
 
+import io.sentry.BuildConfig
+import org.gradle.util.GradleVersion
 import kotlin.test.assertTrue
 import org.junit.Test
 
 class SentryPluginWithMinifiedLibsTest :
-    BaseSentryPluginTest(androidGradlePluginVersion = "7.1.2", gradleVersion = "7.4") {
+    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
     @Test
     fun `does not break when there is a minified jar dependency`() {

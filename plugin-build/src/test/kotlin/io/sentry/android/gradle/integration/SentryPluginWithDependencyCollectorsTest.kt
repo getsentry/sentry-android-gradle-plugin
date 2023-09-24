@@ -1,10 +1,12 @@
 package io.sentry.android.gradle.integration
 
+import io.sentry.BuildConfig
+import org.gradle.util.GradleVersion
 import kotlin.test.assertTrue
 import org.junit.Test
 
 class SentryPluginWithDependencyCollectorsTest :
-    BaseSentryPluginTest(androidGradlePluginVersion = "7.3.0", gradleVersion = "7.6") {
+    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
     @Test
     fun `does not break when there are plugins that collect dependencies applied`() {
