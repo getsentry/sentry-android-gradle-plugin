@@ -52,7 +52,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
     namespace = "io.sentry.samples.instrumentation"
 
@@ -66,7 +66,7 @@ android {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 // useful, when we want to modify room-generated classes, and then compile them into .class files

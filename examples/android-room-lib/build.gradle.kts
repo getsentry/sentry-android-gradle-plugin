@@ -11,7 +11,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
     namespace = "io.sentry.android.instrumentation.lib"
 }
