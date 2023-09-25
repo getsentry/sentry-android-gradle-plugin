@@ -18,7 +18,7 @@ class InstrumentableMethodsCollectingVisitorTest {
 
         val sut
             get() = InstrumentableMethodsCollectingVisitor(
-                Opcodes.ASM9,
+                Opcodes.ASM7,
                 nextVisitorInitializer,
                 logger
             )
@@ -117,7 +117,7 @@ class InstrumentableMethodsCollectingVisitorTest {
     }
 }
 
-class NextVisitor : ClassVisitor(Opcodes.ASM9) {
+class NextVisitor : ClassVisitor(Opcodes.ASM7) {
 
     var visited: Boolean = false
 

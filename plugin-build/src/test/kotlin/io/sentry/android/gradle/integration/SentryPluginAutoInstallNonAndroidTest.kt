@@ -1,16 +1,15 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
 import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.gradle.util.GradleVersion
+import org.hamcrest.CoreMatchers.`is`
+import org.junit.Assume.assumeThat
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@RunWith(Parameterized::class)
-class SentryPluginAutoInstallNonAndroidTest(
-    gradleVersion: String
-) : BaseSentryNonAndroidPluginTest(gradleVersion) {
+class SentryPluginAutoInstallNonAndroidTest :
+    BaseSentryNonAndroidPluginTest(GradleVersion.current().version) {
 
     @Test
     fun `adds sentry dependency`() {
@@ -36,6 +35,7 @@ class SentryPluginAutoInstallNonAndroidTest(
 
     @Test
     fun `does not do anything when autoinstall is disabled`() {
+        assumeThat(getJavaVersion() >= 17, `is`(true))
         appBuildFile.writeText(
             // language=Groovy
             """
@@ -71,6 +71,7 @@ class SentryPluginAutoInstallNonAndroidTest(
 
     @Test
     fun `uses user-provided sentryVersion when sentry is not available in direct deps`() {
+        assumeThat(getJavaVersion() >= 17, `is`(true))
         appBuildFile.writeText(
             // language=Groovy
             """
@@ -157,6 +158,7 @@ class SentryPluginAutoInstallNonAndroidTest(
 
     @Test
     fun `jdbc is added for spring-jdbc`() {
+        assumeThat(getJavaVersion() >= 17, `is`(true))
         appBuildFile.writeText(
             // language=Groovy
             """
@@ -387,6 +389,7 @@ class SentryPluginAutoInstallNonAndroidTest(
 
     @Test
     fun `spring-jakarta is added for Spring 6`() {
+        assumeThat(getJavaVersion() >= 17, `is`(true))
         appBuildFile.writeText(
             // language=Groovy
             """
@@ -443,6 +446,7 @@ class SentryPluginAutoInstallNonAndroidTest(
 
     @Test
     fun `spring-boot-starter-jakarta is added for Spring Boot 3`() {
+        assumeThat(getJavaVersion() >= 17, `is`(true))
         appBuildFile.writeText(
             // language=Groovy
             """
@@ -472,4 +476,17 @@ class SentryPluginAutoInstallNonAndroidTest(
     private fun runListDependenciesTask() = runner
         .appendArguments("app:dependencies")
         .build()
+
+    private fun getJavaVersion(): Int {
+        var version = System.getProperty("java.version")
+        if (version.startsWith("1.")) {
+            version = version.substring(2, 3)
+        } else {
+            val dot = version.indexOf(".")
+            if (dot != -1) {
+                version = version.substring(0, dot)
+            }
+        }
+        return version.toInt()
+    }
 }

@@ -1,16 +1,12 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
+import io.sentry.BuildConfig
 import kotlin.test.assertTrue
+import org.gradle.util.GradleVersion
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@Suppress("FunctionName")
-@RunWith(Parameterized::class)
-class SentryPluginCheckAndroidSdkTest(
-    androidGradlePluginVersion: String,
-    gradleVersion: String
-) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
+class SentryPluginCheckAndroidSdkTest :
+    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
     @Test
     fun `when tracingInstrumentation is disabled does not check sentry-android sdk state`() {

@@ -1,38 +1,21 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
+import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
+import io.sentry.android.gradle.verifyDependenciesReportAndroid
+import io.sentry.android.gradle.verifyDependenciesReportJava
+import io.sentry.android.gradle.verifyIntegrationList
+import io.sentry.android.gradle.verifyProguardUuid
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.gradle.util.GradleVersion
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@Suppress("FunctionName")
-@RunWith(Parameterized::class)
-class SentryPluginTest(
-    androidGradlePluginVersion: String,
-    gradleVersion: String
-) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
-
-    @Test
-    fun `plugin can be applied`() {
-        appBuildFile.appendText(
-            // language=Groovy
-            """
-                sentry {
-                  autoUploadProguardMapping = false
-                  tracingInstrumentation {
-                    enabled = false
-                  }
-                }
-            """.trimIndent()
-        )
-
-        runner.build()
-    }
+class SentryPluginTest :
+    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
     @Test
     fun `plugin does not configure tasks`() {
@@ -68,15 +51,6 @@ class SentryPluginTest(
         val uuid2 = verifyProguardUuid(testProjectDir.root)
 
         assertNotEquals(uuid1, uuid2)
-    }
-
-    @Test
-    fun `includes a UUID in the APK`() {
-        runner
-            .appendArguments(":app:assembleRelease")
-            .build()
-
-        verifyProguardUuid(testProjectDir.root)
     }
 
     @Test
@@ -498,10 +472,14 @@ class SentryPluginTest(
             )
         )
 
-        runner.appendArguments(":app:assembleRelease")
+        runner.appendArguments(":app:assembleDebug")
         runner.build()
 
-        val integrations = verifyIntegrationList(testProjectDir.root).sorted()
+        val integrations = verifyIntegrationList(
+            testProjectDir.root,
+            variant = "debug",
+            signed = false
+        ).sorted()
 
         val expectedIntegrations = listOf(
             InstrumentationFeature.DATABASE,
@@ -528,10 +506,14 @@ class SentryPluginTest(
             )
         )
 
-        runner.appendArguments(":app:assembleRelease")
+        runner.appendArguments(":app:assembleDebug")
 
         runner.build()
-        val integrations = verifyIntegrationList(testProjectDir.root).sorted()
+        val integrations = verifyIntegrationList(
+            testProjectDir.root,
+            variant = "debug",
+            signed = false
+        ).sorted()
 
         val expectedIntegrations = listOf(
             InstrumentationFeature.DATABASE,
@@ -552,12 +534,12 @@ class SentryPluginTest(
             )
         )
 
-        runner.appendArguments(":app:assembleRelease")
+        runner.appendArguments(":app:assembleDebug")
 
         runner.build()
 
         assertThrows(NoSuchElementException::class.java) {
-            verifyIntegrationList(testProjectDir.root)
+            verifyIntegrationList(testProjectDir.root, variant = "debug", signed = false)
         }
     }
 

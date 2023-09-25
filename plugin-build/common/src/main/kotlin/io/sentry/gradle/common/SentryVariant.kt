@@ -20,5 +20,8 @@ interface SentryVariant {
     val packageProvider: TaskProvider<out Task>? get() = null
     val assembleProvider: TaskProvider<out Task>? get() = null
     fun mappingFileProvider(project: Project): Provider<FileCollection>
-    fun sources(project: Project, additionalSources: Provider<out Collection<Directory>>): Provider<out Collection<Directory>>
+    fun sources(
+        project: Project,
+        additionalSources: Provider<out Collection<Directory>>
+    ): Provider<out Collection<Directory>>
 }

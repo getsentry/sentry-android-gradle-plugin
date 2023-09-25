@@ -18,7 +18,7 @@ class CommonClassVisitorTest {
 
         fun getSut(tmpDir: File, debug: Boolean = false) =
             CommonClassVisitor(
-                Opcodes.ASM9,
+                Opcodes.ASM7,
                 ParentClassVisitor(),
                 "SomeClass",
                 listOf(TestInstrumentable()),
@@ -91,9 +91,9 @@ class CommonClassVisitorTest {
     }
 }
 
-class ParentClassVisitor : ClassVisitor(Opcodes.ASM9) {
+class ParentClassVisitor : ClassVisitor(Opcodes.ASM7) {
 
-    inner class ParentMethodVisitor : MethodVisitor(Opcodes.ASM9)
+    inner class ParentMethodVisitor : MethodVisitor(Opcodes.ASM7)
 
     override fun visitMethod(
         access: Int,
@@ -107,7 +107,7 @@ class ParentClassVisitor : ClassVisitor(Opcodes.ASM9) {
 class TestInstrumentable : MethodInstrumentable {
 
     inner class TestVisitor(originalVisitor: MethodVisitor) :
-        MethodVisitor(Opcodes.ASM9, originalVisitor)
+        MethodVisitor(Opcodes.ASM7, originalVisitor)
 
     override val fqName: String get() = "test"
 

@@ -1,4 +1,4 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
 import java.io.File
 import org.gradle.testkit.runner.GradleRunner
@@ -6,18 +6,14 @@ import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import org.junit.runners.Parameterized
 
-@Suppress("FunctionName")
-abstract class BaseSentryPluginTest(
-    private val androidGradlePluginVersion: String,
+abstract class BaseSentryNonAndroidPluginTest(
     private val gradleVersion: String
 ) {
     @get:Rule
     val testProjectDir = TemporaryFolder()
 
     private val projectTemplateFolder = File("src/test/resources/testFixtures/appTestProject")
-    private val mavenTestRepoPath = File("./../build/mavenTestRepo")
 
     private lateinit var rootBuildFile: File
     protected lateinit var appBuildFile: File
@@ -49,7 +45,7 @@ abstract class BaseSentryPluginTest(
                 mavenCentral()
               }
               dependencies {
-                classpath 'com.android.tools.build:gradle:$androidGradlePluginVersion'
+                classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0'
                 // This is needed to populate the plugin classpath instead of using
                 // withPluginClasspath on the Gradle Runner.
                 $additionalBuildClasspath
@@ -59,32 +55,9 @@ abstract class BaseSentryPluginTest(
 
             allprojects {
               repositories {
-                maven {
-                  url = "${mavenTestRepoPath.absoluteFile.toURI()}"
-                }
                 google()
                 mavenCentral()
                 mavenLocal()
-                maven { url 'https://appboy.github.io/appboy-android-sdk/sdk' }
-                maven { url 'https://pkgs.dev.azure.com/Synerise/AndroidSDK/_packaging/prod/maven/v1' }
-              }
-            }
-            subprojects {
-              pluginManager.withPlugin('com.android.application') {
-                android {
-                  compileSdkVersion 33
-                  defaultConfig {
-                    applicationId "com.example"
-                    minSdkVersion 21
-                  }
-                  buildTypes {
-                    release {
-                      minifyEnabled true
-                      proguardFiles("src/release/proguard-rules.pro")
-                    }
-                  }
-                  $additionalRootProjectConfig
-                }
               }
             }
             """.trimIndent()
@@ -98,21 +71,6 @@ abstract class BaseSentryPluginTest(
     }
 
     companion object {
-
-        @Parameterized.Parameters(name = "AGP {0}, Gradle {1}")
-        @JvmStatic
-        fun parameters() = listOf(
-            // The supported Gradle version can be found here:
-            // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
-            // The pair is [AGP Version, Gradle Version]
-            arrayOf("7.0.4", "7.2"),
-            arrayOf("7.1.3", "7.3.3"),
-            arrayOf("7.2.1", "7.4"),
-            arrayOf("7.3.0", "7.5"),
-            arrayOf("7.4.0", "7.6"),
-            arrayOf("8.0.0", "8.0.2"),
-            arrayOf("8.1.0-alpha11", "8.1")
-        )
 
         internal fun GradleRunner.appendArguments(vararg arguments: String) =
             withArguments(this.arguments + arguments)

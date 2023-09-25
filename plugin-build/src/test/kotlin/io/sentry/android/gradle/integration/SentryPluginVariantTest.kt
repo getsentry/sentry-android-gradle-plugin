@@ -1,17 +1,13 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
+import io.sentry.BuildConfig
+import org.gradle.util.GradleVersion
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@Suppress("FunctionName")
-@RunWith(Parameterized::class)
-class SentryPluginVariantTest(
-    androidGradlePluginVersion: String,
-    gradleVersion: String
-) : BaseSentryPluginTest(androidGradlePluginVersion, gradleVersion) {
+class SentryPluginVariantTest :
+    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
     override val additionalRootProjectConfig: String =
         // language=Groovy

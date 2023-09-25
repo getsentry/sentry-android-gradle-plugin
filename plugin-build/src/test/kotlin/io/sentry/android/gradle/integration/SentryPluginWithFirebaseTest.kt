@@ -1,21 +1,22 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
+import io.sentry.BuildConfig
 import kotlin.test.assertTrue
+import org.gradle.util.GradleVersion
 import org.junit.Test
 
-class SentryPluginWithDependencyCollectorsTest :
-    BaseSentryPluginTest(androidGradlePluginVersion = "7.3.0", gradleVersion = "7.6") {
+class SentryPluginWithFirebaseTest :
+    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
     @Test
-    fun `does not break when there are plugins that collect dependencies applied`() {
+    fun `does not break when there is a firebase-perf plugin applied`() {
         appBuildFile.writeText(
             // language=Groovy
             """
             plugins {
               id "com.android.application"
               id "io.sentry.android.gradle"
-              id "com.mikepenz.aboutlibraries.plugin"
-              id "com.google.android.gms.oss-licenses-plugin"
+              id "com.google.firebase.firebase-perf"
             }
 
             android {
@@ -23,14 +24,16 @@ class SentryPluginWithDependencyCollectorsTest :
 
               buildTypes {
                 release {
-                  minifyEnabled true
+                  proguardFiles 'proguard-rules.pro'
+                  minifyEnabled = true
                 }
               }
             }
 
             dependencies {
-              implementation 'androidx.compose.runtime:runtime:1.3.0'
-              implementation 'androidx.compose.ui:ui:1.3.0'
+              implementation 'io.sentry:sentry-android-core:5.6.0'
+              implementation 'androidx.work:work-runtime:2.5.0'
+              implementation 'com.google.firebase:firebase-perf-ktx:20.4.1'
             }
 
             sentry {
@@ -48,7 +51,6 @@ class SentryPluginWithDependencyCollectorsTest :
 
     override val additionalBuildClasspath: String =
         """
-        classpath 'com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:10.6.1'
-        classpath 'com.google.android.gms:oss-licenses-plugin:0.10.5'
+        classpath 'com.google.firebase:perf-plugin:1.4.2'
         """.trimIndent()
 }

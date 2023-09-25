@@ -18,7 +18,7 @@ class CatchingMethodVisitorTest {
             MethodContext(Opcodes.ACC_PUBLIC, "someMethod", null, null, null)
         val sut
             get() = CatchingMethodVisitor(
-                Opcodes.ASM9,
+                Opcodes.ASM7,
                 throwingVisitor,
                 "SomeClass",
                 methodContext,
@@ -64,7 +64,7 @@ class CatchingMethodVisitorTest {
 
 class CustomException : RuntimeException("This method throws!")
 
-class ThrowingMethodVisitor : MethodVisitor(Opcodes.ASM9) {
+class ThrowingMethodVisitor : MethodVisitor(Opcodes.ASM7) {
 
     override fun visitMaxs(maxStack: Int, maxLocals: Int) {
         throw CustomException()

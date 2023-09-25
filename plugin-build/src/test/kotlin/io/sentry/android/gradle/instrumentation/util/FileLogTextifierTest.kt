@@ -14,7 +14,7 @@ class FileLogTextifierTest {
 
         fun getSut(tmpFile: File) =
             FileLogTextifier(
-                Opcodes.ASM9,
+                Opcodes.ASM7,
                 tmpFile,
                 "SomeMethod",
                 "(Ljava/lang/Throwable;)V"

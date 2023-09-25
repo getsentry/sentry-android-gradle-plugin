@@ -18,7 +18,7 @@ class ChainedInstrumentableTest {
         ): ClassVisitor {
             return ChainedInstrumentable(instrumentables).getVisitor(
                 TestClassContext(TestClassData("RandomClass")),
-                Opcodes.ASM9,
+                Opcodes.ASM7,
                 originalVisitor,
                 TestSpanAddingParameters(inMemoryDir = File(""))
             )
@@ -75,10 +75,10 @@ class ChainedInstrumentableTest {
     }
 }
 
-class OriginalVisitor : ClassVisitor(Opcodes.ASM9)
+class OriginalVisitor : ClassVisitor(Opcodes.ASM7)
 
 class FirstInstrumentable(val isInstrumentable: Boolean = true) : ClassInstrumentable {
-    class FirstVisitor(prevVisitor: ClassVisitor) : ClassVisitor(Opcodes.ASM9, prevVisitor) {
+    class FirstVisitor(prevVisitor: ClassVisitor) : ClassVisitor(Opcodes.ASM7, prevVisitor) {
         val prevVisitor get() = cv
     }
 
@@ -93,7 +93,7 @@ class FirstInstrumentable(val isInstrumentable: Boolean = true) : ClassInstrumen
 }
 
 class SecondInstrumentable(val isInstrumentable: Boolean = true) : ClassInstrumentable {
-    class SecondVisitor(prevVisitor: ClassVisitor) : ClassVisitor(Opcodes.ASM9, prevVisitor) {
+    class SecondVisitor(prevVisitor: ClassVisitor) : ClassVisitor(Opcodes.ASM7, prevVisitor) {
         val prevVisitor get() = cv
     }
 
