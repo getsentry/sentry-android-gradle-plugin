@@ -473,6 +473,31 @@ class SentryPluginAutoInstallNonAndroidTest :
         assertFalse { "FAILED" in result.output }
     }
 
+    @Test
+    fun `quartz is added`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+                id "java"
+                id "io.sentry.jvm.gradle"
+            }
+            dependencies {
+              implementation 'org.quartz-scheduler:quartz:2.3.0'
+            }
+
+            sentry.autoInstallation.enabled = true
+            sentry.autoInstallation.sentryVersion = "6.30.0"
+            """.trimIndent()
+        )
+
+        val result = runListDependenciesTask()
+
+        assertTrue { "io.sentry:sentry-quartz:6.30.0" in result.output }
+        // ensure all dependencies could be resolved
+        assertFalse { "FAILED" in result.output }
+    }
+
     private fun runListDependenciesTask() = runner
         .appendArguments("app:dependencies")
         .build()
