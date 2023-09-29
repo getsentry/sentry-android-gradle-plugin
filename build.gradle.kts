@@ -41,7 +41,6 @@ tasks.register("integrationTest") {
     description = "Runs the integration tests"
 
     dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":publishAllPublicationsToMavenTestRepoRepository"))
-    mustRunAfter(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":publishAllPublicationsToMavenTestRepoRepository"))
     dependsOn(gradle.includedBuild("plugin-build").task(":integrationTest"))
 }
 
