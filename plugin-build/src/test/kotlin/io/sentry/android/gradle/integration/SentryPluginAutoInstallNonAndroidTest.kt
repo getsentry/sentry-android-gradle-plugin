@@ -202,8 +202,6 @@ class SentryPluginAutoInstallNonAndroidTest :
 
         val result = runListDependenciesTask()
 
-        println(result.output)
-
         assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }

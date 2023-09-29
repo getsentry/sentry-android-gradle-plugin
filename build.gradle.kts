@@ -36,6 +36,15 @@ tasks.register("clean", Delete::class.java) {
     dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":clean"))
 }
 
+tasks.register("integrationTest") {
+    group = "verification"
+    description = "Runs the integration tests"
+
+    dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":publishAllPublicationsToMavenTestRepoRepository"))
+    mustRunAfter(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":publishAllPublicationsToMavenTestRepoRepository"))
+    dependsOn(gradle.includedBuild("plugin-build").task(":integrationTest"))
+}
+
 tasks.register("preMerge") {
     description = "Runs all the tests/verification tasks on both top level and included build."
 
