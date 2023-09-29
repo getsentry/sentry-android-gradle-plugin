@@ -100,7 +100,7 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           gradle-version: ${{ matrix.gradle }}
-          arguments: -p plugin-build integrationTest
+          arguments: integrationTest
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v3
