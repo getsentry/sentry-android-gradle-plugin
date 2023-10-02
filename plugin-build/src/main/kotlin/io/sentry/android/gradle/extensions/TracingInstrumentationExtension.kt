@@ -57,6 +57,16 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
     ) {
         logcatAction.execute(logcat)
     }
+
+    val appStart: AppStartExtension = objects.newInstance(
+        AppStartExtension::class.java
+    )
+
+    fun appStart(
+        appStartExtensionAction: Action<AppStartExtension>
+    ) {
+        appStartExtensionAction.execute(appStart)
+    }
 }
 
 enum class InstrumentationFeature(val integrationName: String) {

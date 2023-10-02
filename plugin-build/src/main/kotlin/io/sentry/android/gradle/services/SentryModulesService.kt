@@ -37,6 +37,10 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
             features.add("LogcatInstrumentation")
         }
 
+        if (isAppStartInstrEnabled()) {
+            features.add("AppStartInstrumentation")
+        }
+
         if (parameters.sourceContextEnabled.getOrElse(false)) {
             features.add("SourceContext")
         }
@@ -95,6 +99,12 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
             SentryVersions.VERSION_COMPOSE
         ) && parameters.features.get().contains(InstrumentationFeature.COMPOSE)
 
+    fun isAppStartInstrEnabled(): Boolean =
+        sentryModules.isAtLeast(
+            SentryModules.SENTRY_ANDROID_CORE,
+            SentryVersions.VERSION_APP_START
+        ) && parameters.appStartEnabled.get()
+
     private fun Map<ModuleIdentifier, SemVer>.isAtLeast(
         module: ModuleIdentifier,
         minVersion: SemVer
@@ -106,7 +116,8 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
             project: Project,
             features: Provider<Set<InstrumentationFeature>>,
             logcatEnabled: Provider<Boolean>,
-            sourceContextEnabled: Provider<Boolean>
+            sourceContextEnabled: Provider<Boolean>,
+            appStartEnabled: Provider<Boolean>
         ): Provider<SentryModulesService> {
             return project.gradle.sharedServices.registerIfAbsent(
                 getBuildServiceName(SentryModulesService::class.java),
@@ -115,6 +126,7 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
                 it.parameters.features.setDisallowChanges(features)
                 it.parameters.logcatEnabled.setDisallowChanges(logcatEnabled)
                 it.parameters.sourceContextEnabled.setDisallowChanges(sourceContextEnabled)
+                it.parameters.appStartEnabled.setDisallowChanges(appStartEnabled)
             }
         }
     }
@@ -128,5 +140,8 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
 
         @get:Input
         val sourceContextEnabled: Property<Boolean>
+
+        @get:Input
+        val appStartEnabled: Property<Boolean>
     }
 }

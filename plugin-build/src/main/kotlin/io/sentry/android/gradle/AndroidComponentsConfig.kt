@@ -95,7 +95,8 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     project,
                     extension.tracingInstrumentation.features,
                     extension.tracingInstrumentation.logcat.enabled,
-                    extension.includeSourceContext
+                    extension.includeSourceContext,
+                    extension.tracingInstrumentation.appStart.enabled
                 )
                 project.collectModules(
                     "${variant.name}RuntimeClasspath",
