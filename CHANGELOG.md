@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix tracing instrumentation not working when configuration-cache is enabled on Gradle 8+ ([#568](https://github.com/getsentry/sentry-android-gradle-plugin/pull/568))
+
 ## 3.13.0
 
 ### Features
