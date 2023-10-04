@@ -1,10 +1,13 @@
 package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
+import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.gradle.util.GradleVersion
+import org.hamcrest.CoreMatchers.`is`
+import org.junit.Assume.assumeThat
 import org.junit.Test
 
 class SentryPluginConfigurationCacheTest :
@@ -12,6 +15,12 @@ class SentryPluginConfigurationCacheTest :
 
     @Test
     fun `dependency collector task respects configuration cache`() {
+        assumeThat(
+            "SentryExternalDependenciesReportTask only supports " +
+                "configuration cache from Gradle 7.5 onwards",
+            GradleVersions.CURRENT >= GradleVersions.VERSION_7_5,
+            `is`(true)
+        )
         appBuildFile.appendText(
             // language=Groovy
             """
