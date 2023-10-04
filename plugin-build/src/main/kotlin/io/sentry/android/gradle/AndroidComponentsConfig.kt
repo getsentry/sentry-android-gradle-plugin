@@ -40,10 +40,12 @@ import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.build.event.BuildEventsListenerRegistry
 
 fun AndroidComponentsExtension<*, *, *>.configure(
     project: Project,
     extension: SentryPluginExtension,
+    listenerRegistry: BuildEventsListenerRegistry,
     cliExecutable: String,
     sentryOrg: String?,
     sentryProject: String?
@@ -97,6 +99,13 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     extension.tracingInstrumentation.logcat.enabled,
                     extension.includeSourceContext
                 )
+                /**
+                 * We have to register SentryModulesService as a build event listener, so it will
+                 * not be discarded after the configuration phase (where we store the collected
+                 * dependencies), and will be passed down to the InstrumentationFactory
+                 */
+                listenerRegistry.onTaskCompletion(sentryModulesService)
+
                 project.collectModules(
                     "${variant.name}RuntimeClasspath",
                     variant.name,

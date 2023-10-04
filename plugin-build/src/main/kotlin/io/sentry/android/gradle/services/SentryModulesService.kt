@@ -16,8 +16,12 @@ import org.gradle.api.provider.SetProperty
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 import org.gradle.api.tasks.Input
+import org.gradle.tooling.events.FinishEvent
+import org.gradle.tooling.events.OperationCompletionListener
 
-abstract class SentryModulesService : BuildService<SentryModulesService.Parameters> {
+abstract class SentryModulesService :
+    BuildService<SentryModulesService.Parameters>,
+    OperationCompletionListener {
 
     @get:Synchronized
     @set:Synchronized
@@ -119,7 +123,10 @@ abstract class SentryModulesService : BuildService<SentryModulesService.Paramete
         }
     }
 
+    override fun onFinish(event: FinishEvent?) = Unit // no-op
+
     interface Parameters : BuildServiceParameters {
+
         @get:Input
         val features: SetProperty<InstrumentationFeature>
 
