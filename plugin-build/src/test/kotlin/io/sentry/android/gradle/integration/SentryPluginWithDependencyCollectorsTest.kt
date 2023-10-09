@@ -1,20 +1,23 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
+import io.sentry.BuildConfig
 import kotlin.test.assertTrue
+import org.gradle.util.GradleVersion
 import org.junit.Test
 
-class SentryPluginWithFirebaseTest :
-    BaseSentryPluginTest(androidGradlePluginVersion = "7.2.1", gradleVersion = "7.5") {
+class SentryPluginWithDependencyCollectorsTest :
+    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
     @Test
-    fun `does not break when there is a firebase-perf plugin applied`() {
+    fun `does not break when there are plugins that collect dependencies applied`() {
         appBuildFile.writeText(
             // language=Groovy
             """
             plugins {
               id "com.android.application"
               id "io.sentry.android.gradle"
-              id "com.google.firebase.firebase-perf"
+              id "com.mikepenz.aboutlibraries.plugin"
+              id "com.google.android.gms.oss-licenses-plugin"
             }
 
             android {
@@ -22,14 +25,14 @@ class SentryPluginWithFirebaseTest :
 
               buildTypes {
                 release {
-                  minifyEnabled = true
+                  minifyEnabled true
                 }
               }
             }
 
             dependencies {
-              implementation 'io.sentry:sentry-android-core:5.6.0'
-              implementation 'androidx.work:work-runtime:2.5.0'
+              implementation 'androidx.compose.runtime:runtime:1.3.0'
+              implementation 'androidx.compose.ui:ui:1.3.0'
             }
 
             sentry {
@@ -47,6 +50,7 @@ class SentryPluginWithFirebaseTest :
 
     override val additionalBuildClasspath: String =
         """
-        classpath 'com.google.firebase:perf-plugin:1.4.1'
+        classpath 'com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:10.6.1'
+        classpath 'com.google.android.gms:oss-licenses-plugin:0.10.5'
         """.trimIndent()
 }

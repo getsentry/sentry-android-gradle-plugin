@@ -1,9 +1,11 @@
 name: Benchmark build speed and upload results
 
 on:
-  pull_request:
-    paths:
-      - '**/instrumentation/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   benchmark:

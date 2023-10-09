@@ -7,6 +7,10 @@ on:
       - release/**
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   integration-test:
     runs-on: ubuntu-latest
@@ -30,4 +34,4 @@ jobs:
       - name: Start server and run integration test for sentry-cli commands
         run: |
           test/integration-test-server-start.sh &
-          ./gradlew -p plugin-build test --tests SentryPluginIntegrationTest
+          ./gradlew -p plugin-build integrationTest --tests SentryPluginIntegrationTest

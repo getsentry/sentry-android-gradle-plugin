@@ -144,8 +144,32 @@ tasks.named("pluginUnderTestMetadata").configure {
     (this as PluginUnderTestMetadata).pluginClasspath.from(fixtureClasspath)
 }
 
-tasks.withType<Test>().configureEach {
+tasks.named("test").configure {
+    require(this is Test)
     maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+
+    // Cap JVM args per test
+    minHeapSize = "128m"
+    maxHeapSize = "1g"
+
+    filter {
+        excludeTestsMatching("io.sentry.android.gradle.integration.*")
+    }
+}
+
+tasks.register<Test>("integrationTest").configure {
+    group = "verification"
+    description = "Runs the integration tests"
+
+    maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+
+    // Cap JVM args per test
+    minHeapSize = "128m"
+    maxHeapSize = "1g"
+
+    filter {
+        includeTestsMatching("io.sentry.android.gradle.integration.*")
+    }
 }
 
 gradlePlugin {
@@ -309,6 +333,7 @@ buildConfig {
 
     buildConfigField("String", "Version", provider { "\"${project.version}\"" })
     buildConfigField("String", "SdkVersion", provider { "\"${project.property("sdk_version")}\"" })
+    buildConfigField("String", "AgpVersion", provider { "\"${BuildPluginsVersion.AGP}\"" })
 }
 
 tasks.register<ASMifyTask>("asmify")

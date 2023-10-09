@@ -1,4 +1,4 @@
-name: Test Publishing UUID Dry Run
+name: Test Matrix
 
 on:
   push:
@@ -7,9 +7,13 @@ on:
       - release/**
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   publish-dry-run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
@@ -36,7 +40,7 @@ jobs:
             gradle: "8.1"
             java: "17"
 
-    name: Publish Dry Run - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
+    name: Test Matrix - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
     env:
       VERSION_AGP: ${{ matrix.agp }}
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -90,3 +94,17 @@ jobs:
           unzip ./examples/android-gradle-kts/build/outputs/bundle/release/android-gradle-kts-release.aab -d output
           cat output/base/assets/sentry-debug-meta.properties
           rm -r output
+
+      - name: Run Integration Tests
+        uses: gradle/gradle-build-action@7e48093f71aa12588241894ff3695e83c4b5e4b0 # pin@v2.4.2
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          gradle-version: ${{ matrix.gradle }}
+          arguments: integrationTest
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-AGP${{ matrix.agp }}-Gradle${{ matrix.gradle }}
+          path: plugin-build/build/reports/tests/
+        if: always()

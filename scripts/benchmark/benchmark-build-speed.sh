@@ -25,6 +25,7 @@ gradle-profiler --benchmark \
 
 cd Android
 git apply ../duckduckgo/add-sentry-to-duckduckgo.patch
+./gradlew tasks --continue
 cd ..
 
 gradle-profiler --benchmark \

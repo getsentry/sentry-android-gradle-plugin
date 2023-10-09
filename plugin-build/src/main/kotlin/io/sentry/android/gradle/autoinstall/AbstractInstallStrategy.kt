@@ -32,7 +32,7 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
         minSupportedThirdPartyVersion?.let {
             parseVersion(context.details.id.version)?.let { thirdPartySemVersion ->
                 if (thirdPartySemVersion < it) {
-                    logger.warn {
+                    logger.info {
                         "$sentryModuleId won't be installed because the current version is " +
                             "lower than the minimum supported version ($it)"
                     }
@@ -43,7 +43,7 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
         maxSupportedThirdPartyVersion?.let {
             parseVersion(context.details.id.version)?.let { thirdPartySemVersion ->
                 if (thirdPartySemVersion > it) {
-                    logger.warn {
+                    logger.info {
                         "$sentryModuleId won't be installed because the current version is " +
                             "higher than the maximum supported version ($it)"
                     }

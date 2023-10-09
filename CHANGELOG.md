@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+### Dependencies
+
+- Bump CLI from v2.21.1 to v2.21.2 ([#569](https://github.com/getsentry/sentry-android-gradle-plugin/pull/569))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2212)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.1...2.21.2)
+
+## 3.13.0
+
+### Features
+
+- Auto install `sentry-quartz` if `quartz` is installed ([#562](https://github.com/getsentry/sentry-android-gradle-plugin/pull/562))
+
+### Internal
+
+- Change room span op name to `db.sql.room` ([#557](https://github.com/getsentry/sentry-android-gradle-plugin/pull/557))
+
+### Fixes
+
+- Reduce log level from warn to info for some auto install messages ([#553](https://github.com/getsentry/sentry-android-gradle-plugin/pull/553))
+  - There was some confusion especially around our Spring and Spring Boot integrations where we offer a different set of dependencies for Spring 5 (`sentry-spring`), Spring 6 (`sentry-spring-jakarta`), Spring Boot 2 (`sentry-spring-boot`) and Spring Boot 3 (`sentry-spring-boot-jakarta`) where there's always going to be one that's installed and one that's not installed.
+
+### Dependencies
+
+- Bump CLI from v2.20.3 to v2.21.1 ([#540](https://github.com/getsentry/sentry-android-gradle-plugin/pull/540), [#545](https://github.com/getsentry/sentry-android-gradle-plugin/pull/545), [#550](https://github.com/getsentry/sentry-android-gradle-plugin/pull/550), [#556](https://github.com/getsentry/sentry-android-gradle-plugin/pull/556), [#561](https://github.com/getsentry/sentry-android-gradle-plugin/pull/561))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2211)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.20.3...2.21.1)
+- Bump Android SDK from v6.28.0 to v6.30.0 ([#555](https://github.com/getsentry/sentry-android-gradle-plugin/pull/555), [#563](https://github.com/getsentry/sentry-android-gradle-plugin/pull/563))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6300)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.28.0...6.30.0)
+
+## 3.12.0
+
 ### Features
 
 - Add release information args to proguard mapping upload task ([#476](https://github.com/getsentry/sentry-android-gradle-plugin/pull/476))

@@ -1,16 +1,17 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
+import io.sentry.android.gradle.verifySourceBundleContents
+import io.sentry.android.gradle.withDummyCustomFile
+import io.sentry.android.gradle.withDummyJavaFile
+import io.sentry.android.gradle.withDummyKtFile
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome.SKIPPED
+import org.gradle.util.GradleVersion
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@RunWith(Parameterized::class)
-class SentrySourceContextNonAndroidTest(
-    gradleVersion: String
-) : BaseSentryNonAndroidPluginTest(gradleVersion) {
+class SentryPluginSourceContextNonAndroidTest :
+    BaseSentryNonAndroidPluginTest(GradleVersion.current().version) {
 
     @Test
     fun `skips bundle and upload tasks if no sources`() {

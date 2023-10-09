@@ -16,6 +16,8 @@ import io.sentry.android.gradle.autoinstall.logback.LogbackInstallStrategy
 import io.sentry.android.gradle.autoinstall.logback.LogbackInstallStrategy.Registrar.SENTRY_LOGBACK_ID
 import io.sentry.android.gradle.autoinstall.okhttp.OkHttpInstallStrategy
 import io.sentry.android.gradle.autoinstall.okhttp.OkHttpInstallStrategy.Registrar.SENTRY_OKHTTP_ID
+import io.sentry.android.gradle.autoinstall.quartz.QuartzInstallStrategy
+import io.sentry.android.gradle.autoinstall.quartz.QuartzInstallStrategy.Registrar.SENTRY_QUARTZ_ID
 import io.sentry.android.gradle.autoinstall.spring.Spring5InstallStrategy
 import io.sentry.android.gradle.autoinstall.spring.Spring5InstallStrategy.Registrar.SENTRY_SPRING_5_ID
 import io.sentry.android.gradle.autoinstall.spring.Spring6InstallStrategy
@@ -52,6 +54,7 @@ private val strategies = listOf(
     Log4j2InstallStrategy.Registrar,
     JdbcInstallStrategy.Registrar,
     GraphqlInstallStrategy.Registrar,
+    QuartzInstallStrategy.Registrar,
     KotlinExtensionsInstallStrategy.Registrar
 )
 
@@ -86,6 +89,7 @@ fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boo
                     installLog4j2 = !dependencies.isModuleAvailable(SENTRY_LOG4J2_ID)
                     installJdbc = !dependencies.isModuleAvailable(SENTRY_JDBC_ID)
                     installGraphql = !dependencies.isModuleAvailable(SENTRY_GRAPHQL_ID)
+                    installQuartz = !dependencies.isModuleAvailable(SENTRY_QUARTZ_ID)
                     installKotlinExtensions = !dependencies.isModuleAvailable(
                         SENTRY_KOTLIN_EXTENSIONS_ID
                     )

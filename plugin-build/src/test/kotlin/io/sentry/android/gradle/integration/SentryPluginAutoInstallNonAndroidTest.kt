@@ -1,16 +1,15 @@
-package io.sentry.android.gradle
+package io.sentry.android.gradle.integration
 
 import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.gradle.util.GradleVersion
+import org.hamcrest.CoreMatchers.`is`
+import org.junit.Assume.assumeThat
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
-@RunWith(Parameterized::class)
-class SentryPluginAutoInstallNonAndroidTest(
-    gradleVersion: String
-) : BaseSentryNonAndroidPluginTest(gradleVersion) {
+class SentryPluginAutoInstallNonAndroidTest :
+    BaseSentryNonAndroidPluginTest(GradleVersion.current().version) {
 
     @Test
     fun `adds sentry dependency`() {
@@ -36,6 +35,7 @@ class SentryPluginAutoInstallNonAndroidTest(
 
     @Test
     fun `does not do anything when autoinstall is disabled`() {
+        assumeThat(getJavaVersion() >= 17, `is`(true))
         appBuildFile.writeText(
             // language=Groovy
             """
@@ -71,6 +71,7 @@ class SentryPluginAutoInstallNonAndroidTest(
 
     @Test
     fun `uses user-provided sentryVersion when sentry is not available in direct deps`() {
+        assumeThat(getJavaVersion() >= 17, `is`(true))
         appBuildFile.writeText(
             // language=Groovy
             """
@@ -157,6 +158,7 @@ class SentryPluginAutoInstallNonAndroidTest(
 
     @Test
     fun `jdbc is added for spring-jdbc`() {
+        assumeThat(getJavaVersion() >= 17, `is`(true))
         appBuildFile.writeText(
             // language=Groovy
             """
@@ -199,8 +201,6 @@ class SentryPluginAutoInstallNonAndroidTest(
         )
 
         val result = runListDependenciesTask()
-
-        println(result.output)
 
         assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
         // ensure all dependencies could be resolved
@@ -387,6 +387,7 @@ class SentryPluginAutoInstallNonAndroidTest(
 
     @Test
     fun `spring-jakarta is added for Spring 6`() {
+        assumeThat(getJavaVersion() >= 17, `is`(true))
         appBuildFile.writeText(
             // language=Groovy
             """
@@ -443,6 +444,7 @@ class SentryPluginAutoInstallNonAndroidTest(
 
     @Test
     fun `spring-boot-starter-jakarta is added for Spring Boot 3`() {
+        assumeThat(getJavaVersion() >= 17, `is`(true))
         appBuildFile.writeText(
             // language=Groovy
             """
@@ -469,7 +471,45 @@ class SentryPluginAutoInstallNonAndroidTest(
         assertFalse { "FAILED" in result.output }
     }
 
+    @Test
+    fun `quartz is added`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+                id "java"
+                id "io.sentry.jvm.gradle"
+            }
+            dependencies {
+              implementation 'org.quartz-scheduler:quartz:2.3.0'
+            }
+
+            sentry.autoInstallation.enabled = true
+            sentry.autoInstallation.sentryVersion = "6.30.0"
+            """.trimIndent()
+        )
+
+        val result = runListDependenciesTask()
+
+        assertTrue { "io.sentry:sentry-quartz:6.30.0" in result.output }
+        // ensure all dependencies could be resolved
+        assertFalse { "FAILED" in result.output }
+    }
+
     private fun runListDependenciesTask() = runner
         .appendArguments("app:dependencies")
         .build()
+
+    private fun getJavaVersion(): Int {
+        var version = System.getProperty("java.version")
+        if (version.startsWith("1.")) {
+            version = version.substring(2, 3)
+        } else {
+            val dot = version.indexOf(".")
+            if (dot != -1) {
+                version = version.substring(0, dot)
+            }
+        }
+        return version.toInt()
+    }
 }
