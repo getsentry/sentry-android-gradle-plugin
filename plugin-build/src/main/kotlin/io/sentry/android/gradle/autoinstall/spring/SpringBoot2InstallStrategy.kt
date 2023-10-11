@@ -32,7 +32,7 @@ abstract class SpringBoot2InstallStrategy : AbstractInstallStrategy {
 
     companion object Registrar : InstallStrategyRegistrar {
         private const val SPRING_GROUP = "org.springframework.boot"
-        private const val SPRING_BOOT_2_ID = "spring-boot-starter"
+        private const val SPRING_BOOT_2_ID = "spring-boot"
         internal const val SENTRY_SPRING_BOOT_2_ID = "sentry-spring-boot"
 
         private val MIN_SUPPORTED_VERSION = SemVer(2, 1, 0)

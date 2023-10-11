@@ -30,7 +30,7 @@ abstract class SpringBoot3InstallStrategy : AbstractInstallStrategy {
 
     companion object Registrar : InstallStrategyRegistrar {
         private const val SPRING_GROUP = "org.springframework.boot"
-        private const val SPRING_BOOT_3_ID = "spring-boot-starter"
+        private const val SPRING_BOOT_3_ID = "spring-boot"
         internal const val SENTRY_SPRING_BOOT_3_ID = "sentry-spring-boot-jakarta"
 
         private val MIN_SUPPORTED_VERSION = SemVer(3, 0, 0)
