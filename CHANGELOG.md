@@ -1,11 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Instrument ContentProvider/Application onCreate calls to measure app-start performance
+
 ## 3.13.0
 
 ### Features
 
 - Auto install `sentry-quartz` if `quartz` is installed ([#562](https://github.com/getsentry/sentry-android-gradle-plugin/pull/562))
-- Instrument ContentProvider/Application onCreate calls to measure app-start performance ([#565](https://github.com/getsentry/sentry-android-gradle-plugin/pull/565))
 
 ### Internal
 
