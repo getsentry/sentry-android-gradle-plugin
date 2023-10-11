@@ -27,6 +27,7 @@ import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
@@ -39,6 +40,7 @@ import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
 fun AndroidComponentsExtension<*, *, *>.configure(
@@ -46,7 +48,8 @@ fun AndroidComponentsExtension<*, *, *>.configure(
     extension: SentryPluginExtension,
     cliExecutable: String,
     sentryOrg: String?,
-    sentryProject: String?
+    sentryProject: String?,
+    sentryTelemetryProvider: Provider<SentryTelemetryService>
 ) {
     // temp folder for sentry-related stuff
     val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
@@ -66,7 +69,8 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 paths,
                 cliExecutable,
                 sentryOrg,
-                sentryProject
+                sentryProject,
+                sentryTelemetryProvider
             )
             sourceContextTasks?.let { tasksGeneratingProperties.add(it.generateBundleIdTask) }
 
@@ -193,7 +197,8 @@ private fun Variant.configureSourceBundleTasks(
     paths: OutputPaths,
     cliExecutable: String,
     sentryOrg: String?,
-    sentryProject: String?
+    sentryProject: String?,
+    sentryTelemetryProvider: Provider<SentryTelemetryService>
 ): SourceContext.SourceContextTasks? {
     if (extension.includeSourceContext.get()) {
         if (isAGP74) {
@@ -208,7 +213,8 @@ private fun Variant.configureSourceBundleTasks(
                 cliExecutable,
                 sentryOrg,
                 sentryProject,
-                taskSuffix
+                taskSuffix,
+                sentryTelemetryProvider
             )
 
             if (variant.buildTypeName == "release") {

@@ -1,8 +1,10 @@
 package io.sentry.android.gradle.sourcecontext
 
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.gradle.common.SentryVariant
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
 class SourceContext {
@@ -15,7 +17,8 @@ class SourceContext {
             cliExecutable: String,
             sentryOrg: String?,
             sentryProject: String?,
-            taskSuffix: String
+            taskSuffix: String,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>
         ): SourceContextTasks {
             val additionalSourcesProvider = project.provider {
                 extension.additionalSourceDirsForSourceContext.getOrElse(emptySet())
@@ -29,6 +32,7 @@ class SourceContext {
                 project,
                 output = paths.bundleIdDir,
                 extension.includeSourceContext,
+                sentryTelemetryProvider,
                 taskSuffix
             )
 

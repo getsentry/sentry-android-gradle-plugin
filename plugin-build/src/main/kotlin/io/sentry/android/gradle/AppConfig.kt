@@ -18,6 +18,7 @@ import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
 import io.sentry.android.gradle.util.ReleaseInfo
@@ -30,6 +31,7 @@ import io.sentry.android.gradle.util.hookWithPackageTasks
 import io.sentry.android.gradle.util.info
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
 fun AppExtension.configure(
@@ -37,7 +39,8 @@ fun AppExtension.configure(
     extension: SentryPluginExtension,
     cliExecutable: String,
     sentryOrg: String?,
-    sentryProject: String?
+    sentryProject: String?,
+    sentryTelemetryProvider: Provider<SentryTelemetryService>
 ) {
     applicationVariants.matching {
         isVariantAllowed(extension, it.name, it.flavorName, it.buildType.name)
@@ -61,7 +64,8 @@ fun AppExtension.configure(
             extension,
             cliExecutable,
             sentryOrg,
-            sentryProject
+            sentryProject,
+            sentryTelemetryProvider
         )
         sourceContextTasks?.let { tasksGeneratingProperties.add(it.generateBundleIdTask) }
 
@@ -135,7 +139,8 @@ private fun ApplicationVariant.configureSourceBundleTasks(
     extension: SentryPluginExtension,
     cliExecutable: String,
     sentryOrg: String?,
-    sentryProject: String?
+    sentryProject: String?,
+    sentryTelemetryProvider: Provider<SentryTelemetryService>
 ): SourceContext.SourceContextTasks? {
     if (isAGP74) {
         project.logger.info {
@@ -156,7 +161,8 @@ private fun ApplicationVariant.configureSourceBundleTasks(
             cliExecutable,
             sentryOrg,
             sentryProject,
-            taskSuffix
+            taskSuffix,
+            sentryTelemetryProvider
         )
 
         if (variant.buildTypeName == "release") {

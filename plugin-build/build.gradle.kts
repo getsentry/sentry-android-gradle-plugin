@@ -67,6 +67,11 @@ dependencies {
 
     // compileOnly since we'll be shading the common dependency into the final jar
     // but we still need to be able to compile it (this also excludes it from .pom)
+    compileOnly(Libs.SENTRY)
+    shade(Libs.SENTRY)
+
+    // compileOnly since we'll be shading the common dependency into the final jar
+    // but we still need to be able to compile it (this also excludes it from .pom)
     compileOnly(project(":common"))
     shade(project(":common"))
 

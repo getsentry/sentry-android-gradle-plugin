@@ -29,7 +29,7 @@ object LibsVersion {
     const val JUNIT = "4.13.2"
     const val ASM = "7.0" // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
     const val SQLITE = "2.1.0"
-    const val SENTRY = "6.23.0"
+    const val SENTRY = "6.30.0"
 }
 
 object Libs {
@@ -47,6 +47,7 @@ object Libs {
     const val ASM_COMMONS = "org.ow2.asm:asm-commons:${LibsVersion.ASM}"
     const val SQLITE = "androidx.sqlite:sqlite:${LibsVersion.SQLITE}"
     const val SQLITE_FRAMEWORK = "androidx.sqlite:sqlite-framework:${LibsVersion.SQLITE}"
+    const val SENTRY = "io.sentry:sentry:${LibsVersion.SENTRY}"
     const val SENTRY_ANDROID = "io.sentry:sentry-android:${LibsVersion.SENTRY}"
     const val SENTRY_ANDROID_OKHTTP = "io.sentry:sentry-android-okhttp:${LibsVersion.SENTRY}"
 

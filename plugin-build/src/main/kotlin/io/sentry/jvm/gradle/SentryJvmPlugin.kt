@@ -9,6 +9,7 @@ import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.SentryPluginUtils
 import io.sentry.android.gradle.util.hookWithAssembleTasks
 import io.sentry.android.gradle.util.info
@@ -19,6 +20,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.provider.Provider
 
 class SentryJvmPlugin : Plugin<Project> {
 
@@ -35,6 +37,15 @@ class SentryJvmPlugin : Plugin<Project> {
             SentryPluginExtension::class.java,
             project
         )
+
+        val sentryTelemetryProvider: Provider<SentryTelemetryService> = project.gradle.sharedServices.registerIfAbsent(
+            "sentry",
+            SentryTelemetryService::class.java
+        ) { spec ->
+            // Provide some parameters
+            spec.parameters.dsn.set("https://502f25099c204a2fbf4cb16edc5975d1@o447951.ingest.sentry.io/5428563")
+        }
+
         project.pluginManager.withPlugin("org.gradle.java") {
             if (configuredForJavaProject.getAndSet(true)) {
                 SentryPlugin.logger.info { "The Sentry Gradle plugin was already configured" }
@@ -67,7 +78,8 @@ class SentryJvmPlugin : Plugin<Project> {
                 cliExecutable,
                 sentryOrgParameter,
                 sentryProjectParameter,
-                "Java"
+                "Java",
+                sentryTelemetryProvider
             )
 
             sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, javaVariant)

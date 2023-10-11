@@ -6,11 +6,13 @@ import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.AgpVersions
 import java.io.File
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtraPropertiesExtension
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.StopExecutionException
 import org.slf4j.LoggerFactory
 
@@ -27,6 +29,14 @@ class SentryPlugin : Plugin<Project> {
                 https://docs.sentry.io/platforms/android/migration/#migrating-from-iosentrysentry-android-gradle-plugin-2x-to-iosentrysentry-android-gradle-plugin-300
                 """.trimIndent()
             )
+        }
+
+        val sentryTelemetryProvider: Provider<SentryTelemetryService> = project.gradle.sharedServices.registerIfAbsent(
+            "sentry",
+            SentryTelemetryService::class.java
+        ) { spec ->
+            // Provide some parameters
+            spec.parameters.dsn.set("https://502f25099c204a2fbf4cb16edc5975d1@o447951.ingest.sentry.io/5428563")
         }
 
         val extension = project.extensions.create(
@@ -56,7 +66,8 @@ class SentryPlugin : Plugin<Project> {
                 extension,
                 cliExecutable,
                 sentryOrgParameter,
-                sentryProjectParameter
+                sentryProjectParameter,
+                sentryTelemetryProvider
             )
 
             // old API configuration
@@ -65,7 +76,8 @@ class SentryPlugin : Plugin<Project> {
                 extension,
                 cliExecutable,
                 sentryOrgParameter,
-                sentryProjectParameter
+                sentryProjectParameter,
+                sentryTelemetryProvider
             )
 
             project.installDependencies(extension, true)
