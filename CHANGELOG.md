@@ -4,7 +4,7 @@
 
 ### Features
 
-- Instrument ContentProvider/Application onCreate calls to measure app-start performance
+- Instrument ContentProvider/Application onCreate calls to measure app-start performance ([#565](https://github.com/getsentry/sentry-android-gradle-plugin/pull/565))
 
 ### Fixes
 
