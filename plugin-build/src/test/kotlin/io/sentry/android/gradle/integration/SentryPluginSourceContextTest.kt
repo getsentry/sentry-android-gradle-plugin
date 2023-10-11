@@ -112,4 +112,52 @@ class SentryPluginSourceContextTest :
             customContents
         )
     }
+
+    @Test
+    fun `respects configuration cache`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+
+              buildFeatures {
+                buildConfig false
+              }
+            }
+
+            sentry {
+              debug = true
+              includeSourceContext = true
+              autoUploadSourceContext = false
+              autoUploadProguardMapping = false
+              org = "sentry-sdks"
+              projectName = "sentry-android"
+            }
+            """.trimIndent()
+        )
+
+        sentryPropertiesFile.writeText("")
+
+        val ktContents = testProjectDir.withDummyComposeFile()
+
+        val result = runner
+            .appendArguments("app:assembleRelease")
+            .appendArguments("--configuration-cache")
+            .build()
+
+        assertTrue { "Configuration cache entry stored." in result.output }
+        assertTrue { "BUILD SUCCESSFUL" in result.output }
+
+        verifySourceBundleContents(
+            testProjectDir.root,
+            "files/_/_/com/example/Example.jvm",
+            ktContents
+        )
+    }
 }

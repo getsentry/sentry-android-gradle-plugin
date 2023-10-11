@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.integration
 
 import io.sentry.android.gradle.verifySourceBundleContents
+import io.sentry.android.gradle.withDummyComposeFile
 import io.sentry.android.gradle.withDummyCustomFile
 import io.sentry.android.gradle.withDummyJavaFile
 import io.sentry.android.gradle.withDummyKtFile
@@ -132,6 +133,48 @@ class SentryPluginSourceContextNonAndroidTest :
             testProjectDir.root,
             "files/_/_/io/other/TestCustom.jvm",
             customContents,
+            variant = "java",
+            archivePath = "app/build/libs/app.jar"
+        )
+    }
+
+    @Test
+    fun `respects configuration cache`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.jvm.gradle"
+            }
+
+            sentry {
+              debug = true
+              includeSourceContext = true
+              autoUploadSourceContext = false
+              autoUploadProguardMapping = false
+              org = "sentry-sdks"
+              projectName = "sentry-android"
+            }
+            """.trimIndent()
+        )
+
+        sentryPropertiesFile.writeText("")
+
+        val ktContents = testProjectDir.withDummyComposeFile()
+
+        val result = runner
+            .appendArguments("app:assemble")
+            .appendArguments("--configuration-cache")
+            .build()
+
+        assertTrue { "Configuration cache entry stored." in result.output }
+        assertTrue { "BUILD SUCCESSFUL" in result.output }
+
+        verifySourceBundleContents(
+            testProjectDir.root,
+            "files/_/_/com/example/Example.jvm",
+            ktContents,
             variant = "java",
             archivePath = "app/build/libs/app.jar"
         )

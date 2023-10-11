@@ -22,7 +22,16 @@ abstract class UploadSourceBundleTask : Exec() {
     init {
         group = SENTRY_GROUP
         description = "Uploads a Sentry source bundle file."
+
+        @Suppress("LeakingThis")
+        onlyIf {
+            includeSourceContext.getOrElse(false) &&
+                !sourceBundleDir.asFileTree.isEmpty
+        }
     }
+
+    @get:Input
+    abstract val includeSourceContext: Property<Boolean>
 
     @get:InputDirectory
     abstract val sourceBundleDir: DirectoryProperty
@@ -139,10 +148,7 @@ abstract class UploadSourceBundleTask : Exec() {
                 SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)?.let {
                     task.sentryProperties.set(File(it))
                 }
-                task.onlyIf {
-                    includeSourceContext.getOrElse(false) &&
-                        !task.sourceBundleDir.asFileTree.isEmpty
-                }
+                task.includeSourceContext.set(includeSourceContext)
             }
         }
     }

@@ -28,7 +28,16 @@ abstract class BundleSourcesTask : Exec() {
     init {
         group = SENTRY_GROUP
         description = "Creates a Sentry source bundle file."
+
+        @Suppress("LeakingThis")
+        onlyIf {
+            includeSourceContext.getOrElse(false) &&
+                !sourceDir.asFileTree.isEmpty
+        }
     }
+
+    @get:Input
+    abstract val includeSourceContext: Property<Boolean>
 
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
@@ -158,10 +167,7 @@ abstract class BundleSourcesTask : Exec() {
                 }
                 task.bundleIdFile.set(generateDebugIdTask.flatMap { it.outputFile })
                 task.output.set(output)
-                task.onlyIf {
-                    includeSourceContext.getOrElse(false) &&
-                        !task.sourceDir.asFileTree.isEmpty
-                }
+                task.includeSourceContext.set(includeSourceContext)
             }
         }
     }
