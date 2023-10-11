@@ -6,6 +6,16 @@
 
 - Instrument ContentProvider/Application onCreate calls to measure app-start performance
 
+### Fixes
+
+- Use `spring-boot` instead of `spring-boot-starter` for auto install detection ([#543](https://github.com/getsentry/sentry-android-gradle-plugin/pull/543))
+
+### Dependencies
+
+- Bump CLI from v2.21.1 to v2.21.2 ([#569](https://github.com/getsentry/sentry-android-gradle-plugin/pull/569))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2212)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.1...2.21.2)
+
 ## 3.13.0
 
 ### Features
