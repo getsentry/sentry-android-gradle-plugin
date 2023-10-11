@@ -25,13 +25,12 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
     @get:Internal
     override val outputFile: Provider<RegularFile> get() = output.file(SENTRY_BUNDLE_ID_OUTPUT)
 
-    // using Any due to https://github.com/gradle/gradle/issues/17559
-    @Internal
-    abstract fun getSentryTelemetryService(): Property<Any>
+    @get:Internal
+    abstract val sentryTelemetryService: Property<SentryTelemetryService>
 
     @TaskAction
     fun generateProperties() {
-        (getSentryTelemetryService().get() as SentryTelemetryService).captureError("hello gradle build")
+        sentryTelemetryService.get().captureError("hello gradle build")
         val outputDir = output.get().asFile
         outputDir.mkdirs()
 
@@ -67,7 +66,7 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
             ) { task ->
                 output?.let { task.output.set(it) }
                 task.onlyIf { includeSourceContext.getOrElse(false) }
-                task.getSentryTelemetryService().setProvider(sentryTelemetryProvider)
+                task.sentryTelemetryService.set(sentryTelemetryProvider)
                 task.usesService(sentryTelemetryProvider)
             }
             return generateBundleIdTask
@@ -75,8 +74,4 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
 
         fun taskName(taskSuffix: String) = "generateSentryBundleId$taskSuffix"
     }
-}
-
-fun <T> Property<T>.setProvider(provider: Provider<out T>) {
-    set(provider)
 }

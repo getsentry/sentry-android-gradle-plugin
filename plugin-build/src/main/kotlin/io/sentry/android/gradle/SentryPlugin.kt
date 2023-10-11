@@ -12,7 +12,6 @@ import java.io.File
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtraPropertiesExtension
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.StopExecutionException
 import org.slf4j.LoggerFactory
 
@@ -31,13 +30,10 @@ class SentryPlugin : Plugin<Project> {
             )
         }
 
-        val sentryTelemetryProvider: Provider<SentryTelemetryService> = project.gradle.sharedServices.registerIfAbsent(
-            "sentry",
-            SentryTelemetryService::class.java
-        ) { spec ->
-            // Provide some parameters
-            spec.parameters.dsn.set("https://502f25099c204a2fbf4cb16edc5975d1@o447951.ingest.sentry.io/5428563")
-        }
+        val sentryTelemetryProvider = SentryTelemetryService.register(
+            project,
+            "https://502f25099c204a2fbf4cb16edc5975d1@o447951.ingest.sentry.io/5428563"
+        )
 
         val extension = project.extensions.create(
             "sentry",

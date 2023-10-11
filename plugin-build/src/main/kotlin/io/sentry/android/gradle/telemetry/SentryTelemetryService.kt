@@ -3,15 +3,20 @@ package io.sentry.android.gradle.telemetry
 import io.sentry.HubAdapter
 import io.sentry.IHub
 import io.sentry.Sentry
+import io.sentry.android.gradle.util.getBuildServiceName
+import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
+import org.gradle.api.tasks.Input
 
 abstract class SentryTelemetryService : BuildService<SentryTelemetryService.Params>,
     AutoCloseable {
     // Some parameters for the web server
-    internal interface Params : BuildServiceParameters {
+    interface Params : BuildServiceParameters {
+        @get:Input
         val dsn: Property<String>
     }
 
@@ -33,5 +38,19 @@ abstract class SentryTelemetryService : BuildService<SentryTelemetryService.Para
 
     override fun close() {
         Sentry.close()
+    }
+
+    companion object {
+        fun register(
+            project: Project,
+            dsn: String
+        ): Provider<SentryTelemetryService> {
+            return project.gradle.sharedServices.registerIfAbsent(
+                getBuildServiceName(SentryTelemetryService::class.java),
+                SentryTelemetryService::class.java
+            ) {
+                it.parameters.dsn.set(dsn)
+            }
+        }
     }
 }
