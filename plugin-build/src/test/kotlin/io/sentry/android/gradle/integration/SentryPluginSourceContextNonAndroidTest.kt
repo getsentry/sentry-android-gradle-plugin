@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.integration
 
+import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.verifySourceBundleContents
 import io.sentry.android.gradle.withDummyCustomFile
 import io.sentry.android.gradle.withDummyJavaFile
@@ -7,11 +8,12 @@ import io.sentry.android.gradle.withDummyKtFile
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome.SKIPPED
-import org.gradle.util.GradleVersion
+import org.hamcrest.CoreMatchers.`is`
+import org.junit.Assume.assumeThat
 import org.junit.Test
 
 class SentryPluginSourceContextNonAndroidTest :
-    BaseSentryNonAndroidPluginTest(GradleVersion.current().version) {
+    BaseSentryNonAndroidPluginTest("7.4") {
 
     @Test
     fun `skips bundle and upload tasks if no sources`() {
@@ -139,11 +141,17 @@ class SentryPluginSourceContextNonAndroidTest :
 
     @Test
     fun `respects configuration cache`() {
+        assumeThat(
+            "SentryExternalDependenciesReportTask only supports " +
+                "configuration cache from Gradle 7.5 onwards",
+            GradleVersions.CURRENT >= GradleVersions.VERSION_7_5,
+            `is`(true)
+        )
         appBuildFile.writeText(
             // language=Groovy
             """
             plugins {
-              id "org.jetbrains.kotlin.jvm"
+              id "java"
               id "io.sentry.jvm.gradle"
             }
 
@@ -160,7 +168,7 @@ class SentryPluginSourceContextNonAndroidTest :
 
         sentryPropertiesFile.writeText("")
 
-        val ktContents = testProjectDir.withDummyKtFile()
+        val javaContents = testProjectDir.withDummyJavaFile()
 
         val result = runner
             .appendArguments("app:assemble")
@@ -172,8 +180,8 @@ class SentryPluginSourceContextNonAndroidTest :
 
         verifySourceBundleContents(
             testProjectDir.root,
-            "files/_/_/com/example/Example.jvm",
-            ktContents,
+            "files/_/_/com/example/TestJava.jvm",
+            javaContents,
             variant = "java",
             archivePath = "app/build/libs/app.jar"
         )

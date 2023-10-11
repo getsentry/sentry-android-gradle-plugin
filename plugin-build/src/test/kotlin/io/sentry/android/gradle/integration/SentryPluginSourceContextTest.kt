@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
+import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.verifySourceBundleContents
 import io.sentry.android.gradle.withDummyComposeFile
 import io.sentry.android.gradle.withDummyCustomFile
@@ -9,6 +10,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome.SKIPPED
 import org.gradle.util.GradleVersion
+import org.hamcrest.CoreMatchers
+import org.junit.Assume
 import org.junit.Test
 
 class SentryPluginSourceContextTest :
@@ -115,6 +118,13 @@ class SentryPluginSourceContextTest :
 
     @Test
     fun `respects configuration cache`() {
+        Assume.assumeThat(
+            "SentryExternalDependenciesReportTask only supports " +
+                "configuration cache from Gradle 7.5 onwards",
+            GradleVersions.CURRENT >= GradleVersions.VERSION_7_5,
+            CoreMatchers.`is`(true)
+        )
+
         appBuildFile.writeText(
             // language=Groovy
             """
