@@ -1,7 +1,6 @@
 package io.sentry.android.gradle.integration
 
 import io.sentry.android.gradle.verifySourceBundleContents
-import io.sentry.android.gradle.withDummyComposeFile
 import io.sentry.android.gradle.withDummyCustomFile
 import io.sentry.android.gradle.withDummyJavaFile
 import io.sentry.android.gradle.withDummyKtFile
@@ -144,7 +143,7 @@ class SentryPluginSourceContextNonAndroidTest :
             // language=Groovy
             """
             plugins {
-              id "com.android.application"
+              id "org.jetbrains.kotlin.jvm"
               id "io.sentry.jvm.gradle"
             }
 
@@ -161,7 +160,7 @@ class SentryPluginSourceContextNonAndroidTest :
 
         sentryPropertiesFile.writeText("")
 
-        val ktContents = testProjectDir.withDummyComposeFile()
+        val ktContents = testProjectDir.withDummyKtFile()
 
         val result = runner
             .appendArguments("app:assemble")
