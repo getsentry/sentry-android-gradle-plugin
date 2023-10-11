@@ -6,6 +6,8 @@ import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
+import io.sentry.android.gradle.instrumentation.appstart.ApplicationInstrumentable
+import io.sentry.android.gradle.instrumentation.appstart.ContentProviderInstrumentable
 import io.sentry.android.gradle.instrumentation.classloader.GeneratingMissingClassesClassLoader
 import io.sentry.android.gradle.instrumentation.fakes.TestClassContext
 import io.sentry.android.gradle.instrumentation.fakes.TestClassData
@@ -157,7 +159,9 @@ class VisitorTest(
             arrayOf("okhttp/v3", "OkHttpClient", OkHttpEventListener(SemVer(3, 0, 0)), null),
             arrayOf("okhttp/v4", "OkHttpClient", OkHttpEventListener(SemVer(4, 0, 0)), null),
             arrayOf("androidxCompose", "NavHostControllerKt", ComposeNavigation(), null),
-            arrayOf("logcat", "LogcatTest", LogcatInstrumentable(), null)
+            arrayOf("logcat", "LogcatTest", LogcatInstrumentable(), null),
+            arrayOf("appstart", "MyApplication", ApplicationInstrumentable(), null),
+            arrayOf("appstart", "MyContentProvider", ContentProviderInstrumentable(), null)
         )
 
         private fun roomDaoTestParameters(suffix: String = "") = arrayOf(
