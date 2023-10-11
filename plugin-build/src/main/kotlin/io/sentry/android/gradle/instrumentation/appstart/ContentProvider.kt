@@ -9,7 +9,7 @@ import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 
-class ContentProviderInstrumentable : ClassInstrumentable {
+class ContentProvider : ClassInstrumentable {
 
     override fun getVisitor(
         instrumentableContext: ClassContext,
