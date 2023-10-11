@@ -8,12 +8,13 @@ import io.sentry.android.gradle.withDummyKtFile
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome.SKIPPED
+import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assume.assumeThat
 import org.junit.Test
 
 class SentryPluginSourceContextNonAndroidTest :
-    BaseSentryNonAndroidPluginTest("7.4") {
+    BaseSentryNonAndroidPluginTest(GradleVersion.current().version) {
 
     @Test
     fun `skips bundle and upload tasks if no sources`() {
