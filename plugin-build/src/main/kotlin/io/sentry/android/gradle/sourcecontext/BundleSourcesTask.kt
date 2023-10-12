@@ -72,6 +72,10 @@ abstract class BundleSourcesTask : Exec() {
     @get:Optional
     abstract val sentryAuthToken: Property<String>
 
+    @get:Input
+    @get:Optional
+    abstract val sentryUrl: Property<String>
+
     override fun exec() {
         computeCommandLineArgs().let {
             commandLine(it)
@@ -106,6 +110,11 @@ abstract class BundleSourcesTask : Exec() {
 
         if (debug.getOrElse(false)) {
             args.add("--log-level=debug")
+        }
+
+        sentryUrl.orNull?.let {
+            args.add("--url")
+            args.add(it)
         }
 
         args.add("debug-files")
@@ -149,6 +158,7 @@ abstract class BundleSourcesTask : Exec() {
             sentryOrg: Provider<String>,
             sentryProject: Provider<String>,
             sentryAuthToken: Property<String>,
+            sentryUrl: Property<String>,
             includeSourceContext: Property<Boolean>,
             taskSuffix: String = ""
         ): TaskProvider<BundleSourcesTask> {
@@ -160,6 +170,7 @@ abstract class BundleSourcesTask : Exec() {
                 task.sentryOrganization.set(sentryOrg)
                 task.sentryProject.set(sentryProject)
                 task.sentryAuthToken.set(sentryAuthToken)
+                task.sentryUrl.set(sentryUrl)
                 task.sourceDir.set(collectSourcesTask.flatMap { it.output })
                 task.cliExecutable.set(cliExecutable)
                 SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)?.let {

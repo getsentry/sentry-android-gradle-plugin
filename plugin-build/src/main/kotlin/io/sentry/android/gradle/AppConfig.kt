@@ -255,7 +255,8 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                     ?: extension.projectName,
                 sentryAuthToken = extension.authToken,
                 taskSuffix = name.capitalized,
-                releaseInfo = releaseInfo
+                releaseInfo = releaseInfo,
+                sentryUrl = extension.url
             )
             uploadMappingsTask.hookWithMinifyTasks(project, name, guardsquareEnabled)
 
@@ -294,6 +295,7 @@ private fun ApplicationVariant.configureNativeSymbolsTask(
             it.variantName.set(name)
             it.sentryOrganization.set(sentryOrg)
             it.sentryProject.set(sentryProject)
+            it.sentryUrl.set(extension.url)
         }
         uploadSentryNativeSymbolsTask.hookWithAssembleTasks(project, variant)
     } else {

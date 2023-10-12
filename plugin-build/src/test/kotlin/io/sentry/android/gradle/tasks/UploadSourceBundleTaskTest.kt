@@ -138,6 +138,29 @@ class UploadSourceBundleTaskTest {
     }
 
     @Test
+    fun `with sentryUrl --url is set`() {
+        val project = createProject()
+        val sourceBundleDir = File(project.buildDir, "dummy/folder")
+
+        val task: TaskProvider<UploadSourceBundleTask> =
+            project.tasks.register(
+                "testUploadSourceBundle",
+                UploadSourceBundleTask::class.java
+            ) {
+                it.cliExecutable.set("sentry-cli")
+                it.sourceBundleDir.set(sourceBundleDir)
+                it.autoUploadSourceContext.set(true)
+                it.sentryUrl.set("https://some-host.sentry.io")
+            }
+
+        val args = task.get().computeCommandLineArgs()
+
+
+        assertTrue("--url" in args)
+        assertTrue("https://some-host.sentry.io" in args)
+    }
+
+    @Test
     fun `without sentryProperties file SENTRY_PROPERTIES is not set`() {
         val project = createProject()
         val sourceBundleDir = File(project.buildDir, "dummy/folder")

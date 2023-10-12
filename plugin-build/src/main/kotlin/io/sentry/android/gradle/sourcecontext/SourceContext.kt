@@ -51,6 +51,7 @@ class SourceContext {
                 sentryOrg?.let { project.provider { it } } ?: extension.org,
                 sentryProject?.let { project.provider { it } } ?: extension.projectName,
                 extension.authToken,
+                extension.url,
                 extension.includeSourceContext,
                 taskSuffix
             )
@@ -65,6 +66,7 @@ class SourceContext {
                 sentryOrg?.let { project.provider { it } } ?: extension.org,
                 sentryProject?.let { project.provider { it } } ?: extension.projectName,
                 extension.authToken,
+                extension.url,
                 extension.includeSourceContext,
                 taskSuffix
             )
