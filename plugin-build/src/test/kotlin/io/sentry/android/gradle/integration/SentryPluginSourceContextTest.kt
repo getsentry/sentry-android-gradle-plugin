@@ -81,6 +81,7 @@ class SentryPluginSourceContextTest :
               additionalSourceDirsForSourceContext = ["src/custom/kotlin"]
               org = "sentry-sdks"
               projectName = "sentry-android"
+              url = "https://some-host.sentry.io"
             }
             """.trimIndent()
         )
@@ -97,6 +98,7 @@ class SentryPluginSourceContextTest :
 
         assertTrue { "\"--org\" \"sentry-sdks\"" in result.output }
         assertTrue { "\"--project\" \"sentry-android\"" in result.output }
+        assertTrue { "\"--url\" \"https://some-host.sentry.io\"" in result.output }
         assertTrue { "BUILD SUCCESSFUL" in result.output }
 
         verifySourceBundleContents(
