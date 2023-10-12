@@ -4,8 +4,9 @@
 
 ### Fixes
 
-- Fix tracing instrumentation not working when configuration-cache is enabled on Gradle 8+ ([#568](https://github.com/getsentry/sentry-android-gradle-plugin/pull/568))
 - Use `spring-boot` instead of `spring-boot-starter` for auto install detection ([#543](https://github.com/getsentry/sentry-android-gradle-plugin/pull/543))
+- Fix tracing instrumentation not working when configuration-cache is enabled on Gradle 8+ ([#568](https://github.com/getsentry/sentry-android-gradle-plugin/pull/568))
+- Fix source context not working with configuration cache enabled on Gradle 8+ ([#570](https://github.com/getsentry/sentry-android-gradle-plugin/pull/570))
 
 ### Dependencies
 
