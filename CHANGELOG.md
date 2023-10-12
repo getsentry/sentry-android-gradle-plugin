@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Features
+
+- Add `url` option which is passed through to `sentry-cli` ([#572](https://github.com/getsentry/sentry-android-gradle-plugin/pull/572))
+  - In case you are self hosting Sentry, you can set `url` to your self hosted instance if your org auth token does not contain a URL
+
 ### Fixes
 
 - Use `spring-boot` instead of `spring-boot-starter` for auto install detection ([#543](https://github.com/getsentry/sentry-android-gradle-plugin/pull/543))
