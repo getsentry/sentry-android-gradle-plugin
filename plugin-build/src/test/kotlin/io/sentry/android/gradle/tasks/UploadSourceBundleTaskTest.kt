@@ -155,7 +155,6 @@ class UploadSourceBundleTaskTest {
 
         val args = task.get().computeCommandLineArgs()
 
-
         assertTrue("--url" in args)
         assertTrue("https://some-host.sentry.io" in args)
     }
