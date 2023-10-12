@@ -233,6 +233,9 @@ class SentryUploadProguardMappingTaskTest {
     @Test
     fun `with sentryUrl sets --url`() {
         val project = createProject()
+        val uuidFileProvider = createFakeUuid(project)
+        val mappingFile = createMappingFileProvider(project, "dummy/folder/mapping.txt")
+        val releaseInfo = ReleaseInfo("com.test", "1.0.0")
         val task: TaskProvider<SentryUploadProguardMappingsTask> =
             project.tasks.register(
                 "testUploadProguardMapping",
