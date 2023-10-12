@@ -41,6 +41,10 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
     abstract val sentryProject: Property<String>
 
     @get:Input
+    @get:Optional
+    abstract val sentryUrl: Property<String>
+
+    @get:Input
     abstract val includeNativeSources: Property<Boolean>
 
     @get:Internal
@@ -71,6 +75,11 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
 
         if (debug.getOrElse(false)) {
             args.add("--log-level=debug")
+        }
+
+        sentryUrl.orNull?.let {
+            args.add("--url")
+            args.add(it)
         }
 
         args.add("upload-dif")

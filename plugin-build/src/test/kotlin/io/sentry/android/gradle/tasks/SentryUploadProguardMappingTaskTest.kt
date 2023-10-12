@@ -231,6 +231,31 @@ class SentryUploadProguardMappingTaskTest {
     }
 
     @Test
+    fun `with sentryUrl sets --url`() {
+        val project = createProject()
+        val uuidFileProvider = createFakeUuid(project)
+        val mappingFile = createMappingFileProvider(project, "dummy/folder/mapping.txt")
+        val releaseInfo = ReleaseInfo("com.test", "1.0.0")
+        val task: TaskProvider<SentryUploadProguardMappingsTask> =
+            project.tasks.register(
+                "testUploadProguardMapping",
+                SentryUploadProguardMappingsTask::class.java
+            ) {
+                it.sentryUrl.set("https://some-host.sentry.io")
+                it.cliExecutable.set("sentry-cli")
+                it.uuidFile.set(uuidFileProvider)
+                it.mappingsFiles = mappingFile
+                it.autoUploadProguardMapping.set(false)
+                it.releaseInfo.set(ReleaseInfo("com.test", "1.0.0", 1))
+            }
+
+        val args = task.get().computeCommandLineArgs()
+
+        assertTrue("--url" in args)
+        assertTrue("https://some-host.sentry.io" in args)
+    }
+
+    @Test
     fun `with sentryOrganization adds --org`() {
         val project = createProject()
         val uuidFileProvider = createFakeUuid(project)
