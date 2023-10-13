@@ -45,7 +45,7 @@ class SentryPluginWithDependencyCollectorsTest :
             .appendArguments("app:assembleRelease")
             .build()
 
-        assertTrue { "BUILD SUCCESSFUL" in result.output }
+        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
     }
 
     override val additionalBuildClasspath: String =
