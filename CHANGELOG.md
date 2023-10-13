@@ -19,6 +19,9 @@
 - Bump CLI from v2.21.1 to v2.21.2 ([#569](https://github.com/getsentry/sentry-android-gradle-plugin/pull/569))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2212)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.1...2.21.2)
+- Bump Android SDK from v6.30.0 to v6.31.0 ([#573](https://github.com/getsentry/sentry-android-gradle-plugin/pull/573))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6310)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.30.0...6.31.0)
 
 ## 3.13.0
 

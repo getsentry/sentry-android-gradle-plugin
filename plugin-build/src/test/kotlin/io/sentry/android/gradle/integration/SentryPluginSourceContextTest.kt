@@ -52,7 +52,7 @@ class SentryPluginSourceContextTest :
             result.task(":app:sentryBundleSourcesRelease")?.outcome,
             SKIPPED
         )
-        assertTrue { "BUILD SUCCESSFUL" in result.output }
+        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
     }
 
     @Test
@@ -96,10 +96,10 @@ class SentryPluginSourceContextTest :
             .appendArguments("app:assembleRelease")
             .build()
 
-        assertTrue { "\"--org\" \"sentry-sdks\"" in result.output }
-        assertTrue { "\"--project\" \"sentry-android\"" in result.output }
-        assertTrue { "\"--url\" \"https://some-host.sentry.io\"" in result.output }
-        assertTrue { "BUILD SUCCESSFUL" in result.output }
+        assertTrue(result.output) { "\"--org\" \"sentry-sdks\"" in result.output }
+        assertTrue(result.output) { "\"--project\" \"sentry-android\"" in result.output }
+        assertTrue(result.output) { "\"--url\" \"https://some-host.sentry.io\"" in result.output }
+        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
 
         verifySourceBundleContents(
             testProjectDir.root,
@@ -164,8 +164,8 @@ class SentryPluginSourceContextTest :
             .appendArguments("--configuration-cache")
             .build()
 
-        assertTrue { "Configuration cache entry stored." in result.output }
-        assertTrue { "BUILD SUCCESSFUL" in result.output }
+        assertTrue(result.output) { "Configuration cache entry stored." in result.output }
+        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
 
         verifySourceBundleContents(
             testProjectDir.root,
