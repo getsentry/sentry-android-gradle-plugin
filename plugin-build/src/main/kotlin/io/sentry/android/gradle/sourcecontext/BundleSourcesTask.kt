@@ -28,7 +28,16 @@ abstract class BundleSourcesTask : Exec() {
     init {
         group = SENTRY_GROUP
         description = "Creates a Sentry source bundle file."
+
+        @Suppress("LeakingThis")
+        onlyIf {
+            includeSourceContext.getOrElse(false) &&
+                !sourceDir.asFileTree.isEmpty
+        }
     }
+
+    @get:Input
+    abstract val includeSourceContext: Property<Boolean>
 
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
@@ -62,6 +71,10 @@ abstract class BundleSourcesTask : Exec() {
     @get:Input
     @get:Optional
     abstract val sentryAuthToken: Property<String>
+
+    @get:Input
+    @get:Optional
+    abstract val sentryUrl: Property<String>
 
     override fun exec() {
         computeCommandLineArgs().let {
@@ -97,6 +110,11 @@ abstract class BundleSourcesTask : Exec() {
 
         if (debug.getOrElse(false)) {
             args.add("--log-level=debug")
+        }
+
+        sentryUrl.orNull?.let {
+            args.add("--url")
+            args.add(it)
         }
 
         args.add("debug-files")
@@ -140,6 +158,7 @@ abstract class BundleSourcesTask : Exec() {
             sentryOrg: Provider<String>,
             sentryProject: Provider<String>,
             sentryAuthToken: Property<String>,
+            sentryUrl: Property<String>,
             includeSourceContext: Property<Boolean>,
             taskSuffix: String = ""
         ): TaskProvider<BundleSourcesTask> {
@@ -151,6 +170,7 @@ abstract class BundleSourcesTask : Exec() {
                 task.sentryOrganization.set(sentryOrg)
                 task.sentryProject.set(sentryProject)
                 task.sentryAuthToken.set(sentryAuthToken)
+                task.sentryUrl.set(sentryUrl)
                 task.sourceDir.set(collectSourcesTask.flatMap { it.output })
                 task.cliExecutable.set(cliExecutable)
                 SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)?.let {
@@ -158,10 +178,7 @@ abstract class BundleSourcesTask : Exec() {
                 }
                 task.bundleIdFile.set(generateDebugIdTask.flatMap { it.outputFile })
                 task.output.set(output)
-                task.onlyIf {
-                    includeSourceContext.getOrElse(false) &&
-                        !task.sourceDir.asFileTree.isEmpty
-                }
+                task.includeSourceContext.set(includeSourceContext)
             }
         }
     }

@@ -13,6 +13,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -25,7 +26,15 @@ abstract class CollectSourcesTask : DirectoryOutputTask() {
     init {
         group = SENTRY_GROUP
         description = "Collects sources into a single directory so they can be bundled together."
+
+        @Suppress("LeakingThis")
+        onlyIf {
+            includeSourceContext.getOrElse(false)
+        }
     }
+
+    @get:Input
+    abstract val includeSourceContext: Property<Boolean>
 
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
@@ -52,7 +61,7 @@ abstract class CollectSourcesTask : DirectoryOutputTask() {
             ) { task ->
                 task.sourceDirs.setFrom(sourceDirs)
                 task.output.set(output)
-                task.onlyIf { includeSourceContext.getOrElse(false) }
+                task.includeSourceContext.set(includeSourceContext)
             }
         }
     }

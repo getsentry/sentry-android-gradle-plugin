@@ -22,7 +22,16 @@ abstract class UploadSourceBundleTask : Exec() {
     init {
         group = SENTRY_GROUP
         description = "Uploads a Sentry source bundle file."
+
+        @Suppress("LeakingThis")
+        onlyIf {
+            includeSourceContext.getOrElse(false) &&
+                !sourceBundleDir.asFileTree.isEmpty
+        }
     }
+
+    @get:Input
+    abstract val includeSourceContext: Property<Boolean>
 
     @get:InputDirectory
     abstract val sourceBundleDir: DirectoryProperty
@@ -52,6 +61,10 @@ abstract class UploadSourceBundleTask : Exec() {
     @get:Input
     @get:Optional
     abstract val sentryAuthToken: Property<String>
+
+    @get:Input
+    @get:Optional
+    abstract val sentryUrl: Property<String>
 
     override fun exec() {
         computeCommandLineArgs().let {
@@ -88,6 +101,11 @@ abstract class UploadSourceBundleTask : Exec() {
             args.add("--log-level=debug")
         }
 
+        sentryUrl.orNull?.let {
+            args.add("--url")
+            args.add(it)
+        }
+
         args.add("debug-files")
         args.add("upload")
         args.add("--type=jvm")
@@ -122,6 +140,7 @@ abstract class UploadSourceBundleTask : Exec() {
             sentryOrg: Provider<String>,
             sentryProject: Provider<String>,
             sentryAuthToken: Property<String>,
+            sentryUrl: Property<String>,
             includeSourceContext: Property<Boolean>,
             taskSuffix: String = ""
         ): TaskProvider<UploadSourceBundleTask> {
@@ -133,16 +152,14 @@ abstract class UploadSourceBundleTask : Exec() {
                 task.sentryOrganization.set(sentryOrg)
                 task.sentryProject.set(sentryProject)
                 task.sentryAuthToken.set(sentryAuthToken)
+                task.sentryUrl.set(sentryUrl)
                 task.sourceBundleDir.set(bundleSourcesTask.flatMap { it.output })
                 task.cliExecutable.set(cliExecutable)
                 task.autoUploadSourceContext.set(autoUploadSourceContext)
                 SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)?.let {
                     task.sentryProperties.set(File(it))
                 }
-                task.onlyIf {
-                    includeSourceContext.getOrElse(false) &&
-                        !task.sourceBundleDir.asFileTree.isEmpty
-                }
+                task.includeSourceContext.set(includeSourceContext)
             }
         }
     }
