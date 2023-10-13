@@ -30,7 +30,7 @@ class SentryPluginWithMinifiedLibsTest :
             .appendArguments("app:assembleDebug")
             .build()
 
-        assertTrue { "BUILD SUCCESSFUL" in result.output }
+        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
     }
 
     override val additionalRootProjectConfig: String = ""
