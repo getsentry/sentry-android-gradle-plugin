@@ -3,6 +3,7 @@ package io.sentry.android.gradle.tasks
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask.Companion.SENTRY_PROGUARD_MAPPING_UUID_PROPERTY
 import io.sentry.android.gradle.util.PropertiesUtil
 import io.sentry.android.gradle.util.ReleaseInfo
+import io.sentry.android.gradle.util.asSentryCliExec
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -12,13 +13,14 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskProvider
 
-abstract class SentryUploadProguardMappingsTask : SentryCliExec() {
+abstract class SentryUploadProguardMappingsTask : Exec() {
 
     init {
         description = "Uploads the proguard mappings file to Sentry"
@@ -200,6 +202,7 @@ abstract class SentryUploadProguardMappingsTask : SentryCliExec() {
                 task.releaseInfo.set(releaseInfo)
                 task.sentryAuthToken.set(sentryAuthToken)
                 task.sentryUrl.set(sentryUrl)
+                task.asSentryCliExec()
             }
             return uploadSentryProguardMappingsTask
         }
