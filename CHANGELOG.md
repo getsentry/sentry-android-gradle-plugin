@@ -51,6 +51,7 @@
 ### Features
 
 - Add release information args to proguard mapping upload task ([#476](https://github.com/getsentry/sentry-android-gradle-plugin/pull/476))
+  - Requires Sentry version `>=23.7.2` if you're using self-hosted
 - Auto install Sentry integrations for Java Backend, Desktop, etc. ([#521](https://github.com/getsentry/sentry-android-gradle-plugin/pull/521))
 - Use Spring Boot autoconfigure modules (`sentry-spring-boot` and `sentry-spring-boot-jakarta`) for auto install ([#542](https://github.com/getsentry/sentry-android-gradle-plugin/pull/542))
 
@@ -128,6 +129,7 @@
 
 - Bundle Java Sources and upload to Sentry ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
     - For more information on how to enable source context, please refer to [#633](https://github.com/getsentry/sentry-java/issues/633#issuecomment-1465599120)
+    - Requires Sentry version `>=23.5.0` if you're using self-hosted
 - New `debug` option to enable debug logging for sentry-cli ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
 
 ### Fixes
