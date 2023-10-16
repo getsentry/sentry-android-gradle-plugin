@@ -3,6 +3,7 @@ package io.sentry.android.gradle.sourcecontext
 import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
+import io.sentry.android.gradle.tasks.SentryCliExec
 import io.sentry.android.gradle.util.PropertiesUtil
 import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.SentryVariant
@@ -13,7 +14,6 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
@@ -23,7 +23,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskProvider
 
-abstract class BundleSourcesTask : Exec() {
+abstract class BundleSourcesTask : SentryCliExec() {
 
     init {
         group = SENTRY_GROUP

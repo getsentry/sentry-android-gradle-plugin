@@ -12,14 +12,13 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskProvider
 
-abstract class SentryUploadProguardMappingsTask : Exec() {
+abstract class SentryUploadProguardMappingsTask : SentryCliExec() {
 
     init {
         description = "Uploads the proguard mappings file to Sentry"

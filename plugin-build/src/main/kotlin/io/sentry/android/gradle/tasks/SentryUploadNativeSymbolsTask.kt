@@ -6,13 +6,12 @@ import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 
-abstract class SentryUploadNativeSymbolsTask : Exec() {
+abstract class SentryUploadNativeSymbolsTask : SentryCliExec() {
 
     init {
         description = "Uploads native symbols to Sentry"
