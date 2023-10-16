@@ -296,6 +296,7 @@ private fun Variant.configureProguardMappingsTasks(
                 sentryProject = sentryProject?.let { project.provider { it } }
                     ?: extension.projectName,
                 sentryAuthToken = extension.authToken,
+                sentryUrl = extension.url,
                 taskSuffix = name.capitalized,
                 releaseInfo = releaseInfo
             )

@@ -4,7 +4,9 @@
 
 ### Features
 
-- Provide detailed message for failed sentry-cli API requests ([#576](https://github.com/getsentry/sentry-android-gradle-plugin/pull/576))
+- Add `url` option which is passed through to `sentry-cli` ([#572](https://github.com/getsentry/sentry-android-gradle-plugin/pull/572))
+  - In case you are self hosting Sentry, you can set `url` to your self hosted instance if your org auth token does not contain a URL
+- Provide detailed message for failed sentry-cli API requests ([#576](https://github.com/getsentry/sentry-android-gradle-plugin/pull/576)) 
 
 ### Fixes
 
@@ -18,6 +20,9 @@
 - Bump CLI from v2.21.1 to v2.21.2 ([#569](https://github.com/getsentry/sentry-android-gradle-plugin/pull/569))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2212)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.1...2.21.2)
+- Bump Android SDK from v6.30.0 to v6.31.0 ([#573](https://github.com/getsentry/sentry-android-gradle-plugin/pull/573))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6310)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.30.0...6.31.0)
 
 ## 3.13.0
 

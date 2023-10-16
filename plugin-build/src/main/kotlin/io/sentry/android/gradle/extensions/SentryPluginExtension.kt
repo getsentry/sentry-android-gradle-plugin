@@ -200,4 +200,13 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      */
     val authToken: Property<String> = objects.property(String::class.java)
         .convention(null as String?)
+
+    /**
+     * The url of your Sentry instance. If you're using SAAS (not self hosting) you do not have to
+     * set this. If you are self hosting you can set your URL here.
+     *
+     * Default is null meaning Sentry SAAS.
+     */
+    val url: Property<String> = objects.property(String::class.java)
+        .convention(null as String?)
 }

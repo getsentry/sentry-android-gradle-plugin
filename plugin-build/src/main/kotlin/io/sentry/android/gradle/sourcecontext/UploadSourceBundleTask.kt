@@ -62,6 +62,10 @@ abstract class UploadSourceBundleTask : SentryCliExec() {
     @get:Optional
     abstract val sentryAuthToken: Property<String>
 
+    @get:Input
+    @get:Optional
+    abstract val sentryUrl: Property<String>
+
     override fun exec() {
         computeCommandLineArgs().let {
             commandLine(it)
@@ -95,6 +99,11 @@ abstract class UploadSourceBundleTask : SentryCliExec() {
 
         if (debug.getOrElse(false)) {
             args.add("--log-level=debug")
+        }
+
+        sentryUrl.orNull?.let {
+            args.add("--url")
+            args.add(it)
         }
 
         args.add("debug-files")
@@ -131,6 +140,7 @@ abstract class UploadSourceBundleTask : SentryCliExec() {
             sentryOrg: Provider<String>,
             sentryProject: Provider<String>,
             sentryAuthToken: Property<String>,
+            sentryUrl: Property<String>,
             includeSourceContext: Property<Boolean>,
             taskSuffix: String = ""
         ): TaskProvider<UploadSourceBundleTask> {
@@ -142,6 +152,7 @@ abstract class UploadSourceBundleTask : SentryCliExec() {
                 task.sentryOrganization.set(sentryOrg)
                 task.sentryProject.set(sentryProject)
                 task.sentryAuthToken.set(sentryAuthToken)
+                task.sentryUrl.set(sentryUrl)
                 task.sourceBundleDir.set(bundleSourcesTask.flatMap { it.output })
                 task.cliExecutable.set(cliExecutable)
                 task.autoUploadSourceContext.set(autoUploadSourceContext)
