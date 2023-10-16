@@ -6,12 +6,14 @@
 
 - Add `url` option which is passed through to `sentry-cli` ([#572](https://github.com/getsentry/sentry-android-gradle-plugin/pull/572))
   - In case you are self hosting Sentry, you can set `url` to your self hosted instance if your org auth token does not contain a URL
+- Provide detailed message for failed sentry-cli API requests ([#576](https://github.com/getsentry/sentry-android-gradle-plugin/pull/576)) 
 
 ### Fixes
 
 - Use `spring-boot` instead of `spring-boot-starter` for auto install detection ([#543](https://github.com/getsentry/sentry-android-gradle-plugin/pull/543))
 - Fix tracing instrumentation not working when configuration-cache is enabled on Gradle 8+ ([#568](https://github.com/getsentry/sentry-android-gradle-plugin/pull/568))
 - Fix source context not working with configuration cache enabled on Gradle 8+ ([#570](https://github.com/getsentry/sentry-android-gradle-plugin/pull/570))
+- Make proguard release association backward-compatible ([#576](https://github.com/getsentry/sentry-android-gradle-plugin/pull/576))
 
 ### Dependencies
 

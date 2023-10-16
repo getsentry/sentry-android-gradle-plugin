@@ -2,6 +2,7 @@ package io.sentry.android.gradle.sourcecontext
 
 import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
+import io.sentry.android.gradle.util.asSentryCliExec
 import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.SentryVariant
 import java.io.File
@@ -160,6 +161,7 @@ abstract class UploadSourceBundleTask : Exec() {
                     task.sentryProperties.set(File(it))
                 }
                 task.includeSourceContext.set(includeSourceContext)
+                task.asSentryCliExec()
             }
         }
     }

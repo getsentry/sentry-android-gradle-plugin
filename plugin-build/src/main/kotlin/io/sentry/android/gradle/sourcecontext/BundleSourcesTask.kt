@@ -4,6 +4,7 @@ import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
 import io.sentry.android.gradle.util.PropertiesUtil
+import io.sentry.android.gradle.util.asSentryCliExec
 import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.SentryVariant
 import java.io.File
@@ -179,6 +180,7 @@ abstract class BundleSourcesTask : Exec() {
                 task.bundleIdFile.set(generateDebugIdTask.flatMap { it.outputFile })
                 task.output.set(output)
                 task.includeSourceContext.set(includeSourceContext)
+                task.asSentryCliExec()
             }
         }
     }

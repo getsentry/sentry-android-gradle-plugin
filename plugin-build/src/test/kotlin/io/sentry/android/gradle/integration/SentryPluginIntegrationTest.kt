@@ -46,6 +46,10 @@ class SentryPluginIntegrationTest :
             build.task(":app:uploadSentryProguardMappingsRelease")?.outcome,
             TaskOutcome.SUCCESS
         )
+        assertTrue(build.output) {
+            "Most likely you have to update your self-hosted Sentry version " +
+                "to get all of the latest features." in build.output
+        }
     }
 
     @Test
@@ -95,7 +99,12 @@ class SentryPluginIntegrationTest :
         appBuildFile.appendText(
             // language=Groovy
             """
+                dependencies {
+                    implementation 'androidx.fragment:fragment:1.3.5'
+                }
+
                 sentry {
+                  debug = true
                   includeProguardMapping = true
                   autoUploadProguardMapping = true
                   uploadNativeSymbols = false
