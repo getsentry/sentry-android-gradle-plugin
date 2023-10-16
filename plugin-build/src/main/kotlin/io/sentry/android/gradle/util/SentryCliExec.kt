@@ -11,6 +11,7 @@ import org.gradle.api.tasks.Exec
  */
 fun Exec.asSentryCliExec() {
     isIgnoreExitValue = true
+    // this is a workaround, otherwise doFirst is not needed https://github.com/gradle/gradle/issues/16535
     doFirst {
         errorOutput = ByteArrayOutputStream()
     }
