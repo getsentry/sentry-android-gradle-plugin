@@ -245,6 +245,31 @@ class BundleSourcesTaskTest {
         }
     }
 
+    @Test
+    fun `with sentryUrl --url is set`() {
+        val project = createProject()
+        val debugMetaPropertiesFile = createDebugMetaProperties(project)
+
+        val sourceDir = File(project.buildDir, "dummy/source")
+        val outDir = File(project.buildDir, "dummy/out")
+        val task: TaskProvider<BundleSourcesTask> =
+            project.tasks.register(
+                "testBundleSources",
+                BundleSourcesTask::class.java
+            ) {
+                it.cliExecutable.set("sentry-cli")
+                it.sourceDir.set(sourceDir)
+                it.bundleIdFile.set(debugMetaPropertiesFile)
+                it.output.set(outDir)
+                it.sentryUrl.set("https://some-host.sentry.io")
+            }
+
+        val args = task.get().computeCommandLineArgs()
+
+        assertTrue("--url" in args)
+        assertTrue("https://some-host.sentry.io" in args)
+    }
+
     private fun createProject(): Project {
         with(ProjectBuilder.builder().build()) {
             plugins.apply("io.sentry.android.gradle")
