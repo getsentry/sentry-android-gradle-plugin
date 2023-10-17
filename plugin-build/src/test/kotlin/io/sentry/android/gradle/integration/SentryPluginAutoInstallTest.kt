@@ -39,7 +39,7 @@ class SentryPluginAutoInstallTest :
               implementation 'com.jakewharton.timber:timber:4.7.1'
               implementation 'androidx.fragment:fragment:1.3.5'
               // our plugin shouldn't install okhttp, since it's a direct dep
-              implementation 'io.sentry:sentry-android-okhttp:5.4.0'
+              implementation 'io.sentry:sentry-android-okhttp:6.31.0'
               // our plugin shouldn't install sqlite, since it's a direct dep
               implementation 'io.sentry:sentry-android-sqlite:6.21.0'
             }
@@ -56,7 +56,7 @@ class SentryPluginAutoInstallTest :
         assertTrue { "io.sentry:sentry-android-timber:5.1.0" in result.output }
         assertTrue { "io.sentry:sentry-android-fragment:5.1.0" in result.output }
         assertFalse { "io.sentry:sentry-android-okhttp:5.1.0" in result.output }
-        assertTrue { "io.sentry:sentry-android-okhttp:5.4.0" in result.output }
+        assertTrue { "io.sentry:sentry-android-okhttp:6.31.0" in result.output }
         assertFalse { "io.sentry:sentry-android-sqlite:5.1.0" in result.output }
         assertTrue { "io.sentry:sentry-android-sqlite:6.21.0" in result.output }
         assertFalse { "io.sentry:sentry-compose-android:5.1.0" in result.output }
@@ -105,16 +105,16 @@ class SentryPluginAutoInstallTest :
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "5.1.2"
+            sentry.autoInstallation.sentryVersion = "6.31.0"
             sentry.includeProguardMapping = false
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
 
-        assertTrue { "io.sentry:sentry-android:5.1.2" in result.output }
-        assertTrue { "io.sentry:sentry-android-timber:5.1.2" in result.output }
-        assertTrue { "io.sentry:sentry-android-okhttp:5.1.2" in result.output }
+        assertTrue { "io.sentry:sentry-android:6.31.0" in result.output }
+        assertTrue { "io.sentry:sentry-android-timber:6.31.0" in result.output }
+        assertTrue { "io.sentry:sentry-android-okhttp:6.31.0" in result.output }
         assertTrue { "io.sentry:sentry-android-fragment:5.4.0" in result.output }
 
         // ensure all dependencies could be resolved
