@@ -1,8 +1,12 @@
 package io.sentry.android.gradle.integration
 
+import io.sentry.android.gradle.util.PrintBuildOutputOnFailureRule
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.OutputStreamWriter
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
+import org.gradle.testkit.runner.internal.io.SynchronizedOutputStream
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -12,6 +16,12 @@ abstract class BaseSentryNonAndroidPluginTest(
 ) {
     @get:Rule
     val testProjectDir = TemporaryFolder()
+
+    private val outputStream = ByteArrayOutputStream()
+    private val writer = OutputStreamWriter(SynchronizedOutputStream(outputStream))
+
+    @get:Rule
+    val printBuildOutputOnFailureRule = PrintBuildOutputOnFailureRule(outputStream)
 
     private val projectTemplateFolder = File("src/test/resources/testFixtures/appTestProject")
 
@@ -68,6 +78,8 @@ abstract class BaseSentryNonAndroidPluginTest(
             .withArguments("--stacktrace")
             .withPluginClasspath()
             .withGradleVersion(gradleVersion)
+            .forwardStdOutput(writer)
+            .forwardStdError(writer)
     }
 
     companion object {
