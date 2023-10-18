@@ -30,16 +30,19 @@ class SentryPlugin : Plugin<Project> {
             )
         }
 
-        val sentryTelemetryProvider = SentryTelemetryService.register(
-            project,
-            "https://502f25099c204a2fbf4cb16edc5975d1@o447951.ingest.sentry.io/5428563"
-        )
-
         val extension = project.extensions.create(
             "sentry",
             SentryPluginExtension::class.java,
             project
         )
+
+        val sentryTelemetryProvider = SentryTelemetryService.register(
+            project,
+            extension,
+            "https://dd1f82ad30a331bd7def2a0dce926c6e@o447951.ingest.sentry.io/4506031723446272",
+            "org1"
+        )
+
         project.pluginManager.withPlugin("com.android.application") {
             val oldAGPExtension = project.extensions.getByType(AppExtension::class.java)
             val androidComponentsExt =

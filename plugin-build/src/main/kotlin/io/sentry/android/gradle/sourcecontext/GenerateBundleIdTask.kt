@@ -30,22 +30,25 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
 
     @TaskAction
     fun generateProperties() {
-        sentryTelemetryService.get().captureError("hello gradle build")
-        val outputDir = output.get().asFile
-        outputDir.mkdirs()
+        sentryTelemetryService.get().captureTask("${project.name}__${this::class.java.simpleName}") {
+            val outputDir = output.get().asFile
+            outputDir.mkdirs()
 
-        val debugId = UUID.randomUUID()
+            val debugId = UUID.randomUUID()
 
-        val props = Properties().also {
-            it.setProperty(SENTRY_BUNDLE_ID_PROPERTY, debugId.toString())
-        }
+            val props = Properties().also {
+                it.setProperty(SENTRY_BUNDLE_ID_PROPERTY, debugId.toString())
+            }
 
-        outputFile.get().asFile.writer().use { writer ->
-            props.store(writer, "")
-        }
+            throw RuntimeException("oopsie on prupose")
 
-        logger.info {
-            "GenerateSourceBundleIdTask - outputFile: $outputFile, debugId: $debugId"
+            outputFile.get().asFile.writer().use { writer ->
+                props.store(writer, "")
+            }
+
+            logger.info {
+                "GenerateSourceBundleIdTask - outputFile: $outputFile, debugId: $debugId"
+            }
         }
     }
 

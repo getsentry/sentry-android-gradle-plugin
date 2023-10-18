@@ -3,6 +3,7 @@ package io.sentry.android.gradle.sourcecontext
 import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.PropertiesUtil
 import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.SentryVariant
@@ -17,6 +18,7 @@ import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -63,14 +65,19 @@ abstract class BundleSourcesTask : Exec() {
     @get:Optional
     abstract val sentryAuthToken: Property<String>
 
+    @get:Internal
+    abstract val sentryTelemetryService: Property<SentryTelemetryService>
+
     override fun exec() {
-        computeCommandLineArgs().let {
-            commandLine(it)
-            logger.info { "cli args: $it" }
+        sentryTelemetryService.get().captureTask(this::class.java.simpleName) {
+            computeCommandLineArgs().let {
+                commandLine(it)
+                logger.info { "cli args: $it" }
+            }
+            setSentryPropertiesEnv()
+            setSentryAuthTokenEnv()
+            super.exec()
         }
-        setSentryPropertiesEnv()
-        setSentryAuthTokenEnv()
-        super.exec()
     }
 
     internal fun setSentryPropertiesEnv() {
@@ -141,6 +148,7 @@ abstract class BundleSourcesTask : Exec() {
             sentryProject: Provider<String>,
             sentryAuthToken: Property<String>,
             includeSourceContext: Property<Boolean>,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>,
             taskSuffix: String = ""
         ): TaskProvider<BundleSourcesTask> {
             return project.tasks.register(
@@ -162,6 +170,8 @@ abstract class BundleSourcesTask : Exec() {
                     includeSourceContext.getOrElse(false) &&
                         !task.sourceDir.asFileTree.isEmpty
                 }
+                task.sentryTelemetryService.set(sentryTelemetryProvider)
+                task.usesService(sentryTelemetryProvider)
             }
         }
     }

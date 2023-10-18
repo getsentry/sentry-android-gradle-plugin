@@ -56,6 +56,7 @@ class SourceContext {
                 sentryProject?.let { project.provider { it } } ?: extension.projectName,
                 extension.authToken,
                 extension.includeSourceContext,
+                sentryTelemetryProvider,
                 taskSuffix
             )
 

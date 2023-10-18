@@ -200,4 +200,13 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      */
     val authToken: Property<String> = objects.property(String::class.java)
         .convention(null as String?)
+
+    /**
+     * Whether the plugin should send telemetry data to Sentry.
+     * If disabled the plugin will not send telemetry data.
+     * This is auto disabled if running against a self hosted instance of Sentry.
+     * Default is enabled.
+     */
+    val telemetry: Property<Boolean> = objects
+        .property(Boolean::class.java).convention(true)
 }

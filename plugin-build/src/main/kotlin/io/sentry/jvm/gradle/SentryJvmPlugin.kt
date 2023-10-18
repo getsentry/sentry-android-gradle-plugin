@@ -16,12 +16,17 @@ import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.JavaVariant
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
+import org.gradle.internal.service.ServiceRegistry
+import org.gradle.invocation.DefaultGradle
 
-class SentryJvmPlugin : Plugin<Project> {
+class SentryJvmPlugin @Inject constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugin<Project> {
 
     /**
      * Since we're listening for the JavaBasePlugin, there may be multiple plugins inherting from it
@@ -39,8 +44,13 @@ class SentryJvmPlugin : Plugin<Project> {
 
         val sentryTelemetryProvider = SentryTelemetryService.register(
             project,
-            "https://502f25099c204a2fbf4cb16edc5975d1@o447951.ingest.sentry.io/5428563"
+            extension,
+            "https://dd1f82ad30a331bd7def2a0dce926c6e@o447951.ingest.sentry.io/4506031723446272",
+            "org2"
         )
+
+//        project.gradle.serviceRegistry()[BuildEventListenerRegistryInternal::class.java].onOperationCompletion(sentryTelemetryProvider)
+        buildEvents.onOperationCompletion(sentryTelemetryProvider)
 
         project.pluginManager.withPlugin("org.gradle.java") {
             if (configuredForJavaProject.getAndSet(true)) {
@@ -114,3 +124,5 @@ class SentryJvmPlugin : Plugin<Project> {
         internal val sep = File.separator
     }
 }
+
+//fun Gradle.serviceRegistry(): ServiceRegistry = (this as DefaultGradle).services
