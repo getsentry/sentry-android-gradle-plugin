@@ -9,14 +9,19 @@ import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.AgpVersions
 import java.io.File
+import javax.inject.Inject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.StopExecutionException
+import org.gradle.build.event.BuildEventsListenerRegistry
 import org.slf4j.LoggerFactory
 
 @Suppress("UnstableApiUsage")
-class SentryPlugin : Plugin<Project> {
+abstract class SentryPlugin : Plugin<Project> {
+
+    @get:Inject
+    abstract val listenerRegistry: BuildEventsListenerRegistry
 
     override fun apply(project: Project) {
         if (AgpVersions.CURRENT < AgpVersions.VERSION_7_0_0) {
@@ -63,6 +68,7 @@ class SentryPlugin : Plugin<Project> {
             androidComponentsExt.configure(
                 project,
                 extension,
+                listenerRegistry,
                 cliExecutable,
                 sentryOrgParameter,
                 sentryProjectParameter,

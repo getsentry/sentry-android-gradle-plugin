@@ -202,6 +202,15 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
         .convention(null as String?)
 
     /**
+     * The url of your Sentry instance. If you're using SAAS (not self hosting) you do not have to
+     * set this. If you are self hosting you can set your URL here.
+     *
+     * Default is null meaning Sentry SAAS.
+     */
+    val url: Property<String> = objects.property(String::class.java)
+        .convention(null as String?)
+
+    /**
      * Whether the plugin should send telemetry data to Sentry.
      * If disabled the plugin will not send telemetry data.
      * This is auto disabled if running against a self hosted instance of Sentry.

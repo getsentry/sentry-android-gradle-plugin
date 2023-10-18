@@ -10,6 +10,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
@@ -20,7 +21,15 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
         outputs.upToDateWhen { false }
         description = "Generates a unique build ID to be used " +
             "when bundling sources for upload to Sentry"
+
+        @Suppress("LeakingThis")
+        onlyIf {
+            includeSourceContext.getOrElse(false)
+        }
     }
+
+    @get:Input
+    abstract val includeSourceContext: Property<Boolean>
 
     @get:Internal
     override val outputFile: Provider<RegularFile> get() = output.file(SENTRY_BUNDLE_ID_OUTPUT)
@@ -68,7 +77,7 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
                 GenerateBundleIdTask::class.java
             ) { task ->
                 output?.let { task.output.set(it) }
-                task.onlyIf { includeSourceContext.getOrElse(false) }
+                task.includeSourceContext.set(includeSourceContext)
                 task.sentryTelemetryService.set(sentryTelemetryProvider)
                 task.usesService(sentryTelemetryProvider)
             }

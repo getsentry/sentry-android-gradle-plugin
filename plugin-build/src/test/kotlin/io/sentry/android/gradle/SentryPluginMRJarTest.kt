@@ -24,7 +24,7 @@ class SentryPluginMRJarTest :
             .appendArguments("app:assembleDebug")
             .build()
 
-        assertTrue { "BUILD SUCCESSFUL" in result.output }
+        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
     }
 
     @Test
@@ -44,8 +44,8 @@ class SentryPluginMRJarTest :
             .appendArguments("app:assembleDebug")
             .build()
 
-        assertTrue { "Please update to AGP >= 7.1.2" in result.output }
-        assertTrue { "BUILD SUCCESSFUL" in result.output }
+        assertTrue(result.output) { "Please update to AGP >= 7.1.2" in result.output }
+        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
     }
 
     override val additionalRootProjectConfig: String = ""

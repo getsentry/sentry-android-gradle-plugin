@@ -2,15 +2,27 @@
 
 ## Unreleased
 
+### Features
+
+- Add `url` option which is passed through to `sentry-cli` ([#572](https://github.com/getsentry/sentry-android-gradle-plugin/pull/572))
+  - In case you are self hosting Sentry, you can set `url` to your self hosted instance if your org auth token does not contain a URL
+- Provide detailed message for failed sentry-cli API requests ([#576](https://github.com/getsentry/sentry-android-gradle-plugin/pull/576)) 
+
 ### Fixes
 
 - Use `spring-boot` instead of `spring-boot-starter` for auto install detection ([#543](https://github.com/getsentry/sentry-android-gradle-plugin/pull/543))
+- Fix tracing instrumentation not working when configuration-cache is enabled on Gradle 8+ ([#568](https://github.com/getsentry/sentry-android-gradle-plugin/pull/568))
+- Fix source context not working with configuration cache enabled on Gradle 8+ ([#570](https://github.com/getsentry/sentry-android-gradle-plugin/pull/570))
+- Make proguard release association backward-compatible ([#576](https://github.com/getsentry/sentry-android-gradle-plugin/pull/576))
 
 ### Dependencies
 
 - Bump CLI from v2.21.1 to v2.21.2 ([#569](https://github.com/getsentry/sentry-android-gradle-plugin/pull/569))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2212)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.1...2.21.2)
+- Bump Android SDK from v6.30.0 to v6.31.0 ([#573](https://github.com/getsentry/sentry-android-gradle-plugin/pull/573))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6310)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.30.0...6.31.0)
 
 ## 3.13.0
 
@@ -41,6 +53,7 @@
 ### Features
 
 - Add release information args to proguard mapping upload task ([#476](https://github.com/getsentry/sentry-android-gradle-plugin/pull/476))
+  - Requires Sentry version `>=23.7.2` if you're using self-hosted
 - Auto install Sentry integrations for Java Backend, Desktop, etc. ([#521](https://github.com/getsentry/sentry-android-gradle-plugin/pull/521))
 - Use Spring Boot autoconfigure modules (`sentry-spring-boot` and `sentry-spring-boot-jakarta`) for auto install ([#542](https://github.com/getsentry/sentry-android-gradle-plugin/pull/542))
 
@@ -118,6 +131,7 @@
 
 - Bundle Java Sources and upload to Sentry ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
     - For more information on how to enable source context, please refer to [#633](https://github.com/getsentry/sentry-java/issues/633#issuecomment-1465599120)
+    - Requires Sentry version `>=23.5.0` if you're using self-hosted
 - New `debug` option to enable debug logging for sentry-cli ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
 
 ### Fixes

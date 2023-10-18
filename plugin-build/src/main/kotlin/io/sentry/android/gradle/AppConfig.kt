@@ -25,6 +25,7 @@ import io.sentry.android.gradle.util.ReleaseInfo
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
+import io.sentry.android.gradle.util.asSentryCliExec
 import io.sentry.android.gradle.util.hookWithAssembleTasks
 import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.hookWithPackageTasks
@@ -261,7 +262,8 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                     ?: extension.projectName,
                 sentryAuthToken = extension.authToken,
                 taskSuffix = name.capitalized,
-                releaseInfo = releaseInfo
+                releaseInfo = releaseInfo,
+                sentryUrl = extension.url
             )
             uploadMappingsTask.hookWithMinifyTasks(project, name, guardsquareEnabled)
 
@@ -300,6 +302,8 @@ private fun ApplicationVariant.configureNativeSymbolsTask(
             it.variantName.set(name)
             it.sentryOrganization.set(sentryOrg)
             it.sentryProject.set(sentryProject)
+            it.sentryUrl.set(extension.url)
+            it.asSentryCliExec()
         }
         uploadSentryNativeSymbolsTask.hookWithAssembleTasks(project, variant)
     } else {
