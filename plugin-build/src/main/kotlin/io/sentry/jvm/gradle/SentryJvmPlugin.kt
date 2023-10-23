@@ -19,14 +19,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
-import org.gradle.internal.service.ServiceRegistry
-import org.gradle.invocation.DefaultGradle
 
-class SentryJvmPlugin @Inject constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugin<Project> {
+class SentryJvmPlugin @Inject constructor(
+    private val buildEvents: BuildEventListenerRegistryInternal
+) : Plugin<Project> {
 
     /**
      * Since we're listening for the JavaBasePlugin, there may be multiple plugins inherting from it
@@ -41,16 +40,6 @@ class SentryJvmPlugin @Inject constructor(private val buildEvents: BuildEventLis
             SentryPluginExtension::class.java,
             project
         )
-
-        val sentryTelemetryProvider = SentryTelemetryService.register(
-            project,
-            extension,
-            "https://dd1f82ad30a331bd7def2a0dce926c6e@o447951.ingest.sentry.io/4506031723446272",
-            "org2"
-        )
-
-//        project.gradle.serviceRegistry()[BuildEventListenerRegistryInternal::class.java].onOperationCompletion(sentryTelemetryProvider)
-        buildEvents.onOperationCompletion(sentryTelemetryProvider)
 
         project.pluginManager.withPlugin("org.gradle.java") {
             if (configuredForJavaProject.getAndSet(true)) {
@@ -76,16 +65,27 @@ class SentryJvmPlugin @Inject constructor(private val buildEvents: BuildEventLis
                 extraProperties.get(SentryPlugin.SENTRY_PROJECT_PARAMETER).toString()
             }.getOrNull()
 
+            val sentryTelemetryProvider = SentryTelemetryService.register(
+                project,
+                javaVariant,
+                extension,
+                cliExecutable,
+                sentryOrgParameter,
+                "JVM"
+            )
+
+            buildEvents.onOperationCompletion(sentryTelemetryProvider)
+
             val sourceContextTasks = SourceContext.register(
                 project,
                 extension,
+                sentryTelemetryProvider,
                 javaVariant,
                 outputPaths,
                 cliExecutable,
                 sentryOrgParameter,
                 sentryProjectParameter,
-                "Java",
-                sentryTelemetryProvider
+                "Java"
             )
 
             sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, javaVariant)
@@ -96,6 +96,7 @@ class SentryJvmPlugin @Inject constructor(private val buildEvents: BuildEventLis
 
             val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
                 project,
+                sentryTelemetryProvider,
                 listOf(sourceContextTasks.generateBundleIdTask),
                 sentryResDir,
                 "java"
@@ -103,6 +104,7 @@ class SentryJvmPlugin @Inject constructor(private val buildEvents: BuildEventLis
 
             val reportDependenciesTask = SentryExternalDependenciesReportTaskFactory.register(
                 project = project,
+                sentryTelemetryProvider,
                 configurationName = "runtimeClasspath",
                 attributeValueJar = "jar",
                 includeReport = extension.includeDependenciesReport,
@@ -124,5 +126,3 @@ class SentryJvmPlugin @Inject constructor(private val buildEvents: BuildEventLis
         internal val sep = File.separator
     }
 }
-
-//fun Gradle.serviceRegistry(): ServiceRegistry = (this as DefaultGradle).services

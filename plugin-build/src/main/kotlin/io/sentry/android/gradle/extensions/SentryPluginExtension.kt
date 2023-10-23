@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.extensions
 
+import io.sentry.android.gradle.telemetry.SentryTelemetryService.Companion.SENTRY_SAAS_DSN
 import javax.inject.Inject
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -218,4 +219,12 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      */
     val telemetry: Property<Boolean> = objects
         .property(Boolean::class.java).convention(true)
+
+    /**
+     * The DSN (Sentry URL) telemetry data is sent to.
+     *
+     * Default is Sentry SAAS.
+     */
+    val telemetryDsn: Property<String> = objects.property(String::class.java)
+        .convention(SENTRY_SAAS_DSN)
 }

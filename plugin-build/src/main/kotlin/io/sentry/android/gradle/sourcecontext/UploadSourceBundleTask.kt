@@ -2,6 +2,8 @@ package io.sentry.android.gradle.sourcecontext
 
 import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
+import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.asSentryCliExec
 import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.SentryVariant
@@ -15,6 +17,7 @@ import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskProvider
 
@@ -67,6 +70,9 @@ abstract class UploadSourceBundleTask : Exec() {
     @get:Optional
     abstract val sentryUrl: Property<String>
 
+    @get:Internal
+    abstract val sentryTelemetryService: Property<SentryTelemetryService>
+
     override fun exec() {
         computeCommandLineArgs().let {
             commandLine(it)
@@ -102,6 +108,8 @@ abstract class UploadSourceBundleTask : Exec() {
             args.add("--log-level=debug")
         }
 
+        sentryTelemetryService.get().traceCli().let { args.addAll(it) }
+
         sentryUrl.orNull?.let {
             args.add("--url")
             args.add(it)
@@ -133,6 +141,7 @@ abstract class UploadSourceBundleTask : Exec() {
     companion object {
         fun register(
             project: Project,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>,
             variant: SentryVariant,
             bundleSourcesTask: TaskProvider<BundleSourcesTask>,
             debug: Property<Boolean>,
@@ -161,7 +170,9 @@ abstract class UploadSourceBundleTask : Exec() {
                     task.sentryProperties.set(File(it))
                 }
                 task.includeSourceContext.set(includeSourceContext)
+                task.sentryTelemetryService.set(sentryTelemetryProvider)
                 task.asSentryCliExec()
+                task.withSentryTelemetry(sentryTelemetryProvider)
             }
         }
     }

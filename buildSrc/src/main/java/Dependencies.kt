@@ -29,7 +29,7 @@ object LibsVersion {
     const val JUNIT = "4.13.2"
     const val ASM = "7.0" // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
     const val SQLITE = "2.1.0"
-    const val SENTRY = "6.30.0"
+    const val SENTRY = "6.31.0"
 }
 
 object Libs {

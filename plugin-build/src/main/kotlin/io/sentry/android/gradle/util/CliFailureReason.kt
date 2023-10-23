@@ -51,6 +51,11 @@ enum class CliFailureReason(val message: (taskName: String) -> String) {
     ```
         """.trimIndent()
     }),
+    INVALID_TOKEN({
+        """
+    An API request has failed due to an invalid token. Please provide a valid token with required permissions.
+        """.trimIndent()
+    }),
     UNKNOWN({
         """
     An error occurred while executing task '$it'. Please check the detailed sentry-cli output above.
@@ -64,6 +69,9 @@ enum class CliFailureReason(val message: (taskName: String) -> String) {
                 errOut.contains("error: An organization slug is required") -> ORG_SLUG
                 errOut.contains("error: A project slug is required") -> PROJECT_SLUG
                 errOut.contains("error: Failed to parse org auth token") -> INVALID_ORG_AUTH_TOKEN
+                errOut.contains("error: API request failed") && errOut.contains(
+                    """Invalid token \(http status: \d+\)""".toRegex()
+                ) -> INVALID_TOKEN
                 else -> UNKNOWN
             }
         }

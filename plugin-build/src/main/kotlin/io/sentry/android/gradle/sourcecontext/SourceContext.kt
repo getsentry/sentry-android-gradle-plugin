@@ -12,13 +12,13 @@ class SourceContext {
         fun register(
             project: Project,
             extension: SentryPluginExtension,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>,
             variant: SentryVariant,
             paths: OutputPaths,
             cliExecutable: String,
             sentryOrg: String?,
             sentryProject: String?,
-            taskSuffix: String,
-            sentryTelemetryProvider: Provider<SentryTelemetryService>
+            taskSuffix: String
         ): SourceContextTasks {
             val additionalSourcesProvider = project.provider {
                 extension.additionalSourceDirsForSourceContext.getOrElse(emptySet())
@@ -30,14 +30,15 @@ class SourceContext {
             )
             val generateBundleIdTask = GenerateBundleIdTask.register(
                 project,
+                sentryTelemetryProvider,
                 output = paths.bundleIdDir,
                 extension.includeSourceContext,
-                sentryTelemetryProvider,
                 taskSuffix
             )
 
             val collectSourcesTask = CollectSourcesTask.register(
                 project,
+                sentryTelemetryProvider,
                 sourceFiles,
                 output = paths.sourceDir,
                 extension.includeSourceContext,
@@ -46,6 +47,7 @@ class SourceContext {
 
             val bundleSourcesTask = BundleSourcesTask.register(
                 project,
+                sentryTelemetryProvider,
                 variant,
                 generateBundleIdTask,
                 collectSourcesTask,
@@ -57,12 +59,12 @@ class SourceContext {
                 extension.authToken,
                 extension.url,
                 extension.includeSourceContext,
-                sentryTelemetryProvider,
                 taskSuffix
             )
 
             val uploadSourceBundleTask = UploadSourceBundleTask.register(
                 project,
+                sentryTelemetryProvider,
                 variant,
                 bundleSourcesTask,
                 extension.debug,

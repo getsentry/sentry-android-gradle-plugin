@@ -6,7 +6,6 @@ import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
-import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.AgpVersions
 import java.io.File
 import javax.inject.Inject
@@ -41,13 +40,6 @@ abstract class SentryPlugin : Plugin<Project> {
             project
         )
 
-        val sentryTelemetryProvider = SentryTelemetryService.register(
-            project,
-            extension,
-            "https://dd1f82ad30a331bd7def2a0dce926c6e@o447951.ingest.sentry.io/4506031723446272",
-            "org1"
-        )
-
         project.pluginManager.withPlugin("com.android.application") {
             val oldAGPExtension = project.extensions.getByType(AppExtension::class.java)
             val androidComponentsExt =
@@ -71,8 +63,7 @@ abstract class SentryPlugin : Plugin<Project> {
                 listenerRegistry,
                 cliExecutable,
                 sentryOrgParameter,
-                sentryProjectParameter,
-                sentryTelemetryProvider
+                sentryProjectParameter
             )
 
             // old API configuration
@@ -81,8 +72,7 @@ abstract class SentryPlugin : Plugin<Project> {
                 extension,
                 cliExecutable,
                 sentryOrgParameter,
-                sentryProjectParameter,
-                sentryTelemetryProvider
+                sentryProjectParameter
             )
 
             project.installDependencies(extension, true)

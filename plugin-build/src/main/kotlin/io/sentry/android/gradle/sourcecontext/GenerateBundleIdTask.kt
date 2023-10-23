@@ -2,6 +2,7 @@ package io.sentry.android.gradle.sourcecontext
 
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
+import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.info
 import java.util.Properties
 import java.util.UUID
@@ -34,30 +35,23 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
     @get:Internal
     override val outputFile: Provider<RegularFile> get() = output.file(SENTRY_BUNDLE_ID_OUTPUT)
 
-    @get:Internal
-    abstract val sentryTelemetryService: Property<SentryTelemetryService>
-
     @TaskAction
     fun generateProperties() {
-        sentryTelemetryService.get().captureTask("${project.name}__${this::class.java.simpleName}") {
-            val outputDir = output.get().asFile
-            outputDir.mkdirs()
+        val outputDir = output.get().asFile
+        outputDir.mkdirs()
 
-            val debugId = UUID.randomUUID()
+        val debugId = UUID.randomUUID()
 
-            val props = Properties().also {
-                it.setProperty(SENTRY_BUNDLE_ID_PROPERTY, debugId.toString())
-            }
+        val props = Properties().also {
+            it.setProperty(SENTRY_BUNDLE_ID_PROPERTY, debugId.toString())
+        }
 
-            throw RuntimeException("oopsie on prupose")
+        outputFile.get().asFile.writer().use { writer ->
+            props.store(writer, "")
+        }
 
-            outputFile.get().asFile.writer().use { writer ->
-                props.store(writer, "")
-            }
-
-            logger.info {
-                "GenerateSourceBundleIdTask - outputFile: $outputFile, debugId: $debugId"
-            }
+        logger.info {
+            "GenerateSourceBundleIdTask - outputFile: $outputFile, debugId: $debugId"
         }
     }
 
@@ -67,9 +61,9 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
 
         fun register(
             project: Project,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>,
             output: Provider<Directory>? = null,
             includeSourceContext: Property<Boolean>,
-            sentryTelemetryProvider: Provider<SentryTelemetryService>,
             taskSuffix: String = ""
         ): TaskProvider<GenerateBundleIdTask> {
             val generateBundleIdTask = project.tasks.register(
@@ -78,8 +72,7 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
             ) { task ->
                 output?.let { task.output.set(it) }
                 task.includeSourceContext.set(includeSourceContext)
-                task.sentryTelemetryService.set(sentryTelemetryProvider)
-                task.usesService(sentryTelemetryProvider)
+                task.withSentryTelemetry(sentryTelemetryProvider)
             }
             return generateBundleIdTask
         }

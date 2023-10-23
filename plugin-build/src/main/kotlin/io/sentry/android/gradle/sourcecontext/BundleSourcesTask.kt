@@ -4,6 +4,7 @@ import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
+import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.PropertiesUtil
 import io.sentry.android.gradle.util.asSentryCliExec
 import io.sentry.android.gradle.util.info
@@ -83,15 +84,13 @@ abstract class BundleSourcesTask : Exec() {
     abstract val sentryTelemetryService: Property<SentryTelemetryService>
 
     override fun exec() {
-        sentryTelemetryService.get().captureTask(this::class.java.simpleName) {
-            computeCommandLineArgs().let {
-                commandLine(it)
-                logger.info { "cli args: $it" }
-            }
-            setSentryPropertiesEnv()
-            setSentryAuthTokenEnv()
-            super.exec()
+        computeCommandLineArgs().let {
+            commandLine(it)
+            logger.info { "cli args: $it" }
         }
+        setSentryPropertiesEnv()
+        setSentryAuthTokenEnv()
+        super.exec()
     }
 
     internal fun setSentryPropertiesEnv() {
@@ -119,6 +118,8 @@ abstract class BundleSourcesTask : Exec() {
         if (debug.getOrElse(false)) {
             args.add("--log-level=debug")
         }
+
+        sentryTelemetryService.get().traceCli().let { args.addAll(it) }
 
         sentryUrl.orNull?.let {
             args.add("--url")
@@ -157,6 +158,7 @@ abstract class BundleSourcesTask : Exec() {
 
         fun register(
             project: Project,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>,
             variant: SentryVariant,
             generateDebugIdTask: TaskProvider<GenerateBundleIdTask>,
             collectSourcesTask: TaskProvider<CollectSourcesTask>,
@@ -168,7 +170,6 @@ abstract class BundleSourcesTask : Exec() {
             sentryAuthToken: Property<String>,
             sentryUrl: Property<String>,
             includeSourceContext: Property<Boolean>,
-            sentryTelemetryProvider: Provider<SentryTelemetryService>,
             taskSuffix: String = ""
         ): TaskProvider<BundleSourcesTask> {
             return project.tasks.register(
@@ -189,8 +190,8 @@ abstract class BundleSourcesTask : Exec() {
                 task.output.set(output)
                 task.includeSourceContext.set(includeSourceContext)
                 task.sentryTelemetryService.set(sentryTelemetryProvider)
-                task.usesService(sentryTelemetryProvider)
                 task.asSentryCliExec()
+                task.withSentryTelemetry(sentryTelemetryProvider)
             }
         }
     }

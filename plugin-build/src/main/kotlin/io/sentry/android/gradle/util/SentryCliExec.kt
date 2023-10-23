@@ -18,12 +18,13 @@ fun Exec.asSentryCliExec() {
 
     doLast {
         val err = errorOutput.toString()
-        if (executionResult.get().exitValue != 0) {
+        val exitValue = executionResult.orNull?.exitValue ?: 0
+        if (exitValue != 0) {
             when (val reason = CliFailureReason.fromErrOut(err)) {
                 OUTDATED -> logger.warn { reason.message(name) }
                 else -> {
                     logger.lifecycle(err)
-                    throw GradleException(reason.message(name))
+                    throw SentryCliException(reason, name)
                 }
             }
         } else if (err.isNotEmpty()) {
@@ -31,3 +32,7 @@ fun Exec.asSentryCliExec() {
         }
     }
 }
+
+open class SentryCliException(val reason: CliFailureReason, name: String) : GradleException(
+    reason.message(name)
+)

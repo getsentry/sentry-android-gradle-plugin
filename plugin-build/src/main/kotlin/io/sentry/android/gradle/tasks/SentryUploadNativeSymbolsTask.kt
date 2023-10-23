@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -50,6 +51,9 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
     @get:Internal
     abstract val variantName: Property<String>
 
+    @get:Internal
+    abstract val sentryTelemetryService: Property<SentryTelemetryService>
+
     override fun exec() {
         computeCommandLineArgs().let {
             commandLine(it)
@@ -76,6 +80,8 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
         if (debug.getOrElse(false)) {
             args.add("--log-level=debug")
         }
+
+        sentryTelemetryService.get().traceCli().let { args.addAll(it) }
 
         sentryUrl.orNull?.let {
             args.add("--url")

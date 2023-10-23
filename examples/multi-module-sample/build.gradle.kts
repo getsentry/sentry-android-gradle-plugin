@@ -1,5 +1,4 @@
 // ktlint-disable max-line-length
-import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -14,8 +13,8 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-//sentry {
+// sentry {
 //    debug.set(true)
 //    includeSourceContext.set(true)
 //    additionalSourceDirsForSourceContext.set(setOf("testsrc"))
-//}
+// }

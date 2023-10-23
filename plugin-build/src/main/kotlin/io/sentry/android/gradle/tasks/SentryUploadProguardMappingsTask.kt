@@ -1,6 +1,8 @@
 package io.sentry.android.gradle.tasks
 
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask.Companion.SENTRY_PROGUARD_MAPPING_UUID_PROPERTY
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
+import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.PropertiesUtil
 import io.sentry.android.gradle.util.ReleaseInfo
 import io.sentry.android.gradle.util.asSentryCliExec
@@ -17,6 +19,7 @@ import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskProvider
 
@@ -64,6 +67,9 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
     @get:Input
     @get:Optional
     abstract val sentryUrl: Property<String>
+
+    @get:Internal
+    abstract val sentryTelemetryService: Property<SentryTelemetryService>
 
     override fun exec() {
         if (!mappingsFiles.isPresent || mappingsFiles.get().isEmpty) {
@@ -115,6 +121,8 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
         if (debug.getOrElse(false)) {
             args.add("--log-level=debug")
         }
+
+        sentryTelemetryService.get().traceCli().let { args.addAll(it) }
 
         sentryUrl.orNull?.let {
             args.add("--url")
@@ -170,6 +178,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
 
         fun register(
             project: Project,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>,
             debug: Property<Boolean>,
             cliExecutable: String,
             sentryProperties: String?,
@@ -202,7 +211,9 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
                 task.releaseInfo.set(releaseInfo)
                 task.sentryAuthToken.set(sentryAuthToken)
                 task.sentryUrl.set(sentryUrl)
+                task.sentryTelemetryService.set(sentryTelemetryProvider)
                 task.asSentryCliExec()
+                task.withSentryTelemetry(sentryTelemetryProvider)
             }
             return uploadSentryProguardMappingsTask
         }

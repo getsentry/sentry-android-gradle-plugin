@@ -19,6 +19,7 @@ import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
+import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
 import io.sentry.android.gradle.util.ReleaseInfo
@@ -40,8 +41,7 @@ fun AppExtension.configure(
     extension: SentryPluginExtension,
     cliExecutable: String,
     sentryOrg: String?,
-    sentryProject: String?,
-    sentryTelemetryProvider: Provider<SentryTelemetryService>
+    sentryProject: String?
 ) {
     applicationVariants.matching {
         isVariantAllowed(extension, it.name, it.flavorName, it.buildType.name)
@@ -59,20 +59,29 @@ fun AppExtension.configure(
             }
         )
 
-        val tasksGeneratingProperties = mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
-        val sourceContextTasks = variant.configureSourceBundleTasks(
+        val sentryTelemetryProvider = variant.configureTelemetry(
             project,
             extension,
             cliExecutable,
             sentryOrg,
-            sentryProject,
-            sentryTelemetryProvider
+            sentryProject
+        )
+
+        val tasksGeneratingProperties = mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
+        val sourceContextTasks = variant.configureSourceBundleTasks(
+            project,
+            extension,
+            sentryTelemetryProvider,
+            cliExecutable,
+            sentryOrg,
+            sentryProject
         )
         sourceContextTasks?.let { tasksGeneratingProperties.add(it.generateBundleIdTask) }
 
         variant.configureDependenciesTask(
             project,
             extension,
+            sentryTelemetryProvider,
             this,
             mergeAssetsDependants
         )
@@ -80,6 +89,7 @@ fun AppExtension.configure(
         val generateProguardUuidTask = variant.configureProguardMappingsTasks(
             project,
             extension,
+            sentryTelemetryProvider,
             cliExecutable,
             sentryOrg,
             sentryProject
@@ -89,6 +99,7 @@ fun AppExtension.configure(
         variant.configureNativeSymbolsTask(
             project,
             extension,
+            sentryTelemetryProvider,
             cliExecutable,
             sentryOrg,
             sentryProject
@@ -97,15 +108,35 @@ fun AppExtension.configure(
         variant.configureDebugMetaPropertiesTask(
             project,
             this,
+            sentryTelemetryProvider,
             mergeAssetsDependants,
             tasksGeneratingProperties
         )
     }
 }
 
+private fun ApplicationVariant.configureTelemetry(
+    project: Project,
+    extension: SentryPluginExtension,
+    cliExecutable: String,
+    sentryOrg: String?,
+    sentryProject: String?
+): Provider<SentryTelemetryService> {
+    val variant = if (isAGP74) null else AndroidVariant70(this)
+    return SentryTelemetryService.register(
+        project,
+        variant,
+        extension,
+        cliExecutable,
+        sentryOrg,
+        "Android"
+    )
+}
+
 private fun ApplicationVariant.configureDebugMetaPropertiesTask(
     project: Project,
     appExtension: AppExtension,
+    sentryTelemetryProvider: Provider<SentryTelemetryService>,
     dependants: Set<TaskProvider<out Task>?>,
     tasksGeneratingProperties: List<TaskProvider<out PropertiesFileOutputTask>>
 ) {
@@ -122,6 +153,7 @@ private fun ApplicationVariant.configureDebugMetaPropertiesTask(
         )
         val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
             project,
+            sentryTelemetryProvider,
             tasksGeneratingProperties,
             outputDir,
             taskSuffix
@@ -138,10 +170,10 @@ private fun ApplicationVariant.configureDebugMetaPropertiesTask(
 private fun ApplicationVariant.configureSourceBundleTasks(
     project: Project,
     extension: SentryPluginExtension,
+    sentryTelemetryProvider: Provider<SentryTelemetryService>,
     cliExecutable: String,
     sentryOrg: String?,
-    sentryProject: String?,
-    sentryTelemetryProvider: Provider<SentryTelemetryService>
+    sentryProject: String?
 ): SourceContext.SourceContextTasks? {
     if (isAGP74) {
         project.logger.info {
@@ -157,13 +189,13 @@ private fun ApplicationVariant.configureSourceBundleTasks(
         val sourceContextTasks = SourceContext.register(
             project,
             extension,
+            sentryTelemetryProvider,
             variant,
             paths,
             cliExecutable,
             sentryOrg,
             sentryProject,
-            taskSuffix,
-            sentryTelemetryProvider
+            taskSuffix
         )
 
         if (variant.buildTypeName == "release") {
@@ -179,6 +211,7 @@ private fun ApplicationVariant.configureSourceBundleTasks(
 private fun BaseVariant.configureDependenciesTask(
     project: Project,
     extension: SentryPluginExtension,
+    sentryTelemetryProvider: Provider<SentryTelemetryService>,
     appExtension: AppExtension,
     dependants: Set<TaskProvider<out Task>?>
 ) {
@@ -195,6 +228,7 @@ private fun BaseVariant.configureDependenciesTask(
         val reportDependenciesTask =
             SentryExternalDependenciesReportTaskFactory.register(
                 project = project,
+                sentryTelemetryProvider,
                 configurationName = "${name}RuntimeClasspath",
                 attributeValueJar = "android-classes",
                 includeReport = extension.includeDependenciesReport,
@@ -211,6 +245,7 @@ private fun BaseVariant.configureDependenciesTask(
 private fun ApplicationVariant.configureProguardMappingsTasks(
     project: Project,
     extension: SentryPluginExtension,
+    sentryTelemetryProvider: Provider<SentryTelemetryService>,
     cliExecutable: String,
     sentryOrg: String?,
     sentryProject: String?
@@ -234,6 +269,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
             val generateUuidTask =
                 SentryGenerateProguardUuidTask.register(
                     project = project,
+                    sentryTelemetryProvider,
                     output = outputDir,
                     taskSuffix = name.capitalized
                 )
@@ -247,6 +283,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
             val releaseInfo = ReleaseInfo(applicationId, versionName, versionCode)
             val uploadMappingsTask = SentryUploadProguardMappingsTask.register(
                 project = project,
+                sentryTelemetryProvider,
                 debug = extension.debug,
                 cliExecutable = cliExecutable,
                 generateUuidTask = generateUuidTask,
@@ -277,6 +314,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
 private fun ApplicationVariant.configureNativeSymbolsTask(
     project: Project,
     extension: SentryPluginExtension,
+    sentryTelemetryProvider: Provider<SentryTelemetryService>,
     cliExecutable: String,
     sentryOrg: String?,
     sentryProject: String?
@@ -303,7 +341,9 @@ private fun ApplicationVariant.configureNativeSymbolsTask(
             it.sentryOrganization.set(sentryOrg)
             it.sentryProject.set(sentryProject)
             it.sentryUrl.set(extension.url)
+            it.sentryTelemetryService.set(sentryTelemetryProvider)
             it.asSentryCliExec()
+            it.withSentryTelemetry(sentryTelemetryProvider)
         }
         uploadSentryNativeSymbolsTask.hookWithAssembleTasks(project, variant)
     } else {
