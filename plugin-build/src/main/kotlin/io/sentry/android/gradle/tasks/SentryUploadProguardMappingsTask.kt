@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask.Companion.SENTRY_PROGUARD_MAPPING_UUID_PROPERTY
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
@@ -178,6 +179,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
 
         fun register(
             project: Project,
+            extension: SentryPluginExtension,
             sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             debug: Property<Boolean>,
             cliExecutable: String,
@@ -213,7 +215,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
                 task.sentryUrl.set(sentryUrl)
                 sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
                 task.asSentryCliExec()
-                task.withSentryTelemetry(sentryTelemetryProvider)
+                task.withSentryTelemetry(extension, sentryTelemetryProvider)
             }
             return uploadSentryProguardMappingsTask
         }

@@ -30,6 +30,7 @@ class SourceContext {
             )
             val generateBundleIdTask = GenerateBundleIdTask.register(
                 project,
+                extension,
                 sentryTelemetryProvider,
                 output = paths.bundleIdDir,
                 extension.includeSourceContext,
@@ -38,6 +39,7 @@ class SourceContext {
 
             val collectSourcesTask = CollectSourcesTask.register(
                 project,
+                extension,
                 sentryTelemetryProvider,
                 sourceFiles,
                 output = paths.sourceDir,
@@ -47,6 +49,7 @@ class SourceContext {
 
             val bundleSourcesTask = BundleSourcesTask.register(
                 project,
+                extension,
                 sentryTelemetryProvider,
                 variant,
                 generateBundleIdTask,
@@ -64,6 +67,7 @@ class SourceContext {
 
             val uploadSourceBundleTask = UploadSourceBundleTask.register(
                 project,
+                extension,
                 sentryTelemetryProvider,
                 variant,
                 bundleSourcesTask,

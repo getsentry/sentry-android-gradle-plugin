@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    id("io.sentry.jvm.gradle") apply false
+    id("io.sentry.jvm.gradle")
 }
 
 tasks.withType<KotlinCompile> {
@@ -13,8 +13,9 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-// sentry {
-//    debug.set(true)
-//    includeSourceContext.set(true)
-//    additionalSourceDirsForSourceContext.set(setOf("testsrc"))
-// }
+ sentry {
+    debug.set(true)
+    telemetry.set(false)
+    includeSourceContext.set(true)
+    additionalSourceDirsForSourceContext.set(setOf("testsrc"))
+ }

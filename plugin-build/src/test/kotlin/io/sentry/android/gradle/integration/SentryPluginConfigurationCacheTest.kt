@@ -47,6 +47,7 @@ class SentryPluginConfigurationCacheTest :
         assertTrue { "Configuration cache entry stored." in output }
 
         val outputWithConfigCache = runner.build().output
+        println(outputWithConfigCache)
         assertTrue { "Configuration cache entry reused." in outputWithConfigCache }
     }
 

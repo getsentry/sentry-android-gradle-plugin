@@ -11,6 +11,7 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
+import io.sentry.Sentry
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
@@ -61,6 +62,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
         if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
             val paths = OutputPaths(project, variant.name)
 
+            println(">>> AndroidComponentsConfig STS ${Sentry::class.java.classLoader}")
             val sentryTelemetryProvider = variant.configureTelemetry(
                 project,
                 extension,
@@ -68,6 +70,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 sentryOrg,
                 sentryProject
             )
+            println("### ${sentryTelemetryProvider.get()}")
 
             variant.configureDependenciesTask(project, extension, sentryTelemetryProvider)
 
@@ -97,6 +100,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
 
             variant.configureDebugMetaPropertiesTask(
                 project,
+                extension,
                 sentryTelemetryProvider,
                 tasksGeneratingProperties
             )
@@ -153,7 +157,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 ) {
                     it.sentryModulesService.set(sentryModulesService)
                     it.usesService(sentryTelemetryProvider)
-                    it.withSentryTelemetry(sentryTelemetryProvider)
+                    it.withSentryTelemetry(extension, sentryTelemetryProvider)
                 }
 
                 variant.artifacts.use(manifestUpdater).wiredWithFiles(
@@ -191,6 +195,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
 
 private fun Variant.configureDebugMetaPropertiesTask(
     project: Project,
+    extension: SentryPluginExtension,
     sentryTelemetryProvider: Provider<SentryTelemetryService>,
     tasksGeneratingProperties: List<TaskProvider<out PropertiesFileOutputTask>>
 ) {
@@ -198,6 +203,7 @@ private fun Variant.configureDebugMetaPropertiesTask(
         val taskSuffix = name.capitalized
         val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
             project,
+            extension,
             sentryTelemetryProvider,
             tasksGeneratingProperties,
             null,
@@ -287,6 +293,7 @@ private fun Variant.configureDependenciesTask(
             val reportDependenciesTask =
                 SentryExternalDependenciesReportTaskFactory.register(
                     project = project,
+                    extension,
                     sentryTelemetryProvider,
                     configurationName = "${name}RuntimeClasspath",
                     attributeValueJar = "android-classes",
@@ -325,6 +332,7 @@ private fun Variant.configureProguardMappingsTasks(
             val generateUuidTask =
                 SentryGenerateProguardUuidTask.register(
                     project = project,
+                    extension,
                     sentryTelemetryProvider,
                     taskSuffix = name.capitalized,
                     output = paths.proguardUuidDir
@@ -333,6 +341,7 @@ private fun Variant.configureProguardMappingsTasks(
             val releaseInfo = getReleaseInfo(project, this)
             val uploadMappingsTask = SentryUploadProguardMappingsTask.register(
                 project = project,
+                extension,
                 sentryTelemetryProvider,
                 debug = extension.debug,
                 cliExecutable = cliExecutable,

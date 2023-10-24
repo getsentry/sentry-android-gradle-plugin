@@ -1,5 +1,6 @@
 package io.sentry.jvm.gradle
 
+import io.sentry.Sentry
 import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.SentryTasksProvider
@@ -65,6 +66,7 @@ class SentryJvmPlugin @Inject constructor(
                 extraProperties.get(SentryPlugin.SENTRY_PROJECT_PARAMETER).toString()
             }.getOrNull()
 
+            println(">>> JVM plugin STS ${Sentry::class.java.classLoader}")
             val sentryTelemetryProvider = SentryTelemetryService.register(
                 project,
                 javaVariant,
@@ -73,6 +75,7 @@ class SentryJvmPlugin @Inject constructor(
                 sentryOrgParameter,
                 "JVM"
             )
+            println("### ${sentryTelemetryProvider.get()}")
 
             buildEvents.onOperationCompletion(sentryTelemetryProvider)
 
@@ -96,6 +99,7 @@ class SentryJvmPlugin @Inject constructor(
 
             val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
                 project,
+                extension,
                 sentryTelemetryProvider,
                 listOf(sourceContextTasks.generateBundleIdTask),
                 sentryResDir,
@@ -104,6 +108,7 @@ class SentryJvmPlugin @Inject constructor(
 
             val reportDependenciesTask = SentryExternalDependenciesReportTaskFactory.register(
                 project = project,
+                extension,
                 sentryTelemetryProvider,
                 configurationName = "runtimeClasspath",
                 attributeValueJar = "jar",

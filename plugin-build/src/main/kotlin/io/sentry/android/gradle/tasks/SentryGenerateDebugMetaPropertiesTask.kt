@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.PropertiesUtil
@@ -51,6 +52,7 @@ abstract class SentryGenerateDebugMetaPropertiesTask : DirectoryOutputTask() {
 
         fun register(
             project: Project,
+            extension: SentryPluginExtension,
             sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             tasksGeneratingProperties: List<TaskProvider<out PropertiesFileOutputTask>>,
             output: Provider<Directory>? = null,
@@ -65,7 +67,7 @@ abstract class SentryGenerateDebugMetaPropertiesTask : DirectoryOutputTask() {
             ) { task ->
                 task.inputFiles.setFrom(inputFiles)
                 output?.let { task.output.set(it) }
-                task.withSentryTelemetry(sentryTelemetryProvider)
+                task.withSentryTelemetry(extension, sentryTelemetryProvider)
             }
         }
     }

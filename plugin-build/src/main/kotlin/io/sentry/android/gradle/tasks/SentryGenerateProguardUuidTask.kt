@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.info
@@ -50,6 +51,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
 
         fun register(
             project: Project,
+            extension: SentryPluginExtension,
             sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             output: Provider<Directory>? = null,
             taskSuffix: String = ""
@@ -59,7 +61,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
                 SentryGenerateProguardUuidTask::class.java
             ) { task ->
                 output?.let { task.output.set(it) }
-                task.withSentryTelemetry(sentryTelemetryProvider)
+                task.withSentryTelemetry(extension, sentryTelemetryProvider)
             }
             return generateUuidTask
         }

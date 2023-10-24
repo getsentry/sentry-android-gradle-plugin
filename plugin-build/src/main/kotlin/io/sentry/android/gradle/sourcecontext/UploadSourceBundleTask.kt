@@ -2,6 +2,7 @@ package io.sentry.android.gradle.sourcecontext
 
 import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
+import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.asSentryCliExec
@@ -141,6 +142,7 @@ abstract class UploadSourceBundleTask : Exec() {
     companion object {
         fun register(
             project: Project,
+            extension: SentryPluginExtension,
             sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             variant: SentryVariant,
             bundleSourcesTask: TaskProvider<BundleSourcesTask>,
@@ -172,7 +174,7 @@ abstract class UploadSourceBundleTask : Exec() {
                 task.includeSourceContext.set(includeSourceContext)
                 sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
                 task.asSentryCliExec()
-                task.withSentryTelemetry(sentryTelemetryProvider)
+                task.withSentryTelemetry(extension, sentryTelemetryProvider)
             }
         }
     }

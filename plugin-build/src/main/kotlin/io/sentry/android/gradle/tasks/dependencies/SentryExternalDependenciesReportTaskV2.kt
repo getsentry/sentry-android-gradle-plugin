@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks.dependencies
 
+import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory.SENTRY_DEPENDENCIES_REPORT_OUTPUT
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
@@ -47,6 +48,7 @@ abstract class SentryExternalDependenciesReportTaskV2 : DirectoryOutputTask() {
     companion object {
         fun register(
             project: Project,
+            extension: SentryPluginExtension,
             sentryTelemetryProvider: Provider<SentryTelemetryService>,
             configurationName: String,
             attributeValueJar: String,
@@ -71,7 +73,7 @@ abstract class SentryExternalDependenciesReportTaskV2 : DirectoryOutputTask() {
                 task.artifactIds.set(artifactIds)
                 task.includeReport.set(includeReport)
                 output?.let { task.output.set(it) }
-                task.withSentryTelemetry(sentryTelemetryProvider)
+                task.withSentryTelemetry(extension, sentryTelemetryProvider)
             }
         }
     }

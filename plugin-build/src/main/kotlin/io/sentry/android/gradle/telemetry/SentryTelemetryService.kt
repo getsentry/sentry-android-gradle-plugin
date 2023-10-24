@@ -83,6 +83,7 @@ abstract class SentryTelemetryService :
     private var didAddChildSpans: Boolean = false
 
     init {
+        println(">>>>> STS init ${Sentry::class.java.classLoader}")
         // TODO duplicate transaction SentryPlugin and SentryJvmPlugin
         // TODO config phase errors are not reported because this Service is never initialized
         if (parameters.saas.orNull == false) {
@@ -282,14 +283,12 @@ abstract class SentryTelemetryService :
             sentryOrg: String?,
             buildType: String
         ): Provider<SentryTelemetryService> {
-            if (extension.telemetry.orNull == false) {
-                return project.provider { null }
-            }
-
+            println(">>>>> maybe init ${Sentry::class.java.classLoader}")
             return project.gradle.sharedServices.registerIfAbsent(
                 getBuildServiceName(SentryTelemetryService::class.java),
                 SentryTelemetryService::class.java
             ) {
+                println(">>>>> init ${Sentry::class.java.classLoader}")
                 it.parameters.sentryOrganization.set(sentryOrg)
                 it.parameters.dsn.set(extension.telemetryDsn)
                 it.parameters.buildType.set(buildType)
@@ -297,18 +296,19 @@ abstract class SentryTelemetryService :
 
                 if (isExecAvailable()) {
                     val infoResult = runSentryCliInfo(project, variant, cliExecutable, extension)
+                    println(infoResult)
 
                     val infoOutput = infoResult.standardOutput.asText.getOrElse("")
                     val isSaas = infoOutput.contains("(?m)Sentry Server: .*sentry.io$".toRegex())
                     it.parameters.saas.set(isSaas)
-
-                    orgRegex.find(infoOutput)?.let { matchResult ->
-                        val groupValues = matchResult.groupValues
-                        if (groupValues.size > 1) {
-                            val defaultOrg = groupValues[1]
-                            it.parameters.defaultSentryOrganization.set(defaultOrg)
-                        }
-                    }
+//
+//                    orgRegex.find(infoOutput)?.let { matchResult ->
+//                        val groupValues = matchResult.groupValues
+//                        if (groupValues.size > 1) {
+//                            val defaultOrg = groupValues[1]
+//                            it.parameters.defaultSentryOrganization.set(defaultOrg)
+//                        }
+//                    }
 
                     val versionResult = runSentryCliVersion(project, cliExecutable)
                     val versionOutput = versionResult.standardOutput.asText.getOrElse("")
@@ -327,6 +327,7 @@ abstract class SentryTelemetryService :
         }
 
         private fun isExecAvailable(): Boolean {
+//            return false
             return GradleVersions.CURRENT >= GradleVersions.VERSION_7_5
         }
 
@@ -340,7 +341,7 @@ abstract class SentryTelemetryService :
                 exec.isIgnoreExitValue = true
                 var args = mutableListOf(cliExecutable)
 
-//                args.add("--log-level=debug")
+                args.add("--log-level=error")
 
                 extension.url.orNull?.let {
                     args.add("--url")
@@ -348,6 +349,7 @@ abstract class SentryTelemetryService :
                 }
 
                 args.add("info")
+                args.add("2>/dev/null")
 
                 variant?.let { variantNotNul ->
                     SentryPropertiesFileProvider.getPropertiesFilePath(project, variantNotNul)
@@ -371,7 +373,9 @@ abstract class SentryTelemetryService :
             return project.providers.exec { exec ->
                 exec.isIgnoreExitValue = true
                 var args = mutableListOf(cliExecutable)
+                args.add("--log-level=error")
                 args.add("--version")
+                args.add("2>/dev/null")
                 exec.commandLine(args)
             }
         }

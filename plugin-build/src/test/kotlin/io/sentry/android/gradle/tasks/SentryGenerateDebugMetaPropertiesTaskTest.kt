@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask.Companion.SENTRY_PROGUARD_MAPPING_UUID_PROPERTY
@@ -19,6 +20,11 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
         val project = createProject()
         val bundleIdTask = GenerateBundleIdTask.register(
             project,
+            project.extensions.create(
+                "sentry",
+                SentryPluginExtension::class.java,
+                project
+            ),
             null,
             project.layout.buildDirectory.dir("dummy/folder/"),
             project.objects.property(Boolean::class.java).convention(true),
@@ -26,6 +32,11 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
         )
         val proguardIdTask = SentryGenerateProguardUuidTask.register(
             project,
+            project.extensions.create(
+                "sentry",
+                SentryPluginExtension::class.java,
+                project
+            ),
             null,
             project.layout.buildDirectory.dir("dummy/folder/"),
             "test"
@@ -37,6 +48,11 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
         val task: TaskProvider<SentryGenerateDebugMetaPropertiesTask> =
             SentryGenerateDebugMetaPropertiesTask.register(
                 project,
+                project.extensions.create(
+                    "sentry",
+                    SentryPluginExtension::class.java,
+                    project
+                ),
                 null,
                 idGenerationTasks,
                 project.layout.buildDirectory.dir("dummy/folder/"),
@@ -60,6 +76,11 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
         val project = createProject()
         val bundleIdTask = GenerateBundleIdTask.register(
             project,
+            project.extensions.create(
+                "sentry",
+                SentryPluginExtension::class.java,
+                project
+            ),
             null,
             project.layout.buildDirectory.dir("dummy/folder/"),
             project.objects.property(Boolean::class.java).convention(true),
@@ -67,6 +88,11 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
         )
         val proguardIdTask = SentryGenerateProguardUuidTask.register(
             project,
+            project.extensions.create(
+                "sentry",
+                SentryPluginExtension::class.java,
+                project
+            ),
             null,
             project.layout.buildDirectory.dir("dummy/folder/"),
             "test"
@@ -78,6 +104,11 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
         val task: TaskProvider<SentryGenerateDebugMetaPropertiesTask> =
             SentryGenerateDebugMetaPropertiesTask.register(
                 project,
+                project.extensions.create(
+                    "sentry",
+                    SentryPluginExtension::class.java,
+                    project
+                ),
                 null,
                 idGenerationTasks,
                 project.layout.buildDirectory.dir("dummy/folder/"),
