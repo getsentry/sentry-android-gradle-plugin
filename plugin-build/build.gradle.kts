@@ -65,10 +65,7 @@ dependencies {
 
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:${KotlinCompilerVersion.VERSION}")
 
-    // compileOnly since we'll be shading the common dependency into the final jar
-    // but we still need to be able to compile it (this also excludes it from .pom)
-    compileOnly(Libs.SENTRY)
-    shade(Libs.SENTRY)
+    implementation(Libs.SENTRY)
 
     // compileOnly since we'll be shading the common dependency into the final jar
     // but we still need to be able to compile it (this also excludes it from .pom)
