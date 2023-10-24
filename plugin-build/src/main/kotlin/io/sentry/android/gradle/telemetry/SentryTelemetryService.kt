@@ -13,6 +13,8 @@ import io.sentry.SentryTraceHeader
 import io.sentry.SpanStatus
 import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.util.AgpVersions
+import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.SentryCliException
 import io.sentry.android.gradle.util.getBuildServiceName
 import io.sentry.exception.ExceptionMechanismException
@@ -66,9 +68,11 @@ abstract class SentryTelemetryService :
         val extraTags: MapProperty<String, String>
 
         @get:Input
+        @get:Optional
         val saas: Property<Boolean>
 
         @get:Input
+        @get:Optional
         val cliVersion: Property<String>
     }
 
@@ -81,7 +85,7 @@ abstract class SentryTelemetryService :
     init {
         // TODO duplicate transaction SentryPlugin and SentryJvmPlugin
         // TODO config phase errors are not reported because this Service is never initialized
-        if (!parameters.saas.get()) {
+        if (parameters.saas.orNull == false) {
             println(
                 "Sentry is running against a self hosted instance. Telemetry has been disabled."
             )
@@ -92,6 +96,10 @@ abstract class SentryTelemetryService :
         } else {
             if (!Sentry.isEnabled()) {
                 // TODO test telemetry disabled
+                println(
+                    "Sentry telemetry is enabled. To disable set `telemetry=false` " +
+                        "in the sentry config block."
+                )
                 // TODO Logs a message, telemetry is enabled and how to disable it
                 Sentry.init { options ->
                     options.dsn = parameters.dsn.get()
@@ -102,11 +110,11 @@ abstract class SentryTelemetryService :
                     options.isSendModules = false
                     options.environment = parameters.buildType.get()
                     options.setTag("SDK_VERSION", BuildConfig.SdkVersion)
-                    options.setTag("AGP_VERSION", BuildConfig.AgpVersion)
+                    options.setTag("AGP_VERSION", AgpVersions.CURRENT.toString())
                     options.setTag("BUILD_SYSTEM", "gradle")
                     options.setTag("BUILD_TYPE", parameters.buildType.get())
                     options.setTag("GRADLE_VERSION", GradleVersion.current().version)
-                    options.setTag("SENTRY_CLI_VERSION", parameters.cliVersion.get())
+                    parameters.cliVersion.orNull?.let { options.setTag("SENTRY_CLI_VERSION", it) }
 
                     parameters.extraTags.orNull?.forEach { (key, value) ->
                         options.setTag(
@@ -274,6 +282,10 @@ abstract class SentryTelemetryService :
             sentryOrg: String?,
             buildType: String
         ): Provider<SentryTelemetryService> {
+            if (extension.telemetry.orNull == false) {
+                return project.provider { null }
+            }
+
             return project.gradle.sharedServices.registerIfAbsent(
                 getBuildServiceName(SentryTelemetryService::class.java),
                 SentryTelemetryService::class.java
@@ -283,33 +295,39 @@ abstract class SentryTelemetryService :
                 it.parameters.buildType.set(buildType)
                 it.parameters.sendTelemetry.set(extension.telemetry)
 
-                val infoResult = runSentryCliInfo(project, variant, cliExecutable, extension)
+                if (isExecAvailable()) {
+                    val infoResult = runSentryCliInfo(project, variant, cliExecutable, extension)
 
-                val infoOutput = infoResult.standardOutput.asText.getOrElse("")
-                val isSaas = infoOutput.contains("(?m)Sentry Server: .*sentry.io$".toRegex())
-                it.parameters.saas.set(isSaas)
+                    val infoOutput = infoResult.standardOutput.asText.getOrElse("")
+                    val isSaas = infoOutput.contains("(?m)Sentry Server: .*sentry.io$".toRegex())
+                    it.parameters.saas.set(isSaas)
 
-                orgRegex.find(infoOutput)?.let { matchResult ->
-                    val groupValues = matchResult.groupValues
-                    if (groupValues.size > 1) {
-                        val defaultOrg = groupValues.get(1)
-                        it.parameters.defaultSentryOrganization.set(defaultOrg)
+                    orgRegex.find(infoOutput)?.let { matchResult ->
+                        val groupValues = matchResult.groupValues
+                        if (groupValues.size > 1) {
+                            val defaultOrg = groupValues[1]
+                            it.parameters.defaultSentryOrganization.set(defaultOrg)
+                        }
                     }
-                }
 
-                val versionResult = runSentryCliVersion(project, cliExecutable)
-                val versionOutput = versionResult.standardOutput.asText.getOrElse("")
-                versionRegex.find(versionOutput)?.let { matchResult ->
-                    val groupValues = matchResult.groupValues
-                    if (groupValues.size > 1) {
-                        val version = groupValues.get(1)
-                        it.parameters.cliVersion.set(version)
+                    val versionResult = runSentryCliVersion(project, cliExecutable)
+                    val versionOutput = versionResult.standardOutput.asText.getOrElse("")
+                    versionRegex.find(versionOutput)?.let { matchResult ->
+                        val groupValues = matchResult.groupValues
+                        if (groupValues.size > 1) {
+                            val version = groupValues[1]
+                            it.parameters.cliVersion.set(version)
+                        }
                     }
                 }
 
                 val tags = extraTagsFromExtension(project, extension)
                 it.parameters.extraTags.set(tags)
             }
+        }
+
+        private fun isExecAvailable(): Boolean {
+            return GradleVersions.CURRENT >= GradleVersions.VERSION_7_5
         }
 
         private fun runSentryCliInfo(
@@ -334,7 +352,6 @@ abstract class SentryTelemetryService :
                 variant?.let { variantNotNul ->
                     SentryPropertiesFileProvider.getPropertiesFilePath(project, variantNotNul)
                         ?.let {
-                            println("=========== properties file $it ${File(it)}")
                             exec.environment("SENTRY_PROPERTIES", File(it))
                         }
                 }

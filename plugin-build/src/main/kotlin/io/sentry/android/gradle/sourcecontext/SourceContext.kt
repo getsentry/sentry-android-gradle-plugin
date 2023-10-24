@@ -12,7 +12,7 @@ class SourceContext {
         fun register(
             project: Project,
             extension: SentryPluginExtension,
-            sentryTelemetryProvider: Provider<SentryTelemetryService>,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             variant: SentryVariant,
             paths: OutputPaths,
             cliExecutable: String,

@@ -8,14 +8,14 @@ import org.gradle.api.provider.Provider
  * An ext function for tasks that wrap sentry-cli, which provides common error handling. Must be
  * called at configuration phase (=when registering a task).
  */
-fun Task.withSentryTelemetry(sentryTelemetryProvider: Provider<SentryTelemetryService>) {
-    usesService(sentryTelemetryProvider)
+fun Task.withSentryTelemetry(sentryTelemetryProvider: Provider<SentryTelemetryService>?) {
+    sentryTelemetryProvider?.let { usesService(it) }
     var sentrySpan: ISpan? = null
     doFirst {
-        sentrySpan = sentryTelemetryProvider.get().startTask(this.javaClass.simpleName)
+        sentrySpan = sentryTelemetryProvider?.orNull?.startTask(this.javaClass.simpleName)
     }
 
     doLast {
-        sentryTelemetryProvider.get().endTask(sentrySpan, this)
+        sentryTelemetryProvider?.orNull?.endTask(sentrySpan, this)
     }
 }

@@ -52,7 +52,7 @@ abstract class CollectSourcesTask : DirectoryOutputTask() {
     companion object {
         fun register(
             project: Project,
-            sentryTelemetryProvider: Provider<SentryTelemetryService>,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             sourceDirs: Provider<out Collection<Directory>>,
             output: Provider<Directory>,
             includeSourceContext: Property<Boolean>,

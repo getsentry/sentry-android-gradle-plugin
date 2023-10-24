@@ -81,7 +81,7 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
             args.add("--log-level=debug")
         }
 
-        sentryTelemetryService.get().traceCli().let { args.addAll(it) }
+        sentryTelemetryService.orNull?.traceCli()?.let { args.addAll(it) }
 
         sentryUrl.orNull?.let {
             args.add("--url")

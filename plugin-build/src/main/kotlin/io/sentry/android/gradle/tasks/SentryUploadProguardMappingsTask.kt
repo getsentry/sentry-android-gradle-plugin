@@ -122,7 +122,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             args.add("--log-level=debug")
         }
 
-        sentryTelemetryService.get().traceCli().let { args.addAll(it) }
+        sentryTelemetryService.orNull?.traceCli()?.let { args.addAll(it) }
 
         sentryUrl.orNull?.let {
             args.add("--url")
@@ -178,7 +178,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
 
         fun register(
             project: Project,
-            sentryTelemetryProvider: Provider<SentryTelemetryService>,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             debug: Property<Boolean>,
             cliExecutable: String,
             sentryProperties: String?,
@@ -211,7 +211,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
                 task.releaseInfo.set(releaseInfo)
                 task.sentryAuthToken.set(sentryAuthToken)
                 task.sentryUrl.set(sentryUrl)
-                task.sentryTelemetryService.set(sentryTelemetryProvider)
+                sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
                 task.asSentryCliExec()
                 task.withSentryTelemetry(sentryTelemetryProvider)
             }

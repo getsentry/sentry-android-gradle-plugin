@@ -20,6 +20,7 @@ class GenerateBundleIdTaskTest {
         val task: TaskProvider<GenerateBundleIdTask> =
             GenerateBundleIdTask.register(
                 project,
+                null,
                 project.layout.buildDirectory.dir("dummy/folder/"),
                 project.objects.property(Boolean::class.java).convention(true),
                 "test"
@@ -41,6 +42,7 @@ class GenerateBundleIdTaskTest {
         val task: TaskProvider<GenerateBundleIdTask> =
             GenerateBundleIdTask.register(
                 project,
+                null,
                 project.layout.buildDirectory.dir("dummy/folder/"),
                 project.objects.property(Boolean::class.java).convention(true),
                 "test"

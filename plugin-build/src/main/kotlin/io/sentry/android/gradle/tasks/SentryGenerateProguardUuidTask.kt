@@ -50,7 +50,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
 
         fun register(
             project: Project,
-            sentryTelemetryProvider: Provider<SentryTelemetryService>,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             output: Provider<Directory>? = null,
             taskSuffix: String = ""
         ): TaskProvider<SentryGenerateProguardUuidTask> {

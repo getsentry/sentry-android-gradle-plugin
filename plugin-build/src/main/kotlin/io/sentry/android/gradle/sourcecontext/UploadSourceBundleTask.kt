@@ -108,7 +108,7 @@ abstract class UploadSourceBundleTask : Exec() {
             args.add("--log-level=debug")
         }
 
-        sentryTelemetryService.get().traceCli().let { args.addAll(it) }
+        sentryTelemetryService.orNull?.traceCli()?.let { args.addAll(it) }
 
         sentryUrl.orNull?.let {
             args.add("--url")
@@ -141,7 +141,7 @@ abstract class UploadSourceBundleTask : Exec() {
     companion object {
         fun register(
             project: Project,
-            sentryTelemetryProvider: Provider<SentryTelemetryService>,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             variant: SentryVariant,
             bundleSourcesTask: TaskProvider<BundleSourcesTask>,
             debug: Property<Boolean>,
@@ -170,7 +170,7 @@ abstract class UploadSourceBundleTask : Exec() {
                     task.sentryProperties.set(File(it))
                 }
                 task.includeSourceContext.set(includeSourceContext)
-                task.sentryTelemetryService.set(sentryTelemetryProvider)
+                sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
                 task.asSentryCliExec()
                 task.withSentryTelemetry(sentryTelemetryProvider)
             }

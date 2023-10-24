@@ -19,12 +19,14 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
         val project = createProject()
         val bundleIdTask = GenerateBundleIdTask.register(
             project,
+            null,
             project.layout.buildDirectory.dir("dummy/folder/"),
             project.objects.property(Boolean::class.java).convention(true),
             "test"
         )
         val proguardIdTask = SentryGenerateProguardUuidTask.register(
             project,
+            null,
             project.layout.buildDirectory.dir("dummy/folder/"),
             "test"
         )
@@ -35,6 +37,7 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
         val task: TaskProvider<SentryGenerateDebugMetaPropertiesTask> =
             SentryGenerateDebugMetaPropertiesTask.register(
                 project,
+                null,
                 idGenerationTasks,
                 project.layout.buildDirectory.dir("dummy/folder/"),
                 "test"
@@ -57,12 +60,14 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
         val project = createProject()
         val bundleIdTask = GenerateBundleIdTask.register(
             project,
+            null,
             project.layout.buildDirectory.dir("dummy/folder/"),
             project.objects.property(Boolean::class.java).convention(true),
             "test"
         )
         val proguardIdTask = SentryGenerateProguardUuidTask.register(
             project,
+            null,
             project.layout.buildDirectory.dir("dummy/folder/"),
             "test"
         )
@@ -73,6 +78,7 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
         val task: TaskProvider<SentryGenerateDebugMetaPropertiesTask> =
             SentryGenerateDebugMetaPropertiesTask.register(
                 project,
+                null,
                 idGenerationTasks,
                 project.layout.buildDirectory.dir("dummy/folder/"),
                 "test"

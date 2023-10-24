@@ -61,7 +61,7 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
 
         fun register(
             project: Project,
-            sentryTelemetryProvider: Provider<SentryTelemetryService>,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             output: Provider<Directory>? = null,
             includeSourceContext: Property<Boolean>,
             taskSuffix: String = ""

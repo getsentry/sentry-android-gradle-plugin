@@ -119,7 +119,7 @@ abstract class BundleSourcesTask : Exec() {
             args.add("--log-level=debug")
         }
 
-        sentryTelemetryService.get().traceCli().let { args.addAll(it) }
+        sentryTelemetryService.orNull?.traceCli()?.let { args.addAll(it) }
 
         sentryUrl.orNull?.let {
             args.add("--url")
@@ -158,7 +158,7 @@ abstract class BundleSourcesTask : Exec() {
 
         fun register(
             project: Project,
-            sentryTelemetryProvider: Provider<SentryTelemetryService>,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             variant: SentryVariant,
             generateDebugIdTask: TaskProvider<GenerateBundleIdTask>,
             collectSourcesTask: TaskProvider<CollectSourcesTask>,
@@ -189,7 +189,7 @@ abstract class BundleSourcesTask : Exec() {
                 task.bundleIdFile.set(generateDebugIdTask.flatMap { it.outputFile })
                 task.output.set(output)
                 task.includeSourceContext.set(includeSourceContext)
-                task.sentryTelemetryService.set(sentryTelemetryProvider)
+                sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
                 task.asSentryCliExec()
                 task.withSentryTelemetry(sentryTelemetryProvider)
             }

@@ -51,7 +51,7 @@ abstract class SentryGenerateDebugMetaPropertiesTask : DirectoryOutputTask() {
 
         fun register(
             project: Project,
-            sentryTelemetryProvider: Provider<SentryTelemetryService>,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             tasksGeneratingProperties: List<TaskProvider<out PropertiesFileOutputTask>>,
             output: Provider<Directory>? = null,
             taskSuffix: String = ""
