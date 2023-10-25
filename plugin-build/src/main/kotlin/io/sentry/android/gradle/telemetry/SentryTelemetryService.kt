@@ -103,14 +103,13 @@ abstract class SentryTelemetryService :
             hub = NoOpHub.getInstance()
         } else {
             if (!Sentry.isEnabled()) {
-                // TODO test telemetry disabled
                 println(
                     "Sentry telemetry is enabled. To disable set `telemetry=false` " +
                         "in the sentry config block."
                 )
-                // TODO Logs a message, telemetry is enabled and how to disable it
                 Sentry.init { options ->
-                    options.dsn = parameters.dsn.get()
+//                    options.dsn = parameters.dsn.get()
+                    options.dsn = SENTRY_SAAS_DSN
                     options.isDebug = true
                     options.isEnablePrettySerializationOutput = false
                     options.tracesSampleRate = 1.0
@@ -153,7 +152,10 @@ abstract class SentryTelemetryService :
         buildOperationDescriptor: BuildOperationDescriptor,
         operationFinishEvent: OperationFinishEvent
     ) {
+//        println(parameters.dsn.orNull)
         val details = buildOperationDescriptor.details
+        println(buildOperationDescriptor)
+        println(details)
         if (details is NotifyTaskGraphWhenReadyBuildOperationType.Details) {
             configPhaseSpan?.finish()
             executionPhaseSpan = hub.span?.startChild("execution phase")
@@ -219,32 +221,6 @@ abstract class SentryTelemetryService :
         return args
     }
 
-    fun getTraceHeader(): SentryTraceHeader? {
-        return hub.traceparent
-    }
-
-    fun getBaggageHeader(): BaggageHeader? {
-        return hub.baggage
-    }
-
-    fun captureTask(operation: String, callback: () -> Unit) {
-        // do nothing for now
-    }
-    fun captureTask2(operation: String, callback: () -> Unit) {
-        val span = hub.span?.startChild(operation)
-        didAddChildSpans = true
-        hub.setTag("step", operation)
-        try {
-            callback()
-            span?.status = SpanStatus.OK
-        } catch (t: Throwable) {
-            captureError(t, operation)
-            span?.status = SpanStatus.UNKNOWN_ERROR
-        } finally {
-            span?.finish()
-        }
-    }
-
     fun startTask(operation: String): ISpan? {
         didAddChildSpans = true
         hub.setTag("step", operation)
@@ -252,17 +228,12 @@ abstract class SentryTelemetryService :
     }
 
     fun endTask(span: ISpan?, task: Task) {
+        println("&&&&&&&& ending task " + parameters.dsn.orNull)
         span?.let { span ->
             task.state.failure?.let { throwable ->
                 captureError(throwable, span.operation)
                 span.status = SpanStatus.UNKNOWN_ERROR
             }
-
-            span.setData("gradle_skipped", task.state.skipped)
-            span.setData("gradle_uptodate", task.state.upToDate)
-            span.setData("gradle_executed", task.state.executed)
-            span.setData("gradle_didwork", task.state.didWork)
-            span.setData("gradle_nosource", task.state.noSource)
 
             span.finish()
         }
@@ -290,21 +261,20 @@ abstract class SentryTelemetryService :
             sentryOrg: String?,
             buildType: String
         ): Provider<SentryTelemetryService> {
-            println(">>>>> maybe init ${Sentry::class.java.classLoader}")
+            println(">>>>> maybe register ${System.identityHashCode(extension)} ${Sentry::class.java.classLoader}")
             return project.gradle.sharedServices.registerIfAbsent(
                 getBuildServiceName(SentryTelemetryService::class.java),
                 SentryTelemetryService::class.java
             ) {
-                println(">>>>> init ${Sentry::class.java.classLoader}")
+                println(">>>>> register ${Sentry::class.java.classLoader}")
                 it.parameters.sentryOrganization.set(sentryOrg)
                 it.parameters.dsn.set(extension.telemetryDsn)
                 it.parameters.buildType.set(buildType)
+//                println("###### ${extension.telemetry.orNull}")
+//                println("###### ${extension.telemetryDsn.orNull}")
                 it.parameters.sendTelemetry.set(extension.telemetry)
 
                 if (isExecAvailable()) {
-//                    val infoResult = runSentryCliInfo(project, variant, cliExecutable, extension)
-//                    println(infoResult.standardOutput.asText.get())
-
                     val infoOutput = project.providers.of(SentryCliInfoValueSource::class.java) { cliVS ->
                         cliVS.parameters.cliExecutable.set(cliExecutable)
                         cliVS.parameters.authToken.set(extension.authToken)
@@ -313,29 +283,34 @@ abstract class SentryTelemetryService :
                             cliVS.parameters.propertiesFilePath.set(SentryPropertiesFileProvider.getPropertiesFilePath(project, v))
                         }
                     }.get()
-                    print(infoOutput)
                     val isSaas = infoOutput.contains("(?m)Sentry Server: .*sentry.io$".toRegex())
                     it.parameters.saas.set(isSaas)
-//
-//                    orgRegex.find(infoOutput)?.let { matchResult ->
-//                        val groupValues = matchResult.groupValues
-//                        if (groupValues.size > 1) {
-//                            val defaultOrg = groupValues[1]
-//                            it.parameters.defaultSentryOrganization.set(defaultOrg)
-//                        }
-//                    }
 
-//                    val versionResult = runSentryCliVersion(project, cliExecutable)
-//                    val versionOutput = versionResult.standardOutput.asText.getOrElse("")
-//                    versionRegex.find(versionOutput)?.let { matchResult ->
-//                        val groupValues = matchResult.groupValues
-//                        if (groupValues.size > 1) {
-//                            val version = groupValues[1]
-//                            it.parameters.cliVersion.set(version)
-//                        }
-//                    }
+                    orgRegex.find(infoOutput)?.let { matchResult ->
+                        val groupValues = matchResult.groupValues
+                        if (groupValues.size > 1) {
+                            val defaultOrg = groupValues[1]
+                            it.parameters.defaultSentryOrganization.set(defaultOrg)
+                        }
+                    }
+
+                    val versionOutput = project.providers.of(SentryCliVersionValueSource::class.java) { cliVS ->
+                        cliVS.parameters.cliExecutable.set(cliExecutable)
+                        cliVS.parameters.authToken.set(extension.authToken)
+                        cliVS.parameters.url.set(extension.url)
+                        variant?.let { v ->
+                            cliVS.parameters.propertiesFilePath.set(SentryPropertiesFileProvider.getPropertiesFilePath(project, v))
+                        }
+                    }.get()
+
+                    versionRegex.find(versionOutput)?.let { matchResult ->
+                        val groupValues = matchResult.groupValues
+                        if (groupValues.size > 1) {
+                            val version = groupValues[1]
+                            it.parameters.cliVersion.set(version)
+                        }
+                    }
                 }
-                it.parameters.cliVersion.set("1.0")
 
                 val tags = extraTagsFromExtension(project, extension)
                 it.parameters.extraTags.set(tags)
@@ -343,22 +318,7 @@ abstract class SentryTelemetryService :
         }
 
         private fun isExecAvailable(): Boolean {
-//            return false
             return GradleVersions.CURRENT >= GradleVersions.VERSION_7_5
-        }
-
-        private fun runSentryCliVersion(
-            project: Project,
-            cliExecutable: String
-        ): ExecOutput {
-            return project.providers.exec { exec ->
-                exec.isIgnoreExitValue = true
-                var args = mutableListOf(cliExecutable)
-                args.add("--log-level=error")
-                args.add("--version")
-                args.add("2>/dev/null")
-                exec.commandLine(args)
-            }
         }
 
         private fun extraTagsFromExtension(
@@ -485,12 +445,12 @@ abstract class SentryCliInfoValueSource : ValueSource<String, Params> {
             it.isIgnoreExitValue = true
             val args = mutableListOf(parameters.cliExecutable.get())
 
-            args.add("info")
-
             parameters.url.orNull?.let { url ->
                 args.add("--url")
                 args.add(url)
             }
+
+            args.add("info")
 
             parameters.propertiesFilePath.orNull?.let { path ->
                 it.environment("SENTRY_PROPERTIES", path)
@@ -499,6 +459,40 @@ abstract class SentryCliInfoValueSource : ValueSource<String, Params> {
             parameters.authToken.orNull?.let {authToken ->
                 it.environment("SENTRY_AUTH_TOKEN", authToken)
             }
+
+            it.commandLine(args)
+            it.standardOutput = output
+        }
+        return String(output.toByteArray(), Charset.defaultCharset())
+    }
+}
+
+abstract class SentryCliVersionValueSource : ValueSource<String, Params> {
+    interface Params : ValueSourceParameters {
+        @get:Input
+        val cliExecutable: Property<String>
+
+        @get:Input
+        val propertiesFilePath: Property<String>
+
+        @get:Input
+        val url: Property<String>
+
+        @get:Input
+        val authToken: Property<String>
+    }
+
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    override fun obtain(): String {
+        val output = ByteArrayOutputStream()
+        execOperations.exec {
+            it.isIgnoreExitValue = true
+            val args = mutableListOf(parameters.cliExecutable.get())
+
+            args.add("--log-level=error")
+            args.add("--version")
 
             it.commandLine(args)
             it.standardOutput = output

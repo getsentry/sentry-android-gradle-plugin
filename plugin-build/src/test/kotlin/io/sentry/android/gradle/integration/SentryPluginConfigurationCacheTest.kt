@@ -3,6 +3,7 @@ package io.sentry.android.gradle.integration
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
+import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.gradle.util.GradleVersion
@@ -48,6 +49,11 @@ class SentryPluginConfigurationCacheTest :
 
         val outputWithConfigCache = runner.build().output
         println(outputWithConfigCache)
+        Regex("See the complete report at (.*)").find(outputWithConfigCache)?.let {
+            println("------v")
+            File(it.groupValues[1]).copyTo(File("/Users/adinauer/gradle_report.txt"), overwrite = true)
+            println("------^")
+        }
         assertTrue { "Configuration cache entry reused." in outputWithConfigCache }
     }
 
