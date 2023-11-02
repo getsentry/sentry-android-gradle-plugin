@@ -36,13 +36,15 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 
 fun AppExtension.configure(
     project: Project,
     extension: SentryPluginExtension,
     cliExecutable: String,
     sentryOrg: String?,
-    sentryProject: String?
+    sentryProject: String?,
+    buildEvents: BuildEventListenerRegistryInternal
 ) {
     applicationVariants.matching {
         isVariantAllowed(extension, it.name, it.flavorName, it.buildType.name)
@@ -60,15 +62,14 @@ fun AppExtension.configure(
             }
         )
 
-        println(">>> AppConfig plugin STS ${Sentry::class.java.classLoader}")
         val sentryTelemetryProvider = variant.configureTelemetry(
             project,
             extension,
             cliExecutable,
             sentryOrg,
-            sentryProject
+            sentryProject,
+            buildEvents
         )
-        println("### ${sentryTelemetryProvider.get()}")
 
         val tasksGeneratingProperties = mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
         val sourceContextTasks = variant.configureSourceBundleTasks(
@@ -124,17 +125,25 @@ private fun ApplicationVariant.configureTelemetry(
     extension: SentryPluginExtension,
     cliExecutable: String,
     sentryOrg: String?,
-    sentryProject: String?
+    sentryProject: String?,
+    buildEvents: BuildEventListenerRegistryInternal
 ): Provider<SentryTelemetryService> {
     val variant = if (isAGP74) null else AndroidVariant70(this)
-    return SentryTelemetryService.register(
-        project,
-        variant,
-        extension,
-        cliExecutable,
-        sentryOrg,
-        "Android"
-    )
+    val sentryTelemetryProvider = SentryTelemetryService.register(project)
+
+    project.gradle.taskGraph.whenReady {
+        sentryTelemetryProvider.get().start(SentryTelemetryService.createParameters(
+            project,
+            variant,
+            extension,
+            cliExecutable,
+            sentryOrg,
+            "AndroidAC"
+        ))
+        buildEvents.onOperationCompletion(sentryTelemetryProvider)
+    }
+
+    return sentryTelemetryProvider
 }
 
 private fun ApplicationVariant.configureDebugMetaPropertiesTask(

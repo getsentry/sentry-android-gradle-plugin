@@ -66,18 +66,18 @@ class SentryJvmPlugin @Inject constructor(
                 extraProperties.get(SentryPlugin.SENTRY_PROJECT_PARAMETER).toString()
             }.getOrNull()
 
-            println(">>> JVM plugin STS ${Sentry::class.java.classLoader}")
-            val sentryTelemetryProvider = SentryTelemetryService.register(
-                project,
-                javaVariant,
-                extension,
-                cliExecutable,
-                sentryOrgParameter,
-                "JVM"
-            )
-            println("### ${sentryTelemetryProvider.get()}")
-
-            buildEvents.onOperationCompletion(sentryTelemetryProvider)
+            val sentryTelemetryProvider = SentryTelemetryService.register(project)
+            project.gradle.taskGraph.whenReady {
+                sentryTelemetryProvider.get().start(SentryTelemetryService.createParameters(
+                    project,
+                    javaVariant,
+                    extension,
+                    cliExecutable,
+                    sentryOrgParameter,
+                    "JVM_SJP"
+                ))
+                buildEvents.onOperationCompletion(sentryTelemetryProvider)
+            }
 
             val sourceContextTasks = SourceContext.register(
                 project,

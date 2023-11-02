@@ -14,10 +14,13 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.StopExecutionException
 import org.gradle.build.event.BuildEventsListenerRegistry
+import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 import org.slf4j.LoggerFactory
 
 @Suppress("UnstableApiUsage")
-abstract class SentryPlugin : Plugin<Project> {
+abstract class SentryPlugin @Inject constructor(
+    private val buildEvents: BuildEventListenerRegistryInternal
+) : Plugin<Project> {
 
     @get:Inject
     abstract val listenerRegistry: BuildEventsListenerRegistry
@@ -63,7 +66,8 @@ abstract class SentryPlugin : Plugin<Project> {
                 listenerRegistry,
                 cliExecutable,
                 sentryOrgParameter,
-                sentryProjectParameter
+                sentryProjectParameter,
+                buildEvents
             )
 
             // old API configuration
@@ -72,7 +76,8 @@ abstract class SentryPlugin : Plugin<Project> {
                 extension,
                 cliExecutable,
                 sentryOrgParameter,
-                sentryProjectParameter
+                sentryProjectParameter,
+                buildEvents
             )
 
             project.installDependencies(extension, true)

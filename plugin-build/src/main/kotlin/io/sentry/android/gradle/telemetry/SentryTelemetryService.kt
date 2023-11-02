@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.telemetry
 
-import io.sentry.BaggageHeader
 import io.sentry.BuildConfig
 import io.sentry.IHub
 import io.sentry.ISpan
@@ -9,8 +8,8 @@ import io.sentry.NoOpHub
 import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
-import io.sentry.SentryTraceHeader
 import io.sentry.SpanStatus
+import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryCliInfoValueSource.Params
@@ -22,20 +21,15 @@ import io.sentry.exception.ExceptionMechanismException
 import io.sentry.gradle.common.SentryVariant
 import io.sentry.protocol.Mechanism
 import io.sentry.protocol.User
-import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.services.BuildService
-import org.gradle.api.services.BuildServiceParameters
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Optional
 import org.gradle.execution.RunRootBuildWorkBuildOperationType
-import org.gradle.execution.taskgraph.NotifyTaskGraphWhenReadyBuildOperationType
 import org.gradle.internal.operations.BuildOperationDescriptor
 import org.gradle.internal.operations.BuildOperationListener
 import org.gradle.internal.operations.OperationFinishEvent
@@ -43,104 +37,79 @@ import org.gradle.internal.operations.OperationIdentifier
 import org.gradle.internal.operations.OperationProgressEvent
 import org.gradle.internal.operations.OperationStartEvent
 import org.gradle.process.ExecOperations
-import org.gradle.process.ExecOutput
 import org.gradle.util.GradleVersion
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import javax.inject.Inject
+import org.gradle.api.internal.tasks.execution.ExecuteTaskBuildOperationDetails
+import org.gradle.api.services.BuildServiceParameters.None
 
 abstract class SentryTelemetryService :
-    BuildService<SentryTelemetryService.Params>,
+    BuildService<None>,
     BuildOperationListener,
     AutoCloseable {
-    interface Params : BuildServiceParameters {
-        @get:Input
-        val sendTelemetry: Property<Boolean>
 
-        @get:Input
-        val dsn: Property<String>
-
-        @get:Input
-        @get:Optional
-        val sentryOrganization: Property<String>
-
-        @get:Input
-        @get:Optional
-        val defaultSentryOrganization: Property<String>
-
-        @get:Input
-        val buildType: Property<String>
-
-        @get:Input
-        val extraTags: MapProperty<String, String>
-
-        @get:Input
-        @get:Optional
-        val saas: Property<Boolean>
-
-        @get:Input
-        @get:Optional
-        val cliVersion: Property<String>
-    }
-
-    private val hub: IHub
+    private var hub: IHub = NoOpHub.getInstance()
     private var transaction: ITransaction? = null
-    private var configPhaseSpan: ISpan? = null
-    private var executionPhaseSpan: ISpan? = null
     private var didAddChildSpans: Boolean = false
+    private var started: Boolean = false
 
-    init {
-        println(">>>>> STS init ${Sentry::class.java.classLoader}")
-        // TODO duplicate transaction SentryPlugin and SentryJvmPlugin
-        // TODO config phase errors are not reported because this Service is never initialized
-        if (parameters.saas.orNull == false) {
-            println(
-                "Sentry is running against a self hosted instance. Telemetry has been disabled."
-            )
-            hub = NoOpHub.getInstance()
-        } else if (!parameters.sendTelemetry.get()) {
-            println("Sentry telemetry has been disabled.")
-            hub = NoOpHub.getInstance()
-        } else {
-            if (!Sentry.isEnabled()) {
-                println(
-                    "Sentry telemetry is enabled. To disable set `telemetry=false` " +
-                        "in the sentry config block."
+    fun start(startParameters: SentryTelemetryServiceParams) {
+        if (started) {
+            return
+        }
+
+        started = true
+        try {
+            if (startParameters.saas == false) {
+                SentryPlugin.logger.info(
+                    "Sentry is running against a self hosted instance. Telemetry has been disabled."
                 )
-                Sentry.init { options ->
-//                    options.dsn = parameters.dsn.get()
-                    options.dsn = SENTRY_SAAS_DSN
-                    options.isDebug = true
-                    options.isEnablePrettySerializationOutput = false
-                    options.tracesSampleRate = 1.0
-                    options.release = BuildConfig.Version
-                    options.isSendModules = false
-                    options.environment = parameters.buildType.get()
-                    options.setTag("SDK_VERSION", BuildConfig.SdkVersion)
-                    options.setTag("AGP_VERSION", AgpVersions.CURRENT.toString())
-                    options.setTag("BUILD_SYSTEM", "gradle")
-                    options.setTag("BUILD_TYPE", parameters.buildType.get())
-                    options.setTag("GRADLE_VERSION", GradleVersion.current().version)
-                    parameters.cliVersion.orNull?.let { options.setTag("SENTRY_CLI_VERSION", it) }
+                hub = NoOpHub.getInstance()
+            } else if (!startParameters.sendTelemetry) {
+                SentryPlugin.logger.info("Sentry telemetry has been disabled.")
+                hub = NoOpHub.getInstance()
+            } else {
+                if (!Sentry.isEnabled()) {
+                    SentryPlugin.logger.info(
+                        "Sentry telemetry is enabled. To disable set `telemetry=false` " +
+                            "in the sentry config block."
+                    )
+                    Sentry.init { options ->
+                        options.dsn = startParameters.dsn
+                        options.isDebug = true
+                        options.isEnablePrettySerializationOutput = false
+                        options.tracesSampleRate = 1.0
+                        options.release = BuildConfig.Version
+                        options.isSendModules = false
+                        options.environment = startParameters.buildType
+                        options.setTag("SDK_VERSION", BuildConfig.SdkVersion)
+                        options.setTag("AGP_VERSION", AgpVersions.CURRENT.toString())
+                        options.setTag("BUILD_SYSTEM", "gradle")
+                        options.setTag("BUILD_TYPE", startParameters.buildType)
+                        options.setTag("GRADLE_VERSION", GradleVersion.current().version)
+                        startParameters.cliVersion?.let { options.setTag("SENTRY_CLI_VERSION", it) }
 
-                    parameters.extraTags.orNull?.forEach { (key, value) ->
-                        options.setTag(
-                            key,
-                            value
-                        )
+                        startParameters.extraTags.forEach { (key, value) ->
+                            options.setTag(
+                                key,
+                                value
+                            )
+                        }
+                    }
+                }
+                hub = Sentry.getCurrentHub()
+                startRun("gradle build ${startParameters.buildType}")
+
+                hub.configureScope { scope ->
+                    scope.user = User().also { user ->
+                        startParameters.defaultSentryOrganization.let { user.id = it }
+                        startParameters.sentryOrganization.let { user.id = it }
                     }
                 }
             }
-            hub = Sentry.getCurrentHub()
-            startRun("gradle build ${parameters.buildType.get()}")
-
-            configPhaseSpan = hub.span?.startChild("configuration phase")
-            hub.configureScope { scope ->
-                scope.user = User().also { user ->
-                    parameters.defaultSentryOrganization.orNull?.let { user.id = it }
-                    parameters.sentryOrganization.orNull?.let { user.id = it }
-                }
-            }
+        } catch (t: Throwable) {
+            SentryPlugin.logger.error("Sentry failed to initialize.", t)
         }
     }
 
@@ -152,28 +121,28 @@ abstract class SentryTelemetryService :
         buildOperationDescriptor: BuildOperationDescriptor,
         operationFinishEvent: OperationFinishEvent
     ) {
-//        println(parameters.dsn.orNull)
         val details = buildOperationDescriptor.details
-        println(buildOperationDescriptor)
-        println(details)
-        if (details is NotifyTaskGraphWhenReadyBuildOperationType.Details) {
-            configPhaseSpan?.finish()
-            executionPhaseSpan = hub.span?.startChild("execution phase")
-        }
 
         operationFinishEvent.failure?.let { error ->
-            captureError(error, "build")
-            transaction?.status = SpanStatus.UNKNOWN_ERROR
+            // TODO check if Sentry task, otherwise ignore
+            if (isSentryError(error, details)) {
+                captureError(error, "build")
+                transaction?.status = SpanStatus.UNKNOWN_ERROR
+            }
         }
 
         if (details is RunRootBuildWorkBuildOperationType.Details) {
-            executionPhaseSpan?.finish()
             endRun()
         }
     }
 
+    private fun isSentryError(throwable: Throwable, details: Any?): Boolean {
+//        details?.let { it is }
+        val sentryTaskName = (details as? ExecuteTaskBuildOperationDetails)?.let { it.task.name.substringAfterLast(":").contains("sentry", ignoreCase = true) } ?: false
+        return sentryTaskName || throwable.stackTrace.any { it.className.startsWith("io.sentry") }
+    }
+
     fun captureError(exception: Throwable, operation: String?) {
-        // TODO how specific can we get without risking PII?
         val message = if (exception is SentryCliException) {
             "$operation failed with SentryCliException and reason ${exception.reason}"
         } else {
@@ -196,9 +165,9 @@ abstract class SentryTelemetryService :
         hub.captureEvent(event)
     }
 
-    fun startRun(operaton: String) {
+    fun startRun(transactionName: String) {
         hub.startSession()
-        transaction = hub.startTransaction("gradle run", "op1", true)
+        transaction = hub.startTransaction(transactionName, "build", true)
     }
 
     fun endRun() {
@@ -228,7 +197,6 @@ abstract class SentryTelemetryService :
     }
 
     fun endTask(span: ISpan?, task: Task) {
-        println("&&&&&&&& ending task " + parameters.dsn.orNull)
         span?.let { span ->
             task.state.failure?.let { throwable ->
                 captureError(throwable, span.operation)
@@ -253,68 +221,77 @@ abstract class SentryTelemetryService :
         private val orgRegex = Regex("""(?m)Default Organization: (.*)$""")
         private val versionRegex = Regex("""(?m)sentry-cli (.*)$""")
 
-        fun register(
+        fun createParameters(
             project: Project,
             variant: SentryVariant?,
             extension: SentryPluginExtension,
             cliExecutable: String,
             sentryOrg: String?,
-            buildType: String
-        ): Provider<SentryTelemetryService> {
-            println(">>>>> maybe register ${System.identityHashCode(extension)} ${Sentry::class.java.classLoader}")
-            return project.gradle.sharedServices.registerIfAbsent(
-                getBuildServiceName(SentryTelemetryService::class.java),
-                SentryTelemetryService::class.java
-            ) {
-                println(">>>>> register ${Sentry::class.java.classLoader}")
-                it.parameters.sentryOrganization.set(sentryOrg)
-                it.parameters.dsn.set(extension.telemetryDsn)
-                it.parameters.buildType.set(buildType)
-//                println("###### ${extension.telemetry.orNull}")
-//                println("###### ${extension.telemetryDsn.orNull}")
-                it.parameters.sendTelemetry.set(extension.telemetry)
+            buildType: String): SentryTelemetryServiceParams {
+            val tags = extraTagsFromExtension(project, extension)
+            var isSaas: Boolean? = null
+            var cliVersion: String? = null
+            var defaultSentryOrganization: String? = null
 
-                if (isExecAvailable()) {
-                    val infoOutput = project.providers.of(SentryCliInfoValueSource::class.java) { cliVS ->
-                        cliVS.parameters.cliExecutable.set(cliExecutable)
-                        cliVS.parameters.authToken.set(extension.authToken)
-                        cliVS.parameters.url.set(extension.url)
-                        variant?.let { v ->
-                            cliVS.parameters.propertiesFilePath.set(SentryPropertiesFileProvider.getPropertiesFilePath(project, v))
-                        }
-                    }.get()
-                    val isSaas = infoOutput.contains("(?m)Sentry Server: .*sentry.io$".toRegex())
-                    it.parameters.saas.set(isSaas)
-
-                    orgRegex.find(infoOutput)?.let { matchResult ->
-                        val groupValues = matchResult.groupValues
-                        if (groupValues.size > 1) {
-                            val defaultOrg = groupValues[1]
-                            it.parameters.defaultSentryOrganization.set(defaultOrg)
-                        }
+            if (isExecAvailable()) {
+                val infoOutput = project.providers.of(SentryCliInfoValueSource::class.java) { cliVS ->
+                    cliVS.parameters.cliExecutable.set(cliExecutable)
+                    cliVS.parameters.authToken.set(extension.authToken)
+                    cliVS.parameters.url.set(extension.url)
+                    variant?.let { v ->
+                        cliVS.parameters.propertiesFilePath.set(SentryPropertiesFileProvider.getPropertiesFilePath(project, v))
                     }
+                }.get()
+                isSaas = infoOutput.contains("(?m)Sentry Server: .*sentry.io$".toRegex())
 
-                    val versionOutput = project.providers.of(SentryCliVersionValueSource::class.java) { cliVS ->
-                        cliVS.parameters.cliExecutable.set(cliExecutable)
-                        cliVS.parameters.authToken.set(extension.authToken)
-                        cliVS.parameters.url.set(extension.url)
-                        variant?.let { v ->
-                            cliVS.parameters.propertiesFilePath.set(SentryPropertiesFileProvider.getPropertiesFilePath(project, v))
-                        }
-                    }.get()
-
-                    versionRegex.find(versionOutput)?.let { matchResult ->
-                        val groupValues = matchResult.groupValues
-                        if (groupValues.size > 1) {
-                            val version = groupValues[1]
-                            it.parameters.cliVersion.set(version)
-                        }
+                orgRegex.find(infoOutput)?.let { matchResult ->
+                    val groupValues = matchResult.groupValues
+                    if (groupValues.size > 1) {
+                        val defaultOrg = groupValues[1]
+                        defaultSentryOrganization = defaultOrg
                     }
                 }
 
-                val tags = extraTagsFromExtension(project, extension)
-                it.parameters.extraTags.set(tags)
+                val versionOutput = project.providers.of(SentryCliVersionValueSource::class.java) { cliVS ->
+                    cliVS.parameters.cliExecutable.set(cliExecutable)
+                    cliVS.parameters.authToken.set(extension.authToken)
+                    cliVS.parameters.url.set(extension.url)
+                    variant?.let { v ->
+                        cliVS.parameters.propertiesFilePath.set(SentryPropertiesFileProvider.getPropertiesFilePath(project, v))
+                    }
+                }.get()
+
+                versionRegex.find(versionOutput)?.let { matchResult ->
+                    val groupValues = matchResult.groupValues
+                    if (groupValues.size > 1) {
+                        val version = groupValues[1]
+                        cliVersion = version
+                    }
+                }
+
+                return SentryTelemetryServiceParams(
+                    extension.telemetry.get(),
+                    extension.telemetryDsn.get(),
+                    sentryOrg,
+                    buildType,
+                    tags,
+                    )
+            } else {
+                return SentryTelemetryServiceParams(
+                    extension.telemetry.get(),
+                    extension.telemetryDsn.get(),
+                    sentryOrg,
+                    buildType,
+                    tags
+                )
             }
+        }
+
+        fun register(project: Project): Provider<SentryTelemetryService> {
+            return project.gradle.sharedServices.registerIfAbsent(
+                getBuildServiceName(SentryTelemetryService::class.java),
+                SentryTelemetryService::class.java
+            ) {}
         }
 
         private fun isExecAvailable(): Boolean {
@@ -500,3 +477,13 @@ abstract class SentryCliVersionValueSource : ValueSource<String, Params> {
         return String(output.toByteArray(), Charset.defaultCharset())
     }
 }
+data class SentryTelemetryServiceParams(
+    val sendTelemetry: Boolean,
+    val dsn: String,
+    val sentryOrganization: String?,
+    val buildType: String,
+    val extraTags: Map<String, String>,
+    val defaultSentryOrganization: String? = null,
+    val saas: Boolean? = null,
+    val cliVersion: String? = null
+)

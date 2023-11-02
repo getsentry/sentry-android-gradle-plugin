@@ -45,6 +45,7 @@ import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.build.event.BuildEventsListenerRegistry
+import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 
 fun AndroidComponentsExtension<*, *, *>.configure(
     project: Project,
@@ -52,7 +53,8 @@ fun AndroidComponentsExtension<*, *, *>.configure(
     listenerRegistry: BuildEventsListenerRegistry,
     cliExecutable: String,
     sentryOrg: String?,
-    sentryProject: String?
+    sentryProject: String?,
+    buildEvents: BuildEventListenerRegistryInternal
 ) {
     // temp folder for sentry-related stuff
     val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
@@ -62,15 +64,14 @@ fun AndroidComponentsExtension<*, *, *>.configure(
         if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
             val paths = OutputPaths(project, variant.name)
 
-            println(">>> AndroidComponentsConfig STS ${Sentry::class.java.classLoader}")
             val sentryTelemetryProvider = variant.configureTelemetry(
                 project,
                 extension,
                 cliExecutable,
                 sentryOrg,
-                sentryProject
+                sentryProject,
+                buildEvents
             )
-            println("### ${sentryTelemetryProvider.get()}")
 
             variant.configureDependenciesTask(project, extension, sentryTelemetryProvider)
 
@@ -227,17 +228,23 @@ private fun Variant.configureTelemetry(
     extension: SentryPluginExtension,
     cliExecutable: String,
     sentryOrg: String?,
-    sentryProject: String?
+    sentryProject: String?,
+    buildEvents: BuildEventListenerRegistryInternal
 ): Provider<SentryTelemetryService> {
     val variant = if (isAGP74) AndroidVariant74(this) else null
-    return SentryTelemetryService.register(
-        project,
-        variant,
-        extension,
-        cliExecutable,
-        sentryOrg,
-        "Android"
-    )
+    val sentryTelemetryProvider = SentryTelemetryService.register(project)
+    project.gradle.taskGraph.whenReady {
+        sentryTelemetryProvider.get().start(SentryTelemetryService.createParameters(
+            project,
+            variant,
+            extension,
+            cliExecutable,
+            sentryOrg,
+            "AndroidACC"
+        ))
+        buildEvents.onOperationCompletion(sentryTelemetryProvider)
+    }
+    return sentryTelemetryProvider
 }
 
 private fun Variant.configureSourceBundleTasks(
