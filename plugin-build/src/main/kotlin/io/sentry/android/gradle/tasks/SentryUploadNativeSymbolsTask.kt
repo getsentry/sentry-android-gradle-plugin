@@ -73,6 +73,9 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
             cliExecutable.get()
         )
 
+        args.add("debug-files")
+        args.add("upload")
+
         if (debug.getOrElse(false)) {
             args.add("--log-level=debug")
         }
@@ -81,8 +84,6 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
             args.add("--url")
             args.add(it)
         }
-
-        args.add("upload-dif")
 
         if (!autoUploadNativeSymbol.get()) {
             args.add("--no-upload")
