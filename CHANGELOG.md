@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Print a warning if the Sentry plugin is not applied on the app module ([#586](https://github.com/getsentry/sentry-android-gradle-plugin/pull/586))
+
 ### Dependencies
 
 - Bump Android SDK from v6.32.0 to v6.33.0 ([#588](https://github.com/getsentry/sentry-android-gradle-plugin/pull/588))

@@ -33,6 +33,15 @@ abstract class SentryPlugin : Plugin<Project> {
                 """.trimIndent()
             )
         }
+        if (!project.plugins.hasPlugin("com.android.application")) {
+            project.logger.warn(
+                """
+                WARNING: Using 'io.sentry.android.gradle' is only supported for the app module.
+                Please make sure that you apply the Sentry gradle plugin alongside 'com.android.application' on the _module_ level, and not on the root project level.
+                https://docs.sentry.io/platforms/android/configuration/gradle/
+                """.trimIndent()
+            )
+        }
 
         val extension = project.extensions.create(
             "sentry",
