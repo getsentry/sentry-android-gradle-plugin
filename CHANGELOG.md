@@ -2,9 +2,19 @@
 
 ## Unreleased
 
+### Features
+
+- Print a warning if the Sentry plugin is not applied on the app module ([#586](https://github.com/getsentry/sentry-android-gradle-plugin/pull/586))
+
 ### Chores
 
 - Change cli command from `upload-dif` to `debug-files upload` for native symbols ([#587](https://github.com/getsentry/sentry-android-gradle-plugin/pull/587))
+
+### Dependencies
+
+- Bump Android SDK from v6.32.0 to v6.33.0 ([#588](https://github.com/getsentry/sentry-android-gradle-plugin/pull/588))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6330)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.32.0...6.33.0)
 
 ## 3.14.0
 
