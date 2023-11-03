@@ -97,7 +97,8 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     project,
                     extension.tracingInstrumentation.features,
                     extension.tracingInstrumentation.logcat.enabled,
-                    extension.includeSourceContext
+                    extension.includeSourceContext,
+                    extension.dexguardEnabled
                 )
                 /**
                  * We have to register SentryModulesService as a build event listener, so it will
