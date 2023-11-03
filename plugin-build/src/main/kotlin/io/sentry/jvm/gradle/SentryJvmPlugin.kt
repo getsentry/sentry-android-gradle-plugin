@@ -1,6 +1,5 @@
 package io.sentry.jvm.gradle
 
-import io.sentry.Sentry
 import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.SentryTasksProvider
@@ -68,14 +67,16 @@ class SentryJvmPlugin @Inject constructor(
 
             val sentryTelemetryProvider = SentryTelemetryService.register(project)
             project.gradle.taskGraph.whenReady {
-                sentryTelemetryProvider.get().start(SentryTelemetryService.createParameters(
-                    project,
-                    javaVariant,
-                    extension,
-                    cliExecutable,
-                    sentryOrgParameter,
-                    "JVM_SJP"
-                ))
+                sentryTelemetryProvider.get().start(
+                    SentryTelemetryService.createParameters(
+                        project,
+                        javaVariant,
+                        extension,
+                        cliExecutable,
+                        sentryOrgParameter,
+                        "JVM_SJP"
+                    )
+                )
                 buildEvents.onOperationCompletion(sentryTelemetryProvider)
             }
 

@@ -21,13 +21,18 @@ import io.sentry.exception.ExceptionMechanismException
 import io.sentry.gradle.common.SentryVariant
 import io.sentry.protocol.Mechanism
 import io.sentry.protocol.User
+import java.io.ByteArrayOutputStream
+import java.nio.charset.Charset
+import javax.inject.Inject
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.internal.tasks.execution.ExecuteTaskBuildOperationDetails
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.services.BuildService
+import org.gradle.api.services.BuildServiceParameters.None
 import org.gradle.api.tasks.Input
 import org.gradle.execution.RunRootBuildWorkBuildOperationType
 import org.gradle.internal.operations.BuildOperationDescriptor
@@ -38,11 +43,6 @@ import org.gradle.internal.operations.OperationProgressEvent
 import org.gradle.internal.operations.OperationStartEvent
 import org.gradle.process.ExecOperations
 import org.gradle.util.GradleVersion
-import java.io.ByteArrayOutputStream
-import java.nio.charset.Charset
-import javax.inject.Inject
-import org.gradle.api.internal.tasks.execution.ExecuteTaskBuildOperationDetails
-import org.gradle.api.services.BuildServiceParameters.None
 
 abstract class SentryTelemetryService :
     BuildService<None>,
@@ -137,9 +137,13 @@ abstract class SentryTelemetryService :
     }
 
     private fun isSentryError(throwable: Throwable, details: Any?): Boolean {
-//        details?.let { it is }
-        val sentryTaskName = (details as? ExecuteTaskBuildOperationDetails)?.let { it.task.name.substringAfterLast(":").contains("sentry", ignoreCase = true) } ?: false
-        return sentryTaskName || throwable.stackTrace.any { it.className.startsWith("io.sentry") }
+        val isSentryTaskName = (details as? ExecuteTaskBuildOperationDetails)
+            ?.let {
+                it.task.name.substringAfterLast(":")
+                    .contains("sentry", ignoreCase = true)
+            } ?: false
+        return isSentryTaskName ||
+            throwable.stackTrace.any { it.className.startsWith("io.sentry") }
     }
 
     fun captureError(exception: Throwable, operation: String?) {
@@ -227,55 +231,26 @@ abstract class SentryTelemetryService :
             extension: SentryPluginExtension,
             cliExecutable: String,
             sentryOrg: String?,
-            buildType: String): SentryTelemetryServiceParams {
+            buildType: String
+        ): SentryTelemetryServiceParams {
             val tags = extraTagsFromExtension(project, extension)
             var isSaas: Boolean? = null
             var cliVersion: String? = null
             var defaultSentryOrganization: String? = null
 
             if (isExecAvailable()) {
-                val infoOutput = project.providers.of(SentryCliInfoValueSource::class.java) { cliVS ->
-                    cliVS.parameters.cliExecutable.set(cliExecutable)
-                    cliVS.parameters.authToken.set(extension.authToken)
-                    cliVS.parameters.url.set(extension.url)
-                    variant?.let { v ->
-                        cliVS.parameters.propertiesFilePath.set(SentryPropertiesFileProvider.getPropertiesFilePath(project, v))
-                    }
-                }.get()
-                isSaas = infoOutput.contains("(?m)Sentry Server: .*sentry.io$".toRegex())
-
-                orgRegex.find(infoOutput)?.let { matchResult ->
-                    val groupValues = matchResult.groupValues
-                    if (groupValues.size > 1) {
-                        val defaultOrg = groupValues[1]
-                        defaultSentryOrganization = defaultOrg
-                    }
-                }
-
-                val versionOutput = project.providers.of(SentryCliVersionValueSource::class.java) { cliVS ->
-                    cliVS.parameters.cliExecutable.set(cliExecutable)
-                    cliVS.parameters.authToken.set(extension.authToken)
-                    cliVS.parameters.url.set(extension.url)
-                    variant?.let { v ->
-                        cliVS.parameters.propertiesFilePath.set(SentryPropertiesFileProvider.getPropertiesFilePath(project, v))
-                    }
-                }.get()
-
-                versionRegex.find(versionOutput)?.let { matchResult ->
-                    val groupValues = matchResult.groupValues
-                    if (groupValues.size > 1) {
-                        val version = groupValues[1]
-                        cliVersion = version
-                    }
-                }
-
-                return SentryTelemetryServiceParams(
-                    extension.telemetry.get(),
-                    extension.telemetryDsn.get(),
+                return paramsWithExecAvailable(
+                    project,
+                    cliExecutable,
+                    extension,
+                    variant,
+                    isSaas,
+                    defaultSentryOrganization,
+                    cliVersion,
                     sentryOrg,
                     buildType,
-                    tags,
-                    )
+                    tags
+                )
             } else {
                 return SentryTelemetryServiceParams(
                     extension.telemetry.get(),
@@ -285,6 +260,70 @@ abstract class SentryTelemetryService :
                     tags
                 )
             }
+        }
+
+        private fun paramsWithExecAvailable(
+            project: Project,
+            cliExecutable: String,
+            extension: SentryPluginExtension,
+            variant: SentryVariant?,
+            isSaas: Boolean?,
+            defaultSentryOrganization: String?,
+            cliVersion: String?,
+            sentryOrg: String?,
+            buildType: String,
+            tags: Map<String, String>
+        ): SentryTelemetryServiceParams {
+            var isSaas1 = isSaas
+            var defaultSentryOrganization1 = defaultSentryOrganization
+            var cliVersion1 = cliVersion
+            val infoOutput = project.providers.of(SentryCliInfoValueSource::class.java) { cliVS ->
+                cliVS.parameters.cliExecutable.set(cliExecutable)
+                cliVS.parameters.authToken.set(extension.authToken)
+                cliVS.parameters.url.set(extension.url)
+                variant?.let { v ->
+                    cliVS.parameters.propertiesFilePath.set(
+                        SentryPropertiesFileProvider.getPropertiesFilePath(project, v)
+                    )
+                }
+            }.get()
+            isSaas1 = infoOutput.contains("(?m)Sentry Server: .*sentry.io$".toRegex())
+
+            orgRegex.find(infoOutput)?.let { matchResult ->
+                val groupValues = matchResult.groupValues
+                if (groupValues.size > 1) {
+                    val defaultOrg = groupValues[1]
+                    defaultSentryOrganization1 = defaultOrg
+                }
+            }
+
+            val versionOutput =
+                project.providers.of(SentryCliVersionValueSource::class.java) { cliVS ->
+                    cliVS.parameters.cliExecutable.set(cliExecutable)
+                    cliVS.parameters.authToken.set(extension.authToken)
+                    cliVS.parameters.url.set(extension.url)
+                    variant?.let { v ->
+                        cliVS.parameters.propertiesFilePath.set(
+                            SentryPropertiesFileProvider.getPropertiesFilePath(project, v)
+                        )
+                    }
+                }.get()
+
+            versionRegex.find(versionOutput)?.let { matchResult ->
+                val groupValues = matchResult.groupValues
+                if (groupValues.size > 1) {
+                    val version = groupValues[1]
+                    cliVersion1 = version
+                }
+            }
+
+            return SentryTelemetryServiceParams(
+                extension.telemetry.get(),
+                extension.telemetryDsn.get(),
+                sentryOrg,
+                buildType,
+                tags,
+            )
         }
 
         fun register(project: Project): Provider<SentryTelemetryService> {
@@ -433,7 +472,7 @@ abstract class SentryCliInfoValueSource : ValueSource<String, Params> {
                 it.environment("SENTRY_PROPERTIES", path)
             }
 
-            parameters.authToken.orNull?.let {authToken ->
+            parameters.authToken.orNull?.let { authToken ->
                 it.environment("SENTRY_AUTH_TOKEN", authToken)
             }
 

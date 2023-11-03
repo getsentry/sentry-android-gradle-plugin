@@ -53,7 +53,7 @@ class GenerateBundleIdTaskTest {
                     SentryPluginExtension::class.java,
                     project
                 ),
-        null,
+                null,
                 project.layout.buildDirectory.dir("dummy/folder/"),
                 project.objects.property(Boolean::class.java).convention(true),
                 "test"

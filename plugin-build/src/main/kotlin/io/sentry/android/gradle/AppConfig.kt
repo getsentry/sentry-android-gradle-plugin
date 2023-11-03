@@ -3,7 +3,6 @@ package io.sentry.android.gradle
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariant
-import io.sentry.Sentry
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
@@ -132,14 +131,16 @@ private fun ApplicationVariant.configureTelemetry(
     val sentryTelemetryProvider = SentryTelemetryService.register(project)
 
     project.gradle.taskGraph.whenReady {
-        sentryTelemetryProvider.get().start(SentryTelemetryService.createParameters(
-            project,
-            variant,
-            extension,
-            cliExecutable,
-            sentryOrg,
-            "AndroidAC"
-        ))
+        sentryTelemetryProvider.get().start(
+            SentryTelemetryService.createParameters(
+                project,
+                variant,
+                extension,
+                cliExecutable,
+                sentryOrg,
+                "AndroidAC"
+            )
+        )
         buildEvents.onOperationCompletion(sentryTelemetryProvider)
     }
 

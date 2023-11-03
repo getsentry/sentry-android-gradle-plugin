@@ -11,7 +11,6 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
-import io.sentry.Sentry
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
@@ -234,14 +233,16 @@ private fun Variant.configureTelemetry(
     val variant = if (isAGP74) AndroidVariant74(this) else null
     val sentryTelemetryProvider = SentryTelemetryService.register(project)
     project.gradle.taskGraph.whenReady {
-        sentryTelemetryProvider.get().start(SentryTelemetryService.createParameters(
-            project,
-            variant,
-            extension,
-            cliExecutable,
-            sentryOrg,
-            "AndroidACC"
-        ))
+        sentryTelemetryProvider.get().start(
+            SentryTelemetryService.createParameters(
+                project,
+                variant,
+                extension,
+                cliExecutable,
+                sentryOrg,
+                "AndroidACC"
+            )
+        )
         buildEvents.onOperationCompletion(sentryTelemetryProvider)
     }
     return sentryTelemetryProvider
