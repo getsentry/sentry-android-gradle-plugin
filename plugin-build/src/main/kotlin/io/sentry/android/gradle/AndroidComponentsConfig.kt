@@ -272,7 +272,7 @@ private fun Variant.configureProguardMappingsTasks(
     if (isAGP74) {
         val variant = AndroidVariant74(this)
         val sentryProps = getPropertiesFilePath(project, variant)
-        val guardsquareEnabled = extension.experimentalGuardsquareSupport.get()
+        val guardsquareEnabled = extension.dexguardEnabled.get()
         val isMinifyEnabled = isMinificationEnabled(project, variant, guardsquareEnabled)
 
         if (isMinifyEnabled && extension.includeProguardMapping.get()) {

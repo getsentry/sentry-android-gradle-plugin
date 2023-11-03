@@ -218,8 +218,8 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
     } else {
         val variant = AndroidVariant70(this)
         val sentryProps = getPropertiesFilePath(project, variant)
-        val guardsquareEnabled = extension.experimentalGuardsquareSupport.get()
-        val isMinifyEnabled = isMinificationEnabled(project, variant, guardsquareEnabled)
+        val dexguardEnabled = extension.dexguardEnabled.get()
+        val isMinifyEnabled = isMinificationEnabled(project, variant, dexguardEnabled)
         val outputDir = project.layout.buildDirectory.dir(
             "generated${sep}assets${sep}sentry${sep}proguard${sep}$name"
         )
@@ -248,7 +248,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                 mappingFiles = SentryTasksProvider.getMappingFileProvider(
                     project,
                     variant,
-                    guardsquareEnabled
+                    dexguardEnabled
                 ),
                 autoUploadProguardMapping = extension.autoUploadProguardMapping,
                 sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
@@ -259,7 +259,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                 releaseInfo = releaseInfo,
                 sentryUrl = extension.url
             )
-            uploadMappingsTask.hookWithMinifyTasks(project, name, guardsquareEnabled)
+            uploadMappingsTask.hookWithMinifyTasks(project, name, dexguardEnabled)
 
             return generateUuidTask
         } else {
