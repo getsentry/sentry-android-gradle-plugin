@@ -74,7 +74,7 @@ class SentryJvmPlugin @Inject constructor(
                         extension,
                         cliExecutable,
                         sentryOrgParameter,
-                        "JVM_SJP"
+                        "JVM"
                     )
                 )
                 buildEvents.onOperationCompletion(sentryTelemetryProvider)

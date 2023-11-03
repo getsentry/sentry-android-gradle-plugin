@@ -21,11 +21,7 @@ class GenerateBundleIdTaskTest {
         val task: TaskProvider<GenerateBundleIdTask> =
             GenerateBundleIdTask.register(
                 project,
-                project.extensions.create(
-                    "sentry",
-                    SentryPluginExtension::class.java,
-                    project
-                ),
+                project.extensions.findByName("sentry") as SentryPluginExtension,
                 null,
                 project.layout.buildDirectory.dir("dummy/folder/"),
                 project.objects.property(Boolean::class.java).convention(true),
@@ -48,11 +44,7 @@ class GenerateBundleIdTaskTest {
         val task: TaskProvider<GenerateBundleIdTask> =
             GenerateBundleIdTask.register(
                 project,
-                project.extensions.create(
-                    "sentry",
-                    SentryPluginExtension::class.java,
-                    project
-                ),
+                project.extensions.findByName("sentry") as SentryPluginExtension,
                 null,
                 project.layout.buildDirectory.dir("dummy/folder/"),
                 project.objects.property(Boolean::class.java).convention(true),

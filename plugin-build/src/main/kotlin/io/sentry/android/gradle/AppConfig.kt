@@ -138,7 +138,7 @@ private fun ApplicationVariant.configureTelemetry(
                 extension,
                 cliExecutable,
                 sentryOrg,
-                "AndroidAC"
+                "Android"
             )
         )
         buildEvents.onOperationCompletion(sentryTelemetryProvider)
