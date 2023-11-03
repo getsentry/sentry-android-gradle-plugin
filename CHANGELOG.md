@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Send telemetry data for plugin usage ([#582](https://github.com/getsentry/sentry-android-gradle-plugin/pull/582))
+
 ### Dependencies
 
 - Bump Android SDK from v6.32.0 to v6.33.0 ([#588](https://github.com/getsentry/sentry-android-gradle-plugin/pull/588))
