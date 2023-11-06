@@ -10,6 +10,10 @@
 
 - Change cli command from `upload-dif` to `debug-files upload` for native symbols ([#587](https://github.com/getsentry/sentry-android-gradle-plugin/pull/587))
 
+**Breaking changes:**
+
+- Rename `experimentalGuardsquareSupport` flag to `dexguardEnabled` ([#589](https://github.com/getsentry/sentry-android-gradle-plugin/pull/589))
+
 ### Dependencies
 
 - Bump Android SDK from v6.32.0 to v6.33.0 ([#588](https://github.com/getsentry/sentry-android-gradle-plugin/pull/588))

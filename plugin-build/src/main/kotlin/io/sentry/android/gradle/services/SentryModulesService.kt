@@ -45,6 +45,10 @@ abstract class SentryModulesService :
             features.add("SourceContext")
         }
 
+        if (parameters.dexguardEnabled.getOrElse(false)) {
+            features.add("DexGuard")
+        }
+
         return features
     }
 
@@ -110,7 +114,8 @@ abstract class SentryModulesService :
             project: Project,
             features: Provider<Set<InstrumentationFeature>>,
             logcatEnabled: Provider<Boolean>,
-            sourceContextEnabled: Provider<Boolean>
+            sourceContextEnabled: Provider<Boolean>,
+            dexguardEnabled: Provider<Boolean>
         ): Provider<SentryModulesService> {
             return project.gradle.sharedServices.registerIfAbsent(
                 getBuildServiceName(SentryModulesService::class.java),
@@ -119,6 +124,7 @@ abstract class SentryModulesService :
                 it.parameters.features.setDisallowChanges(features)
                 it.parameters.logcatEnabled.setDisallowChanges(logcatEnabled)
                 it.parameters.sourceContextEnabled.setDisallowChanges(sourceContextEnabled)
+                it.parameters.dexguardEnabled.setDisallowChanges(dexguardEnabled)
             }
         }
     }
@@ -135,5 +141,8 @@ abstract class SentryModulesService :
 
         @get:Input
         val sourceContextEnabled: Property<Boolean>
+
+        @get:Input
+        val dexguardEnabled: Property<Boolean>
     }
 }

@@ -43,7 +43,7 @@ class SentryTaskProviderTest {
             getTransformerTask(
                 project,
                 "debug",
-                experimentalGuardsquareSupport = true
+                dexguardEnabled = true
             )?.get()
         )
     }
@@ -58,7 +58,7 @@ class SentryTaskProviderTest {
             getTransformerTask(
                 project,
                 "debug",
-                experimentalGuardsquareSupport = false
+                dexguardEnabled = false
             )
         )
     }
@@ -87,7 +87,7 @@ class SentryTaskProviderTest {
             getTransformerTask(
                 project,
                 "debug",
-                experimentalGuardsquareSupport = true
+                dexguardEnabled = true
             )?.get()?.name
         )
     }
@@ -102,7 +102,7 @@ class SentryTaskProviderTest {
             getTransformerTask(
                 project,
                 "debug",
-                experimentalGuardsquareSupport = false
+                dexguardEnabled = false
             )?.get()
         )
     }
