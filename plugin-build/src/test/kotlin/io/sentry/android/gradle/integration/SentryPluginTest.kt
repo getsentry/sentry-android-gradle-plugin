@@ -564,6 +564,35 @@ class SentryPluginTest :
         }
     }
 
+    @Test
+    fun `does not instrument classes that are provided in excludes`() {
+        applyTracingInstrumentation(
+            features = setOf(InstrumentationFeature.OKHTTP),
+            debug = true,
+            excludes = setOf("okhttp3/RealCall")
+        )
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+
+            dependencies {
+              implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+              implementation 'io.sentry:sentry-android-okhttp:6.6.0'
+            }
+            """.trimIndent()
+        )
+
+        runner
+            .appendArguments(":app:assembleDebug")
+            .build()
+
+        // since it's an integration test, we just test that the log file wasn't created
+        // for the class meaning our CommonClassVisitor has NOT instrumented it
+        val debugOutput =
+            testProjectDir.root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
+        assertTrue { !debugOutput.exists() }
+    }
+
     private fun applyUploadNativeSymbols() {
         appBuildFile.appendText(
             // language=Groovy
@@ -598,7 +627,8 @@ class SentryPluginTest :
         tracingInstrumentation: Boolean = true,
         features: Set<InstrumentationFeature> = emptySet(),
         dependencies: Set<String> = emptySet(),
-        debug: Boolean = false
+        debug: Boolean = false,
+        excludes: Set<String> = emptySet()
     ) {
         appBuildFile.appendText(
             // language=Groovy
@@ -615,6 +645,7 @@ class SentryPluginTest :
                     enabled = $tracingInstrumentation
                     debug = $debug
                     features = [${features.joinToString { "${it::class.java.canonicalName}.${it.name}" }}]
+                    excludes = ["${excludes.joinToString()}"]
                   }
                 }
             """.trimIndent()

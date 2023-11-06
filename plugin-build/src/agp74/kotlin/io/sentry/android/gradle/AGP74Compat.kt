@@ -18,6 +18,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
 
 data class AndroidVariant74(
@@ -73,6 +74,7 @@ fun <T : InstrumentationParameters> configureInstrumentationFor74(
     classVisitorFactoryImplClass: Class<out AsmClassVisitorFactory<T>>,
     scope: InstrumentationScope,
     mode: FramesComputationMode,
+    excludes: SetProperty<String>,
     instrumentationParamsConfig: (T) -> Unit
 ) {
     variant.instrumentation.transformClassesWith(
@@ -81,6 +83,7 @@ fun <T : InstrumentationParameters> configureInstrumentationFor74(
         instrumentationParamsConfig
     )
     variant.instrumentation.setAsmFramesComputationMode(mode)
+    variant.instrumentation.excludes.set(excludes)
 }
 
 fun onVariants74(
