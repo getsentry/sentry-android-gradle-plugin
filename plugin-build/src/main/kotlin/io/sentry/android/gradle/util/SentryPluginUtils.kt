@@ -32,9 +32,9 @@ internal object SentryPluginUtils {
     fun isMinificationEnabled(
         project: Project,
         variant: SentryVariant,
-        experimentalGuardsquareSupport: Boolean = false
+        dexguardEnabled: Boolean = false
     ): Boolean {
-        if (experimentalGuardsquareSupport) {
+        if (dexguardEnabled) {
             var isConfiguredWithGuardsquareProguard = false
             project.plugins.withId("com.guardsquare.proguard") {
                 val proguardExtension = project.extensions.getByType(
