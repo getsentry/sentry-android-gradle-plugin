@@ -246,9 +246,8 @@ class SentryPluginTest :
             .appendArguments(":app:assembleDebug", "--info")
             .build()
 
-        val instr = "OkHttpEventListener, OkHttp"
         assertTrue {
-            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=$instr)" in build.output
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=OkHttp)" in build.output
         }
     }
 
