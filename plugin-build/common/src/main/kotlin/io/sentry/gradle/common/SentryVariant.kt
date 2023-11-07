@@ -17,6 +17,7 @@ interface SentryVariant {
     val buildTypeName: String?
     val productFlavors: List<String>
     val isMinifyEnabled: Boolean
+    val isDebuggable: Boolean
     val packageProvider: TaskProvider<out Task>? get() = null
     val assembleProvider: TaskProvider<out Task>? get() = null
     fun mappingFileProvider(project: Project): Provider<FileCollection>

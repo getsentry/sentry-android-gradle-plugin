@@ -10,6 +10,7 @@ import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.CanMinifyCode
 import com.android.build.api.variant.Variant
+import com.android.build.api.variant.impl.ApplicationVariantImpl
 import com.android.build.api.variant.impl.VariantImpl
 import io.sentry.gradle.common.SentryVariant
 import org.gradle.api.Project
@@ -28,6 +29,9 @@ data class AndroidVariant74(
     override val buildTypeName: String? = variant.buildType
     override val productFlavors: List<String> = variant.productFlavors.map { it.second }
     override val isMinifyEnabled: Boolean = (variant as? CanMinifyCode)?.isMinifyEnabled == true
+
+    // TODO: replace this eventually (when targeting AGP 8.3.0) with https://cs.android.com/android-studio/platform/tools/base/+/mirror-goog-studio-main:build-system/gradle-api/src/main/java/com/android/build/api/variant/Component.kt;l=103-104;bpv=1
+    override val isDebuggable: Boolean = (variant as? ApplicationVariantImpl)?.debuggable == true
 
     // internal APIs are a bit dirty, but our plugin would need a lot of rework to make proper
     // dependencies via artifacts API.
