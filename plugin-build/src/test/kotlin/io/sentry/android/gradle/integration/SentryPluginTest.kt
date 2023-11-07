@@ -2,6 +2,8 @@ package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
+import io.sentry.android.gradle.util.AgpVersions
+import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
 import io.sentry.android.gradle.verifyDependenciesReportJava
 import io.sentry.android.gradle.verifyIntegrationList
@@ -11,7 +13,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import org.gradle.util.GradleVersion
+import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThrows
+import org.junit.Assume.assumeThat
 import org.junit.Test
 
 class SentryPluginTest :
@@ -566,6 +570,11 @@ class SentryPluginTest :
 
     @Test
     fun `does not instrument classes that are provided in excludes`() {
+        assumeThat(
+            "We only support the 'excludes' option from AGP 7.4.0 onwards",
+            SemVer.parse(androidGradlePluginVersion) >= AgpVersions.VERSION_7_4_0,
+            `is`(true)
+        )
         applyTracingInstrumentation(
             features = setOf(InstrumentationFeature.OKHTTP),
             debug = true,
