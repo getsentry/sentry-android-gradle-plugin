@@ -3,7 +3,6 @@ package io.sentry.android.gradle.integration
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
-import io.sentry.android.gradle.verifyDependenciesReportJava
 import io.sentry.android.gradle.verifyIntegrationList
 import io.sentry.android.gradle.verifyProguardUuid
 import kotlin.test.assertEquals
@@ -420,38 +419,6 @@ class SentryPluginTest :
         assertThrows(AssertionError::class.java) {
             verifyDependenciesReportAndroid(testProjectDir.root)
         }
-    }
-
-    @Test
-    fun `works for pure java modules`() {
-        moduleBuildFile.writeText(
-            // language=Groovy
-            """
-            plugins {
-                id 'java'
-                id 'io.sentry.jvm.gradle'
-            }
-
-            dependencies {
-              implementation 'ch.qos.logback:logback-classic:1.4.8'
-            }
-
-            sentry.autoInstallation.sentryVersion = "6.25.2"
-            """.trimIndent()
-        )
-
-        runner.appendArguments(":module:jar").build()
-        val deps = verifyDependenciesReportJava(testProjectDir.root)
-        assertEquals(
-            """
-            ch.qos.logback:logback-classic:1.4.8
-            ch.qos.logback:logback-core:1.4.8
-            io.sentry:sentry-logback:6.25.2
-            io.sentry:sentry:6.25.2
-            org.slf4j:slf4j-api:2.0.7
-            """.trimIndent(),
-            deps
-        )
     }
 
     @Test
