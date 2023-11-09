@@ -9,6 +9,7 @@
 ### Chores
 
 - Change cli command from `upload-dif` to `debug-files upload` for native symbols ([#587](https://github.com/getsentry/sentry-android-gradle-plugin/pull/587))
+- Use new AGP api for native symbols upload ([#592](https://github.com/getsentry/sentry-android-gradle-plugin/pull/592))
 
 **Breaking changes:**
 

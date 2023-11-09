@@ -15,8 +15,8 @@ import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
 import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
-import io.sentry.android.gradle.tasks.SentryUploadNativeSymbolsTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
+import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
@@ -24,7 +24,6 @@ import io.sentry.android.gradle.util.ReleaseInfo
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
-import io.sentry.android.gradle.util.asSentryCliExec
 import io.sentry.android.gradle.util.hookWithAssembleTasks
 import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.hookWithPackageTasks
@@ -82,7 +81,9 @@ fun AppExtension.configure(
         )
         generateProguardUuidTask?.let { tasksGeneratingProperties.add(it) }
 
-        variant.configureNativeSymbolsTask(
+        // TODO: do this only once, and all other tasks should be SentryVariant.configureSomething
+        val sentryVariant = if (isAGP74) null else AndroidVariant70(variant)
+        sentryVariant?.configureNativeSymbolsTask(
             project,
             extension,
             cliExecutable,
@@ -265,43 +266,6 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
         } else {
             return null
         }
-    }
-}
-
-private fun ApplicationVariant.configureNativeSymbolsTask(
-    project: Project,
-    extension: SentryPluginExtension,
-    cliExecutable: String,
-    sentryOrg: String?,
-    sentryProject: String?
-) {
-    // only debug symbols of non debuggable code should be uploaded (aka release builds).
-    // uploadSentryNativeSymbols task will only be executed after the assemble task
-    // and also only if `uploadNativeSymbols` is enabled, as this is an opt-in feature.
-    if (!buildType.isDebuggable && extension.uploadNativeSymbols.get()) {
-        val variant = AndroidVariant70(this)
-        val sentryProps = getPropertiesFilePath(project, variant)
-
-        // Setup the task to upload native symbols task after the assembling task
-        val uploadSentryNativeSymbolsTask = project.tasks.register(
-            "uploadSentryNativeSymbolsFor${name.capitalized}",
-            SentryUploadNativeSymbolsTask::class.java
-        ) {
-            it.workingDir(project.rootDir)
-            it.debug.set(extension.debug)
-            it.autoUploadNativeSymbol.set(extension.autoUploadNativeSymbols)
-            it.cliExecutable.set(cliExecutable)
-            it.sentryProperties.set(sentryProps?.let { file -> project.file(file) })
-            it.includeNativeSources.set(extension.includeNativeSources)
-            it.variantName.set(name)
-            it.sentryOrganization.set(sentryOrg)
-            it.sentryProject.set(sentryProject)
-            it.sentryUrl.set(extension.url)
-            it.asSentryCliExec()
-        }
-        uploadSentryNativeSymbolsTask.hookWithAssembleTasks(project, variant)
-    } else {
-        project.logger.info { "uploadSentryNativeSymbols won't be executed" }
     }
 }
 

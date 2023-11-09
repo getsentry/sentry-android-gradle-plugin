@@ -26,6 +26,7 @@ import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
 import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
+import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.util.AgpVersions
@@ -81,6 +82,16 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 sentryProject
             )
             generateProguardUuidTask?.let { tasksGeneratingProperties.add(it) }
+
+            // TODO: do this only once, and all other tasks should be SentryVariant.configureSomething
+            val sentryVariant = if (isAGP74) AndroidVariant74(variant) else null
+            sentryVariant?.configureNativeSymbolsTask(
+                project,
+                extension,
+                cliExecutable,
+                sentryOrg,
+                sentryProject
+            )
 
             variant.configureDebugMetaPropertiesTask(project, tasksGeneratingProperties)
 
@@ -273,8 +284,8 @@ private fun Variant.configureProguardMappingsTasks(
     if (isAGP74) {
         val variant = AndroidVariant74(this)
         val sentryProps = getPropertiesFilePath(project, variant)
-        val guardsquareEnabled = extension.dexguardEnabled.get()
-        val isMinifyEnabled = isMinificationEnabled(project, variant, guardsquareEnabled)
+        val dexguardEnabled = extension.dexguardEnabled.get()
+        val isMinifyEnabled = isMinificationEnabled(project, variant, dexguardEnabled)
 
         if (isMinifyEnabled && extension.includeProguardMapping.get()) {
             val generateUuidTask =
@@ -291,7 +302,7 @@ private fun Variant.configureProguardMappingsTasks(
                 cliExecutable = cliExecutable,
                 generateUuidTask = generateUuidTask,
                 sentryProperties = sentryProps,
-                mappingFiles = getMappingFileProvider(project, variant, guardsquareEnabled),
+                mappingFiles = getMappingFileProvider(project, variant, dexguardEnabled),
                 autoUploadProguardMapping = extension.autoUploadProguardMapping,
                 sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
                 sentryProject = sentryProject?.let { project.provider { it } }
@@ -301,7 +312,7 @@ private fun Variant.configureProguardMappingsTasks(
                 taskSuffix = name.capitalized,
                 releaseInfo = releaseInfo
             )
-            uploadMappingsTask.hookWithMinifyTasks(project, name, guardsquareEnabled)
+            uploadMappingsTask.hookWithMinifyTasks(project, name, dexguardEnabled)
 
             return generateUuidTask
         } else {
