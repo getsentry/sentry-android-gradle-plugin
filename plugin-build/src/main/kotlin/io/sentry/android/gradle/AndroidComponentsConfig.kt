@@ -40,6 +40,7 @@ import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Project
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.build.event.BuildEventsListenerRegistry
 
@@ -128,6 +129,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     SpanAddingClassVisitorFactory::class.java,
                     InstrumentationScope.ALL,
                     FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS,
+                    extension.tracingInstrumentation.excludes
                 ) { params ->
                     if (extension.tracingInstrumentation.forceInstrumentDependencies.get()) {
                         params.invalidate.setDisallowChanges(System.currentTimeMillis())
@@ -331,6 +333,7 @@ private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
     classVisitorFactoryImplClass: Class<out AsmClassVisitorFactory<T>>,
     scope: InstrumentationScope,
     mode: FramesComputationMode,
+    excludes: SetProperty<String>,
     instrumentationParamsConfig: (T) -> Unit,
 ) {
     if (isAGP74) {
@@ -339,6 +342,7 @@ private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
             classVisitorFactoryImplClass,
             scope,
             mode,
+            excludes,
             instrumentationParamsConfig
         )
     } else {

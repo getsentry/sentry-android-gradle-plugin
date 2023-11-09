@@ -2,6 +2,8 @@ package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
+import io.sentry.android.gradle.util.AgpVersions
+import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
 import io.sentry.android.gradle.verifyIntegrationList
 import io.sentry.android.gradle.verifyProguardUuid
@@ -10,7 +12,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import org.gradle.util.GradleVersion
+import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThrows
+import org.junit.Assume.assumeThat
 import org.junit.Test
 
 class SentryPluginTest :
@@ -530,6 +534,40 @@ class SentryPluginTest :
         }
     }
 
+    @Test
+    fun `does not instrument classes that are provided in excludes`() {
+        assumeThat(
+            "We only support the 'excludes' option from AGP 7.4.0 onwards",
+            SemVer.parse(androidGradlePluginVersion) >= AgpVersions.VERSION_7_4_0,
+            `is`(true)
+        )
+        applyTracingInstrumentation(
+            features = setOf(InstrumentationFeature.OKHTTP),
+            debug = true,
+            excludes = setOf("okhttp3/RealCall")
+        )
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+
+            dependencies {
+              implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+              implementation 'io.sentry:sentry-android-okhttp:6.6.0'
+            }
+            """.trimIndent()
+        )
+
+        runner
+            .appendArguments(":app:assembleDebug")
+            .build()
+
+        // since it's an integration test, we just test that the log file wasn't created
+        // for the class meaning our CommonClassVisitor has NOT instrumented it
+        val debugOutput =
+            testProjectDir.root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
+        assertTrue { !debugOutput.exists() }
+    }
+
     private fun applyUploadNativeSymbols() {
         appBuildFile.appendText(
             // language=Groovy
@@ -564,7 +602,8 @@ class SentryPluginTest :
         tracingInstrumentation: Boolean = true,
         features: Set<InstrumentationFeature> = emptySet(),
         dependencies: Set<String> = emptySet(),
-        debug: Boolean = false
+        debug: Boolean = false,
+        excludes: Set<String> = emptySet()
     ) {
         appBuildFile.appendText(
             // language=Groovy
@@ -581,6 +620,7 @@ class SentryPluginTest :
                     enabled = $tracingInstrumentation
                     debug = $debug
                     features = [${features.joinToString { "${it::class.java.canonicalName}.${it.name}" }}]
+                    excludes = ["${excludes.joinToString()}"]
                   }
                 }
             """.trimIndent()

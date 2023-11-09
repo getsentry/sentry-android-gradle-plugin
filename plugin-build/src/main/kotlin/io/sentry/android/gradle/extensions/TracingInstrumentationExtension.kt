@@ -48,6 +48,24 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
             )
         )
 
+    /**
+     * The set of glob patterns to exclude from instrumentation. Classes matching any of these
+     * patterns in the project sources and dependencies jars do not get instrumented by the Sentry
+     * Gradle plugin.
+     *
+     * Do not add the file extension to the end as the filtration is done on compiled classes and
+     * the .class suffix is not included in the pattern matching.
+     *
+     * Example usage:
+     * ```
+     * excludes.set(setOf("com/example/donotinstrument/**", "**/*Test"))
+     * ```
+     *
+     * Only supported when using Android Gradle plugin (AGP) version 7.4.0 and above.
+     */
+    val excludes: SetProperty<String> = objects.setProperty(String::class.java)
+        .convention(emptySet())
+
     val logcat: LogcatExtension = objects.newInstance(
         LogcatExtension::class.java
     )

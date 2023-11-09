@@ -13,7 +13,7 @@ import org.junit.rules.TemporaryFolder
 
 @Suppress("FunctionName")
 abstract class BaseSentryPluginTest(
-    private val androidGradlePluginVersion: String,
+    protected val androidGradlePluginVersion: String,
     private val gradleVersion: String
 ) {
     @get:Rule
