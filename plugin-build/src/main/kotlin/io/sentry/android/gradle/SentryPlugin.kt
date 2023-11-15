@@ -22,9 +22,6 @@ abstract class SentryPlugin @Inject constructor(
     private val buildEvents: BuildEventListenerRegistryInternal
 ) : Plugin<Project> {
 
-    @get:Inject
-    abstract val listenerRegistry: BuildEventsListenerRegistry
-
     override fun apply(project: Project) {
         if (AgpVersions.CURRENT < AgpVersions.VERSION_7_0_0) {
             throw StopExecutionException(
@@ -63,11 +60,10 @@ abstract class SentryPlugin @Inject constructor(
             androidComponentsExt.configure(
                 project,
                 extension,
-                listenerRegistry,
+                buildEvents,
                 cliExecutable,
                 sentryOrgParameter,
                 sentryProjectParameter,
-                buildEvents
             )
 
             // old API configuration

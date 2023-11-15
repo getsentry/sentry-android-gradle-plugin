@@ -43,17 +43,15 @@ import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.build.event.BuildEventsListenerRegistry
 import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 
 fun AndroidComponentsExtension<*, *, *>.configure(
     project: Project,
     extension: SentryPluginExtension,
-    listenerRegistry: BuildEventsListenerRegistry,
+    buildEvents: BuildEventListenerRegistryInternal,
     cliExecutable: String,
     sentryOrg: String?,
     sentryProject: String?,
-    buildEvents: BuildEventListenerRegistryInternal
 ) {
     // temp folder for sentry-related stuff
     val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
@@ -68,7 +66,6 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 extension,
                 cliExecutable,
                 sentryOrg,
-                sentryProject,
                 buildEvents
             )
 
@@ -125,7 +122,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                  * not be discarded after the configuration phase (where we store the collected
                  * dependencies), and will be passed down to the InstrumentationFactory
                  */
-                listenerRegistry.onTaskCompletion(sentryModulesService)
+                buildEvents.onTaskCompletion(sentryModulesService)
 
                 project.collectModules(
                     "${variant.name}RuntimeClasspath",
@@ -156,7 +153,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     SentryGenerateIntegrationListTask::class.java
                 ) {
                     it.sentryModulesService.set(sentryModulesService)
-                    it.usesService(sentryTelemetryProvider)
+                    it.usesService(sentryModulesService)
                     it.withSentryTelemetry(extension, sentryTelemetryProvider)
                 }
 
@@ -227,7 +224,6 @@ private fun Variant.configureTelemetry(
     extension: SentryPluginExtension,
     cliExecutable: String,
     sentryOrg: String?,
-    sentryProject: String?,
     buildEvents: BuildEventListenerRegistryInternal
 ): Provider<SentryTelemetryService> {
     val variant = if (isAGP74) AndroidVariant74(this) else null

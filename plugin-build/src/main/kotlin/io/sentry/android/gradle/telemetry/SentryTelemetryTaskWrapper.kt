@@ -8,8 +8,8 @@ import org.gradle.api.Task
 import org.gradle.api.provider.Provider
 
 /**
- * An ext function for tasks that wrap sentry-cli, which provides common error handling. Must be
- * called at configuration phase (=when registering a task).
+ * An ext function for tasks that we want to collect telemetry for. Must be called at configuration
+ * phase (=when registering a task).
  */
 fun Task.withSentryTelemetry(
     extension: SentryPluginExtension,

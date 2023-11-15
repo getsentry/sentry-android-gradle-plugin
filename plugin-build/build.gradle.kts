@@ -7,6 +7,8 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.configurationcache.extensions.serviceOf
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     id("dev.gradleplugins.groovy-gradle-plugin") version BuildPluginsVersion.GROOVY_REDISTRIBUTED
@@ -336,6 +338,11 @@ buildConfig {
     buildConfigField("String", "Version", provider { "\"${project.version}\"" })
     buildConfigField("String", "SdkVersion", provider { "\"${project.property("sdk_version")}\"" })
     buildConfigField("String", "AgpVersion", provider { "\"${BuildPluginsVersion.AGP}\"" })
+    buildConfigField("String", "CliVersion", provider {
+        "\"${Properties()
+            .apply { load(FileInputStream(File("$projectDir/sentry-cli.properties"))) }
+            .getProperty("version")}\""
+    })
 }
 
 tasks.register<ASMifyTask>("asmify")

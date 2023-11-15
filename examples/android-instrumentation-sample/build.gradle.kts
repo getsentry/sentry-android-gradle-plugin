@@ -102,7 +102,6 @@ dependencies {
 
 sentry {
     debug.set(true)
-//    telemetry.set(false)
     autoUploadProguardMapping.set(CI.canAutoUpload())
 
     includeSourceContext.set(true)

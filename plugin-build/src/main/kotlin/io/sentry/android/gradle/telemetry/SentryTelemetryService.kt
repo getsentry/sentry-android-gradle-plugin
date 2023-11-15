@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 package io.sentry.android.gradle.telemetry
 
 import io.sentry.BuildConfig
@@ -223,7 +225,6 @@ abstract class SentryTelemetryService :
             "https://dd1f82ad30a331bd7def2a0dce926c6e@o447951.ingest.sentry.io/4506031723446272"
         val MECHANISM_TYPE: String = "GradleTelemetry"
         private val orgRegex = Regex("""(?m)Default Organization: (.*)$""")
-        private val versionRegex = Regex("""(?m)sentry-cli (.*)$""")
 
         fun createParameters(
             project: Project,
@@ -235,7 +236,6 @@ abstract class SentryTelemetryService :
         ): SentryTelemetryServiceParams {
             val tags = extraTagsFromExtension(project, extension)
             var isSaas: Boolean? = null
-            var cliVersion: String? = null
             var defaultSentryOrganization: String? = null
 
             if (isExecAvailable()) {
@@ -246,7 +246,6 @@ abstract class SentryTelemetryService :
                     variant,
                     isSaas,
                     defaultSentryOrganization,
-                    cliVersion,
                     sentryOrg,
                     buildType,
                     tags
@@ -257,7 +256,8 @@ abstract class SentryTelemetryService :
                     extension.telemetryDsn.get(),
                     sentryOrg,
                     buildType,
-                    tags
+                    tags,
+                    cliVersion = BuildConfig.CliVersion
                 )
             }
         }
@@ -269,14 +269,12 @@ abstract class SentryTelemetryService :
             variant: SentryVariant?,
             isSaas: Boolean?,
             defaultSentryOrganization: String?,
-            cliVersion: String?,
             sentryOrg: String?,
             buildType: String,
             tags: Map<String, String>
         ): SentryTelemetryServiceParams {
             var isSaas1 = isSaas
             var defaultSentryOrganization1 = defaultSentryOrganization
-            var cliVersion1 = cliVersion
             val infoOutput = project.providers.of(SentryCliInfoValueSource::class.java) { cliVS ->
                 cliVS.parameters.cliExecutable.set(cliExecutable)
                 cliVS.parameters.authToken.set(extension.authToken)
@@ -297,32 +295,13 @@ abstract class SentryTelemetryService :
                 }
             }
 
-            val versionOutput =
-                project.providers.of(SentryCliVersionValueSource::class.java) { cliVS ->
-                    cliVS.parameters.cliExecutable.set(cliExecutable)
-                    cliVS.parameters.authToken.set(extension.authToken)
-                    cliVS.parameters.url.set(extension.url)
-                    variant?.let { v ->
-                        cliVS.parameters.propertiesFilePath.set(
-                            SentryPropertiesFileProvider.getPropertiesFilePath(project, v)
-                        )
-                    }
-                }.get()
-
-            versionRegex.find(versionOutput)?.let { matchResult ->
-                val groupValues = matchResult.groupValues
-                if (groupValues.size > 1) {
-                    val version = groupValues[1]
-                    cliVersion1 = version
-                }
-            }
-
             return SentryTelemetryServiceParams(
                 extension.telemetry.get(),
                 extension.telemetryDsn.get(),
                 sentryOrg,
                 buildType,
                 tags,
+                cliVersion = BuildConfig.CliVersion
             )
         }
 
@@ -483,39 +462,6 @@ abstract class SentryCliInfoValueSource : ValueSource<String, Params> {
     }
 }
 
-abstract class SentryCliVersionValueSource : ValueSource<String, Params> {
-    interface Params : ValueSourceParameters {
-        @get:Input
-        val cliExecutable: Property<String>
-
-        @get:Input
-        val propertiesFilePath: Property<String>
-
-        @get:Input
-        val url: Property<String>
-
-        @get:Input
-        val authToken: Property<String>
-    }
-
-    @get:Inject
-    abstract val execOperations: ExecOperations
-
-    override fun obtain(): String {
-        val output = ByteArrayOutputStream()
-        execOperations.exec {
-            it.isIgnoreExitValue = true
-            val args = mutableListOf(parameters.cliExecutable.get())
-
-            args.add("--log-level=error")
-            args.add("--version")
-
-            it.commandLine(args)
-            it.standardOutput = output
-        }
-        return String(output.toByteArray(), Charset.defaultCharset())
-    }
-}
 data class SentryTelemetryServiceParams(
     val sendTelemetry: Boolean,
     val dsn: String,
