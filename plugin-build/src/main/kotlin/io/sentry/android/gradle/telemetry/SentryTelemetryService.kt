@@ -239,7 +239,7 @@ abstract class SentryTelemetryService :
             var isSaas: Boolean? = null
             var defaultSentryOrganization: String? = null
 
-            if (isExecAvailable()) {
+//            if (isExecAvailable()) {
                 return paramsWithExecAvailable(
                     project,
                     cliExecutable,
@@ -251,17 +251,17 @@ abstract class SentryTelemetryService :
                     buildType,
                     tags
                 )
-            } else {
-                return SentryTelemetryServiceParams(
-                    extension.telemetry.get(),
-                    extension.telemetryDsn.get(),
-                    sentryOrg,
-                    buildType,
-                    tags,
-                    extension.debug.get(),
-                    cliVersion = BuildConfig.CliVersion
-                )
-            }
+//            } else {
+//                return SentryTelemetryServiceParams(
+//                    extension.telemetry.get(),
+//                    extension.telemetryDsn.get(),
+//                    sentryOrg,
+//                    buildType,
+//                    tags,
+//                    extension.debug.get(),
+//                    cliVersion = BuildConfig.CliVersion
+//                )
+//            }
         }
 
         private fun paramsWithExecAvailable(
