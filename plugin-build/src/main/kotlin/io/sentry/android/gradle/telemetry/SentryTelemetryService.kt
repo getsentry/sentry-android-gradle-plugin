@@ -18,7 +18,9 @@ import io.sentry.android.gradle.telemetry.SentryCliInfoValueSource.Params
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.SentryCliException
+import io.sentry.android.gradle.util.error
 import io.sentry.android.gradle.util.getBuildServiceName
+import io.sentry.android.gradle.util.info
 import io.sentry.exception.ExceptionMechanismException
 import io.sentry.gradle.common.SentryVariant
 import io.sentry.protocol.Mechanism
@@ -64,22 +66,22 @@ abstract class SentryTelemetryService :
         started = true
         try {
             if (startParameters.saas == false) {
-                SentryPlugin.logger.info(
+                SentryPlugin.logger.info {
                     "Sentry is running against a self hosted instance. Telemetry has been disabled."
-                )
+                }
                 hub = NoOpHub.getInstance()
             } else if (!startParameters.sendTelemetry) {
-                SentryPlugin.logger.info("Sentry telemetry has been disabled.")
+                SentryPlugin.logger.info { "Sentry telemetry has been disabled." }
                 hub = NoOpHub.getInstance()
             } else {
                 if (!Sentry.isEnabled()) {
-                    SentryPlugin.logger.info(
+                    SentryPlugin.logger.info {
                         "Sentry telemetry is enabled. To disable set `telemetry=false` " +
                             "in the sentry config block."
-                    )
+                    }
                     Sentry.init { options ->
                         options.dsn = startParameters.dsn
-                        options.isDebug = true
+                        options.isDebug = startParameters.isDebug
                         options.isEnablePrettySerializationOutput = false
                         options.tracesSampleRate = 1.0
                         options.release = BuildConfig.Version
@@ -105,13 +107,13 @@ abstract class SentryTelemetryService :
 
                 hub.configureScope { scope ->
                     scope.user = User().also { user ->
-                        startParameters.defaultSentryOrganization.let { user.id = it }
-                        startParameters.sentryOrganization.let { user.id = it }
+                        startParameters.defaultSentryOrganization?.let { user.id = it }
+                        startParameters.sentryOrganization?.let { user.id = it }
                     }
                 }
             }
         } catch (t: Throwable) {
-            SentryPlugin.logger.error("Sentry failed to initialize.", t)
+            SentryPlugin.logger.error(t) { "Sentry failed to initialize." }
         }
     }
 
@@ -126,7 +128,6 @@ abstract class SentryTelemetryService :
         val details = buildOperationDescriptor.details
 
         operationFinishEvent.failure?.let { error ->
-            // TODO check if Sentry task, otherwise ignore
             if (isSentryError(error, details)) {
                 captureError(error, "build")
                 transaction?.status = SpanStatus.UNKNOWN_ERROR
@@ -257,6 +258,7 @@ abstract class SentryTelemetryService :
                     sentryOrg,
                     buildType,
                     tags,
+                    extension.debug.get(),
                     cliVersion = BuildConfig.CliVersion
                 )
             }
@@ -301,6 +303,7 @@ abstract class SentryTelemetryService :
                 sentryOrg,
                 buildType,
                 tags,
+                extension.debug.get(),
                 cliVersion = BuildConfig.CliVersion
             )
         }
@@ -338,17 +341,14 @@ abstract class SentryTelemetryService :
                 extension.autoUploadNativeSymbols.get().toString()
             )
             tags.put("SENTRY_includeNativeSources", extension.includeNativeSources.get().toString())
-            // TODO PII?
             tags.put(
                 "SENTRY_ignoredVariants_set",
                 extension.ignoredVariants.get().isNotEmpty().toString()
             )
-            // TODO PII?
             tags.put(
                 "SENTRY_ignoredBuildTypes_set",
                 extension.ignoredBuildTypes.get().isNotEmpty().toString()
             )
-            // TODO PII?
             tags.put(
                 "SENTRY_ignoredFlavors",
                 extension.ignoredFlavors.get().isNotEmpty().toString()
@@ -394,13 +394,10 @@ abstract class SentryTelemetryService :
                 extension.includeDependenciesReport.get().toString()
             )
             tags.put("SENTRY_includeSourceContext", extension.includeSourceContext.get().toString())
-            // TODO PII?
             tags.put(
                 "SENTRY_additionalSourceDirsForSourceContext_set",
                 extension.additionalSourceDirsForSourceContext.get().isNotEmpty().toString()
             )
-            // TODO PII?
-            extension.org.orNull?.let { tags.put("SENTRY_org", it) }
             // TODO PII?
             extension.projectName.orNull?.let { tags.put("SENTRY_projectName", it) }
 
@@ -468,7 +465,8 @@ data class SentryTelemetryServiceParams(
     val sentryOrganization: String?,
     val buildType: String,
     val extraTags: Map<String, String>,
+    val isDebug: Boolean,
     val defaultSentryOrganization: String? = null,
     val saas: Boolean? = null,
-    val cliVersion: String? = null
+    val cliVersion: String? = null,
 )
