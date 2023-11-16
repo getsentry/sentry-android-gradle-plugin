@@ -13,9 +13,9 @@ tasks.withType<KotlinCompile> {
     }
 }
 
- sentry {
+sentry {
     debug.set(true)
     telemetry.set(false)
     includeSourceContext.set(true)
     additionalSourceDirsForSourceContext.set(setOf("testsrc"))
- }
+}

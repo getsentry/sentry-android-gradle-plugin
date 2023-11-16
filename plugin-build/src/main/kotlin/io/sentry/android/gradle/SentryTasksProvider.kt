@@ -25,10 +25,10 @@ internal object SentryTasksProvider {
     fun getTransformerTask(
         project: Project,
         variantName: String,
-        experimentalGuardsquareSupport: Boolean = false
+        dexguardEnabled: Boolean = false
     ): TaskProvider<Task>? {
         val taskList = mutableListOf<String>()
-        if (experimentalGuardsquareSupport) {
+        if (dexguardEnabled) {
             // We prioritize the Guardsquare's Proguard task towards the AGP ones.
             taskList.add(
                 "transformClassesAndResourcesWithProguardTransformFor${variantName.capitalized}"
@@ -95,9 +95,9 @@ internal object SentryTasksProvider {
     fun getMappingFileProvider(
         project: Project,
         variant: SentryVariant,
-        experimentalGuardsquareSupport: Boolean = false
+        dexguardEnabled: Boolean = false
     ): Provider<FileCollection> {
-        if (experimentalGuardsquareSupport) {
+        if (dexguardEnabled) {
             val sep = File.separator
             if (project.plugins.hasPlugin("com.guardsquare.proguard")) {
                 val fileCollection = project.files(

@@ -13,7 +13,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.StopExecutionException
-import org.gradle.build.event.BuildEventsListenerRegistry
 import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 import org.slf4j.LoggerFactory
 
@@ -30,6 +29,15 @@ abstract class SentryPlugin @Inject constructor(
                 Either upgrade the AGP version to 7+, or use an earlier version of the Sentry
                 Android Gradle Plugin. For more information check our migration guide
                 https://docs.sentry.io/platforms/android/migration/#migrating-from-iosentrysentry-android-gradle-plugin-2x-to-iosentrysentry-android-gradle-plugin-300
+                """.trimIndent()
+            )
+        }
+        if (!project.plugins.hasPlugin("com.android.application")) {
+            project.logger.warn(
+                """
+                WARNING: Using 'io.sentry.android.gradle' is only supported for the app module.
+                Please make sure that you apply the Sentry gradle plugin alongside 'com.android.application' on the _module_ level, and not on the root project level.
+                https://docs.sentry.io/platforms/android/configuration/gradle/
                 """.trimIndent()
             )
         }

@@ -16,7 +16,7 @@ import org.gradle.api.tasks.TaskProvider
 fun TaskProvider<out Task>.hookWithMinifyTasks(
     project: Project,
     variantName: String,
-    experimentalGuardsquareSupport: Boolean
+    dexguardEnabled: Boolean
 ) {
     // we need to wait for project evaluation to have all tasks available, otherwise the new
     // AndroidComponentsExtension is configured too early to look up for the tasks
@@ -25,11 +25,11 @@ fun TaskProvider<out Task>.hookWithMinifyTasks(
             getTransformerTask(
                 project,
                 variantName,
-                experimentalGuardsquareSupport
+                dexguardEnabled
             )
         }
 
-        if (experimentalGuardsquareSupport &&
+        if (dexguardEnabled &&
             GroovyCompat.isDexguardEnabledForVariant(project, variantName)
         ) {
             project.tasks.named(

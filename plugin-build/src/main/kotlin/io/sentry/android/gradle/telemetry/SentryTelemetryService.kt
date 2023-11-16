@@ -354,8 +354,8 @@ abstract class SentryTelemetryService :
                 extension.ignoredFlavors.get().isNotEmpty().toString()
             )
             tags.put(
-                "SENTRY_experimentalGuardsquareSupport",
-                extension.experimentalGuardsquareSupport.get().toString()
+                "SENTRY_dexguardEnabled",
+                extension.dexguardEnabled.get().toString()
             )
             tags.put(
                 "SENTRY_tracing_enabled",

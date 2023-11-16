@@ -18,6 +18,7 @@ data class JavaVariant(
     override val buildTypeName = null
     override val productFlavors = emptyList<String>()
     override val isMinifyEnabled = false
+    override val isDebuggable = false
 
     override val assembleProvider: TaskProvider<out Task>?
         get() = project.tasks.named("assemble", DefaultTask::class.java)

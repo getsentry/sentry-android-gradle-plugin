@@ -26,6 +26,7 @@ import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
 import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
+import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
@@ -42,6 +43,7 @@ import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 
@@ -95,6 +97,17 @@ fun AndroidComponentsExtension<*, *, *>.configure(
             )
             generateProguardUuidTask?.let { tasksGeneratingProperties.add(it) }
 
+            // TODO: do this only once, and all other tasks should be SentryVariant.configureSomething
+            val sentryVariant = if (isAGP74) AndroidVariant74(variant) else null
+            sentryVariant?.configureNativeSymbolsTask(
+                project,
+                extension,
+                sentryTelemetryProvider,
+                cliExecutable,
+                sentryOrg,
+                sentryProject
+            )
+
             variant.configureDebugMetaPropertiesTask(
                 project,
                 extension,
@@ -115,7 +128,8 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     project,
                     extension.tracingInstrumentation.features,
                     extension.tracingInstrumentation.logcat.enabled,
-                    extension.includeSourceContext
+                    extension.includeSourceContext,
+                    extension.dexguardEnabled
                 )
                 /**
                  * We have to register SentryModulesService as a build event listener, so it will
@@ -134,6 +148,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     SpanAddingClassVisitorFactory::class.java,
                     InstrumentationScope.ALL,
                     FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS,
+                    extension.tracingInstrumentation.excludes
                 ) { params ->
                     if (extension.tracingInstrumentation.forceInstrumentDependencies.get()) {
                         params.invalidate.setDisallowChanges(System.currentTimeMillis())
@@ -329,8 +344,8 @@ private fun Variant.configureProguardMappingsTasks(
     if (isAGP74) {
         val variant = AndroidVariant74(this)
         val sentryProps = getPropertiesFilePath(project, variant)
-        val guardsquareEnabled = extension.experimentalGuardsquareSupport.get()
-        val isMinifyEnabled = isMinificationEnabled(project, variant, guardsquareEnabled)
+        val dexguardEnabled = extension.dexguardEnabled.get()
+        val isMinifyEnabled = isMinificationEnabled(project, variant, dexguardEnabled)
 
         if (isMinifyEnabled && extension.includeProguardMapping.get()) {
             val generateUuidTask =
@@ -351,7 +366,7 @@ private fun Variant.configureProguardMappingsTasks(
                 cliExecutable = cliExecutable,
                 generateUuidTask = generateUuidTask,
                 sentryProperties = sentryProps,
-                mappingFiles = getMappingFileProvider(project, variant, guardsquareEnabled),
+                mappingFiles = getMappingFileProvider(project, variant, dexguardEnabled),
                 autoUploadProguardMapping = extension.autoUploadProguardMapping,
                 sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
                 sentryProject = sentryProject?.let { project.provider { it } }
@@ -361,7 +376,7 @@ private fun Variant.configureProguardMappingsTasks(
                 taskSuffix = name.capitalized,
                 releaseInfo = releaseInfo
             )
-            uploadMappingsTask.hookWithMinifyTasks(project, name, guardsquareEnabled)
+            uploadMappingsTask.hookWithMinifyTasks(project, name, dexguardEnabled)
 
             return generateUuidTask
         } else {
@@ -380,6 +395,7 @@ private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
     classVisitorFactoryImplClass: Class<out AsmClassVisitorFactory<T>>,
     scope: InstrumentationScope,
     mode: FramesComputationMode,
+    excludes: SetProperty<String>,
     instrumentationParamsConfig: (T) -> Unit,
 ) {
     if (isAGP74) {
@@ -388,6 +404,7 @@ private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
             classVisitorFactoryImplClass,
             scope,
             mode,
+            excludes,
             instrumentationParamsConfig
         )
     } else {
