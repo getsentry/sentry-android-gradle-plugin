@@ -67,7 +67,7 @@ class SentryJvmPlugin @Inject constructor(
 
             val sentryTelemetryProvider = SentryTelemetryService.register(project)
             project.gradle.taskGraph.whenReady {
-                sentryTelemetryProvider.get().start(
+                sentryTelemetryProvider.get().start {
                     SentryTelemetryService.createParameters(
                         project,
                         javaVariant,
@@ -76,7 +76,7 @@ class SentryJvmPlugin @Inject constructor(
                         sentryOrgParameter,
                         "JVM"
                     )
-                )
+                }
                 buildEvents.onOperationCompletion(sentryTelemetryProvider)
             }
 

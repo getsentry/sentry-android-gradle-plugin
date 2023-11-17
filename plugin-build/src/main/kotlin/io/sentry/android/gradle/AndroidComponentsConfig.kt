@@ -244,7 +244,7 @@ private fun Variant.configureTelemetry(
     val variant = if (isAGP74) AndroidVariant74(this) else null
     val sentryTelemetryProvider = SentryTelemetryService.register(project)
     project.gradle.taskGraph.whenReady {
-        sentryTelemetryProvider.get().start(
+        sentryTelemetryProvider.get().start {
             SentryTelemetryService.createParameters(
                 project,
                 variant,
@@ -253,7 +253,7 @@ private fun Variant.configureTelemetry(
                 sentryOrg,
                 "Android"
             )
-        )
+        }
         buildEvents.onOperationCompletion(sentryTelemetryProvider)
     }
     return sentryTelemetryProvider

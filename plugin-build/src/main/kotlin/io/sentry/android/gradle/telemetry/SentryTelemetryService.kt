@@ -58,64 +58,72 @@ abstract class SentryTelemetryService :
     private var didAddChildSpans: Boolean = false
     private var started: Boolean = false
 
-    fun start(startParameters: SentryTelemetryServiceParams) {
+    fun start(paramsCallback: () -> SentryTelemetryServiceParams) {
         if (started) {
             return
         }
 
-        started = true
-        try {
-            if (startParameters.saas == false) {
-                SentryPlugin.logger.info {
-                    "Sentry is running against a self hosted instance. Telemetry has been disabled."
-                }
-                hub = NoOpHub.getInstance()
-            } else if (!startParameters.sendTelemetry) {
-                SentryPlugin.logger.info { "Sentry telemetry has been disabled." }
-                hub = NoOpHub.getInstance()
-            } else {
-                if (!Sentry.isEnabled()) {
-                    SentryPlugin.logger.info {
-                        "Sentry telemetry is enabled. To disable set `telemetry=false` " +
-                            "in the sentry config block."
-                    }
-                    Sentry.init { options ->
-                        options.dsn = startParameters.dsn
-                        options.isDebug = startParameters.isDebug
-                        options.isEnablePrettySerializationOutput = false
-                        options.tracesSampleRate = 1.0
-                        options.release = BuildConfig.Version
-                        options.isSendModules = false
-                        options.environment = startParameters.buildType
-                        options.setTag("SDK_VERSION", BuildConfig.SdkVersion)
-                        options.setTag("BUILD_SYSTEM", "gradle")
-                        options.setTag("GRADLE_VERSION", GradleVersion.current().version)
-                        startParameters.cliVersion?.let { options.setTag("SENTRY_CLI_VERSION", it) }
-
-                        startParameters.extraTags.forEach { (key, value) ->
-                            options.setTag(
-                                key,
-                                value
-                            )
-                        }
-
-                        try {
-                            options.setTag("AGP_VERSION", AgpVersions.CURRENT.toString())
-                        } catch (t: Throwable) {}
-                    }
-                }
-                hub = Sentry.getCurrentHub()
-                startRun("gradle build ${startParameters.buildType}")
-
-                hub.configureScope { scope ->
-                    scope.user = User().also { user ->
-                        startParameters.defaultSentryOrganization?.let { user.id = it }
-                        startParameters.sentryOrganization?.let { user.id = it }
-                    }
-                }
+        synchronized(started) {
+            if (started) {
+                return
             }
-        } catch (t: Throwable) {
-            SentryPlugin.logger.error(t) { "Sentry failed to initialize." }
+            val startParameters = paramsCallback()
+
+            try {
+                if (startParameters.saas == false) {
+                    SentryPlugin.logger.info {
+                        "Sentry is running against a self hosted instance. Telemetry has been disabled."
+                    }
+                    hub = NoOpHub.getInstance()
+                } else if (!startParameters.sendTelemetry) {
+                    SentryPlugin.logger.info { "Sentry telemetry has been disabled." }
+                    hub = NoOpHub.getInstance()
+                } else {
+                    if (!Sentry.isEnabled()) {
+                        SentryPlugin.logger.info {
+                            "Sentry telemetry is enabled. To disable set `telemetry=false` " +
+                                "in the sentry config block."
+                        }
+                        Sentry.init { options ->
+                            options.dsn = startParameters.dsn
+                            options.isDebug = startParameters.isDebug
+                            options.isEnablePrettySerializationOutput = false
+                            options.tracesSampleRate = 1.0
+                            options.release = BuildConfig.Version
+                            options.isSendModules = false
+                            options.environment = startParameters.buildType
+                            options.setTag("SDK_VERSION", BuildConfig.SdkVersion)
+                            options.setTag("BUILD_SYSTEM", "gradle")
+                            options.setTag("GRADLE_VERSION", GradleVersion.current().version)
+                            startParameters.cliVersion?.let { options.setTag("SENTRY_CLI_VERSION", it) }
+
+                            startParameters.extraTags.forEach { (key, value) ->
+                                options.setTag(
+                                    key,
+                                    value
+                                )
+                            }
+
+                            try {
+                                options.setTag("AGP_VERSION", AgpVersions.CURRENT.toString())
+                            } catch (t: Throwable) {}
+                        }
+                    }
+                    hub = Sentry.getCurrentHub()
+                    startRun("gradle build ${startParameters.buildType}")
+
+                    hub.configureScope { scope ->
+                        scope.user = User().also { user ->
+                            startParameters.defaultSentryOrganization?.let { user.id = it }
+                            startParameters.sentryOrganization?.let { user.id = it }
+                        }
+                    }
+
+                    started = true
+                }
+            } catch (t: Throwable) {
+                SentryPlugin.logger.error(t) { "Sentry failed to initialize." }
+            }
         }
     }
 
