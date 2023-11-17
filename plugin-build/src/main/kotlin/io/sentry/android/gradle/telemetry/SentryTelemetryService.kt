@@ -236,7 +236,7 @@ abstract class SentryTelemetryService :
 
     companion object {
         val SENTRY_SAAS_DSN: String =
-            "https://dd1f82ad30a331bd7def2a0dce926c6e@o447951.ingest.sentry.io/4506031723446272"
+            "https://000e5dea9770b4537055f8a6d28c021e@o1.ingest.sentry.io/4506241308295168"
         val MECHANISM_TYPE: String = "GradleTelemetry"
         private val orgRegex = Regex("""(?m)Default Organization: (.*)$""")
         private val versionRegex = Regex("""(?m)sentry-cli (.*)$""")
