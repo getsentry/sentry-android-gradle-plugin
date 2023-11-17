@@ -225,6 +225,7 @@ abstract class SentryTelemetryService :
             "https://dd1f82ad30a331bd7def2a0dce926c6e@o447951.ingest.sentry.io/4506031723446272"
         val MECHANISM_TYPE: String = "GradleTelemetry"
         private val orgRegex = Regex("""(?m)Default Organization: (.*)$""")
+        private val versionRegex = Regex("""(?m)sentry-cli (.*)$""")
 
         fun createParameters(
             project: Project,
@@ -236,7 +237,6 @@ abstract class SentryTelemetryService :
         ): SentryTelemetryServiceParams {
             val tags = extraTagsFromExtension(project, extension)
             var isSaas: Boolean? = extension.org.orNull != null
-            var defaultSentryOrganization: String? = null
 
             if (isExecAvailable()) {
                 return paramsWithExecAvailable(
@@ -245,7 +245,6 @@ abstract class SentryTelemetryService :
                     extension,
                     variant,
                     isSaas,
-                    defaultSentryOrganization,
                     sentryOrg,
                     buildType,
                     tags
@@ -270,13 +269,13 @@ abstract class SentryTelemetryService :
             extension: SentryPluginExtension,
             variant: SentryVariant?,
             isSaas: Boolean?,
-            defaultSentryOrganization: String?,
             sentryOrg: String?,
             buildType: String,
             tags: Map<String, String>
         ): SentryTelemetryServiceParams {
             var isSaas1 = isSaas
-            var defaultSentryOrganization1 = defaultSentryOrganization
+            var cliVersion: String? = BuildConfig.CliVersion
+            var defaultSentryOrganization: String? = null
             val infoOutput = project.providers.of(SentryCliInfoValueSource::class.java) { cliVS ->
                 cliVS.parameters.cliExecutable.set(cliExecutable)
                 cliVS.parameters.authToken.set(extension.authToken)
@@ -292,8 +291,26 @@ abstract class SentryTelemetryService :
             orgRegex.find(infoOutput)?.let { matchResult ->
                 val groupValues = matchResult.groupValues
                 if (groupValues.size > 1) {
-                    val defaultOrg = groupValues[1]
-                    defaultSentryOrganization1 = defaultOrg
+                    defaultSentryOrganization = groupValues[1]
+                }
+            }
+
+            val versionOutput =
+                project.providers.of(SentryCliVersionValueSource::class.java) { cliVS ->
+                    cliVS.parameters.cliExecutable.set(cliExecutable)
+                    cliVS.parameters.authToken.set(extension.authToken)
+                    cliVS.parameters.url.set(extension.url)
+                    variant?.let { v ->
+                        cliVS.parameters.propertiesFilePath.set(
+                            SentryPropertiesFileProvider.getPropertiesFilePath(project, v)
+                        )
+                    }
+                }.get()
+
+            versionRegex.find(versionOutput)?.let { matchResult ->
+                val groupValues = matchResult.groupValues
+                if (groupValues.size > 1) {
+                    cliVersion = groupValues[1]
                 }
             }
 
@@ -304,9 +321,9 @@ abstract class SentryTelemetryService :
                 buildType,
                 tags,
                 extension.debug.get(),
-                defaultSentryOrganization1,
+                defaultSentryOrganization,
                 isSaas1,
-                cliVersion = BuildConfig.CliVersion
+                cliVersion = cliVersion
             )
         }
 
@@ -453,6 +470,40 @@ abstract class SentryCliInfoValueSource : ValueSource<String, Params> {
             parameters.authToken.orNull?.let { authToken ->
                 it.environment("SENTRY_AUTH_TOKEN", authToken)
             }
+
+            it.commandLine(args)
+            it.standardOutput = output
+        }
+        return String(output.toByteArray(), Charset.defaultCharset())
+    }
+}
+
+abstract class SentryCliVersionValueSource : ValueSource<String, Params> {
+    interface Params : ValueSourceParameters {
+        @get:Input
+        val cliExecutable: Property<String>
+
+        @get:Input
+        val propertiesFilePath: Property<String>
+
+        @get:Input
+        val url: Property<String>
+
+        @get:Input
+        val authToken: Property<String>
+    }
+
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    override fun obtain(): String {
+        val output = ByteArrayOutputStream()
+        execOperations.exec {
+            it.isIgnoreExitValue = true
+            val args = mutableListOf(parameters.cliExecutable.get())
+
+            args.add("--log-level=error")
+            args.add("--version")
 
             it.commandLine(args)
             it.standardOutput = output
