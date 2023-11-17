@@ -90,7 +90,6 @@ abstract class SentryTelemetryService :
                         options.setTag("SDK_VERSION", BuildConfig.SdkVersion)
                         options.setTag("AGP_VERSION", AgpVersions.CURRENT.toString())
                         options.setTag("BUILD_SYSTEM", "gradle")
-                        options.setTag("BUILD_TYPE", startParameters.buildType)
                         options.setTag("GRADLE_VERSION", GradleVersion.current().version)
                         startParameters.cliVersion?.let { options.setTag("SENTRY_CLI_VERSION", it) }
 
@@ -236,7 +235,7 @@ abstract class SentryTelemetryService :
             buildType: String
         ): SentryTelemetryServiceParams {
             val tags = extraTagsFromExtension(project, extension)
-            var isSaas: Boolean? = null
+            var isSaas: Boolean? = extension.org.orNull != null
             var defaultSentryOrganization: String? = null
 
             if (isExecAvailable()) {
@@ -259,6 +258,7 @@ abstract class SentryTelemetryService :
                     buildType,
                     tags,
                     extension.debug.get(),
+                    saas = isSaas,
                     cliVersion = BuildConfig.CliVersion
                 )
             }
@@ -327,81 +327,81 @@ abstract class SentryTelemetryService :
         ): Map<String, String> {
             val tags = mutableMapOf<String, String>()
 
-            tags.put("SENTRY_debug", extension.debug.get().toString())
+            tags.put("debug", extension.debug.get().toString())
             tags.put(
-                "SENTRY_includeProguardMapping",
+                "includeProguardMapping",
                 extension.includeProguardMapping.get().toString()
             )
             tags.put(
-                "SENTRY_autoUploadProguardMapping",
+                "autoUploadProguardMapping",
                 extension.autoUploadProguardMapping.get().toString()
             )
-            tags.put("SENTRY_autoUpload", extension.autoUpload.get().toString())
-            tags.put("SENTRY_uploadNativeSymbols", extension.uploadNativeSymbols.get().toString())
+            tags.put("autoUpload", extension.autoUpload.get().toString())
+            tags.put("uploadNativeSymbols", extension.uploadNativeSymbols.get().toString())
             tags.put(
-                "SENTRY_autoUploadNativeSymbols",
+                "autoUploadNativeSymbols",
                 extension.autoUploadNativeSymbols.get().toString()
             )
-            tags.put("SENTRY_includeNativeSources", extension.includeNativeSources.get().toString())
+            tags.put("includeNativeSources", extension.includeNativeSources.get().toString())
             tags.put(
-                "SENTRY_ignoredVariants_set",
+                "ignoredVariants_set",
                 extension.ignoredVariants.get().isNotEmpty().toString()
             )
             tags.put(
-                "SENTRY_ignoredBuildTypes_set",
+                "ignoredBuildTypes_set",
                 extension.ignoredBuildTypes.get().isNotEmpty().toString()
             )
             tags.put(
-                "SENTRY_ignoredFlavors",
+                "ignoredFlavors_set",
                 extension.ignoredFlavors.get().isNotEmpty().toString()
             )
             tags.put(
-                "SENTRY_dexguardEnabled",
+                "dexguardEnabled",
                 extension.dexguardEnabled.get().toString()
             )
             tags.put(
-                "SENTRY_tracing_enabled",
+                "tracing_enabled",
                 extension.tracingInstrumentation.enabled.get().toString()
             )
             tags.put(
-                "SENTRY_tracing_debug",
+                "tracing_debug",
                 extension.tracingInstrumentation.debug.get().toString()
             )
             tags.put(
-                "SENTRY_tracing_forceInstrumentDependencies",
+                "tracing_forceInstrumentDependencies",
                 extension.tracingInstrumentation.forceInstrumentDependencies.get().toString()
             )
             tags.put(
-                "SENTRY_tracing_features",
+                "tracing_features",
                 extension.tracingInstrumentation.features.get().toString()
             )
             tags.put(
-                "SENTRY_tracing_logcat_enabled",
+                "tracing_logcat_enabled",
                 extension.tracingInstrumentation.logcat.enabled.get().toString()
             )
             tags.put(
-                "SENTRY_tracing_logcat_minLevel",
+                "tracing_logcat_minLevel",
                 extension.tracingInstrumentation.logcat.minLevel.get().toString()
             )
             tags.put(
-                "SENTRY_autoInstallation_enabled",
+                "autoInstallation_enabled",
                 extension.autoInstallation.enabled.get().toString()
             )
             tags.put(
-                "SENTRY_autoInstallation_sentryVersion",
+                "autoInstallation_sentryVersion",
                 extension.autoInstallation.sentryVersion.get().toString()
             )
             tags.put(
-                "SENTRY_includeDependenciesReport",
+                "includeDependenciesReport",
                 extension.includeDependenciesReport.get().toString()
             )
-            tags.put("SENTRY_includeSourceContext", extension.includeSourceContext.get().toString())
+            tags.put("includeSourceContext", extension.includeSourceContext.get().toString())
             tags.put(
-                "SENTRY_additionalSourceDirsForSourceContext_set",
+                "additionalSourceDirsForSourceContext_set",
                 extension.additionalSourceDirsForSourceContext.get().isNotEmpty().toString()
             )
             // TODO PII?
-            extension.projectName.orNull?.let { tags.put("SENTRY_projectName", it) }
+            extension.projectName.orNull?.let { tags.put("projectName", it) }
 
             return tags
         }
