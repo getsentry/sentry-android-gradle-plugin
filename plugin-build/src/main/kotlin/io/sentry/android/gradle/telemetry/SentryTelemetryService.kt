@@ -88,7 +88,6 @@ abstract class SentryTelemetryService :
                         options.isSendModules = false
                         options.environment = startParameters.buildType
                         options.setTag("SDK_VERSION", BuildConfig.SdkVersion)
-                        options.setTag("AGP_VERSION", AgpVersions.CURRENT.toString())
                         options.setTag("BUILD_SYSTEM", "gradle")
                         options.setTag("GRADLE_VERSION", GradleVersion.current().version)
                         startParameters.cliVersion?.let { options.setTag("SENTRY_CLI_VERSION", it) }
@@ -99,6 +98,10 @@ abstract class SentryTelemetryService :
                                 value
                             )
                         }
+
+                        try {
+                            options.setTag("AGP_VERSION", AgpVersions.CURRENT.toString())
+                        } catch (t: Throwable) {}
                     }
                 }
                 hub = Sentry.getCurrentHub()
@@ -236,7 +239,7 @@ abstract class SentryTelemetryService :
             buildType: String
         ): SentryTelemetryServiceParams {
             val tags = extraTagsFromExtension(project, extension)
-            var isSaas: Boolean? = extension.org.orNull != null
+            var isSaas: Boolean? = extension.url.orNull == null
 
             if (isExecAvailable()) {
                 return paramsWithExecAvailable(
@@ -418,7 +421,7 @@ abstract class SentryTelemetryService :
                 extension.additionalSourceDirsForSourceContext.get().isNotEmpty().toString()
             )
             // TODO PII?
-            extension.projectName.orNull?.let { tags.put("projectName", it) }
+//            extension.projectName.orNull?.let { tags.put("projectName", it) }
 
             return tags
         }
