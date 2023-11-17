@@ -47,7 +47,7 @@ class SentryPluginTest :
         )
 
         val result = runner
-            .appendArguments("app:collectDependencies")
+            .appendArguments("app:assembleRelease")
             .build()
 
         assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
@@ -76,7 +76,7 @@ class SentryPluginTest :
         )
 
         val result = runner
-            .appendArguments("app:collectDependencies")
+            .appendArguments("app:assembleRelease")
             .build()
 
         assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
