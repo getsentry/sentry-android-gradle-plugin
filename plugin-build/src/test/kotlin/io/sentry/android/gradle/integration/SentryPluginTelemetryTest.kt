@@ -1,0 +1,38 @@
+package io.sentry.android.gradle.integration
+
+import io.sentry.BuildConfig
+import kotlin.test.assertTrue
+import org.gradle.util.GradleVersion
+import org.junit.Test
+
+class SentryPluginTelemetryTest :
+    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
+    @Test
+    fun `telemetry can be disabled`() {
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+                sentry {
+                  telemetry = false
+                }
+            """.trimIndent()
+        )
+
+        val result = runner
+            .appendArguments("app:assembleRelease", "--debug")
+            .build()
+
+        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
+        assertTrue(result.output) { "Sentry telemetry has been disabled." in result.output }
+    }
+
+    @Test
+    fun `telemetry is enabled by default`() {
+        val result = runner
+            .appendArguments("app:assembleRelease", "--info")
+            .build()
+
+        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
+        assertTrue(result.output) { "Sentry telemetry is enabled." in result.output }
+    }
+}
