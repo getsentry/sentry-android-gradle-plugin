@@ -2,7 +2,6 @@ package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
-import io.sentry.android.gradle.integration.BaseSentryNonAndroidPluginTest.Companion.appendArguments
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
