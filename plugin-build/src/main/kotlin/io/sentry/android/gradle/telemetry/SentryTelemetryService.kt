@@ -72,7 +72,8 @@ abstract class SentryTelemetryService :
             try {
                 if (startParameters.saas == false) {
                     SentryPlugin.logger.info {
-                        "Sentry is running against a self hosted instance. Telemetry has been disabled."
+                        "Sentry is running against a self hosted instance. " +
+                            "Telemetry has been disabled."
                     }
                     hub = NoOpHub.getInstance()
                 } else if (!startParameters.sendTelemetry) {
@@ -95,7 +96,9 @@ abstract class SentryTelemetryService :
                             options.setTag("SDK_VERSION", BuildConfig.SdkVersion)
                             options.setTag("BUILD_SYSTEM", "gradle")
                             options.setTag("GRADLE_VERSION", GradleVersion.current().version)
-                            startParameters.cliVersion?.let { options.setTag("SENTRY_CLI_VERSION", it) }
+                            startParameters.cliVersion?.let {
+                                options.setTag("SENTRY_CLI_VERSION", it)
+                            }
 
                             startParameters.extraTags.forEach { (key, value) ->
                                 options.setTag(
