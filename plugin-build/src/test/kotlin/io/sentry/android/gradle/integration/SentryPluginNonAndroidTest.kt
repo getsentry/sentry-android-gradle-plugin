@@ -33,7 +33,7 @@ class SentryPluginNonAndroidTest :
         )
 
         val result = runner
-            .appendArguments("app:assembleRelease")
+            .appendArguments("app:assemble")
             .build()
 
         assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
@@ -62,7 +62,7 @@ class SentryPluginNonAndroidTest :
         )
 
         val result = runner
-            .appendArguments("app:assembleRelease")
+            .appendArguments("app:assemble")
             .build()
 
         assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
