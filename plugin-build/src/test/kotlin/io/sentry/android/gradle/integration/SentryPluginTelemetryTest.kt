@@ -19,7 +19,7 @@ class SentryPluginTelemetryTest :
         )
 
         val result = runner
-            .appendArguments("app:assembleRelease", "--debug")
+            .appendArguments("app:assembleDebug", "--debug")
             .build()
 
         assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
@@ -29,7 +29,7 @@ class SentryPluginTelemetryTest :
     @Test
     fun `telemetry is enabled by default`() {
         val result = runner
-            .appendArguments("app:assembleRelease", "--info")
+            .appendArguments("app:assembleDebug", "--info")
             .build()
 
         assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }

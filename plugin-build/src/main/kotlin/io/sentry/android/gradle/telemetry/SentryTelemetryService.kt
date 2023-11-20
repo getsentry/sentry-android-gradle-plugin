@@ -57,13 +57,14 @@ abstract class SentryTelemetryService :
     private var transaction: ITransaction? = null
     private var didAddChildSpans: Boolean = false
     private var started: Boolean = false
+    private val startLock = Any()
 
     fun start(paramsCallback: () -> SentryTelemetryServiceParams) {
         if (started) {
             return
         }
 
-        synchronized(started) {
+        synchronized(startLock) {
             if (started) {
                 return
             }
