@@ -1,12 +1,12 @@
 package io.sentry.android.gradle.integration
 
-//import io.sentry.BuildConfig
-//import kotlin.test.Ignore
-//import kotlin.test.Test
-//import kotlin.test.assertTrue
-//import org.gradle.util.GradleVersion
+// import io.sentry.BuildConfig
+// import kotlin.test.Ignore
+// import kotlin.test.Test
+// import kotlin.test.assertTrue
+// import org.gradle.util.GradleVersion
 //
-//class SentryPluginTelemetryTest :
+// class SentryPluginTelemetryTest :
 //    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 //
 //    @Test
@@ -37,4 +37,4 @@ package io.sentry.android.gradle.integration
 //        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
 //        assertTrue(result.output) { "Sentry telemetry is enabled." in result.output }
 //    }
-//}
+// }

@@ -245,7 +245,6 @@ abstract class SentryTelemetryService :
             buildType: String
         ): SentryTelemetryServiceParams {
             val tags = extraTagsFromExtension(project, extension)
-            var isSaas: Boolean? = extension.url.orNull == null
 
             if (isExecAvailable()) {
                 return paramsWithExecAvailable(
@@ -253,7 +252,6 @@ abstract class SentryTelemetryService :
                     cliExecutable,
                     extension,
                     variant,
-                    isSaas,
                     sentryOrg,
                     buildType,
                     tags
@@ -266,7 +264,7 @@ abstract class SentryTelemetryService :
                     buildType,
                     tags,
                     extension.debug.get(),
-                    saas = isSaas,
+                    saas = extension.url.orNull == null,
                     cliVersion = BuildConfig.CliVersion
                 )
             }
@@ -277,12 +275,10 @@ abstract class SentryTelemetryService :
             cliExecutable: String,
             extension: SentryPluginExtension,
             variant: SentryVariant?,
-            isSaas: Boolean?,
             sentryOrg: String?,
             buildType: String,
             tags: Map<String, String>
         ): SentryTelemetryServiceParams {
-            var isSaas1 = isSaas
             var cliVersion: String? = BuildConfig.CliVersion
             var defaultSentryOrganization: String? = null
             val infoOutput = project.providers.of(SentryCliInfoValueSource::class.java) { cliVS ->
@@ -295,7 +291,7 @@ abstract class SentryTelemetryService :
                     )
                 }
             }.get()
-            isSaas1 = infoOutput.contains("(?m)Sentry Server: .*sentry.io$".toRegex())
+            val isSaas = infoOutput.contains("(?m)Sentry Server: .*sentry.io$".toRegex())
 
             orgRegex.find(infoOutput)?.let { matchResult ->
                 val groupValues = matchResult.groupValues
@@ -331,7 +327,7 @@ abstract class SentryTelemetryService :
                 tags,
                 extension.debug.get(),
                 defaultSentryOrganization,
-                isSaas1,
+                isSaas,
                 cliVersion = cliVersion
             )
         }
