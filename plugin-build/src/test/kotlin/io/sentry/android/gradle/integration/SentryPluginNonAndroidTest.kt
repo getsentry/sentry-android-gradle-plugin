@@ -1,9 +1,9 @@
 package io.sentry.android.gradle.integration
 
-import kotlin.test.assertTrue
-import org.gradle.util.GradleVersion
 import kotlin.test.Ignore
 import kotlin.test.Test
+import kotlin.test.assertTrue
+import org.gradle.util.GradleVersion
 
 class SentryPluginNonAndroidTest :
     BaseSentryNonAndroidPluginTest(GradleVersion.current().version) {
