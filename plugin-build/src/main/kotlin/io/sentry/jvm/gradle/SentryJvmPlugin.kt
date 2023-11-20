@@ -9,18 +9,23 @@ import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.SentryPluginUtils
 import io.sentry.android.gradle.util.hookWithAssembleTasks
 import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.JavaVariant
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 
-class SentryJvmPlugin : Plugin<Project> {
+class SentryJvmPlugin @Inject constructor(
+    private val buildEvents: BuildEventListenerRegistryInternal
+) : Plugin<Project> {
 
     /**
      * Since we're listening for the JavaBasePlugin, there may be multiple plugins inherting from it
@@ -35,6 +40,7 @@ class SentryJvmPlugin : Plugin<Project> {
             SentryPluginExtension::class.java,
             project
         )
+
         project.pluginManager.withPlugin("org.gradle.java") {
             if (configuredForJavaProject.getAndSet(true)) {
                 SentryPlugin.logger.info { "The Sentry Gradle plugin was already configured" }
@@ -59,9 +65,25 @@ class SentryJvmPlugin : Plugin<Project> {
                 extraProperties.get(SentryPlugin.SENTRY_PROJECT_PARAMETER).toString()
             }.getOrNull()
 
+            val sentryTelemetryProvider = SentryTelemetryService.register(project)
+            project.gradle.taskGraph.whenReady {
+                sentryTelemetryProvider.get().start {
+                    SentryTelemetryService.createParameters(
+                        project,
+                        javaVariant,
+                        extension,
+                        cliExecutable,
+                        sentryOrgParameter,
+                        "JVM"
+                    )
+                }
+                buildEvents.onOperationCompletion(sentryTelemetryProvider)
+            }
+
             val sourceContextTasks = SourceContext.register(
                 project,
                 extension,
+                sentryTelemetryProvider,
                 javaVariant,
                 outputPaths,
                 cliExecutable,
@@ -78,6 +100,8 @@ class SentryJvmPlugin : Plugin<Project> {
 
             val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
                 project,
+                extension,
+                sentryTelemetryProvider,
                 listOf(sourceContextTasks.generateBundleIdTask),
                 sentryResDir,
                 "java"
@@ -85,6 +109,8 @@ class SentryJvmPlugin : Plugin<Project> {
 
             val reportDependenciesTask = SentryExternalDependenciesReportTaskFactory.register(
                 project = project,
+                extension,
+                sentryTelemetryProvider,
                 configurationName = "runtimeClasspath",
                 attributeValueJar = "jar",
                 includeReport = extension.includeDependenciesReport,

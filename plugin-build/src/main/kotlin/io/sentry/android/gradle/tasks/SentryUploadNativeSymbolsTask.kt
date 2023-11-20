@@ -3,6 +3,8 @@ package io.sentry.android.gradle.tasks
 import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
+import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.asSentryCliExec
 import io.sentry.android.gradle.util.hookWithAssembleTasks
 import io.sentry.android.gradle.util.info
@@ -63,6 +65,9 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
     @get:Internal
     abstract val variantName: Property<String>
 
+    @get:Internal
+    abstract val sentryTelemetryService: Property<SentryTelemetryService>
+
     override fun exec() {
         computeCommandLineArgs().let {
             commandLine(it)
@@ -102,6 +107,8 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
         if (debug.getOrElse(false)) {
             args.add("--log-level=debug")
         }
+
+        sentryTelemetryService.orNull?.traceCli()?.let { args.addAll(it) }
 
         sentryUrl.orNull?.let {
             args.add("--url")
@@ -148,6 +155,8 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
     companion object {
         fun register(
             project: Project,
+            extension: SentryPluginExtension,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>,
             variantName: String,
             debug: Property<Boolean>,
             cliExecutable: String,
@@ -175,7 +184,9 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
                 task.sentryProject.set(sentryProject)
                 task.sentryAuthToken.set(sentryAuthToken)
                 task.sentryUrl.set(sentryUrl)
+                task.sentryTelemetryService.set(sentryTelemetryProvider)
                 task.asSentryCliExec()
+                task.withSentryTelemetry(extension, sentryTelemetryProvider)
             }
             return uploadSentryNativeSymbolsTask
         }
@@ -185,6 +196,7 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
 fun SentryVariant.configureNativeSymbolsTask(
     project: Project,
     extension: SentryPluginExtension,
+    sentryTelemetryProvider: Provider<SentryTelemetryService>,
     cliExecutable: String,
     sentryOrg: String?,
     sentryProject: String?
@@ -194,6 +206,8 @@ fun SentryVariant.configureNativeSymbolsTask(
         // Setup the task to upload native symbols task after the assembling task
         val uploadSentryNativeSymbolsTask = SentryUploadNativeSymbolsTask.register(
             project = project,
+            extension = extension,
+            sentryTelemetryProvider = sentryTelemetryProvider,
             variantName = name,
             debug = extension.debug,
             cliExecutable = cliExecutable,

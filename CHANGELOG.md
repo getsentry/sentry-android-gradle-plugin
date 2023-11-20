@@ -6,6 +6,8 @@
 
 - Print a warning if the Sentry plugin is not applied on the app module ([#586](https://github.com/getsentry/sentry-android-gradle-plugin/pull/586))
 - Add new `excludes` option to exclude classes from instrumentation ([#590](https://github.com/getsentry/sentry-android-gradle-plugin/pull/590))
+- Send telemetry data for plugin usage ([#582](https://github.com/getsentry/sentry-android-gradle-plugin/pull/582))
+  - This will collect errors and timings of the plugin and its tasks (anonymized, except the sentry org id), so we can better understand how the plugin is performing. If you wish to opt-out of this behavior, set `telemetry = false` in the `sentry` plugin configuration block.
 
 ### Chores
 

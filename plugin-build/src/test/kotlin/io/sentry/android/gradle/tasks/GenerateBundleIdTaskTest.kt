@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
 import io.sentry.android.gradle.util.PropertiesUtil
@@ -20,6 +21,8 @@ class GenerateBundleIdTaskTest {
         val task: TaskProvider<GenerateBundleIdTask> =
             GenerateBundleIdTask.register(
                 project,
+                project.extensions.findByName("sentry") as SentryPluginExtension,
+                null,
                 project.layout.buildDirectory.dir("dummy/folder/"),
                 project.objects.property(Boolean::class.java).convention(true),
                 "test"
@@ -41,6 +44,8 @@ class GenerateBundleIdTaskTest {
         val task: TaskProvider<GenerateBundleIdTask> =
             GenerateBundleIdTask.register(
                 project,
+                project.extensions.findByName("sentry") as SentryPluginExtension,
+                null,
                 project.layout.buildDirectory.dir("dummy/folder/"),
                 project.objects.property(Boolean::class.java).convention(true),
                 "test"

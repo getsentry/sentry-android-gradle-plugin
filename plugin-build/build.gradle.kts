@@ -2,6 +2,8 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.vanniktech.maven.publish.MavenPublishPluginExtension
 import io.sentry.android.gradle.internal.ASMifyTask
 import io.sentry.android.gradle.internal.BootstrapAndroidSdk
+import java.io.FileInputStream
+import java.util.Properties
 import org.gradle.api.internal.classpath.ModuleRegistry
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.configurationcache.extensions.serviceOf
@@ -64,6 +66,8 @@ dependencies {
     compileOnly(Libs.ASM_COMMONS)
 
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:${KotlinCompilerVersion.VERSION}")
+
+    implementation(Libs.SENTRY)
 
     // compileOnly since we'll be shading the common dependency into the final jar
     // but we still need to be able to compile it (this also excludes it from .pom)
@@ -334,6 +338,17 @@ buildConfig {
     buildConfigField("String", "Version", provider { "\"${project.version}\"" })
     buildConfigField("String", "SdkVersion", provider { "\"${project.property("sdk_version")}\"" })
     buildConfigField("String", "AgpVersion", provider { "\"${BuildPluginsVersion.AGP}\"" })
+    buildConfigField(
+        "String",
+        "CliVersion",
+        provider {
+            "\"${Properties().apply {
+                load(
+                    FileInputStream(File("$projectDir/sentry-cli.properties"))
+                )
+            }.getProperty("version")}\""
+        }
+    )
 }
 
 tasks.register<ASMifyTask>("asmify")

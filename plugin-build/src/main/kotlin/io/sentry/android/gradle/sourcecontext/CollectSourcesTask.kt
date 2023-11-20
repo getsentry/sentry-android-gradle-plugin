@@ -2,7 +2,10 @@ package io.sentry.android.gradle.sourcecontext
 
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
+import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
+import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.debug
 import java.io.File
 import org.gradle.api.Project
@@ -50,6 +53,8 @@ abstract class CollectSourcesTask : DirectoryOutputTask() {
     companion object {
         fun register(
             project: Project,
+            extension: SentryPluginExtension,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             sourceDirs: Provider<out Collection<Directory>>,
             output: Provider<Directory>,
             includeSourceContext: Property<Boolean>,
@@ -62,6 +67,7 @@ abstract class CollectSourcesTask : DirectoryOutputTask() {
                 task.sourceDirs.setFrom(sourceDirs)
                 task.output.set(output)
                 task.includeSourceContext.set(includeSourceContext)
+                task.withSentryTelemetry(extension, sentryTelemetryProvider)
             }
         }
     }

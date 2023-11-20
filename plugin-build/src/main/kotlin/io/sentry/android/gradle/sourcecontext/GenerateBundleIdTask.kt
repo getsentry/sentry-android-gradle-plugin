@@ -1,6 +1,9 @@
 package io.sentry.android.gradle.sourcecontext
 
+import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
+import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.info
 import java.util.Properties
 import java.util.UUID
@@ -59,6 +62,8 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
 
         fun register(
             project: Project,
+            extension: SentryPluginExtension,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             output: Provider<Directory>? = null,
             includeSourceContext: Property<Boolean>,
             taskSuffix: String = ""
@@ -69,6 +74,7 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
             ) { task ->
                 output?.let { task.output.set(it) }
                 task.includeSourceContext.set(includeSourceContext)
+                task.withSentryTelemetry(extension, sentryTelemetryProvider)
             }
             return generateBundleIdTask
         }

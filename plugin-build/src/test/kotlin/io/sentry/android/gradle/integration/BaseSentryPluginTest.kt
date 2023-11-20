@@ -104,6 +104,7 @@ abstract class BaseSentryPluginTest(
             .withArguments("--stacktrace")
             .withPluginClasspath()
             .withGradleVersion(gradleVersion)
+//            .withDebug(true)
             .forwardStdOutput(writer)
             .forwardStdError(writer)
     }
