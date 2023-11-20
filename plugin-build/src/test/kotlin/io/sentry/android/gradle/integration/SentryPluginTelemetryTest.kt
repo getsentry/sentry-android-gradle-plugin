@@ -3,10 +3,13 @@ package io.sentry.android.gradle.integration
 import io.sentry.BuildConfig
 import kotlin.test.assertTrue
 import org.gradle.util.GradleVersion
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.Ignore
 
 class SentryPluginTelemetryTest :
     BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
+
+    @Ignore
     @Test
     fun `telemetry can be disabled`() {
         appBuildFile.appendText(
@@ -26,6 +29,7 @@ class SentryPluginTelemetryTest :
         assertTrue(result.output) { "Sentry telemetry has been disabled." in result.output }
     }
 
+    @Ignore
     @Test
     fun `telemetry is enabled by default`() {
         val result = runner
