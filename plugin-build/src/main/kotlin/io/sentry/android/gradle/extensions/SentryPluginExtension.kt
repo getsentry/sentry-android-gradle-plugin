@@ -218,7 +218,7 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      * Default is enabled.
      */
     val telemetry: Property<Boolean> = objects
-        .property(Boolean::class.java).convention(false)
+        .property(Boolean::class.java).convention(true)
 
     /**
      * The DSN (Sentry URL) telemetry data is sent to.
