@@ -108,6 +108,9 @@ sentry {
     autoUploadSourceContext.set(CI.canAutoUpload())
     additionalSourceDirsForSourceContext.set(setOf("src/custom/java"))
 
+    org.set("sentry-sdks")
+    projectName.set("sentry-android")
+
     tracingInstrumentation {
         forceInstrumentDependencies.set(true)
     }

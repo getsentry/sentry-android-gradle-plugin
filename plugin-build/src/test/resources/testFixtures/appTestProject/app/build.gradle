@@ -18,4 +18,5 @@ sentry {
     autoInstallation {
         enabled = false
     }
+    telemetry = false
 }

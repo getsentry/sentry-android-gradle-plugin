@@ -113,7 +113,11 @@ abstract class SentryTelemetryService :
 
                 hub.configureScope { scope ->
                     scope.user = User().also { user ->
-                        startParameters.defaultSentryOrganization?.let { user.id = it }
+                        startParameters.defaultSentryOrganization?.let { org ->
+                            if (org != "-") {
+                                user.id = org
+                            }
+                        }
                         startParameters.sentryOrganization?.let { user.id = it }
                     }
                 }
@@ -245,6 +249,7 @@ abstract class SentryTelemetryService :
             buildType: String
         ): SentryTelemetryServiceParams {
             val tags = extraTagsFromExtension(project, extension)
+            val org = sentryOrg ?: extension.org.orNull
 
             if (isExecAvailable()) {
                 return paramsWithExecAvailable(
@@ -252,7 +257,7 @@ abstract class SentryTelemetryService :
                     cliExecutable,
                     extension,
                     variant,
-                    sentryOrg,
+                    org,
                     buildType,
                     tags
                 )
@@ -260,7 +265,7 @@ abstract class SentryTelemetryService :
                 return SentryTelemetryServiceParams(
                     extension.telemetry.get(),
                     extension.telemetryDsn.get(),
-                    sentryOrg,
+                    org,
                     buildType,
                     tags,
                     extension.debug.get(),
