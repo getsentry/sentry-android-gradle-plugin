@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Retrieve `sentryOrg` from the `SentryPluginExtension` for telemetry ([#599](https://github.com/getsentry/sentry-android-gradle-plugin/pull/599))
+
 ### Dependencies
 
 - Bump CLI from v2.21.5 to v2.22.3 ([#598](https://github.com/getsentry/sentry-android-gradle-plugin/pull/598), [#600](https://github.com/getsentry/sentry-android-gradle-plugin/pull/600))

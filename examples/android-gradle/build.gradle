@@ -34,6 +34,7 @@ android {
 sentry {
     autoUploadProguardMapping = CI.INSTANCE.canAutoUpload()
 
+    telemetryDsn = CI.INSTANCE.SENTRY_SDKS_DSN
     tracingInstrumentation {
         enabled = false
     }

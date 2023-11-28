@@ -58,6 +58,7 @@ object Libs {
 }
 
 object CI {
+    const val SENTRY_SDKS_DSN = "https://dd1f82ad30a331bd7def2a0dce926c6e@o447951.ingest.sentry.io/4506031723446272"
     fun canAutoUpload(): Boolean {
         return System.getenv("AUTO_UPLOAD").toBoolean() &&
                 !System.getenv("SENTRY_AUTH_TOKEN").isNullOrEmpty()
