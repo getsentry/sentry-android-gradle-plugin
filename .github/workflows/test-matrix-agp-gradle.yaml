@@ -103,6 +103,8 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           gradle-version: ${{ matrix.gradle }}
+          gradle-home-cache-excludes: |
+            caches/transforms-3
           arguments: integrationTest
 
       - name: Upload Test Results
