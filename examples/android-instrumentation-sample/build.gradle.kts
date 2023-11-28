@@ -110,6 +110,7 @@ sentry {
 
     org.set("sentry-sdks")
     projectName.set("sentry-android")
+    telemetryDsn.set(CI.SENTRY_SDKS_DSN)
 
     tracingInstrumentation {
         forceInstrumentDependencies.set(true)

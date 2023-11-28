@@ -50,6 +50,7 @@ sentry {
 
     dexguardEnabled = true
 
+    telemetryDsn = CI.INSTANCE.SENTRY_SDKS_DSN
     tracingInstrumentation {
         enabled = false
     }
