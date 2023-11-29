@@ -42,7 +42,8 @@ class SentryPluginConfigurationCacheTest :
             com.squareup.okhttp3:okhttp:3.14.9
             com.squareup.okio:okio:1.17.2
             """.trimIndent(),
-            deps
+            deps,
+            "$deps\ndo not match expected value"
         )
         assertTrue { "Configuration cache entry stored." in output }
 
