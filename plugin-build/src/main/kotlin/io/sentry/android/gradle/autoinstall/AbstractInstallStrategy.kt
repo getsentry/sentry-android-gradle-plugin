@@ -64,8 +64,8 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
             } catch (ex: IllegalArgumentException) {
                 logger.warn {
                     "$sentryModuleId won't be installed because the provided " +
-                        "sentry version(${autoInstallState.sentryVersion}) could not be processed " +
-                        "as a semantic version."
+                        "sentry version(${autoInstallState.sentryVersion}) could not be " +
+                        "processed as a semantic version."
                 }
                 return
             }

@@ -1,4 +1,3 @@
-// ktlint-disable max-line-length
 package io.sentry.android.gradle.autoinstall.override
 
 import io.sentry.android.gradle.SentryPlugin
@@ -38,7 +37,11 @@ abstract class WarnOnOverrideStrategy : ComponentMetadataRule {
 
         if (userVersion < providedVersion) {
             logger.warn(
-                "WARNING: Version of '${context.details.id.module}' was overridden from '$userVersion' to '$providedVersion' by the Sentry Gradle plugin. If you want to use the older version, you can add `autoInstallation.sentryVersion.set(\"$userVersion\")` in the `sentry {}` plugin configuration block"
+                "WARNING: Version of '${context.details.id.module}' was overridden " +
+                    "from '$userVersion' to '$providedVersion' by the Sentry Gradle plugin. " +
+                    "If you want to use the older version, you can add " +
+                    "`autoInstallation.sentryVersion.set(\"$userVersion\")` in the `sentry {}` " +
+                    "plugin configuration block"
             )
         }
     }
