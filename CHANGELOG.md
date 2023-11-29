@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+### Features
+
+- Do not consider user-defined sentry versions when auto-installing integrations. This is necessary because we want to align integrations versions to the same one as one of `sentry-android-core`/`sentry`/`sentry-android`. ([#602](https://github.com/getsentry/sentry-android-gradle-plugin/pull/602))
+  - If you have directly defined one of the core versions, we will use that to install integrations, otherwise `autoInstallation.sentryVersion` or the default bundled SDK version is used.
+
+This means if you have defined something like that:
+```kotlin
+// direct deps
+dependencies {
+  implementation("io.sentry:sentry-android-core:7.0.0")
+  implementation("io.sentry:sentry-android-okhttp:6.34.0")
+}
+
+// or with the gradle plugin
+sentry {
+  autoInstallation.sentryVersion = '7.0.0' // or the latest version bundled within the plugin
+}
+
+dependencies {
+  implementation("io.sentry:sentry-android-okhttp:6.34.0")
+}
+```
+
+Then in both cases it will use `7.0.0` when installing the `sentry-android-okhttp` integration and print a warning that we have overridden the version.
+
 ### Fixes
 
 - Retrieve `sentryOrg` from the `SentryPluginExtension` for telemetry ([#599](https://github.com/getsentry/sentry-android-gradle-plugin/pull/599))
