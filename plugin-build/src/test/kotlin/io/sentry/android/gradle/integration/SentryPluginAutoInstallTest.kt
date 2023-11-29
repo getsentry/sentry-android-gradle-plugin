@@ -1,3 +1,4 @@
+// ktlint-disable max-line-length
 package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
@@ -205,6 +206,33 @@ class SentryPluginAutoInstallTest :
         assertTrue { "io.sentry:sentry-android-sqlite:6.21.0" in result.output }
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
+    }
+
+    @Test
+    fun `warns about overriding user-defined sentry dependencies`() {
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+            dependencies {
+              implementation project(':module')
+            }
+            sentry.autoInstallation.enabled = true
+            sentry.autoInstallation.sentryVersion = "6.21.0"
+            sentry.includeProguardMapping = false
+            """.trimIndent()
+        )
+
+        moduleBuildFile.appendText(
+            // language=Groovy
+            """
+            dependencies {
+              implementation 'io.sentry:sentry-android-core:6.0.0'
+            }
+            """.trimIndent()
+        )
+
+        val result = runner.appendArguments("app:assembleDebug").build()
+        assertTrue { "WARNING: Version of 'io.sentry:sentry-android-core' was overridden from '6.0.0' to '6.21.0' by the Sentry Gradle plugin. If you want to use the older version, you can add `autoInstallation.sentryVersion.set(\"6.0.0\")` in the `sentry {}` plugin configuration block" in result.output }
     }
 
     private fun runListDependenciesTask() = runner

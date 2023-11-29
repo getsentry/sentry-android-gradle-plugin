@@ -12,66 +12,10 @@ class AutoInstallState private constructor() : Serializable {
 
     @get:Synchronized
     @set:Synchronized
-    var installOkHttp: Boolean = false
-
-    @get:Synchronized
-    @set:Synchronized
-    var installSqlite: Boolean = false
-
-    @get:Synchronized
-    @set:Synchronized
-    var installFragment: Boolean = false
-
-    @get:Synchronized
-    @set:Synchronized
-    var installTimber: Boolean = false
-
-    @get:Synchronized
-    @set:Synchronized
-    var installCompose: Boolean = false
-
-    @get:Synchronized
-    @set:Synchronized
-    var installSpring: Boolean = false
-
-    @get:Synchronized
-    @set:Synchronized
-    var installLogback: Boolean = false
-
-    @get:Synchronized
-    @set:Synchronized
-    var installLog4j2: Boolean = false
-
-    @get:Synchronized
-    @set:Synchronized
-    var installJdbc: Boolean = false
-
-    @get:Synchronized
-    @set:Synchronized
-    var installGraphql: Boolean = false
-
-    @get:Synchronized
-    @set:Synchronized
-    var installQuartz: Boolean = false
-
-    @get:Synchronized
-    @set:Synchronized
-    var installKotlinExtensions: Boolean = false
+    var enabled: Boolean = false
 
     override fun toString(): String {
-        return "AutoInstallState(sentryVersion='$sentryVersion', " +
-            "installOkHttp=$installOkHttp, " +
-            "installSqlite=$installSqlite, " +
-            "installFragment=$installFragment, " +
-            "installTimber=$installTimber, " +
-            "installCompose=$installCompose, " +
-            "installSpring=$installSpring, " +
-            "installLogback=$installLogback, " +
-            "installLog4j2=$installLog4j2, " +
-            "installJdbc=$installJdbc), " +
-            "installGraphql=$installGraphql), " +
-            "installQuartz=$installQuartz), " +
-            "installKotlinExtensions=$installKotlinExtensions)"
+        return "AutoInstallState(sentryVersion='$sentryVersion', enabled=$enabled)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -81,36 +25,12 @@ class AutoInstallState private constructor() : Serializable {
         other as AutoInstallState
 
         if (sentryVersion != other.sentryVersion) return false
-        if (installOkHttp != other.installOkHttp) return false
-        if (installSqlite != other.installSqlite) return false
-        if (installFragment != other.installFragment) return false
-        if (installTimber != other.installTimber) return false
-        if (installCompose != other.installCompose) return false
-        if (installSpring != other.installSpring) return false
-        if (installLogback != other.installLogback) return false
-        if (installLog4j2 != other.installLog4j2) return false
-        if (installJdbc != other.installJdbc) return false
-        if (installGraphql != other.installGraphql) return false
-        if (installQuartz != other.installQuartz) return false
-        if (installKotlinExtensions != other.installKotlinExtensions) return false
-
-        return true
+        return enabled == other.enabled
     }
 
     override fun hashCode(): Int {
         var result = sentryVersion.hashCode()
-        result = 31 * result + installOkHttp.hashCode()
-        result = 31 * result + installSqlite.hashCode()
-        result = 31 * result + installFragment.hashCode()
-        result = 31 * result + installTimber.hashCode()
-        result = 31 * result + installCompose.hashCode()
-        result = 31 * result + installSpring.hashCode()
-        result = 31 * result + installLogback.hashCode()
-        result = 31 * result + installLog4j2.hashCode()
-        result = 31 * result + installJdbc.hashCode()
-        result = 31 * result + installGraphql.hashCode()
-        result = 31 * result + installQuartz.hashCode()
-        result = 31 * result + installKotlinExtensions.hashCode()
+        result = 31 * result + enabled.hashCode()
         return result
     }
 

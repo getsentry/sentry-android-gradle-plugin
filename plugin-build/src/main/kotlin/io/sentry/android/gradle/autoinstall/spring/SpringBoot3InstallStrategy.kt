@@ -2,7 +2,6 @@ package io.sentry.android.gradle.autoinstall.spring
 
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.AbstractInstallStrategy
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.autoinstall.InstallStrategyRegistrar
 import io.sentry.android.gradle.util.SemVer
 import javax.inject.Inject
@@ -21,8 +20,6 @@ abstract class SpringBoot3InstallStrategy : AbstractInstallStrategy {
     constructor() : this(SentryPlugin.logger)
 
     override val sentryModuleId: String get() = SENTRY_SPRING_BOOT_3_ID
-
-    override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installSpring
 
     override val minSupportedThirdPartyVersion: SemVer get() = MIN_SUPPORTED_VERSION
 

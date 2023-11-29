@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
                 .all()
                 .map {
                     val remote = withContext(Dispatchers.IO) {
-                        TrackService.instance.tracks("9365c2e9-906c-407c-851c-7204cc2975f7")
+                        TrackService.instance.tracks("6188aa82-3102-436a-9a68-513e6ad9efcb")
                     }
                     remote + it
                 }

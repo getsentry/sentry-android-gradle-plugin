@@ -5,7 +5,6 @@ import com.nhaarman.mockitokotlin2.check
 import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import io.sentry.android.gradle.autoinstall.AutoInstallState
@@ -39,14 +38,14 @@ class FragmentInstallStrategyTest {
             }.whenever(metadataDetails).allVariants(any<Action<VariantMetadata>>())
         }
 
-        fun getSut(installFragment: Boolean = true): FragmentInstallStrategy {
+        fun getSut(): FragmentInstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
                 whenever(it.version).doReturn("1.3.5")
             }
             whenever(metadataDetails.id).thenReturn(id)
 
             with(AutoInstallState.getInstance()) {
-                this.installFragment = installFragment
+                this.enabled = true
                 this.sentryVersion = "5.6.1"
             }
             return FragmentInstallStrategyImpl(logger)
@@ -54,19 +53,6 @@ class FragmentInstallStrategyTest {
     }
 
     private val fixture = Fixture()
-
-    @Test
-    fun `when sentry-android-fragment is a direct dependency logs a message and does nothing`() {
-        val sut = fixture.getSut(installFragment = false)
-        sut.execute(fixture.metadataContext)
-
-        assertTrue {
-            fixture.logger.capturedMessage ==
-                "[sentry] sentry-android-fragment won't be installed because it was already " +
-                "installed directly"
-        }
-        verify(fixture.metadataContext, never()).details
-    }
 
     @Test
     fun `installs sentry-android-fragment with info message`() {
