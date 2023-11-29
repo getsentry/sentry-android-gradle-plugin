@@ -4,7 +4,7 @@
 
 ### Features
 
-- Do not consider user-defined sentry versions when auto-installing integrations. This is necessary because we want to align integrations versions to the same one as one of `sentry-android-core`/`sentry`/`sentry-android`. ([#602](https://github.com/getsentry/sentry-android-gradle-plugin/pull/602))
+- Do not consider user-defined sentry versions when auto-installing integrations. This is necessary because we want to align integrations versions to the same one as one of `sentry-android-core`/`sentry`/`sentry-android` to prevent runtime crashes due to binary incompatibility. ([#602](https://github.com/getsentry/sentry-android-gradle-plugin/pull/602))
   - If you have directly defined one of the core versions, we will use that to install integrations, otherwise `autoInstallation.sentryVersion` or the default bundled SDK version is used.
 
 This means if you have defined something like that:
