@@ -7,6 +7,22 @@ Version 4 of the Sentry Android Gradle plugin brings a variety of features and f
 - Rename `experimentalGuardsquareSupport` flag to `dexguardEnabled`
 - Add new `excludes` option to allow excluding certain classes from instrumentation. It's available under the `sentry.tracingInstrumentation` extension
 
+## Sentry Android SDK Compatibility
+
+Make sure to use Sentry Gradle plugin 4.+ together with the Sentry Android SDK 7.+, otherwise it might crash at runtime due to binary incompatibility. (E.g. if you're using `-timber`, `-okhttp` or other packages)
+
+If you can't do that for some reason, you can specify sentry version via the plugin config block:
+
+```kotlin
+sentry {
+  autoInstallation {
+    sentryVersion.set("7.0.0")
+  }
+}
+```
+
+Similarly, if you have a Sentry SDK (e.g. `sentry-android-core`) dependency on one of your Gradle modules and you're updating it to 7.+, make sure the Gradle plugin is at 4.+ or specify the SDK version as shown in the snippet above.
+
 ## Breaking Changes
 
 - Rename `experimentalGuardsquareSupport` flag to `dexguardEnabled` ([#589](https://github.com/getsentry/sentry-android-gradle-plugin/pull/589))
