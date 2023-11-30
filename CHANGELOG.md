@@ -2,42 +2,38 @@
 
 ## Unreleased
 
-### Fixes
+Version 4 of the Sentry Android Gradle plugin brings a variety of features and fixes. The most notable changes are:
+- Bump Sentry Android SDK to `7.0.0`. Please, refer to the [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#700) of the SDK for more details
+- Rename `experimentalGuardsquareSupport` flag to `dexguardEnabled`
+- Add new `excludes` option to allow excluding certain classes from instrumentation. It's available under the `sentry.tracingInstrumentation` extension
 
-- Retrieve `sentryOrg` from the `SentryPluginExtension` for telemetry ([#599](https://github.com/getsentry/sentry-android-gradle-plugin/pull/599))
+## Breaking Changes
 
-### Dependencies
+- Rename `experimentalGuardsquareSupport` flag to `dexguardEnabled` ([#589](https://github.com/getsentry/sentry-android-gradle-plugin/pull/589))
+- Bump Sentry Android SDK to `7.0.0`
 
-- Bump CLI from v2.21.5 to v2.22.3 ([#598](https://github.com/getsentry/sentry-android-gradle-plugin/pull/598), [#600](https://github.com/getsentry/sentry-android-gradle-plugin/pull/600))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2223)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.5...2.22.3)
-
-## 4.0.0-beta.1
+## Other Changes
 
 ### Features
 
 - Print a warning if the Sentry plugin is not applied on the app module ([#586](https://github.com/getsentry/sentry-android-gradle-plugin/pull/586))
 - Add new `excludes` option to exclude classes from instrumentation ([#590](https://github.com/getsentry/sentry-android-gradle-plugin/pull/590))
 - Send telemetry data for plugin usage ([#582](https://github.com/getsentry/sentry-android-gradle-plugin/pull/582))
-  - This will collect errors and timings of the plugin and its tasks (anonymized, except the sentry org id), so we can better understand how the plugin is performing. If you wish to opt-out of this behavior, set `telemetry = false` in the `sentry` plugin configuration block.
+    - This will collect errors and timings of the plugin and its tasks (anonymized, except the sentry org id), so we can better understand how the plugin is performing. If you wish to opt-out of this behavior, set `telemetry = false` in the `sentry` plugin configuration block.
 
 ### Chores
 
 - Change cli command from `upload-dif` to `debug-files upload` for native symbols ([#587](https://github.com/getsentry/sentry-android-gradle-plugin/pull/587))
 - Use new AGP api for native symbols upload ([#592](https://github.com/getsentry/sentry-android-gradle-plugin/pull/592))
 
-**Breaking changes:**
-
-- Rename `experimentalGuardsquareSupport` flag to `dexguardEnabled` ([#589](https://github.com/getsentry/sentry-android-gradle-plugin/pull/589))
-
 ### Dependencies
 
-- Bump Android SDK from v6.32.0 to v6.34.0 ([#588](https://github.com/getsentry/sentry-android-gradle-plugin/pull/588), [#593](https://github.com/getsentry/sentry-android-gradle-plugin/pull/593), [#597](https://github.com/getsentry/sentry-android-gradle-plugin/pull/597))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6340)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.32.0...6.34.0)
-- Bump CLI from v2.21.2 to v2.21.5 ([#594](https://github.com/getsentry/sentry-android-gradle-plugin/pull/594), [#596](https://github.com/getsentry/sentry-android-gradle-plugin/pull/596))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2215)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.2...2.21.5)
+- Bump Android SDK from v6.32.0 to v7.0.0 ([#588](https://github.com/getsentry/sentry-android-gradle-plugin/pull/588), [#593](https://github.com/getsentry/sentry-android-gradle-plugin/pull/593), [#597](https://github.com/getsentry/sentry-android-gradle-plugin/pull/597))
+    - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#700)
+    - [diff](https://github.com/getsentry/sentry-java/compare/6.32.0...7.0.0)
+- Bump CLI from v2.21.2 to v2.22.3 ([#598](https://github.com/getsentry/sentry-android-gradle-plugin/pull/598), [#600](https://github.com/getsentry/sentry-android-gradle-plugin/pull/600))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2223)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.2...2.22.3)
 
 ## 3.14.0
 
