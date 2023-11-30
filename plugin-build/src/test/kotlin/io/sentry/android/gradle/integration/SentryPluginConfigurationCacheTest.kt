@@ -37,6 +37,7 @@ class SentryPluginConfigurationCacheTest :
 
         val output = runner.build().output
         val deps = verifyDependenciesReportAndroid(testProjectDir.root)
+        print(deps)
         assertEquals(
             """
             com.squareup.okhttp3:okhttp:3.14.9
