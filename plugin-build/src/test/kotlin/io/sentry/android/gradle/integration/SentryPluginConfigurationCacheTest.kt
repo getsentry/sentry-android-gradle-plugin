@@ -32,12 +32,12 @@ class SentryPluginConfigurationCacheTest :
             }
             """.trimIndent()
         )
+        print(appBuildFile.readText())
         runner.appendArguments(":app:assembleDebug")
             .appendArguments("--configuration-cache")
 
         val output = runner.build().output
         val deps = verifyDependenciesReportAndroid(testProjectDir.root)
-        print(deps)
         assertEquals(
             """
             com.squareup.okhttp3:okhttp:3.14.9
