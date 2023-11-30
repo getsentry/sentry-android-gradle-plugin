@@ -29,6 +29,12 @@ class SentryPluginConfigurationCacheTest :
               id "io.sentry.android.gradle"
             }
 
+            repositories {
+                flatDir {
+                    dir('../libs')
+                }
+            }
+
             android {
               namespace 'com.example'
             }
@@ -105,7 +111,7 @@ class SentryPluginConfigurationCacheTest :
             ?.trim()
         /* ktlint-disable max-line-length */
         assertEquals(
-            "{io.sentry:sentry-android-core=6.30.0, io.sentry:sentry=6.30.0, io.sentry:sentry-android-okhttp=6.30.0, io.sentry:sentry-android-sqlite=6.30.0}",
+            "{io.sentry:sentry-android-core=6.30.0, io.sentry:sentry=6.30.0, io.sentry:sentry-android-okhttp=6.30.0}",
             readSentryModules
         )
         /* ktlint-enable max-line-length */
