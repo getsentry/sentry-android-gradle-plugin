@@ -19,7 +19,7 @@ Version 4 of the Sentry Android Gradle plugin brings a variety of features and f
 - Print a warning if the Sentry plugin is not applied on the app module ([#586](https://github.com/getsentry/sentry-android-gradle-plugin/pull/586))
 - Add new `excludes` option to exclude classes from instrumentation ([#590](https://github.com/getsentry/sentry-android-gradle-plugin/pull/590))
 - Send telemetry data for plugin usage ([#582](https://github.com/getsentry/sentry-android-gradle-plugin/pull/582))
-    - This will collect errors and timings of the plugin and its tasks (anonymized, except the sentry org id), so we can better understand how the plugin is performing. If you wish to opt-out of this behavior, set `telemetry = false` in the `sentry` plugin configuration block.
+  - This will collect errors and timings of the plugin and its tasks (anonymized, except the sentry org id), so we can better understand how the plugin is performing. If you wish to opt-out of this behavior, set `telemetry = false` in the `sentry` plugin configuration block.
 
 ### Chores
 
@@ -29,8 +29,8 @@ Version 4 of the Sentry Android Gradle plugin brings a variety of features and f
 ### Dependencies
 
 - Bump Android SDK from v6.32.0 to v7.0.0 ([#588](https://github.com/getsentry/sentry-android-gradle-plugin/pull/588), [#593](https://github.com/getsentry/sentry-android-gradle-plugin/pull/593), [#597](https://github.com/getsentry/sentry-android-gradle-plugin/pull/597))
-    - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#700)
-    - [diff](https://github.com/getsentry/sentry-java/compare/6.32.0...7.0.0)
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#700)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.32.0...7.0.0)
 - Bump CLI from v2.21.2 to v2.22.3 ([#598](https://github.com/getsentry/sentry-android-gradle-plugin/pull/598), [#600](https://github.com/getsentry/sentry-android-gradle-plugin/pull/600))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2223)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.2...2.22.3)
