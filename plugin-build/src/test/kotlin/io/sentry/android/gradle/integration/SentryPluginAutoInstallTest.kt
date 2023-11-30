@@ -42,7 +42,7 @@ class SentryPluginAutoInstallTest :
               // our plugin should override okhttp to 6.34.0
               implementation 'com.squareup.okhttp3:okhttp:4.9.2'
               implementation 'io.sentry:sentry-android-okhttp:6.31.0'
-              // our plugin should override sqlite to 6.34.0
+              // our plugin shouldn't override sqlite to 6.34.0
               implementation 'androidx.sqlite:sqlite:2.0.0'
               implementation 'io.sentry:sentry-android-sqlite:6.21.0'
             }

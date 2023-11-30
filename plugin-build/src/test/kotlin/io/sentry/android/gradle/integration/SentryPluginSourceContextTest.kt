@@ -88,9 +88,9 @@ class SentryPluginSourceContextTest :
 
         sentryPropertiesFile.writeText("")
 
-        val ktContents = root.withDummyComposeFile()
-        val javaContents = root.withDummyJavaFile()
-        val customContents = root.withDummyCustomFile()
+        val ktContents = testProjectDir.withDummyComposeFile()
+        val javaContents = testProjectDir.withDummyJavaFile()
+        val customContents = testProjectDir.withDummyCustomFile()
 
         val result = runner
             .appendArguments("app:assembleRelease")
@@ -102,17 +102,17 @@ class SentryPluginSourceContextTest :
         assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
 
         verifySourceBundleContents(
-            root,
+            testProjectDir.root,
             "files/_/_/com/example/Example.jvm",
             ktContents
         )
         verifySourceBundleContents(
-            root,
+            testProjectDir.root,
             "files/_/_/com/example/TestJava.jvm",
             javaContents
         )
         verifySourceBundleContents(
-            root,
+            testProjectDir.root,
             "files/_/_/io/other/TestCustom.jvm",
             customContents
         )
@@ -157,7 +157,7 @@ class SentryPluginSourceContextTest :
 
         sentryPropertiesFile.writeText("")
 
-        val ktContents = root.withDummyComposeFile()
+        val ktContents = testProjectDir.withDummyComposeFile()
 
         val result = runner
             .appendArguments("app:assembleRelease")
@@ -168,7 +168,7 @@ class SentryPluginSourceContextTest :
         assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
 
         verifySourceBundleContents(
-            root,
+            testProjectDir.root,
             "files/_/_/com/example/Example.jvm",
             ktContents
         )

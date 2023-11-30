@@ -20,6 +20,7 @@ import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.exception.ZipException
 import net.lingala.zip4j.io.inputstream.ZipInputStream
 import org.gradle.api.Project
+import org.junit.rules.TemporaryFolder
 
 /* ktlint-disable max-line-length */
 private val ASSET_PATTERN_PROGUARD =
@@ -170,7 +171,7 @@ fun Project.retrieveAndroidVariant(agpVersion: SemVer, variantName: String): Sen
     }
 }
 
-fun File.withDummyComposeFile(): String {
+fun TemporaryFolder.withDummyComposeFile(): String {
     val contents =
         // language=kotlin
         """
@@ -184,14 +185,14 @@ fun File.withDummyComposeFile(): String {
                 BasicText("Hello World")
             }
         """.trimIndent()
-    val folder = File(this, "app/src/main/kotlin/com/example/").also { it.mkdirs() }
-    val sourceFile = File(folder, "Example.kt")
+    val sourceFile =
+        File(newFolder("app/src/main/kotlin/com/example/"), "Example.kt")
 
     sourceFile.writeText(contents)
     return contents
 }
 
-fun File.withDummyKtFile(): String {
+fun TemporaryFolder.withDummyKtFile(): String {
     val contents =
         // language=kotlin
         """
@@ -199,14 +200,14 @@ fun File.withDummyKtFile(): String {
 
             fun math(a: Int) = a * 2
         """.trimIndent()
-    val folder = File(this, "app/src/main/kotlin/com/example/").also { it.mkdirs() }
-    val sourceFile = File(folder, "Example.kt")
+    val sourceFile =
+        File(newFolder("app/src/main/kotlin/com/example/"), "Example.kt")
 
     sourceFile.writeText(contents)
     return contents
 }
 
-fun File.withDummyJavaFile(): String {
+fun TemporaryFolder.withDummyJavaFile(): String {
     val contents =
         // language=java
         """
@@ -215,14 +216,14 @@ fun File.withDummyJavaFile(): String {
             public class TestJava {
             }
         """.trimIndent()
-    val folder = File(this, "app/src/main/java/com/example/").also { it.mkdirs() }
-    val sourceFile = File(folder, "TestJava.java")
+    val sourceFile =
+        File(newFolder("app/src/main/java/com/example/"), "TestJava.java")
 
     sourceFile.writeText(contents)
     return contents
 }
 
-fun File.withDummyCustomFile(): String {
+fun TemporaryFolder.withDummyCustomFile(): String {
     val contents =
         // language=kotlin
         """
@@ -232,8 +233,8 @@ fun File.withDummyCustomFile(): String {
               fun math(a: Int) = a * 2
             }
         """.trimIndent()
-    val folder = File(this, "app/src/custom/kotlin/io/other/").also { it.mkdirs() }
-    val sourceFile = File(folder, "TestCustom.kt")
+    val sourceFile =
+        File(newFolder("app/src/custom/kotlin/io/other/"), "TestCustom.kt")
 
     sourceFile.writeText(contents)
     return contents

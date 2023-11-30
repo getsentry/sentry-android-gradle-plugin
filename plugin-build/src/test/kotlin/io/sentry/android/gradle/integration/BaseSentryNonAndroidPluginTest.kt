@@ -25,7 +25,6 @@ abstract class BaseSentryNonAndroidPluginTest(
 
     private val projectTemplateFolder = File("src/test/resources/testFixtures/appTestProject")
 
-    protected lateinit var root: File
     private lateinit var rootBuildFile: File
     protected lateinit var appBuildFile: File
     protected lateinit var moduleBuildFile: File
@@ -37,22 +36,16 @@ abstract class BaseSentryNonAndroidPluginTest(
 
     @Before
     fun setup() {
-        root = File(
-            testProjectDir.root.absolutePath,
-            "gradle-$gradleVersion"
-        ).also { it.mkdirs() }
-        projectTemplateFolder.copyRecursively(root)
+        projectTemplateFolder.copyRecursively(testProjectDir.root)
 
         val pluginClasspath = PluginUnderTestMetadataReading.readImplementationClasspath()
             .joinToString(separator = ", ") { "\"$it\"" }
             .replace(File.separator, "/")
 
-        appBuildFile = File(root, "app/build.gradle")
-        moduleBuildFile = File(root, "module/build.gradle")
-        sentryPropertiesFile = File(root, "sentry.properties")
-        rootBuildFile = testProjectDir.writeFile(
-            "${root.relativeTo(testProjectDir.root)}${File.separator}build.gradle"
-        ) {
+        appBuildFile = File(testProjectDir.root, "app/build.gradle")
+        moduleBuildFile = File(testProjectDir.root, "module/build.gradle")
+        sentryPropertiesFile = File(testProjectDir.root, "sentry.properties")
+        rootBuildFile = testProjectDir.writeFile("build.gradle") {
             // language=Groovy
             """
             buildscript {
@@ -81,7 +74,7 @@ abstract class BaseSentryNonAndroidPluginTest(
         }
 
         runner = GradleRunner.create()
-            .withProjectDir(root)
+            .withProjectDir(testProjectDir.root)
             .withArguments("--stacktrace")
             .withPluginClasspath()
             .withGradleVersion(gradleVersion)
