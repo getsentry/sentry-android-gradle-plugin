@@ -76,7 +76,7 @@ class SentryPluginIntegrationTest :
         }
         applyUploadSourceContexts()
 
-        testProjectDir.withDummyComposeFile()
+        root.withDummyComposeFile()
         /* ktlint-disable max-line-length */
         val uploadedIdRegex = """\w+":\{"state":"ok","missingChunks":\[],"uploaded_id":"(\w+-\w+-\w+-\w+-\w+)""".toRegex()
         /* ktlint-enable max-line-length */
@@ -91,7 +91,7 @@ class SentryPluginIntegrationTest :
         )
 
         val uploadedId = uploadedIdRegex.find(build.output)?.groupValues?.get(1)
-        val bundledId = verifySourceContextId(testProjectDir.root).toString()
+        val bundledId = verifySourceContextId(root).toString()
         assertEquals(uploadedId, bundledId)
     }
 

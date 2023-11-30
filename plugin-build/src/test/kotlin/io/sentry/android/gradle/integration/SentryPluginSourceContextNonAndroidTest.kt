@@ -64,8 +64,8 @@ class SentryPluginSourceContextNonAndroidTest :
 
         sentryPropertiesFile.writeText("")
 
-        testProjectDir.withDummyKtFile()
-        testProjectDir.withDummyJavaFile()
+        root.withDummyKtFile()
+        root.withDummyJavaFile()
 
         val result = runner
             .appendArguments("app:assemble")
@@ -107,9 +107,9 @@ class SentryPluginSourceContextNonAndroidTest :
 
         sentryPropertiesFile.writeText("")
 
-        val ktContents = testProjectDir.withDummyKtFile()
-        val javaContents = testProjectDir.withDummyJavaFile()
-        val customContents = testProjectDir.withDummyCustomFile()
+        val ktContents = root.withDummyKtFile()
+        val javaContents = root.withDummyJavaFile()
+        val customContents = root.withDummyCustomFile()
 
         val result = runner
             .appendArguments("app:assemble")
@@ -120,21 +120,21 @@ class SentryPluginSourceContextNonAndroidTest :
         assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
 
         verifySourceBundleContents(
-            testProjectDir.root,
+            root,
             "files/_/_/com/example/Example.jvm",
             ktContents,
             variant = "java",
             archivePath = "app/build/libs/app.jar"
         )
         verifySourceBundleContents(
-            testProjectDir.root,
+            root,
             "files/_/_/com/example/TestJava.jvm",
             javaContents,
             variant = "java",
             archivePath = "app/build/libs/app.jar"
         )
         verifySourceBundleContents(
-            testProjectDir.root,
+            root,
             "files/_/_/io/other/TestCustom.jvm",
             customContents,
             variant = "java",
@@ -171,7 +171,7 @@ class SentryPluginSourceContextNonAndroidTest :
 
         sentryPropertiesFile.writeText("")
 
-        val javaContents = testProjectDir.withDummyJavaFile()
+        val javaContents = root.withDummyJavaFile()
 
         val result = runner
             .appendArguments("app:assemble")
@@ -182,7 +182,7 @@ class SentryPluginSourceContextNonAndroidTest :
         assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
 
         verifySourceBundleContents(
-            testProjectDir.root,
+            root,
             "files/_/_/com/example/TestJava.jvm",
             javaContents,
             variant = "java",

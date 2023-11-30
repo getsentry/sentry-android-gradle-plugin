@@ -48,10 +48,10 @@ class SentryPluginTest :
         runner.appendArguments(":app:assembleRelease")
 
         runner.build()
-        val uuid1 = verifyProguardUuid(testProjectDir.root)
+        val uuid1 = verifyProguardUuid(root)
 
         runner.build()
-        val uuid2 = verifyProguardUuid(testProjectDir.root)
+        val uuid2 = verifyProguardUuid(root)
 
         assertNotEquals(uuid1, uuid2)
     }
@@ -64,7 +64,7 @@ class SentryPluginTest :
             .build()
 
         assertThrows(AssertionError::class.java) {
-            verifyProguardUuid(testProjectDir.root, variant = "debug", signed = false)
+            verifyProguardUuid(root, variant = "debug", signed = false)
         }
     }
 
@@ -84,7 +84,7 @@ class SentryPluginTest :
             .build()
 
         assertThrows(AssertionError::class.java) {
-            verifyProguardUuid(testProjectDir.root)
+            verifyProguardUuid(root)
         }
     }
 
@@ -324,7 +324,7 @@ class SentryPluginTest :
         // since it's an integration test, we just test that the log file was created for the class
         // meaning our CommonClassVisitor has visited and instrumented it
         val debugOutput =
-            testProjectDir.root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
+            root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
         assertTrue { debugOutput.exists() && debugOutput.length() > 0 }
     }
 
@@ -344,7 +344,7 @@ class SentryPluginTest :
         runner.appendArguments(":app:assembleDebug")
 
         runner.build()
-        val deps = verifyDependenciesReportAndroid(testProjectDir.root)
+        val deps = verifyDependenciesReportAndroid(root)
         assertEquals(
             """
             com.squareup.okhttp3:okhttp:3.14.9
@@ -368,7 +368,7 @@ class SentryPluginTest :
         runner.appendArguments(":app:assembleDebug")
 
         runner.build()
-        val deps = verifyDependenciesReportAndroid(testProjectDir.root)
+        val deps = verifyDependenciesReportAndroid(root)
         assertEquals(
             """
             com.squareup.okhttp3:okhttp:3.14.9
@@ -387,7 +387,7 @@ class SentryPluginTest :
             """.trimIndent()
         )
         runner.build()
-        val depsAfterChange = verifyDependenciesReportAndroid(testProjectDir.root)
+        val depsAfterChange = verifyDependenciesReportAndroid(root)
         assertEquals(
             """
             com.jakewharton.timber:timber:5.0.1
@@ -421,7 +421,7 @@ class SentryPluginTest :
 
         assertTrue { "collectExternalDebugDependenciesForSentry" !in output }
         assertThrows(AssertionError::class.java) {
-            verifyDependenciesReportAndroid(testProjectDir.root)
+            verifyDependenciesReportAndroid(root)
         }
     }
 
@@ -446,7 +446,7 @@ class SentryPluginTest :
         runner.build()
 
         val integrations = verifyIntegrationList(
-            testProjectDir.root,
+            root,
             variant = "debug",
             signed = false
         ).sorted()
@@ -480,7 +480,7 @@ class SentryPluginTest :
 
         runner.build()
         val integrations = verifyIntegrationList(
-            testProjectDir.root,
+            root,
             variant = "debug",
             signed = false
         ).sorted()
@@ -509,7 +509,7 @@ class SentryPluginTest :
         runner.build()
 
         assertThrows(NoSuchElementException::class.java) {
-            verifyIntegrationList(testProjectDir.root, variant = "debug", signed = false)
+            verifyIntegrationList(root, variant = "debug", signed = false)
         }
     }
 
@@ -530,7 +530,7 @@ class SentryPluginTest :
         runner.build()
 
         assertThrows(NoSuchElementException::class.java) {
-            verifyIntegrationList(testProjectDir.root)
+            verifyIntegrationList(root)
         }
     }
 
@@ -564,7 +564,7 @@ class SentryPluginTest :
         // since it's an integration test, we just test that the log file wasn't created
         // for the class meaning our CommonClassVisitor has NOT instrumented it
         val debugOutput =
-            testProjectDir.root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
+            root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
         assertTrue { !debugOutput.exists() }
     }
 
