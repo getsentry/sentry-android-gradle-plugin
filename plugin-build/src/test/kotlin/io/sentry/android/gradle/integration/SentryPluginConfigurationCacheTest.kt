@@ -21,18 +21,31 @@ class SentryPluginConfigurationCacheTest :
             GradleVersions.CURRENT >= GradleVersions.VERSION_7_5,
             `is`(true)
         )
-        appBuildFile.appendText(
+        appBuildFile.writeText(
             // language=Groovy
             """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+            }
 
             dependencies {
               implementation 'com.squareup.okhttp3:okhttp:3.14.9'
               implementation project(':module') // multi-module project dependency
               implementation ':asm-9.2' // flat jar
             }
+
+            sentry {
+              autoUploadProguardMapping = false
+              autoInstallation.enabled = false
+              telemetry = false
+            }
             """.trimIndent()
         )
-        print(appBuildFile.readText())
         runner.appendArguments(":app:assembleDebug")
             .appendArguments("--configuration-cache")
 
@@ -74,6 +87,8 @@ class SentryPluginConfigurationCacheTest :
 
             sentry {
               autoUploadProguardMapping = false
+              autoInstallation.enabled = false
+              telemetry = false
             }
             """.trimIndent()
         )
