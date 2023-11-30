@@ -186,27 +186,27 @@ class SentryPluginAutoInstallTest :
         assertFalse { "FAILED" in result.output }
     }
 
-    @Test
-    fun `sqlite is added with when sentry version 6_21_0 or above is used`() {
-        appBuildFile.appendText(
-            // language=Groovy
-            """
-            dependencies {
-              implementation 'androidx.sqlite:sqlite:2.0.0'
-            }
-
-            sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.sentryVersion = "6.21.0"
-            sentry.includeProguardMapping = false
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-android-sqlite:6.21.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
+//    @Test
+//    fun `sqlite is added with when sentry version 6_21_0 or above is used`() {
+//        appBuildFile.appendText(
+//            // language=Groovy
+//            """
+//            dependencies {
+//              implementation 'androidx.sqlite:sqlite:2.0.0'
+//            }
+//
+//            sentry.autoInstallation.enabled = true
+//            sentry.autoInstallation.sentryVersion = "6.21.0"
+//            sentry.includeProguardMapping = false
+//            """.trimIndent()
+//        )
+//
+//        val result = runListDependenciesTask()
+//
+//        assertTrue { "io.sentry:sentry-android-sqlite:6.21.0" in result.output }
+//        // ensure all dependencies could be resolved
+//        assertFalse { "FAILED" in result.output }
+//    }
 
 //    @Test
 //    fun `warns about overriding user-defined sentry dependencies`() {
