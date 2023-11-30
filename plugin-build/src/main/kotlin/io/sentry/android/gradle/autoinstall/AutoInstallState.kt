@@ -4,7 +4,7 @@ import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
 import java.io.Serializable
 import org.gradle.api.invocation.Gradle
 
-class AutoInstallState private constructor() : Serializable {
+class AutoInstallState private constructor() {
 
     @get:Synchronized
     @set:Synchronized
