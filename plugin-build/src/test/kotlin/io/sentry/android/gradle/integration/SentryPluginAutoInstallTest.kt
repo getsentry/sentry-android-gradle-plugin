@@ -30,37 +30,38 @@ class SentryPluginAutoInstallTest :
     }
 
     @Test
-    fun `adds integrations`() {
+    fun `adds integrations and overrides directly user-defined versions with what -core has`() {
         appBuildFile.appendText(
             // language=Groovy
             """
             dependencies {
               // sentry-android shouldn't be installed, since sentry-android-core is present
-              implementation 'io.sentry:sentry-android-core:5.1.0'
+              implementation 'io.sentry:sentry-android-core:6.34.0'
               implementation 'com.jakewharton.timber:timber:4.7.1'
               implementation 'androidx.fragment:fragment:1.3.5'
-              // our plugin shouldn't install okhttp, since it's a direct dep
+              // our plugin should override okhttp to 6.34.0
+              implementation 'com.squareup.okhttp3:okhttp:4.9.2'
               implementation 'io.sentry:sentry-android-okhttp:6.31.0'
-              // our plugin shouldn't install sqlite, since it's a direct dep
+              // our plugin shouldn't override sqlite to 6.34.0
+              implementation 'androidx.sqlite:sqlite:2.0.0'
               implementation 'io.sentry:sentry-android-sqlite:6.21.0'
             }
 
             sentry {
               includeProguardMapping = false
               autoInstallation.enabled = true
+              includeDependenciesReport = false
             }
             """.trimIndent()
         )
 
         val result = runListDependenciesTask()
-        assertFalse { "io.sentry:sentry-android:5.1.0" in result.output }
-        assertTrue { "io.sentry:sentry-android-timber:5.1.0" in result.output }
-        assertTrue { "io.sentry:sentry-android-fragment:5.1.0" in result.output }
-        assertFalse { "io.sentry:sentry-android-okhttp:5.1.0" in result.output }
-        assertTrue { "io.sentry:sentry-android-okhttp:6.31.0" in result.output }
-        assertFalse { "io.sentry:sentry-android-sqlite:5.1.0" in result.output }
-        assertTrue { "io.sentry:sentry-android-sqlite:6.21.0" in result.output }
-        assertFalse { "io.sentry:sentry-compose-android:5.1.0" in result.output }
+        assertFalse { "io.sentry:sentry-android:6.34.0" in result.output }
+        assertTrue { "io.sentry:sentry-android-timber:6.34.0" in result.output }
+        assertTrue { "io.sentry:sentry-android-fragment:6.34.0" in result.output }
+        assertTrue { "io.sentry:sentry-android-okhttp:6.31.0 -> 6.34.0" in result.output }
+        assertTrue { "io.sentry:sentry-android-sqlite:6.21.0 -> 6.34.0" in result.output }
+        assertFalse { "io.sentry:sentry-compose-android:6.34.0" in result.output }
 
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
@@ -101,7 +102,6 @@ class SentryPluginAutoInstallTest :
             dependencies {
               implementation 'com.jakewharton.timber:timber:4.7.1'
               implementation 'com.squareup.okhttp3:okhttp:4.9.2'
-              // the fragment integration should stay as it is, the version shouldn't be overridden
               implementation 'io.sentry:sentry-android-fragment:5.4.0'
             }
 
@@ -116,7 +116,7 @@ class SentryPluginAutoInstallTest :
         assertTrue { "io.sentry:sentry-android:6.31.0" in result.output }
         assertTrue { "io.sentry:sentry-android-timber:6.31.0" in result.output }
         assertTrue { "io.sentry:sentry-android-okhttp:6.31.0" in result.output }
-        assertTrue { "io.sentry:sentry-android-fragment:5.4.0" in result.output }
+        assertTrue { "io.sentry:sentry-android-fragment:5.4.0 -> 6.31.0" in result.output }
 
         // ensure all dependencies could be resolved
         assertFalse { "FAILED" in result.output }
