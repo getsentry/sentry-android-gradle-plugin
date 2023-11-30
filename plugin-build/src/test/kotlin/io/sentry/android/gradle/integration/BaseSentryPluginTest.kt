@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.integration
 
+import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.util.PrintBuildOutputOnFailureRule
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -7,6 +8,7 @@ import java.io.OutputStreamWriter
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.gradle.testkit.runner.internal.io.SynchronizedOutputStream
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -107,6 +109,11 @@ abstract class BaseSentryPluginTest(
 //            .withDebug(true)
             .forwardStdOutput(writer)
             .forwardStdError(writer)
+    }
+
+    @After
+    fun teardown() {
+        println(AutoInstallState.getInstance())
     }
 
     companion object {
