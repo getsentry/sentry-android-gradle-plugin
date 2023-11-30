@@ -165,7 +165,7 @@ tasks.register<Test>("integrationTest").configure {
     group = "verification"
     description = "Runs the integration tests"
 
-    maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+    maxParallelForks = 1
 
     // Cap JVM args per test
     minHeapSize = "128m"
