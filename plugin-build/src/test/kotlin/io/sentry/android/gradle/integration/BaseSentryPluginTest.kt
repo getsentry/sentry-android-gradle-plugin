@@ -11,7 +11,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import org.junit.rules.TestName
 
 @Suppress("FunctionName")
 abstract class BaseSentryPluginTest(
@@ -20,9 +19,6 @@ abstract class BaseSentryPluginTest(
 ) {
     @get:Rule
     val testProjectDir = TemporaryFolder()
-
-    @get:Rule
-    val name = TestName()
 
     private val outputStream = ByteArrayOutputStream()
     private val writer = OutputStreamWriter(SynchronizedOutputStream(outputStream))
@@ -115,7 +111,7 @@ abstract class BaseSentryPluginTest(
 
         runner = GradleRunner.create()
             .withProjectDir(testProjectDir.root)
-            .withArguments("--stacktrace", "-DtestName=${name.methodName}")
+            .withArguments("--stacktrace")
             .withPluginClasspath()
             .withGradleVersion(gradleVersion)
 //            .withDebug(true)

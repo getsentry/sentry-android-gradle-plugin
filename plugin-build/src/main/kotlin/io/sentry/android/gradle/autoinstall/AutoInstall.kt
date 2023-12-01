@@ -61,7 +61,6 @@ fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boo
                         extension
                     )
                     this.enabled = true
-                    this.culprit = System.getProperty("testName")
                 }
             }
         }
