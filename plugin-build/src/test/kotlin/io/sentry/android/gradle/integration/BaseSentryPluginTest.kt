@@ -125,7 +125,11 @@ abstract class BaseSentryPluginTest(
 
     @After
     fun teardown() {
-        runner.appendArguments("app:cleanupAutoInstallState").build()
+        try {
+            runner.appendArguments("app:cleanupAutoInstallState").build()
+        } catch (ignored: Throwable) {
+            // may fail if we are relying on BuildFinishesListener, but we don't care here
+        }
     }
 
     companion object {
