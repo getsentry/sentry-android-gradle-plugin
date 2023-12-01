@@ -54,6 +54,7 @@ class SentryPluginConfigurationCacheTest :
         )
         runner.appendArguments(":app:assembleDebug")
             .appendArguments("--configuration-cache")
+            .appendArguments("--info")
 
         val output = runner.build().output
         val deps = verifyDependenciesReportAndroid(testProjectDir.root)

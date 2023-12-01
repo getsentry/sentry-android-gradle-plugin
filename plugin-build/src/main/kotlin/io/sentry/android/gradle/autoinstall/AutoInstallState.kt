@@ -14,6 +14,10 @@ class AutoInstallState private constructor() {
     @set:Synchronized
     var enabled: Boolean = false
 
+    @get:Synchronized
+    @set:Synchronized
+    var throwable: Throwable? = null
+
     override fun toString(): String {
         return "AutoInstallState(sentryVersion='$sentryVersion', enabled=$enabled)"
     }
