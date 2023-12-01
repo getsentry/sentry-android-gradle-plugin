@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.sentry.Sentry
 import io.sentry.SpanStatus
+import io.sentry.TransactionOptions
 import io.sentry.samples.instrumentation.R
 import io.sentry.samples.instrumentation.SampleApp
 import io.sentry.samples.instrumentation.network.TrackService
@@ -32,7 +33,7 @@ class MainActivity : ComponentActivity() {
             val transaction = Sentry.startTransaction(
                 "Track Interaction",
                 "ui.action.load",
-                true
+                TransactionOptions().apply { isBindToScope = true }
             )
             SampleApp.database.tracksDao()
                 .all()
