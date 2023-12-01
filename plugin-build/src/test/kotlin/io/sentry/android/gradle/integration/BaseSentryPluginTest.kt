@@ -111,11 +111,6 @@ abstract class BaseSentryPluginTest(
             .forwardStdError(writer)
     }
 
-    @After
-    fun teardown() {
-        println(AutoInstallState.getInstance())
-    }
-
     companion object {
 
         internal fun GradleRunner.appendArguments(vararg arguments: String) =
