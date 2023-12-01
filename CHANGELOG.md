@@ -2,17 +2,33 @@
 
 ## Unreleased
 
-### Fixes
+Version 4 of the Sentry Android Gradle plugin brings a variety of features and fixes. The most notable changes are:
+- Bump Sentry Android SDK to `7.0.0`. Please, refer to the [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#700) of the SDK for more details
+- Rename `experimentalGuardsquareSupport` flag to `dexguardEnabled`
+- Add new `excludes` option to allow excluding certain classes from instrumentation. It's available under the `sentry.tracingInstrumentation` extension
 
-- Retrieve `sentryOrg` from the `SentryPluginExtension` for telemetry ([#599](https://github.com/getsentry/sentry-android-gradle-plugin/pull/599))
+## Sentry Android SDK Compatibility
 
-### Dependencies
+Make sure to use Sentry Gradle plugin 4.+ together with the Sentry Android SDK 7.+, otherwise it might crash at runtime due to binary incompatibility. (E.g. if you're using `-timber`, `-okhttp` or other packages)
 
-- Bump CLI from v2.21.5 to v2.22.3 ([#598](https://github.com/getsentry/sentry-android-gradle-plugin/pull/598), [#600](https://github.com/getsentry/sentry-android-gradle-plugin/pull/600))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2223)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.5...2.22.3)
+If you can't do that for some reason, you can specify sentry version via the plugin config block:
 
-## 4.0.0-beta.1
+```kotlin
+sentry {
+  autoInstallation {
+    sentryVersion.set("7.0.0")
+  }
+}
+```
+
+Similarly, if you have a Sentry SDK (e.g. `sentry-android-core`) dependency on one of your Gradle modules and you're updating it to 7.+, make sure the Gradle plugin is at 4.+ or specify the SDK version as shown in the snippet above.
+
+## Breaking Changes
+
+- Rename `experimentalGuardsquareSupport` flag to `dexguardEnabled` ([#589](https://github.com/getsentry/sentry-android-gradle-plugin/pull/589))
+- Bump Sentry Android SDK to `7.0.0`
+
+## Other Changes
 
 ### Features
 
@@ -26,18 +42,14 @@
 - Change cli command from `upload-dif` to `debug-files upload` for native symbols ([#587](https://github.com/getsentry/sentry-android-gradle-plugin/pull/587))
 - Use new AGP api for native symbols upload ([#592](https://github.com/getsentry/sentry-android-gradle-plugin/pull/592))
 
-**Breaking changes:**
-
-- Rename `experimentalGuardsquareSupport` flag to `dexguardEnabled` ([#589](https://github.com/getsentry/sentry-android-gradle-plugin/pull/589))
-
 ### Dependencies
 
-- Bump Android SDK from v6.32.0 to v6.34.0 ([#588](https://github.com/getsentry/sentry-android-gradle-plugin/pull/588), [#593](https://github.com/getsentry/sentry-android-gradle-plugin/pull/593), [#597](https://github.com/getsentry/sentry-android-gradle-plugin/pull/597))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6340)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.32.0...6.34.0)
-- Bump CLI from v2.21.2 to v2.21.5 ([#594](https://github.com/getsentry/sentry-android-gradle-plugin/pull/594), [#596](https://github.com/getsentry/sentry-android-gradle-plugin/pull/596))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2215)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.2...2.21.5)
+- Bump Android SDK from v6.32.0 to v7.0.0 ([#588](https://github.com/getsentry/sentry-android-gradle-plugin/pull/588), [#593](https://github.com/getsentry/sentry-android-gradle-plugin/pull/593), [#597](https://github.com/getsentry/sentry-android-gradle-plugin/pull/597))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#700)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.32.0...7.0.0)
+- Bump CLI from v2.21.2 to v2.22.3 ([#598](https://github.com/getsentry/sentry-android-gradle-plugin/pull/598), [#600](https://github.com/getsentry/sentry-android-gradle-plugin/pull/600))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2223)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.2...2.22.3)
 
 ## 3.14.0
 

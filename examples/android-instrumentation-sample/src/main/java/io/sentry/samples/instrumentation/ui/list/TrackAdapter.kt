@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter
 import androidx.recyclerview.widget.RecyclerView
 import io.sentry.Sentry
 import io.sentry.SpanStatus
+import io.sentry.TransactionOptions
 import io.sentry.samples.instrumentation.R
 import io.sentry.samples.instrumentation.SampleApp
 import io.sentry.samples.instrumentation.data.Track
@@ -43,7 +44,7 @@ class TrackAdapter : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
             val transaction = Sentry.startTransaction(
                 "Track Interaction",
                 "ui.action.delete",
-                true
+                TransactionOptions().apply { isBindToScope = true }
             )
             runBlocking {
                 SampleApp.database.tracksDao().delete(data[holder.bindingAdapterPosition])
