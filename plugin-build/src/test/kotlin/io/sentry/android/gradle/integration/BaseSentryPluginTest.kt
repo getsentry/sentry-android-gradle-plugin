@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.integration
 
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.util.PrintBuildOutputOnFailureRule
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -8,10 +7,10 @@ import java.io.OutputStreamWriter
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.gradle.testkit.runner.internal.io.SynchronizedOutputStream
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.junit.rules.TestName
 
 @Suppress("FunctionName")
 abstract class BaseSentryPluginTest(
@@ -20,6 +19,9 @@ abstract class BaseSentryPluginTest(
 ) {
     @get:Rule
     val testProjectDir = TemporaryFolder()
+
+    @get:Rule
+    val name = TestName()
 
     private val outputStream = ByteArrayOutputStream()
     private val writer = OutputStreamWriter(SynchronizedOutputStream(outputStream))
@@ -103,12 +105,13 @@ abstract class BaseSentryPluginTest(
 
         runner = GradleRunner.create()
             .withProjectDir(testProjectDir.root)
-            .withArguments("--stacktrace")
+            .withArguments("--stacktrace", "-DtestName=${name.methodName}")
             .withPluginClasspath()
             .withGradleVersion(gradleVersion)
-//            .withDebug(true)
-            .forwardStdOutput(writer)
-            .forwardStdError(writer)
+            .withDebug(true)
+            .forwardOutput()
+//            .forwardStdOutput(writer)
+//            .forwardStdError(writer)
     }
 
     companion object {

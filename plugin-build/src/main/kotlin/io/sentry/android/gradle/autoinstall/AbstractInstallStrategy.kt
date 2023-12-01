@@ -79,7 +79,10 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
                 logger.info {
                     "$sentryModuleId was successfully installed with version: $sentryVersion"
                 }
-                logger.info("$sentryModuleId was installed because of this culprit:", autoInstallState.throwable)
+                logger.info(
+                    "$sentryModuleId was installed because of this culprit: " +
+                        "${autoInstallState.culprit}"
+                )
             }
         }
     }

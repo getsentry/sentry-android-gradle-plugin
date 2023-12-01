@@ -1,7 +1,6 @@
 package io.sentry.android.gradle.autoinstall
 
 import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
-import java.io.Serializable
 import org.gradle.api.invocation.Gradle
 
 class AutoInstallState private constructor() {
@@ -16,7 +15,7 @@ class AutoInstallState private constructor() {
 
     @get:Synchronized
     @set:Synchronized
-    var throwable: Throwable? = null
+    var culprit: String? = null
 
     override fun toString(): String {
         return "AutoInstallState(sentryVersion='$sentryVersion', enabled=$enabled)"
