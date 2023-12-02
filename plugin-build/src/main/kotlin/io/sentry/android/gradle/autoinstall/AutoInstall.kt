@@ -17,14 +17,12 @@ import io.sentry.android.gradle.autoinstall.spring.SpringBoot3InstallStrategy
 import io.sentry.android.gradle.autoinstall.sqlite.SQLiteInstallStrategy
 import io.sentry.android.gradle.autoinstall.timber.TimberInstallStrategy
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.info
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
 
 internal const val SENTRY_GROUP = "io.sentry"
-private const val SENTRY_JAVA_ID = "sentry"
-private const val SENTRY_ANDROID_ID = "sentry-android"
-private const val SENTRY_ANDROID_CORE_ID = "sentry-android-core"
 
 private val strategies = listOf(
     OkHttpInstallStrategy.Registrar,
@@ -53,7 +51,11 @@ fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boo
             if (extension.autoInstallation.enabled.get()) {
                 val sentryVersion = dependencies.findSentryVersion(isAndroid)
                 with(AutoInstallState.getInstance(gradle)) {
-                    val sentryArtifactId = if (isAndroid) SENTRY_ANDROID_ID else SENTRY_JAVA_ID
+                    val sentryArtifactId = if (isAndroid) {
+                        SentryModules.SENTRY_ANDROID.name
+                    } else {
+                        SentryModules.SENTRY.name
+                    }
                     this.sentryVersion = installSentrySdk(
                         sentryVersion,
                         dependencies,
@@ -97,11 +99,14 @@ private fun DependencySet.findSentryVersion(isAndroid: Boolean): String? =
     if (isAndroid) {
         find {
             it.group == SENTRY_GROUP &&
-                (it.name == SENTRY_ANDROID_ID || it.name == SENTRY_ANDROID_CORE_ID)
+                (it.name == SentryModules.SENTRY_ANDROID_CORE.name ||
+                    it.name == SentryModules.SENTRY_ANDROID.name)
         }?.version
     } else {
         find {
             it.group == SENTRY_GROUP &&
-                (it.name == SENTRY_JAVA_ID)
+                (it.name == SentryModules.SENTRY.name ||
+                    it.name == SentryModules.SENTRY_SPRING_BOOT2.name ||
+                    it.name == SentryModules.SENTRY_SPRING_BOOT3.name)
         }?.version
     }
