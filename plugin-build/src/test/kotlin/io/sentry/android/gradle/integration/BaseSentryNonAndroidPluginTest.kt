@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.integration
 
-import io.sentry.android.gradle.integration.BaseSentryPluginTest.Companion.appendArguments
 import io.sentry.android.gradle.util.PrintBuildOutputOnFailureRule
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -45,6 +44,10 @@ abstract class BaseSentryNonAndroidPluginTest(
             .replace(File.separator, "/")
 
         appBuildFile = File(testProjectDir.root, "app/build.gradle")
+        appBuildFile.writeText(appBuildFile.readText()
+            .replace("id \"com.android.application\"", "")
+            .replace("id \"io.sentry.android.gradle\"", "id \"io.sentry.jvm.gradle\"")
+            .replace("android\\s*\\{\\s*namespace\\s*'com\\.example'\\s*\\}".toRegex(), ""))
         moduleBuildFile = File(testProjectDir.root, "module/build.gradle")
         sentryPropertiesFile = File(testProjectDir.root, "sentry.properties")
         rootBuildFile = testProjectDir.writeFile("build.gradle") {
