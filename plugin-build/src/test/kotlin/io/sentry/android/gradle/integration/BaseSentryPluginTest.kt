@@ -104,9 +104,9 @@ abstract class BaseSentryPluginTest(
                     AutoInstallState.clearReference()
                   }
                 }
-//                tasks.register('unlockTransforms', Exec) {
-//                  commandLine 'find', project.gradle.gradleUserHomeDir, '-type', 'f', '-name', 'transforms-3.lock', '-delete'
-//                }
+                tasks.register('unlockTransforms', Exec) {
+                  commandLine 'find', project.gradle.gradleUserHomeDir, '-type', 'f', '-name', 'transforms-3.lock', '-delete'
+                }
               }
             }
             """.trimIndent()
@@ -121,7 +121,7 @@ abstract class BaseSentryPluginTest(
             .forwardStdOutput(writer)
             .forwardStdError(writer)
 
-//        runner.appendArguments("app:unlockTransforms").build()
+        runner.appendArguments("app:unlockTransforms").build()
     }
 
     @After
