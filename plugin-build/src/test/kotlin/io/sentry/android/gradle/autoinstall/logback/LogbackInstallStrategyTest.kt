@@ -39,7 +39,6 @@ class LogbackInstallStrategyTest {
         }
 
         fun getSut(
-            installLogback: Boolean = true,
             logbackVersion: String = "2.0.0"
         ): LogbackInstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
@@ -48,7 +47,7 @@ class LogbackInstallStrategyTest {
             whenever(metadataDetails.id).thenReturn(id)
 
             with(AutoInstallState.getInstance()) {
-                this.installLogback = installLogback
+                this.enabled = true
                 this.sentryVersion = "6.25.2"
             }
             return LogbackInstallStrategyImpl(logger)
@@ -56,19 +55,6 @@ class LogbackInstallStrategyTest {
     }
 
     private val fixture = Fixture()
-
-    @Test
-    fun `when sentry-logback is a direct dependency logs a message and does nothing`() {
-        val sut = fixture.getSut(installLogback = false)
-        sut.execute(fixture.metadataContext)
-
-        assertTrue {
-            fixture.logger.capturedMessage ==
-                "[sentry] sentry-logback won't be installed because it was already " +
-                "installed directly"
-        }
-        verify(fixture.metadataContext, never()).details
-    }
 
     @Test
     fun `when logback version is unsupported logs a message and does nothing`() {

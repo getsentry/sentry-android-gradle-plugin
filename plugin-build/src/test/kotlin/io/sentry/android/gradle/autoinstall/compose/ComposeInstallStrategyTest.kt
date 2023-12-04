@@ -40,7 +40,6 @@ class ComposeInstallStrategyTest {
         }
 
         fun getSut(
-            installCompose: Boolean = true,
             composeVersion: String = "1.0.0"
         ): ComposeInstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
@@ -49,7 +48,7 @@ class ComposeInstallStrategyTest {
             whenever(metadataDetails.id).thenReturn(id)
 
             with(AutoInstallState.getInstance()) {
-                this.installCompose = installCompose
+                this.enabled = true
                 this.sentryVersion = "6.7.0"
             }
             return ComposeInstallStrategyImpl(logger)
@@ -57,19 +56,6 @@ class ComposeInstallStrategyTest {
     }
 
     private val fixture = Fixture()
-
-    @Test
-    fun `when sentry-compose-android is a direct dependency logs a message and does nothing`() {
-        val sut = fixture.getSut(installCompose = false)
-        sut.execute(fixture.metadataContext)
-
-        assertTrue {
-            fixture.logger.capturedMessage ==
-                "[sentry] sentry-compose-android won't be installed because it was already " +
-                "installed directly"
-        }
-        verify(fixture.metadataContext, never()).details
-    }
 
     @Test
     fun `when sentry version is unsupported logs a message and does nothing`() {

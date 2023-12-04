@@ -2,7 +2,6 @@ package io.sentry.android.gradle.autoinstall.kotlin
 
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.AbstractInstallStrategy
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.autoinstall.InstallStrategyRegistrar
 import io.sentry.android.gradle.util.SemVer
 import javax.inject.Inject
@@ -21,9 +20,6 @@ abstract class KotlinExtensionsInstallStrategy : AbstractInstallStrategy {
     constructor() : this(SentryPlugin.logger)
 
     override val sentryModuleId: String get() = SENTRY_KOTLIN_EXTENSIONS_ID
-
-    override val shouldInstallModule: Boolean get() =
-        AutoInstallState.getInstance().installKotlinExtensions
 
     override val minSupportedThirdPartyVersion: SemVer get() = MIN_SUPPORTED_VERSION
 

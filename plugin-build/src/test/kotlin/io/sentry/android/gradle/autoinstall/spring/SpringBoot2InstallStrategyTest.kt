@@ -39,7 +39,6 @@ class SpringBoot2InstallStrategyTest {
         }
 
         fun getSut(
-            installSpring: Boolean = true,
             springVersion: String = "2.1.0"
         ): SpringBoot2InstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
@@ -48,7 +47,7 @@ class SpringBoot2InstallStrategyTest {
             whenever(metadataDetails.id).thenReturn(id)
 
             with(AutoInstallState.getInstance()) {
-                this.installSpring = installSpring
+                this.enabled = true
                 this.sentryVersion = "6.28.0"
             }
             return SpringBoot2InstallStrategyImpl(logger)
@@ -56,19 +55,6 @@ class SpringBoot2InstallStrategyTest {
     }
 
     private val fixture = Fixture()
-
-    @Test
-    fun `when sentry-spring-boot is a direct dependency logs a message and does nothing`() {
-        val sut = fixture.getSut(installSpring = false)
-        sut.execute(fixture.metadataContext)
-
-        assertTrue {
-            fixture.logger.capturedMessage ==
-                "[sentry] sentry-spring-boot won't be installed because it was already " +
-                "installed directly"
-        }
-        verify(fixture.metadataContext, never()).details
-    }
 
     @Test
     fun `when spring version is too low logs a message and does nothing`() {

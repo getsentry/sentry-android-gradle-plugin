@@ -39,7 +39,6 @@ class SqliteInstallStrategyTest {
         }
 
         fun getSut(
-            installSqlite: Boolean = true,
             sqliteVersion: String = "2.0.0"
         ): SQLiteInstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
@@ -48,7 +47,7 @@ class SqliteInstallStrategyTest {
             whenever(metadataDetails.id).thenReturn(id)
 
             with(AutoInstallState.getInstance()) {
-                this.installSqlite = installSqlite
+                this.enabled = true
                 this.sentryVersion = "6.21.0"
             }
             return SQLiteInstallStrategyImpl(logger)
@@ -56,19 +55,6 @@ class SqliteInstallStrategyTest {
     }
 
     private val fixture = Fixture()
-
-    @Test
-    fun `when sentry-android-sqlite is a direct dependency logs a message and does nothing`() {
-        val sut = fixture.getSut(installSqlite = false)
-        sut.execute(fixture.metadataContext)
-
-        assertTrue {
-            fixture.logger.capturedMessage ==
-                "[sentry] sentry-android-sqlite won't be installed because it was already " +
-                "installed directly"
-        }
-        verify(fixture.metadataContext, never()).details
-    }
 
     @Test
     fun `when sqlite version is unsupported logs a message and does nothing`() {

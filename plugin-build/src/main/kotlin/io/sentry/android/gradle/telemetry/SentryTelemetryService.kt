@@ -158,7 +158,13 @@ abstract class SentryTelemetryService :
                     .contains("sentry", ignoreCase = true)
             } ?: false
         return isSentryTaskName ||
-            throwable.stackTrace.any { it.className.startsWith("io.sentry") }
+            throwable.stackTrace.any {
+                it.className.startsWith("io.sentry") &&
+                    !(
+                        it.className.contains("test", ignoreCase = true) ||
+                            it.className.contains("rule", ignoreCase = true)
+                        )
+            }
     }
 
     fun captureError(exception: Throwable, operation: String?) {

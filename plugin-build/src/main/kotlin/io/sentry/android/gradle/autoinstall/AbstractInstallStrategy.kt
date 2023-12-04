@@ -13,8 +13,6 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
 
     protected abstract val sentryModuleId: String
 
-    protected abstract val shouldInstallModule: Boolean
-
     protected open val minSupportedThirdPartyVersion: SemVer? = null
 
     protected open val maxSupportedThirdPartyVersion: SemVer? = null
@@ -23,9 +21,9 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
 
     override fun execute(context: ComponentMetadataContext) {
         val autoInstallState = AutoInstallState.getInstance()
-        if (!shouldInstallModule) {
+        if (!autoInstallState.enabled) {
             logger.info {
-                "$sentryModuleId won't be installed because it was already installed directly"
+                "$sentryModuleId won't be installed because autoInstallation is disabled"
             }
             return
         }
@@ -66,8 +64,8 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
             } catch (ex: IllegalArgumentException) {
                 logger.warn {
                     "$sentryModuleId won't be installed because the provided " +
-                        "sentry version($autoInstallState.sentryVersion) could not be processed " +
-                        "as a semantic version."
+                        "sentry version(${autoInstallState.sentryVersion}) could not be " +
+                        "processed as a semantic version."
                 }
                 return
             }

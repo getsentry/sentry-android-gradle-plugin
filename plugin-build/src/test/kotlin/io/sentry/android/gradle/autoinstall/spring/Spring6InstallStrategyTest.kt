@@ -39,7 +39,6 @@ class Spring6InstallStrategyTest {
         }
 
         fun getSut(
-            installSpring: Boolean = true,
             springVersion: String = "6.0.0"
         ): Spring6InstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
@@ -48,7 +47,7 @@ class Spring6InstallStrategyTest {
             whenever(metadataDetails.id).thenReturn(id)
 
             with(AutoInstallState.getInstance()) {
-                this.installSpring = installSpring
+                this.enabled = true
                 this.sentryVersion = "6.21.0"
             }
             return Spring6InstallStrategyImpl(logger)
@@ -56,19 +55,6 @@ class Spring6InstallStrategyTest {
     }
 
     private val fixture = Fixture()
-
-    @Test
-    fun `when sentry-spring-jakarta is a direct dependency logs a message and does nothing`() {
-        val sut = fixture.getSut(installSpring = false)
-        sut.execute(fixture.metadataContext)
-
-        assertTrue {
-            fixture.logger.capturedMessage ==
-                "[sentry] sentry-spring-jakarta won't be installed because it was already " +
-                "installed directly"
-        }
-        verify(fixture.metadataContext, never()).details
-    }
 
     @Test
     fun `when spring version is too low logs a message and does nothing`() {

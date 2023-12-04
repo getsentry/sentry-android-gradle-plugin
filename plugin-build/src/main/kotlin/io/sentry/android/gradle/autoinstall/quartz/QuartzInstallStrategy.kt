@@ -2,7 +2,6 @@ package io.sentry.android.gradle.autoinstall.quartz
 
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.AbstractInstallStrategy
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.autoinstall.InstallStrategyRegistrar
 import io.sentry.android.gradle.util.SemVer
 import javax.inject.Inject
@@ -21,8 +20,6 @@ abstract class QuartzInstallStrategy : AbstractInstallStrategy {
     constructor() : this(SentryPlugin.logger)
 
     override val sentryModuleId: String get() = SENTRY_QUARTZ_ID
-
-    override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installQuartz
 
     override val minSupportedSentryVersion: SemVer get() = SemVer(6, 30, 0)
 

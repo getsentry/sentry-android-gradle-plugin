@@ -496,6 +496,32 @@ class SentryPluginAutoInstallNonAndroidTest :
         assertFalse { "FAILED" in result.output }
     }
 
+    @Test
+    fun `spring-boot version is respected and not overridden when a direct dep`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+                id "java"
+                id "io.sentry.jvm.gradle"
+            }
+            dependencies {
+              implementation 'io.sentry:sentry-spring-boot:6.30.0'
+              implementation 'org.springframework.boot:spring-boot-starter:2.1.0.RELEASE'
+            }
+
+            sentry.autoInstallation.enabled = true
+            sentry.autoInstallation.sentryVersion = "6.34.0"
+            """.trimIndent()
+        )
+
+        val result = runListDependenciesTask()
+
+        assertFalse { "io.sentry:sentry-spring-boot:6.30.0 -> 6.34.0" in result.output }
+        // ensure all dependencies could be resolved
+        assertFalse { "FAILED" in result.output }
+    }
+
     private fun runListDependenciesTask() = runner
         .appendArguments("app:dependencies")
         .build()
