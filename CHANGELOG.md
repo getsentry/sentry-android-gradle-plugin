@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 4.0.0
 
 Version 4 of the Sentry Android Gradle plugin brings a variety of features and fixes. The most notable changes are:
 - Bump Sentry Android SDK to `7.0.0`. Please, refer to the [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#700) of the SDK for more details
