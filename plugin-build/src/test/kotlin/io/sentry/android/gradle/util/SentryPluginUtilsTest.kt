@@ -48,7 +48,7 @@ class SentryPluginUtilsTest(
 
         assertEquals(
             false,
-            isMinificationEnabled(project, variant, experimentalGuardsquareSupport = true)
+            isMinificationEnabled(project, variant, dexguardEnabled = true)
         )
     }
 
@@ -66,7 +66,7 @@ class SentryPluginUtilsTest(
 
         assertEquals(
             true,
-            isMinificationEnabled(project, variant, experimentalGuardsquareSupport = true)
+            isMinificationEnabled(project, variant, dexguardEnabled = true)
         )
     }
 
@@ -84,7 +84,7 @@ class SentryPluginUtilsTest(
 
         assertEquals(
             false,
-            isMinificationEnabled(project, variant, experimentalGuardsquareSupport = false)
+            isMinificationEnabled(project, variant, dexguardEnabled = false)
         )
     }
 

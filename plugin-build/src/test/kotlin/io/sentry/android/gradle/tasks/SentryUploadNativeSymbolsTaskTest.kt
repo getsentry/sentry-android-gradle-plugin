@@ -25,7 +25,8 @@ class SentryUploadNativeSymbolsTaskTest {
         val sep = File.separator
 
         assertTrue("sentry-cli" in args)
-        assertTrue("upload-dif" in args)
+        assertTrue("debug-files" in args)
+        assertTrue("upload" in args)
         val path = "${project.buildDir}${sep}intermediates" +
             "${sep}merged_native_libs${sep}debug"
         assertTrue(path in args)

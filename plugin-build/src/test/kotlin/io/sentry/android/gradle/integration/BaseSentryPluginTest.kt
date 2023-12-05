@@ -1,19 +1,30 @@
 package io.sentry.android.gradle.integration
 
+import io.sentry.android.gradle.util.PrintBuildOutputOnFailureRule
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.OutputStreamWriter
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
+import org.gradle.testkit.runner.internal.io.SynchronizedOutputStream
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 
 @Suppress("FunctionName")
 abstract class BaseSentryPluginTest(
-    private val androidGradlePluginVersion: String,
+    protected val androidGradlePluginVersion: String,
     private val gradleVersion: String
 ) {
     @get:Rule
     val testProjectDir = TemporaryFolder()
+
+    private val outputStream = ByteArrayOutputStream()
+    private val writer = OutputStreamWriter(SynchronizedOutputStream(outputStream))
+
+    @get:Rule
+    val printBuildOutputOnFailureRule = PrintBuildOutputOnFailureRule(outputStream)
 
     private val projectTemplateFolder = File("src/test/resources/testFixtures/appTestProject")
     private val mavenTestRepoPath = File("./../build/mavenTestRepo")
@@ -41,6 +52,7 @@ abstract class BaseSentryPluginTest(
         rootBuildFile = testProjectDir.writeFile("build.gradle") {
             // language=Groovy
             """
+            import io.sentry.android.gradle.autoinstall.AutoInstallState
             buildscript {
               repositories {
                 google()
@@ -85,6 +97,17 @@ abstract class BaseSentryPluginTest(
                   $additionalRootProjectConfig
                 }
               }
+
+              pluginManager.withPlugin('io.sentry.android.gradle') {
+                tasks.register('cleanupAutoInstallState') {
+                  doLast {
+                    AutoInstallState.clearReference()
+                  }
+                }
+                tasks.register('unlockTransforms', Exec) {
+                  commandLine 'find', project.gradle.gradleUserHomeDir, '-type', 'f', '-name', 'transforms-3.lock', '-delete'
+                }
+              }
             }
             """.trimIndent()
         }
@@ -94,6 +117,20 @@ abstract class BaseSentryPluginTest(
             .withArguments("--stacktrace")
             .withPluginClasspath()
             .withGradleVersion(gradleVersion)
+//            .withDebug(true)
+            .forwardStdOutput(writer)
+            .forwardStdError(writer)
+
+        runner.appendArguments("app:unlockTransforms").build()
+    }
+
+    @After
+    fun teardown() {
+        try {
+            runner.appendArguments("app:cleanupAutoInstallState").build()
+        } catch (ignored: Throwable) {
+            // may fail if we are relying on BuildFinishesListener, but we don't care here
+        }
     }
 
     companion object {

@@ -2,8 +2,9 @@ package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
+import io.sentry.android.gradle.util.AgpVersions
+import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
-import io.sentry.android.gradle.verifyDependenciesReportJava
 import io.sentry.android.gradle.verifyIntegrationList
 import io.sentry.android.gradle.verifyProguardUuid
 import kotlin.test.assertEquals
@@ -11,7 +12,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import org.gradle.util.GradleVersion
+import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThrows
+import org.junit.Assume.assumeThat
 import org.junit.Test
 
 class SentryPluginTest :
@@ -264,9 +267,8 @@ class SentryPluginTest :
             .appendArguments(":app:assembleDebug", "--info")
             .build()
 
-        val instr = "OkHttpEventListener, OkHttp"
         assertTrue {
-            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=$instr)" in build.output
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=OkHttp)" in build.output
         }
     }
 
@@ -477,38 +479,6 @@ class SentryPluginTest :
     }
 
     @Test
-    fun `works for pure java modules`() {
-        moduleBuildFile.writeText(
-            // language=Groovy
-            """
-            plugins {
-                id 'java'
-                id 'io.sentry.jvm.gradle'
-            }
-
-            dependencies {
-              implementation 'ch.qos.logback:logback-classic:1.4.8'
-            }
-
-            sentry.autoInstallation.sentryVersion = "6.25.2"
-            """.trimIndent()
-        )
-
-        runner.appendArguments(":module:jar").build()
-        val deps = verifyDependenciesReportJava(testProjectDir.root)
-        assertEquals(
-            """
-            ch.qos.logback:logback-classic:1.4.8
-            ch.qos.logback:logback-core:1.4.8
-            io.sentry:sentry-logback:6.25.2
-            io.sentry:sentry:6.25.2
-            org.slf4j:slf4j-api:2.0.7
-            """.trimIndent(),
-            deps
-        )
-    }
-
-    @Test
     fun `all integrations are written to manifest`() {
         applyTracingInstrumentation(
             features = setOf(
@@ -617,6 +587,40 @@ class SentryPluginTest :
         }
     }
 
+    @Test
+    fun `does not instrument classes that are provided in excludes`() {
+        assumeThat(
+            "We only support the 'excludes' option from AGP 7.4.0 onwards",
+            SemVer.parse(androidGradlePluginVersion) >= AgpVersions.VERSION_7_4_0,
+            `is`(true)
+        )
+        applyTracingInstrumentation(
+            features = setOf(InstrumentationFeature.OKHTTP),
+            debug = true,
+            excludes = setOf("okhttp3/RealCall")
+        )
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+
+            dependencies {
+              implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+              implementation 'io.sentry:sentry-android-okhttp:6.6.0'
+            }
+            """.trimIndent()
+        )
+
+        runner
+            .appendArguments(":app:assembleDebug")
+            .build()
+
+        // since it's an integration test, we just test that the log file wasn't created
+        // for the class meaning our CommonClassVisitor has NOT instrumented it
+        val debugOutput =
+            testProjectDir.root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
+        assertTrue { !debugOutput.exists() }
+    }
+
     private fun applyUploadNativeSymbols() {
         appBuildFile.appendText(
             // language=Groovy
@@ -653,7 +657,8 @@ class SentryPluginTest :
         logcat: Boolean = false,
         appStart: Boolean = false,
         dependencies: Set<String> = emptySet(),
-        debug: Boolean = false
+        debug: Boolean = false,
+        excludes: Set<String> = emptySet()
     ) {
         appBuildFile.appendText(
             // language=Groovy
@@ -676,6 +681,7 @@ class SentryPluginTest :
                     logcat {
                         enabled = $logcat
                     }
+                    excludes = ["${excludes.joinToString()}"]
                   }
                 }
             """.trimIndent()

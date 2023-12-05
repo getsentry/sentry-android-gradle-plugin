@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.appcompat.widget.Toolbar
 import io.sentry.Sentry
 import io.sentry.SpanStatus
+import io.sentry.TransactionOptions
 import io.sentry.samples.instrumentation.R
 import io.sentry.samples.instrumentation.SampleApp
 import io.sentry.samples.instrumentation.data.Track
@@ -36,7 +37,7 @@ class EditActivity : ComponentActivity() {
                 val transaction = Sentry.startTransaction(
                     "Track Interaction",
                     if (originalTrack == null) "ui.action.add" else "ui.action.edit",
-                    true
+                    TransactionOptions().apply { isBindToScope = true }
                 )
 
                 val name = nameInput.text.toString()

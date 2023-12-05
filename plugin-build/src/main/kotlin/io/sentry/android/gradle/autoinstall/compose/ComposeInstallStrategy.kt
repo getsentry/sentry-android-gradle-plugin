@@ -2,7 +2,6 @@ package io.sentry.android.gradle.autoinstall.compose
 
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.AbstractInstallStrategy
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.autoinstall.InstallStrategyRegistrar
 import io.sentry.android.gradle.util.SemVer
 import javax.inject.Inject
@@ -20,8 +19,6 @@ abstract class ComposeInstallStrategy : AbstractInstallStrategy {
     constructor() : this(SentryPlugin.logger)
 
     override val sentryModuleId: String get() = SENTRY_COMPOSE_ID
-
-    override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installCompose
 
     override val minSupportedSentryVersion: SemVer
         get() = SemVer(6, 7, 0)

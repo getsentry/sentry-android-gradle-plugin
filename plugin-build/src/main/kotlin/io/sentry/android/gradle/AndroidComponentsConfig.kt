@@ -26,7 +26,10 @@ import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
 import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
+import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
+import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
@@ -39,16 +42,18 @@ import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.build.event.BuildEventsListenerRegistry
+import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 
 fun AndroidComponentsExtension<*, *, *>.configure(
     project: Project,
     extension: SentryPluginExtension,
-    listenerRegistry: BuildEventsListenerRegistry,
+    buildEvents: BuildEventListenerRegistryInternal,
     cliExecutable: String,
     sentryOrg: String?,
-    sentryProject: String?
+    sentryProject: String?,
 ) {
     // temp folder for sentry-related stuff
     val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
@@ -58,13 +63,22 @@ fun AndroidComponentsExtension<*, *, *>.configure(
         if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
             val paths = OutputPaths(project, variant.name)
 
-            variant.configureDependenciesTask(project, extension)
+            val sentryTelemetryProvider = variant.configureTelemetry(
+                project,
+                extension,
+                cliExecutable,
+                sentryOrg,
+                buildEvents
+            )
+
+            variant.configureDependenciesTask(project, extension, sentryTelemetryProvider)
 
             val tasksGeneratingProperties =
                 mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
             val sourceContextTasks = variant.configureSourceBundleTasks(
                 project,
                 extension,
+                sentryTelemetryProvider,
                 paths,
                 cliExecutable,
                 sentryOrg,
@@ -75,6 +89,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
             val generateProguardUuidTask = variant.configureProguardMappingsTasks(
                 project,
                 extension,
+                sentryTelemetryProvider,
                 paths,
                 cliExecutable,
                 sentryOrg,
@@ -82,7 +97,23 @@ fun AndroidComponentsExtension<*, *, *>.configure(
             )
             generateProguardUuidTask?.let { tasksGeneratingProperties.add(it) }
 
-            variant.configureDebugMetaPropertiesTask(project, tasksGeneratingProperties)
+            // TODO: do this only once, and all other tasks should be SentryVariant.configureSomething
+            val sentryVariant = if (isAGP74) AndroidVariant74(variant) else null
+            sentryVariant?.configureNativeSymbolsTask(
+                project,
+                extension,
+                sentryTelemetryProvider,
+                cliExecutable,
+                sentryOrg,
+                sentryProject
+            )
+
+            variant.configureDebugMetaPropertiesTask(
+                project,
+                extension,
+                sentryTelemetryProvider,
+                tasksGeneratingProperties
+            )
 
             if (extension.tracingInstrumentation.enabled.get()) {
                 /**
@@ -98,6 +129,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     extension.tracingInstrumentation.features,
                     extension.tracingInstrumentation.logcat.enabled,
                     extension.includeSourceContext,
+                    extension.dexguardEnabled,
                     extension.tracingInstrumentation.appStart.enabled
                 )
                 /**
@@ -105,7 +137,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                  * not be discarded after the configuration phase (where we store the collected
                  * dependencies), and will be passed down to the InstrumentationFactory
                  */
-                listenerRegistry.onTaskCompletion(sentryModulesService)
+                buildEvents.onTaskCompletion(sentryModulesService)
 
                 project.collectModules(
                     "${variant.name}RuntimeClasspath",
@@ -117,6 +149,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     SpanAddingClassVisitorFactory::class.java,
                     InstrumentationScope.ALL,
                     FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS,
+                    extension.tracingInstrumentation.excludes
                 ) { params ->
                     if (extension.tracingInstrumentation.forceInstrumentDependencies.get()) {
                         params.invalidate.setDisallowChanges(System.currentTimeMillis())
@@ -137,6 +170,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 ) {
                     it.sentryModulesService.set(sentryModulesService)
                     it.usesService(sentryModulesService)
+                    it.withSentryTelemetry(extension, sentryTelemetryProvider)
                 }
 
                 variant.artifacts.use(manifestUpdater).wiredWithFiles(
@@ -174,12 +208,16 @@ fun AndroidComponentsExtension<*, *, *>.configure(
 
 private fun Variant.configureDebugMetaPropertiesTask(
     project: Project,
+    extension: SentryPluginExtension,
+    sentryTelemetryProvider: Provider<SentryTelemetryService>,
     tasksGeneratingProperties: List<TaskProvider<out PropertiesFileOutputTask>>
 ) {
     if (isAGP74) {
         val taskSuffix = name.capitalized
         val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
             project,
+            extension,
+            sentryTelemetryProvider,
             tasksGeneratingProperties,
             null,
             taskSuffix
@@ -197,9 +235,35 @@ private fun Variant.configureDebugMetaPropertiesTask(
     }
 }
 
+private fun Variant.configureTelemetry(
+    project: Project,
+    extension: SentryPluginExtension,
+    cliExecutable: String,
+    sentryOrg: String?,
+    buildEvents: BuildEventListenerRegistryInternal
+): Provider<SentryTelemetryService> {
+    val variant = if (isAGP74) AndroidVariant74(this) else null
+    val sentryTelemetryProvider = SentryTelemetryService.register(project)
+    project.gradle.taskGraph.whenReady {
+        sentryTelemetryProvider.get().start {
+            SentryTelemetryService.createParameters(
+                project,
+                variant,
+                extension,
+                cliExecutable,
+                sentryOrg,
+                "Android"
+            )
+        }
+        buildEvents.onOperationCompletion(sentryTelemetryProvider)
+    }
+    return sentryTelemetryProvider
+}
+
 private fun Variant.configureSourceBundleTasks(
     project: Project,
     extension: SentryPluginExtension,
+    sentryTelemetryProvider: Provider<SentryTelemetryService>,
     paths: OutputPaths,
     cliExecutable: String,
     sentryOrg: String?,
@@ -213,6 +277,7 @@ private fun Variant.configureSourceBundleTasks(
             val sourceContextTasks = SourceContext.register(
                 project,
                 extension,
+                sentryTelemetryProvider,
                 variant,
                 paths,
                 cliExecutable,
@@ -238,12 +303,18 @@ private fun Variant.configureSourceBundleTasks(
     }
 }
 
-private fun Variant.configureDependenciesTask(project: Project, extension: SentryPluginExtension) {
+private fun Variant.configureDependenciesTask(
+    project: Project,
+    extension: SentryPluginExtension,
+    sentryTelemetryProvider: Provider<SentryTelemetryService>
+) {
     if (isAGP74) {
         if (extension.includeDependenciesReport.get()) {
             val reportDependenciesTask =
                 SentryExternalDependenciesReportTaskFactory.register(
                     project = project,
+                    extension,
+                    sentryTelemetryProvider,
                     configurationName = "${name}RuntimeClasspath",
                     attributeValueJar = "android-classes",
                     includeReport = extension.includeDependenciesReport,
@@ -265,6 +336,7 @@ private fun Variant.configureDependenciesTask(project: Project, extension: Sentr
 private fun Variant.configureProguardMappingsTasks(
     project: Project,
     extension: SentryPluginExtension,
+    sentryTelemetryProvider: Provider<SentryTelemetryService>,
     paths: OutputPaths,
     cliExecutable: String,
     sentryOrg: String?,
@@ -273,13 +345,15 @@ private fun Variant.configureProguardMappingsTasks(
     if (isAGP74) {
         val variant = AndroidVariant74(this)
         val sentryProps = getPropertiesFilePath(project, variant)
-        val guardsquareEnabled = extension.experimentalGuardsquareSupport.get()
-        val isMinifyEnabled = isMinificationEnabled(project, variant, guardsquareEnabled)
+        val dexguardEnabled = extension.dexguardEnabled.get()
+        val isMinifyEnabled = isMinificationEnabled(project, variant, dexguardEnabled)
 
         if (isMinifyEnabled && extension.includeProguardMapping.get()) {
             val generateUuidTask =
                 SentryGenerateProguardUuidTask.register(
                     project = project,
+                    extension,
+                    sentryTelemetryProvider,
                     taskSuffix = name.capitalized,
                     output = paths.proguardUuidDir
                 )
@@ -287,11 +361,13 @@ private fun Variant.configureProguardMappingsTasks(
             val releaseInfo = getReleaseInfo(project, this)
             val uploadMappingsTask = SentryUploadProguardMappingsTask.register(
                 project = project,
+                extension,
+                sentryTelemetryProvider,
                 debug = extension.debug,
                 cliExecutable = cliExecutable,
                 generateUuidTask = generateUuidTask,
                 sentryProperties = sentryProps,
-                mappingFiles = getMappingFileProvider(project, variant, guardsquareEnabled),
+                mappingFiles = getMappingFileProvider(project, variant, dexguardEnabled),
                 autoUploadProguardMapping = extension.autoUploadProguardMapping,
                 sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
                 sentryProject = sentryProject?.let { project.provider { it } }
@@ -301,7 +377,7 @@ private fun Variant.configureProguardMappingsTasks(
                 taskSuffix = name.capitalized,
                 releaseInfo = releaseInfo
             )
-            uploadMappingsTask.hookWithMinifyTasks(project, name, guardsquareEnabled)
+            uploadMappingsTask.hookWithMinifyTasks(project, name, dexguardEnabled)
 
             return generateUuidTask
         } else {
@@ -320,6 +396,7 @@ private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
     classVisitorFactoryImplClass: Class<out AsmClassVisitorFactory<T>>,
     scope: InstrumentationScope,
     mode: FramesComputationMode,
+    excludes: SetProperty<String>,
     instrumentationParamsConfig: (T) -> Unit,
 ) {
     if (isAGP74) {
@@ -328,6 +405,7 @@ private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
             classVisitorFactoryImplClass,
             scope,
             mode,
+            excludes,
             instrumentationParamsConfig
         )
     } else {

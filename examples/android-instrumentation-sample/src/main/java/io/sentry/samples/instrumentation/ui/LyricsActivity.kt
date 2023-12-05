@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.appcompat.widget.Toolbar
 import io.sentry.Sentry
 import io.sentry.SpanStatus
+import io.sentry.TransactionOptions
 import io.sentry.samples.instrumentation.R
 import io.sentry.samples.instrumentation.data.Track
 import io.sentry.samples.instrumentation.util.Filesystem
@@ -25,7 +26,7 @@ class LyricsActivity : ComponentActivity() {
         val transaction = Sentry.startTransaction(
             "Track Interaction",
             "ui.action.lyrics",
-            true
+            TransactionOptions().apply { isBindToScope = true }
         )
 
         lyricsInput = findViewById(R.id.lyrics)
@@ -46,7 +47,7 @@ class LyricsActivity : ComponentActivity() {
         val transaction = Sentry.getSpan() ?: Sentry.startTransaction(
             "Track Interaction",
             "ui.action.lyrics_finish",
-            true
+            TransactionOptions().apply { isBindToScope = true }
         )
         filesystem.write(this, "${track.id}.txt", lyricsInput.text.toString())
         transaction.finish(SpanStatus.OK)

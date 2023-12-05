@@ -1,6 +1,8 @@
 package io.sentry.android.gradle.tasks.dependencies
 
+import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.GradleVersions
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
@@ -13,6 +15,8 @@ object SentryExternalDependenciesReportTaskFactory {
 
     fun register(
         project: Project,
+        extension: SentryPluginExtension,
+        sentryTelemetryProvider: Provider<SentryTelemetryService>,
         configurationName: String,
         attributeValueJar: String,
         includeReport: Provider<Boolean>,
@@ -24,6 +28,8 @@ object SentryExternalDependenciesReportTaskFactory {
         return if (GradleVersions.CURRENT >= GradleVersions.VERSION_7_5) {
             SentryExternalDependenciesReportTaskV2.register(
                 project,
+                extension,
+                sentryTelemetryProvider,
                 configurationName,
                 attributeValueJar,
                 output,
@@ -33,6 +39,8 @@ object SentryExternalDependenciesReportTaskFactory {
         } else {
             SentryExternalDependenciesReportTask.register(
                 project,
+                extension,
+                sentryTelemetryProvider,
                 configurationName,
                 attributeValueJar,
                 output,

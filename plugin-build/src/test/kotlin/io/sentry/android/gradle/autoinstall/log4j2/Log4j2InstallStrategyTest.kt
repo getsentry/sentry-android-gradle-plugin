@@ -39,7 +39,6 @@ class Log4j2InstallStrategyTest {
         }
 
         fun getSut(
-            installLog4j2: Boolean = true,
             log4j2Version: String = "2.0.0"
         ): Log4j2InstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
@@ -48,7 +47,7 @@ class Log4j2InstallStrategyTest {
             whenever(metadataDetails.id).thenReturn(id)
 
             with(AutoInstallState.getInstance()) {
-                this.installLog4j2 = installLog4j2
+                this.enabled = true
                 this.sentryVersion = "6.25.2"
             }
             return Log4j2InstallStrategyImpl(logger)
@@ -56,19 +55,6 @@ class Log4j2InstallStrategyTest {
     }
 
     private val fixture = Fixture()
-
-    @Test
-    fun `when sentry-log4j2 is a direct dependency logs a message and does nothing`() {
-        val sut = fixture.getSut(installLog4j2 = false)
-        sut.execute(fixture.metadataContext)
-
-        assertTrue {
-            fixture.logger.capturedMessage ==
-                "[sentry] sentry-log4j2 won't be installed because it was already " +
-                "installed directly"
-        }
-        verify(fixture.metadataContext, never()).details
-    }
 
     @Test
     fun `when log4j2 version is unsupported logs a message and does nothing`() {

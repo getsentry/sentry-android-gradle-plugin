@@ -1,8 +1,10 @@
 package io.sentry.android.gradle.sourcecontext
 
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.gradle.common.SentryVariant
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
 class SourceContext {
@@ -10,6 +12,7 @@ class SourceContext {
         fun register(
             project: Project,
             extension: SentryPluginExtension,
+            sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             variant: SentryVariant,
             paths: OutputPaths,
             cliExecutable: String,
@@ -27,6 +30,8 @@ class SourceContext {
             )
             val generateBundleIdTask = GenerateBundleIdTask.register(
                 project,
+                extension,
+                sentryTelemetryProvider,
                 output = paths.bundleIdDir,
                 extension.includeSourceContext,
                 taskSuffix
@@ -34,6 +39,8 @@ class SourceContext {
 
             val collectSourcesTask = CollectSourcesTask.register(
                 project,
+                extension,
+                sentryTelemetryProvider,
                 sourceFiles,
                 output = paths.sourceDir,
                 extension.includeSourceContext,
@@ -42,6 +49,8 @@ class SourceContext {
 
             val bundleSourcesTask = BundleSourcesTask.register(
                 project,
+                extension,
+                sentryTelemetryProvider,
                 variant,
                 generateBundleIdTask,
                 collectSourcesTask,
@@ -58,6 +67,8 @@ class SourceContext {
 
             val uploadSourceBundleTask = UploadSourceBundleTask.register(
                 project,
+                extension,
+                sentryTelemetryProvider,
                 variant,
                 bundleSourcesTask,
                 extension.debug,

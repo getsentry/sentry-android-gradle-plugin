@@ -25,6 +25,7 @@ data class AndroidVariant70(
     override val buildTypeName: String = variant.buildType.name
     override val productFlavors: List<String> = variant.productFlavors.map { it.name }
     override val isMinifyEnabled: Boolean = variant.buildType.isMinifyEnabled
+    override val isDebuggable: Boolean = variant.buildType.isDebuggable
     override val packageProvider: TaskProvider<out Task>? = variant.packageApplicationProvider
     override val assembleProvider: TaskProvider<out Task>? = variant.assembleProvider
     override fun mappingFileProvider(project: Project): Provider<FileCollection> =

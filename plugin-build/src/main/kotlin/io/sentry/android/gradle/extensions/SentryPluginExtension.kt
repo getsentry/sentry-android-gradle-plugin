@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.extensions
 
+import io.sentry.android.gradle.telemetry.SentryTelemetryService.Companion.SENTRY_SAAS_DSN
 import javax.inject.Inject
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -93,12 +94,12 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     )
 
     /**
-     * Experimental flag to turn on support for GuardSquare's tools integration (Dexguard and External Proguard).
+     * Turn on support for GuardSquare's tools integration (Dexguard and External Proguard).
      * If enabled, the plugin will try to consume and upload the mapping file
      * produced by Dexguard and External Proguard.
      * Default is disabled.
      */
-    val experimentalGuardsquareSupport: Property<Boolean> = objects
+    val dexguardEnabled: Property<Boolean> = objects
         .property(Boolean::class.java).convention(false)
 
     /**
@@ -209,4 +210,21 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
      */
     val url: Property<String> = objects.property(String::class.java)
         .convention(null as String?)
+
+    /**
+     * Whether the plugin should send telemetry data to Sentry.
+     * If disabled the plugin will not send telemetry data.
+     * This is auto disabled if running against a self hosted instance of Sentry.
+     * Default is enabled.
+     */
+    val telemetry: Property<Boolean> = objects
+        .property(Boolean::class.java).convention(true)
+
+    /**
+     * The DSN (Sentry URL) telemetry data is sent to.
+     *
+     * Default is Sentry SAAS.
+     */
+    val telemetryDsn: Property<String> = objects.property(String::class.java)
+        .convention(SENTRY_SAAS_DSN)
 }

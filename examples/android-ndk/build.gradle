@@ -41,6 +41,7 @@ if (System.getenv("AUTO_UPLOAD")) {
         includeNativeSources = true
         autoUploadNativeSymbols = CI.INSTANCE.canAutoUpload()
 
+        telemetryDsn = CI.INSTANCE.SENTRY_SDKS_DSN
         tracingInstrumentation {
             enabled = false
         }

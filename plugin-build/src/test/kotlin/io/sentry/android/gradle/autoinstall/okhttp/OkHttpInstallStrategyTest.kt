@@ -40,7 +40,6 @@ class OkHttpInstallStrategyTest {
         }
 
         fun getSut(
-            installOkHttp: Boolean = true,
             okHttpVersion: String = "4.9.3"
         ): OkHttpInstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
@@ -49,7 +48,7 @@ class OkHttpInstallStrategyTest {
             whenever(metadataDetails.id).thenReturn(id)
 
             with(AutoInstallState.getInstance()) {
-                this.installOkHttp = installOkHttp
+                this.enabled = true
                 this.sentryVersion = "5.6.1"
             }
             return OkHttpInstallStrategyImpl(logger)
@@ -57,19 +56,6 @@ class OkHttpInstallStrategyTest {
     }
 
     private val fixture = Fixture()
-
-    @Test
-    fun `when sentry-android-okhttp is a direct dependency logs a message and does nothing`() {
-        val sut = fixture.getSut(installOkHttp = false)
-        sut.execute(fixture.metadataContext)
-
-        assertTrue {
-            fixture.logger.capturedMessage ==
-                "[sentry] sentry-android-okhttp won't be installed because it was already " +
-                "installed directly"
-        }
-        verify(fixture.metadataContext, never()).details
-    }
 
     @Test
     fun `when okhttp version is unsupported logs a message and does nothing`() {

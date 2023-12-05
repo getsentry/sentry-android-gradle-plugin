@@ -40,7 +40,6 @@ class TimberInstallStrategyTest {
         }
 
         fun getSut(
-            installTimber: Boolean = true,
             timberVersion: String = "4.7.1"
         ): TimberInstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
@@ -49,7 +48,7 @@ class TimberInstallStrategyTest {
             whenever(metadataDetails.id).thenReturn(id)
 
             with(AutoInstallState.getInstance()) {
-                this.installTimber = installTimber
+                this.enabled = true
                 this.sentryVersion = "5.6.1"
             }
             return TimberInstallStrategyImpl(logger)
@@ -57,19 +56,6 @@ class TimberInstallStrategyTest {
     }
 
     private val fixture = Fixture()
-
-    @Test
-    fun `when sentry-android-timber is a direct dependency logs a message and does nothing`() {
-        val sut = fixture.getSut(installTimber = false)
-        sut.execute(fixture.metadataContext)
-
-        assertTrue {
-            fixture.logger.capturedMessage ==
-                "[sentry] sentry-android-timber won't be installed because it was already " +
-                "installed directly"
-        }
-        verify(fixture.metadataContext, never()).details
-    }
 
     @Test
     fun `when timber version is unsupported logs a message and does nothing`() {

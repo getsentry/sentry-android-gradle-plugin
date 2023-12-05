@@ -2,7 +2,6 @@ package io.sentry.android.gradle.autoinstall.jdbc
 
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.AbstractInstallStrategy
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.autoinstall.InstallStrategyRegistrar
 import io.sentry.android.gradle.util.SemVer
 import javax.inject.Inject
@@ -21,8 +20,6 @@ abstract class JdbcInstallStrategy : AbstractInstallStrategy {
     constructor() : this(SentryPlugin.logger)
 
     override val sentryModuleId: String get() = SENTRY_JDBC_ID
-
-    override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installJdbc
 
     override val minSupportedSentryVersion: SemVer get() = SemVer(5, 3, 0)
 

@@ -4,24 +4,104 @@
 
 ### Features
 
+- Do not consider user-defined sentry versions when auto-installing integrations. This is necessary because we want to align integrations versions to the same one as one of `sentry-android-core`/`sentry`/`sentry-android`/`sentry-spring-boot` to prevent runtime crashes due to binary incompatibility. ([#602](https://github.com/getsentry/sentry-android-gradle-plugin/pull/602))
+    - If you have directly defined one of the core versions, we will use that to install integrations, otherwise `autoInstallation.sentryVersion` or the default bundled SDK version is used.
+- Instrument ContentProvider/Application onCreate calls to measure app-start performance ([#565](https://github.com/getsentry/sentry-android-gradle-plugin/pull/565))
+
+This means if you have defined something like that:
+```kotlin
+// direct deps
+dependencies {
+  implementation("io.sentry:sentry-android-core:7.0.0")
+  implementation("io.sentry:sentry-android-okhttp:6.34.0")
+}
+
+// or with the gradle plugin
+sentry {
+  autoInstallation.sentryVersion = '7.0.0' // or the latest version bundled within the plugin
+}
+
+dependencies {
+  implementation("io.sentry:sentry-android-okhttp:6.34.0")
+}
+```
+
+Then in both cases it will use `7.0.0` when installing the `sentry-android-okhttp` integration and print a warning that we have overridden the version.
+
+## 4.0.0
+
+Version 4 of the Sentry Android Gradle plugin brings a variety of features and fixes. The most notable changes are:
+- Bump Sentry Android SDK to `7.0.0`. Please, refer to the [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#700) of the SDK for more details
+- Rename `experimentalGuardsquareSupport` flag to `dexguardEnabled`
+- Add new `excludes` option to allow excluding certain classes from instrumentation. It's available under the `sentry.tracingInstrumentation` extension
+
+## Sentry Android SDK Compatibility
+
+Make sure to use Sentry Gradle plugin 4.+ together with the Sentry Android SDK 7.+, otherwise it might crash at runtime due to binary incompatibility. (E.g. if you're using `-timber`, `-okhttp` or other packages)
+
+If you can't do that for some reason, you can specify sentry version via the plugin config block:
+
+```kotlin
+sentry {
+  autoInstallation {
+    sentryVersion.set("7.0.0")
+  }
+}
+```
+
+Similarly, if you have a Sentry SDK (e.g. `sentry-android-core`) dependency on one of your Gradle modules and you're updating it to 7.+, make sure the Gradle plugin is at 4.+ or specify the SDK version as shown in the snippet above.
+
+## Breaking Changes
+
+- Rename `experimentalGuardsquareSupport` flag to `dexguardEnabled` ([#589](https://github.com/getsentry/sentry-android-gradle-plugin/pull/589))
+- Bump Sentry Android SDK to `7.0.0`
+
+## Other Changes
+
+### Features
+
+- Print a warning if the Sentry plugin is not applied on the app module ([#586](https://github.com/getsentry/sentry-android-gradle-plugin/pull/586))
+- Add new `excludes` option to exclude classes from instrumentation ([#590](https://github.com/getsentry/sentry-android-gradle-plugin/pull/590))
+- Send telemetry data for plugin usage ([#582](https://github.com/getsentry/sentry-android-gradle-plugin/pull/582))
+  - This will collect errors and timings of the plugin and its tasks (anonymized, except the sentry org id), so we can better understand how the plugin is performing. If you wish to opt-out of this behavior, set `telemetry = false` in the `sentry` plugin configuration block.
+
+### Chores
+
+- Change cli command from `upload-dif` to `debug-files upload` for native symbols ([#587](https://github.com/getsentry/sentry-android-gradle-plugin/pull/587))
+- Use new AGP api for native symbols upload ([#592](https://github.com/getsentry/sentry-android-gradle-plugin/pull/592))
+
+### Dependencies
+
+- Bump Android SDK from v6.32.0 to v7.0.0 ([#588](https://github.com/getsentry/sentry-android-gradle-plugin/pull/588), [#593](https://github.com/getsentry/sentry-android-gradle-plugin/pull/593), [#597](https://github.com/getsentry/sentry-android-gradle-plugin/pull/597))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#700)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.32.0...7.0.0)
+- Bump CLI from v2.21.2 to v2.22.3 ([#598](https://github.com/getsentry/sentry-android-gradle-plugin/pull/598), [#600](https://github.com/getsentry/sentry-android-gradle-plugin/pull/600))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2223)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.2...2.22.3)
+
+## 3.14.0
+
+### Features
+
 - Add `url` option which is passed through to `sentry-cli` ([#572](https://github.com/getsentry/sentry-android-gradle-plugin/pull/572))
   - In case you are self hosting Sentry, you can set `url` to your self hosted instance if your org auth token does not contain a URL
-- Instrument ContentProvider/Application onCreate calls to measure app-start performance ([#565](https://github.com/getsentry/sentry-android-gradle-plugin/pull/565))
+- Provide detailed message for failed sentry-cli API requests ([#576](https://github.com/getsentry/sentry-android-gradle-plugin/pull/576)) 
 
 ### Fixes
 
 - Use `spring-boot` instead of `spring-boot-starter` for auto install detection ([#543](https://github.com/getsentry/sentry-android-gradle-plugin/pull/543))
 - Fix tracing instrumentation not working when configuration-cache is enabled on Gradle 8+ ([#568](https://github.com/getsentry/sentry-android-gradle-plugin/pull/568))
 - Fix source context not working with configuration cache enabled on Gradle 8+ ([#570](https://github.com/getsentry/sentry-android-gradle-plugin/pull/570))
+- Make proguard release association backward-compatible ([#576](https://github.com/getsentry/sentry-android-gradle-plugin/pull/576))
 
 ### Dependencies
 
 - Bump CLI from v2.21.1 to v2.21.2 ([#569](https://github.com/getsentry/sentry-android-gradle-plugin/pull/569))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2212)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.1...2.21.2)
-- Bump Android SDK from v6.30.0 to v6.31.0 ([#573](https://github.com/getsentry/sentry-android-gradle-plugin/pull/573))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6310)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.30.0...6.31.0)
+- Bump Android SDK from v6.30.0 to v6.32.0 ([#573](https://github.com/getsentry/sentry-android-gradle-plugin/pull/573), [#581](https://github.com/getsentry/sentry-android-gradle-plugin/pull/581))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6320)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.30.0...6.32.0)
 
 ## 3.13.0
 
@@ -52,6 +132,7 @@
 ### Features
 
 - Add release information args to proguard mapping upload task ([#476](https://github.com/getsentry/sentry-android-gradle-plugin/pull/476))
+  - Requires Sentry version `>=23.7.2` if you're using self-hosted
 - Auto install Sentry integrations for Java Backend, Desktop, etc. ([#521](https://github.com/getsentry/sentry-android-gradle-plugin/pull/521))
 - Use Spring Boot autoconfigure modules (`sentry-spring-boot` and `sentry-spring-boot-jakarta`) for auto install ([#542](https://github.com/getsentry/sentry-android-gradle-plugin/pull/542))
 
@@ -129,6 +210,7 @@
 
 - Bundle Java Sources and upload to Sentry ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
     - For more information on how to enable source context, please refer to [#633](https://github.com/getsentry/sentry-java/issues/633#issuecomment-1465599120)
+    - Requires Sentry version `>=23.5.0` if you're using self-hosted
 - New `debug` option to enable debug logging for sentry-cli ([#472](https://github.com/getsentry/sentry-android-gradle-plugin/pull/472))
 
 ### Fixes

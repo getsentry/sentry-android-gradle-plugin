@@ -1,8 +1,13 @@
 package io.sentry.android.gradle.integration
 
+import io.sentry.android.gradle.util.PrintBuildOutputOnFailureRule
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.OutputStreamWriter
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
+import org.gradle.testkit.runner.internal.io.SynchronizedOutputStream
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -12,6 +17,12 @@ abstract class BaseSentryNonAndroidPluginTest(
 ) {
     @get:Rule
     val testProjectDir = TemporaryFolder()
+
+    private val outputStream = ByteArrayOutputStream()
+    private val writer = OutputStreamWriter(SynchronizedOutputStream(outputStream))
+
+    @get:Rule
+    val printBuildOutputOnFailureRule = PrintBuildOutputOnFailureRule(outputStream)
 
     private val projectTemplateFolder = File("src/test/resources/testFixtures/appTestProject")
 
@@ -33,6 +44,12 @@ abstract class BaseSentryNonAndroidPluginTest(
             .replace(File.separator, "/")
 
         appBuildFile = File(testProjectDir.root, "app/build.gradle")
+        appBuildFile.writeText(
+            appBuildFile.readText()
+                .replace("id \"com.android.application\"", "")
+                .replace("id \"io.sentry.android.gradle\"", "id \"io.sentry.jvm.gradle\"")
+                .replace("android\\s*\\{\\s*namespace\\s*'com\\.example'\\s*\\}".toRegex(), "")
+        )
         moduleBuildFile = File(testProjectDir.root, "module/build.gradle")
         sentryPropertiesFile = File(testProjectDir.root, "sentry.properties")
         rootBuildFile = testProjectDir.writeFile("build.gradle") {
@@ -60,6 +77,19 @@ abstract class BaseSentryNonAndroidPluginTest(
                 mavenLocal()
               }
             }
+
+            subprojects {
+              pluginManager.withPlugin('io.sentry.jvm.gradle') {
+                tasks.register('cleanupAutoInstallState') {
+                  doLast {
+                    AutoInstallState.clearReference()
+                  }
+                }
+                tasks.register('unlockTransforms', Exec) {
+                  commandLine 'find', project.gradle.gradleUserHomeDir, '-type', 'f', '-name', 'transforms-3.lock', '-delete'
+                }
+              }
+            }
             """.trimIndent()
         }
 
@@ -68,6 +98,19 @@ abstract class BaseSentryNonAndroidPluginTest(
             .withArguments("--stacktrace")
             .withPluginClasspath()
             .withGradleVersion(gradleVersion)
+            .forwardStdOutput(writer)
+            .forwardStdError(writer)
+
+        runner.appendArguments("app:unlockTransforms").build()
+    }
+
+    @After
+    fun teardown() {
+        try {
+            runner.appendArguments("app:cleanupAutoInstallState").build()
+        } catch (ignored: Throwable) {
+            // may fail if we are relying on BuildFinishesListener, but we don't care here
+        }
     }
 
     companion object {

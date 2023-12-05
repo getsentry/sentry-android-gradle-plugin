@@ -48,8 +48,9 @@ if (BuildPluginsVersion.INSTANCE.isProguardApplicable()) {
 sentry {
     autoUploadProguardMapping = CI.INSTANCE.canAutoUpload()
 
-    experimentalGuardsquareSupport = true
+    dexguardEnabled = true
 
+    telemetryDsn = CI.INSTANCE.SENTRY_SDKS_DSN
     tracingInstrumentation {
         enabled = false
     }

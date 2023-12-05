@@ -31,6 +31,9 @@ include(":examples:android-ndk")
 include(":examples:android-instrumentation-sample")
 include(":examples:android-room-lib")
 include(":examples:spring-boot-sample")
+include(":examples:multi-module-sample")
+include(":examples:multi-module-sample:spring-boot-in-multi-module-sample")
+include(":examples:multi-module-sample:spring-boot-in-multi-module-sample2")
 includeBuild("plugin-build") {
     dependencySubstitution {
         substitute(module("io.sentry:sentry-android-gradle-plugin")).using(project(":"))

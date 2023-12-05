@@ -61,6 +61,7 @@ class SentryModulesCollectorTest {
             val featureProvider = fakeProject.provider { emptySet<InstrumentationFeature>() }
             val logcatEnabled = fakeProject.provider { true }
             val sourceContextEnabled = fakeProject.provider { true }
+            val dexguardEnabled = fakeProject.provider { true }
             val appStartEnabled = fakeProject.provider { true }
 
             val project = spy(fakeProject)
@@ -71,6 +72,7 @@ class SentryModulesCollectorTest {
                 featureProvider,
                 logcatEnabled,
                 sourceContextEnabled,
+                dexguardEnabled,
                 appStartEnabled
             )
 

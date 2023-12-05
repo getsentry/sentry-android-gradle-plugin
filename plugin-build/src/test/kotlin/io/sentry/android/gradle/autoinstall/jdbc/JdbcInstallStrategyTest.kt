@@ -4,7 +4,6 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import io.sentry.android.gradle.autoinstall.AutoInstallState
@@ -39,7 +38,6 @@ class JdbcInstallStrategyTest {
         }
 
         fun getSut(
-            installJdbc: Boolean = true,
             jdbcVersion: String = "2.0.0"
         ): JdbcInstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
@@ -48,7 +46,7 @@ class JdbcInstallStrategyTest {
             whenever(metadataDetails.id).thenReturn(id)
 
             with(AutoInstallState.getInstance()) {
-                this.installJdbc = installJdbc
+                this.enabled = true
                 this.sentryVersion = "6.21.0"
             }
             return JdbcInstallStrategyImpl(logger)
@@ -56,19 +54,6 @@ class JdbcInstallStrategyTest {
     }
 
     private val fixture = Fixture()
-
-    @Test
-    fun `when sentry-jdbc is a direct dependency logs a message and does nothing`() {
-        val sut = fixture.getSut(installJdbc = false)
-        sut.execute(fixture.metadataContext)
-
-        assertTrue {
-            fixture.logger.capturedMessage ==
-                "[sentry] sentry-jdbc won't be installed because it was already " +
-                "installed directly"
-        }
-        verify(fixture.metadataContext, never()).details
-    }
 
     @Test
     fun `installs sentry-jdbc with info message`() {

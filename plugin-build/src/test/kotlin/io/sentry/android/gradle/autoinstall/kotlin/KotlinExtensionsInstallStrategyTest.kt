@@ -39,7 +39,6 @@ class KotlinExtensionsInstallStrategyTest {
         }
 
         fun getSut(
-            installKotlinExtensions: Boolean = true,
             kotlinExtensionsVersion: String = "1.6.1"
         ): KotlinExtensionsInstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
@@ -48,7 +47,7 @@ class KotlinExtensionsInstallStrategyTest {
             whenever(metadataDetails.id).thenReturn(id)
 
             with(AutoInstallState.getInstance()) {
-                this.installKotlinExtensions = installKotlinExtensions
+                this.enabled = true
                 this.sentryVersion = "6.25.2"
             }
             return KotlinExtensionsInstallStrategyImpl(logger)
@@ -56,19 +55,6 @@ class KotlinExtensionsInstallStrategyTest {
     }
 
     private val fixture = Fixture()
-
-    @Test
-    fun `when sentry-kotlin-extensions is a direct dependency logs a message and does nothing`() {
-        val sut = fixture.getSut(installKotlinExtensions = false)
-        sut.execute(fixture.metadataContext)
-
-        assertTrue {
-            fixture.logger.capturedMessage ==
-                "[sentry] sentry-kotlin-extensions won't be installed because it was already " +
-                "installed directly"
-        }
-        verify(fixture.metadataContext, never()).details
-    }
 
     @Test
     fun `when kotlinExtensions version is unsupported logs a message and does nothing`() {

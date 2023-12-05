@@ -2,7 +2,6 @@ package io.sentry.android.gradle.autoinstall.sqlite
 
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.AbstractInstallStrategy
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.autoinstall.InstallStrategyRegistrar
 import io.sentry.android.gradle.util.SemVer
 import javax.inject.Inject
@@ -20,8 +19,6 @@ abstract class SQLiteInstallStrategy : AbstractInstallStrategy {
     constructor() : this(SentryPlugin.logger)
 
     override val sentryModuleId: String get() = SENTRY_SQLITE_ID
-
-    override val shouldInstallModule: Boolean get() = AutoInstallState.getInstance().installSqlite
 
     override val minSupportedThirdPartyVersion: SemVer get() = MIN_SUPPORTED_VERSION
 

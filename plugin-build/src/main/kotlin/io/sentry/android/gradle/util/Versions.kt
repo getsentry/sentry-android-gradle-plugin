@@ -33,9 +33,21 @@ internal object SentryVersions {
 }
 
 internal object SentryModules {
+    internal val SENTRY = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry"
+    )
+    internal val SENTRY_ANDROID = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-android"
+    )
     internal val SENTRY_ANDROID_CORE = DefaultModuleIdentifier.newId(
         "io.sentry",
         "sentry-android-core"
+    )
+    internal val SENTRY_ANDROID_NDK = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-android-ndk"
     )
     internal val SENTRY_ANDROID_SQLITE = DefaultModuleIdentifier.newId(
         "io.sentry",
@@ -48,5 +60,57 @@ internal object SentryModules {
     internal val SENTRY_ANDROID_COMPOSE = DefaultModuleIdentifier.newId(
         "io.sentry",
         "sentry-compose-android"
+    )
+    internal val SENTRY_ANDROID_FRAGMENT = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-android-fragment"
+    )
+    internal val SENTRY_ANDROID_NAVIGATION = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-android-navigation"
+    )
+    internal val SENTRY_ANDROID_TIMBER = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-android-timber"
+    )
+    internal val SENTRY_KOTLIN_EXTENSIONS = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-kotlin-extensions"
+    )
+    internal val SENTRY_JDBC = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-jdbc"
+    )
+    internal val SENTRY_GRAPHQL = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-graphql"
+    )
+    internal val SENTRY_LOG4J2 = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-log4j2"
+    )
+    internal val SENTRY_LOGBACK = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-logback"
+    )
+    internal val SENTRY_QUARTZ = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-quartz"
+    )
+    internal val SENTRY_SPRING5 = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-spring"
+    )
+    internal val SENTRY_SPRING6 = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-spring-jakarta"
+    )
+    internal val SENTRY_SPRING_BOOT2 = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-spring-boot"
+    )
+    internal val SENTRY_SPRING_BOOT3 = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-spring-boot-jakarta"
     )
 }
