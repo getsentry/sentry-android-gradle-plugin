@@ -33,7 +33,7 @@ abstract class AbstractRoomVisitor(
     override fun visitCode() {
         super.visitCode()
         instrumenting.set(true)
-        originalVisitor.visitTryCatchBlocks("java/lang/Exception")
+//        originalVisitor.visitTryCatchBlocks("java/lang/Exception")
 
         originalVisitor.visitStartSpan(startSpanIfNull) {
             visitLdcInsn(SpanOperations.DB_SQL_ROOM)

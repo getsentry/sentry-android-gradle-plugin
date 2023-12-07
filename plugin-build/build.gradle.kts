@@ -135,7 +135,7 @@ tasks.withType<KotlinCompile>().configureEach {
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
-        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn", "-Xjvm-default=enable")
+        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn", "-Xjvm-default=all")
         languageVersion = "1.4"
         apiVersion = "1.4"
     }

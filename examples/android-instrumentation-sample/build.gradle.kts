@@ -3,6 +3,7 @@ plugins {
     kotlin("android")
     kotlin("kapt")
     id("io.sentry.android.gradle")
+    id("com.google.devtools.ksp") version "1.9.20-1.0.14"
 }
 
 // useful for local debugging of the androidx.sqlite lib
@@ -61,7 +62,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.6"
+        kotlinCompilerExtensionVersion = "1.5.5"
     }
 }
 
@@ -74,6 +75,10 @@ kotlin {
 // afterEvaluate {
 //    tasks.getByName("kaptDebugKotlin").enabled = false
 // }
+
+ksp {
+    arg("room.generateKotlin", "true")
+}
 
 dependencies {
     implementation(Samples.AndroidX.recyclerView)
@@ -97,7 +102,7 @@ dependencies {
     implementation(Samples.Fragment.fragmentKtx)
     implementation(project(":examples:android-room-lib"))
 
-    kapt(Samples.Room.compiler)
+    ksp(Samples.Room.compiler)
 }
 
 sentry {

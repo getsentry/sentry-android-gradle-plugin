@@ -2,9 +2,9 @@ import BuildPluginsVersion.SPRING_BOOT
 import org.gradle.util.VersionNumber
 
 object BuildPluginsVersion {
-    val AGP = System.getenv("VERSION_AGP") ?: "7.4.0"
+    val AGP = System.getenv("VERSION_AGP") ?: "8.0.2"
     const val DOKKA = "1.8.10"
-    const val KOTLIN = "1.8.20"
+    const val KOTLIN = "1.9.20"
     const val AAR_2_JAR = "0.6"
     const val KTLINT = "10.2.1"
     const val SHADOW = "7.1.2"
@@ -23,7 +23,7 @@ object BuildPluginsVersion {
 }
 
 object LibsVersion {
-    const val SDK_VERSION = 33
+    const val SDK_VERSION = 34
     const val MIN_SDK_VERSION = 21
 
     const val JUNIT = "4.13.2"
@@ -85,7 +85,7 @@ object Samples {
     }
 
     object Room {
-        private const val version = "2.5.0"
+        private const val version = "2.6.0"
         const val runtime = "androidx.room:room-runtime:${version}"
         const val ktx = "androidx.room:room-ktx:${version}"
         const val compiler = "androidx.room:room-compiler:${version}"
