@@ -9,7 +9,7 @@ function prop {
 
 base_url="$(prop 'repo')/releases/download/$(prop 'version')"
 target_dir="src/main/resources/bin/"
-PLATFORMS="Darwin-universal Linux-i686 Linux-x86_64 Windows-i686"
+PLATFORMS="Darwin-universal Linux-i686 Linux-x86_64 Linux-aarch64 Windows-i686"
 
 rm -f $target_dir/sentry-cli-*
 for plat in $PLATFORMS; do
