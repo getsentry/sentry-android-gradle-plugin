@@ -39,6 +39,9 @@ Then in both cases it will use `7.0.0` when installing the `sentry-android-okhtt
 - Bump CLI from v2.22.3 to v2.23.0 ([#607](https://github.com/getsentry/sentry-android-gradle-plugin/pull/607))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2230)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.22.3...2.23.0)
+- Bump Android SDK from v7.0.0 to v7.1.0 ([#612](https://github.com/getsentry/sentry-android-gradle-plugin/pull/612))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#710)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.0.0...7.1.0)
 
 ## 4.0.0
 
