@@ -154,6 +154,22 @@ class SentryUploadNativeSymbolsTaskTest {
         assertTrue("https://some-host.sentry.io" in args)
     }
 
+    @Test
+    fun `the --url parameter is placed as the first argument`() {
+        val project = createProject()
+        val task = createTestTask(project) {
+            it.cliExecutable.set("sentry-cli")
+            it.sentryUrl.set("https://some-host.sentry.io")
+            it.includeNativeSources.set(true)
+            it.variantName.set("debug")
+            it.autoUploadNativeSymbol.set(true)
+        }
+
+        val args = task.computeCommandLineArgs()
+
+        assertEquals(1, args.indexOf("--url"))
+    }
+
     private fun createProject(): Project {
         with(ProjectBuilder.builder().build()) {
             plugins.apply("io.sentry.android.gradle")
