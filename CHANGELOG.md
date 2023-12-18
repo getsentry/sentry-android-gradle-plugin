@@ -30,6 +30,10 @@ Then in both cases it will use `7.0.0` when installing the `sentry-android-okhtt
 - Add aarch64 sentry-cli ([#611](https://github.com/getsentry/sentry-android-gradle-plugin/pull/611))
     - This is used when the build is executed inside a docker container on an Apple silicon chip (e.g. M1)
 
+### Fixes
+
+- Fix sentry-cli url parameter position ([#610](https://github.com/getsentry/sentry-android-gradle-plugin/pull/610))
+
 ### Dependencies
 
 - Bump CLI from v2.22.3 to v2.23.0 ([#607](https://github.com/getsentry/sentry-android-gradle-plugin/pull/607))
