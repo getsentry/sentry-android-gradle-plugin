@@ -6,7 +6,6 @@
 
 - Do not consider user-defined sentry versions when auto-installing integrations. This is necessary because we want to align integrations versions to the same one as one of `sentry-android-core`/`sentry`/`sentry-android`/`sentry-spring-boot` to prevent runtime crashes due to binary incompatibility. ([#602](https://github.com/getsentry/sentry-android-gradle-plugin/pull/602))
     - If you have directly defined one of the core versions, we will use that to install integrations, otherwise `autoInstallation.sentryVersion` or the default bundled SDK version is used.
-- Instrument ContentProvider/Application onCreate calls to measure app-start performance ([#565](https://github.com/getsentry/sentry-android-gradle-plugin/pull/565))
 
 This means if you have defined something like that:
 ```kotlin
@@ -30,6 +29,19 @@ Then in both cases it will use `7.0.0` when installing the `sentry-android-okhtt
 
 - Add aarch64 sentry-cli ([#611](https://github.com/getsentry/sentry-android-gradle-plugin/pull/611))
     - This is used when the build is executed inside a docker container on an Apple silicon chip (e.g. M1)
+
+- Instrument ContentProvider/Application onCreate calls to measure app-start performance ([#565](https://github.com/getsentry/sentry-android-gradle-plugin/pull/565))
+    - This feature requires the `sentry-java` SDK version `7.1.0` and is enabled by default
+    - To disable the feature, set `sentry.tracingInstrumentation.appStart.enabled` to `false`
+```kotlin
+sentry {
+  tracingInstrumentation {
+    appStart {
+      enabled.set(false)
+    }
+  }
+}
+```
 
 ### Fixes
 
