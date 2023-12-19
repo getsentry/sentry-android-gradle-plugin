@@ -487,6 +487,8 @@ class SentryPluginTest :
                 InstrumentationFeature.OKHTTP,
                 InstrumentationFeature.COMPOSE
             ),
+            logcat = true,
+            appStart = true,
             dependencies = setOf(
                 "com.squareup.okhttp3:okhttp:3.14.9",
                 "io.sentry:sentry-android-okhttp:6.6.0",
@@ -504,12 +506,16 @@ class SentryPluginTest :
             signed = false
         ).sorted()
 
-        val expectedIntegrations = listOf(
-            InstrumentationFeature.DATABASE,
-            InstrumentationFeature.FILE_IO,
-            InstrumentationFeature.COMPOSE,
-            InstrumentationFeature.OKHTTP
-        ).map { it.integrationName }.sorted()
+        val expectedIntegrations = (
+            listOf(
+                InstrumentationFeature.DATABASE,
+                InstrumentationFeature.FILE_IO,
+                InstrumentationFeature.COMPOSE,
+                InstrumentationFeature.OKHTTP
+            ).map { it.integrationName }.toMutableList() +
+                listOf("LogcatInstrumentation", "AppStartInstrumentation")
+            )
+            .sorted()
 
         assertEquals(expectedIntegrations, integrations)
     }
@@ -664,7 +670,7 @@ class SentryPluginTest :
             // language=Groovy
             """
                 dependencies {
-                  implementation 'io.sentry:sentry-android:6.30.0'
+                  implementation 'io.sentry:sentry-android:7.1.0'
                   ${dependencies.joinToString("\n") { "implementation '$it'" }}
                 }
 
