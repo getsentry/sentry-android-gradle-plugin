@@ -10,7 +10,9 @@ import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
-import io.sentry.android.gradle.instrumentation.logcat.LogcatInstrumentable
+import io.sentry.android.gradle.instrumentation.appstart.Application
+import io.sentry.android.gradle.instrumentation.appstart.ContentProvider
+import io.sentry.android.gradle.instrumentation.logcat.Logcat
 import io.sentry.android.gradle.instrumentation.logcat.LogcatLevel
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttpEventListener
@@ -120,8 +122,14 @@ abstract class SpanAddingClassVisitorFactory :
                     ComposeNavigation().takeIf {
                         sentryModulesService.isComposeInstrEnabled()
                     },
-                    LogcatInstrumentable().takeIf {
+                    Logcat().takeIf {
                         sentryModulesService.isLogcatInstrEnabled()
+                    },
+                    Application().takeIf {
+                        sentryModulesService.isAppStartInstrEnabled()
+                    },
+                    ContentProvider().takeIf {
+                        sentryModulesService.isAppStartInstrEnabled()
                     }
                 )
             )

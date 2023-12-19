@@ -6,11 +6,13 @@ import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
+import io.sentry.android.gradle.instrumentation.appstart.Application
+import io.sentry.android.gradle.instrumentation.appstart.ContentProvider
 import io.sentry.android.gradle.instrumentation.classloader.GeneratingMissingClassesClassLoader
 import io.sentry.android.gradle.instrumentation.fakes.TestClassContext
 import io.sentry.android.gradle.instrumentation.fakes.TestClassData
 import io.sentry.android.gradle.instrumentation.fakes.TestSpanAddingParameters
-import io.sentry.android.gradle.instrumentation.logcat.LogcatInstrumentable
+import io.sentry.android.gradle.instrumentation.logcat.Logcat
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttpEventListener
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
@@ -157,7 +159,9 @@ class VisitorTest(
             arrayOf("okhttp/v3", "OkHttpClient", OkHttpEventListener(SemVer(3, 0, 0)), null),
             arrayOf("okhttp/v4", "OkHttpClient", OkHttpEventListener(SemVer(4, 0, 0)), null),
             arrayOf("androidxCompose", "NavHostControllerKt", ComposeNavigation(), null),
-            arrayOf("logcat", "LogcatTest", LogcatInstrumentable(), null)
+            arrayOf("logcat", "LogcatTest", Logcat(), null),
+            arrayOf("appstart", "MyApplication", Application(), null),
+            arrayOf("appstart", "MyContentProvider", ContentProvider(), null)
         )
 
         private fun roomDaoTestParameters(suffix: String = "") = arrayOf(

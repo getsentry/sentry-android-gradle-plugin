@@ -43,7 +43,10 @@ abstract class SentryGenerateIntegrationListTask : DefaultTask() {
 
         if (integrations.isNotEmpty()) {
             val manifestWriter = ManifestWriter()
-            val integrationsList = integrations.joinToString(",")
+            val integrationsList = integrations
+                .toList()
+                .sorted()
+                .joinToString(",")
             manifestWriter.writeMetaData(
                 manifestFile,
                 updatedManifestFile,
