@@ -294,6 +294,21 @@ class SentryPluginTest :
     }
 
     @Test
+    fun `does not apply app start instrumentations when older SDK version is used`() {
+        applyTracingInstrumentation(
+            appStart = true,
+            sdkVersion = "7.0.0"
+        )
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--info")
+            .build()
+
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=)" in build.output
+        }
+    }
+
+    @Test
     fun `applies app start instrumentations when enabled`() {
         applyTracingInstrumentation(
             appStart = true
@@ -664,13 +679,14 @@ class SentryPluginTest :
         appStart: Boolean = false,
         dependencies: Set<String> = emptySet(),
         debug: Boolean = false,
-        excludes: Set<String> = emptySet()
+        excludes: Set<String> = emptySet(),
+        sdkVersion: String = "7.1.0"
     ) {
         appBuildFile.appendText(
             // language=Groovy
             """
                 dependencies {
-                  implementation 'io.sentry:sentry-android:7.1.0'
+                  implementation 'io.sentry:sentry-android:$sdkVersion'
                   ${dependencies.joinToString("\n") { "implementation '$it'" }}
                 }
 
