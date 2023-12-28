@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fix VerifyError when optimized code is instrumented ([#619](https://github.com/getsentry/sentry-android-gradle-plugin/pull/619))
+
 ### Dependencies
 
 - Bump CLI from v2.23.0 to v2.23.1 ([#615](https://github.com/getsentry/sentry-android-gradle-plugin/pull/615))
