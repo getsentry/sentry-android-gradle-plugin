@@ -32,22 +32,21 @@ class ContentProviderMethodVisitor(
     instrumentableContext.descriptor
 ) {
 
-    private var counterIdx = 0
-    private var safeThisIdx = 0
+    private var thisIdx = 0
 
     override fun onMethodEnter() {
+        // add local variables, this seems to confuse the optimizer enough
         newLocal(Types.OBJECT)
-        counterIdx = newLocal(Types.INT)
-        safeThisIdx = newLocal(Types.OBJECT)
+        newLocal(Types.OBJECT)
+
+        // as we can't assume that variable 0 will be this, store it away into a separate local
+        thisIdx = newLocal(Types.OBJECT)
 
         // finally load this and store it in the local variable
         visitVarInsn(ALOAD, 0)
-        visitVarInsn(ASTORE, safeThisIdx)
-//
-//        visitInsn(ICONST_5)
-//        visitVarInsn(ISTORE, counterIdx)
+        visitVarInsn(ASTORE, thisIdx)
 
-        visitVarInsn(ALOAD, safeThisIdx)
+        visitVarInsn(ALOAD, thisIdx)
         box(Type.getType("Landroid/content/ContentProvider;"))
 
         visitMethodInsn(
@@ -60,8 +59,9 @@ class ContentProviderMethodVisitor(
     }
 
     override fun onMethodExit(opcode: Int) {
-        visitVarInsn(ALOAD, safeThisIdx)
+        visitVarInsn(ALOAD, thisIdx)
         box(Type.getType("Landroid/content/ContentProvider;"))
+
         visitMethodInsn(
             INVOKESTATIC,
             "io/sentry/android/core/performance/AppStartMetrics",
@@ -69,7 +69,5 @@ class ContentProviderMethodVisitor(
             "(Landroid/content/ContentProvider;)V",
             false
         )
-//        visitInsn(ICONST_3)
-//        visitVarInsn(ISTORE, counterIdx)
     }
 }
