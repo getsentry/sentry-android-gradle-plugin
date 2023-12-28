@@ -43,9 +43,9 @@ class ContentProviderMethodVisitor(
         // finally load this and store it in the local variable
         visitVarInsn(ALOAD, 0)
         visitVarInsn(ASTORE, safeThisIdx)
-
-        visitInsn(ICONST_5)
-        visitVarInsn(ISTORE, counterIdx)
+//
+//        visitInsn(ICONST_5)
+//        visitVarInsn(ISTORE, counterIdx)
 
         visitVarInsn(ALOAD, safeThisIdx)
         box(Type.getType("Landroid/content/ContentProvider;"))
@@ -69,7 +69,7 @@ class ContentProviderMethodVisitor(
             "(Landroid/content/ContentProvider;)V",
             false
         )
-        visitInsn(ICONST_3)
-        visitVarInsn(ISTORE, counterIdx)
+//        visitInsn(ICONST_3)
+//        visitVarInsn(ISTORE, counterIdx)
     }
 }
