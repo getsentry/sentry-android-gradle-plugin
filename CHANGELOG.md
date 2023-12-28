@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix VerifyError when optimized code is instrumented ([#619](https://github.com/getsentry/sentry-android-gradle-plugin/pull/619))
+
 ## 4.1.0
 
 ### Features
