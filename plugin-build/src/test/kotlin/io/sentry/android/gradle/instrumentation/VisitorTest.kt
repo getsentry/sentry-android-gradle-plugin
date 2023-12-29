@@ -85,7 +85,11 @@ class VisitorTest(
             false,
             printWriter
         )
-        assertEquals(stringWriter.toString(), "")
+        assertEquals(
+            "Instrumented class verification failed with the following exception:\n$stringWriter",
+            stringWriter.toString(),
+            ""
+        )
     }
 
     @After
@@ -161,7 +165,8 @@ class VisitorTest(
             arrayOf("androidxCompose", "NavHostControllerKt", ComposeNavigation(), null),
             arrayOf("logcat", "LogcatTest", Logcat(), null),
             arrayOf("appstart", "MyApplication", Application(), null),
-            arrayOf("appstart", "MyContentProvider", ContentProvider(), null)
+            arrayOf("appstart", "MyContentProvider", ContentProvider(), null),
+            arrayOf("appstart", "MlKitInitProvider", ContentProvider(), null)
         )
 
         private fun roomDaoTestParameters(suffix: String = "") = arrayOf(
