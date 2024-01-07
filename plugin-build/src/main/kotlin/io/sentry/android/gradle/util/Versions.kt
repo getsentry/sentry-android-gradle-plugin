@@ -113,4 +113,8 @@ internal object SentryModules {
         "io.sentry",
         "sentry-spring-boot-jakarta"
     )
+    internal val SENTRY_BOM = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-bom"
+    )
 }

@@ -101,8 +101,9 @@ private fun DependencySet.findSentryVersion(isAndroid: Boolean): String? =
             it.group == SENTRY_GROUP &&
                 (
                     it.name == SentryModules.SENTRY_ANDROID_CORE.name ||
-                        it.name == SentryModules.SENTRY_ANDROID.name
-                    )
+                        it.name == SentryModules.SENTRY_ANDROID.name ||
+                        it.name == SentryModules.SENTRY_BOM.name
+                    ) && it.version != null
         }?.version
     } else {
         find {
@@ -110,7 +111,8 @@ private fun DependencySet.findSentryVersion(isAndroid: Boolean): String? =
                 (
                     it.name == SentryModules.SENTRY.name ||
                         it.name == SentryModules.SENTRY_SPRING_BOOT2.name ||
-                        it.name == SentryModules.SENTRY_SPRING_BOOT3.name
-                    )
+                        it.name == SentryModules.SENTRY_SPRING_BOOT3.name ||
+                        it.name == SentryModules.SENTRY_BOM.name
+                    ) && it.version != null
         }?.version
     }

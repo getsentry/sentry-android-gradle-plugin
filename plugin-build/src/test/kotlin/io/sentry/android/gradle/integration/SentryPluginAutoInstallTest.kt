@@ -317,6 +317,36 @@ class SentryPluginAutoInstallTest :
         assertTrue { "WARNING: Version of 'io.sentry:sentry-android-core' was overridden from '6.0.0' to '6.21.0' by the Sentry Gradle plugin. If you want to use the older version, you can add `autoInstallation.sentryVersion.set(\"6.0.0\")` in the `sentry {}` plugin configuration block" in result.output }
     }
 
+    @Test
+    fun `considers sentry-bom as a core version`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+            }
+
+            dependencies {
+              implementation 'io.sentry:sentry-android'
+              implementation platform('io.sentry:sentry-bom:7.0.0')
+            }
+
+            sentry.autoInstallation.enabled = true
+            sentry.autoInstallation.sentryVersion = "6.32.0"
+            sentry.includeProguardMapping = false
+            """.trimIndent()
+        )
+
+        val result = runListDependenciesTask()
+        // since we consider sentry-bom now, the plugin should not add sentry-android:6.32.0 at all
+        assertFalse { "io.sentry:sentry-android:6.32.0 -> 7.0.0" in result.output }
+    }
+
     private fun runListDependenciesTask() = runner
         .appendArguments("app:dependencies")
         .appendArguments("--configuration")
