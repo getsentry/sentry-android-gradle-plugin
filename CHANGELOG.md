@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Consider `sentry-bom` version when auto-installing integrations and the SDK ([#625](https://github.com/getsentry/sentry-android-gradle-plugin/pull/625)) 
+
 ### Dependencies
 
 - Bump CLI from v2.23.1 to v2.24.1 ([#622](https://github.com/getsentry/sentry-android-gradle-plugin/pull/622), [#624](https://github.com/getsentry/sentry-android-gradle-plugin/pull/624))
