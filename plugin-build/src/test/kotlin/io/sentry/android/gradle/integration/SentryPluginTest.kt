@@ -134,7 +134,11 @@ class SentryPluginTest :
 
     @Test
     fun `skips tracing instrumentation if tracingInstrumentation is disabled`() {
-        applyTracingInstrumentation(false)
+        applyTracingInstrumentation(
+            false,
+            appStart = false,
+            logcat = false
+        )
 
         val build = runner
             .appendArguments(":app:assembleRelease", "--dry-run")
@@ -161,7 +165,9 @@ class SentryPluginTest :
             dependencies = setOf(
                 "androidx.sqlite:sqlite:2.0.0",
                 "io.sentry:sentry-android-sqlite:6.21.0"
-            )
+            ),
+            appStart = false,
+            logcat = false
         )
 
         val build = runner
@@ -176,7 +182,11 @@ class SentryPluginTest :
 
     @Test
     fun `applies only FILE_IO instrumentables when only FILE_IO feature enabled`() {
-        applyTracingInstrumentation(features = setOf(InstrumentationFeature.FILE_IO))
+        applyTracingInstrumentation(
+            features = setOf(InstrumentationFeature.FILE_IO),
+            appStart = false,
+            logcat = false
+        )
 
         val build = runner
             .appendArguments(":app:assembleDebug", "--info")
@@ -195,7 +205,9 @@ class SentryPluginTest :
             dependencies = setOf(
                 "androidx.compose.runtime:runtime:1.1.0",
                 "io.sentry:sentry-compose-android:6.7.0"
-            )
+            ),
+            appStart = false,
+            logcat = false
         )
 
         val build = runner
@@ -210,7 +222,9 @@ class SentryPluginTest :
     @Test
     fun `does not apply Compose instrumentable when app does not depend on compose (runtime)`() {
         applyTracingInstrumentation(
-            features = setOf(InstrumentationFeature.COMPOSE)
+            features = setOf(InstrumentationFeature.COMPOSE),
+            appStart = false,
+            logcat = false
         )
 
         val build = runner
@@ -224,7 +238,9 @@ class SentryPluginTest :
     @Test
     fun `apply old Database instrumentable when app does not depend on sentry-android-sqlite`() {
         applyTracingInstrumentation(
-            features = setOf(InstrumentationFeature.DATABASE)
+            features = setOf(InstrumentationFeature.DATABASE),
+            appStart = false,
+            logcat = false
         )
 
         val build = runner
@@ -243,7 +259,9 @@ class SentryPluginTest :
             dependencies = setOf(
                 "com.squareup.okhttp3:okhttp:3.14.9",
                 "io.sentry:sentry-android-okhttp:6.19.0"
-            )
+            ),
+            appStart = false,
+            logcat = false
         )
         val build = runner
             .appendArguments(":app:assembleDebug", "--info")
@@ -261,7 +279,9 @@ class SentryPluginTest :
             dependencies = setOf(
                 "com.squareup.okhttp3:okhttp:3.14.9",
                 "io.sentry:sentry-android-okhttp:6.20.0"
-            )
+            ),
+            appStart = false,
+            logcat = false
         )
         val build = runner
             .appendArguments(":app:assembleDebug", "--info")
@@ -270,6 +290,52 @@ class SentryPluginTest :
         assertTrue {
             "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
                 "OkHttpEventListener, OkHttp)" in build.output
+        }
+    }
+
+    @Test
+    fun `does not apply app start instrumentations when older SDK version is used`() {
+        applyTracingInstrumentation(
+            appStart = true,
+            sdkVersion = "7.0.0"
+        )
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--info")
+            .build()
+
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=)" in build.output
+        }
+    }
+
+    @Test
+    fun `applies app start instrumentations when enabled`() {
+        applyTracingInstrumentation(
+            appStart = true
+        )
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--info")
+            .build()
+
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "Application, ContentProvider)" in build.output
+        }
+    }
+
+    @Test
+    fun `applies logcat instrumentation when enabled`() {
+        applyTracingInstrumentation(
+            appStart = false,
+            logcat = true
+        )
+        val build = runner
+            .appendArguments(":app:assembleDebug", "--info")
+            .build()
+
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "Logcat)" in build.output
         }
     }
 
@@ -289,7 +355,9 @@ class SentryPluginTest :
                 "androidx.compose.runtime:runtime:1.1.0",
                 "io.sentry:sentry-compose-android:6.7.0",
                 "io.sentry:sentry-android-sqlite:6.21.0"
-            )
+            ),
+            appStart = true,
+            logcat = true
         )
         val build = runner
             .appendArguments(":app:assembleDebug", "--info")
@@ -299,7 +367,7 @@ class SentryPluginTest :
             "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
                 "AndroidXSQLiteOpenHelper, AndroidXRoomDao, OkHttpEventListener, " +
                 "OkHttp, WrappingInstrumentable, RemappingInstrumentable, " +
-                "ComposeNavigation)" in build.output
+                "ComposeNavigation, Logcat, Application, ContentProvider)" in build.output
         }
     }
 
@@ -434,6 +502,8 @@ class SentryPluginTest :
                 InstrumentationFeature.OKHTTP,
                 InstrumentationFeature.COMPOSE
             ),
+            logcat = true,
+            appStart = true,
             dependencies = setOf(
                 "com.squareup.okhttp3:okhttp:3.14.9",
                 "io.sentry:sentry-android-okhttp:6.6.0",
@@ -451,12 +521,16 @@ class SentryPluginTest :
             signed = false
         ).sorted()
 
-        val expectedIntegrations = listOf(
-            InstrumentationFeature.DATABASE,
-            InstrumentationFeature.FILE_IO,
-            InstrumentationFeature.COMPOSE,
-            InstrumentationFeature.OKHTTP
-        ).map { it.integrationName }.sorted()
+        val expectedIntegrations = (
+            listOf(
+                InstrumentationFeature.DATABASE,
+                InstrumentationFeature.FILE_IO,
+                InstrumentationFeature.COMPOSE,
+                InstrumentationFeature.OKHTTP
+            ).map { it.integrationName }.toMutableList() +
+                listOf("LogcatInstrumentation", "AppStartInstrumentation")
+            )
+            .sorted()
 
         assertEquals(expectedIntegrations, integrations)
     }
@@ -601,15 +675,18 @@ class SentryPluginTest :
     private fun applyTracingInstrumentation(
         tracingInstrumentation: Boolean = true,
         features: Set<InstrumentationFeature> = emptySet(),
+        logcat: Boolean = false,
+        appStart: Boolean = false,
         dependencies: Set<String> = emptySet(),
         debug: Boolean = false,
-        excludes: Set<String> = emptySet()
+        excludes: Set<String> = emptySet(),
+        sdkVersion: String = "7.1.0"
     ) {
         appBuildFile.appendText(
             // language=Groovy
             """
                 dependencies {
-                  implementation 'io.sentry:sentry-android:6.6.0'
+                  implementation 'io.sentry:sentry-android:$sdkVersion'
                   ${dependencies.joinToString("\n") { "implementation '$it'" }}
                 }
 
@@ -620,6 +697,12 @@ class SentryPluginTest :
                     enabled = $tracingInstrumentation
                     debug = $debug
                     features = [${features.joinToString { "${it::class.java.canonicalName}.${it.name}" }}]
+                    appStart {
+                        enabled = $appStart
+                    }
+                    logcat {
+                        enabled = $logcat
+                    }
                     excludes = ["${excludes.joinToString()}"]
                   }
                 }

@@ -101,6 +101,11 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
             cliExecutable.get()
         )
 
+        sentryUrl.orNull?.let {
+            args.add("--url")
+            args.add(it)
+        }
+
         args.add("debug-files")
         args.add("upload")
 
@@ -109,11 +114,6 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
         }
 
         sentryTelemetryService.orNull?.traceCli()?.let { args.addAll(it) }
-
-        sentryUrl.orNull?.let {
-            args.add("--url")
-            args.add(it)
-        }
 
         if (!autoUploadNativeSymbol.get()) {
             args.add("--no-upload")

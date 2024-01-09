@@ -41,6 +41,10 @@ abstract class SentryModulesService :
             features.add("LogcatInstrumentation")
         }
 
+        if (isAppStartInstrEnabled()) {
+            features.add("AppStartInstrumentation")
+        }
+
         if (parameters.sourceContextEnabled.getOrElse(false)) {
             features.add("SourceContext")
         }
@@ -103,6 +107,12 @@ abstract class SentryModulesService :
             SentryVersions.VERSION_COMPOSE
         ) && parameters.features.get().contains(InstrumentationFeature.COMPOSE)
 
+    fun isAppStartInstrEnabled(): Boolean =
+        sentryModules.isAtLeast(
+            SentryModules.SENTRY_ANDROID_CORE,
+            SentryVersions.VERSION_APP_START
+        ) && parameters.appStartEnabled.get()
+
     private fun Map<ModuleIdentifier, SemVer>.isAtLeast(
         module: ModuleIdentifier,
         minVersion: SemVer
@@ -115,7 +125,8 @@ abstract class SentryModulesService :
             features: Provider<Set<InstrumentationFeature>>,
             logcatEnabled: Provider<Boolean>,
             sourceContextEnabled: Provider<Boolean>,
-            dexguardEnabled: Provider<Boolean>
+            dexguardEnabled: Provider<Boolean>,
+            appStartEnabled: Provider<Boolean>
         ): Provider<SentryModulesService> {
             return project.gradle.sharedServices.registerIfAbsent(
                 getBuildServiceName(SentryModulesService::class.java),
@@ -125,6 +136,7 @@ abstract class SentryModulesService :
                 it.parameters.logcatEnabled.setDisallowChanges(logcatEnabled)
                 it.parameters.sourceContextEnabled.setDisallowChanges(sourceContextEnabled)
                 it.parameters.dexguardEnabled.setDisallowChanges(dexguardEnabled)
+                it.parameters.appStartEnabled.setDisallowChanges(appStartEnabled)
             }
         }
     }
@@ -144,5 +156,8 @@ abstract class SentryModulesService :
 
         @get:Input
         val dexguardEnabled: Property<Boolean>
+
+        @get:Input
+        val appStartEnabled: Property<Boolean>
     }
 }

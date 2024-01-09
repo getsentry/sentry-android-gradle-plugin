@@ -4,6 +4,30 @@
 
 ### Features
 
+- Consider `sentry-bom` version when auto-installing integrations and the SDK ([#625](https://github.com/getsentry/sentry-android-gradle-plugin/pull/625)) 
+
+### Dependencies
+
+- Bump CLI from v2.23.1 to v2.24.1 ([#622](https://github.com/getsentry/sentry-android-gradle-plugin/pull/622), [#624](https://github.com/getsentry/sentry-android-gradle-plugin/pull/624))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2241)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.23.1...2.24.1)
+
+## 4.1.1
+
+### Fixes
+
+- Fix VerifyError when optimized code is instrumented ([#619](https://github.com/getsentry/sentry-android-gradle-plugin/pull/619))
+
+### Dependencies
+
+- Bump CLI from v2.23.0 to v2.23.1 ([#615](https://github.com/getsentry/sentry-android-gradle-plugin/pull/615))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2231)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.23.0...2.23.1)
+
+## 4.1.0
+
+### Features
+
 - Do not consider user-defined sentry versions when auto-installing integrations. This is necessary because we want to align integrations versions to the same one as one of `sentry-android-core`/`sentry`/`sentry-android`/`sentry-spring-boot` to prevent runtime crashes due to binary incompatibility. ([#602](https://github.com/getsentry/sentry-android-gradle-plugin/pull/602))
     - If you have directly defined one of the core versions, we will use that to install integrations, otherwise `autoInstallation.sentryVersion` or the default bundled SDK version is used.
 
@@ -26,6 +50,35 @@ dependencies {
 ```
 
 Then in both cases it will use `7.0.0` when installing the `sentry-android-okhttp` integration and print a warning that we have overridden the version.
+
+- Add aarch64 sentry-cli ([#611](https://github.com/getsentry/sentry-android-gradle-plugin/pull/611))
+    - This is used when the build is executed inside a docker container on an Apple silicon chip (e.g. M1)
+
+- Instrument ContentProvider/Application onCreate calls to measure app-start performance ([#565](https://github.com/getsentry/sentry-android-gradle-plugin/pull/565))
+    - This feature requires the `sentry-java` SDK version `7.1.0` and is enabled by default
+    - To disable the feature, set `sentry.tracingInstrumentation.appStart.enabled` to `false`
+```kotlin
+sentry {
+  tracingInstrumentation {
+    appStart {
+      enabled.set(false)
+    }
+  }
+}
+```
+
+### Fixes
+
+- Fix sentry-cli url parameter position ([#610](https://github.com/getsentry/sentry-android-gradle-plugin/pull/610))
+
+### Dependencies
+
+- Bump CLI from v2.22.3 to v2.23.0 ([#607](https://github.com/getsentry/sentry-android-gradle-plugin/pull/607))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2230)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.22.3...2.23.0)
+- Bump Android SDK from v7.0.0 to v7.1.0 ([#612](https://github.com/getsentry/sentry-android-gradle-plugin/pull/612))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#710)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.0.0...7.1.0)
 
 ## 4.0.0
 

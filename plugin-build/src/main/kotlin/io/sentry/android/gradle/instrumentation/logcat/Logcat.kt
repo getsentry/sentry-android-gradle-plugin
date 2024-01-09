@@ -9,7 +9,7 @@ import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.util.isSentryClass
 import org.objectweb.asm.ClassVisitor
 
-class LogcatInstrumentable :
+class Logcat :
     ClassInstrumentable {
 
     companion object {
