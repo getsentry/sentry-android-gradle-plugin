@@ -3,7 +3,6 @@ package io.sentry.android.gradle
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AppExtension
 import io.sentry.BuildConfig
-import io.sentry.android.gradle.SentryCliProvider.getSentryCliPath
 import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.util.AgpVersions
@@ -52,7 +51,7 @@ abstract class SentryPlugin @Inject constructor(
             val oldAGPExtension = project.extensions.getByType(AppExtension::class.java)
             val androidComponentsExt =
                 project.extensions.getByType(AndroidComponentsExtension::class.java)
-            val cliExecutable = getSentryCliPath(project)
+            val cliExecutable = project.cliExecutableProvider()
 
             val extraProperties = project.extensions.getByName("ext")
                 as ExtraPropertiesExtension

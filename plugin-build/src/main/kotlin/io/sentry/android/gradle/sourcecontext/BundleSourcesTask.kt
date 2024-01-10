@@ -166,7 +166,7 @@ abstract class BundleSourcesTask : Exec() {
             collectSourcesTask: TaskProvider<CollectSourcesTask>,
             output: Provider<Directory>,
             debug: Property<Boolean>,
-            cliExecutable: String,
+            cliExecutable: Provider<String>,
             sentryOrg: Provider<String>,
             sentryProject: Provider<String>,
             sentryAuthToken: Property<String>,

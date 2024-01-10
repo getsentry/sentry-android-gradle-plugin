@@ -182,7 +182,7 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
             extension: SentryPluginExtension,
             sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             debug: Property<Boolean>,
-            cliExecutable: String,
+            cliExecutable: Provider<String>,
             sentryProperties: String?,
             generateUuidTask: Provider<SentryGenerateProguardUuidTask>,
             mappingFiles: Provider<FileCollection>,
