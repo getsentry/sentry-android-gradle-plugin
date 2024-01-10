@@ -144,6 +144,18 @@ class VisitorTest(
             selectDaoTestParameters("LiveDataList"),
             selectDaoTestParameters("Paging"),
             selectDaoTestParameters("Impl"),
+            kspFavoritesDaoTestParameters("all"),
+            kspFavoritesDaoTestParameters("count"),
+            kspFavoritesDaoTestParameters("delete"),
+            kspFavoritesDaoTestParameters("insert"),
+            kspFavoritesDaoTestParameters("insertAll"),
+            kspFavoritesDaoTestParameters("update"),
+            kspTracksDaoTestParameters("all"),
+            kspTracksDaoTestParameters("count"),
+            kspTracksDaoTestParameters("delete"),
+            kspTracksDaoTestParameters("insert"),
+            kspTracksDaoTestParameters("insertAll"),
+            kspTracksDaoTestParameters("update"),
             arrayOf("fileIO", "SQLiteCopyOpenHelper", WrappingInstrumentable(), null),
             arrayOf("fileIO", "TypefaceCompatUtil", WrappingInstrumentable(), null),
             arrayOf(
@@ -170,7 +182,7 @@ class VisitorTest(
         )
 
         private fun roomDaoTestParameters(suffix: String = "") = arrayOf(
-            "androidxRoom",
+            "androidxRoom/java",
             "TracksDao_$suffix",
             AndroidXRoomDao(),
             TestClassContext("TracksDao_$suffix") { lookupName ->
@@ -179,7 +191,7 @@ class VisitorTest(
         )
 
         private fun deletionDaoTestParameters(suffix: String = "") = arrayOf(
-            "androidxRoom/delete",
+            "androidxRoom/java/delete",
             "DeletionDao_$suffix",
             AndroidXRoomDao(),
             TestClassContext("DeletionDao_$suffix") { lookupName ->
@@ -188,7 +200,7 @@ class VisitorTest(
         )
 
         private fun insertionDaoTestParameters(suffix: String = "") = arrayOf(
-            "androidxRoom/insert",
+            "androidxRoom/java/insert",
             "InsertionDao_$suffix",
             AndroidXRoomDao(),
             TestClassContext("InsertionDao_$suffix") { lookupName ->
@@ -197,7 +209,7 @@ class VisitorTest(
         )
 
         private fun updateDaoTestParameters(suffix: String = "") = arrayOf(
-            "androidxRoom/update",
+            "androidxRoom/java/update",
             "UpdateDao_$suffix",
             AndroidXRoomDao(),
             TestClassContext("UpdateDao_$suffix") { lookupName ->
@@ -206,10 +218,28 @@ class VisitorTest(
         )
 
         private fun selectDaoTestParameters(suffix: String = "") = arrayOf(
-            "androidxRoom/select",
+            "androidxRoom/java/select",
             "SelectDao_$suffix",
             AndroidXRoomDao(),
             TestClassContext("SelectDao_$suffix") { lookupName ->
+                TestClassData(lookupName, classAnnotations = listOf(AndroidXRoomDao().fqName))
+            }
+        )
+
+        private fun kspFavoritesDaoTestParameters(suffix: String = "") = arrayOf(
+            "androidxRoom/ksp",
+            "FavoritesDao_$suffix",
+            AndroidXRoomDao(),
+            TestClassContext("FavoritesDao_$suffix") { lookupName ->
+                TestClassData(lookupName, classAnnotations = listOf(AndroidXRoomDao().fqName))
+            }
+        )
+
+        private fun kspTracksDaoTestParameters(suffix: String = "") = arrayOf(
+            "androidxRoom/ksp/tracksDao",
+            "TracksDao_$suffix",
+            AndroidXRoomDao(),
+            TestClassContext("TracksDao_$suffix") { lookupName ->
                 TestClassData(lookupName, classAnnotations = listOf(AndroidXRoomDao().fqName))
             }
         )

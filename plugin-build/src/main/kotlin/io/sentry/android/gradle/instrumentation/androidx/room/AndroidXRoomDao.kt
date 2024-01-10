@@ -10,9 +10,7 @@ import io.sentry.android.gradle.instrumentation.MethodContext
 import io.sentry.android.gradle.instrumentation.MethodInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.androidx.room.visitor.InstrumentableMethodsCollectingVisitor
-import io.sentry.android.gradle.instrumentation.androidx.room.visitor.RoomQueryVisitor
-import io.sentry.android.gradle.instrumentation.androidx.room.visitor.RoomQueryWithTransactionVisitor
-import io.sentry.android.gradle.instrumentation.androidx.room.visitor.RoomTransactionVisitor
+import io.sentry.android.gradle.instrumentation.androidx.room.visitor.AndroidXRoomDaoVisitor
 import io.sentry.android.gradle.util.info
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
@@ -84,32 +82,13 @@ class RoomMethod(
         apiVersion: Int,
         originalVisitor: MethodVisitor,
         parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
-    ): MethodVisitor = when (type) {
-        RoomMethodType.TRANSACTION -> RoomTransactionVisitor(
-            className,
-            apiVersion,
-            methodNode,
-            originalVisitor,
-            instrumentableContext.access,
-            instrumentableContext.descriptor
-        )
-        RoomMethodType.QUERY -> RoomQueryVisitor(
-            className,
-            apiVersion,
-            methodNode,
-            originalVisitor,
-            instrumentableContext.access,
-            instrumentableContext.descriptor
-        )
-        RoomMethodType.QUERY_WITH_TRANSACTION -> RoomQueryWithTransactionVisitor(
-            className,
-            apiVersion,
-            methodNode,
-            originalVisitor,
-            instrumentableContext.access,
-            instrumentableContext.descriptor
-        )
-    }
+    ): MethodVisitor = AndroidXRoomDaoVisitor(
+        className,
+        apiVersion,
+        originalVisitor,
+        instrumentableContext.access,
+        instrumentableContext.descriptor
+    )
 
     override fun isInstrumentable(data: MethodContext): Boolean {
         return data.name == fqName && data.descriptor == methodNode.desc &&
