@@ -227,7 +227,7 @@ class VisitorTest(
         )
 
         private fun kspFavoritesDaoTestParameters(suffix: String = "") = arrayOf(
-            "androidxRoom/ksp",
+            "androidxRoom/ksp/favoritesDao",
             "FavoritesDao_$suffix",
             AndroidXRoomDao(),
             TestClassContext("FavoritesDao_$suffix") { lookupName ->

@@ -9,8 +9,8 @@ import io.sentry.android.gradle.instrumentation.CommonClassVisitor
 import io.sentry.android.gradle.instrumentation.MethodContext
 import io.sentry.android.gradle.instrumentation.MethodInstrumentable
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
-import io.sentry.android.gradle.instrumentation.androidx.room.visitor.InstrumentableMethodsCollectingVisitor
 import io.sentry.android.gradle.instrumentation.androidx.room.visitor.AndroidXRoomDaoVisitor
+import io.sentry.android.gradle.instrumentation.androidx.room.visitor.InstrumentableMethodsCollectingVisitor
 import io.sentry.android.gradle.util.info
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
