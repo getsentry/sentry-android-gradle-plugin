@@ -8,17 +8,17 @@ import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.error
 import io.sentry.android.gradle.util.info
 import io.sentry.android.gradle.util.warn
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.Locale
+import java.util.Properties
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.tasks.Input
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.util.Locale
-import java.util.Properties
 
 internal object SentryCliProvider {
 
