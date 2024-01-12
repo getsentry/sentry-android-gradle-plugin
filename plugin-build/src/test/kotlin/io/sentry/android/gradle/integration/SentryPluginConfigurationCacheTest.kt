@@ -152,8 +152,8 @@ class SentryPluginConfigurationCacheTest :
         val output = runner.build().output
         val cliPath = output
             .lines()
-            .find { it.startsWith("[sentry] cli extracted from resources into:") }
-            ?.substringAfter("[sentry] cli extracted from resources into:")
+            .find { it.startsWith("[sentry] Using memoized cli path:") }
+            ?.substringAfter("[sentry] Using memoized cli path:")
             ?.trim()
 
         val cli = File(cliPath!!).also { it.delete() }

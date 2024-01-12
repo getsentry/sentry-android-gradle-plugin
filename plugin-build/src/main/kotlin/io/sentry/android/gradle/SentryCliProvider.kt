@@ -7,7 +7,6 @@ import io.sentry.android.gradle.SentryPlugin.Companion.logger
 import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.error
 import io.sentry.android.gradle.util.info
-import io.sentry.android.gradle.util.warn
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -35,7 +34,7 @@ internal object SentryCliProvider {
     fun getSentryCliPath(projectDir: File, rootDir: File): String {
         val cliPath = memoizedCliPath
         if (!cliPath.isNullOrEmpty() && File(cliPath).exists()) {
-            logger.warn { "Using memoized cli path: $cliPath" }
+            logger.info { "Using memoized cli path: $cliPath" }
             return cliPath
         }
         // If a path is provided explicitly use that first.
@@ -67,7 +66,7 @@ internal object SentryCliProvider {
             logger.info { "Trying to load cli from $resourcePath in a temp file..." }
 
             loadCliFromResourcesToTemp(resourcePath)?.let {
-                logger.warn { "cli extracted from resources into: $it" }
+                logger.info { "cli extracted from resources into: $it" }
                 memoizedCliPath = it
                 return@getSentryCliPath it
             } ?: logger.info { "Failed to load sentry-cli from resource folder" }
