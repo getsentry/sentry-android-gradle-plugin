@@ -7,31 +7,43 @@ import io.sentry.android.gradle.SentryPlugin.Companion.logger
 import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.error
 import io.sentry.android.gradle.util.info
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.util.Locale
-import java.util.Properties
+import io.sentry.android.gradle.util.warn
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.tasks.Input
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.Locale
+import java.util.Properties
 
 internal object SentryCliProvider {
+
+    @field:Volatile
+    private var memoizedCliPath: String? = null
+
     /**
      * Return the correct sentry-cli executable path to use for the given project.  This
      * will look for a sentry-cli executable in a local node_modules in case it was put
      * there by sentry-react-native or others before falling back to the global installation.
      */
     @JvmStatic
+    @Synchronized
     fun getSentryCliPath(projectDir: File, rootDir: File): String {
+        val cliPath = memoizedCliPath
+        if (!cliPath.isNullOrEmpty() && File(cliPath).exists()) {
+            logger.warn { "Using memoized cli path: $cliPath" }
+            return cliPath
+        }
         // If a path is provided explicitly use that first.
         logger.info { "Searching cli from sentry.properties file..." }
 
         searchCliInPropertiesFile(projectDir, rootDir)?.let {
             logger.info { "cli Found: $it" }
+            memoizedCliPath = it
             return@getSentryCliPath it
         } ?: logger.info { "sentry-cli not found in sentry.properties file" }
 
@@ -47,6 +59,7 @@ internal object SentryCliProvider {
 
             searchCliInResources(resourcePath)?.let {
                 logger.info { "cli found in resources: $it" }
+                memoizedCliPath = it
                 return@getSentryCliPath it
             } ?: logger.info { "Failed to load sentry-cli from resource folder" }
 
@@ -54,13 +67,14 @@ internal object SentryCliProvider {
             logger.info { "Trying to load cli from $resourcePath in a temp file..." }
 
             loadCliFromResourcesToTemp(resourcePath)?.let {
-                logger.info { "cli extracted from resources into: $it" }
+                logger.warn { "cli extracted from resources into: $it" }
+                memoizedCliPath = it
                 return@getSentryCliPath it
             } ?: logger.info { "Failed to load sentry-cli from resource folder" }
         }
 
         logger.error { "Falling back to invoking `sentry-cli` from shell" }
-        return "sentry-cli"
+        return "sentry-cli".also { memoizedCliPath = it }
     }
 
     internal fun getSentryPropertiesPath(projectDir: File, rootDir: File): String? =
