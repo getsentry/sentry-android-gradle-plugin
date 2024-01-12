@@ -55,6 +55,8 @@ abstract class BaseSentryNonAndroidPluginTest(
         rootBuildFile = testProjectDir.writeFile("build.gradle") {
             // language=Groovy
             """
+            import io.sentry.android.gradle.autoinstall.AutoInstallState
+
             buildscript {
               repositories {
                 google()
