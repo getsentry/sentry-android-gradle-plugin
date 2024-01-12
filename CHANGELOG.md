@@ -452,10 +452,6 @@ Similarly, if you have a Sentry SDK (e.g. `sentry-android-core`) dependency on o
 
 ## 3.1.4
 
-### Fixes
-
-- Detect minified classes and skip instrumentation to avoid build problems ([#362](https://github.com/getsentry/sentry-android-gradle-plugin/pull/362))
-
 ### Features
 
 - Bump AGP to 7.2.1 and Gradle to 7.5.0 ([#363](https://github.com/getsentry/sentry-android-gradle-plugin/pull/363))
@@ -465,6 +461,10 @@ Similarly, if you have a Sentry SDK (e.g. `sentry-android-core`) dependency on o
 - Bump CLI to v2.5.0 ([#358](https://github.com/getsentry/sentry-android-gradle-plugin/pull/358))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#250)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.4.1...2.5.0)
+
+### Fixes
+
+- Detect minified classes and skip instrumentation to avoid build problems ([#362](https://github.com/getsentry/sentry-android-gradle-plugin/pull/362))
 
 ## 3.1.3
 
