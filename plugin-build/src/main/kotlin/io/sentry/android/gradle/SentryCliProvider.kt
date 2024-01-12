@@ -18,6 +18,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.tasks.Input
+import java.nio.file.Files
 
 internal object SentryCliProvider {
 
@@ -104,7 +105,17 @@ internal object SentryCliProvider {
 
     internal fun loadCliFromResourcesToTemp(resourcePath: String): String? {
         val resourceStream = javaClass.getResourceAsStream(resourcePath)
-        val tempFile = File.createTempFile(".sentry-cli", ".exe").apply {
+        val tmpDirPrefix = try {
+            // only specific for some tests for deterministic behavior when executing in parallel
+            System.getProperty("sentryCliTempFolder")
+        } catch (e: Throwable) {
+            null
+        }
+        val tempFile = File.createTempFile(
+            ".sentry-cli",
+            ".exe",
+            tmpDirPrefix?.let { Files.createTempDirectory(it).toFile() }
+        ).apply {
             deleteOnExit()
             setExecutable(true)
         }
