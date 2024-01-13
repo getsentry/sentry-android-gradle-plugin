@@ -112,7 +112,10 @@ internal object SentryCliProvider {
         }
     }
 
-    internal fun loadCliFromResourcesToTemp(resourcePath: String, tmpDirPrefix: String?): String? {
+    internal fun loadCliFromResourcesToTemp(
+        resourcePath: String,
+        tmpDirPrefix: String? = null
+    ): String? {
         val resourceStream = javaClass.getResourceAsStream(resourcePath)
         val tempFile = File.createTempFile(
             ".sentry-cli",
