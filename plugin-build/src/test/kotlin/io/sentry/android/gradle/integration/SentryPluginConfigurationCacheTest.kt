@@ -4,7 +4,6 @@ import io.sentry.BuildConfig
 import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
 import java.io.File
-import java.nio.file.Files
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -164,15 +163,10 @@ class SentryPluginConfigurationCacheTest :
             ?.substringAfter("[sentry] Using memoized cli path:")
             ?.trim()
 
-        val cli = File(cliPath!!)
-        val tmpCli = File("tmp-cli")
-        Files.copy(cli.toPath(), tmpCli.toPath())
-        cli.delete()
+        val cli = File(cliPath!!).also { it.delete() }
         assertFalse { cli.exists() }
 
         val outputWithConfigCache = runner.build().output
         assertFalse { "BUILD FAILED" in outputWithConfigCache }
-
-        Files.copy(tmpCli.toPath(), cli.toPath())
     }
 }
