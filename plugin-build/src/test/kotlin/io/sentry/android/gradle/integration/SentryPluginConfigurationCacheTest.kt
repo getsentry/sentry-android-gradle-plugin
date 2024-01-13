@@ -124,8 +124,10 @@ class SentryPluginConfigurationCacheTest :
     fun `sentry-cli path calculation respects configuration cache`() {
         assumeThat(
             "SentryCliProvider only supports " +
-                "configuration cache from Gradle 7.5 onwards",
-            GradleVersions.CURRENT >= GradleVersions.VERSION_7_5,
+                "configuration cache from Gradle 7.5 onwards and Gradle 8.1 uses cli " +
+                "from resources, so there's no extracting from .jar to a /tmp folder involved",
+            GradleVersions.CURRENT >= GradleVersions.VERSION_7_5 &&
+                GradleVersions.CURRENT <= GradleVersions.VERSION_8_0,
             `is`(true)
         )
         appBuildFile.writeText(
@@ -160,8 +162,12 @@ class SentryPluginConfigurationCacheTest :
         val output = runner.build().output
         val cliPath = output
             .lines()
-            .find { it.startsWith("[sentry] cli extracted from resources into:") }
+            .find {
+                it.startsWith("[sentry] cli extracted from resources into:") ||
+                    it.startsWith("[sentry] Using memoized cli path:")
+            }
             ?.substringAfter("[sentry] cli extracted from resources into:")
+            ?.substringAfter("[sentry] Using memoized cli path:")
             ?.trim()
 
         val cli = File(cliPath!!).also { it.delete() }

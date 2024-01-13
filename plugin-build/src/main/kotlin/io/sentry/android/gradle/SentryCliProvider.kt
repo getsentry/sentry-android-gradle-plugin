@@ -54,28 +54,19 @@ internal object SentryCliProvider {
         if (!cliSuffix.isNullOrBlank()) {
             val resourcePath = "/bin/sentry-cli-$cliSuffix"
 
-            val tmpDirPrefix = try {
-                // only specific for some tests for deterministic behavior when executing in parallel
-                System.getProperty("sentryCliTempFolder")
-            } catch (e: Throwable) {
-                null
-            }
+            // if we are not in a jar, we can use the file directly
+            logger.info { "Searching for $resourcePath in resources folder..." }
 
-            if (tmpDirPrefix.isNullOrEmpty()) {
-                // if we are not in a jar, we can use the file directly
-                logger.info { "Searching for $resourcePath in resources folder..." }
-
-                searchCliInResources(resourcePath)?.let {
-                    logger.info { "cli found in resources: $it" }
-                    memoizedCliPath = it
-                    return@getSentryCliPath it
-                } ?: logger.info { "Failed to load sentry-cli from resource folder" }
-            }
+            searchCliInResources(resourcePath)?.let {
+                logger.info { "cli found in resources: $it" }
+                memoizedCliPath = it
+                return@getSentryCliPath it
+            } ?: logger.info { "Failed to load sentry-cli from resource folder" }
 
             // otherwise we need to unpack into a file
             logger.info { "Trying to load cli from $resourcePath in a temp file..." }
 
-            loadCliFromResourcesToTemp(resourcePath, tmpDirPrefix)?.let {
+            loadCliFromResourcesToTemp(resourcePath)?.let {
                 logger.info { "cli extracted from resources into: $it" }
                 memoizedCliPath = it
                 return@getSentryCliPath it
@@ -112,11 +103,14 @@ internal object SentryCliProvider {
         }
     }
 
-    internal fun loadCliFromResourcesToTemp(
-        resourcePath: String,
-        tmpDirPrefix: String? = null
-    ): String? {
+    internal fun loadCliFromResourcesToTemp(resourcePath: String): String? {
         val resourceStream = javaClass.getResourceAsStream(resourcePath)
+        val tmpDirPrefix = try {
+            // only specific for some tests for deterministic behavior when executing in parallel
+            System.getProperty("sentryCliTempFolder")
+        } catch (e: Throwable) {
+            null
+        }
         val tempFile = File.createTempFile(
             ".sentry-cli",
             ".exe",
