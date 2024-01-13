@@ -156,6 +156,7 @@ class SentryPluginConfigurationCacheTest :
         runner.appendArguments(":app:assembleDebug")
             .appendArguments("--configuration-cache")
             .appendArguments("--info")
+            .appendArguments("-DsentryCliTempFolder=configCacheTest")
         val output = runner.build().output
         val cliPath = output
             .lines()
