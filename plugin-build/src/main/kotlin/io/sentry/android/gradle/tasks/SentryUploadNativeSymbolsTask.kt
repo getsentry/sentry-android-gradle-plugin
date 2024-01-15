@@ -159,7 +159,7 @@ abstract class SentryUploadNativeSymbolsTask : Exec() {
             sentryTelemetryProvider: Provider<SentryTelemetryService>,
             variantName: String,
             debug: Property<Boolean>,
-            cliExecutable: String,
+            cliExecutable: Provider<String>,
             sentryProperties: String?,
             sentryOrg: Provider<String>,
             sentryProject: Provider<String>,
@@ -197,7 +197,7 @@ fun SentryVariant.configureNativeSymbolsTask(
     project: Project,
     extension: SentryPluginExtension,
     sentryTelemetryProvider: Provider<SentryTelemetryService>,
-    cliExecutable: String,
+    cliExecutable: Provider<String>,
     sentryOrg: String?,
     sentryProject: String?
 ) {

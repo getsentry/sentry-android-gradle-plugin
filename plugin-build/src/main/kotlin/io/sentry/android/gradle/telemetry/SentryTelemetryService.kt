@@ -250,7 +250,7 @@ abstract class SentryTelemetryService :
             project: Project,
             variant: SentryVariant?,
             extension: SentryPluginExtension,
-            cliExecutable: String,
+            cliExecutable: Provider<String>,
             sentryOrg: String?,
             buildType: String
         ): SentryTelemetryServiceParams {
@@ -283,7 +283,7 @@ abstract class SentryTelemetryService :
 
         private fun paramsWithExecAvailable(
             project: Project,
-            cliExecutable: String,
+            cliExecutable: Provider<String>,
             extension: SentryPluginExtension,
             variant: SentryVariant?,
             sentryOrg: String?,

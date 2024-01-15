@@ -36,7 +36,7 @@ class SentryCliProviderTest {
 
         assertEquals(
             project.file("sentry.properties").path,
-            getSentryPropertiesPath(project)
+            getSentryPropertiesPath(project.projectDir, project.rootDir)
         )
     }
 
@@ -56,7 +56,7 @@ class SentryCliProviderTest {
 
         assertEquals(
             topLevelProject.file("sentry.properties").path,
-            getSentryPropertiesPath(project)
+            getSentryPropertiesPath(project.projectDir, project.rootDir)
         )
     }
 
@@ -67,7 +67,7 @@ class SentryCliProviderTest {
             .withProjectDir(testProjectDir.root)
             .build()
 
-        assertNull(getSentryPropertiesPath(project))
+        assertNull(getSentryPropertiesPath(project.projectDir, project.rootDir))
     }
 
     @Test
@@ -81,7 +81,7 @@ class SentryCliProviderTest {
             writeText("cli.executable=vim")
         }
 
-        assertEquals("vim", searchCliInPropertiesFile(project))
+        assertEquals("vim", searchCliInPropertiesFile(project.projectDir, project.rootDir))
     }
 
     @Test
@@ -95,7 +95,7 @@ class SentryCliProviderTest {
             writeText("another=field")
         }
 
-        assertNull(searchCliInPropertiesFile(project))
+        assertNull(searchCliInPropertiesFile(project.projectDir, project.rootDir))
     }
 
     @Test
@@ -107,7 +107,7 @@ class SentryCliProviderTest {
 
         testProjectDir.newFile("sentry.properties")
 
-        assertNull(searchCliInPropertiesFile(project))
+        assertNull(searchCliInPropertiesFile(project.projectDir, project.rootDir))
     }
 
     @Test
@@ -117,7 +117,7 @@ class SentryCliProviderTest {
             .withProjectDir(testProjectDir.root)
             .build()
 
-        assertNull(searchCliInPropertiesFile(project))
+        assertNull(searchCliInPropertiesFile(project.projectDir, project.rootDir))
     }
 
     @Test

@@ -147,7 +147,7 @@ abstract class UploadSourceBundleTask : Exec() {
             variant: SentryVariant,
             bundleSourcesTask: TaskProvider<BundleSourcesTask>,
             debug: Property<Boolean>,
-            cliExecutable: String,
+            cliExecutable: Provider<String>,
             autoUploadSourceContext: Property<Boolean>,
             sentryOrg: Provider<String>,
             sentryProject: Provider<String>,
