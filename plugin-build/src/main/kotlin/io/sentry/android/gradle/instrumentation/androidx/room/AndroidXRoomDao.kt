@@ -87,7 +87,8 @@ class RoomMethod(
         apiVersion,
         originalVisitor,
         instrumentableContext.access,
-        instrumentableContext.descriptor
+        instrumentableContext.descriptor,
+        type
     )
 
     override fun isInstrumentable(data: MethodContext): Boolean {
