@@ -67,14 +67,14 @@ class AndroidXRoomDaoVisitor(
         }
     }
 
-    private fun instrumentTransactionSuccessful(name: String?, opcode: Int) =
-        type.isTransaction() && name == SET_TRANSACTION_SUCCESSFUL && opcode == Opcodes.INVOKEVIRTUAL
+    private fun instrumentTransactionSuccessful(name: String?, op: Int) =
+        type.isTransaction() && name == SET_TRANSACTION_SUCCESSFUL && op == Opcodes.INVOKEVIRTUAL
 
-    private fun instrumentQuery(name: String?, opcode: Int) =
-        type == RoomMethodType.QUERY && name == CLOSE && opcode == Opcodes.INVOKEINTERFACE
+    private fun instrumentQuery(name: String?, op: Int) =
+        type == RoomMethodType.QUERY && name == CLOSE && op == Opcodes.INVOKEINTERFACE
 
-    private fun instrumentEndTransaction(name: String?, opcode: Int) =
-        type.isTransaction() && name == END_TRANSACTION && opcode == Opcodes.INVOKEVIRTUAL
+    private fun instrumentEndTransaction(name: String?, op: Int) =
+        type.isTransaction() && name == END_TRANSACTION && op == Opcodes.INVOKEVIRTUAL
 
     companion object {
         private const val CLOSE = "close"
