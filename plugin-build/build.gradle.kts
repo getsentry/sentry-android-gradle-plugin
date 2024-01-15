@@ -171,6 +171,15 @@ tasks.register<Test>("integrationTest").configure {
     minHeapSize = "128m"
     maxHeapSize = "1g"
 
+    jvmArgs = listOf(
+        "--add-opens=java.base/java.lang=ALL-UNNAMED",
+        "--add-opens=java.base/java.io=ALL-UNNAMED",
+        "--add-opens=java.base/java.util=ALL-UNNAMED",
+        "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED",
+        "--add-opens=java.base/java.net=ALL-UNNAMED",
+        "--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED"
+    )
+
     filter {
         includeTestsMatching("io.sentry.android.gradle.integration.*")
     }

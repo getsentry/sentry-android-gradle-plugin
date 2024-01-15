@@ -55,6 +55,9 @@ abstract class BaseSentryNonAndroidPluginTest(
         rootBuildFile = testProjectDir.writeFile("build.gradle") {
             // language=Groovy
             """
+            import io.sentry.android.gradle.autoinstall.AutoInstallState
+            import io.sentry.android.gradle.util.GradleVersions
+
             buildscript {
               repositories {
                 google()
@@ -85,10 +88,14 @@ abstract class BaseSentryNonAndroidPluginTest(
                     AutoInstallState.clearReference()
                   }
                 }
-                tasks.register('unlockTransforms', Exec) {
-                  commandLine 'find', project.gradle.gradleUserHomeDir, '-type', 'f', '-name', 'transforms-3.lock', '-delete'
-                }
               }
+            }
+
+            if (GradleVersions.INSTANCE.CURRENT >= GradleVersions.INSTANCE.VERSION_7_5) {
+                // unlock transforms because we're running tests in parallel therefore they may conflict
+                print(providers.exec {
+                  commandLine 'find', project.gradle.gradleUserHomeDir, '-type', 'f', '-name', 'transforms-3.lock', '-delete'
+                }.standardOutput.asText.get())
             }
             """.trimIndent()
         }
@@ -100,8 +107,6 @@ abstract class BaseSentryNonAndroidPluginTest(
             .withGradleVersion(gradleVersion)
             .forwardStdOutput(writer)
             .forwardStdError(writer)
-
-        runner.appendArguments("app:unlockTransforms").build()
     }
 
     @After

@@ -38,7 +38,7 @@ import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 fun AppExtension.configure(
     project: Project,
     extension: SentryPluginExtension,
-    cliExecutable: String,
+    cliExecutable: Provider<String>,
     sentryOrg: String?,
     sentryProject: String?,
     buildEvents: BuildEventListenerRegistryInternal
@@ -122,7 +122,7 @@ fun AppExtension.configure(
 private fun ApplicationVariant.configureTelemetry(
     project: Project,
     extension: SentryPluginExtension,
-    cliExecutable: String,
+    cliExecutable: Provider<String>,
     sentryOrg: String?,
     sentryProject: String?,
     buildEvents: BuildEventListenerRegistryInternal
@@ -187,7 +187,7 @@ private fun ApplicationVariant.configureSourceBundleTasks(
     project: Project,
     extension: SentryPluginExtension,
     sentryTelemetryProvider: Provider<SentryTelemetryService>,
-    cliExecutable: String,
+    cliExecutable: Provider<String>,
     sentryOrg: String?,
     sentryProject: String?
 ): SourceContext.SourceContextTasks? {
@@ -263,7 +263,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
     project: Project,
     extension: SentryPluginExtension,
     sentryTelemetryProvider: Provider<SentryTelemetryService>,
-    cliExecutable: String,
+    cliExecutable: Provider<String>,
     sentryOrg: String?,
     sentryProject: String?
 ): TaskProvider<SentryGenerateProguardUuidTask>? {

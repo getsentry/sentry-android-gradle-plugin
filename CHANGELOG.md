@@ -8,13 +8,18 @@
 
 ### Fixes
 
-- Support Room kotlin gencode ([#630](https://github.com/getsentry/sentry-android-gradle-plugin/pull/630))
+- Support Room kotlin codegen ([#630](https://github.com/getsentry/sentry-android-gradle-plugin/pull/630))
+- Make sentry-cli path calculation configuration-cache compatible ([#631](https://github.com/getsentry/sentry-android-gradle-plugin/pull/631))
+  - This will prevent build from failing when e.g. switching branches with stale configuration cache
 
 ### Dependencies
 
-- Bump CLI from v2.23.1 to v2.24.1 ([#622](https://github.com/getsentry/sentry-android-gradle-plugin/pull/622), [#624](https://github.com/getsentry/sentry-android-gradle-plugin/pull/624))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2241)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.23.1...2.24.1)
+- Bump CLI from v2.23.1 to v2.25.0 ([#622](https://github.com/getsentry/sentry-android-gradle-plugin/pull/622), [#624](https://github.com/getsentry/sentry-android-gradle-plugin/pull/624), [#629](https://github.com/getsentry/sentry-android-gradle-plugin/pull/629))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2250)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.23.1...2.25.0)
+- Bump Android SDK from v7.1.0 to v7.2.0 ([#632](https://github.com/getsentry/sentry-android-gradle-plugin/pull/632))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#720)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.1.0...7.2.0)
 
 ## 4.1.1
 
@@ -451,10 +456,6 @@ Similarly, if you have a Sentry SDK (e.g. `sentry-android-core`) dependency on o
 
 ## 3.1.4
 
-### Fixes
-
-- Detect minified classes and skip instrumentation to avoid build problems ([#362](https://github.com/getsentry/sentry-android-gradle-plugin/pull/362))
-
 ### Features
 
 - Bump AGP to 7.2.1 and Gradle to 7.5.0 ([#363](https://github.com/getsentry/sentry-android-gradle-plugin/pull/363))
@@ -464,6 +465,10 @@ Similarly, if you have a Sentry SDK (e.g. `sentry-android-core`) dependency on o
 - Bump CLI to v2.5.0 ([#358](https://github.com/getsentry/sentry-android-gradle-plugin/pull/358))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#250)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.4.1...2.5.0)
+
+### Fixes
+
+- Detect minified classes and skip instrumentation to avoid build problems ([#362](https://github.com/getsentry/sentry-android-gradle-plugin/pull/362))
 
 ## 3.1.3
 
