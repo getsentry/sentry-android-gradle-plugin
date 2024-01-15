@@ -51,7 +51,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
     project: Project,
     extension: SentryPluginExtension,
     buildEvents: BuildEventListenerRegistryInternal,
-    cliExecutable: String,
+    cliExecutable: Provider<String>,
     sentryOrg: String?,
     sentryProject: String?,
 ) {
@@ -238,7 +238,7 @@ private fun Variant.configureDebugMetaPropertiesTask(
 private fun Variant.configureTelemetry(
     project: Project,
     extension: SentryPluginExtension,
-    cliExecutable: String,
+    cliExecutable: Provider<String>,
     sentryOrg: String?,
     buildEvents: BuildEventListenerRegistryInternal
 ): Provider<SentryTelemetryService> {
@@ -265,7 +265,7 @@ private fun Variant.configureSourceBundleTasks(
     extension: SentryPluginExtension,
     sentryTelemetryProvider: Provider<SentryTelemetryService>,
     paths: OutputPaths,
-    cliExecutable: String,
+    cliExecutable: Provider<String>,
     sentryOrg: String?,
     sentryProject: String?
 ): SourceContext.SourceContextTasks? {
@@ -338,7 +338,7 @@ private fun Variant.configureProguardMappingsTasks(
     extension: SentryPluginExtension,
     sentryTelemetryProvider: Provider<SentryTelemetryService>,
     paths: OutputPaths,
-    cliExecutable: String,
+    cliExecutable: Provider<String>,
     sentryOrg: String?,
     sentryProject: String?
 ): TaskProvider<SentryGenerateProguardUuidTask>? {

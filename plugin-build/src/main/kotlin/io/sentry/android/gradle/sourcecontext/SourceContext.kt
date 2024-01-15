@@ -15,7 +15,7 @@ class SourceContext {
             sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             variant: SentryVariant,
             paths: OutputPaths,
-            cliExecutable: String,
+            cliExecutable: Provider<String>,
             sentryOrg: String?,
             sentryProject: String?,
             taskSuffix: String
