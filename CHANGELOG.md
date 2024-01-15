@@ -8,6 +8,7 @@
 
 ### Fixes
 
+- Support Room kotlin codegen ([#630](https://github.com/getsentry/sentry-android-gradle-plugin/pull/630))
 - Make sentry-cli path calculation configuration-cache compatible ([#631](https://github.com/getsentry/sentry-android-gradle-plugin/pull/631))
   - This will prevent build from failing when e.g. switching branches with stale configuration cache
 
