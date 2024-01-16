@@ -31,6 +31,7 @@ import io.sentry.android.gradle.util.hookWithPackageTasks
 import io.sentry.android.gradle.util.info
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
@@ -68,11 +69,32 @@ fun AppExtension.configure(
             buildEvents
         )
 
+        // TODO: do this only once, and all other tasks should be SentryVariant.configureSomething
+        val sentryVariant = if (isAGP74) null else AndroidVariant70(variant)
+        sentryVariant?.configureNativeSymbolsTask(
+            project,
+            extension,
+            sentryTelemetryProvider,
+            cliExecutable,
+            sentryOrg,
+            sentryProject
+        )
+
+        val additionalSourcesProvider = project.provider {
+            extension.additionalSourceDirsForSourceContext.getOrElse(emptySet())
+                .map { project.layout.projectDirectory.dir(it) }
+        }
+        val sourceFiles = sentryVariant?.sources(
+            project,
+            additionalSourcesProvider
+        )
+
         val tasksGeneratingProperties = mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
         val sourceContextTasks = variant.configureSourceBundleTasks(
             project,
             extension,
             sentryTelemetryProvider,
+            sourceFiles,
             cliExecutable,
             sentryOrg,
             sentryProject
@@ -91,22 +113,12 @@ fun AppExtension.configure(
             project,
             extension,
             sentryTelemetryProvider,
+            sourceFiles,
             cliExecutable,
             sentryOrg,
             sentryProject
         )
         generateProguardUuidTask?.let { tasksGeneratingProperties.add(it) }
-
-        // TODO: do this only once, and all other tasks should be SentryVariant.configureSomething
-        val sentryVariant = if (isAGP74) null else AndroidVariant70(variant)
-        sentryVariant?.configureNativeSymbolsTask(
-            project,
-            extension,
-            sentryTelemetryProvider,
-            cliExecutable,
-            sentryOrg,
-            sentryProject
-        )
 
         variant.configureDebugMetaPropertiesTask(
             project,
@@ -187,6 +199,7 @@ private fun ApplicationVariant.configureSourceBundleTasks(
     project: Project,
     extension: SentryPluginExtension,
     sentryTelemetryProvider: Provider<SentryTelemetryService>,
+    sourceFiles: Provider<out Collection<Directory>>?,
     cliExecutable: Provider<String>,
     sentryOrg: String?,
     sentryProject: String?
@@ -208,6 +221,7 @@ private fun ApplicationVariant.configureSourceBundleTasks(
             sentryTelemetryProvider,
             variant,
             paths,
+            sourceFiles,
             cliExecutable,
             sentryOrg,
             sentryProject,
@@ -263,6 +277,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
     project: Project,
     extension: SentryPluginExtension,
     sentryTelemetryProvider: Provider<SentryTelemetryService>,
+    sourceFiles: Provider<out Collection<Directory>>?,
     cliExecutable: Provider<String>,
     sentryOrg: String?,
     sentryProject: String?
@@ -289,6 +304,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                     extension,
                     sentryTelemetryProvider,
                     output = outputDir,
+                    sourceFiles,
                     taskSuffix = name.capitalized
                 )
 

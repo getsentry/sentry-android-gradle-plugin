@@ -7,23 +7,30 @@ import io.sentry.android.gradle.util.info
 import java.util.Properties
 import java.util.UUID
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 
 abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
 
     init {
-        outputs.upToDateWhen { false }
         description = "Generates a unique build ID to be used " +
             "when uploading the Sentry mapping file"
     }
 
     @get:Internal
     override val outputFile: Provider<RegularFile> get() = output.file(SENTRY_UUID_OUTPUT)
+
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:InputFiles
+    abstract val sourceDirs: ConfigurableFileCollection
 
     @TaskAction
     fun generateProperties() {
@@ -54,6 +61,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
             extension: SentryPluginExtension,
             sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             output: Provider<Directory>? = null,
+            sourceFiles: Provider<out Collection<Directory>>?,
             taskSuffix: String = ""
         ): TaskProvider<SentryGenerateProguardUuidTask> {
             val generateUuidTask = project.tasks.register(
@@ -62,6 +70,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
             ) { task ->
                 output?.let { task.output.set(it) }
                 task.withSentryTelemetry(extension, sentryTelemetryProvider)
+                task.sourceDirs.setFrom(sourceFiles)
             }
             return generateUuidTask
         }

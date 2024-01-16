@@ -8,19 +8,23 @@ import io.sentry.android.gradle.util.info
 import java.util.Properties
 import java.util.UUID
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 
 abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
 
     init {
-        outputs.upToDateWhen { false }
+//        outputs.upToDateWhen { false }
         description = "Generates a unique build ID to be used " +
             "when bundling sources for upload to Sentry"
 
@@ -32,6 +36,10 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
 
     @get:Input
     abstract val includeSourceContext: Property<Boolean>
+
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:InputFiles
+    abstract val sourceDirs: ConfigurableFileCollection
 
     @get:Internal
     override val outputFile: Provider<RegularFile> get() = output.file(SENTRY_BUNDLE_ID_OUTPUT)
@@ -64,6 +72,7 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
             project: Project,
             extension: SentryPluginExtension,
             sentryTelemetryProvider: Provider<SentryTelemetryService>?,
+            sourceDirs: Provider<out Collection<Directory>>?,
             output: Provider<Directory>? = null,
             includeSourceContext: Property<Boolean>,
             taskSuffix: String = ""
@@ -75,6 +84,7 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
                 output?.let { task.output.set(it) }
                 task.includeSourceContext.set(includeSourceContext)
                 task.withSentryTelemetry(extension, sentryTelemetryProvider)
+                task.sourceDirs.setFrom(sourceDirs)
             }
             return generateBundleIdTask
         }

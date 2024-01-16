@@ -18,9 +18,12 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
     @Test
     fun `generate debug-meta properties generates proguard mapping UUID and bundle id correctly`() {
         val project = createProject()
+        val sourceDirs = project.files()
+        sourceDirs.from("dummy/src/a")
         val bundleIdTask = GenerateBundleIdTask.register(
             project,
             project.extensions.findByName("sentry") as SentryPluginExtension,
+            null,
             null,
             project.layout.buildDirectory.dir("dummy/folder/"),
             project.objects.property(Boolean::class.java).convention(true),
@@ -31,6 +34,7 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
             project.extensions.findByName("sentry") as SentryPluginExtension,
             null,
             project.layout.buildDirectory.dir("dummy/folder/"),
+            null,
             "test"
         )
         val idGenerationTasks = listOf(
@@ -66,6 +70,7 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
             project,
             project.extensions.findByName("sentry") as SentryPluginExtension,
             null,
+            null,
             project.layout.buildDirectory.dir("dummy/folder/"),
             project.objects.property(Boolean::class.java).convention(true),
             "test"
@@ -75,6 +80,7 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
             project.extensions.findByName("sentry") as SentryPluginExtension,
             null,
             project.layout.buildDirectory.dir("dummy/folder/"),
+            null,
             "test"
         )
         val idGenerationTasks = listOf(

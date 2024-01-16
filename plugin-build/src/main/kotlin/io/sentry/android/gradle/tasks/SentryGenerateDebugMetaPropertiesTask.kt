@@ -12,13 +12,14 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 
 abstract class SentryGenerateDebugMetaPropertiesTask : DirectoryOutputTask() {
 
     init {
-        outputs.upToDateWhen { false }
         description = "Combines multiple properties files into sentry-debug-meta.properties"
     }
 
