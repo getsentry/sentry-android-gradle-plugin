@@ -178,7 +178,8 @@ class VisitorTest(
             arrayOf("logcat", "LogcatTest", Logcat(), null),
             arrayOf("appstart", "MyApplication", Application(), null),
             arrayOf("appstart", "MyContentProvider", ContentProvider(), null),
-            arrayOf("appstart", "MlKitInitProvider", ContentProvider(), null)
+            arrayOf("appstart", "MlKitInitProvider", ContentProvider(), null),
+            arrayOf("appstart", "FacebookContentProvider", ContentProvider(), null)
         )
 
         private fun roomDaoTestParameters(suffix: String = "") = arrayOf(
