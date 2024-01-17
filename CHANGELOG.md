@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Bundle ASM version within the plugin and bump it to `9.4` ([#637](https://github.com/getsentry/sentry-android-gradle-plugin/pull/637))
+  - This should fix the `java.lang.AssertionError: Class with incorrect id found` exception when using `kotlinx.serialization`
+
 ## 4.2.0
 
 ### Features
