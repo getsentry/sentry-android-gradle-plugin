@@ -84,7 +84,7 @@ fun TaskProvider<out Task>.hookWithAssembleTasks(
         val bundleTask = withLogging(project.logger, "bundleTask") {
             getBundleTask(project, variant.name)
         }
-        getAssembleTaskProvider(variant)?.configure {
+        getAssembleTaskProvider(project, variant)?.configure {
             it.finalizedBy(this)
         }
         // if its a bundle aab, assemble might not be executed, so we hook into bundle task

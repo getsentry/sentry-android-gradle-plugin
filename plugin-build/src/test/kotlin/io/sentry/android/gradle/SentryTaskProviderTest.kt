@@ -151,18 +151,18 @@ class SentryTaskProviderTest {
 
     @Test
     fun `getAssembleTaskProvider works correctly for all the variants AGP70`() {
-        val android = getAndroidExtFromProject()
+        val (project, android) = getAndroidExtFromProject()
 
         android.applicationVariants.configureEach {
             if (it.name == "debug") {
                 assertEquals(
                     "assembleDebug",
-                    getAssembleTaskProvider(AndroidVariant70(it))?.get()?.name
+                    getAssembleTaskProvider(project, AndroidVariant70(it))?.get()?.name
                 )
             } else {
                 assertEquals(
                     "assembleRelease",
-                    getAssembleTaskProvider(AndroidVariant70(it))?.get()?.name
+                    getAssembleTaskProvider(project, AndroidVariant70(it))?.get()?.name
                 )
             }
         }
@@ -170,7 +170,7 @@ class SentryTaskProviderTest {
 
     @Test
     fun `getMergeAssetsProvider works correctly for all the variants`() {
-        val android = getAndroidExtFromProject()
+        val (_, android) = getAndroidExtFromProject()
 
         android.applicationVariants.configureEach {
             if (it.name == "debug") {
@@ -183,7 +183,7 @@ class SentryTaskProviderTest {
 
     @Test
     fun `getPackageProvider works correctly for all the variants`() {
-        val android = getAndroidExtFromProject()
+        val (_, android) = getAndroidExtFromProject()
 
         android.applicationVariants.configureEach {
             if (it.name == "debug") {
@@ -236,7 +236,7 @@ class SentryTaskProviderTest {
         assertEquals(task, getProcessResourcesProvider(project)?.get())
     }
 
-    private fun getAndroidExtFromProject(): AppExtension {
+    private fun getAndroidExtFromProject(): Pair<Project, AppExtension> {
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("com.android.application")
         val android = project.extensions.getByType(AppExtension::class.java).apply {
@@ -245,7 +245,7 @@ class SentryTaskProviderTest {
 
         // This forces the project to be evaluated
         project.getTasksByName("assembleDebug", false)
-        return android
+        return project to android
     }
 
     private fun getTestProjectWithTask(taskName: String): Pair<Project, Task> {
