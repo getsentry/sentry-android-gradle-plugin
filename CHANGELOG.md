@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fall back to `findTask` if `assembleProvider` of AndroidVariant is null when hooking source bundle and native symbols upload tasks ([#639](https://github.com/getsentry/sentry-android-gradle-plugin/pull/639))
+
 ## 4.2.0
 
 ### Features
