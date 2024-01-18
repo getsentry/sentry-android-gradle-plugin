@@ -2,6 +2,7 @@ package io.sentry.android.gradle
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
+import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.util.GroovyCompat.isDexguardAvailable
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.gradle.common.SentryVariant
@@ -74,8 +75,8 @@ internal object SentryTasksProvider {
      * @return the provider if found or null otherwise
      */
     @JvmStatic
-    fun getAssembleTaskProvider(variant: SentryVariant): TaskProvider<out Task>? =
-        variant.assembleProvider
+    fun getAssembleTaskProvider(project: Project, variant: SentryVariant): TaskProvider<out Task>? =
+        variant.assembleProvider ?: project.findTask(listOf("assemble${variant.name.capitalized}"))
 
     /**
      * Returns the merge asset provider

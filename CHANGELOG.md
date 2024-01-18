@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fall back to `findTask` if `assembleProvider` of AndroidVariant is null when hooking source bundle and native symbols upload tasks ([#639](https://github.com/getsentry/sentry-android-gradle-plugin/pull/639))
+
 ### Dependencies
 
 - Bump CLI from v2.25.0 to v2.25.2 ([#638](https://github.com/getsentry/sentry-android-gradle-plugin/pull/638))
