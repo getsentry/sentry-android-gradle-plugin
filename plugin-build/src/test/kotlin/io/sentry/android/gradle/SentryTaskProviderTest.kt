@@ -11,10 +11,12 @@ import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getProcessResourcesProvider
 import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
+import io.sentry.gradle.common.SentryVariant
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
@@ -163,6 +165,28 @@ class SentryTaskProviderTest {
                 assertEquals(
                     "assembleRelease",
                     getAssembleTaskProvider(project, AndroidVariant70(it))?.get()?.name
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `getAssembleTaskProvider falls back to findTask if assembleProvider is null`() {
+        val (project, android) = getAndroidExtFromProject()
+
+        android.applicationVariants.configureEach {
+            val sentryVariant = object : SentryVariant by AndroidVariant70(it) {
+                override val assembleProvider: TaskProvider<out Task>? get() = null
+            }
+            if (it.name == "debug") {
+                assertEquals(
+                    "assembleDebug",
+                    getAssembleTaskProvider(project, sentryVariant)?.get()?.name
+                )
+            } else {
+                assertEquals(
+                    "assembleRelease",
+                    getAssembleTaskProvider(project, sentryVariant)?.get()?.name
                 )
             }
         }
