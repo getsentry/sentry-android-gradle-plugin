@@ -9,6 +9,7 @@ import java.util.UUID
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.InputFiles
@@ -61,7 +62,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
             extension: SentryPluginExtension,
             sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             output: Provider<Directory>? = null,
-            sourceFiles: Provider<out Collection<Directory>>?,
+            sourceFiles: Provider<FileCollection>?,
             taskSuffix: String = ""
         ): TaskProvider<SentryGenerateProguardUuidTask> {
             val generateUuidTask = project.tasks.register(

@@ -33,6 +33,9 @@ abstract class UploadSourceBundleTask : Exec() {
             includeSourceContext.getOrElse(false) &&
                 !sourceBundleDir.asFileTree.isEmpty
         }
+
+        // Allows gradle to consider this task up-to-date if the inputs haven't changed
+        outputs.upToDateWhen { true }
     }
 
     @get:Input

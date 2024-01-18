@@ -105,7 +105,6 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 extension,
                 sentryTelemetryProvider,
                 paths,
-                sourceFiles,
                 cliExecutable,
                 sentryOrg,
                 sentryProject
@@ -353,7 +352,6 @@ private fun Variant.configureProguardMappingsTasks(
     extension: SentryPluginExtension,
     sentryTelemetryProvider: Provider<SentryTelemetryService>,
     paths: OutputPaths,
-    sourceFiles: Provider<out Collection<Directory>>,
     cliExecutable: Provider<String>,
     sentryOrg: String?,
     sentryProject: String?
@@ -370,7 +368,7 @@ private fun Variant.configureProguardMappingsTasks(
                     project = project,
                     extension,
                     sentryTelemetryProvider,
-                    sourceFiles = sourceFiles,
+                    sourceFiles = getMappingFileProvider(project, variant, dexguardEnabled),
                     taskSuffix = name.capitalized,
                     output = paths.proguardUuidDir
                 )

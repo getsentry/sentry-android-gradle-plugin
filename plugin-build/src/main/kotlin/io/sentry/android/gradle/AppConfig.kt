@@ -113,7 +113,6 @@ fun AppExtension.configure(
             project,
             extension,
             sentryTelemetryProvider,
-            sourceFiles,
             cliExecutable,
             sentryOrg,
             sentryProject
@@ -277,7 +276,6 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
     project: Project,
     extension: SentryPluginExtension,
     sentryTelemetryProvider: Provider<SentryTelemetryService>,
-    sourceFiles: Provider<out Collection<Directory>>?,
     cliExecutable: Provider<String>,
     sentryOrg: String?,
     sentryProject: String?
@@ -304,7 +302,11 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                     extension,
                     sentryTelemetryProvider,
                     output = outputDir,
-                    sourceFiles,
+                    SentryTasksProvider.getMappingFileProvider(
+                        project,
+                        variant,
+                        dexguardEnabled
+                    ),
                     taskSuffix = name.capitalized
                 )
 
