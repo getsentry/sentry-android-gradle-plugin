@@ -62,8 +62,8 @@ dependencies {
     compileOnly(agp74.output)
     compileOnly(Libs.PROGUARD)
 
-    compileOnly(Libs.ASM)
-    compileOnly(Libs.ASM_COMMONS)
+    implementation(Libs.ASM)
+    implementation(Libs.ASM_COMMONS)
 
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:${KotlinCompilerVersion.VERSION}")
 
