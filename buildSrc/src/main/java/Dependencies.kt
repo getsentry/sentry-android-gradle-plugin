@@ -27,7 +27,7 @@ object LibsVersion {
     const val MIN_SDK_VERSION = 21
 
     const val JUNIT = "4.13.2"
-    const val ASM = "7.0" // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
+    const val ASM = "9.4" // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
     const val SQLITE = "2.1.0"
     const val SENTRY = "6.31.0"
 }
