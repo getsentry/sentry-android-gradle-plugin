@@ -6,12 +6,13 @@
 
 - Bundle ASM version within the plugin and bump it to `9.4` ([#637](https://github.com/getsentry/sentry-android-gradle-plugin/pull/637))
   - This should fix the `java.lang.AssertionError: Class with incorrect id found` exception when using `kotlinx.serialization`
+- Fall back to `findTask` if `assembleProvider` of AndroidVariant is null when hooking source bundle and native symbols upload tasks ([#639](https://github.com/getsentry/sentry-android-gradle-plugin/pull/639))
 
 ### Dependencies
 
-- Bump CLI from v2.25.0 to v2.25.2 ([#638](https://github.com/getsentry/sentry-android-gradle-plugin/pull/638))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2252)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.25.0...2.25.2)
+- Bump CLI from v2.25.0 to v2.25.3 ([#638](https://github.com/getsentry/sentry-android-gradle-plugin/pull/638), [#640](https://github.com/getsentry/sentry-android-gradle-plugin/pull/640))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2253)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.25.0...2.25.3)
 
 ## 4.2.0
 
