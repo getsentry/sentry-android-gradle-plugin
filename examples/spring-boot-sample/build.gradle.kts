@@ -53,10 +53,4 @@ sentry {
     debug.set(true)
     includeSourceContext.set(true)
     additionalSourceDirsForSourceContext.set(setOf("testsrc"))
-
-    org.set("lukas-bloder")
-    projectName.set("java")
-    authToken.set(
-        "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"
-    )
 }
