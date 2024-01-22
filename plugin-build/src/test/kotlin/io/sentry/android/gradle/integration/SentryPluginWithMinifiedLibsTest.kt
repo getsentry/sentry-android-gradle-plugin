@@ -14,7 +14,7 @@ class SentryPluginWithMinifiedLibsTest :
             // language=Groovy
             """
             dependencies {
-              implementation 'io.sentry:sentry-android-core:5.6.0'
+              implementation 'io.sentry:sentry-android-core:${BuildConfig.SdkVersion}'
               implementation 'com.google.android.play:core-ktx:1.8.1'
               implementation 'com.google.android.gms:play-services-vision:20.1.3'
               implementation 'com.google.android.gms:play-services-mlkit-text-recognition:18.0.0'
@@ -22,7 +22,11 @@ class SentryPluginWithMinifiedLibsTest :
               implementation 'com.appboy:android-sdk-ui:19.0.0'
               implementation 'com.stripe:stripeterminal-internal-common:2.12.0'
               implementation 'com.synerise.sdk:synerise-mobile-sdk:4.8.0'
+              implementation 'com.google.android.gms:play-services-mlkit-face-detection:17.1.0'
+              implementation 'com.facebook.android:facebook-core:16.3.0'
             }
+
+            sentry.tracingInstrumentation.forceInstrumentDependencies = true
             """.trimIndent()
         )
 

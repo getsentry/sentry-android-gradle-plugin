@@ -43,10 +43,10 @@ class ContentProviderMethodVisitor(
         thisIdx = newLocal(Types.OBJECT)
 
         // finally load this and store it in the local variable
-        visitVarInsn(ALOAD, 0)
-        visitVarInsn(ASTORE, thisIdx)
+        loadThis()
+        storeLocal(thisIdx)
 
-        visitVarInsn(ALOAD, thisIdx)
+        loadLocal(thisIdx)
         box(Type.getType("Landroid/content/ContentProvider;"))
 
         visitMethodInsn(
@@ -59,7 +59,7 @@ class ContentProviderMethodVisitor(
     }
 
     override fun onMethodExit(opcode: Int) {
-        visitVarInsn(ALOAD, thisIdx)
+        loadLocal(thisIdx)
         box(Type.getType("Landroid/content/ContentProvider;"))
 
         visitMethodInsn(

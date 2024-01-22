@@ -60,7 +60,7 @@ class VisitorTest(
         val classContext = this.classContext ?: TestClassContext(instrumentable.fqName)
         val classVisitor = instrumentable.getVisitor(
             classContext,
-            Opcodes.ASM7,
+            Opcodes.ASM9,
             classWriter,
             parameters = TestSpanAddingParameters(inMemoryDir = tmpDir.root)
         )
@@ -72,7 +72,7 @@ class VisitorTest(
         // and pass it through CheckClassAdapter to verify that the bytecode is correct and can be accepted by JVM
         val bytes = classWriter.toByteArray()
         val verifyReader = ClassReader(bytes)
-        val checkAdapter = CheckClassAdapter(ClassWriter(0), true)
+        val checkAdapter = CheckClassAdapter(ClassWriter(ClassWriter.COMPUTE_FRAMES), true)
 //        val methodNamePrintingVisitor = MethodNamePrintingVisitor(Opcodes.ASM7, checkAdapter)
         verifyReader.accept(checkAdapter, 0)
 
@@ -178,7 +178,8 @@ class VisitorTest(
             arrayOf("logcat", "LogcatTest", Logcat(), null),
             arrayOf("appstart", "MyApplication", Application(), null),
             arrayOf("appstart", "MyContentProvider", ContentProvider(), null),
-            arrayOf("appstart", "MlKitInitProvider", ContentProvider(), null)
+            arrayOf("appstart", "MlKitInitProvider", ContentProvider(), null),
+            arrayOf("appstart", "FacebookInitProvider", ContentProvider(), null)
         )
 
         private fun roomDaoTestParameters(suffix: String = "") = arrayOf(
