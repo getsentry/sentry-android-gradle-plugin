@@ -81,7 +81,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 extension.additionalSourceDirsForSourceContext.getOrElse(emptySet())
                     .map { project.layout.projectDirectory.dir(it) }
             }
-            val sourceFiles = sentryVariant!!.sources(
+            val sourceFiles = sentryVariant?.sources(
                 project,
                 additionalSourcesProvider
             )
@@ -277,7 +277,7 @@ private fun Variant.configureSourceBundleTasks(
     extension: SentryPluginExtension,
     sentryTelemetryProvider: Provider<SentryTelemetryService>,
     paths: OutputPaths,
-    sourceFiles: Provider<out Collection<Directory>>,
+    sourceFiles: Provider<out Collection<Directory>>?,
     cliExecutable: Provider<String>,
     sentryOrg: String?,
     sentryProject: String?
