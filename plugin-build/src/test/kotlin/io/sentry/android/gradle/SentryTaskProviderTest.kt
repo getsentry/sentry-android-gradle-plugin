@@ -3,6 +3,7 @@ package io.sentry.android.gradle
 import com.android.build.gradle.AppExtension
 import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
+import io.sentry.android.gradle.SentryTasksProvider.getInstallTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalAnalyzeProvider
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalReportProvider
 import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
@@ -187,6 +188,37 @@ class SentryTaskProviderTest {
                 assertEquals(
                     "assembleRelease",
                     getAssembleTaskProvider(project, sentryVariant)?.get()?.name
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `getInstallTaskProvider works correctly for all the variants AGP70`() {
+        val (project, android) = getAndroidExtFromProject()
+
+        android.applicationVariants.configureEach {
+            if (it.name == "debug") {
+                assertEquals(
+                    "installDebug",
+                    getInstallTaskProvider(project, AndroidVariant70(it))?.get()?.name
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `getInstallTaskProvider falls back to findTask if assembleProvider is null`() {
+        val (project, android) = getAndroidExtFromProject()
+
+        android.applicationVariants.configureEach {
+            val sentryVariant = object : SentryVariant by AndroidVariant70(it) {
+                override val installProvider: TaskProvider<out Task>? get() = null
+            }
+            if (it.name == "debug") {
+                assertEquals(
+                    "installDebug",
+                    getInstallTaskProvider(project, sentryVariant)?.get()?.name
                 )
             }
         }
