@@ -79,6 +79,15 @@ internal object SentryTasksProvider {
         variant.assembleProvider ?: project.findTask(listOf("assemble${variant.name.capitalized}"))
 
     /**
+     * Returns the install task provider
+     *
+     * @return the provider if found or null otherwise
+     */
+    @JvmStatic
+    fun getInstallTaskProvider(project: Project, variant: SentryVariant): TaskProvider<out Task>? =
+        variant.installProvider ?: project.findTask(listOf("install${variant.name.capitalized}"))
+
+    /**
      * Returns the merge asset provider
      *
      * @return the provider if found or null otherwise

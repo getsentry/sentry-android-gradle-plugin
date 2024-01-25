@@ -28,6 +28,7 @@ data class AndroidVariant70(
     override val isDebuggable: Boolean = variant.buildType.isDebuggable
     override val packageProvider: TaskProvider<out Task>? = variant.packageApplicationProvider
     override val assembleProvider: TaskProvider<out Task>? = variant.assembleProvider
+    override val installProvider: TaskProvider<out Task>? = variant.installProvider
     override fun mappingFileProvider(project: Project): Provider<FileCollection> =
         variant.mappingFileProvider
     override fun sources(

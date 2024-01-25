@@ -38,6 +38,8 @@ data class AndroidVariant74(
     // dependencies via artifacts API.
     override val assembleProvider: TaskProvider<out Task>?
         get() = (variant as? VariantImpl<*>)?.taskContainer?.assembleTask
+    override val installProvider: TaskProvider<out Task>?
+        get() = (variant as? VariantImpl<*>)?.taskContainer?.installTask
     override fun mappingFileProvider(project: Project): Provider<FileCollection> =
         project.provider {
             project.files(variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE))
