@@ -42,7 +42,7 @@ jobs:
             gradle: "8.4"
             java: "17"
           - agp: "8.4.0-alpha06"
-            gradle: "8.4"
+            gradle: "8.6-rc-1"
             java: "17"
 
     name: Test Matrix - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
