@@ -186,6 +186,9 @@ tasks.register<Test>("integrationTest").configure {
 }
 
 gradlePlugin {
+    compatibility {
+        gradleApiVersion.set(GradleVersion.current().baseVersion.version)
+    }
     plugins {
         register("sentryPlugin") {
             id = "io.sentry.android.gradle"
