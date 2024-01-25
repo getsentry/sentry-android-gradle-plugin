@@ -187,7 +187,11 @@ tasks.register<Test>("integrationTest").configure {
 
 gradlePlugin {
     compatibility {
-        gradleApiVersion.set(GradleVersion.current().baseVersion.version)
+        // TODO: remove after dev.gradleplugins:gradle-api:8.6 is published
+        // TODO: just a workaround for our test matrix for now
+        if (GradleVersion.current().baseVersion.version == "8.6") {
+            gradleApiVersion.set("8.4")
+        }
     }
     plugins {
         register("sentryPlugin") {

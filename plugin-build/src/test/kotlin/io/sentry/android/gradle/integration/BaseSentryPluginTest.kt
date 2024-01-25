@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.integration
 
-import io.sentry.android.gradle.integration.BaseSentryNonAndroidPluginTest.Companion.appendArguments
 import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.PrintBuildOutputOnFailureRule
 import io.sentry.android.gradle.util.SemVer
