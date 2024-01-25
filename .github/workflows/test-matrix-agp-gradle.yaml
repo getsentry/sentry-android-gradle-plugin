@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - release/**
   pull_request:
 
 concurrency:
@@ -36,11 +35,14 @@ jobs:
           - agp: "8.1.2"
             gradle: "8.1"
             java: "17"
-          - agp: "8.2.0-beta05"
+          - agp: "8.2.2"
             gradle: "8.2"
             java: "17"
-          - agp: "8.3.0-alpha06"
-            gradle: "8.3"
+          - agp: "8.3.0-beta02"
+            gradle: "8.4"
+            java: "17"
+          - agp: "8.4.0-alpha06"
+            gradle: "8.6-rc-1"
             java: "17"
 
     name: Test Matrix - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
@@ -58,13 +60,13 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ matrix.java }}
 
-      - name: Run ./gradlew (Fixes Gradle < 7.4)
-        continue-on-error: true
-        uses: gradle/gradle-build-action@7e48093f71aa12588241894ff3695e83c4b5e4b0 # pin@v2.4.2
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          gradle-version: ${{ matrix.gradle }}
-          arguments: tasks
+#      - name: Run ./gradlew (Fixes Gradle < 7.4)
+#        continue-on-error: true
+#        uses: gradle/gradle-build-action@7e48093f71aa12588241894ff3695e83c4b5e4b0 # pin@v2.4.2
+#        with:
+#          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+#          gradle-version: ${{ matrix.gradle }}
+#          arguments: tasks
 
       - name: Build the Release variant
         uses: gradle/gradle-build-action@7e48093f71aa12588241894ff3695e83c4b5e4b0 # pin@v2.4.2
