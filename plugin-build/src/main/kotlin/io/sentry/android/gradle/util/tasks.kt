@@ -3,6 +3,7 @@ package io.sentry.android.gradle.util
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
+import io.sentry.android.gradle.SentryTasksProvider.getInstallTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
@@ -85,6 +86,9 @@ fun TaskProvider<out Task>.hookWithAssembleTasks(
             getBundleTask(project, variant.name)
         }
         getAssembleTaskProvider(project, variant)?.configure {
+            it.finalizedBy(this)
+        }
+        getInstallTaskProvider(project, variant)?.configure {
             it.finalizedBy(this)
         }
         // if its a bundle aab, assemble might not be executed, so we hook into bundle task
