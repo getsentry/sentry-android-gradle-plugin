@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.integration
 
+import com.android.build.api.artifact.SingleArtifact.*
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.util.AgpVersions
@@ -7,15 +8,18 @@ import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
 import io.sentry.android.gradle.verifyIntegrationList
 import io.sentry.android.gradle.verifyProguardUuid
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
-import kotlin.test.assertTrue
+import org.gradle.testkit.runner.TaskOutcome
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThrows
 import org.junit.Assume.assumeThat
 import org.junit.Test
+import java.io.File
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
+
 
 class SentryPluginTest :
     BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
@@ -44,7 +48,7 @@ class SentryPluginTest :
     }
 
     @Test
-    fun `regenerates UUID every build`() {
+    fun `does not regenerate UUID every build`() {
         runner.appendArguments(":app:assembleRelease")
 
         runner.build()
@@ -53,7 +57,145 @@ class SentryPluginTest :
         runner.build()
         val uuid2 = verifyProguardUuid(testProjectDir.root)
 
+        assertEquals(uuid1, uuid2)
+    }
+
+    @Test
+    fun `regenerates UUID if mapping file changes`() {
+        runner.appendArguments(":app:assembleRelease")
+
+        val sourceDir = File(testProjectDir.root, "app/src/main/java/com/example").apply {
+            mkdirs()
+        }
+
+        val manifest = File(testProjectDir.root, "app/src/main/AndroidManifest.xml")
+        manifest.writeText("""
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application>
+                    <activity android:name=".MainActivity"/>
+                </application>
+            </manifest>
+        """.trimIndent())
+
+        val sourceFile = File(sourceDir, "MainActivity.java")
+        sourceFile.createNewFile()
+        sourceFile.writeText("""
+            package com.example;
+            import android.app.Activity;
+            import android.os.Bundle;
+
+            public class MainActivity extends Activity {
+                @Override
+                protected void onCreate(Bundle savedInstanceState) {
+                    super.onCreate(savedInstanceState);
+                    hello();
+                }
+
+               public void hello() {
+                    System.out.println("Hello");
+                }
+            }
+        """.trimIndent())
+
+        runner.appendArguments(":app:assembleRelease").build()
+        val uuid1 = verifyProguardUuid(testProjectDir.root)
+
+        sourceFile.writeText("""
+            package com.example;
+            import android.app.Activity;
+            import android.os.Bundle;
+
+            public class MainActivity extends Activity {
+                @Override
+                protected void onCreate(Bundle savedInstanceState) {
+                    super.onCreate(savedInstanceState);
+                    hello();
+                    hello2();
+                }
+
+               public void hello() {
+                    System.out.println("Hello");
+                }
+
+               public void hello2() {
+                    System.out.println("Hello2");
+                }
+            }
+        """.trimIndent())
+
+        runner.appendArguments(":app:assembleRelease").build()
+        val uuid2 = verifyProguardUuid(testProjectDir.root)
+
         assertNotEquals(uuid1, uuid2)
+    }
+
+    @Test
+    fun `does not regenerate UUID if mapping file stays the same`() {
+        runner.appendArguments(":app:assembleRelease")
+
+        val sourceDir = File(testProjectDir.root, "app/src/main/java/com/example").apply {
+            mkdirs()
+        }
+
+        val manifest = File(testProjectDir.root, "app/src/main/AndroidManifest.xml")
+        manifest.writeText("""
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application>
+                    <activity android:name=".MainActivity"/>
+                </application>
+            </manifest>
+        """.trimIndent())
+
+        val sourceFile = File(sourceDir, "MainActivity.java")
+        sourceFile.createNewFile()
+        sourceFile.writeText("""
+            package com.example;
+            import android.app.Activity;
+            import android.os.Bundle;
+
+            public class MainActivity extends Activity {
+                @Override
+                protected void onCreate(Bundle savedInstanceState) {
+                    super.onCreate(savedInstanceState);
+                    hello();
+                }
+
+               public void hello() {
+                    System.out.println("Hello");
+                }
+            }
+        """.trimIndent())
+
+        runner.appendArguments(":app:assembleRelease").build()
+        val uuid1 = verifyProguardUuid(testProjectDir.root)
+
+        sourceFile.writeText("""
+            package com.example;
+            import android.app.Activity;
+            import android.os.Bundle;
+
+            public class MainActivity extends Activity {
+                @Override
+                protected void onCreate(Bundle savedInstanceState) {
+                    super.onCreate(savedInstanceState);
+                    hello();
+                }
+
+               public void hello() {
+                    System.out.println("Hello2");
+                }
+            }
+        """.trimIndent())
+
+        val build = runner.appendArguments(":app:assembleRelease").build()
+        val uuid2 = verifyProguardUuid(testProjectDir.root)
+
+        assertEquals(
+            build.task(":app:generateSentryProguardUuidRelease")?.outcome,
+            TaskOutcome.UP_TO_DATE
+        )
+
+        assertEquals(uuid1, uuid2)
     }
 
     @Test
