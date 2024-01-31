@@ -209,6 +209,26 @@ class SentryPluginTest :
     }
 
     @Test
+    fun `generateSentryDebugMetaProperties task is up-to-date on subsequent builds`() {
+        runner.appendArguments(":app:assembleRelease")
+
+        val firstBuild = runner.build()
+        val subsequentBuild = runner.build()
+
+        assertEquals(
+            firstBuild.task(":app:generateSentryDebugMetaPropertiesRelease")?.outcome,
+            TaskOutcome.SUCCESS
+        )
+
+        assertEquals(
+            subsequentBuild.task(":app:generateSentryDebugMetaPropertiesRelease")?.outcome,
+            TaskOutcome.UP_TO_DATE
+        )
+
+        assertTrue(subsequentBuild.output) { "BUILD SUCCESSFUL" in subsequentBuild.output }
+    }
+
+    @Test
     fun `does not include a UUID in the APK`() {
         // isMinifyEnabled is disabled by default in debug builds
         runner

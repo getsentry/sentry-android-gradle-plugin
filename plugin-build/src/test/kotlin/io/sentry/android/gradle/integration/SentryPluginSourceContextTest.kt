@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
+import io.sentry.android.gradle.integration.BaseSentryPluginTest.Companion.appendArguments
 import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.verifySourceBundleContents
 import io.sentry.android.gradle.withDummyComposeFile
@@ -9,6 +10,8 @@ import io.sentry.android.gradle.withDummyJavaFile
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome.SKIPPED
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assume.assumeThat
@@ -53,6 +56,92 @@ class SentryPluginSourceContextTest :
             SKIPPED
         )
         assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
+    }
+
+    @Test
+    fun `sentryCollectSources task is up-to-date on subsequent builds`() {
+        runner.appendArguments("app:assembleRelease")
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+
+              buildFeatures {
+                buildConfig false
+              }
+            }
+
+            sentry {
+              includeSourceContext = true
+              autoUploadSourceContext = false
+              autoUploadProguardMapping = false
+            }
+            """.trimIndent()
+        )
+        val firstBuild = runner.build()
+
+        val subsequentBuild = runner.build()
+
+        assertEquals(
+            firstBuild.task(":app:sentryCollectSourcesRelease")?.outcome,
+            SUCCESS
+        )
+
+        assertEquals(
+            subsequentBuild.task(":app:sentryCollectSourcesRelease")?.outcome,
+            UP_TO_DATE
+        )
+
+        assertTrue(subsequentBuild.output) { "BUILD SUCCESSFUL" in subsequentBuild.output }
+    }
+
+    @Test
+    fun `generateSentryBundleId task is up-to-date on subsequent builds`() {
+        runner.appendArguments("app:assembleRelease")
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+
+              buildFeatures {
+                buildConfig false
+              }
+            }
+
+            sentry {
+              includeSourceContext = true
+              autoUploadSourceContext = false
+              autoUploadProguardMapping = false
+            }
+            """.trimIndent()
+        )
+        val firstBuild = runner.build()
+
+        val subsequentBuild = runner.build()
+
+        assertEquals(
+            firstBuild.task(":app:generateSentryBundleIdRelease")?.outcome,
+            SUCCESS
+        )
+
+        assertEquals(
+            subsequentBuild.task(":app:generateSentryBundleIdRelease")?.outcome,
+            UP_TO_DATE
+        )
+
+        assertTrue(subsequentBuild.output) { "BUILD SUCCESSFUL" in subsequentBuild.output }
     }
 
     @Test

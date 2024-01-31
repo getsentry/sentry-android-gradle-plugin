@@ -28,6 +28,9 @@ abstract class SentryUploadProguardMappingsTask : Exec() {
 
     init {
         description = "Uploads the proguard mappings file to Sentry"
+
+        // Allows gradle to consider this task up-to-date if the inputs haven't changed
+        outputs.upToDateWhen { true }
     }
 
     @get:Input

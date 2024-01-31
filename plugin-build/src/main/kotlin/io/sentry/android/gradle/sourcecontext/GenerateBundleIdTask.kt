@@ -24,7 +24,6 @@ import org.gradle.api.tasks.TaskProvider
 abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
 
     init {
-//        outputs.upToDateWhen { false }
         description = "Generates a unique build ID to be used " +
             "when bundling sources for upload to Sentry"
 
