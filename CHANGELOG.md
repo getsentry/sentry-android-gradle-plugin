@@ -8,6 +8,9 @@
   - This should fix the `java.lang.AssertionError: Class with incorrect id found` exception when using `kotlinx.serialization`
 - Fall back to `findTask` if `assembleProvider` of AndroidVariant is null when hooking source bundle and native symbols upload tasks ([#639](https://github.com/getsentry/sentry-android-gradle-plugin/pull/639))
 - Hook source context tasks to also run after `install{Variant}` tasks ([#643](https://github.com/getsentry/sentry-android-gradle-plugin/pull/643))
+- Proguard and source context tasks don't run on every build ([#634](https://github.com/getsentry/sentry-android-gradle-plugin/pull/634))
+  - Proguard UUID task now depends on the proguard mapping file. I.e. it will only run if the mapping file has changed
+  - Source context tasks now depend on source file changes, if there are no source changes, the tasks won't run
 
 ### Dependencies
 

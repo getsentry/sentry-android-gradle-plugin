@@ -302,7 +302,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                     extension,
                     sentryTelemetryProvider,
                     output = outputDir,
-                    SentryTasksProvider.getMappingFileProvider(
+                    proguardMappingFile = SentryTasksProvider.getMappingFileProvider(
                         project,
                         variant,
                         dexguardEnabled

@@ -31,7 +31,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
 
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
-    abstract val sourceDirs: ConfigurableFileCollection
+    abstract val proguardMappingFile: ConfigurableFileCollection
 
     @TaskAction
     fun generateProperties() {
@@ -62,7 +62,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
             extension: SentryPluginExtension,
             sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             output: Provider<Directory>? = null,
-            sourceFiles: Provider<FileCollection>?,
+            proguardMappingFile: Provider<FileCollection>?,
             taskSuffix: String = ""
         ): TaskProvider<SentryGenerateProguardUuidTask> {
             val generateUuidTask = project.tasks.register(
@@ -71,7 +71,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
             ) { task ->
                 output?.let { task.output.set(it) }
                 task.withSentryTelemetry(extension, sentryTelemetryProvider)
-                task.sourceDirs.setFrom(sourceFiles)
+                task.proguardMappingFile.setFrom(proguardMappingFile)
             }
             return generateUuidTask
         }

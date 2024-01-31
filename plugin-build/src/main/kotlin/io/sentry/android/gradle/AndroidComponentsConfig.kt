@@ -368,7 +368,7 @@ private fun Variant.configureProguardMappingsTasks(
                     project = project,
                     extension,
                     sentryTelemetryProvider,
-                    sourceFiles = getMappingFileProvider(project, variant, dexguardEnabled),
+                    proguardMappingFile = getMappingFileProvider(project, variant, dexguardEnabled),
                     taskSuffix = name.capitalized,
                     output = paths.proguardUuidDir
                 )
