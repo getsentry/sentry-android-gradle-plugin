@@ -150,7 +150,7 @@ class SentryPluginConfigurationCacheTest :
               autoUploadProguardMapping = false
               autoInstallation.enabled = false
               includeDependenciesReport = false
-              telemetry = false
+              telemetry = true
             }
             """.trimIndent()
         )

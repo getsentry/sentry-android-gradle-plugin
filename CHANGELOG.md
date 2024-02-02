@@ -8,6 +8,7 @@
   - This should fix the `java.lang.AssertionError: Class with incorrect id found` exception when using `kotlinx.serialization`
 - Fall back to `findTask` if `assembleProvider` of AndroidVariant is null when hooking source bundle and native symbols upload tasks ([#639](https://github.com/getsentry/sentry-android-gradle-plugin/pull/639))
 - Hook source context tasks to also run after `install{Variant}` tasks ([#643](https://github.com/getsentry/sentry-android-gradle-plugin/pull/643))
+- Do not run sentry-cli commands if telemetry is disabled ([#648](https://github.com/getsentry/sentry-android-gradle-plugin/pull/648))
 
 ### Dependencies
 

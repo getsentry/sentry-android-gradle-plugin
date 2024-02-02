@@ -115,6 +115,7 @@ abstract class BaseSentryPluginTest(
                 // unlock transforms because we're running tests in parallel therefore they may conflict
                 print(providers.exec {
                   commandLine 'find', project.gradle.gradleUserHomeDir, '-type', 'f', '-name', 'transforms-3.lock', '-delete'
+                  ignoreExitValue true
                 }.standardOutput.asText.get())
             } else {
               tasks.register('unlockTransforms', Exec) {

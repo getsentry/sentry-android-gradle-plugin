@@ -14,7 +14,8 @@ import io.sentry.SpanStatus
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
-import io.sentry.android.gradle.telemetry.SentryCliInfoValueSource.Params
+import io.sentry.android.gradle.telemetry.SentryCliInfoValueSource.InfoParams
+import io.sentry.android.gradle.telemetry.SentryCliVersionValueSource.VersionParams
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.SentryCliException
@@ -256,8 +257,11 @@ abstract class SentryTelemetryService :
         ): SentryTelemetryServiceParams {
             val tags = extraTagsFromExtension(project, extension)
             val org = sentryOrg ?: extension.org.orNull
+            val isTelemetryEnabled = extension.telemetry.get()
 
-            if (isExecAvailable()) {
+            // if telemetry is disabled we don't even need to exec sentry-cli as telemetry service
+            // will be no-op
+            if (isExecAvailable() && isTelemetryEnabled) {
                 return paramsWithExecAvailable(
                     project,
                     cliExecutable,
@@ -269,7 +273,7 @@ abstract class SentryTelemetryService :
                 )
             } else {
                 return SentryTelemetryServiceParams(
-                    extension.telemetry.get(),
+                    isTelemetryEnabled,
                     extension.telemetryDsn.get(),
                     org,
                     buildType,
@@ -314,13 +318,7 @@ abstract class SentryTelemetryService :
             val versionOutput =
                 project.providers.of(SentryCliVersionValueSource::class.java) { cliVS ->
                     cliVS.parameters.cliExecutable.set(cliExecutable)
-                    cliVS.parameters.authToken.set(extension.authToken)
                     cliVS.parameters.url.set(extension.url)
-                    variant?.let { v ->
-                        cliVS.parameters.propertiesFilePath.set(
-                            SentryPropertiesFileProvider.getPropertiesFilePath(project, v)
-                        )
-                    }
                 }.get()
 
             versionRegex.find(versionOutput)?.let { matchResult ->
@@ -448,8 +446,8 @@ class SentryMinimalException(message: String) : RuntimeException(message) {
     }
 }
 
-abstract class SentryCliInfoValueSource : ValueSource<String, Params> {
-    interface Params : ValueSourceParameters {
+abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
+    interface InfoParams : ValueSourceParameters {
         @get:Input
         val cliExecutable: Property<String>
 
@@ -477,6 +475,7 @@ abstract class SentryCliInfoValueSource : ValueSource<String, Params> {
                 args.add(url)
             }
 
+            args.add("--log-level=error")
             args.add("info")
 
             parameters.propertiesFilePath.orNull?.let { path ->
@@ -494,19 +493,13 @@ abstract class SentryCliInfoValueSource : ValueSource<String, Params> {
     }
 }
 
-abstract class SentryCliVersionValueSource : ValueSource<String, Params> {
-    interface Params : ValueSourceParameters {
+abstract class SentryCliVersionValueSource : ValueSource<String, VersionParams> {
+    interface VersionParams : ValueSourceParameters {
         @get:Input
         val cliExecutable: Property<String>
 
         @get:Input
-        val propertiesFilePath: Property<String>
-
-        @get:Input
         val url: Property<String>
-
-        @get:Input
-        val authToken: Property<String>
     }
 
     @get:Inject
