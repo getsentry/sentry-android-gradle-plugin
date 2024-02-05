@@ -80,12 +80,22 @@ class SentryJvmPlugin @Inject constructor(
                 buildEvents.onOperationCompletion(sentryTelemetryProvider)
             }
 
+            val additionalSourcesProvider = project.provider {
+                extension.additionalSourceDirsForSourceContext.getOrElse(emptySet())
+                    .map { project.layout.projectDirectory.dir(it) }
+            }
+            val sourceFiles = javaVariant.sources(
+                project,
+                additionalSourcesProvider
+            )
+
             val sourceContextTasks = SourceContext.register(
                 project,
                 extension,
                 sentryTelemetryProvider,
                 javaVariant,
                 outputPaths,
+                sourceFiles,
                 cliExecutable,
                 sentryOrgParameter,
                 sentryProjectParameter,

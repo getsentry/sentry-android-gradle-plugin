@@ -23,6 +23,7 @@ class GenerateBundleIdTaskTest {
                 project,
                 project.extensions.findByName("sentry") as SentryPluginExtension,
                 null,
+                null,
                 project.layout.buildDirectory.dir("dummy/folder/"),
                 project.objects.property(Boolean::class.java).convention(true),
                 "test"
@@ -45,6 +46,7 @@ class GenerateBundleIdTaskTest {
             GenerateBundleIdTask.register(
                 project,
                 project.extensions.findByName("sentry") as SentryPluginExtension,
+                null,
                 null,
                 project.layout.buildDirectory.dir("dummy/folder/"),
                 project.objects.property(Boolean::class.java).convention(true),

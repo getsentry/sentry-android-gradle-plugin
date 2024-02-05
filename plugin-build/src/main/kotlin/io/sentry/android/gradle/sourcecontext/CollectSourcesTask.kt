@@ -55,7 +55,7 @@ abstract class CollectSourcesTask : DirectoryOutputTask() {
             project: Project,
             extension: SentryPluginExtension,
             sentryTelemetryProvider: Provider<SentryTelemetryService>?,
-            sourceDirs: Provider<out Collection<Directory>>,
+            sourceDirs: Provider<out Collection<Directory>>?,
             output: Provider<Directory>,
             includeSourceContext: Property<Boolean>,
             taskSuffix: String = ""

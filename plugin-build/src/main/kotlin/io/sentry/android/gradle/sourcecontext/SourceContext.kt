@@ -4,6 +4,7 @@ import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.gradle.common.SentryVariant
 import org.gradle.api.Project
+import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
@@ -15,23 +16,17 @@ class SourceContext {
             sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             variant: SentryVariant,
             paths: OutputPaths,
+            sourceFiles: Provider<out Collection<Directory>>?,
             cliExecutable: Provider<String>,
             sentryOrg: String?,
             sentryProject: String?,
             taskSuffix: String
         ): SourceContextTasks {
-            val additionalSourcesProvider = project.provider {
-                extension.additionalSourceDirsForSourceContext.getOrElse(emptySet())
-                    .map { project.layout.projectDirectory.dir(it) }
-            }
-            val sourceFiles = variant.sources(
-                project,
-                additionalSourcesProvider
-            )
             val generateBundleIdTask = GenerateBundleIdTask.register(
                 project,
                 extension,
                 sentryTelemetryProvider,
+                sourceFiles,
                 output = paths.bundleIdDir,
                 extension.includeSourceContext,
                 taskSuffix

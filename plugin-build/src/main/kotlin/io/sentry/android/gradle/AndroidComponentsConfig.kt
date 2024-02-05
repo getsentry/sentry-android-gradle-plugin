@@ -42,6 +42,7 @@ import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Project
+import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
@@ -73,6 +74,18 @@ fun AndroidComponentsExtension<*, *, *>.configure(
 
             variant.configureDependenciesTask(project, extension, sentryTelemetryProvider)
 
+            // TODO: do this only once, and all other tasks should be SentryVariant.configureSomething
+            val sentryVariant = if (isAGP74) AndroidVariant74(variant) else null
+
+            val additionalSourcesProvider = project.provider {
+                extension.additionalSourceDirsForSourceContext.getOrElse(emptySet())
+                    .map { project.layout.projectDirectory.dir(it) }
+            }
+            val sourceFiles = sentryVariant?.sources(
+                project,
+                additionalSourcesProvider
+            )
+
             val tasksGeneratingProperties =
                 mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
             val sourceContextTasks = variant.configureSourceBundleTasks(
@@ -80,6 +93,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 extension,
                 sentryTelemetryProvider,
                 paths,
+                sourceFiles,
                 cliExecutable,
                 sentryOrg,
                 sentryProject
@@ -97,8 +111,6 @@ fun AndroidComponentsExtension<*, *, *>.configure(
             )
             generateProguardUuidTask?.let { tasksGeneratingProperties.add(it) }
 
-            // TODO: do this only once, and all other tasks should be SentryVariant.configureSomething
-            val sentryVariant = if (isAGP74) AndroidVariant74(variant) else null
             sentryVariant?.configureNativeSymbolsTask(
                 project,
                 extension,
@@ -265,6 +277,7 @@ private fun Variant.configureSourceBundleTasks(
     extension: SentryPluginExtension,
     sentryTelemetryProvider: Provider<SentryTelemetryService>,
     paths: OutputPaths,
+    sourceFiles: Provider<out Collection<Directory>>?,
     cliExecutable: Provider<String>,
     sentryOrg: String?,
     sentryProject: String?
@@ -280,6 +293,7 @@ private fun Variant.configureSourceBundleTasks(
                 sentryTelemetryProvider,
                 variant,
                 paths,
+                sourceFiles,
                 cliExecutable,
                 sentryOrg,
                 sentryProject,
@@ -354,6 +368,7 @@ private fun Variant.configureProguardMappingsTasks(
                     project = project,
                     extension,
                     sentryTelemetryProvider,
+                    proguardMappingFile = getMappingFileProvider(project, variant, dexguardEnabled),
                     taskSuffix = name.capitalized,
                     output = paths.proguardUuidDir
                 )

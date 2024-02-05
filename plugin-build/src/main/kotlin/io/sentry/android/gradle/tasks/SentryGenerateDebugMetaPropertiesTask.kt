@@ -18,7 +18,6 @@ import org.gradle.api.tasks.TaskProvider
 abstract class SentryGenerateDebugMetaPropertiesTask : DirectoryOutputTask() {
 
     init {
-        outputs.upToDateWhen { false }
         description = "Combines multiple properties files into sentry-debug-meta.properties"
     }
 
