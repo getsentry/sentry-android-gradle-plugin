@@ -92,8 +92,6 @@ class SentryPluginSourceContextTest :
         )
         val firstBuild = runner.build()
 
-        testProjectDir.withDummyComposeFile()
-
         val subsequentBuild = runner.build()
 
         assertEquals(
@@ -149,6 +147,8 @@ class SentryPluginSourceContextTest :
             """.trimIndent()
         )
         val firstBuild = runner.build()
+
+        testProjectDir.withDummyComposeFile()
 
         val subsequentBuild = runner.build()
 
