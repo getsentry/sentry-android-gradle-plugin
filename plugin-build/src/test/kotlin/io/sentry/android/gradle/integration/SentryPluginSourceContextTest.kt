@@ -84,6 +84,9 @@ class SentryPluginSourceContextTest :
               includeSourceContext = true
               autoUploadSourceContext = false
               autoUploadProguardMapping = false
+              org = "sentry-sdks"
+              projectName = "sentry-android"
+              url = "https://some-host.sentry.io"
             }
             """.trimIndent()
         )
@@ -139,6 +142,9 @@ class SentryPluginSourceContextTest :
               includeSourceContext = true
               autoUploadSourceContext = false
               autoUploadProguardMapping = false
+              org = "sentry-sdks"
+              projectName = "sentry-android"
+              url = "https://some-host.sentry.io"
             }
             """.trimIndent()
         )
