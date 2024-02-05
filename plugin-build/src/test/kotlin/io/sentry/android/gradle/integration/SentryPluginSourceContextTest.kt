@@ -2,12 +2,14 @@ package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryCliProvider
-import io.sentry.android.gradle.integration.BaseSentryPluginTest.Companion.appendArguments
 import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.verifySourceBundleContents
 import io.sentry.android.gradle.withDummyComposeFile
 import io.sentry.android.gradle.withDummyCustomFile
 import io.sentry.android.gradle.withDummyJavaFile
+import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome.SKIPPED
@@ -17,10 +19,6 @@ import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assume.assumeThat
 import org.junit.Test
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
-import kotlin.test.assertNotNull
 
 class SentryPluginSourceContextTest :
     BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
