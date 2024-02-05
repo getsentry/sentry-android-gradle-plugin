@@ -62,7 +62,7 @@ class SentryPluginSourceContextTest :
     }
 
     @Test
-    fun `generateSentryBundleId and sentryCollectSources tasks are up-to-date on subsequent builds`() {
+    fun `generateBundleId and collectSources are up-to-date on subsequent builds`() {
         runner.appendArguments("app:assembleRelease")
         appBuildFile.writeText(
             // language=Groovy
@@ -117,7 +117,7 @@ class SentryPluginSourceContextTest :
     }
 
     @Test
-    fun `generateSentryBundleId and sentryCollectSources tasks are not up-to-date on subsequent builds if sources change`() {
+    fun `generateBundleId and collectSources are not up-to-date if sources change`() {
         runner.appendArguments("app:assembleRelease")
         appBuildFile.writeText(
             // language=Groovy
