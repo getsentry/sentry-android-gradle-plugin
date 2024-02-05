@@ -62,7 +62,7 @@ class SentryPluginSourceContextTest :
     }
 
     @Test
-    fun `sentryCollectSources task is up-to-date on subsequent builds`() {
+    fun `generateSentryBundleId and sentryCollectSources tasks are up-to-date on subsequent builds`() {
         runner.appendArguments("app:assembleRelease")
         appBuildFile.writeText(
             // language=Groovy
@@ -89,11 +89,23 @@ class SentryPluginSourceContextTest :
         )
         val firstBuild = runner.build()
 
+        testProjectDir.withDummyComposeFile()
+
         val subsequentBuild = runner.build()
+
+        assertEquals(
+            firstBuild.task(":app:generateSentryBundleIdRelease")?.outcome,
+            SUCCESS
+        )
 
         assertEquals(
             firstBuild.task(":app:sentryCollectSourcesRelease")?.outcome,
             SUCCESS
+        )
+
+        assertEquals(
+            subsequentBuild.task(":app:generateSentryBundleIdRelease")?.outcome,
+            UP_TO_DATE
         )
 
         assertEquals(
@@ -105,7 +117,7 @@ class SentryPluginSourceContextTest :
     }
 
     @Test
-    fun `generateSentryBundleId task is up-to-date on subsequent builds`() {
+    fun `generateSentryBundleId and sentryCollectSources tasks are not up-to-date on subsequent builds if sources change`() {
         runner.appendArguments("app:assembleRelease")
         appBuildFile.writeText(
             // language=Groovy
@@ -140,8 +152,18 @@ class SentryPluginSourceContextTest :
         )
 
         assertEquals(
+            firstBuild.task(":app:sentryCollectSourcesRelease")?.outcome,
+            SUCCESS
+        )
+
+        assertEquals(
             subsequentBuild.task(":app:generateSentryBundleIdRelease")?.outcome,
-            UP_TO_DATE
+            SUCCESS
+        )
+
+        assertEquals(
+            subsequentBuild.task(":app:sentryCollectSourcesRelease")?.outcome,
+            SUCCESS
         )
 
         assertTrue(subsequentBuild.output) { "BUILD SUCCESSFUL" in subsequentBuild.output }
