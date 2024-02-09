@@ -41,10 +41,5 @@ jobs:
           cd plugin-build
           ./gradlew testClasses
 
-      - name: Build Compiler Plugin
-        run: |
-          cd sentry-kotlin-compiler-plugin
-          ./gradlew testClasses
-
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@cdcdbb579706841c47f7063dda365e292e5cad7a # pin@v2
