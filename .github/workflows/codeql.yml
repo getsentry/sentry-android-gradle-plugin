@@ -43,7 +43,7 @@ jobs:
 
       - name: Build Compiler Plugin
         run: |
-          cd plugin-build
+          cd sentry-kotlin-compiler-plugin
           ./gradlew testClasses
 
       - name: Perform CodeQL Analysis
