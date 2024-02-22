@@ -40,13 +40,13 @@ import io.sentry.android.gradle.util.collectModules
 import io.sentry.android.gradle.util.hookWithAssembleTasks
 import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.info
-import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
+import java.io.File
 
 fun AndroidComponentsExtension<*, *, *>.configure(
     project: Project,
@@ -392,6 +392,7 @@ private fun Variant.configureProguardMappingsTasks(
                 taskSuffix = name.capitalized,
                 releaseInfo = releaseInfo
             )
+            generateUuidTask.hookWithMinifyTasks(project, name, dexguardEnabled)
             uploadMappingsTask.hookWithMinifyTasks(project, name, dexguardEnabled)
 
             return generateUuidTask
