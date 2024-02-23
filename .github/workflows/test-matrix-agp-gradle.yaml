@@ -38,11 +38,11 @@ jobs:
           - agp: "8.2.2"
             gradle: "8.2"
             java: "17"
-          - agp: "8.3.0-beta02"
+          - agp: "8.3.0-rc02"
             gradle: "8.4"
             java: "17"
-          - agp: "8.4.0-alpha06"
-            gradle: "8.6-rc-1"
+          - agp: "8.4.0-alpha11"
+            gradle: "8.6"
             java: "17"
 
     name: Test Matrix - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
