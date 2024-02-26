@@ -4,6 +4,7 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppExtension
 import com.reandroid.lib.apk.ApkModule
+import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
 import io.sentry.android.gradle.testutil.forceEvaluate
 import io.sentry.android.gradle.util.AgpVersions
@@ -39,11 +40,24 @@ private val ASSET_PATTERN_SOURCE_CONTEXT =
 internal fun verifyProguardUuid(
     rootFile: File,
     variant: String = "release",
-    signed: Boolean = true
+    signed: Boolean = true,
+    inGeneratedFolder: Boolean = false
 ): UUID {
     val signedStr = if (signed) "-unsigned" else ""
     val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant$signedStr.apk")
-    val sentryProperties = extractZip(apk, "assets/sentry-debug-meta.properties")
+    val sentryProperties = if (inGeneratedFolder) {
+        /* ktlint-disable max-line-length experimental:argument-list-wrapping */
+        val propsFile = rootFile
+            .resolve(
+                "app/build/generated/assets" +
+                    "/generateSentryDebugMetaProperties${variant.capitalized}" +
+                    "/sentry-debug-meta.properties"
+            )
+        /* ktlint-enable max-line-length experimental:argument-list-wrapping */
+        if (propsFile.exists()) propsFile.readText() else ""
+    } else {
+        extractZip(apk, "assets/sentry-debug-meta.properties")
+    }
     val matcher = sentryProperties.lines().mapNotNull { line ->
         ASSET_PATTERN_PROGUARD.matchEntire(line)
     }.firstOrNull()
