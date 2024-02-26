@@ -2,11 +2,21 @@
 
 ## Unreleased
 
+### Fixes
+
+- Do not pollute build classpath with groovy dependencies ([#660](https://github.com/getsentry/sentry-android-gradle-plugin/pull/660))
+
 ### Dependencies
 
-  Bump CLI from v2.28.0 to v2.28.5 ([#655](https://github.com/getsentry/sentry-android-gradle-plugin/pull/655))
-    [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2285)
-    [diff](https://github.com/getsentry/sentry-cli/compare/2.28.0...2.28.5)
+- Bump CLI from v2.28.0 to v2.28.5 ([#655](https://github.com/getsentry/sentry-android-gradle-plugin/pull/655))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2285)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.28.0...2.28.5)
+- Bump CLI from v2.28.5 to v2.28.6 ([#657](https://github.com/getsentry/sentry-android-gradle-plugin/pull/657))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2286)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.28.5...2.28.6)
+- Bump Android SDK from v7.3.0 to v7.4.0 ([#659](https://github.com/getsentry/sentry-android-gradle-plugin/pull/659))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#740)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.3.0...7.4.0)
 
 ## 4.3.0
 
@@ -27,8 +37,8 @@
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2280)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.25.0...2.28.0)
   Bump Android SDK from v7.2.0 to v7.3.0 ([#646](https://github.com/getsentry/sentry-android-gradle-plugin/pull/646))
-    [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#730)
-    [diff](https://github.com/getsentry/sentry-java/compare/7.2.0...7.3.0)
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#730)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.2.0...7.3.0)
 
 ## 4.2.0
 
