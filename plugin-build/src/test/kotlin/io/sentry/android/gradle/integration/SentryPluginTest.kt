@@ -7,7 +7,6 @@ import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
 import io.sentry.android.gradle.verifyIntegrationList
 import io.sentry.android.gradle.verifyProguardUuid
-import io.sentry.android.gradle.withDummyKtFile
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

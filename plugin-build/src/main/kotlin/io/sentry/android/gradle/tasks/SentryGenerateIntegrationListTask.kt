@@ -1,18 +1,15 @@
 package io.sentry.android.gradle.tasks
 
 import io.sentry.android.gradle.ManifestWriter
-import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.util.info
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.NONE
@@ -29,7 +26,8 @@ abstract class SentryGenerateIntegrationListTask : DefaultTask() {
         description = "Writes enabled integrations to AndroidManifest.xml"
     }
 
-    @get:PathSensitive(NONE) // we only care about contents
+    // we only care about contents
+    @get:PathSensitive(NONE)
     @get:InputFile
     abstract val mergedManifest: RegularFileProperty
 

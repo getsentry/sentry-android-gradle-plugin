@@ -180,9 +180,11 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     "${variant.name}SentryGenerateIntegrationListTask",
                     SentryGenerateIntegrationListTask::class.java
                 ) {
-                    it.integrations.set(sentryModulesService.map { service ->
-                        service.retrieveEnabledInstrumentationFeatures()
-                    })
+                    it.integrations.set(
+                        sentryModulesService.map { service ->
+                            service.retrieveEnabledInstrumentationFeatures()
+                        }
+                    )
                     it.usesService(sentryModulesService)
                     it.withSentryTelemetry(extension, sentryTelemetryProvider)
                 }
