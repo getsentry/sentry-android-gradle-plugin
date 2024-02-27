@@ -12,6 +12,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.PathSensitive
@@ -19,6 +20,7 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 
+@CacheableTask
 abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
 
     init {
@@ -29,7 +31,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
     @get:Internal
     override val outputFile: Provider<RegularFile> get() = output.file(SENTRY_UUID_OUTPUT)
 
-    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:PathSensitive(PathSensitivity.NONE) // we only care about file contents
     @get:InputFiles
     abstract val proguardMappingFile: ConfigurableFileCollection
 

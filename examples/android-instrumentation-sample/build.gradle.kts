@@ -102,10 +102,9 @@ dependencies {
 
 sentry {
     debug.set(true)
-    includeProguardMapping.set(false)
     autoUploadProguardMapping.set(CI.canAutoUpload())
 
-    includeSourceContext.set(false)
+    includeSourceContext.set(true)
     autoUploadSourceContext.set(CI.canAutoUpload())
     additionalSourceDirsForSourceContext.set(setOf("src/custom/java"))
 

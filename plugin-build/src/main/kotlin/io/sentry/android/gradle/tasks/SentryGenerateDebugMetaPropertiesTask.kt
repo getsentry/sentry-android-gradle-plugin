@@ -14,6 +14,7 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity.NONE
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
@@ -29,7 +30,7 @@ abstract class SentryGenerateDebugMetaPropertiesTask : DirectoryOutputTask() {
     val outputFile: Provider<RegularFile> get() = output.file(SENTRY_DEBUG_META_PROPERTIES_OUTPUT)
 
     @get:InputFiles
-    @get:PathSensitive(RELATIVE)
+    @get:PathSensitive(NONE) // we only care about file contents
     abstract val inputFiles: ConfigurableFileCollection
 
     @TaskAction
