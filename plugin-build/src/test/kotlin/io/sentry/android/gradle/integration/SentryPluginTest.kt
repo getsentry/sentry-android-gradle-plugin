@@ -814,6 +814,46 @@ class SentryPluginTest :
         assertTrue { !debugOutput.exists() }
     }
 
+    @Test
+    fun `does not run minify tasks when isIncludeAndroidResources is enabled`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+                id "com.android.application"
+                id "io.sentry.android.gradle"
+            }
+
+            android {
+                namespace 'com.example'
+                testOptions {
+                    unitTests {
+                        includeAndroidResources = true
+                    }
+                }
+            }
+
+            sentry {
+                autoUploadProguardMapping = false
+                autoInstallation {
+                    enabled = false
+                }
+                telemetry = false
+            }
+            """.trimIndent()
+        )
+
+        val result1 = runner.appendArguments(":app:testReleaseUnitTest").build()
+        val uuid1 = verifyProguardUuid(testProjectDir.root, inGeneratedFolder = true)
+        assertFalse { "minifyReleaseWithR8" in result1.output }
+
+        val result2 = runner.build()
+        val uuid2 = verifyProguardUuid(testProjectDir.root, inGeneratedFolder = true)
+        assertFalse { "minifyReleaseWithR8" in result2.output }
+
+        assertEquals(uuid1, uuid2)
+    }
+
     private fun applyUploadNativeSymbols() {
         appBuildFile.appendText(
             // language=Groovy
