@@ -3,20 +3,19 @@ package io.sentry.android.gradle.tasks
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
+import io.sentry.android.gradle.util.contentHash
 import io.sentry.android.gradle.util.info
 import java.util.Properties
 import java.util.UUID
 import org.gradle.api.Project
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 
@@ -31,9 +30,8 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
     @get:Internal
     override val outputFile: Provider<RegularFile> get() = output.file(SENTRY_UUID_OUTPUT)
 
-    @get:PathSensitive(PathSensitivity.NONE) // we only care about file contents
-    @get:InputFiles
-    abstract val proguardMappingFile: ConfigurableFileCollection
+    @get:Input
+    abstract val proguardMappingFileHash: Property<String>
 
     @TaskAction
     fun generateProperties() {
@@ -56,6 +54,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
     }
 
     companion object {
+        internal const val STATIC_HASH = "<hash>"
         internal const val SENTRY_UUID_OUTPUT = "sentry-proguard-uuid.properties"
         const val SENTRY_PROGUARD_MAPPING_UUID_PROPERTY = "io.sentry.ProguardUuids"
 
@@ -73,7 +72,13 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
             ) { task ->
                 output?.let { task.output.set(it) }
                 task.withSentryTelemetry(extension, sentryTelemetryProvider)
-                task.proguardMappingFile.setFrom(proguardMappingFile)
+                task.proguardMappingFileHash.set(
+                    proguardMappingFile?.map {
+                        it.files.joinToString { file ->
+                            if (file.exists()) file.contentHash() else STATIC_HASH
+                        }
+                    } ?: project.provider { STATIC_HASH }
+                )
             }
             return generateUuidTask
         }

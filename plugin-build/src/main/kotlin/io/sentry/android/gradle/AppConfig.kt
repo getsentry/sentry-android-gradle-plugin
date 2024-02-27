@@ -339,6 +339,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                 releaseInfo = releaseInfo,
                 sentryUrl = extension.url
             )
+            generateUuidTask.hookWithMinifyTasks(project, name, dexguardEnabled)
             uploadMappingsTask.hookWithMinifyTasks(project, name, dexguardEnabled)
 
             return generateUuidTask

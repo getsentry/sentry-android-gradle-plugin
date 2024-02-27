@@ -63,6 +63,8 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.6"
     }
+
+    testOptions.unitTests.isIncludeAndroidResources = true
 }
 
 kotlin {
