@@ -47,12 +47,19 @@ internal fun verifyProguardUuid(
     val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant$signedStr.apk")
     val sentryProperties = if (inGeneratedFolder) {
         /* ktlint-disable max-line-length experimental:argument-list-wrapping */
-        val propsFile = rootFile
-            .resolve(
+        val propsFile = if (AgpVersions.isAGP74) {
+            rootFile
+                .resolve(
+                    "app/build/generated/assets" +
+                        "/generateSentryDebugMetaProperties${variant.capitalized}" +
+                        "/sentry-debug-meta.properties"
+                )
+        } else {
+            rootFile.resolve(
                 "app/build/generated/assets" +
-                    "/generateSentryDebugMetaProperties${variant.capitalized}" +
-                    "/sentry-debug-meta.properties"
+                    "/sentry/debug-meta-properties/$variant/sentry-debug-meta.properties"
             )
+        }
         /* ktlint-enable max-line-length experimental:argument-list-wrapping */
         if (propsFile.exists()) propsFile.readText() else ""
     } else {
