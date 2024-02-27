@@ -6,7 +6,7 @@
 
 - Do not pollute build classpath with groovy dependencies ([#660](https://github.com/getsentry/sentry-android-gradle-plugin/pull/660))
 - Do not execute `minifyWithR8` task when running tests with `isIncludeAndroidResources` enabled ([#662](https://github.com/getsentry/sentry-android-gradle-plugin/pull/662))
-- Make tasks with reproducible inputs Cacheable ([#653](https://github.com/getsentry/sentry-android-gradle-plugin/pull/653))
+- Make tasks with reproducible inputs Cacheable ([#664](https://github.com/getsentry/sentry-android-gradle-plugin/pull/664))
   - `SentryGenerateIntegrationListTask`
   - `SentryGenerateDebugMetaPropertiesTask`
   - `GenerateBundleIdTask`
