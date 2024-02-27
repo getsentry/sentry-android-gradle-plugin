@@ -8,11 +8,17 @@ import java.nio.file.StandardCopyOption
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
+import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity.NONE
 import org.gradle.api.tasks.TaskAction
 
+@CacheableTask
 abstract class SentryGenerateIntegrationListTask : DefaultTask() {
 
     companion object {
@@ -23,21 +29,22 @@ abstract class SentryGenerateIntegrationListTask : DefaultTask() {
         description = "Writes enabled integrations to AndroidManifest.xml"
     }
 
+    @get:PathSensitive(NONE) // we only care about contents
     @get:InputFile
     abstract val mergedManifest: RegularFileProperty
 
     @get:OutputFile
     abstract val updatedManifest: RegularFileProperty
 
-    @get:Internal
-    abstract val sentryModulesService: Property<SentryModulesService>
+    @get:Input
+    abstract val integrations: SetProperty<String>
 
     @TaskAction
     fun writeIntegrationListToManifest() {
         logger.info {
             "SentryGenerateIntegrationListTask - outputFile: ${updatedManifest.get()}"
         }
-        val integrations = sentryModulesService.get().retrieveEnabledInstrumentationFeatures()
+        val integrations = integrations.get()
         val manifestFile = mergedManifest.asFile.get()
         val updatedManifestFile = updatedManifest.asFile.get()
 
