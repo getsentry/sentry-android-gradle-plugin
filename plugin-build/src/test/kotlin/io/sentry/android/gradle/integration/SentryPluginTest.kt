@@ -13,6 +13,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.testkit.runner.TaskOutcome.FROM_CACHE
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThrows
@@ -851,6 +852,35 @@ class SentryPluginTest :
         val uuid2 = verifyProguardUuid(testProjectDir.root, inGeneratedFolder = true)
         assertFalse { "minifyReleaseWithR8" in result2.output }
 
+        assertEquals(uuid1, uuid2)
+    }
+
+    @Test
+    fun `caches uuid-generating tasks`() {
+        // first build it so it gets cached
+        runner.withArguments(":app:assembleRelease", "--build-cache").build()
+        val uuid1 = verifyProguardUuid(testProjectDir.root)
+
+        // this should erase the build folder so the tasks are not up-to-date
+        runner.withArguments("clean").build()
+
+        // this should restore the entry from cache as the mapping file hasn't changed
+        val build = runner.withArguments("app:assembleRelease", "--build-cache").build()
+        val uuid2 = verifyProguardUuid(testProjectDir.root)
+
+        assertEquals(
+            build.task(":app:generateSentryProguardUuidRelease")?.outcome,
+            FROM_CACHE
+        )
+        assertEquals(
+            build.task(":app:generateSentryDebugMetaPropertiesRelease")?.outcome,
+            FROM_CACHE
+        )
+        assertEquals(
+            build.task(":app:releaseSentryGenerateIntegrationListTask")?.outcome,
+            FROM_CACHE
+        )
+        // should be the same uuid
         assertEquals(uuid1, uuid2)
     }
 

@@ -10,11 +10,15 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity.NONE
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 
+@CacheableTask
 abstract class SentryGenerateDebugMetaPropertiesTask : DirectoryOutputTask() {
 
     init {
@@ -24,6 +28,8 @@ abstract class SentryGenerateDebugMetaPropertiesTask : DirectoryOutputTask() {
     @get:Internal
     val outputFile: Provider<RegularFile> get() = output.file(SENTRY_DEBUG_META_PROPERTIES_OUTPUT)
 
+    // we only care about file contents
+    @get:PathSensitive(NONE)
     @get:InputFiles
     abstract val inputFiles: ConfigurableFileCollection
 
