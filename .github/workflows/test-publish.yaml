@@ -26,7 +26,7 @@ jobs:
         uses: gradle/gradle-build-action@7e48093f71aa12588241894ff3695e83c4b5e4b0 # pin@v2.4.2
 
       - name: Build the Release variant
-        run: ./gradlew assembleRelease | tee gradle.log
+        run: ./gradlew assembleRelease --no-build-cache | tee gradle.log
 
       - name: Verify that Native Symbols were uploaded
         run: grep "Uploaded [1-9][0-9]* missing debug information file" gradle.log
