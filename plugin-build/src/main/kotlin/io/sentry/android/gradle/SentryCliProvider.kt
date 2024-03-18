@@ -2,6 +2,7 @@
 
 package io.sentry.android.gradle
 
+import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryCliValueSource.Params
 import io.sentry.android.gradle.SentryPlugin.Companion.logger
 import io.sentry.android.gradle.util.GradleVersions
@@ -10,7 +11,6 @@ import io.sentry.android.gradle.util.info
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.nio.file.Files
 import java.util.Locale
 import java.util.Properties
 import org.gradle.api.Project
@@ -32,7 +32,7 @@ internal object SentryCliProvider {
      */
     @JvmStatic
     @Synchronized
-    fun getSentryCliPath(projectDir: File, rootDir: File): String {
+    fun getSentryCliPath(projectDir: File, projectBuildFile: File, rootDir: File): String {
         val cliPath = memoizedCliPath
         if (!cliPath.isNullOrEmpty() && File(cliPath).exists()) {
             logger.info { "Using memoized cli path: $cliPath" }
@@ -66,7 +66,7 @@ internal object SentryCliProvider {
             // otherwise we need to unpack into a file
             logger.info { "Trying to load cli from $resourcePath in a temp file..." }
 
-            loadCliFromResourcesToTemp(resourcePath)?.let {
+            loadCliFromResources(projectBuildFile, resourcePath)?.let {
                 logger.info { "cli extracted from resources into: $it" }
                 memoizedCliPath = it
                 return@getSentryCliPath it
@@ -103,32 +103,41 @@ internal object SentryCliProvider {
         }
     }
 
-    internal fun loadCliFromResourcesToTemp(resourcePath: String): String? {
+    internal fun loadCliFromResources(projectBuildFile: File, resourcePath: String): String? {
         val resourceStream = javaClass.getResourceAsStream(resourcePath)
-        val tmpDirPrefix = try {
-            // only specific for some tests for deterministic behavior when executing in parallel
-            System.getProperty("sentryCliTempFolder")
-        } catch (e: Throwable) {
-            null
-        }
-        val tempFile = File.createTempFile(
-            ".sentry-cli",
-            ".exe",
-            tmpDirPrefix?.let { Files.createTempDirectory(it).toFile() }
-        ).apply {
-            deleteOnExit()
-            setExecutable(true)
-        }
-
         return if (resourceStream != null) {
-            FileOutputStream(tempFile).use { output ->
+            val baseFolder = try {
+                // only specific for some tests for deterministic behavior when executing in parallel
+                val folder = System.getProperty("sentryCliTempFolder")
+                if (folder != null) {
+                    File(folder)
+                } else {
+                    null
+                }
+            } catch (e: Throwable) {
+                null
+            } ?: File(projectBuildFile, "tmp")
+
+            logger.error { "sentry-cli base folder: ${baseFolder.absolutePath}" }
+
+            if (!baseFolder.exists() && !baseFolder.mkdirs()) {
+                logger.error { "Failed to create sentry-cli base folder" }
+                return null
+            }
+
+            val cliFilePath =
+                File(baseFolder, ".sentry-cli-${BuildConfig.Version}-${BuildConfig.CliVersion}.exe")
+            FileOutputStream(cliFilePath).use { output ->
                 resourceStream.use { input ->
                     input.copyTo(output)
                 }
             }
-            tempFile.absolutePath
+            cliFilePath.setExecutable(true)
+            cliFilePath.deleteOnExit()
+
+            cliFilePath.absolutePath
         } else {
-            null
+            return null
         }
     }
 
@@ -151,12 +160,16 @@ abstract class SentryCliValueSource : ValueSource<String, Params> {
         val projectDir: Property<File>
 
         @get:Input
+        val projectBuildDir: Property<File>
+
+        @get:Input
         val rootProjDir: Property<File>
     }
 
     override fun obtain(): String? {
         return SentryCliProvider.getSentryCliPath(
             parameters.projectDir.get(),
+            parameters.projectBuildDir.get(),
             parameters.rootProjDir.get()
         )
     }
@@ -168,12 +181,14 @@ fun Project.cliExecutableProvider(): Provider<String> {
         // e.g. switching branches
         providers.of(SentryCliValueSource::class.java) {
             it.parameters.projectDir.set(project.projectDir)
+            it.parameters.projectBuildDir.set(project.layout.buildDirectory.asFile.get())
             it.parameters.rootProjDir.set(project.rootDir)
         }
     } else {
         return provider {
             SentryCliProvider.getSentryCliPath(
                 project.projectDir,
+                project.layout.buildDirectory.asFile.get(),
                 project.rootDir
             )
         }

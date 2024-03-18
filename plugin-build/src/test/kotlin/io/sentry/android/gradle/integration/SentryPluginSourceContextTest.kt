@@ -296,7 +296,11 @@ class SentryPluginSourceContextTest :
 
     @Test
     fun `uploadSourceBundle task is up-to-date on subsequent builds`() {
-        val sentryCli = SentryCliProvider.getSentryCliPath(File(""), File(""))
+        val sentryCli = SentryCliProvider.getSentryCliPath(
+            File(""),
+            File("build"),
+            File("")
+        )
         sentryPropertiesFile.writeText("cli.executable=$sentryCli")
 
         runner.appendArguments("app:assembleRelease")
@@ -346,7 +350,11 @@ class SentryPluginSourceContextTest :
 
     @Test
     fun `uploadSourceBundle task is not up-to-date on subsequent builds if cli path changes`() {
-        val sentryCli = SentryCliProvider.getSentryCliPath(File(""), File(""))
+        val sentryCli = SentryCliProvider.getSentryCliPath(
+            File(""),
+            File("build"),
+            File("")
+        )
         sentryPropertiesFile.writeText("cli.executable=$sentryCli")
 
         runner.appendArguments("app:assembleRelease")

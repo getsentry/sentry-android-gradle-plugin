@@ -2,7 +2,7 @@ package io.sentry.android.gradle
 
 import io.sentry.android.gradle.SentryCliProvider.getCliSuffix
 import io.sentry.android.gradle.SentryCliProvider.getSentryPropertiesPath
-import io.sentry.android.gradle.SentryCliProvider.loadCliFromResourcesToTemp
+import io.sentry.android.gradle.SentryCliProvider.loadCliFromResources
 import io.sentry.android.gradle.SentryCliProvider.searchCliInPropertiesFile
 import io.sentry.android.gradle.SentryCliProvider.searchCliInResources
 import io.sentry.android.gradle.util.SystemPropertyRule
@@ -157,7 +157,7 @@ class SentryCliProviderTest {
                 writeText("echo \"This is just a dummy script\"")
             }
 
-        val loadedPath = loadCliFromResourcesToTemp(resourcePath)
+        val loadedPath = loadCliFromResources(File("."), resourcePath)
         assertNotNull(loadedPath)
 
         val binContent = File(loadedPath).readText()
@@ -170,7 +170,7 @@ class SentryCliProviderTest {
     fun `loadCliFromResourcesToTemp returns null if file does not exist`() {
         val resourcePath = "./dummy-bin/i-dont-exist"
 
-        assertNull(loadCliFromResourcesToTemp(resourcePath))
+        assertNull(loadCliFromResources(File("."), resourcePath))
     }
 
     @Test
