@@ -887,9 +887,13 @@ class SentryPluginTest :
     @Test
     fun `works well with configuration cache`() {
         val run0 = runner.withArguments("--configuration-cache", ":app:assembleRelease").build()
+        println("Run 0")
+        println(run0.output)
         assertFalse("Reusing configuration cache." in run0.output, run0.output)
 
         val run1 = runner.withArguments("--configuration-cache", ":app:assembleRelease").build()
+        println("Run 1")
+        println(run1.output)
         assertTrue("Reusing configuration cache." in run1.output, run1.output)
     }
 
