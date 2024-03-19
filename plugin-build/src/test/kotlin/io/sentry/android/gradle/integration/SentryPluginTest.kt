@@ -884,6 +884,15 @@ class SentryPluginTest :
         assertEquals(uuid1, uuid2)
     }
 
+    @Test
+    fun `works well with configuration cache`() {
+        val run0 = runner.withArguments("--configuration-cache", ":app:assembleRelease").build()
+        assertFalse("Reusing configuration cache." in run0.output, run0.output)
+
+        val run1 = runner.withArguments("--configuration-cache", ":app:assembleRelease").build()
+        assertTrue("Reusing configuration cache." in run1.output, run1.output)
+    }
+
     private fun applyUploadNativeSymbols() {
         appBuildFile.appendText(
             // language=Groovy
