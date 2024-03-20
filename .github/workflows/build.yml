@@ -46,7 +46,7 @@ jobs:
             ${{ github.workspace }}/plugin-build/build/distributions/*.zip
             ${{ github.workspace }}/sentry-kotlin-compiler-plugin/build/distributions/*.zip
 
-      - name: Verifies Sentry CLI is bundled
+      - name: Verify artifact contents
         shell: bash
         run: |
           zipfile=$(ls -1 plugin-build/build/distributions | grep -v "PluginMarker")
@@ -55,3 +55,4 @@ jobs:
           find /tmp/$filename | grep "pom-default.xml"
           unzip /tmp/$filename/$filename.jar -d /tmp/jar/
           find /tmp/jar | grep "bin/sentry-cli"
+          grep -q "dev.gradleplugins" /tmp/$filename/pom-default.xml && exit 1
