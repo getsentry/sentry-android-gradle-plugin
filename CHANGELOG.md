@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Fixes
+- Ensure sentry-cli works well with configuration cache ([#675](https://github.com/getsentry/sentry-android-gradle-plugin/pull/675))
+
 ### Dependencies
 
 - Bump Android SDK from v7.5.0 to v7.6.0 ([#671](https://github.com/getsentry/sentry-android-gradle-plugin/pull/671))
