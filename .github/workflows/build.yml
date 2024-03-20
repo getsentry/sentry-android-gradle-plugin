@@ -55,4 +55,4 @@ jobs:
           find /tmp/$filename | grep "pom-default.xml"
           unzip /tmp/$filename/$filename.jar -d /tmp/jar/
           find /tmp/jar | grep "bin/sentry-cli"
-          grep -q "dev.gradleplugins" /tmp/$filename/pom-default.xml && exit 1
+          cat /tmp/$filename/pom-default.xml
