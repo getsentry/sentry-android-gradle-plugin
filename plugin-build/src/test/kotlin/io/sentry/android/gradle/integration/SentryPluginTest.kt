@@ -886,15 +886,33 @@ class SentryPluginTest :
 
     @Test
     fun `works well with configuration cache`() {
-        val run0 = runner.withArguments("--configuration-cache", ":app:assembleDebug").build()
-        println("Run 0")
-        println(run0.output)
-        assertFalse("Reusing configuration cache." in run0.output, run0.output)
+        if (GradleVersion.current() < GradleVersion.version("8.0.0")) {
+            // older versions of gradle in combination with AGP have issues with configuration cache
+            // producing output like
+            // 0 problems were found storing the configuration cache.
+            // Configuration cache entry discarded.
+            return
+        }
 
-        val run1 = runner.withArguments("--configuration-cache", ":app:assembleDebug").build()
-        println("Run 1")
-        println(run1.output)
-        assertTrue("Reusing configuration cache." in run1.output, run1.output)
+        val runner = runner.withArguments(
+            "--configuration-cache",
+            "--build-cache",
+            ":app:assembleDebug"
+        )
+
+        val run0 = runner.build()
+        assertFalse(
+            "Reusing configuration cache." in run0.output ||
+                "Configuration cache entry reused." in run0.output,
+            run0.output
+        )
+
+        val run1 = runner.build()
+        assertTrue(
+            "Reusing configuration cache." in run1.output ||
+                "Configuration cache entry reused." in run1.output,
+            run1.output
+        )
     }
 
     private fun applyUploadNativeSymbols() {
