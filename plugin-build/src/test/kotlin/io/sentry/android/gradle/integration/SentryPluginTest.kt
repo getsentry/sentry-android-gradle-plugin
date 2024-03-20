@@ -886,11 +886,14 @@ class SentryPluginTest :
 
     @Test
     fun `works well with configuration cache`() {
-        if (GradleVersion.current() < GradleVersion.version("8.0.0")) {
-            // older versions of gradle in combination with AGP have issues with configuration cache
-            // producing output like
+        if (!AgpVersions.isAGP74 || GradleVersion.current() < GradleVersion.version("8.0.0")) {
+            // configuration cache doesn't seem to work well on older Gradle/AGP combinations
+            // producing the following output:
+            //
             // 0 problems were found storing the configuration cache.
-            // Configuration cache entry discarded.
+            // Configuration cache entry discarded
+            //
+            // so we skip them for now
             return
         }
 
