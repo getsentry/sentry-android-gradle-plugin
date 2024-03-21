@@ -106,15 +106,8 @@ internal object SentryCliProvider {
     internal fun extractCliFromResources(projectBuildFile: File, resourcePath: String): String? {
         val resourceStream = javaClass.getResourceAsStream(resourcePath)
         return if (resourceStream != null) {
-            // output folder is either specified via properties or defaults to <project>/build/tmp/
-            val baseFolder = try {
-                // only specific for some tests for deterministic behavior when executing in parallel
-                val folder = System.getProperty("sentryCliTempFolder")
-                folder?.let { File(folder) }
-            } catch (e: Throwable) {
-                null
-            } ?: File(projectBuildFile, "tmp")
-
+            // usually <project>/build/tmp/
+            val baseFolder = File(projectBuildFile, "tmp")
             logger.info { "sentry-cli base folder: ${baseFolder.absolutePath}" }
 
             if (!baseFolder.exists() && !baseFolder.mkdirs()) {

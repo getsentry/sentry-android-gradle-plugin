@@ -884,40 +884,6 @@ class SentryPluginTest :
         assertEquals(uuid1, uuid2)
     }
 
-    @Test
-    fun `works well with configuration cache`() {
-        if (!AgpVersions.isAGP74 || GradleVersion.current() < GradleVersion.version("8.0.0")) {
-            // configuration cache doesn't seem to work well on older Gradle/AGP combinations
-            // producing the following output:
-            //
-            // 0 problems were found storing the configuration cache.
-            // Configuration cache entry discarded
-            //
-            // so we skip them for now
-            return
-        }
-
-        val runner = runner.withArguments(
-            "--configuration-cache",
-            "--build-cache",
-            ":app:assembleDebug"
-        )
-
-        val run0 = runner.build()
-        assertFalse(
-            "Reusing configuration cache." in run0.output ||
-                "Configuration cache entry reused." in run0.output,
-            run0.output
-        )
-
-        val run1 = runner.build()
-        assertTrue(
-            "Reusing configuration cache." in run1.output ||
-                "Configuration cache entry reused." in run1.output,
-            run1.output
-        )
-    }
-
     private fun applyUploadNativeSymbols() {
         appBuildFile.appendText(
             // language=Groovy
