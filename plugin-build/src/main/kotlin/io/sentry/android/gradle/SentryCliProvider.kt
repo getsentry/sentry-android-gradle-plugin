@@ -32,7 +32,7 @@ internal object SentryCliProvider {
      */
     @JvmStatic
     @Synchronized
-    fun getSentryCliPath(projectDir: File, projectBuildFile: File, rootDir: File): String {
+    fun getSentryCliPath(projectDir: File, projectBuildDir: File, rootDir: File): String {
         val cliPath = memoizedCliPath
         if (!cliPath.isNullOrEmpty() && File(cliPath).exists()) {
             logger.info { "Using memoized cli path: $cliPath" }
@@ -66,7 +66,7 @@ internal object SentryCliProvider {
             // otherwise we need to unpack into a file
             logger.info { "Trying to load cli from $resourcePath in a temp file..." }
 
-            extractCliFromResources(projectBuildFile, resourcePath)?.let {
+            extractCliFromResources(projectBuildDir, resourcePath)?.let {
                 logger.info { "cli extracted from resources into: $it" }
                 memoizedCliPath = it
                 return@getSentryCliPath it
@@ -103,11 +103,17 @@ internal object SentryCliProvider {
         }
     }
 
-    internal fun extractCliFromResources(projectBuildFile: File, resourcePath: String): String? {
+    fun getCliTargetPathForResources(projectBuildDir: File): File {
+        // usually <project>/build/tmp/
+        return File(File(projectBuildDir, "tmp"), "sentry-cli-${BuildConfig.CliVersion}.exe")
+    }
+
+    internal fun extractCliFromResources(projectBuildDir: File, resourcePath: String): String? {
         val resourceStream = javaClass.getResourceAsStream(resourcePath)
         return if (resourceStream != null) {
-            // usually <project>/build/tmp/
-            val baseFolder = File(projectBuildFile, "tmp")
+            val cliFilePath = getCliTargetPathForResources(projectBuildDir)
+
+            val baseFolder = cliFilePath.parentFile
             logger.info { "sentry-cli base folder: ${baseFolder.absolutePath}" }
 
             if (!baseFolder.exists() && !baseFolder.mkdirs()) {
@@ -115,7 +121,6 @@ internal object SentryCliProvider {
                 return null
             }
 
-            val cliFilePath = File(baseFolder, "sentry-cli-${BuildConfig.CliVersion}.exe")
             FileOutputStream(cliFilePath).use { output ->
                 resourceStream.use { input ->
                     input.copyTo(output)
