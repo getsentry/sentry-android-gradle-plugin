@@ -12,7 +12,7 @@ object BuildPluginsVersion {
     // build/publications/maven
     const val MAVEN_PUBLISH = "0.17.0"
     const val PROGUARD = "7.1.0"
-    const val GROOVY_REDISTRIBUTED = "1.5"
+    const val GROOVY_REDISTRIBUTED = "1.2"
     const val BUILDCONFIG = "3.1.0"
 
     const val SPRING_BOOT = "2.7.4"
