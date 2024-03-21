@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Do not pollute build classpath with groovy dependencies ([#677](https://github.com/getsentry/sentry-android-gradle-plugin/pull/677))
+
 ### Dependencies
 
 - Bump Android SDK from v7.5.0 to v7.6.0 ([#671](https://github.com/getsentry/sentry-android-gradle-plugin/pull/671))
