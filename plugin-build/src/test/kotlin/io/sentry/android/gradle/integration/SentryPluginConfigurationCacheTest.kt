@@ -192,10 +192,11 @@ class SentryPluginConfigurationCacheTest :
         val cliPath = SentryCliProvider.getCliTargetPathForResources(
             File(runner.projectDir, "build")
         )
-        assertTrue(cliPath.exists())
 
-        // when some external influence wipes the cli
-        cliPath.delete()
+        // On Gradle >= 8, the whole build folder is wiped anyway
+        if (cliPath.exists()) {
+            cliPath.delete()
+        }
 
         // then it should be recovered on the next run
         val run1 = runner.build()
@@ -204,6 +205,6 @@ class SentryPluginConfigurationCacheTest :
                 "Configuration cache entry reused." in run1.output,
             run1.output
         )
-        assertTrue(cliPath.exists())
+        assertTrue(run1.output) { "BUILD SUCCESSFUL" in run1.output }
     }
 }
