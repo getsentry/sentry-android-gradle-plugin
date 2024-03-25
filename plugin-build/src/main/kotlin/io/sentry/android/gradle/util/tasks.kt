@@ -3,10 +3,9 @@ package io.sentry.android.gradle.util
 import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getInstallTaskProvider
-import io.sentry.android.gradle.SentryTasksProvider.getMinifyTasks
+import io.sentry.android.gradle.SentryTasksProvider.getMinifyTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
-import io.sentry.android.gradle.SentryTasksProvider.getPreBuildTask
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
 import io.sentry.gradle.common.SentryVariant
@@ -22,27 +21,16 @@ fun TaskProvider<out Task>.hookWithMinifyTasks(
     // we need to wait for project evaluation to have all tasks available, otherwise the new
     // AndroidComponentsExtension is configured too early to look up for the tasks
     project.afterEvaluate {
-        val minifyTasks = getMinifyTasks(
+        val minifyTask = getMinifyTask(
             project,
             variantName,
             dexguardEnabled
         )
 
         // we just hack ourselves into the Proguard/R8/DexGuard task's doLast.
-        for (task in minifyTasks) {
-            task.configure {
-                it.finalizedBy(this)
-            }
+        minifyTask?.configure {
+            it.finalizedBy(this)
         }
-    }
-}
-
-fun TaskProvider<out Task>.finalizeByPreBuildTask(
-    project: Project,
-    variantName: String
-) {
-    configure {
-        it.finalizedBy(getPreBuildTask(project, variantName))
     }
 }
 

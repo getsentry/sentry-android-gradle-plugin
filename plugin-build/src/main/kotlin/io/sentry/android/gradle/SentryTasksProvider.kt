@@ -16,63 +16,30 @@ import org.gradle.api.tasks.TaskProvider
 internal object SentryTasksProvider {
 
     /**
-     * Returns the transformer task for the given project and variant.
-     * It could be either ProGuard or R8
+     * Returns the minify task for the given project and variant.
+     * It could be either ProGuard, R8 or DexGuard.
      *
      * @return the task or null otherwise
      */
     @JvmStatic
-    fun getPreBuildTask(
-        project: Project,
-        variantName: String
-    ): TaskProvider<Task>? = project.findTask(
-        listOf(
-            "pre${variantName.capitalized}Build",
-        )
-    )
-
-    /**
-     * Returns the transformer task for the given project and variant.
-     * It could be either ProGuard or R8
-     *
-     * @return the task or null otherwise
-     */
-    @JvmStatic
-    fun getMinifyTasks(
+    fun getMinifyTask(
         project: Project,
         variantName: String,
         dexguardEnabled: Boolean = false
-    ): List<TaskProvider<Task>> {
-        if (dexguardEnabled) {
+    ): TaskProvider<Task>? {
+        val tasks = if (dexguardEnabled) {
             // We prioritize the Guardsquare's Proguard task towards the AGP ones.
-            /* ktlint-disable max-line-length */
-            val transformTask = project.findTask(
-                listOf(
-                    "transformClassesAndResourcesWithProguardTransformFor${variantName.capitalized}"
-                )
-            )
-            /* ktlint-enable max-line-length */
-            if (transformTask != null) {
-                return listOf(transformTask)
-            }
-
-            // return both apk/aab tasks
-            return project.findTasks(
-                listOf(
-                    "dexguardApk${variantName.capitalized}",
-                    "dexguardAab${variantName.capitalized}"
-                )
+            listOf(
+                "transformClassesAndResourcesWithProguardTransformFor${variantName.capitalized}",
+                "mergeDex${variantName.capitalized}"
             )
         } else {
-            // only hook into first task if found
-            val task = project.findTask(
-                listOf(
-                    "minify${variantName.capitalized}WithR8",
-                    "minify${variantName.capitalized}WithProguard"
-                )
+            listOf(
+                "minify${variantName.capitalized}WithR8",
+                "minify${variantName.capitalized}WithProguard"
             )
-            return task?.let { listOf(task) } ?: emptyList()
         }
+        return project.findTask(tasks)
     }
 
     /**
@@ -221,18 +188,6 @@ internal object SentryTasksProvider {
                 }
             }
             .firstOrNull()
-
-    /**
-     * @return all tasks found in the list or null
-     */
-    private fun Project.findTasks(taskName: List<String>): List<TaskProvider<Task>> =
-        taskName.mapNotNull {
-            try {
-                project.tasks.named(it)
-            } catch (e: UnknownTaskException) {
-                null
-            }
-        }
 
     internal val String.capitalized: String get() = this.capitalizeUS()
 }

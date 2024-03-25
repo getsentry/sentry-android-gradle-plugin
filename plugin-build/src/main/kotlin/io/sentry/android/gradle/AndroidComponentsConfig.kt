@@ -38,7 +38,6 @@ import io.sentry.android.gradle.util.ReleaseInfo
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.collectModules
-import io.sentry.android.gradle.util.finalizeByPreBuildTask
 import io.sentry.android.gradle.util.hookWithAssembleTasks
 import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.info
@@ -398,11 +397,16 @@ private fun Variant.configureProguardMappingsTasks(
                 taskSuffix = name.capitalized,
                 releaseInfo = releaseInfo
             )
-            generateUuidTask.finalizeByPreBuildTask(project, name)
-            uploadMappingsTask.hookWithMinifyTasks(
+
+            generateUuidTask.hookWithMinifyTasks(
                 project,
                 name,
                 dexguardEnabled && GroovyCompat.isDexguardEnabledForVariant(project, name)
+            )
+
+            uploadMappingsTask.hookWithAssembleTasks(
+                project,
+                variant
             )
 
             return generateUuidTask

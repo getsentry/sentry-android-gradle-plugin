@@ -202,8 +202,9 @@ class SentryPluginTest :
         val uuid2 = verifyProguardUuid(testProjectDir.root)
 
         assertEquals(
+            TaskOutcome.UP_TO_DATE,
             build.task(":app:generateSentryProguardUuidRelease")?.outcome,
-            TaskOutcome.UP_TO_DATE
+            build.output
         )
 
         assertEquals(uuid1, uuid2)
