@@ -1,13 +1,13 @@
 package io.sentry.android.gradle.util
 
-import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getInstallTaskProvider
+import io.sentry.android.gradle.SentryTasksProvider.getMinifyTasks
 import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
+import io.sentry.android.gradle.SentryTasksProvider.getPreBuildTask
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
-import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
 import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
 import io.sentry.gradle.common.SentryVariant
 import org.gradle.api.Project
@@ -22,29 +22,27 @@ fun TaskProvider<out Task>.hookWithMinifyTasks(
     // we need to wait for project evaluation to have all tasks available, otherwise the new
     // AndroidComponentsExtension is configured too early to look up for the tasks
     project.afterEvaluate {
-        val transformerTaskProvider = withLogging(project.logger, "transformerTask") {
-            getTransformerTask(
-                project,
-                variantName,
-                dexguardEnabled
-            )
-        }
+        val minifyTasks = getMinifyTasks(
+            project,
+            variantName,
+            dexguardEnabled
+        )
 
-        if (dexguardEnabled &&
-            GroovyCompat.isDexguardEnabledForVariant(project, variantName)
-        ) {
-            project.tasks.named(
-                "dexguardApk${variantName.capitalized}"
-            ).configure { it.finalizedBy(this) }
-            project.tasks.named(
-                "dexguardAab${variantName.capitalized}"
-            ).configure { it.finalizedBy(this) }
-        } else {
-            // we just hack ourselves into the Proguard/R8 task's doLast.
-            transformerTaskProvider?.configure {
+        // we just hack ourselves into the Proguard/R8/DexGuard task's doLast.
+        for (task in minifyTasks) {
+            task.configure {
                 it.finalizedBy(this)
             }
         }
+    }
+}
+
+fun TaskProvider<out Task>.finalizeByPreBuildTask(
+    project: Project,
+    variantName: String
+) {
+    configure {
+        it.finalizedBy(getPreBuildTask(project, variantName))
     }
 }
 

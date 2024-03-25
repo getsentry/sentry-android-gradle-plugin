@@ -7,14 +7,15 @@ import io.sentry.android.gradle.SentryTasksProvider.getInstallTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalAnalyzeProvider
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalReportProvider
 import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
+import io.sentry.android.gradle.SentryTasksProvider.getMinifyTasks
 import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getProcessResourcesProvider
-import io.sentry.android.gradle.SentryTasksProvider.getTransformerTask
 import io.sentry.gradle.common.SentryVariant
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
@@ -32,7 +33,7 @@ class SentryTaskProviderTest {
     fun `getTransformerTask returns null for missing task`() {
         val project = ProjectBuilder.builder().build()
 
-        assertNull(getTransformerTask(project, "debug")?.get())
+        assertTrue(getMinifyTasks(project, "debug").isEmpty())
     }
 
     @Test
@@ -43,11 +44,11 @@ class SentryTaskProviderTest {
 
         assertEquals(
             task,
-            getTransformerTask(
+            getMinifyTasks(
                 project,
                 "debug",
                 dexguardEnabled = true
-            )?.get()
+            ).first().get()
         )
     }
 
@@ -57,12 +58,12 @@ class SentryTaskProviderTest {
             "transformClassesAndResourcesWithProguardTransformForDebug"
         )
 
-        assertNull(
-            getTransformerTask(
+        assertTrue(
+            getMinifyTasks(
                 project,
                 "debug",
                 dexguardEnabled = false
-            )
+            ).isEmpty()
         )
     }
 
@@ -70,14 +71,14 @@ class SentryTaskProviderTest {
     fun `getTransformerTask returns minify for R8`() {
         val (project, task) = getTestProjectWithTask("minifyDebugWithR8")
 
-        assertEquals(task, getTransformerTask(project, "debug")?.get())
+        assertEquals(task, getMinifyTasks(project, "debug").first().get())
     }
 
     @Test
     fun `getTransformerTask returns minify for embedded Proguard`() {
         val (project, task) = getTestProjectWithTask("minifyDebugWithProguard")
 
-        assertEquals(task, getTransformerTask(project, "debug")?.get())
+        assertEquals(task, getMinifyTasks(project, "debug").first().get())
     }
 
     @Test
@@ -87,11 +88,11 @@ class SentryTaskProviderTest {
 
         assertEquals(
             "transformClassesAndResourcesWithProguardTransformForDebug",
-            getTransformerTask(
+            getMinifyTasks(
                 project,
                 "debug",
                 dexguardEnabled = true
-            )?.get()?.name
+            ).first().name
         )
     }
 
@@ -102,11 +103,11 @@ class SentryTaskProviderTest {
 
         assertEquals(
             r8task,
-            getTransformerTask(
+            getMinifyTasks(
                 project,
                 "debug",
                 dexguardEnabled = false
-            )?.get()
+            ).first().get()
         )
     }
 

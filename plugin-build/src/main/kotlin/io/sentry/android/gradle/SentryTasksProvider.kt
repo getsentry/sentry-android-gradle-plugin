@@ -2,7 +2,6 @@ package io.sentry.android.gradle
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
-import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.util.GroovyCompat.isDexguardAvailable
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.gradle.common.SentryVariant
@@ -23,22 +22,57 @@ internal object SentryTasksProvider {
      * @return the task or null otherwise
      */
     @JvmStatic
-    fun getTransformerTask(
+    fun getPreBuildTask(
+        project: Project,
+        variantName: String
+    ): TaskProvider<Task>? = project.findTask(
+        listOf(
+            "pre${variantName.capitalized}Build",
+        )
+    )
+
+    /**
+     * Returns the transformer task for the given project and variant.
+     * It could be either ProGuard or R8
+     *
+     * @return the task or null otherwise
+     */
+    @JvmStatic
+    fun getMinifyTasks(
         project: Project,
         variantName: String,
         dexguardEnabled: Boolean = false
-    ): TaskProvider<Task>? {
-        val taskList = mutableListOf<String>()
+    ): List<TaskProvider<Task>> {
         if (dexguardEnabled) {
             // We prioritize the Guardsquare's Proguard task towards the AGP ones.
-            taskList.add(
-                "transformClassesAndResourcesWithProguardTransformFor${variantName.capitalized}"
+            /* ktlint-disable max-line-length */
+            val transformTask = project.findTask(
+                listOf(
+                    "transformClassesAndResourcesWithProguardTransformFor${variantName.capitalized}"
+                )
             )
+            /* ktlint-enable max-line-length */
+            if (transformTask != null) {
+                return listOf(transformTask)
+            }
+
+            // return both apk/aab tasks
+            return project.findTasks(
+                listOf(
+                    "dexguardApk${variantName.capitalized}",
+                    "dexguardAab${variantName.capitalized}"
+                )
+            )
+        } else {
+            // only hook into first task if found
+            val task = project.findTask(
+                listOf(
+                    "minify${variantName.capitalized}WithR8",
+                    "minify${variantName.capitalized}WithProguard"
+                )
+            )
+            return task?.let { listOf(task) } ?: emptyList()
         }
-        // AGP 3.3 includes the R8 shrinker.
-        taskList.add("minify${variantName.capitalized}WithR8")
-        taskList.add("minify${variantName.capitalized}WithProguard")
-        return project.findTask(taskList)
     }
 
     /**
@@ -174,6 +208,9 @@ internal object SentryTasksProvider {
     @JvmStatic
     fun getProcessResourcesProvider(project: Project) = project.findTask(listOf("processResources"))
 
+    /**
+     * @return the first task found in the list or null
+     */
     private fun Project.findTask(taskName: List<String>): TaskProvider<Task>? =
         taskName
             .mapNotNull {
@@ -184,6 +221,18 @@ internal object SentryTasksProvider {
                 }
             }
             .firstOrNull()
+
+    /**
+     * @return all tasks found in the list or null
+     */
+    private fun Project.findTasks(taskName: List<String>): List<TaskProvider<Task>> =
+        taskName.mapNotNull {
+            try {
+                project.tasks.named(it)
+            } catch (e: UnknownTaskException) {
+                null
+            }
+        }
 
     internal val String.capitalized: String get() = this.capitalizeUS()
 }
