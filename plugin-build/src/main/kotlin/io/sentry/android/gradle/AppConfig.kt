@@ -21,6 +21,7 @@ import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesRep
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
+import io.sentry.android.gradle.util.GroovyCompat
 import io.sentry.android.gradle.util.ReleaseInfo
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
@@ -339,8 +340,16 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
                 releaseInfo = releaseInfo,
                 sentryUrl = extension.url
             )
-            generateUuidTask.hookWithMinifyTasks(project, name, dexguardEnabled)
-            uploadMappingsTask.hookWithMinifyTasks(project, name, dexguardEnabled)
+            generateUuidTask.hookWithMinifyTasks(
+                project,
+                name,
+                dexguardEnabled && GroovyCompat.isDexguardEnabledForVariant(project, name)
+            )
+
+            uploadMappingsTask.hookWithAssembleTasks(
+                project,
+                variant
+            )
 
             return generateUuidTask
         } else {

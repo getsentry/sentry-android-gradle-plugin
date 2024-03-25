@@ -2,7 +2,6 @@ package io.sentry.android.gradle
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
-import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.util.GroovyCompat.isDexguardAvailable
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.gradle.common.SentryVariant
@@ -17,28 +16,30 @@ import org.gradle.api.tasks.TaskProvider
 internal object SentryTasksProvider {
 
     /**
-     * Returns the transformer task for the given project and variant.
-     * It could be either ProGuard or R8
+     * Returns the minify task for the given project and variant.
+     * It could be either ProGuard, R8 or DexGuard.
      *
      * @return the task or null otherwise
      */
     @JvmStatic
-    fun getTransformerTask(
+    fun getMinifyTask(
         project: Project,
         variantName: String,
         dexguardEnabled: Boolean = false
     ): TaskProvider<Task>? {
-        val taskList = mutableListOf<String>()
-        if (dexguardEnabled) {
+        val tasks = if (dexguardEnabled) {
             // We prioritize the Guardsquare's Proguard task towards the AGP ones.
-            taskList.add(
-                "transformClassesAndResourcesWithProguardTransformFor${variantName.capitalized}"
+            listOf(
+                "transformClassesAndResourcesWithProguardTransformFor${variantName.capitalized}",
+                "mergeDex${variantName.capitalized}"
+            )
+        } else {
+            listOf(
+                "minify${variantName.capitalized}WithR8",
+                "minify${variantName.capitalized}WithProguard"
             )
         }
-        // AGP 3.3 includes the R8 shrinker.
-        taskList.add("minify${variantName.capitalized}WithR8")
-        taskList.add("minify${variantName.capitalized}WithProguard")
-        return project.findTask(taskList)
+        return project.findTask(tasks)
     }
 
     /**
@@ -174,6 +175,9 @@ internal object SentryTasksProvider {
     @JvmStatic
     fun getProcessResourcesProvider(project: Project) = project.findTask(listOf("processResources"))
 
+    /**
+     * @return the first task found in the list or null
+     */
     private fun Project.findTask(taskName: List<String>): TaskProvider<Task>? =
         taskName
             .mapNotNull {

@@ -5,6 +5,7 @@
 ### Fixes
 - Do not pollute build classpath with groovy dependencies ([#677](https://github.com/getsentry/sentry-android-gradle-plugin/pull/677))
 - Ensure sentry-cli works well with configuration cache ([#675](https://github.com/getsentry/sentry-android-gradle-plugin/pull/675))
+- Fix circular task dependency in combination with DexGuard plugin ([#678](https://github.com/getsentry/sentry-android-gradle-plugin/pull/678))
 
 ### Dependencies
 
