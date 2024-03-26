@@ -157,6 +157,13 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
         .property(Boolean::class.java).convention(true)
 
     /**
+     * Which build types should be considered for automatic source context upload.
+     * Default is "release" only.
+     */
+    val autoUploadSourceContextBuildTypes: SetProperty<String> = objects
+        .setProperty(String::class.java).convention(setOf("release"))
+
+    /**
      * Configure additional directories to be included in the source bundle which is used for
      * source context. The directories should be specified relative to the Gradle module/project's
      * root. For example, if you have a custom source set alongside 'main', the parameter would be

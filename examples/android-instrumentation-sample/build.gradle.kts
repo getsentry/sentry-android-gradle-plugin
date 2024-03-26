@@ -108,6 +108,7 @@ sentry {
 
     includeSourceContext.set(true)
     autoUploadSourceContext.set(CI.canAutoUpload())
+    autoUploadSourceContextBuildTypes.set(setOf("debug", "release"))
     additionalSourceDirsForSourceContext.set(setOf("src/custom/java"))
 
     org.set("sentry-sdks")
