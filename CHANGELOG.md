@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 4.4.0
 
 ### Fixes
 - Do not pollute build classpath with groovy dependencies ([#677](https://github.com/getsentry/sentry-android-gradle-plugin/pull/677))
