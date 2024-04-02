@@ -2,7 +2,6 @@
 
 package io.sentry.android.gradle
 
-import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationParameters
@@ -22,14 +21,12 @@ import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
-import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
-import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
+import io.sentry.android.gradle.tasks.SentryEmbedDebugMetaManifestTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
-import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
@@ -121,12 +118,29 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 sentryProject
             )
 
-            variant.configureDebugMetaPropertiesTask(
+            // we can't hook into asset generation, nor manifest merging, as all those task
+            // are dependencies of the compilation / minification task
+            // and our ProGuard UUID depends on minification itself, creating a circular dependency
+            // instead we simply modify the final merged manifest
+            val mergedManifestsFile = project.layout.buildDirectory.file(
+                "intermediates${sep}merged_manifests${sep}${variant.name}${sep}AndroidManifest.xml"
+            )
+            val embedDebugMetaTask = SentryEmbedDebugMetaManifestTask.register(
                 project,
-                extension,
-                sentryTelemetryProvider,
+                variant.name.capitalized,
+                mergedManifestsFile,
                 tasksGeneratingProperties
             )
+
+            project.afterEvaluate {
+                SentryTasksProvider.getProcessManifestTask(project, variant.name)?.configure {
+                    it.finalizedBy(embedDebugMetaTask)
+                }
+                SentryTasksProvider.getProcessAppManifestForBundleTask(project, variant.name)
+                    ?.configure {
+                        it.dependsOn(embedDebugMetaTask)
+                    }
+            }
 
             if (extension.tracingInstrumentation.enabled.get()) {
                 /**
@@ -177,24 +191,6 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     params.tmpDir.set(tmpDir)
                 }
 
-                val manifestUpdater = project.tasks.register(
-                    "${variant.name}SentryGenerateIntegrationListTask",
-                    SentryGenerateIntegrationListTask::class.java
-                ) {
-                    it.integrations.set(
-                        sentryModulesService.map { service ->
-                            service.retrieveEnabledInstrumentationFeatures()
-                        }
-                    )
-                    it.usesService(sentryModulesService)
-                    it.withSentryTelemetry(extension, sentryTelemetryProvider)
-                }
-
-                variant.artifacts.use(manifestUpdater).wiredWithFiles(
-                    SentryGenerateIntegrationListTask::mergedManifest,
-                    SentryGenerateIntegrationListTask::updatedManifest
-                ).toTransform(SingleArtifact.MERGED_MANIFEST)
-
                 /**
                  * This necessary to address the issue when target app uses a multi-release jar
                  * (MR-JAR) as a dependency. https://github.com/getsentry/sentry-android-gradle-plugin/issues/256
@@ -219,35 +215,6 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     )
                 }
             }
-        }
-    }
-}
-
-private fun Variant.configureDebugMetaPropertiesTask(
-    project: Project,
-    extension: SentryPluginExtension,
-    sentryTelemetryProvider: Provider<SentryTelemetryService>,
-    tasksGeneratingProperties: List<TaskProvider<out PropertiesFileOutputTask>>
-) {
-    if (isAGP74) {
-        val taskSuffix = name.capitalized
-        val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
-            project,
-            extension,
-            sentryTelemetryProvider,
-            tasksGeneratingProperties,
-            null,
-            taskSuffix
-        )
-
-        configureGeneratedSourcesFor74(
-            this,
-            generateDebugMetaPropertiesTask to DirectoryOutputTask::output
-        )
-    } else {
-        project.logger.info {
-            "Not configuring AndroidComponentsExtension for ${AgpVersions.CURRENT}, since it does" +
-                "not have new addGeneratedSourceDirectory API"
         }
     }
 }
