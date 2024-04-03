@@ -21,7 +21,7 @@ import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
-import io.sentry.android.gradle.tasks.SentryEmbedDebugMetaManifestTask
+import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
@@ -120,25 +120,28 @@ fun AndroidComponentsExtension<*, *, *>.configure(
 
             // we can't hook into asset generation, nor manifest merging, as all those task
             // are dependencies of the compilation / minification task
-            // and our ProGuard UUID depends on minification itself, creating a circular dependency
-            // instead we simply modify the final merged manifest
-            val mergedManifestsFile = project.layout.buildDirectory.file(
-                "intermediates${sep}merged_manifests${sep}${variant.name}${sep}AndroidManifest.xml"
+            // and as our ProGuard UUID depends on minification itself this would create
+            // a circular dependency
+            // instead, we simply add a file to the intermediate assets folder
+            val intermediateAssetsFolder = project.layout.buildDirectory.dir(
+                "intermediates${sep}assets${sep}${variant.name}"
             )
-            val embedDebugMetaTask = SentryEmbedDebugMetaManifestTask.register(
+            val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
                 project,
-                variant.name.capitalized,
-                mergedManifestsFile,
-                tasksGeneratingProperties
+                extension,
+                sentryTelemetryProvider,
+                tasksGeneratingProperties,
+                intermediateAssetsFolder,
+                variant.name
             )
 
             project.afterEvaluate {
                 SentryTasksProvider.getProcessManifestTask(project, variant.name)?.configure {
-                    it.finalizedBy(embedDebugMetaTask)
+                    it.finalizedBy(generateDebugMetaPropertiesTask)
                 }
                 SentryTasksProvider.getProcessAppManifestForBundleTask(project, variant.name)
                     ?.configure {
-                        it.dependsOn(embedDebugMetaTask)
+                        it.dependsOn(generateDebugMetaPropertiesTask)
                     }
             }
 
