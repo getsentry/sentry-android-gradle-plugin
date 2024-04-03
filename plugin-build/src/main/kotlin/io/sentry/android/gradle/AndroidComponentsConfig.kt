@@ -143,6 +143,9 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     ?.configure {
                         it.dependsOn(generateDebugMetaPropertiesTask)
                     }
+                SentryTasksProvider.getCompressAssetsTask(project, variant.name)?.configure {
+                    it.dependsOn(generateDebugMetaPropertiesTask)
+                }
             }
 
             if (extension.tracingInstrumentation.enabled.get()) {
