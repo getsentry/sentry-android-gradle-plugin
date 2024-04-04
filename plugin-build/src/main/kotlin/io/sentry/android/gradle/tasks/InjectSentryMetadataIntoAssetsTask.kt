@@ -55,8 +55,7 @@ abstract class InjectSentryMetadataIntoAssetsTask : DefaultTask() {
         val input = inputDir.get().asFile
         val output = outputDir.get().asFile
 
-        // We must copy the contents of the input directory to the output directory before our transformation
-        input.copyRecursively(output)
+        input.copyRecursively(output, overwrite = true)
         if (input.parentFile.equals(output)) {
             logger.info(
                 "Deleting assets input directory, as it's within the output folder: " +
