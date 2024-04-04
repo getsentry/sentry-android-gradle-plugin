@@ -2,6 +2,7 @@
 
 package io.sentry.android.gradle
 
+import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationParameters
@@ -20,8 +21,8 @@ import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
+import io.sentry.android.gradle.tasks.InjectSentryMetadataIntoAssetsTask
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
-import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
@@ -118,35 +119,23 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 sentryProject
             )
 
-            // we can't hook into asset generation, nor manifest merging, as all those task
+            // we can't hook into asset generation, nor manifest merging, as all those tasks
             // are dependencies of the compilation / minification task
-            // and as our ProGuard UUID depends on minification itself this would create
-            // a circular dependency
-            // instead, we simply add a file to the intermediate assets folder
-            val intermediateAssetsFolder = project.layout.buildDirectory.dir(
-                "intermediates${sep}assets${sep}${variant.name}"
-            )
-            val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
+            // and as our ProGuard UUID depends on minification itself; creating a
+            // circular dependency
+            // instead, we transform all assets and inject the properties file
+            val injectSentryMetadataTask = InjectSentryMetadataIntoAssetsTask.register(
                 project,
                 extension,
                 sentryTelemetryProvider,
                 tasksGeneratingProperties,
-                intermediateAssetsFolder,
-                variant.name
+                variant.name.capitalized
             )
 
-            project.afterEvaluate {
-                SentryTasksProvider.getProcessManifestTask(project, variant.name)?.configure {
-                    it.finalizedBy(generateDebugMetaPropertiesTask)
-                }
-                SentryTasksProvider.getProcessAppManifestForBundleTask(project, variant.name)
-                    ?.configure {
-                        it.dependsOn(generateDebugMetaPropertiesTask)
-                    }
-                SentryTasksProvider.getCompressAssetsTask(project, variant.name)?.configure {
-                    it.dependsOn(generateDebugMetaPropertiesTask)
-                }
-            }
+            variant.artifacts.use(injectSentryMetadataTask).wiredWithDirectories(
+                InjectSentryMetadataIntoAssetsTask::inputDir,
+                InjectSentryMetadataIntoAssetsTask::outputDir
+            ).toTransform(SingleArtifact.ASSETS)
 
             if (extension.tracingInstrumentation.enabled.get()) {
                 /**
