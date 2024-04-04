@@ -29,7 +29,7 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -37,18 +37,19 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 
-abstract class InjectSentryMetadataIntoAssetsTask : DefaultTask() {
+@CacheableTask
+abstract class InjectSentryMetaPropertiesIntoAssetsTask : DefaultTask() {
 
-    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:InputFiles
     abstract val inputDir: DirectoryProperty
 
-    @get:OutputDirectory
-    abstract val outputDir: DirectoryProperty
+    @get:OutputDirectory abstract val outputDir: DirectoryProperty
 
     // we only care about file contents
     @get:PathSensitive(PathSensitivity.NONE)
     @get:InputFiles
-    abstract val inputFiles: ConfigurableFileCollection
+    abstract val inputPropertyFiles: ConfigurableFileCollection
 
     @TaskAction
     fun taskAction() {
@@ -56,19 +57,11 @@ abstract class InjectSentryMetadataIntoAssetsTask : DefaultTask() {
         val output = outputDir.get().asFile
 
         input.copyRecursively(output, overwrite = true)
-        if (input.parentFile.equals(output)) {
-            logger.info(
-                "Deleting assets input directory, as it's within the output folder: " +
-                    "input: ${inputDir.get().asFile.absolutePath}, " +
-                    "output: ${outputDir.get().asFile.absolutePath}"
-            )
-            input.deleteRecursively()
-        }
 
         // merge props
         val props = Properties()
         props.setProperty("io.sentry.build-tool", "gradle")
-        inputFiles.forEach { inputFile ->
+        inputPropertyFiles.forEach { inputFile ->
             PropertiesUtil.loadMaybe(inputFile)?.let { props.putAll(it) }
         }
 
@@ -91,15 +84,16 @@ abstract class InjectSentryMetadataIntoAssetsTask : DefaultTask() {
             sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             tasksGeneratingProperties: List<TaskProvider<out PropertiesFileOutputTask>>,
             taskSuffix: String = ""
-        ): TaskProvider<InjectSentryMetadataIntoAssetsTask> {
+        ): TaskProvider<InjectSentryMetaPropertiesIntoAssetsTask> {
             val inputFiles: List<Provider<RegularFile>> = tasksGeneratingProperties.mapNotNull {
                 it.flatMap { task -> task.outputFile }
             }
             return project.tasks.register(
-                "injectSentryDebugMetaProperties$taskSuffix",
-                InjectSentryMetadataIntoAssetsTask::class.java
+                "injectSentryDebugMetaPropertiesIntoAssets$taskSuffix",
+                InjectSentryMetaPropertiesIntoAssetsTask::class.java
             ) { task ->
-                task.inputFiles.setFrom(inputFiles)
+                task.inputPropertyFiles.setFrom(inputFiles)
+
                 task.withSentryTelemetry(extension, sentryTelemetryProvider)
             }
         }
