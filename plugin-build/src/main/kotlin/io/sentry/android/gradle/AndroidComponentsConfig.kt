@@ -23,11 +23,13 @@ import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
 import io.sentry.android.gradle.tasks.InjectSentryMetaPropertiesIntoAssetsTask
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
+import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
+import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
@@ -202,6 +204,24 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     params.sentryModulesService.setDisallowChanges(sentryModulesService)
                     params.tmpDir.set(tmpDir)
                 }
+
+                val manifestUpdater = project.tasks.register(
+                    "${variant.name}SentryGenerateIntegrationListTask",
+                    SentryGenerateIntegrationListTask::class.java
+                ) {
+                    it.integrations.set(
+                        sentryModulesService.map { service ->
+                            service.retrieveEnabledInstrumentationFeatures()
+                        }
+                    )
+                    it.usesService(sentryModulesService)
+                    it.withSentryTelemetry(extension, sentryTelemetryProvider)
+                }
+
+                variant.artifacts.use(manifestUpdater).wiredWithFiles(
+                    SentryGenerateIntegrationListTask::mergedManifest,
+                    SentryGenerateIntegrationListTask::updatedManifest
+                ).toTransform(SingleArtifact.MERGED_MANIFEST)
 
                 /**
                  * This necessary to address the issue when target app uses a multi-release jar

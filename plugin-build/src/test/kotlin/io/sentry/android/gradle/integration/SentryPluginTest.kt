@@ -43,7 +43,7 @@ class SentryPluginTest :
         // AGP 7.2.x configures the 'clean' task, so ignore it
         configuredTasks.remove(":app:clean")
 
-        assertTrue(configuredTasks.isEmpty())
+        assertTrue(configuredTasks.isEmpty(), configuredTasks.joinToString("\n"))
     }
 
     @Test

@@ -70,19 +70,6 @@ internal object SentryTasksProvider {
         // for APK it uses getPackageProvider
         project.findTask(listOf("package${variantName.capitalized}Bundle"))
 
-    @JvmStatic
-    fun getProcessManifestTask(project: Project, variantName: String): TaskProvider<Task>? =
-        project.findTask(listOf("process${variantName.capitalized}Manifest"))
-
-    @JvmStatic
-    fun getCompressAssetsTask(project: Project, variantName: String): TaskProvider<Task>? =
-        project.findTask(listOf("compress${variantName.capitalized}Assets"))
-
-    @JvmStatic
-    fun getProcessAppManifestForBundleTask(project: Project, variantName: String):
-        TaskProvider<Task>? =
-        project.findTask(listOf("processApplicationManifest${variantName.capitalized}ForBundle"))
-
     /**
      * Returns the assemble task provider
      *
