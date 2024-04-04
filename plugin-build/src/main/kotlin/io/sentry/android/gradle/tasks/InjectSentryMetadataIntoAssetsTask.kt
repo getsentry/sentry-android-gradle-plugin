@@ -41,7 +41,7 @@ abstract class InjectSentryMetadataIntoAssetsTask : DefaultTask() {
         // We must copy the contents of the input directory to the output directory before our transformation
         input.copyRecursively(output)
         if (input.parentFile.equals(output)) {
-            project.logger.info(
+            logger.info(
                 "Deleting assets input directory, as it's within the output folder: " +
                     "input: ${inputDir.get().asFile.absolutePath}, " +
                     "output: ${outputDir.get().asFile.absolutePath}"
