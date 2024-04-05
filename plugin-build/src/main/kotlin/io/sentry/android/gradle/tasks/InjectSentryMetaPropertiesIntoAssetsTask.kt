@@ -20,6 +20,7 @@ package io.sentry.android.gradle.tasks
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
+import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.PropertiesUtil
 import java.io.File
 import java.util.Properties
@@ -44,7 +45,28 @@ abstract class InjectSentryMetaPropertiesIntoAssetsTask : DefaultTask() {
     @get:InputFiles
     abstract val inputDir: DirectoryProperty
 
-    @get:OutputDirectory abstract val outputDir: DirectoryProperty
+    @get:OutputDirectory
+    val outputDir: DirectoryProperty = project.objects.directoryProperty()
+        get() {
+            if (AgpVersions.CURRENT >= AgpVersions.VERSION_8_3_0) {
+                return field
+            }
+            // AGP < 8.3 sets an output folder which contains the input folder
+            // input:  app/intermediates/assets/release/mergeReleaseAssets
+            // output: app/intermediates/assets/release/
+            // re-route output to a sub directory instead,
+            // as otherwise this breaks the gradle cache functionality
+            if (!field.isPresent) {
+                return field
+            }
+
+            val file = File(field.get().asFile, this.name)
+            if (!file.exists()) {
+                file.mkdirs()
+            }
+            return project.objects.directoryProperty()
+                .fileValue(file)
+        }
 
     // we only care about file contents
     @get:PathSensitive(PathSensitivity.NONE)

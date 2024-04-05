@@ -121,39 +121,24 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 sentryProject
             )
 
-            // we can't hook into asset generation, nor manifest merging, as all those tasks
-            // are dependencies of the compilation / minification task
-            // and as our ProGuard UUID depends on minification itself; creating a
-            // circular dependency
-            // instead, we transform all assets and inject the properties file
-            val injectSentryPropsTask = InjectSentryMetaPropertiesIntoAssetsTask.register(
-                project,
-                extension,
-                sentryTelemetryProvider,
-                tasksGeneratingProperties,
-                variant.name.capitalized
-            )
+            if (isAGP74) {
+                // we can't hook into asset generation, nor manifest merging, as all those tasks
+                // are dependencies of the compilation / minification task
+                // and as our ProGuard UUID depends on minification itself; creating a
+                // circular dependency
+                // instead, we transform all assets and inject the properties file
+                val injectSentryPropsTask = InjectSentryMetaPropertiesIntoAssetsTask.register(
+                    project,
+                    extension,
+                    sentryTelemetryProvider,
+                    tasksGeneratingProperties,
+                    variant.name.capitalized
+                )
 
-            variant.artifacts.use(injectSentryPropsTask).wiredWithDirectories(
-                InjectSentryMetaPropertiesIntoAssetsTask::inputDir,
-                InjectSentryMetaPropertiesIntoAssetsTask::outputDir
-            ).toTransform(SingleArtifact.ASSETS)
-
-            project.afterEvaluate {
-                // AGP <= 8.3 sets an output folder which contains the input folder
-                // input:  app/intermediates/assets/release/mergeReleaseAssets
-                // output: app/intermediates/assets/release/
-                // re-route output to a sub directory instead,
-                // as otherwise this breaks the gradle cache functionality
-                val task = injectSentryPropsTask.get()
-                if (task.inputDir.get().asFile.parentFile.equals(task.outputDir.get().asFile)) {
-                    val newOutput = File(task.outputDir.get().asFile, task.name)
-                    project.logger.warn(
-                        "InjectSentryMetadataIntoAssetsTask: changing output directory to: " +
-                            newOutput.absolutePath
-                    )
-                    task.outputDir.set(newOutput)
-                }
+                variant.artifacts.use(injectSentryPropsTask).wiredWithDirectories(
+                    InjectSentryMetaPropertiesIntoAssetsTask::inputDir,
+                    InjectSentryMetaPropertiesIntoAssetsTask::outputDir
+                ).toTransform(SingleArtifact.ASSETS)
             }
 
             if (extension.tracingInstrumentation.enabled.get()) {
