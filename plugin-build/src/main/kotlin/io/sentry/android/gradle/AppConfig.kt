@@ -125,6 +125,7 @@ fun AppExtension.configure(
             extension,
             this,
             sentryTelemetryProvider,
+            mergeAssetsDependants,
             tasksGeneratingProperties
         )
     }
@@ -163,6 +164,7 @@ private fun ApplicationVariant.configureDebugMetaPropertiesTask(
     extension: SentryPluginExtension,
     appExtension: AppExtension,
     sentryTelemetryProvider: Provider<SentryTelemetryService>,
+    dependants: Set<TaskProvider<out Task>?>,
     tasksGeneratingProperties: List<TaskProvider<out PropertiesFileOutputTask>>
 ) {
     if (isAGP74) {
@@ -185,6 +187,7 @@ private fun ApplicationVariant.configureDebugMetaPropertiesTask(
             taskSuffix
         )
 
+        generateDebugMetaPropertiesTask.setupMergeAssetsDependencies(dependants)
         generateDebugMetaPropertiesTask.hookWithPackageTasks(project, variant)
         appExtension.sourceSets.getByName(name).assets.srcDir(
             generateDebugMetaPropertiesTask.flatMap { it.output }
