@@ -54,7 +54,8 @@ abstract class InjectSentryMetaPropertiesIntoAssetsTask : DefaultTask() {
             // re-route output to a sub directory instead,
             // as otherwise this breaks the gradle cache functionality
 
-            if (!field.isPresent) {
+            @Suppress("SENSELESS_COMPARISON")
+            if (field == null || !field.isPresent) {
                 return field
             }
 

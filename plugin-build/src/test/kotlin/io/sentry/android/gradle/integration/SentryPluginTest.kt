@@ -822,6 +822,12 @@ class SentryPluginTest :
 
     @Test
     fun `does not run minify tasks when isIncludeAndroidResources is enabled`() {
+        assumeThat(
+            "On AGP 7.4.0 assets are merged right before final packaging",
+            SemVer.parse(BuildConfig.AgpVersion) < AgpVersions.VERSION_7_4_0,
+            `is`(true)
+        )
+
         appBuildFile.writeText(
             // language=Groovy
             """
