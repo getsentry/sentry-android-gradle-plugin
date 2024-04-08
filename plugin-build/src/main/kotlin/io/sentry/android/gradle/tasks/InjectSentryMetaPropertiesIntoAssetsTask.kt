@@ -20,7 +20,6 @@ package io.sentry.android.gradle.tasks
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
-import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.PropertiesUtil
 import java.io.File
 import java.util.Properties
