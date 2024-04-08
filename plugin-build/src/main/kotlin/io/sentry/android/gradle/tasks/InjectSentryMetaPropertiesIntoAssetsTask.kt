@@ -48,24 +48,21 @@ abstract class InjectSentryMetaPropertiesIntoAssetsTask : DefaultTask() {
     @get:OutputDirectory
     val outputDir: DirectoryProperty = project.objects.directoryProperty()
         get() {
-            if (AgpVersions.CURRENT >= AgpVersions.VERSION_8_3_0) {
-                return field
-            }
             // AGP < 8.3 sets an output folder which contains the input folder
             // input:  app/intermediates/assets/release/mergeReleaseAssets
             // output: app/intermediates/assets/release/
             // re-route output to a sub directory instead,
             // as otherwise this breaks the gradle cache functionality
+
             if (!field.isPresent) {
                 return field
             }
 
-            val file = File(field.get().asFile, this.name)
-            if (!file.exists()) {
-                file.mkdirs()
+            if (!field.get().asFile.name.equals(name)) {
+                field.set(File(field.get().asFile, name))
             }
-            return project.objects.directoryProperty()
-                .fileValue(file)
+
+            return field
         }
 
     // we only care about file contents
@@ -77,6 +74,10 @@ abstract class InjectSentryMetaPropertiesIntoAssetsTask : DefaultTask() {
     fun taskAction() {
         val input = inputDir.get().asFile
         val output = outputDir.get().asFile
+
+        if (!output.exists()) {
+            output.mkdirs()
+        }
 
         input.copyRecursively(output, overwrite = true)
 
