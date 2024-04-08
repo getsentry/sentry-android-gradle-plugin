@@ -121,25 +121,22 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 sentryProject
             )
 
-            if (isAGP74) {
-                // we can't hook into asset generation, nor manifest merging, as all those tasks
-                // are dependencies of the compilation / minification task
-                // and as our ProGuard UUID depends on minification itself; creating a
-                // circular dependency
-                // instead, we transform all assets and inject the properties file
-                val injectSentryPropsTask = InjectSentryMetaPropertiesIntoAssetsTask.register(
+            // we can't hook into asset generation, nor manifest merging, as all those tasks
+            // are dependencies of the compilation / minification task
+            // and as our ProGuard UUID depends on minification itself; creating a
+            // circular dependency
+            // instead, we transform all assets and inject the properties file
+            sentryVariant?.assetsWiredWithDirectories(
+                InjectSentryMetaPropertiesIntoAssetsTask.register(
                     project,
                     extension,
                     sentryTelemetryProvider,
                     tasksGeneratingProperties,
                     variant.name.capitalized
-                )
-
-                variant.artifacts.use(injectSentryPropsTask).wiredWithDirectories(
-                    InjectSentryMetaPropertiesIntoAssetsTask::inputDir,
-                    InjectSentryMetaPropertiesIntoAssetsTask::outputDir
-                ).toTransform(SingleArtifact.ASSETS)
-            }
+                ),
+                InjectSentryMetaPropertiesIntoAssetsTask::inputDir,
+                InjectSentryMetaPropertiesIntoAssetsTask::outputDir
+            )
 
             if (extension.tracingInstrumentation.enabled.get()) {
                 /**
