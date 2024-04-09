@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Fixes
+
 - Fix circular depencency issue between mergeAssets and minify tasks ([#682](https://github.com/getsentry/sentry-android-gradle-plugin/pull/682))
 
 ## 4.4.0
