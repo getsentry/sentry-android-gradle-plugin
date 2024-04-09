@@ -43,7 +43,7 @@ class SentryPluginTest :
         // AGP 7.2.x configures the 'clean' task, so ignore it
         configuredTasks.remove(":app:clean")
 
-        assertTrue(configuredTasks.isEmpty())
+        assertTrue(configuredTasks.isEmpty(), configuredTasks.joinToString("\n"))
     }
 
     @Test
@@ -218,13 +218,17 @@ class SentryPluginTest :
         val subsequentBuild = runner.build()
 
         assertEquals(
-            firstBuild.task(":app:generateSentryDebugMetaPropertiesRelease")?.outcome,
-            TaskOutcome.SUCCESS
+            TaskOutcome.SUCCESS,
+            firstBuild.task(":app:generateSentryDebugMetaPropertiesRelease")?.outcome
+                ?: firstBuild.task(":app:injectSentryDebugMetaPropertiesIntoAssetsRelease")
+                    ?.outcome,
         )
 
         assertEquals(
-            subsequentBuild.task(":app:generateSentryDebugMetaPropertiesRelease")?.outcome,
-            TaskOutcome.UP_TO_DATE
+            TaskOutcome.UP_TO_DATE,
+            subsequentBuild.task(":app:generateSentryDebugMetaPropertiesRelease")?.outcome
+                ?: subsequentBuild.task(":app:injectSentryDebugMetaPropertiesIntoAssetsRelease")
+                    ?.outcome,
         )
 
         assertTrue(subsequentBuild.output) { "BUILD SUCCESSFUL" in subsequentBuild.output }
@@ -818,6 +822,12 @@ class SentryPluginTest :
 
     @Test
     fun `does not run minify tasks when isIncludeAndroidResources is enabled`() {
+        assumeThat(
+            "On AGP 7.4.0 assets are merged right before final packaging",
+            SemVer.parse(BuildConfig.AgpVersion) < AgpVersions.VERSION_7_4_0,
+            `is`(true)
+        )
+
         appBuildFile.writeText(
             // language=Groovy
             """
@@ -870,16 +880,20 @@ class SentryPluginTest :
         val uuid2 = verifyProguardUuid(testProjectDir.root)
 
         assertEquals(
+            FROM_CACHE,
             build.task(":app:generateSentryProguardUuidRelease")?.outcome,
-            FROM_CACHE
+            build.output
         )
         assertEquals(
-            build.task(":app:generateSentryDebugMetaPropertiesRelease")?.outcome,
-            FROM_CACHE
+            FROM_CACHE,
+            build.task(":app:generateSentryDebugMetaPropertiesRelease")?.outcome
+                ?: build.task(":app:injectSentryDebugMetaPropertiesIntoAssetsRelease")?.outcome,
+            build.output
         )
         assertEquals(
+            FROM_CACHE,
             build.task(":app:releaseSentryGenerateIntegrationListTask")?.outcome,
-            FROM_CACHE
+            build.output
         )
         // should be the same uuid
         assertEquals(uuid1, uuid2)
