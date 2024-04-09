@@ -6,6 +6,12 @@
 
 - Fix circular depencency issue between mergeAssets and minify tasks ([#682](https://github.com/getsentry/sentry-android-gradle-plugin/pull/682))
 
+### Dependencies
+
+- Bump Android SDK from v7.6.0 to v7.7.0 ([#689](https://github.com/getsentry/sentry-android-gradle-plugin/pull/689))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#770)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.6.0...7.7.0)
+
 ## 4.4.0
 
 ### Fixes
