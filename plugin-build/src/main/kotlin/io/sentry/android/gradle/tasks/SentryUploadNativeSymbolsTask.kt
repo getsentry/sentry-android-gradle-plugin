@@ -82,6 +82,7 @@ abstract class SentryUploadNativeSymbolsTask : SentryCliExecTask() {
                 task.debug.set(debug)
                 task.autoUploadNativeSymbol.set(autoUploadNativeSymbols)
                 task.cliExecutable.set(cliExecutable)
+                task.buildDirectory.set(project.layout.buildDirectory.asFile)
                 task.sentryProperties.set(sentryProperties?.let { file -> project.file(file) })
                 task.includeNativeSources.set(includeNativeSources)
                 task.variantName.set(variantName)

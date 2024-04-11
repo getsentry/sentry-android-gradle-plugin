@@ -299,7 +299,7 @@ abstract class SentryTelemetryService :
             var cliVersion: String? = BuildConfig.CliVersion
             var defaultSentryOrganization: String? = null
             val infoOutput = project.providers.of(SentryCliInfoValueSource::class.java) { cliVS ->
-                cliVS.parameters.projectBuildFolder.set(project.buildDir)
+                cliVS.parameters.buildDirectory.set(project.buildDir)
                 cliVS.parameters.cliExecutable.set(cliExecutable)
                 cliVS.parameters.authToken.set(extension.authToken)
                 cliVS.parameters.url.set(extension.url)
@@ -453,7 +453,7 @@ class SentryMinimalException(message: String) : RuntimeException(message) {
 abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
     interface InfoParams : ValueSourceParameters {
         @get:Input
-        val projectBuildFolder: Property<File>
+        val buildDirectory: Property<File>
 
         @get:Input
         val cliExecutable: Property<String>
@@ -476,7 +476,7 @@ abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
         execOperations.exec {
             it.isIgnoreExitValue = true
             SentryCliProvider.maybeExtractFromResources(
-                parameters.projectBuildFolder.get(),
+                parameters.buildDirectory.get(),
                 parameters.cliExecutable.get()
             )
 

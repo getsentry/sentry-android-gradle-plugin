@@ -28,6 +28,7 @@ class SentryCliExecTaskTest {
                 TestTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
             }
 
         val args = task.get().computeCommandLineArgs()
@@ -52,6 +53,7 @@ class SentryCliExecTaskTest {
                 TestTask::class.java
             ) {
                 it.cliExecutable.set(cliPath.absolutePath)
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
             }
 
         // when the args are computed (usually during task execution)
@@ -72,6 +74,7 @@ class SentryCliExecTaskTest {
                 TestTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.debug.set(true)
             }
 
@@ -90,6 +93,7 @@ class SentryCliExecTaskTest {
                 TestTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sentryProperties.set(propertiesFile)
             }
 
@@ -110,6 +114,7 @@ class SentryCliExecTaskTest {
                 TestTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sentryAuthToken.set("<token>")
             }
 
@@ -130,6 +135,7 @@ class SentryCliExecTaskTest {
                 TestTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
             }
 
         task.get().setSentryPropertiesEnv()
@@ -146,6 +152,7 @@ class SentryCliExecTaskTest {
                 TestTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sentryOrganization.set("dummy-org")
             }
 
@@ -164,6 +171,7 @@ class SentryCliExecTaskTest {
                 TestTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sentryProject.set("dummy-proj")
             }
 
@@ -182,6 +190,7 @@ class SentryCliExecTaskTest {
                 TestTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sentryUrl.set("https://some-host.sentry.io")
             }
 
