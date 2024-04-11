@@ -21,8 +21,8 @@ import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
+import io.sentry.android.gradle.tasks.InjectSentryMetaPropertiesIntoAssetsTask
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
-import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
 import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
@@ -121,11 +121,21 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 sentryProject
             )
 
-            variant.configureDebugMetaPropertiesTask(
-                project,
-                extension,
-                sentryTelemetryProvider,
-                tasksGeneratingProperties
+            // we can't hook into asset generation, nor manifest merging, as all those tasks
+            // are dependencies of the compilation / minification task
+            // and as our ProGuard UUID depends on minification itself; creating a
+            // circular dependency
+            // instead, we transform all assets and inject the properties file
+            sentryVariant?.assetsWiredWithDirectories(
+                InjectSentryMetaPropertiesIntoAssetsTask.register(
+                    project,
+                    extension,
+                    sentryTelemetryProvider,
+                    tasksGeneratingProperties,
+                    variant.name.capitalized
+                ),
+                InjectSentryMetaPropertiesIntoAssetsTask::inputDir,
+                InjectSentryMetaPropertiesIntoAssetsTask::outputDir
             )
 
             if (extension.tracingInstrumentation.enabled.get()) {
@@ -219,35 +229,6 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                     )
                 }
             }
-        }
-    }
-}
-
-private fun Variant.configureDebugMetaPropertiesTask(
-    project: Project,
-    extension: SentryPluginExtension,
-    sentryTelemetryProvider: Provider<SentryTelemetryService>,
-    tasksGeneratingProperties: List<TaskProvider<out PropertiesFileOutputTask>>
-) {
-    if (isAGP74) {
-        val taskSuffix = name.capitalized
-        val generateDebugMetaPropertiesTask = SentryGenerateDebugMetaPropertiesTask.register(
-            project,
-            extension,
-            sentryTelemetryProvider,
-            tasksGeneratingProperties,
-            null,
-            taskSuffix
-        )
-
-        configureGeneratedSourcesFor74(
-            this,
-            generateDebugMetaPropertiesTask to DirectoryOutputTask::output
-        )
-    } else {
-        project.logger.info {
-            "Not configuring AndroidComponentsExtension for ${AgpVersions.CURRENT}, since it does" +
-                "not have new addGeneratedSourceDirectory API"
         }
     }
 }

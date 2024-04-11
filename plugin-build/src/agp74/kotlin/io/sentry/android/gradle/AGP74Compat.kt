@@ -64,6 +64,17 @@ data class AndroidVariant74(
                     .zip(additionalSources) { javaKotlin, other -> (javaKotlin + other).toSet() }
         }
     }
+
+    fun <T : Task> assetsWiredWithDirectories(
+        task: TaskProvider<T>,
+        inputDir: (T) -> DirectoryProperty,
+        outputDir: (T) -> DirectoryProperty
+    ) {
+        variant.artifacts.use(task).wiredWithDirectories(
+            inputDir,
+            outputDir
+        ).toTransform(SingleArtifact.ASSETS)
+    }
 }
 
 fun <T : Task> configureGeneratedSourcesFor74(
