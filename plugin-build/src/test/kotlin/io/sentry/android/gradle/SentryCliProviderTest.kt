@@ -157,20 +157,22 @@ class SentryCliProviderTest {
                 writeText("echo \"This is just a dummy script\"")
             }
 
-        val loadedPath = extractCliFromResources(File("."), resourcePath)
+        val outputFile = File("bin", "output-bin")
+        val loadedPath = extractCliFromResources(resourcePath, outputFile)
         assertNotNull(loadedPath)
 
         val binContent = File(loadedPath).readText()
         assertEquals("echo \"This is just a dummy script\"", binContent)
 
         resourceFile?.delete()
+        outputFile.delete()
     }
 
     @Test
     fun `loadCliFromResourcesToTemp returns null if file does not exist`() {
         val resourcePath = "./dummy-bin/i-dont-exist"
 
-        assertNull(extractCliFromResources(File("."), resourcePath))
+        assertNull(extractCliFromResources(resourcePath, File(".")))
     }
 
     @Test

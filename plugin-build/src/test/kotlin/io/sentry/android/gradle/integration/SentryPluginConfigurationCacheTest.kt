@@ -189,7 +189,7 @@ class SentryPluginConfigurationCacheTest :
             run0.output
         )
 
-        val cliPath = SentryCliProvider.getCliFromResourcesExtractionPath(
+        val cliPath = SentryCliProvider.getCliResourcesExtractionPath(
             File(runner.projectDir, "build")
         )
 

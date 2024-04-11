@@ -53,7 +53,7 @@ internal object SentryCliProvider {
         val resLocation = getCliLocationInResources()
         if (!resLocation.isNullOrBlank()) {
             logger.info { "cli present in resources: $resLocation" }
-            val extractedResourcePath = getCliFromResourcesExtractionPath(projectBuildDir)
+            val extractedResourcePath = getCliResourcesExtractionPath(projectBuildDir)
                 .absolutePath
             memoizedCliPath = extractedResourcePath
             return extractedResourcePath
@@ -108,7 +108,7 @@ internal object SentryCliProvider {
         }
     }
 
-    fun getCliFromResourcesExtractionPath(projectBuildDir: File): File {
+    fun getCliResourcesExtractionPath(projectBuildDir: File): File {
         // usually <project>/build/tmp/
         return File(
             File(projectBuildDir, "tmp"),
@@ -116,12 +116,10 @@ internal object SentryCliProvider {
         )
     }
 
-    fun extractCliFromResources(projectBuildDir: File, resourcePath: String): String? {
+    fun extractCliFromResources(resourcePath: String, outputPath: File): String? {
         val resourceStream = javaClass.getResourceAsStream(resourcePath)
         return if (resourceStream != null) {
-            val cliFilePath = getCliFromResourcesExtractionPath(projectBuildDir)
-
-            val baseFolder = cliFilePath.parentFile
+            val baseFolder = outputPath.parentFile
             logger.info { "sentry-cli base folder: ${baseFolder.absolutePath}" }
 
             if (!baseFolder.exists() && !baseFolder.mkdirs()) {
@@ -129,15 +127,15 @@ internal object SentryCliProvider {
                 return null
             }
 
-            FileOutputStream(cliFilePath).use { output ->
+            FileOutputStream(outputPath).use { output ->
                 resourceStream.use { input ->
                     input.copyTo(output)
                 }
             }
-            cliFilePath.setExecutable(true)
-            cliFilePath.deleteOnExit()
+            outputPath.setExecutable(true)
+            outputPath.deleteOnExit()
 
-            cliFilePath.absolutePath
+            outputPath.absolutePath
         } else {
             return null
         }
@@ -158,21 +156,21 @@ internal object SentryCliProvider {
     /**
      * Tries to extract the sentry-cli from resources if the computedCliPath does not exist.
      */
-    internal fun maybeExtractFromResources(buildDir: File, computedCliPath: String): String {
-        val cli = File(computedCliPath)
+    internal fun maybeExtractFromResources(buildDir: File, cliPath: String): String {
+        val cli = File(cliPath)
         if (!cli.exists()) {
             // we only want to auto-extract if the path matches the pre-computed one
-            if (File(computedCliPath).absolutePath.equals(
-                    getCliFromResourcesExtractionPath(buildDir).absolutePath
+            if (File(cliPath).absolutePath.equals(
+                    getCliResourcesExtractionPath(buildDir).absolutePath
                 )
             ) {
-                val cliPath = getCliLocationInResources()
-                if (!cliPath.isNullOrBlank()) {
-                    return extractCliFromResources(buildDir, cliPath) ?: computedCliPath
+                val cliResPath = getCliLocationInResources()
+                if (!cliResPath.isNullOrBlank()) {
+                    return extractCliFromResources(cliResPath, cli) ?: cliPath
                 }
             }
         }
-        return computedCliPath
+        return cliPath
     }
 }
 
