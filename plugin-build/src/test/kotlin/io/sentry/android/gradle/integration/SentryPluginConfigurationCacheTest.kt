@@ -189,7 +189,7 @@ class SentryPluginConfigurationCacheTest :
             run0.output
         )
 
-        val cliPath = SentryCliProvider.getCliTargetPathForResources(
+        val cliPath = SentryCliProvider.getCliFromResourcesExtractionPath(
             File(runner.projectDir, "build")
         )
 
@@ -206,5 +206,32 @@ class SentryPluginConfigurationCacheTest :
             run1.output
         )
         assertTrue(run1.output) { "BUILD SUCCESSFUL" in run1.output }
+    }
+
+    @Test
+    fun `sentry-cli is recovered when clean is executed before assemble`() {
+        // configuration cache doesn't seem to work well on older Gradle/AGP combinations
+        // producing the following output:
+        //
+        // 0 problems were found storing the configuration cache.
+        // Configuration cache entry discarded
+        //
+        // so we only run this test on supported versions
+        assumeThat(
+            "We only support configuration cache from AGP 7.4.0 and Gradle 8.0.0 onwards",
+            SemVer.parse(BuildConfig.AgpVersion) >= AgpVersions.VERSION_7_4_0 &&
+                GradleVersions.CURRENT >= GradleVersions.VERSION_8_0,
+            `is`(true)
+        )
+
+        val runner = runner.withArguments(
+            "--configuration-cache",
+            "--build-cache",
+            ":app:clean",
+            ":app:assembleRelease"
+        )
+
+        val run = runner.build()
+        assertTrue(run.output) { "BUILD SUCCESSFUL" in run.output }
     }
 }
