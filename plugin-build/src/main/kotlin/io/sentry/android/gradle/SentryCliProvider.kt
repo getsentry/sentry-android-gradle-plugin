@@ -74,8 +74,8 @@ internal object SentryCliProvider {
             logger.info { "Searching for $resourcePath in resources folder..." }
 
             searchCliInResources(resourcePath)?.let {
-                logger.info { "cli found in resources: $it" }
-                return it
+                logger.info { "cli found in resources: $resourcePath" }
+                return resourcePath
             } ?: logger.info { "Failed to load sentry-cli from resource folder" }
         }
 
@@ -158,9 +158,12 @@ internal object SentryCliProvider {
     internal fun maybeExtractFromResources(buildDir: File, computedCliPath: String): String {
         val cli = File(computedCliPath)
         if (!cli.exists()) {
-            val cliPath = getCliLocationInResources()
-            if (!cliPath.isNullOrBlank()) {
-                return extractCliFromResources(buildDir, cliPath) ?: computedCliPath
+            // we only want to auto-extract if the path matches the pre-computed one
+            if (File(computedCliPath).absolutePath.equals(getCliFromResourcesExtractionPath(buildDir).absolutePath)) {
+                val cliPath = getCliLocationInResources()
+                if (!cliPath.isNullOrBlank()) {
+                    return extractCliFromResources(buildDir, cliPath) ?: computedCliPath
+                }
             }
         }
         return computedCliPath

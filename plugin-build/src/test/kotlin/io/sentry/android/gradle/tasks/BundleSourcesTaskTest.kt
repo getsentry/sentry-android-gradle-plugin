@@ -37,6 +37,7 @@ class BundleSourcesTaskTest {
                 BundleSourcesTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceDir.set(sourceDir)
                 it.bundleIdFile.set(debugMetaPropertiesFile)
                 it.output.set(outDir)
@@ -68,6 +69,7 @@ class BundleSourcesTaskTest {
                 BundleSourcesTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceDir.set(sourceDir)
                 it.bundleIdFile.set(debugMetaPropertiesFile)
                 it.output.set(outDir)
@@ -93,6 +95,7 @@ class BundleSourcesTaskTest {
                 BundleSourcesTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceDir.set(sourceDir)
                 it.bundleIdFile.set(debugMetaPropertiesFile)
                 it.output.set(outDir)
@@ -120,6 +123,7 @@ class BundleSourcesTaskTest {
                 BundleSourcesTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceDir.set(sourceDir)
                 it.bundleIdFile.set(debugMetaPropertiesFile)
                 it.output.set(outDir)
@@ -147,6 +151,7 @@ class BundleSourcesTaskTest {
                 BundleSourcesTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceDir.set(sourceDir)
                 it.bundleIdFile.set(debugMetaPropertiesFile)
                 it.output.set(outDir)
@@ -170,6 +175,7 @@ class BundleSourcesTaskTest {
                 BundleSourcesTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceDir.set(sourceDir)
                 it.bundleIdFile.set(debugMetaPropertiesFile)
                 it.output.set(outDir)
@@ -195,6 +201,7 @@ class BundleSourcesTaskTest {
                 BundleSourcesTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceDir.set(sourceDir)
                 it.bundleIdFile.set(debugMetaPropertiesFile)
                 it.output.set(outDir)
@@ -258,6 +265,7 @@ class BundleSourcesTaskTest {
                 BundleSourcesTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceDir.set(sourceDir)
                 it.bundleIdFile.set(debugMetaPropertiesFile)
                 it.output.set(outDir)

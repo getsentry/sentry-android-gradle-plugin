@@ -29,6 +29,7 @@ class UploadSourceBundleTaskTest {
                 UploadSourceBundleTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceBundleDir.set(sourceBundleDir)
                 it.autoUploadSourceContext.set(true)
             }
@@ -58,6 +59,7 @@ class UploadSourceBundleTaskTest {
                 UploadSourceBundleTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceBundleDir.set(sourceBundleDir)
                 it.autoUploadSourceContext.set(false)
             }
@@ -78,6 +80,7 @@ class UploadSourceBundleTaskTest {
                 UploadSourceBundleTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceBundleDir.set(sourceBundleDir)
                 it.autoUploadSourceContext.set(true)
                 it.debug.set(true)
@@ -100,6 +103,7 @@ class UploadSourceBundleTaskTest {
                 UploadSourceBundleTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceBundleDir.set(sourceBundleDir)
                 it.autoUploadSourceContext.set(true)
                 it.sentryProperties.set(propertiesFile)
@@ -124,6 +128,7 @@ class UploadSourceBundleTaskTest {
                 UploadSourceBundleTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceBundleDir.set(sourceBundleDir)
                 it.autoUploadSourceContext.set(true)
                 it.sentryAuthToken.set("<token>")
@@ -148,6 +153,7 @@ class UploadSourceBundleTaskTest {
                 UploadSourceBundleTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceBundleDir.set(sourceBundleDir)
                 it.autoUploadSourceContext.set(true)
                 it.sentryUrl.set("https://some-host.sentry.io")
@@ -170,6 +176,7 @@ class UploadSourceBundleTaskTest {
                 UploadSourceBundleTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceBundleDir.set(sourceBundleDir)
                 it.autoUploadSourceContext.set(true)
             }
@@ -190,6 +197,7 @@ class UploadSourceBundleTaskTest {
                 UploadSourceBundleTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceBundleDir.set(sourceBundleDir)
                 it.autoUploadSourceContext.set(true)
                 it.sentryOrganization.set("dummy-org")
@@ -212,6 +220,7 @@ class UploadSourceBundleTaskTest {
                 UploadSourceBundleTask::class.java
             ) {
                 it.cliExecutable.set("sentry-cli")
+                it.buildDirectory.set(project.layout.buildDirectory.asFile)
                 it.sourceBundleDir.set(sourceBundleDir)
                 it.autoUploadSourceContext.set(true)
                 it.sentryProject.set("dummy-proj")
