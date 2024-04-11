@@ -110,7 +110,10 @@ internal object SentryCliProvider {
 
     fun getCliFromResourcesExtractionPath(projectBuildDir: File): File {
         // usually <project>/build/tmp/
-        return File(File(projectBuildDir, "tmp"), "sentry-cli-${BuildConfig.CliVersion}.exe")
+        return File(
+            File(projectBuildDir, "tmp"),
+            "sentry-cli-${BuildConfig.CliVersion}.exe"
+        )
     }
 
     fun extractCliFromResources(projectBuildDir: File, resourcePath: String): String? {
@@ -159,7 +162,10 @@ internal object SentryCliProvider {
         val cli = File(computedCliPath)
         if (!cli.exists()) {
             // we only want to auto-extract if the path matches the pre-computed one
-            if (File(computedCliPath).absolutePath.equals(getCliFromResourcesExtractionPath(buildDir).absolutePath)) {
+            if (File(computedCliPath).absolutePath.equals(
+                    getCliFromResourcesExtractionPath(buildDir).absolutePath
+                )
+            ) {
                 val cliPath = getCliLocationInResources()
                 if (!cliPath.isNullOrBlank()) {
                     return extractCliFromResources(buildDir, cliPath) ?: computedCliPath
