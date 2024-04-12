@@ -2,9 +2,9 @@ package io.sentry.android.gradle
 
 import io.sentry.android.gradle.SentryCliProvider.extractCliFromResources
 import io.sentry.android.gradle.SentryCliProvider.getCliSuffix
+import io.sentry.android.gradle.SentryCliProvider.getResourceUrl
 import io.sentry.android.gradle.SentryCliProvider.getSentryPropertiesPath
 import io.sentry.android.gradle.SentryCliProvider.searchCliInPropertiesFile
-import io.sentry.android.gradle.SentryCliProvider.getResourceUrl
 import io.sentry.android.gradle.util.SystemPropertyRule
 import io.sentry.android.gradle.util.WithSystemProperty
 import java.io.File
