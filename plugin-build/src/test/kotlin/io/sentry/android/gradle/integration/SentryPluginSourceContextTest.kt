@@ -301,6 +301,8 @@ class SentryPluginSourceContextTest :
             File("build"),
             File("")
         )
+        SentryCliProvider.maybeExtractFromResources(File("build"), sentryCli)
+
         sentryPropertiesFile.writeText("cli.executable=$sentryCli")
 
         runner.appendArguments("app:assembleRelease")
@@ -355,6 +357,8 @@ class SentryPluginSourceContextTest :
             File("build"),
             File("")
         )
+        SentryCliProvider.maybeExtractFromResources(File("build"), sentryCli)
+
         sentryPropertiesFile.writeText("cli.executable=$sentryCli")
 
         runner.appendArguments("app:assembleRelease")
