@@ -50,9 +50,11 @@ internal object SentryCliProvider {
         } ?: logger.info { "sentry-cli not found in sentry.properties file" }
 
         // next up try a packaged version of sentry-cli
-        val resLocation = getCliLocationInResources()
-        if (!resLocation.isNullOrBlank()) {
-            logger.info { "cli present in resources: $resLocation" }
+        val cliResLocation = getCliLocationInResources()
+        if (!cliResLocation.isNullOrBlank()) {
+            logger.info { "cli present in resources: $cliResLocation" }
+            // just provide the target extraction path
+            // actual extraction will be done prior to task execution
             val extractedResourcePath = getCliResourcesExtractionPath(projectBuildDir)
                 .absolutePath
             memoizedCliPath = extractedResourcePath
@@ -63,7 +65,7 @@ internal object SentryCliProvider {
         return "sentry-cli".also { memoizedCliPath = it }
     }
 
-    internal fun getCliLocationInResources(): String? {
+    private fun getCliLocationInResources(): String? {
         val cliSuffix = getCliSuffix()
         logger.info { "cliSuffix is $cliSuffix" }
 
@@ -73,8 +75,10 @@ internal object SentryCliProvider {
             // if we are not in a jar, we can use the file directly
             logger.info { "Searching for $resourcePath in resources folder..." }
 
-            searchCliInResources(resourcePath)?.let {
-                logger.info { "cli found in resources: $resourcePath" }
+            getResourceUrl(resourcePath)?.let {
+                logger.info { "cli found in resources: $it" }
+
+                // still return the resource path, as it's the one we can use for extraction later
                 return resourcePath
             } ?: logger.info { "Failed to load sentry-cli from resource folder" }
         }
@@ -98,17 +102,10 @@ internal object SentryCliProvider {
         }
     }
 
-    internal fun searchCliInResources(resourcePath: String): String? {
-        val resourceURL = javaClass.getResource(resourcePath)
-        val resourceFile = resourceURL?.let { File(it.file) }
-        return if (resourceFile?.exists() == true) {
-            resourceFile.absolutePath
-        } else {
-            null
-        }
-    }
+    internal fun getResourceUrl(resourcePath: String): String? =
+        javaClass.getResource(resourcePath)?.toString()
 
-    fun getCliResourcesExtractionPath(projectBuildDir: File): File {
+    internal fun getCliResourcesExtractionPath(projectBuildDir: File): File {
         // usually <project>/build/tmp/
         return File(
             File(projectBuildDir, "tmp"),
@@ -116,7 +113,7 @@ internal object SentryCliProvider {
         )
     }
 
-    fun extractCliFromResources(resourcePath: String, outputPath: File): String? {
+    internal fun extractCliFromResources(resourcePath: String, outputPath: File): String? {
         val resourceStream = javaClass.getResourceAsStream(resourcePath)
         return if (resourceStream != null) {
             val baseFolder = outputPath.parentFile

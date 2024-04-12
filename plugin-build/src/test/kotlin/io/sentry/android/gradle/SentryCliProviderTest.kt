@@ -4,7 +4,7 @@ import io.sentry.android.gradle.SentryCliProvider.extractCliFromResources
 import io.sentry.android.gradle.SentryCliProvider.getCliSuffix
 import io.sentry.android.gradle.SentryCliProvider.getSentryPropertiesPath
 import io.sentry.android.gradle.SentryCliProvider.searchCliInPropertiesFile
-import io.sentry.android.gradle.SentryCliProvider.searchCliInResources
+import io.sentry.android.gradle.SentryCliProvider.getResourceUrl
 import io.sentry.android.gradle.util.SystemPropertyRule
 import io.sentry.android.gradle.util.WithSystemProperty
 import java.io.File
@@ -130,7 +130,7 @@ class SentryCliProviderTest {
                 createNewFile()
             }
 
-        val foundPath = searchCliInResources(resourcePath)
+        val foundPath = getResourceUrl(resourcePath)
         assertNotNull(foundPath)
         assertTrue(
             foundPath.endsWith("${File.separator}dummy-bin${File.separator}dummy-sentry-cli")
@@ -143,7 +143,7 @@ class SentryCliProviderTest {
     fun `searchCliInResources returns null if file does not exist`() {
         val resourcePath = "./dummy-bin/i-dont-exist"
 
-        assertNull(searchCliInResources(resourcePath))
+        assertNull(getResourceUrl(resourcePath))
     }
 
     @Test
