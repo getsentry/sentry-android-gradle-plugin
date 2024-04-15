@@ -29,6 +29,8 @@ internal object SentryCliProvider {
      * Return the correct sentry-cli executable path to use for the given project.  This
      * will look for a sentry-cli executable in a local node_modules in case it was put
      * there by sentry-react-native or others before falling back to the global installation.
+     * In case there's no global installation, and a matching cli is packaged in the resources
+     * it will provide a temporary path, without actually extracting it.
      */
     @JvmStatic
     @Synchronized
@@ -48,6 +50,22 @@ internal object SentryCliProvider {
         } ?: logger.info { "sentry-cli not found in sentry.properties file" }
 
         // next up try a packaged version of sentry-cli
+        val cliResLocation = getCliLocationInResources()
+        if (!cliResLocation.isNullOrBlank()) {
+            logger.info { "cli present in resources: $cliResLocation" }
+            // just provide the target extraction path
+            // actual extraction will be done prior to task execution
+            val extractedResourcePath = getCliResourcesExtractionPath(projectBuildDir)
+                .absolutePath
+            memoizedCliPath = extractedResourcePath
+            return extractedResourcePath
+        }
+
+        logger.error { "Falling back to invoking `sentry-cli` from shell" }
+        return "sentry-cli".also { memoizedCliPath = it }
+    }
+
+    private fun getCliLocationInResources(): String? {
         val cliSuffix = getCliSuffix()
         logger.info { "cliSuffix is $cliSuffix" }
 
@@ -57,24 +75,15 @@ internal object SentryCliProvider {
             // if we are not in a jar, we can use the file directly
             logger.info { "Searching for $resourcePath in resources folder..." }
 
-            searchCliInResources(resourcePath)?.let {
+            getResourceUrl(resourcePath)?.let {
                 logger.info { "cli found in resources: $it" }
-                memoizedCliPath = it
-                return@getSentryCliPath it
-            } ?: logger.info { "Failed to load sentry-cli from resource folder" }
 
-            // otherwise we need to unpack into a file
-            logger.info { "Trying to load cli from $resourcePath in a temp file..." }
-
-            extractCliFromResources(projectBuildDir, resourcePath)?.let {
-                logger.info { "cli extracted from resources into: $it" }
-                memoizedCliPath = it
-                return@getSentryCliPath it
+                // still return the resource path, as it's the one we can use for extraction later
+                return resourcePath
             } ?: logger.info { "Failed to load sentry-cli from resource folder" }
         }
 
-        logger.error { "Falling back to invoking `sentry-cli` from shell" }
-        return "sentry-cli".also { memoizedCliPath = it }
+        return null
     }
 
     internal fun getSentryPropertiesPath(projectDir: File, rootDir: File): String? =
@@ -93,27 +102,21 @@ internal object SentryCliProvider {
         }
     }
 
-    internal fun searchCliInResources(resourcePath: String): String? {
-        val resourceURL = javaClass.getResource(resourcePath)
-        val resourceFile = resourceURL?.let { File(it.file) }
-        return if (resourceFile?.exists() == true) {
-            resourceFile.absolutePath
-        } else {
-            null
-        }
-    }
+    internal fun getResourceUrl(resourcePath: String): String? =
+        javaClass.getResource(resourcePath)?.toString()
 
-    fun getCliTargetPathForResources(projectBuildDir: File): File {
+    internal fun getCliResourcesExtractionPath(projectBuildDir: File): File {
         // usually <project>/build/tmp/
-        return File(File(projectBuildDir, "tmp"), "sentry-cli-${BuildConfig.CliVersion}.exe")
+        return File(
+            File(projectBuildDir, "tmp"),
+            "sentry-cli-${BuildConfig.CliVersion}.exe"
+        )
     }
 
-    internal fun extractCliFromResources(projectBuildDir: File, resourcePath: String): String? {
+    internal fun extractCliFromResources(resourcePath: String, outputPath: File): String? {
         val resourceStream = javaClass.getResourceAsStream(resourcePath)
         return if (resourceStream != null) {
-            val cliFilePath = getCliTargetPathForResources(projectBuildDir)
-
-            val baseFolder = cliFilePath.parentFile
+            val baseFolder = outputPath.parentFile
             logger.info { "sentry-cli base folder: ${baseFolder.absolutePath}" }
 
             if (!baseFolder.exists() && !baseFolder.mkdirs()) {
@@ -121,15 +124,15 @@ internal object SentryCliProvider {
                 return null
             }
 
-            FileOutputStream(cliFilePath).use { output ->
+            FileOutputStream(outputPath).use { output ->
                 resourceStream.use { input ->
                     input.copyTo(output)
                 }
             }
-            cliFilePath.setExecutable(true)
-            cliFilePath.deleteOnExit()
+            outputPath.setExecutable(true)
+            outputPath.deleteOnExit()
 
-            cliFilePath.absolutePath
+            outputPath.absolutePath
         } else {
             return null
         }
@@ -145,6 +148,26 @@ internal object SentryCliProvider {
             "win" in osName -> "Windows-i686.exe"
             else -> null
         }
+    }
+
+    /**
+     * Tries to extract the sentry-cli from resources if the computedCliPath does not exist.
+     */
+    internal fun maybeExtractFromResources(buildDir: File, cliPath: String): String {
+        val cli = File(cliPath)
+        if (!cli.exists()) {
+            // we only want to auto-extract if the path matches the pre-computed one
+            if (File(cliPath).absolutePath.equals(
+                    getCliResourcesExtractionPath(buildDir).absolutePath
+                )
+            ) {
+                val cliResPath = getCliLocationInResources()
+                if (!cliResPath.isNullOrBlank()) {
+                    return extractCliFromResources(cliResPath, cli) ?: cliPath
+                }
+            }
+        }
+        return cliPath
     }
 }
 

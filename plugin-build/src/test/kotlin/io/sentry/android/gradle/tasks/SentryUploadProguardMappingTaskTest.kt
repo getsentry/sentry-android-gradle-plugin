@@ -126,7 +126,7 @@ class SentryUploadProguardMappingTaskTest {
 
         val args = task.get().computeCommandLineArgs()
 
-        assertTrue(existingFile.toString() in args)
+        assertTrue(existingFile.toString() in args, "Observed args: $args")
     }
 
     @Test

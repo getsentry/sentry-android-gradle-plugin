@@ -5,6 +5,7 @@
 ### Fixes
 
 - Fix circular depencency issue between mergeAssets and minify tasks ([#682](https://github.com/getsentry/sentry-android-gradle-plugin/pull/682))
+- Fix sentry-cli not being extracted prior to task execution ([#691](https://github.com/getsentry/sentry-android-gradle-plugin/pull/691))
 
 ## 4.4.0
 

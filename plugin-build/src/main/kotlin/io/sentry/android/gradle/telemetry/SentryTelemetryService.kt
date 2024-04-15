@@ -11,6 +11,7 @@ import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SpanStatus
+import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
@@ -27,6 +28,7 @@ import io.sentry.gradle.common.SentryVariant
 import io.sentry.protocol.Mechanism
 import io.sentry.protocol.User
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.nio.charset.Charset
 import javax.inject.Inject
 import org.gradle.api.Project
@@ -297,6 +299,7 @@ abstract class SentryTelemetryService :
             var cliVersion: String? = BuildConfig.CliVersion
             var defaultSentryOrganization: String? = null
             val infoOutput = project.providers.of(SentryCliInfoValueSource::class.java) { cliVS ->
+                cliVS.parameters.buildDirectory.set(project.buildDir)
                 cliVS.parameters.cliExecutable.set(cliExecutable)
                 cliVS.parameters.authToken.set(extension.authToken)
                 cliVS.parameters.url.set(extension.url)
@@ -317,6 +320,7 @@ abstract class SentryTelemetryService :
 
             val versionOutput =
                 project.providers.of(SentryCliVersionValueSource::class.java) { cliVS ->
+                    cliVS.parameters.buildDirectory.set(project.buildDir)
                     cliVS.parameters.cliExecutable.set(cliExecutable)
                     cliVS.parameters.url.set(extension.url)
                 }.get()
@@ -449,6 +453,9 @@ class SentryMinimalException(message: String) : RuntimeException(message) {
 abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
     interface InfoParams : ValueSourceParameters {
         @get:Input
+        val buildDirectory: Property<File>
+
+        @get:Input
         val cliExecutable: Property<String>
 
         @get:Input
@@ -468,6 +475,11 @@ abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
         val output = ByteArrayOutputStream()
         execOperations.exec {
             it.isIgnoreExitValue = true
+            SentryCliProvider.maybeExtractFromResources(
+                parameters.buildDirectory.get(),
+                parameters.cliExecutable.get()
+            )
+
             val args = mutableListOf(parameters.cliExecutable.get())
 
             parameters.url.orNull?.let { url ->
@@ -496,6 +508,9 @@ abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
 abstract class SentryCliVersionValueSource : ValueSource<String, VersionParams> {
     interface VersionParams : ValueSourceParameters {
         @get:Input
+        val buildDirectory: Property<File>
+
+        @get:Input
         val cliExecutable: Property<String>
 
         @get:Input
@@ -509,6 +524,11 @@ abstract class SentryCliVersionValueSource : ValueSource<String, VersionParams> 
         val output = ByteArrayOutputStream()
         execOperations.exec {
             it.isIgnoreExitValue = true
+            SentryCliProvider.maybeExtractFromResources(
+                parameters.buildDirectory.get(),
+                parameters.cliExecutable.get()
+            )
+
             val args = mutableListOf(parameters.cliExecutable.get())
 
             args.add("--log-level=error")
