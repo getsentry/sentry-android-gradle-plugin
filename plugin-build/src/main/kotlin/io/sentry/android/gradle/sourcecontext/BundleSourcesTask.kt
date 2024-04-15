@@ -99,7 +99,6 @@ abstract class BundleSourcesTask : SentryCliExecTask() {
                 task.sentryAuthToken.set(sentryAuthToken)
                 task.sentryUrl.set(sentryUrl)
                 task.sourceDir.set(collectSourcesTask.flatMap { it.output })
-                task.buildDirectory.set(project.layout.buildDirectory.asFile)
                 task.cliExecutable.set(cliExecutable)
                 SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)?.let {
                     task.sentryProperties.set(File(it))

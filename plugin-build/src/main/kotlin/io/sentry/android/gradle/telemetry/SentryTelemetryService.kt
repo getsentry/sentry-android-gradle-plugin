@@ -320,7 +320,7 @@ abstract class SentryTelemetryService :
 
             val versionOutput =
                 project.providers.of(SentryCliVersionValueSource::class.java) { cliVS ->
-                    cliVS.parameters.projectBuildFolder.set(project.buildDir)
+                    cliVS.parameters.buildDirectory.set(project.buildDir)
                     cliVS.parameters.cliExecutable.set(cliExecutable)
                     cliVS.parameters.url.set(extension.url)
                 }.get()
@@ -508,7 +508,7 @@ abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
 abstract class SentryCliVersionValueSource : ValueSource<String, VersionParams> {
     interface VersionParams : ValueSourceParameters {
         @get:Input
-        val projectBuildFolder: Property<File>
+        val buildDirectory: Property<File>
 
         @get:Input
         val cliExecutable: Property<String>
@@ -525,7 +525,7 @@ abstract class SentryCliVersionValueSource : ValueSource<String, VersionParams> 
         execOperations.exec {
             it.isIgnoreExitValue = true
             SentryCliProvider.maybeExtractFromResources(
-                parameters.projectBuildFolder.get(),
+                parameters.buildDirectory.get(),
                 parameters.cliExecutable.get()
             )
 

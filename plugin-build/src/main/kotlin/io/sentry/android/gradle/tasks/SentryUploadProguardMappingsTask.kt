@@ -119,7 +119,6 @@ abstract class SentryUploadProguardMappingsTask : SentryCliExecTask() {
                 task.workingDir(project.rootDir)
                 task.debug.set(debug)
                 task.cliExecutable.set(cliExecutable)
-                task.buildDirectory.set(project.layout.buildDirectory.asFile)
                 task.sentryProperties.set(
                     sentryProperties?.let { file -> project.file(file) }
                 )

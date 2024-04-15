@@ -7,6 +7,7 @@ import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -21,9 +22,6 @@ abstract class SentryCliExecTask : Exec() {
 
     @get:Input
     abstract val cliExecutable: Property<String>
-
-    @get:Input
-    abstract val buildDirectory: Property<File>
 
     @get:InputFile
     @get:Optional
@@ -47,6 +45,8 @@ abstract class SentryCliExecTask : Exec() {
 
     @get:Internal
     abstract val sentryTelemetryService: Property<SentryTelemetryService>
+
+    private val buildDirectory: Provider<File> = project.layout.buildDirectory.asFile
 
     override fun exec() {
         computeCommandLineArgs().let {
