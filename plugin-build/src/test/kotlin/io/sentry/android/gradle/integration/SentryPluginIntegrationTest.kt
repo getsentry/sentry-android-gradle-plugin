@@ -36,6 +36,7 @@ class SentryPluginIntegrationTest :
         if (System.getenv("SENTRY_URL").isNullOrBlank()) {
             return // Don't run test if local test server endpoint is not set
         }
+        sentryPropertiesFile.appendText("auth.token=<token>")
         applyAutoUploadProguardMapping()
 
         val build = runner
@@ -57,6 +58,7 @@ class SentryPluginIntegrationTest :
         if (System.getenv("SENTRY_URL").isNullOrBlank()) {
             return // Don't run test if local test server endpoint is not set
         }
+        sentryPropertiesFile.appendText("auth.token=<token>")
         applyUploadNativeSymbols()
 
         val build = runner
@@ -74,6 +76,7 @@ class SentryPluginIntegrationTest :
         if (System.getenv("SENTRY_URL").isNullOrBlank()) {
             return // Don't run test if local test server endpoint is not set
         }
+        sentryPropertiesFile.appendText("auth.token=<token>")
         applyUploadSourceContexts()
 
         testProjectDir.withDummyComposeFile()
