@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Remove excessive info logging ([#696](https://github.com/getsentry/sentry-android-gradle-plugin/pull/696))
+
 ### Dependencies
 
 - Bump Android SDK from v7.6.0 to v7.8.0 ([#690](https://github.com/getsentry/sentry-android-gradle-plugin/pull/690))
