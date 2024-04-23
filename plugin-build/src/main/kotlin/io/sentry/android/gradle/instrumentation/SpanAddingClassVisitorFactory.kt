@@ -67,9 +67,6 @@ abstract class SpanAddingClassVisitorFactory :
         get() {
             val memoized = parameters.get()._instrumentable
             if (memoized != null) {
-                SentryPlugin.logger.info {
-                    "Instrumentable: $memoized [Memoized]"
-                }
                 return memoized
             }
 
