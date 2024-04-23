@@ -16,7 +16,7 @@ class ChainedInstrumentable(
         originalVisitor: ClassVisitor,
         parameters: SpanAddingClassVisitorFactory.SpanAddingParameters
     ): ClassVisitor {
-        // build a chain of visitors in order they are provdied
+        // build a chain of visitors in order they are provided
         val queue = LinkedList(instrumentables)
         var prevVisitor = originalVisitor
         var visitor: ClassVisitor? = null
