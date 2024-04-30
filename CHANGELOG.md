@@ -8,7 +8,7 @@
 
 ### Dependencies
 
-- Bump CLI from v2.31.0 to v2.31.1 ([#699](https://github.com/getsentry/sentry-android-gradle-plugin/pull/699))
+- Bump CLI from v2.31.0 to v2.31.1 ([#700](https://github.com/getsentry/sentry-android-gradle-plugin/pull/700))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2311)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.31.0...2.31.1)
 
