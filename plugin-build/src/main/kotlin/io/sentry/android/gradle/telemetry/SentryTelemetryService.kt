@@ -263,7 +263,7 @@ abstract class SentryTelemetryService :
 
             // if telemetry is disabled we don't even need to exec sentry-cli as telemetry service
             // will be no-op
-            if (isExecAvailable() && isTelemetryEnabled) {
+            if (isExecAvailable() && isTelemetryEnabled && extension.authToken.orNull != null) {
                 return paramsWithExecAvailable(
                     project,
                     cliExecutable,
