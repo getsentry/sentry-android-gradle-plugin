@@ -65,7 +65,6 @@ data class AndroidVariant74(
                         (java + kotlin).filterBuildConfig().toSet()
                     }
                     .zip(additionalSources) { javaKotlin, other -> (javaKotlin + other).toSet() }
-
         }
     }
 
