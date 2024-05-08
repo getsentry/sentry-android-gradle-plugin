@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Do not include `BuildConfig` into source bundles ([#705](https://github.com/getsentry/sentry-android-gradle-plugin/pull/705))
+
 ### Dependencies
 
 - Bump CLI from v2.31.1 to v2.31.2 ([#702](https://github.com/getsentry/sentry-android-gradle-plugin/pull/702))
