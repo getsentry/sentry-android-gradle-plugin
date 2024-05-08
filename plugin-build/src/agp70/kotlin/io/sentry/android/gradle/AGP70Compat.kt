@@ -10,6 +10,7 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.api.ApplicationVariant
 import io.sentry.gradle.common.SentryVariant
+import io.sentry.gradle.common.filterBuildConfig
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
@@ -43,7 +44,7 @@ data class AndroidVariant70(
             val kotlinDirs = variant.sourceSets.flatMap {
                 it.kotlinDirectories.map { kotlinDir -> projectDir.dir(kotlinDir.absolutePath) }
             }
-            (kotlinDirs + javaDirs).toSet()
+            (kotlinDirs + javaDirs).filterBuildConfig().toSet()
         }.zip(additionalSources) { javaKotlin, other -> javaKotlin + other }
     }
 }
