@@ -487,7 +487,7 @@ abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
                 args.add(url)
             }
 
-            args.add("--log-level=debug")
+            args.add("--log-level=error")
             args.add("info")
 
             parameters.propertiesFilePath.orNull?.let { path ->
@@ -531,7 +531,7 @@ abstract class SentryCliVersionValueSource : ValueSource<String, VersionParams> 
 
             val args = mutableListOf(parameters.cliExecutable.get())
 
-            args.add("--log-level=debug")
+            args.add("--log-level=error")
             args.add("--version")
 
             it.commandLine(args)
