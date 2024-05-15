@@ -14,7 +14,7 @@ class SentryTelemetryServiceTest {
 
     @Suppress("UnstableApiUsage")
     @Test
-    fun `when no auth token is present, SentryCliInfoValueSource sentry-cli info returns an empty string`() {
+    fun `SentryCliInfoValueSource returns empty string when no auth token is present`() {
         val project = ProjectBuilder
             .builder()
             .withProjectDir(testProjectDir.root)
