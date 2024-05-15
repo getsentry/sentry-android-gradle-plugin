@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix misleading auth-token error message in case "sentry-cli info" fails ([#708](https://github.com/getsentry/sentry-android-gradle-plugin/pull/708))
+
 ## 4.5.1
 
 ### Fixes
