@@ -6,6 +6,12 @@
 
 - Fix misleading auth-token error message in case "sentry-cli info" fails ([#708](https://github.com/getsentry/sentry-android-gradle-plugin/pull/708))
 
+### Dependencies
+
+- Bump CLI from v2.31.1 to v2.31.2 ([#702](https://github.com/getsentry/sentry-android-gradle-plugin/pull/702))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2312)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.31.1...2.31.2)
+
 ## 4.5.1
 
 ### Fixes
