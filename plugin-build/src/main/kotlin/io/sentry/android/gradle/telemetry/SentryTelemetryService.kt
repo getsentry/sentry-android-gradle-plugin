@@ -13,6 +13,7 @@ import io.sentry.SentryLevel
 import io.sentry.SpanStatus
 import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.SentryPlugin
+import io.sentry.android.gradle.SentryPlugin.Companion.logger
 import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryCliInfoValueSource.InfoParams
@@ -264,7 +265,7 @@ abstract class SentryTelemetryService :
             // if telemetry is disabled we don't even need to exec sentry-cli as telemetry service
             // will be no-op
             if (isExecAvailable() && isTelemetryEnabled) {
-                return paramsWithExecAvailable(
+                paramsWithExecAvailable(
                     project,
                     cliExecutable,
                     extension,
@@ -272,19 +273,21 @@ abstract class SentryTelemetryService :
                     org,
                     buildType,
                     tags
-                )
-            } else {
-                return SentryTelemetryServiceParams(
-                    isTelemetryEnabled,
-                    extension.telemetryDsn.get(),
-                    org,
-                    buildType,
-                    tags,
-                    extension.debug.get(),
-                    saas = extension.url.orNull == null,
-                    cliVersion = BuildConfig.CliVersion
-                )
+                )?.let {
+                    return it
+                }
             }
+            // fallback: sentry-cli is not available or e.g. auth token is not configured
+            return SentryTelemetryServiceParams(
+                isTelemetryEnabled,
+                extension.telemetryDsn.get(),
+                org,
+                buildType,
+                tags,
+                extension.debug.get(),
+                saas = extension.url.orNull == null,
+                cliVersion = BuildConfig.CliVersion
+            )
         }
 
         private fun paramsWithExecAvailable(
@@ -295,7 +298,7 @@ abstract class SentryTelemetryService :
             sentryOrg: String?,
             buildType: String,
             tags: Map<String, String>
-        ): SentryTelemetryServiceParams {
+        ): SentryTelemetryServiceParams? {
             var cliVersion: String? = BuildConfig.CliVersion
             var defaultSentryOrganization: String? = null
             val infoOutput = project.providers.of(SentryCliInfoValueSource::class.java) { cliVS ->
@@ -309,6 +312,10 @@ abstract class SentryTelemetryService :
                     )
                 }
             }.get()
+
+            if (infoOutput.isEmpty()) {
+                return null
+            }
             val isSaas = infoOutput.contains("(?m)Sentry Server: .*sentry.io$".toRegex())
 
             orgRegex.find(infoOutput)?.let { matchResult ->
@@ -471,9 +478,11 @@ abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
     @get:Inject
     abstract val execOperations: ExecOperations
 
-    override fun obtain(): String {
-        val output = ByteArrayOutputStream()
-        execOperations.exec {
+    override fun obtain(): String? {
+        val stdOutput = ByteArrayOutputStream()
+        val errOutput = ByteArrayOutputStream()
+
+        val execResult = execOperations.exec {
             it.isIgnoreExitValue = true
             SentryCliProvider.maybeExtractFromResources(
                 parameters.buildDirectory.get(),
@@ -499,9 +508,19 @@ abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
             }
 
             it.commandLine(args)
-            it.standardOutput = output
+            it.standardOutput = stdOutput
+            it.errorOutput = errOutput
         }
-        return String(output.toByteArray(), Charset.defaultCharset())
+
+        if (execResult.exitValue == 0) {
+            return String(stdOutput.toByteArray(), Charset.defaultCharset())
+        } else {
+            logger.info {
+                "Failed to execute sentry-cli info. Error Output: " +
+                    String(errOutput.toByteArray(), Charset.defaultCharset())
+            }
+            return ""
+        }
     }
 }
 
