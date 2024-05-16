@@ -27,3 +27,12 @@ interface SentryVariant {
         additionalSources: Provider<out Collection<Directory>>
     ): Provider<out Collection<Directory>>
 }
+
+fun List<Directory>.filterBuildConfig(): List<Directory> =
+    filterNot {
+        // consider also AGP buildConfig folder as well as community plugins:
+        // https://github.com/yshrsmz/BuildKonfig/blob/727f4f9e79e6726ab9489499ec6d92b6f6d56266/buildkonfig-gradle-plugin/src/main/kotlin/com/codingfeline/buildkonfig/gradle/BuildKonfigPlugin.kt#L47
+        // https://github.com/gmazzo/gradle-buildconfig-plugin/blob/9fe73852fe5d545f7825826d288d7b2f4e336060/plugin/src/main/kotlin/com/github/gmazzo/buildconfig/BuildConfigPlugin.kt#L119
+        // https://cs.android.com/android-studio/platform/tools/base/+/mirror-goog-studio-main:build-system/gradle-core/src/main/java/com/android/build/gradle/internal/variant/VariantPathHelper.kt;l=274-275?q=buildConfigSourceOutputDir
+        it.asFile.path.contains("buildConfig") || it.asFile.path.contains("buildkonfig")
+    }

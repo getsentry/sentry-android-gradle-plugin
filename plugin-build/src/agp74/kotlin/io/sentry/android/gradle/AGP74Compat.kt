@@ -13,6 +13,7 @@ import com.android.build.api.variant.Variant
 import com.android.build.api.variant.impl.ApplicationVariantImpl
 import com.android.build.api.variant.impl.VariantImpl
 import io.sentry.gradle.common.SentryVariant
+import io.sentry.gradle.common.filterBuildConfig
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
@@ -60,7 +61,9 @@ data class AndroidVariant74(
             }
             else ->
                 javaProvider
-                    .zip(kotlinProvider) { java, kotlin -> (java + kotlin).toSet() }
+                    .zip(kotlinProvider) { java, kotlin ->
+                        (java + kotlin).filterBuildConfig().toSet()
+                    }
                     .zip(additionalSources) { javaKotlin, other -> (javaKotlin + other).toSet() }
         }
     }
