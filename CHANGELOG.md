@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Migrate Dependencies to Gradle version catalog ([#712](https://github.com/getsentry/sentry-android-gradle-plugin/pull/712))
+
 ## 4.6.0
 
 ### Fixes
