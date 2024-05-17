@@ -1,10 +1,10 @@
 plugins {
-    kotlin("jvm")
-    id("org.jlleitschuh.gradle.ktlint")
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.ktlint)
 }
 
 dependencies {
-    compileOnly(Libs.GRADLE_API)
+    compileOnly(libs.gradleApi)
 }
 
 ktlint {

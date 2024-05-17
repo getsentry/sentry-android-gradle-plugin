@@ -1,9 +1,9 @@
 plugins {
-    kotlin("jvm") version "1.8.20"
-    kotlin("kapt") version "1.8.20"
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.kapt)
     id("distribution")
-    id("com.vanniktech.maven.publish") version "0.17.0"
-    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
+    alias(libs.plugins.mavenPublish)
+    alias(libs.plugins.ktlint)
 }
 
 allprojects {
@@ -58,15 +58,15 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable")
+    compileOnly(libs.kotlinCompilerEmbeddable)
 
-    kapt("com.google.auto.service:auto-service:1.0.1")
-    compileOnly("com.google.auto.service:auto-service-annotations:1.0.1")
+    kapt(libs.autoService)
+    compileOnly(libs.autoServiceAnnotatons)
 
-    testImplementation(kotlin("test-junit"))
-    testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
-    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.5.0")
-    testImplementation("org.jetbrains.compose.desktop:desktop:1.4.0")
+    testImplementation(libs.kotlinJunit)
+    testImplementation(libs.kotlinCompilerEmbeddable)
+    testImplementation(libs.kotlinCompilTesting)
+    testImplementation(libs.composeDesktop)
 }
 
 plugins.withId("com.vanniktech.maven.publish.base") {

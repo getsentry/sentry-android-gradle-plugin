@@ -11,6 +11,7 @@ buildscript {
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'io.sentry.android.gradle'
 
 android {
     compileSdk = LibsVersion.SDK_VERSION

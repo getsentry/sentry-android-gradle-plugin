@@ -1,7 +1,10 @@
 plugins {
-    kotlin("jvm") version BuildPluginsVersion.KOTLIN apply false
-    id("com.android.application") version BuildPluginsVersion.AGP apply false
-    id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
+    alias(libs.plugins.kotlin) apply false
+    alias(libs.plugins.kotlinAndroid) apply false
+    alias(libs.plugins.kapt) apply false
+    alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP apply false
+    alias(libs.plugins.androidLibrary) version BuildPluginsVersion.AGP apply false
+    alias(libs.plugins.ktlint)
 }
 
 allprojects {

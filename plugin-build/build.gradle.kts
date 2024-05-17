@@ -11,17 +11,17 @@ import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("dev.gradleplugins.groovy-gradle-plugin") version BuildPluginsVersion.GROOVY_REDISTRIBUTED
-    kotlin("jvm") version BuildPluginsVersion.KOTLIN
+    alias(libs.plugins.groovyGradlePlugin)
+    alias(libs.plugins.kotlin)
     id("distribution")
-    id("org.jetbrains.dokka") version BuildPluginsVersion.DOKKA
+    alias(libs.plugins.dokka)
     id("java-gradle-plugin")
-    id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
-    id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
+    alias(libs.plugins.mavenPublish) apply false
+    alias(libs.plugins.ktlint)
     // we need this plugin in order to include .aar dependencies into a pure java project, which the gradle plugin is
     id("io.sentry.android.gradle.aar2jar")
-    id("com.github.johnrengelman.shadow") version BuildPluginsVersion.SHADOW
-    id("com.github.gmazzo.buildconfig") version BuildPluginsVersion.BUILDCONFIG
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.buildConfig)
 }
 
 allprojects {
@@ -48,26 +48,26 @@ val shade: Configuration by configurations.creating {
 val fixtureClasspath: Configuration by configurations.creating
 
 dependencies {
-    agp70.compileOnlyConfigurationName(Libs.GRADLE_API)
+    agp70.compileOnlyConfigurationName(libs.gradleApi)
     agp70.compileOnlyConfigurationName(Libs.agp("7.0.4"))
     agp70.compileOnlyConfigurationName(project(":common"))
 
-    agp74.compileOnlyConfigurationName(Libs.GRADLE_API)
+    agp74.compileOnlyConfigurationName(libs.gradleApi)
     agp74.compileOnlyConfigurationName(Libs.agp("7.4.0"))
     agp74.compileOnlyConfigurationName(project(":common"))
 
-    compileOnly(Libs.GRADLE_API)
-    compileOnly(Libs.AGP)
+    compileOnly(libs.gradleApi)
+    compileOnly(libs.agp)
     compileOnly(agp70.output)
     compileOnly(agp74.output)
-    compileOnly(Libs.PROGUARD)
+    compileOnly(libs.proguard)
 
-    implementation(Libs.ASM)
-    implementation(Libs.ASM_COMMONS)
+    implementation(libs.asm)
+    implementation(libs.asmCommons)
 
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:${KotlinCompilerVersion.VERSION}")
 
-    implementation(Libs.SENTRY)
+    implementation(libs.sentry)
 
     // compileOnly since we'll be shading the common dependency into the final jar
     // but we still need to be able to compile it (this also excludes it from .pom)
@@ -76,30 +76,30 @@ dependencies {
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
-    testImplementation(Libs.AGP)
+    testImplementation(libs.agp)
     testImplementation(agp70.output)
     testImplementation(agp74.output)
     testImplementation(project(":common"))
     fixtureClasspath(agp70.output)
     fixtureClasspath(agp74.output)
     fixtureClasspath(project(":common"))
-    testImplementation(Libs.PROGUARD)
-    testImplementation(Libs.JUNIT)
-    testImplementation(Libs.MOCKITO_KOTLIN)
+    testImplementation(libs.proguard)
+    testImplementation(libs.junit)
+    testImplementation(libs.mockitoKotlin)
 
-    testImplementation(Libs.ASM)
-    testImplementation(Libs.ASM_COMMONS)
+    testImplementation(libs.asm)
+    testImplementation(libs.asmCommons)
 
     // we need these dependencies for tests, because the bytecode verifier also analyzes superclasses
-    testImplementationAar(Libs.SQLITE)
-    testImplementationAar(Libs.SQLITE_FRAMEWORK)
+    testImplementationAar(libs.sqlite)
+    testImplementationAar(libs.sqliteFramework)
     testRuntimeOnly(files(androidSdkPath))
-    testImplementation(Libs.SENTRY_ANDROID)
-    testImplementationAar(Libs.SENTRY_ANDROID_OKHTTP)
+    testImplementation(libs.sentryAndroid)
+    testImplementationAar(libs.sentryAndroidOkhttp)
 
     // Needed to read contents from APK/Source Bundles
-    testImplementation(Libs.ARSC_LIB)
-    testImplementation(Libs.ZIP4J)
+    testImplementation(libs.arscLib)
+    testImplementation(libs.zip4j)
 
     testRuntimeOnly(
         files(

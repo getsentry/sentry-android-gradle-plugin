@@ -1,5 +1,5 @@
 plugins {
-    id("com.android.application")
+    alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP
     id("io.sentry.android.gradle")
 }
 
