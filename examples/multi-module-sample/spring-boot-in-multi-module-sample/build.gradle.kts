@@ -3,12 +3,10 @@ import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id(Samples.SpringBoot.springBoot) version
-        BuildPluginsVersion.SPRING_BOOT
-    id(Samples.SpringBoot.springDependencyManagement) version
-        BuildPluginsVersion.SPRING_DEP_MANAGEMENT
-    kotlin("jvm")
-    kotlin("plugin.spring") version BuildPluginsVersion.KOTLIN
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.springDependencyManagement)
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlinSpring)
     id("io.sentry.jvm.gradle")
 }
 
@@ -22,18 +20,18 @@ repositories {
 }
 
 dependencies {
-    implementation(Samples.SpringBoot.springBootStarterSecurity)
-    implementation(Samples.SpringBoot.springBootStarterWeb)
-    implementation(Samples.SpringBoot.springBootStarterWebflux)
-    implementation(Samples.SpringBoot.springBootStarterAop)
-    implementation(Samples.SpringBoot.aspectj)
-    implementation(Samples.SpringBoot.springBootStarter)
-    implementation(Samples.SpringBoot.kotlinReflect)
-    implementation(Samples.SpringBoot.springBootStarterJdbc)
+    implementation(libs.sample.springBoot.starterSecurity)
+    implementation(libs.sample.springBoot.starterWeb)
+    implementation(libs.sample.springBoot.starterWebflux)
+    implementation(libs.sample.springBoot.starterAop)
+    implementation(libs.sample.springBoot.aspectj)
+    implementation(libs.sample.springBoot.starter)
+    implementation(libs.sample.springBoot.kotlinReflect)
+    implementation(libs.sample.springBoot.starterJdbc)
     implementation(kotlin(Samples.SpringBoot.kotlinStdLib, KotlinCompilerVersion.VERSION))
 
-    runtimeOnly(Samples.SpringBoot.hsqldb)
-    testImplementation(Samples.SpringBoot.springBootStarterTest) {
+    runtimeOnly(libs.sample.springBoot.hsqldb)
+    testImplementation(libs.sample.springBoot.starterTest) {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
 }

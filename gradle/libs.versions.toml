@@ -1,0 +1,97 @@
+[versions]
+kotlin = "1.8.20"
+agp = "7.4.0"
+
+asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
+sqlite = "2.1.0"
+sentry = "6.31.0"
+
+sampleCoroutines = "1.5.2"
+sampleRoom = "2.5.0"
+sampleRetrofit = "2.9.0"
+sampleSpringBoot = "2.7.4"
+
+[plugins]
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+dokka = { id = "org.jetbrains.dokka", version = "1.8.10" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "10.2.1" }
+groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.2" }
+shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }
+# do not upgrade `mavenPublish` to 0.18.0, it does not generate the pom-default.xml and module.json under
+# build/publications/maven
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.17.0" }
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
+buildConfig = { id = "com.github.gmazzo.buildconfig", version = "3.1.0" }
+springBoot = { id = "org.springframework.boot", version = "2.7.4" }
+springDependencyManagement = { id = "io.spring.dependency-management", version = "1.0.11.RELEASE" }
+
+[libraries]
+junit = { group = "junit", name = "junit", version = "4.13.2" }
+proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.1.0" }
+# this allows us to develop against a fixed version of Gradle, as opposed to depending on the
+# locally available version. kotlin-gradle-plugin follows the same approach.
+# More info: https://docs.nokee.dev/manual/gradle-plugin-development-plugin.html
+gradleApi = { group = "dev.gradleplugins", name = "gradle-api", version = "7.6" }
+agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable" }
+autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.0.1" }
+autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.0.1" }
+kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
+kotlinCompilTesting = { group = "com.github.tschuchortdev", name = "kotlin-compile-testing", version = "1.5.0" }
+composeDesktop = { group = "org.jetbrains.compose.desktop", name = "desktop", version = "1.4.0" }
+
+# bytecode instrumentation
+asm = { group = "org.ow2.asm", name = "asm-util", version.ref = "asm" }
+asmCommons = { group = "org.ow2.asm", name = "asm-commons", version.ref = "asm" }
+sqlite = { group = "androidx.sqlite", name = "sqlite", version.ref = "sqlite" }
+sqliteFramework = { group = "androidx.sqlite", name = "sqlite-framework", version.ref = "sqlite" }
+sentry = { group = "io.sentry", name = "sentry", version.ref = "sentry" }
+sentryAndroid = { group = "io.sentry", name = "sentry-android", version.ref = "sentry" }
+sentryAndroidOkhttp = { group = "io.sentry", name = "sentry-android-okhttp", version.ref = "sentry" }
+
+# test
+mockitoKotlin = { group = "com.nhaarman.mockitokotlin2", name = "mockito-kotlin", version = "2.2.0" }
+arscLib = { group = "io.github.reandroid", name = "ARSCLib", version = "1.1.4" }
+zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.5" }
+
+# samples
+sample-androidx-recyclerView = "androidx.recyclerview:recyclerview:1.2.0"
+sample-androidx-lifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
+sample-androidx-appcompat = "androidx.appcompat:appcompat:1.2.0"
+
+sample-androidx-composeRuntime = "androidx.compose.runtime:runtime:1.1.1"
+sample-androidx-composeNavigation = "androidx.navigation:navigation-compose:2.5.2"
+sample-androidx-composeActivity = "androidx.activity:activity-compose:1.4.0"
+sample-androidx-composeFoundation = "androidx.compose.foundation:foundation:1.2.1"
+sample-androidx-composeFoundationLayout = "androidx.compose.foundation:foundation-layout:1.2.1"
+
+sample-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "sampleCoroutines" }
+sample-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "sampleCoroutines" }
+
+sample-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "sampleRoom" }
+sample-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "sampleRoom" }
+sample-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "sampleRoom" }
+sample-room-rxjava = { group = "androidx.room", name = "room-rxjava2", version.ref = "sampleRoom" }
+
+sample-retrofit-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "sampleRetrofit" }
+sample-retrofit-retrofitGson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "sampleRetrofit" }
+
+sample-timber-timber = { group = "com.jakewharton.timber", name = "timber", version = "5.0.1" }
+
+sample-fragment-fragmentKtx = { group = "androidx.fragment", name = "fragment-ktx", version = "1.3.5" }
+
+sample-springBoot-starter = { group = "org.springframework.boot", name = "spring-boot-starter", version.ref = "sampleSpringBoot" }
+sample-springBoot-starterTest = { group = "org.springframework.boot", name = "spring-boot-starter-test", version.ref = "sampleSpringBoot" }
+sample-springBoot-starterWeb = { group = "org.springframework.boot", name = "spring-boot-starter-web", version.ref = "sampleSpringBoot" }
+sample-springBoot-starterWebflux = { group = "org.springframework.boot", name = "spring-boot-starter-webflux", version.ref = "sampleSpringBoot" }
+sample-springBoot-starterAop = { group = "org.springframework.boot", name = "spring-boot-starter-aop", version.ref = "sampleSpringBoot" }
+sample-springBoot-starterSecurity = { group = "org.springframework.boot", name = "spring-boot-starter-security", version.ref = "sampleSpringBoot" }
+sample-springBoot-starterJdbc = { group = "org.springframework.boot", name = "spring-boot-starter-jdbc", version.ref = "sampleSpringBoot" }
+sample-springBoot-hsqldb = "org.hsqldb:hsqldb:2.6.1"
+sample-springBoot-aspectj = { group = "org.aspectj", name = "aspectjweaver" }
+sample-springBoot-kotlinReflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect" }
+sample-springBoot-kotlinStdLib = { group = "org.jetbrains.kotlin", name = "stdlib-jdk8" }
