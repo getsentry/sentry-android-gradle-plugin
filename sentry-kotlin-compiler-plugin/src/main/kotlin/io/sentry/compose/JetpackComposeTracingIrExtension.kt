@@ -133,10 +133,10 @@ class JetpackComposeTracingIrExtension(
 
                 val isComposable = declaration.symbol.owner.hasAnnotation(composableAnnotation)
 
-                val isAndroidXPackage = declaration.getPackageFragment().fqName.asString()
+                val isAndroidXPackage = declaration.getPackageFragment().packageFqName.asString()
                     .startsWith("androidx")
 
-                val isSentryPackage = declaration.getPackageFragment().fqName.asString()
+                val isSentryPackage = declaration.getPackageFragment().packageFqName.asString()
                     .startsWith("io.sentry.compose")
 
                 var modifierAdded = false
