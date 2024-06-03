@@ -56,7 +56,8 @@ class JetpackComposeTracingIrExtension(
             return
         }
 
-        val modifierThenRefs = pluginContext.referenceFunctions(modifierClassId.callableId("then"))
+        val modifierThenRefs = pluginContext
+            .referenceFunctions(modifierClassId.callableId("then"))
         if (modifierThenRefs.isEmpty()) {
             messageCollector.report(
                 CompilerMessageSeverity.WARNING,
@@ -137,7 +138,9 @@ class JetpackComposeTracingIrExtension(
             }
 
             override fun visitCall(expression: IrCall): IrExpression {
-                val composableName = visitingFunctionNames.lastOrNull() ?: return super.visitCall(expression)
+                val composableName = visitingFunctionNames.lastOrNull() ?: return super.visitCall(
+                    expression
+                )
 
                 // avoid infinite recursion by instrumenting ourselves
                 val dispatchReceiver = expression.dispatchReceiver
@@ -157,8 +160,8 @@ class JetpackComposeTracingIrExtension(
                 return super.visitCall(expression)
             }
 
-            private fun wrapExpression(expression: IrExpression?, composableName: String): IrExpression {
-
+            private fun wrapExpression(expression: IrExpression?, composableName: String):
+                IrExpression {
                 // Case A: modifier is not supplied
                 // -> simply set our modifier as param
                 // e.g. BasicText(text = "abc")
@@ -171,10 +174,11 @@ class JetpackComposeTracingIrExtension(
                 // see https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/compiler/compiler-hosted/src/main/java/androidx/compose/compiler/plugins/kotlin/lower/ComposerParamTransformer.kt;l=287-298;drc=f0b820e062ac34044b43144a87617e90d74657f3
 
                 val overwriteModifier = expression == null ||
-                    (expression is IrComposite &&
-                        expression.origin == IrStatementOrigin.DEFAULT_VALUE &&
-                        expression.type.classFqName == kotlinNothing)
-
+                    (
+                        expression is IrComposite &&
+                            expression.origin == IrStatementOrigin.DEFAULT_VALUE &&
+                            expression.type.classFqName == kotlinNothing
+                        )
 
                 if (overwriteModifier) {
                     val sentryTagCall = IrCallImpl(
