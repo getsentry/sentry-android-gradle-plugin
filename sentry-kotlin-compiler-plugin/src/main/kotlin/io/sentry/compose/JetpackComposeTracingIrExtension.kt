@@ -20,8 +20,8 @@ import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.companionObject
 import org.jetbrains.kotlin.ir.util.defaultType
-import org.jetbrains.kotlin.ir.util.getPackageFragment
 import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
@@ -120,11 +120,10 @@ class JetpackComposeTracingIrExtension(
 
                 val isComposable = declaration.symbol.owner.hasAnnotation(composableAnnotation)
 
-                val isAndroidXPackage = declaration.getPackageFragment().packageFqName.asString()
-                    .startsWith("androidx")
+                val packageName = declaration.symbol.owner.parent.kotlinFqName.asString()
 
-                val isSentryPackage = declaration.getPackageFragment().packageFqName.asString()
-                    .startsWith("io.sentry.compose")
+                val isAndroidXPackage = packageName.startsWith("androidx")
+                val isSentryPackage = packageName.startsWith("io.sentry.compose")
 
                 if (isComposable && !isAndroidXPackage && !isSentryPackage) {
                     visitingFunctionNames.add(name)
