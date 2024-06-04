@@ -151,8 +151,7 @@ class JetpackComposeInstrumentationTest {
                 @Composable
                 fun NoModifier() {
                     // expected:
-                    // val sentryModifier = Modifier.sentryTag("NoModifier")
-                    // ComposableFunction(modifier = sentryModifier, text = ..
+                    // ComposableFunction(modifier = Modifier.sentryTag("NoModifier"), text = ..
                     ComposableFunction(
                         text = "No Modifier Argument"
                     )
@@ -190,8 +189,7 @@ class JetpackComposeInstrumentationTest {
                 fun ExistingModifier() {
                     ComposableFunction(
                         // expected:
-                        // val sentryModifier = Modifier.sentryTag("ExistingModifier")
-                        // val modifier = sentryModifier.then(Modifier.fillMaxSize().padding(8.dp))
+                        // val modifier = Modifier.sentryTag("ExistingModifier").then(Modifier.fillMaxSize().padding(8.dp))
                         modifier = Modifier.fillMaxSize().padding(8.dp),
                         text = "Existing Modifier"
                     )
@@ -230,8 +228,7 @@ class JetpackComposeInstrumentationTest {
                 fun ModifierAsParam(modifier : Modifier = Modifier.Companion) {
                     ComposableFunction(
                         // expected:
-                        // val sentryModifier = Modifier.sentryTag("ModifierAsParam")
-                        // val modifier = sentryModifier.then(modifier.fillMaxSize().padding(8.dp))
+                        // val modifier = Modifier.sentryTag("ModifierAsParam").then(modifier.fillMaxSize().padding(8.dp))
                         modifier = modifier.fillMaxSize().padding(8.dp),
                         text = "ModifierAsParam"
                     )

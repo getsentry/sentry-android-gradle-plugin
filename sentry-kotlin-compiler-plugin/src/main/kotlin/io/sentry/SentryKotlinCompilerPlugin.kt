@@ -14,7 +14,7 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 class SentryKotlinCompilerPlugin : CompilerPluginRegistrar() {
 
     override val supportsK2: Boolean
-        get() = false
+        get() = true
 
     override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
         val messageCollector = configuration.get(

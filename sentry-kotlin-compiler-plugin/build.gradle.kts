@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.8.20"
-    kotlin("kapt") version "1.8.20"
+    kotlin("jvm") version "1.9.24"
+    kotlin("kapt") version "1.9.24"
     id("distribution")
     id("com.vanniktech.maven.publish") version "0.17.0"
     id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
@@ -65,8 +65,12 @@ dependencies {
 
     testImplementation(kotlin("test-junit"))
     testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
-    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.5.0")
-    testImplementation("org.jetbrains.compose.desktop:desktop:1.4.0")
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.6.0")
+    testImplementation("org.jetbrains.compose.desktop:desktop:1.6.10")
+}
+
+kapt {
+    correctErrorTypes = true
 }
 
 plugins.withId("com.vanniktech.maven.publish.base") {
