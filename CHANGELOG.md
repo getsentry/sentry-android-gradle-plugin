@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix support for Kotlin K2 compiler plugin ([#720](https://github.com/getsentry/sentry-android-gradle-plugin/pull/720))
+
 ## 4.7.0
 
 ### Features
