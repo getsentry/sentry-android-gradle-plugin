@@ -3,21 +3,20 @@ package io.sentry.compose
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
+import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
+import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irGetObjectValue
+import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrComposite
 import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
-import org.jetbrains.kotlin.ir.expressions.impl.IrCallImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrGetObjectValueImpl
 import org.jetbrains.kotlin.ir.types.classFqName
-import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
-import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
+import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.util.companionObject
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.hasAnnotation
@@ -110,6 +109,7 @@ class JetpackComposeTracingIrExtension(
 
             // a stack of the function names
             private var visitingFunctionNames = ArrayDeque<String?>()
+            private var visitingDeclarationIrBuilder = ArrayDeque<DeclarationIrBuilder?>()
 
             override fun visitFunctionNew(declaration: IrFunction): IrStatement {
                 val anonymous = declaration.name == SpecialNames.ANONYMOUS
@@ -128,17 +128,25 @@ class JetpackComposeTracingIrExtension(
 
                 if (isComposable && !isAndroidXPackage && !isSentryPackage) {
                     visitingFunctionNames.add(name)
+                    visitingDeclarationIrBuilder.add(
+                        DeclarationIrBuilder(pluginContext, declaration.symbol)
+                    )
                 } else {
                     visitingFunctionNames.add(null)
+                    visitingDeclarationIrBuilder.add(null)
                 }
                 val irStatement = super.visitFunctionNew(declaration)
 
                 visitingFunctionNames.removeLast()
+                visitingDeclarationIrBuilder.removeLast()
                 return irStatement
             }
 
             override fun visitCall(expression: IrCall): IrExpression {
                 val composableName = visitingFunctionNames.lastOrNull() ?: return super.visitCall(
+                    expression
+                )
+                val builder = visitingDeclarationIrBuilder.lastOrNull() ?: return super.visitCall(
                     expression
                 )
 
@@ -154,65 +162,38 @@ class JetpackComposeTracingIrExtension(
                     val valueParameter = expression.symbol.owner.valueParameters[idx]
                     if (valueParameter.type.classFqName == modifierClassFqName) {
                         val argument = expression.getValueArgument(idx)
-                        expression.putValueArgument(idx, wrapExpression(argument, composableName))
+                        expression.putValueArgument(
+                            idx,
+                            wrapExpression(argument, composableName, builder)
+                        )
                     }
                 }
                 return super.visitCall(expression)
             }
 
-            private fun wrapExpression(expression: IrExpression?, composableName: String):
+            private fun wrapExpression(
+                expression: IrExpression?,
+                composableName: String,
+                builder: DeclarationIrBuilder
+            ):
                 IrExpression {
-                // Case A: modifier is not supplied
-                // -> simply set our modifier as param
-                // e.g. BasicText(text = "abc")
-                // into BasicText(text = "abc", modifier = Modifier.sentryTag("<composable>")
-
-                // we can safely set the sentryModifier if there's no value parameter provided
-                // but in case the Jetpack Compose Compiler plugin runs before us,
-                // it will inject all default value parameters as actual parameters using IrComposite
-                // hence we need to cover this case and overwrite the composite default/null value with sentryModifier
-                // see https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/compiler/compiler-hosted/src/main/java/androidx/compose/compiler/plugins/kotlin/lower/ComposerParamTransformer.kt;l=287-298;drc=f0b820e062ac34044b43144a87617e90d74657f3
-
                 val overwriteModifier = expression == null ||
-                    (
-                        expression is IrComposite &&
-                            expression.origin == IrStatementOrigin.DEFAULT_VALUE &&
-                            expression.type.classFqName == kotlinNothing
-                        )
+                    (expression is IrComposite && expression.type.classFqName == kotlinNothing)
 
                 if (overwriteModifier) {
-                    val sentryTagCall = IrCallImpl(
-                        SYNTHETIC_OFFSET,
-                        SYNTHETIC_OFFSET,
-                        modifierType,
-                        sentryModifierTagFunctionRef,
-                        0,
-                        1,
-                        null,
-                        null
-                    ).also {
-                        it.extensionReceiver = IrGetObjectValueImpl(
-                            SYNTHETIC_OFFSET,
-                            SYNTHETIC_OFFSET,
-                            IrSimpleTypeImpl(
-                                modifierCompanionClassRef,
-                                false,
-                                emptyList(),
-                                emptyList()
-                            ),
-                            modifierCompanionClassRef
-                        )
-                        it.putValueArgument(
-                            0,
-                            IrConstImpl.string(
-                                SYNTHETIC_OFFSET,
-                                SYNTHETIC_OFFSET,
-                                pluginContext.irBuiltIns.stringType,
-                                composableName
-                            )
-                        )
-                    }
-                    return sentryTagCall
+                    // Case A: modifier is not supplied
+                    // -> simply set our modifier as param
+                    // e.g. BasicText(text = "abc")
+                    // into BasicText(text = "abc", modifier = Modifier.sentryTag("<composable>")
+
+                    // we can safely set the sentryModifier if there's no value parameter provided
+                    // but in case the Jetpack Compose Compiler plugin runs before us,
+                    // it will inject all default value parameters as actual parameters using IrComposite
+                    // hence we need to cover this case and overwrite the composite default/null value with sentryModifier
+                    // see https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/compiler/compiler-hosted/src/main/java/androidx/compose/compiler/plugins/kotlin/lower/ComposerParamTransformer.kt;l=287-298;drc=f0b820e062ac34044b43144a87617e90d74657f3
+
+                    // Modifier.sentryTag()
+                    return generateSentryTagCall(builder, composableName)
                 } else {
                     // Case B: modifier is already supplied
                     // -> chain the modifiers
@@ -221,53 +202,43 @@ class JetpackComposeTracingIrExtension(
 
                     // wrap the call with the sentryTag modifier
 
-                    val sentryTagCall = IrCallImpl(
-                        SYNTHETIC_OFFSET,
-                        SYNTHETIC_OFFSET,
-                        modifierType,
-                        sentryModifierTagFunctionRef,
-                        0,
-                        1,
-                        null,
-                        null
-                    ).also {
-                        it.extensionReceiver = IrGetObjectValueImpl(
-                            SYNTHETIC_OFFSET,
-                            SYNTHETIC_OFFSET,
-                            IrSimpleTypeImpl(
-                                modifierCompanionClassRef,
-                                false,
-                                emptyList(),
-                                emptyList()
-                            ),
-                            modifierCompanionClassRef
-                        )
-                        it.putValueArgument(
-                            0,
-                            IrConstImpl.string(
-                                SYNTHETIC_OFFSET,
-                                SYNTHETIC_OFFSET,
-                                pluginContext.irBuiltIns.stringType,
-                                composableName
-                            )
-                        )
-                    }
+                    // Modifier.sentryTag()
+                    val sentryTagCall = generateSentryTagCall(builder, composableName)
 
-                    val wrappedCall = IrCallImpl(
-                        SYNTHETIC_OFFSET,
-                        SYNTHETIC_OFFSET,
-                        modifierType,
+                    // Modifier.then()
+                    val thenCall = builder.irCall(
                         modifierThen,
-                        0,
+                        modifierType,
                         1,
-                        null,
+                        0,
                         null
                     )
-                    wrappedCall.putValueArgument(0, expression)
-                    wrappedCall.dispatchReceiver = sentryTagCall
+                    thenCall.putValueArgument(0, expression)
+                    thenCall.dispatchReceiver = sentryTagCall
 
-                    return wrappedCall
+                    return thenCall
                 }
+            }
+
+            private fun generateSentryTagCall(
+                builder: DeclarationIrBuilder,
+                composableName: String
+            ): IrCall {
+                val sentryTagCall = builder.irCall(
+                    sentryModifierTagFunctionRef,
+                    modifierType,
+                    1,
+                    0,
+                    null
+                ).also {
+                    it.extensionReceiver = builder.irGetObjectValue(
+                        type = modifierCompanionClassRef
+                            .createType(false, emptyList()),
+                        classSymbol = modifierCompanionClassRef
+                    )
+                    it.putValueArgument(0, builder.irString(composableName))
+                }
+                return sentryTagCall
             }
         }
 
