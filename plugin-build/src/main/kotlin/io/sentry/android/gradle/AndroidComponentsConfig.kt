@@ -160,22 +160,21 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 val compressTask: Task? = project.tasks.findByName(compressTaskName)
 
                 if (compressTask is CompressAssetsTask) {
-                    val compressedAssetsOutDir = compressTask.outputDir
-                    val debugMetaTask = debugMetaPropertiesTask.get()
-
                     compressTask.dependsOn(debugMetaPropertiesTask)
+
+                    val debugMetaOutput = debugMetaPropertiesTask.get().outputFile.get()
+                    val assetsFolder = compressTask.outputDir.asFile.get()
 
                     compressTask.doLast {
                         logger.info("Adding debug meta properties jar file")
 
-                        val fileContent =
-                            debugMetaTask.outputFile.get().asFile.readText(Charsets.UTF_8)
+                        val fileContent = debugMetaOutput.asFile.readText(Charsets.UTF_8)
 
                         // the compress task creates on jar per file,
                         // e.g. assets/example.txt -> assets/example.txt.jar
                         val zipEntryPath = "assets/$SENTRY_DEBUG_META_PROPERTIES_OUTPUT"
 
-                        val jarFile = File(compressedAssetsOutDir.asFile.get(), "$zipEntryPath.jar")
+                        val jarFile = File(assetsFolder, "$zipEntryPath.jar")
 
                         jarFile.parentFile?.mkdirs()
 
@@ -204,17 +203,15 @@ fun AndroidComponentsExtension<*, *, *>.configure(
 
                 if (preBundleTask is PerModuleBundleTask) {
                     preBundleTask.dependsOn(debugMetaPropertiesTask)
+
+                    val debugMetaOutput = debugMetaPropertiesTask.get().outputFile.get()
+                    val assetsFolder = preBundleTask.assetsFilesDirectory.asFile.get()
+
                     preBundleTask.doFirst {
                         logger.info("Adding debug meta properties file")
 
-                        val debugMetaTask = debugMetaPropertiesTask.get()
-
-                        val assetsFolder = preBundleTask.assetsFilesDirectory.asFile.get()
-                        val fileContent =
-                            debugMetaTask.outputFile.get().asFile.readText(Charsets.UTF_8)
-
-                        val outputFile =
-                            assetsFolder.resolve(SENTRY_DEBUG_META_PROPERTIES_OUTPUT)
+                        val fileContent = debugMetaOutput.asFile.readText(Charsets.UTF_8)
+                        val outputFile = assetsFolder.resolve(SENTRY_DEBUG_META_PROPERTIES_OUTPUT)
 
                         outputFile.parentFile.mkdirs()
                         outputFile.writeText(fileContent)
