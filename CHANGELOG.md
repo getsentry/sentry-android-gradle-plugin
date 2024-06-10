@@ -1,5 +1,9 @@
 # Changelog
 
+### Unreleased
+
+- Move debug meta injection into compressAssets/preBundle tasks ([#722](https://github.com/getsentry/sentry-android-gradle-plugin/pull/722))
+
 ## 4.7.1
 
 ### Fixes
