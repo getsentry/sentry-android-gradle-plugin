@@ -11,6 +11,7 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.tasks.CompressAssetsTask
+import com.android.build.gradle.internal.tasks.PerModuleBundleTask
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.zipflinger.BytesSource
 import com.android.zipflinger.ZipArchive
@@ -48,6 +49,7 @@ import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
@@ -153,17 +155,19 @@ fun AndroidComponentsExtension<*, *, *>.configure(
             // thus we hook into the asset compression task via doLast
             // and create a jar file with the debug meta properties
             project.afterEvaluate {
+                // for APKs, use the compress task
                 val compressTaskName = "compress${variant.name.capitalized}Assets"
-                val compressTask = project.tasks.findByName(compressTaskName)
-                    as CompressAssetsTask?
+                val compressTask: Task? = project.tasks.findByName(compressTaskName)
 
-                if (compressTask != null) {
+                if (compressTask is CompressAssetsTask) {
                     val compressedAssetsOutDir = compressTask.outputDir
                     val debugMetaTask = debugMetaPropertiesTask.get()
 
                     compressTask.dependsOn(debugMetaPropertiesTask)
 
                     compressTask.doLast {
+                        logger.info("Adding debug meta properties jar file")
+
                         val fileContent =
                             debugMetaTask.outputFile.get().asFile.readText(Charsets.UTF_8)
 
@@ -191,7 +195,32 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                         }
                     }
                 } else {
-                    logger.warn("$compressTaskName not found for variant ${variant.name}")
+                    logger.info("$compressTaskName not found for variant ${variant.name}")
+                }
+
+                // for AABs, hook into preBundle task, as there's no compress task
+                val preBundleTaskName = "build${variant.name.capitalized}PreBundle"
+                val preBundleTask: Task? = project.tasks.findByName(preBundleTaskName)
+
+                if (preBundleTask is PerModuleBundleTask) {
+                    preBundleTask.dependsOn(debugMetaPropertiesTask)
+                    preBundleTask.doFirst {
+                        logger.info("Adding debug meta properties file")
+
+                        val debugMetaTask = debugMetaPropertiesTask.get()
+
+                        val assetsFolder = preBundleTask.assetsFilesDirectory.asFile.get()
+                        val fileContent =
+                            debugMetaTask.outputFile.get().asFile.readText(Charsets.UTF_8)
+
+                        val outputFile =
+                            assetsFolder.resolve(SENTRY_DEBUG_META_PROPERTIES_OUTPUT)
+
+                        outputFile.parentFile.mkdirs()
+                        outputFile.writeText(fileContent)
+                    }
+                } else {
+                    logger.info("$preBundleTaskName not found for variant ${variant.name}")
                 }
             }
 
