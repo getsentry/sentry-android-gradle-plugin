@@ -10,7 +10,11 @@ import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppExtension
+import com.android.build.gradle.internal.tasks.CompressAssetsTask
 import com.android.build.gradle.internal.utils.setDisallowChanges
+import com.android.zipflinger.BytesSource
+import com.android.zipflinger.ZipArchive
+import io.sentry.android.gradle.SentryPlugin.Companion.logger
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
@@ -20,8 +24,9 @@ import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
+import io.sentry.android.gradle.tasks.CreateSentryMetaPropertiesTask
+import io.sentry.android.gradle.tasks.CreateSentryMetaPropertiesTask.Companion.SENTRY_DEBUG_META_PROPERTIES_OUTPUT
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
-import io.sentry.android.gradle.tasks.InjectSentryMetaPropertiesIntoAssetsTask
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
 import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
@@ -121,22 +126,74 @@ fun AndroidComponentsExtension<*, *, *>.configure(
                 sentryProject
             )
 
+            val debugMetaPropertiesTask = CreateSentryMetaPropertiesTask.register(
+                project,
+                extension,
+                sentryTelemetryProvider,
+                tasksGeneratingProperties,
+                variant.name.capitalized
+            )
+
             // we can't hook into asset generation, nor manifest merging, as all those tasks
             // are dependencies of the compilation / minification task
-            // and as our ProGuard UUID depends on minification itself; creating a
-            // circular dependency
-            // instead, we transform all assets and inject the properties file
-            sentryVariant?.assetsWiredWithDirectories(
-                InjectSentryMetaPropertiesIntoAssetsTask.register(
-                    project,
-                    extension,
-                    sentryTelemetryProvider,
-                    tasksGeneratingProperties,
-                    variant.name.capitalized
-                ),
-                InjectSentryMetaPropertiesIntoAssetsTask::inputDir,
-                InjectSentryMetaPropertiesIntoAssetsTask::outputDir
-            )
+            // and as our ProGuard UUID depends on minification itself this would create a
+            // circular task dependency
+
+            // we also can't hook into asset transformation, as this causes issues
+            // with other plugins which manually hook into the asset tasks, like e.g. flutter
+            // https://github.com/flutter/flutter/blob/6ce591f7ea3ba827d9340ce03f7d8e3a37ebb03a/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy#L1295-L1298
+            // causing the following error:
+            // task <x> uses this output of task ':app:copyFlutterAssetsDebug' without declaring an explicit or implicit dependency
+
+            // we also can't define a custom task which modifies the assets before packaging,
+            // as different tasks can't share the same output folder
+            // causing the following error:
+            // Task ‘<x>’ property ‘outputDir’ is already declared as an output property of task ‘:app:compressDebugAssets’ (type CompressAssetsTask).
+
+            // thus we hook into the asset compression task via doLast
+            // and create a jar file with the debug meta properties
+            project.afterEvaluate {
+                val compressTaskName = "compress${variant.name.capitalized}Assets"
+                val compressTask = project.tasks.findByName(compressTaskName)
+                    as CompressAssetsTask?
+
+                if (compressTask != null) {
+                    val compressedAssetsOutDir = compressTask.outputDir
+                    val debugMetaTask = debugMetaPropertiesTask.get()
+
+                    compressTask.dependsOn(debugMetaPropertiesTask)
+
+                    compressTask.doLast {
+                        val fileContent =
+                            debugMetaTask.outputFile.get().asFile.readText(Charsets.UTF_8)
+
+                        // the compress task creates on jar per file,
+                        // e.g. assets/example.txt -> assets/example.txt.jar
+                        val zipEntryPath = "assets/$SENTRY_DEBUG_META_PROPERTIES_OUTPUT"
+
+                        val jarFile = File(compressedAssetsOutDir.asFile.get(), "$zipEntryPath.jar")
+
+                        jarFile.parentFile?.mkdirs()
+
+                        if (jarFile.exists()) {
+                            jarFile.delete()
+                        }
+
+                        @Suppress("DEPRECATION")
+                        ZipArchive(jarFile).use { jar ->
+                            jar.add(
+                                BytesSource(
+                                    fileContent.toByteArray(),
+                                    zipEntryPath,
+                                    compressTask.compressionLevel.get()
+                                )
+                            )
+                        }
+                    }
+                } else {
+                    logger.warn("$compressTaskName not found for variant ${variant.name}")
+                }
+            }
 
             if (extension.tracingInstrumentation.enabled.get()) {
                 /**
