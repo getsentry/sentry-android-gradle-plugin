@@ -91,15 +91,21 @@ abstract class SentryModulesService :
             SentryVersions.VERSION_FILE_IO
         ) && parameters.features.get().contains(InstrumentationFeature.FILE_IO)
 
-    fun isOkHttpListenerInstrEnabled(): Boolean = sentryModules.isAtLeast(
+    fun isOkHttpListenerInstrEnabled(): Boolean = (sentryModules.isAtLeast(
         SentryModules.SENTRY_ANDROID_OKHTTP,
-        SentryVersions.VERSION_OKHTTP_LISTENER
-    ) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
-
-    fun isOkHttpInstrEnabled(): Boolean = sentryModules.isAtLeast(
-        SentryModules.SENTRY_ANDROID_OKHTTP,
+        SentryVersions.VERSION_ANDROID_OKHTTP_LISTENER
+    ) || sentryModules.isAtLeast(
+        SentryModules.SENTRY_OKHTTP,
         SentryVersions.VERSION_OKHTTP
-    ) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
+    )) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
+
+    fun isOkHttpInstrEnabled(): Boolean = (sentryModules.isAtLeast(
+        SentryModules.SENTRY_ANDROID_OKHTTP,
+        SentryVersions.VERSION_ANDROID_OKHTTP
+    ) || sentryModules.isAtLeast(
+        SentryModules.SENTRY_OKHTTP,
+        SentryVersions.VERSION_OKHTTP
+    )) && parameters.features.get().contains(InstrumentationFeature.OKHTTP)
 
     fun isComposeInstrEnabled(): Boolean =
         sentryModules.isAtLeast(

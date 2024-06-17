@@ -10,7 +10,8 @@ class OkHttpEventListenerMethodVisitor(
     apiVersion: Int,
     originalVisitor: MethodVisitor,
     instrumentableContext: MethodContext,
-    private val okHttpVersion: SemVer
+    private val okHttpVersion: SemVer,
+    private val useSentryAndroidOkHttp: Boolean
 ) : AdviceAdapter(
     apiVersion,
     originalVisitor,
@@ -19,6 +20,7 @@ class OkHttpEventListenerMethodVisitor(
     instrumentableContext.descriptor
 ) {
 
+    private val sentryOkHttpEventListener = if (useSentryAndroidOkHttp) "io/sentry/android/okhttp/SentryOkHttpEventListener" else "io/sentry/okhttp/SentryOkHttpEventListener"
     override fun onMethodEnter() {
         super.onMethodEnter()
         // Add the following call at the beginning of the constructor with the Builder parameter:
@@ -28,7 +30,7 @@ class OkHttpEventListenerMethodVisitor(
         visitVarInsn(Opcodes.ALOAD, 1)
 
         // Let's declare the SentryOkHttpEventListener variable
-        visitTypeInsn(Opcodes.NEW, "io/sentry/android/okhttp/SentryOkHttpEventListener")
+        visitTypeInsn(Opcodes.NEW, sentryOkHttpEventListener)
 
         // The SentryOkHttpEventListener constructor, which is called later, will consume the
         //  element without pushing anything back to the stack (<init> returns void).
@@ -62,7 +64,7 @@ class OkHttpEventListenerMethodVisitor(
         // Call SentryOkHttpEventListener constructor passing "eventListenerFactory" as parameter
         visitMethodInsn(
             Opcodes.INVOKESPECIAL,
-            "io/sentry/android/okhttp/SentryOkHttpEventListener",
+            sentryOkHttpEventListener,
             "<init>",
             "(Lokhttp3/EventListener\$Factory;)V",
             false

@@ -19,6 +19,8 @@ object Types {
 
     // OKHTTP
     val OKHTTP_INTERCEPTOR = Type.getType("Lokhttp3/Interceptor;")
-    val SENTRY_OKHTTP_INTERCEPTOR =
+    val SENTRY_ANDROID_OKHTTP_INTERCEPTOR =
         Type.getType("Lio/sentry/android/okhttp/SentryOkHttpInterceptor;")
+    val SENTRY_OKHTTP_INTERCEPTOR =
+        Type.getType("Lio/sentry/okhttp/SentryOkHttpInterceptor;")
 }

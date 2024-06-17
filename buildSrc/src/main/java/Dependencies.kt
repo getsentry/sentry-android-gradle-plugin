@@ -50,6 +50,7 @@ object Libs {
     const val SENTRY = "io.sentry:sentry:${LibsVersion.SENTRY}"
     const val SENTRY_ANDROID = "io.sentry:sentry-android:${LibsVersion.SENTRY}"
     const val SENTRY_ANDROID_OKHTTP = "io.sentry:sentry-android-okhttp:${LibsVersion.SENTRY}"
+    const val SENTRY_OKHTTP = "io.sentry:sentry-okhttp:${LibsVersion.SENTRY}"
 
     // test
     val MOCKITO_KOTLIN = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"

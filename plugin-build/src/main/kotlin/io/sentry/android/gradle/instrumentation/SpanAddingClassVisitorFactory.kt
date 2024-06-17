@@ -23,6 +23,8 @@ import io.sentry.android.gradle.instrumentation.util.isMinifiedClass
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.util.SemVer
+import io.sentry.android.gradle.util.SentryModules
+import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
@@ -85,6 +87,8 @@ abstract class SpanAddingClassVisitorFactory :
                 "okhttp"
             )
             val okHttpVersion = externalModules.getOrDefault(okHttpModule, SemVer())
+            val sentryOkhttpVersion = sentryModules.getOrDefault(SentryModules.SENTRY_OKHTTP, SemVer())
+            val useSentryAndroidOkHttp = sentryOkhttpVersion < SentryVersions.VERSION_OKHTTP
 
             SentryPlugin.logger.info { "Read sentry modules: $sentryModules" }
 
@@ -104,10 +108,10 @@ abstract class SpanAddingClassVisitorFactory :
                         sentryModulesService.isNewDatabaseInstrEnabled() ||
                             sentryModulesService.isOldDatabaseInstrEnabled()
                     },
-                    OkHttpEventListener(okHttpVersion).takeIf {
+                    OkHttpEventListener(useSentryAndroidOkHttp, okHttpVersion).takeIf {
                         sentryModulesService.isOkHttpListenerInstrEnabled()
                     },
-                    OkHttp().takeIf {
+                    OkHttp(useSentryAndroidOkHttp).takeIf {
                         sentryModulesService.isOkHttpInstrEnabled()
                     },
                     WrappingInstrumentable().takeIf {

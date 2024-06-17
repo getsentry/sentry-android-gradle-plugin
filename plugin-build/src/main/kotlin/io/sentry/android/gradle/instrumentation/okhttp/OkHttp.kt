@@ -10,7 +10,7 @@ import io.sentry.android.gradle.instrumentation.okhttp.visitor.ResponseWithInter
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 
-class OkHttp : ClassInstrumentable {
+class OkHttp(private val useSentryAndroidOkHttp: Boolean) : ClassInstrumentable {
     override val fqName: String get() = "RealCall"
 
     override fun getVisitor(
@@ -22,7 +22,7 @@ class OkHttp : ClassInstrumentable {
         apiVersion = apiVersion,
         classVisitor = originalVisitor,
         className = fqName.substringAfterLast('.'),
-        methodInstrumentables = listOf(ResponseWithInterceptorChain()),
+        methodInstrumentables = listOf(ResponseWithInterceptorChain(useSentryAndroidOkHttp)),
         parameters = parameters
     )
 
@@ -33,7 +33,7 @@ class OkHttp : ClassInstrumentable {
             data.currentClassData.className == "okhttp3.RealCall"
 }
 
-class ResponseWithInterceptorChain : MethodInstrumentable {
+class ResponseWithInterceptorChain(private val useSentryAndroidOkHttp: Boolean) : MethodInstrumentable {
     override val fqName: String get() = "getResponseWithInterceptorChain"
 
     override fun getVisitor(
@@ -46,7 +46,8 @@ class ResponseWithInterceptorChain : MethodInstrumentable {
         originalVisitor = originalVisitor,
         access = instrumentableContext.access,
         name = instrumentableContext.name,
-        descriptor = instrumentableContext.descriptor
+        descriptor = instrumentableContext.descriptor,
+        useSentryAndroidOkHttp = useSentryAndroidOkHttp
     )
 
     override fun isInstrumentable(data: MethodContext): Boolean {

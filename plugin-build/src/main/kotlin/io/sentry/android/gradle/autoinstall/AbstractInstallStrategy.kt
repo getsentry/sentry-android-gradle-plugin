@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.autoinstall
 
 import io.sentry.android.gradle.util.SemVer
+import io.sentry.android.gradle.util.debug
 import io.sentry.android.gradle.util.info
 import io.sentry.android.gradle.util.warn
 import org.gradle.api.artifacts.ComponentMetadataContext
@@ -18,6 +19,8 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
     protected open val maxSupportedThirdPartyVersion: SemVer? = null
 
     protected open val minSupportedSentryVersion: SemVer = SemVer(0, 0, 0)
+
+    protected open val maxSupportedSentryVersion: SemVer = SemVer(0, 0, 0)
 
     override fun execute(context: ComponentMetadataContext) {
         val autoInstallState = AutoInstallState.getInstance()
@@ -57,7 +60,28 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
                     logger.warn {
                         "$sentryModuleId won't be installed because the current version is " +
                             "lower than the minimum supported sentry version " +
-                            "($autoInstallState.sentryVersion)"
+                            "(${autoInstallState.sentryVersion})"
+                    }
+                    return
+                }
+            } catch (ex: IllegalArgumentException) {
+                logger.warn {
+                    "$sentryModuleId won't be installed because the provided " +
+                        "sentry version(${autoInstallState.sentryVersion}) could not be " +
+                        "processed as a semantic version."
+                }
+                return
+            }
+        }
+
+        if (maxSupportedSentryVersion.major > 0) {
+            try {
+                val sentrySemVersion = SemVer.parse(autoInstallState.sentryVersion)
+                if (sentrySemVersion > maxSupportedSentryVersion) {
+                    logger.debug {
+                        "$sentryModuleId won't be installed because the current version is " +
+                            "higher than the maximum supported sentry version " +
+                            "(${autoInstallState.sentryVersion})"
                     }
                     return
                 }
