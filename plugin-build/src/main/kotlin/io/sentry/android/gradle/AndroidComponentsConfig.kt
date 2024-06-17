@@ -126,17 +126,37 @@ fun AndroidComponentsExtension<*, *, *>.configure(
             // and as our ProGuard UUID depends on minification itself; creating a
             // circular dependency
             // instead, we transform all assets and inject the properties file
-            sentryVariant?.assetsWiredWithDirectories(
-                InjectSentryMetaPropertiesIntoAssetsTask.register(
+            sentryVariant?.apply {
+                val injectAssetsTask = InjectSentryMetaPropertiesIntoAssetsTask.register(
                     project,
                     extension,
                     sentryTelemetryProvider,
                     tasksGeneratingProperties,
                     variant.name.capitalized
-                ),
-                InjectSentryMetaPropertiesIntoAssetsTask::inputDir,
-                InjectSentryMetaPropertiesIntoAssetsTask::outputDir
-            )
+                )
+
+                assetsWiredWithDirectories(
+                    injectAssetsTask,
+                    InjectSentryMetaPropertiesIntoAssetsTask::inputDir,
+                    InjectSentryMetaPropertiesIntoAssetsTask::outputDir
+                )
+
+                // flutter doesn't use the transform API
+                // and manually wires up task dependencies,
+                // which causes errors like this:
+                //      Task ':app:injectSentryDebugMetaPropertiesIntoAssetsDebug' uses this output of task ':app:copyFlutterAssetsDebug' without declaring an explicit or implicit dependency
+                // thus we have to manually add the task dependency
+                project.afterEvaluate {
+                    // https://github.com/flutter/flutter/blob/6ce591f7ea3ba827d9340ce03f7d8e3a37ebb03a/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy#L1295-L1298
+                    project.tasks
+                        .findByName("copyFlutterAssets${variant.name.capitalized}")
+                        ?.let { flutterAssetsTask ->
+                            injectAssetsTask.configure { injectTask ->
+                                injectTask.dependsOn(flutterAssetsTask)
+                            }
+                        }
+                }
+            }
 
             if (extension.tracingInstrumentation.enabled.get()) {
                 /**
