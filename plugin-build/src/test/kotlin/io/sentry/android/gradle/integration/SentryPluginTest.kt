@@ -899,6 +899,29 @@ class SentryPluginTest :
         assertEquals(uuid1, uuid2)
     }
 
+    @Test
+    fun `copyFlutterAssetsDebug is wired up`() {
+        // first build it so it gets cached
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+            tasks.register("copyFlutterAssetsDebug") {
+                doFirst {
+                    println("Hello World")
+                }
+            }
+            """.trimIndent()
+        )
+
+        val build = runner.withArguments(":app:assembleDebug").build()
+
+        assertEquals(
+            TaskOutcome.SUCCESS,
+            build.task(":app:copyFlutterAssetsDebug")?.outcome,
+            build.output
+        )
+    }
+
     private fun applyUploadNativeSymbols() {
         appBuildFile.appendText(
             // language=Groovy
