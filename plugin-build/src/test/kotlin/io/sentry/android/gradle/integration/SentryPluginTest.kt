@@ -901,7 +901,14 @@ class SentryPluginTest :
 
     @Test
     fun `copyFlutterAssetsDebug is wired up`() {
-        // first build it so it gets cached
+        assumeThat(
+            "We only wire up the copyFlutterAssets task " +
+                "if the transform API (AGP >= 7.4.0) is used",
+            SemVer.parse(androidGradlePluginVersion) >= AgpVersions.VERSION_7_4_0,
+            `is`(true)
+        )
+
+        // when a flutter project is detected
         appBuildFile.appendText(
             // language=Groovy
             """
@@ -913,6 +920,8 @@ class SentryPluginTest :
             """.trimIndent()
         )
 
+        // then InjectSentryMetaPropertiesIntoAssetsTask should depend on it
+        // and thus copyFlutterAssetsDebug should be executed as part of assembleDebug
         val build = runner.withArguments(":app:assembleDebug").build()
 
         assertEquals(
