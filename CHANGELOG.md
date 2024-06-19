@@ -6,6 +6,12 @@
 
 - Add missing copyFlutterAssets task dependency for Flutter ([#723](https://github.com/getsentry/sentry-android-gradle-plugin/pull/723))
 
+### Dependencies
+
+- Bump Android SDK from v7.9.0 to v7.10.0 ([#721](https://github.com/getsentry/sentry-android-gradle-plugin/pull/721))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7100)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.9.0...7.10.0)
+
 ## 4.7.1
 
 ### Fixes
