@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Auto install and instrument sentry-okhttp instead of sentry-android-okhttp on v7+ ([#724](https://github.com/getsentry/sentry-android-gradle-plugin/pull/724))
+
 ## 4.7.1
 
 ### Fixes
