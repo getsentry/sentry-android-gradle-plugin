@@ -18,7 +18,11 @@ class ResponseWithInterceptorChainMethodVisitor(
 
     private var shouldInstrument = false
 
-    private val sentryOkInterceptor = if (useSentryAndroidOkHttp) Types.SENTRY_ANDROID_OKHTTP_INTERCEPTOR else Types.SENTRY_OKHTTP_INTERCEPTOR
+    private val sentryOkInterceptor = if (useSentryAndroidOkHttp) {
+        Types.SENTRY_ANDROID_OKHTTP_INTERCEPTOR
+    } else {
+        Types.SENTRY_OKHTTP_INTERCEPTOR
+    }
 
     override fun visitMethodInsn(
         opcode: Int,

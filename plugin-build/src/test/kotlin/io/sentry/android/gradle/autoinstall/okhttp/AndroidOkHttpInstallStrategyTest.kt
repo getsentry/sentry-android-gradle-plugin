@@ -21,7 +21,7 @@ import org.gradle.api.artifacts.VariantMetadata
 import org.junit.Test
 import org.slf4j.Logger
 
-class OkHttpInstallStrategyTest {
+class AndroidOkHttpInstallStrategyTest {
     class Fixture {
         val logger = CapturingTestLogger()
         val dependencies = mock<DirectDependenciesMetadata>()
@@ -41,8 +41,8 @@ class OkHttpInstallStrategyTest {
 
         fun getSut(
             okHttpVersion: String = "4.9.3",
-            sentryVersion: String = "7.0.0"
-        ): OkHttpInstallStrategy {
+            sentryVersion: String = "5.6.1"
+        ): AndroidOkHttpInstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
                 whenever(it.version).doReturn(okHttpVersion)
             }
@@ -52,7 +52,7 @@ class OkHttpInstallStrategyTest {
                 this.enabled = true
                 this.sentryVersion = sentryVersion
             }
-            return OkHttpInstallStrategyImpl(logger)
+            return AndroidOkHttpInstallStrategyImpl(logger)
         }
     }
 
@@ -65,7 +65,7 @@ class OkHttpInstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-okhttp won't be installed because the current " +
+                "[sentry] sentry-android-okhttp won't be installed because the current " +
                 "version is lower than the minimum supported version (3.13.0)"
         }
         verify(fixture.metadataDetails, never()).allVariants(any())
@@ -73,32 +73,34 @@ class OkHttpInstallStrategyTest {
 
     @Test
     fun `when sentry version is unsupported logs a message and does nothing`() {
-        val sut = fixture.getSut(sentryVersion = "6.33.0")
+        val sut = fixture.getSut(sentryVersion = "7.0.0")
         sut.execute(fixture.metadataContext)
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-okhttp won't be installed because the current sentry " +
-                "version is lower than the minimum supported sentry version (7.0.0)"
+                "[sentry] sentry-android-okhttp won't be installed because the current " +
+                "sentry version is higher than the maximum supported sentry version (6.9999.9999)"
         }
         verify(fixture.metadataDetails, never()).allVariants(any())
     }
 
     @Test
-    fun `installs sentry-okhttp with info message`() {
+    fun `installs sentry-android-okhttp with info message`() {
         val sut = fixture.getSut()
         sut.execute(fixture.metadataContext)
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-okhttp was successfully installed with version: 7.0.0"
+                "[sentry] sentry-android-okhttp was successfully installed with version: 5.6.1"
         }
         verify(fixture.dependencies).add(
             check<String> {
-                assertEquals("io.sentry:sentry-okhttp:7.0.0", it)
+                assertEquals("io.sentry:sentry-android-okhttp:5.6.1", it)
             }
         )
     }
 
-    private class OkHttpInstallStrategyImpl(logger: Logger) : OkHttpInstallStrategy(logger)
+    private class AndroidOkHttpInstallStrategyImpl(
+        logger: Logger
+    ) : AndroidOkHttpInstallStrategy(logger)
 }

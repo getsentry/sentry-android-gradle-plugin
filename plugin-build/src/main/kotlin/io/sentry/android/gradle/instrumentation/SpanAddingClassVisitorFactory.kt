@@ -87,7 +87,10 @@ abstract class SpanAddingClassVisitorFactory :
                 "okhttp"
             )
             val okHttpVersion = externalModules.getOrDefault(okHttpModule, SemVer())
-            val sentryOkhttpVersion = sentryModules.getOrDefault(SentryModules.SENTRY_OKHTTP, SemVer())
+            val sentryOkhttpVersion = sentryModules.getOrDefault(
+                SentryModules.SENTRY_OKHTTP,
+                SemVer()
+            )
             val useSentryAndroidOkHttp = sentryOkhttpVersion < SentryVersions.VERSION_OKHTTP
 
             SentryPlugin.logger.info { "Read sentry modules: $sentryModules" }

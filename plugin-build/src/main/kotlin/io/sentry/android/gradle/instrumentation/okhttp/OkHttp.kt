@@ -33,7 +33,9 @@ class OkHttp(private val useSentryAndroidOkHttp: Boolean) : ClassInstrumentable 
             data.currentClassData.className == "okhttp3.RealCall"
 }
 
-class ResponseWithInterceptorChain(private val useSentryAndroidOkHttp: Boolean) : MethodInstrumentable {
+class ResponseWithInterceptorChain(
+    private val useSentryAndroidOkHttp: Boolean
+) : MethodInstrumentable {
     override val fqName: String get() = "getResponseWithInterceptorChain"
 
     override fun getVisitor(

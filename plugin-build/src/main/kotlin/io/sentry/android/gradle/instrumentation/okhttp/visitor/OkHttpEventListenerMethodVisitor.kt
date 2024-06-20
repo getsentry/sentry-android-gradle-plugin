@@ -20,7 +20,12 @@ class OkHttpEventListenerMethodVisitor(
     instrumentableContext.descriptor
 ) {
 
-    private val sentryOkHttpEventListener = if (useSentryAndroidOkHttp) "io/sentry/android/okhttp/SentryOkHttpEventListener" else "io/sentry/okhttp/SentryOkHttpEventListener"
+    private val sentryOkHttpEventListener = if (useSentryAndroidOkHttp) {
+        "io/sentry/android/okhttp/SentryOkHttpEventListener"
+    } else {
+        "io/sentry/okhttp/SentryOkHttpEventListener"
+    }
+
     override fun onMethodEnter() {
         super.onMethodEnter()
         // Add the following call at the beginning of the constructor with the Builder parameter:

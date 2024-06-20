@@ -24,4 +24,9 @@ class CapturingTestLogger : BaseTestLogger() {
         capturedMessage = msg
         capturedThrowable = throwable
     }
+
+    override fun debug(msg: String, throwable: Throwable?) {
+        capturedMessage = msg
+        capturedThrowable = throwable
+    }
 }

@@ -58,9 +58,9 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
                 val sentrySemVersion = SemVer.parse(autoInstallState.sentryVersion)
                 if (sentrySemVersion < minSupportedSentryVersion) {
                     logger.warn {
-                        "$sentryModuleId won't be installed because the current version is " +
-                            "lower than the minimum supported sentry version " +
-                            "(${autoInstallState.sentryVersion})"
+                        "$sentryModuleId won't be installed because the current sentry version " +
+                            "is lower than the minimum supported sentry version " +
+                            "($minSupportedSentryVersion)"
                     }
                     return
                 }
@@ -79,9 +79,9 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
                 val sentrySemVersion = SemVer.parse(autoInstallState.sentryVersion)
                 if (sentrySemVersion > maxSupportedSentryVersion) {
                     logger.debug {
-                        "$sentryModuleId won't be installed because the current version is " +
-                            "higher than the maximum supported sentry version " +
-                            "(${autoInstallState.sentryVersion})"
+                        "$sentryModuleId won't be installed because the current sentry version " +
+                            "is higher than the maximum supported sentry version " +
+                            "($maxSupportedSentryVersion)"
                     }
                     return
                 }
