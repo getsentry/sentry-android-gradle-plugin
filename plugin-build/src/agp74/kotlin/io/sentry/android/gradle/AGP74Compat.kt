@@ -51,20 +51,24 @@ data class AndroidVariant74(
     ): Provider<out Collection<Directory>> {
         val javaProvider = variant.sources.java?.all
         val kotlinProvider = variant.sources.kotlin?.all
+
+        // we cannot use .zip to combine the sources, because of possibly variation of this bug:
+        // https://github.com/gradle/gradle/issues/23014, but using .map works just fine, so we just
+        // call .get() inside the .map, and the providers will be lazily evaluated this way.
         return when {
             javaProvider == null && kotlinProvider == null -> additionalSources
-            javaProvider == null -> kotlinProvider!!.zip(additionalSources) { kotlin, other ->
-                (kotlin + other).toSet()
+            javaProvider == null -> kotlinProvider!!.map { kotlin ->
+                (kotlin + additionalSources.get()).filterBuildConfig().toSet()
             }
-            kotlinProvider == null -> javaProvider.zip(additionalSources) { java, other ->
-                (java + other).toSet()
+            kotlinProvider == null -> javaProvider.map { java ->
+                (java + additionalSources.get()).filterBuildConfig().toSet()
             }
             else ->
-                javaProvider
-                    .zip(kotlinProvider) { java, kotlin ->
-                        (java + kotlin).filterBuildConfig().toSet()
-                    }
-                    .zip(additionalSources) { javaKotlin, other -> (javaKotlin + other).toSet() }
+               javaProvider.map { java ->
+                   (java + kotlinProvider.get() + additionalSources.get())
+                       .filterBuildConfig()
+                       .toSet()
+               }
         }
     }
 

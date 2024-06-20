@@ -266,7 +266,7 @@ class SentryPluginSourceContextTest :
               namespace 'com.example'
 
               buildFeatures {
-                buildConfig false
+                buildConfig true
               }
             }
 
@@ -297,6 +297,12 @@ class SentryPluginSourceContextTest :
             testProjectDir.root,
             "files/_/_/com/example/Example.jvm",
             ktContents
+        )
+        // do not bundle build config
+        verifySourceBundleContents(
+            testProjectDir.root,
+            "files/_/_/com/example/BuildConfig.jvm",
+            ""
         )
     }
 

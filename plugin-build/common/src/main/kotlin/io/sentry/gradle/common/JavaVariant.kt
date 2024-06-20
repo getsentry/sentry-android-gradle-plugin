@@ -38,7 +38,7 @@ data class JavaVariant(
                     projectDir.dir(javaDir.absolutePath)
                 }
             }
-            javaDirs.filterBuildConfig().toSet()
-        }.zip(additionalSources) { javaKotlin, other -> javaKotlin + other }
+            (javaDirs + additionalSources.get()).filterBuildConfig().toSet()
+        }
     }
 }
