@@ -64,11 +64,11 @@ data class AndroidVariant74(
                 (java + additionalSources.get()).filterBuildConfig().toSet()
             }
             else ->
-               javaProvider.map { java ->
-                   (java + kotlinProvider.get() + additionalSources.get())
-                       .filterBuildConfig()
-                       .toSet()
-               }
+                javaProvider.map { java ->
+                    (java + kotlinProvider.get() + additionalSources.get())
+                        .filterBuildConfig()
+                        .toSet()
+                }
         }
     }
 
