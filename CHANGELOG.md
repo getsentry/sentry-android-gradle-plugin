@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix source bundles with configuration cache on AGP 8+ ([#725](https://github.com/getsentry/sentry-android-gradle-plugin/pull/725)) 
+
 ## 4.8.0
 
 ### Fixes
