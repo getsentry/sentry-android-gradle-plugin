@@ -8,7 +8,6 @@ import javax.inject.Inject
 import org.gradle.api.artifacts.dsl.ComponentMetadataHandler
 import org.slf4j.Logger
 
-// @CacheableRule
 abstract class AndroidOkHttpInstallStrategy : AbstractInstallStrategy {
 
     constructor(logger: Logger) : super() {
