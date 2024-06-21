@@ -28,7 +28,7 @@ interface SentryVariant {
     ): Provider<out Collection<Directory>>
 }
 
-fun List<Directory>.filterBuildConfig(): List<Directory> =
+fun Collection<Directory>.filterBuildConfig(): Collection<Directory> =
     filterNot {
         // consider also AGP buildConfig folder as well as community plugins:
         // https://github.com/yshrsmz/BuildKonfig/blob/727f4f9e79e6726ab9489499ec6d92b6f6d56266/buildkonfig-gradle-plugin/src/main/kotlin/com/codingfeline/buildkonfig/gradle/BuildKonfigPlugin.kt#L47
