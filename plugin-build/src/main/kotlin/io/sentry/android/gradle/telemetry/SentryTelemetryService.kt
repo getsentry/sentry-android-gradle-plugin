@@ -11,6 +11,7 @@ import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SpanStatus
+import io.sentry.TransactionOptions
 import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.SentryPlugin.Companion.logger
@@ -196,7 +197,9 @@ abstract class SentryTelemetryService :
 
     fun startRun(transactionName: String) {
         hub.startSession()
-        transaction = hub.startTransaction(transactionName, "build", true)
+        val options = TransactionOptions()
+        options.isBindToScope = true
+        transaction = hub.startTransaction(transactionName, "build", options)
     }
 
     fun endRun() {

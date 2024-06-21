@@ -8,6 +8,7 @@ import org.objectweb.asm.commons.GeneratorAdapter
 import org.objectweb.asm.commons.Method
 
 class ResponseWithInterceptorChainMethodVisitor(
+    private val useSentryAndroidOkHttp: Boolean,
     api: Int,
     private val originalVisitor: MethodVisitor,
     access: Int,
@@ -16,6 +17,12 @@ class ResponseWithInterceptorChainMethodVisitor(
 ) : GeneratorAdapter(api, originalVisitor, access, name, descriptor) {
 
     private var shouldInstrument = false
+
+    private val sentryOkInterceptor = if (useSentryAndroidOkHttp) {
+        Types.SENTRY_ANDROID_OKHTTP_INTERCEPTOR
+    } else {
+        Types.SENTRY_OKHTTP_INTERCEPTOR
+    }
 
     override fun visitMethodInsn(
         opcode: Int,
@@ -69,7 +76,7 @@ class ResponseWithInterceptorChainMethodVisitor(
         storeLocal(interceptorIndex)
         loadLocal(interceptorIndex)
         checkCast(Types.OKHTTP_INTERCEPTOR)
-        instanceOf(Types.SENTRY_OKHTTP_INTERCEPTOR)
+        instanceOf(sentryOkInterceptor)
         ifZCmp(EQ, whileLabel)
         loadLocal(interceptorIndex)
         val ifLabel = Label()
@@ -83,10 +90,10 @@ class ResponseWithInterceptorChainMethodVisitor(
 
         originalVisitor.visitVarInsn(Opcodes.ALOAD, 1)
         checkCast(Types.COLLECTION)
-        newInstance(Types.SENTRY_OKHTTP_INTERCEPTOR)
+        newInstance(sentryOkInterceptor)
         dup()
         val sentryOkHttpCtor = Method.getMethod("void <init> ()")
-        invokeConstructor(Types.SENTRY_OKHTTP_INTERCEPTOR, sentryOkHttpCtor)
+        invokeConstructor(sentryOkInterceptor, sentryOkHttpCtor)
         val addInterceptor = Method.getMethod("boolean add (Object)")
         invokeInterface(Types.COLLECTION, addInterceptor)
         pop()

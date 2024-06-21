@@ -7,6 +7,7 @@ import io.sentry.android.gradle.autoinstall.jdbc.JdbcInstallStrategy
 import io.sentry.android.gradle.autoinstall.kotlin.KotlinExtensionsInstallStrategy
 import io.sentry.android.gradle.autoinstall.log4j2.Log4j2InstallStrategy
 import io.sentry.android.gradle.autoinstall.logback.LogbackInstallStrategy
+import io.sentry.android.gradle.autoinstall.okhttp.AndroidOkHttpInstallStrategy
 import io.sentry.android.gradle.autoinstall.okhttp.OkHttpInstallStrategy
 import io.sentry.android.gradle.autoinstall.override.WarnOnOverrideStrategy
 import io.sentry.android.gradle.autoinstall.quartz.QuartzInstallStrategy
@@ -25,6 +26,7 @@ import org.gradle.api.artifacts.DependencySet
 internal const val SENTRY_GROUP = "io.sentry"
 
 private val strategies = listOf(
+    AndroidOkHttpInstallStrategy.Registrar,
     OkHttpInstallStrategy.Registrar,
     SQLiteInstallStrategy.Registrar,
     TimberInstallStrategy.Registrar,

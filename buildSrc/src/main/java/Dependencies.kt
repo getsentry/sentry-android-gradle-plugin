@@ -29,7 +29,7 @@ object LibsVersion {
     const val JUNIT = "4.13.2"
     const val ASM = "9.4" // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
     const val SQLITE = "2.1.0"
-    const val SENTRY = "6.31.0"
+    const val SENTRY = "7.0.0"
 }
 
 object Libs {
@@ -50,6 +50,7 @@ object Libs {
     const val SENTRY = "io.sentry:sentry:${LibsVersion.SENTRY}"
     const val SENTRY_ANDROID = "io.sentry:sentry-android:${LibsVersion.SENTRY}"
     const val SENTRY_ANDROID_OKHTTP = "io.sentry:sentry-android-okhttp:${LibsVersion.SENTRY}"
+    const val SENTRY_OKHTTP = "io.sentry:sentry-okhttp:${LibsVersion.SENTRY}"
 
     // test
     val MOCKITO_KOTLIN = "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"

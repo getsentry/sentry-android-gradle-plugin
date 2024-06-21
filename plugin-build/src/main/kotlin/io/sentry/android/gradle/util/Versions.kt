@@ -23,13 +23,14 @@ internal object GradleVersions {
 internal object SentryVersions {
     internal val VERSION_DEFAULT = SemVer()
     internal val VERSION_PERFORMANCE = SemVer(4, 0, 0)
-    internal val VERSION_OKHTTP = SemVer(5, 0, 0)
+    internal val VERSION_ANDROID_OKHTTP = SemVer(5, 0, 0)
     internal val VERSION_FILE_IO = SemVer(5, 5, 0)
     internal val VERSION_COMPOSE = SemVer(6, 7, 0)
     internal val VERSION_LOGCAT = SemVer(6, 17, 0)
     internal val VERSION_APP_START = SemVer(7, 1, 0)
     internal val VERSION_SQLITE = SemVer(6, 21, 0)
-    internal val VERSION_OKHTTP_LISTENER = SemVer(6, 20, 0)
+    internal val VERSION_ANDROID_OKHTTP_LISTENER = SemVer(6, 20, 0)
+    internal val VERSION_OKHTTP = SemVer(7, 0, 0)
 }
 
 internal object SentryModules {
@@ -72,6 +73,10 @@ internal object SentryModules {
     internal val SENTRY_ANDROID_TIMBER = DefaultModuleIdentifier.newId(
         "io.sentry",
         "sentry-android-timber"
+    )
+    internal val SENTRY_OKHTTP = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-okhttp"
     )
     internal val SENTRY_KOTLIN_EXTENSIONS = DefaultModuleIdentifier.newId(
         "io.sentry",
