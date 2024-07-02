@@ -7,6 +7,12 @@
 - Auto install and instrument sentry-okhttp instead of sentry-android-okhttp on v7+ ([#724](https://github.com/getsentry/sentry-android-gradle-plugin/pull/724))
 - Fix source bundles with configuration cache on AGP 8+ ([#725](https://github.com/getsentry/sentry-android-gradle-plugin/pull/725)) 
 
+### Dependencies
+
+- Bump Android SDK from v7.10.0 to v7.11.0 ([#726](https://github.com/getsentry/sentry-android-gradle-plugin/pull/726))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7110)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.10.0...7.11.0)
+
 ## 4.8.0
 
 ### Fixes
