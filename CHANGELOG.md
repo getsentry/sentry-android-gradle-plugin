@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Only apply Jetpack Compose instrumentation if `Modifier` class is available ([#727](https://github.com/getsentry/sentry-android-gradle-plugin/pull/727))
+
 ## 4.9.0
 
 ### Fixes
