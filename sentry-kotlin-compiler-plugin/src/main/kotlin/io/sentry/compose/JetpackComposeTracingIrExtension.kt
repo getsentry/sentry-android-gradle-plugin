@@ -45,7 +45,7 @@ class JetpackComposeTracingIrExtension(
                 CompilerMessageSeverity.WARNING,
                 "No class definition of androidx.compose.ui.Modifier found, " +
                     "Sentry Kotlin Compiler plugin won't run. " +
-                    "Please ensure you're applying to plugin to a compose-enabled project."
+                    "Please ensure you're applying the plugin to a compose-enabled project."
             )
             return
         }
