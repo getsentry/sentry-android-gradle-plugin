@@ -39,8 +39,18 @@ class JetpackComposeTracingIrExtension(
         val modifierClassFqName = FqName("androidx.compose.ui.Modifier")
 
         val modifierClassId = FqName("androidx.compose.ui").classId("Modifier")
-        val modifierType = pluginContext.referenceClass(modifierClassId)!!.owner.defaultType
+        val modifierClassSymbol = pluginContext.referenceClass(modifierClassId)
+        if (modifierClassSymbol == null) {
+            messageCollector.report(
+                CompilerMessageSeverity.WARNING,
+                "No class definition of androidx.compose.ui.Modifier found, " +
+                    "Sentry Kotlin Compiler plugin won't run. " +
+                    "Please ensure you're applying the plugin to a compose-enabled project."
+            )
+            return
+        }
 
+        val modifierType = modifierClassSymbol.owner.defaultType
         val modifierCompanionClass =
             pluginContext.referenceClass(modifierClassId)?.owner?.companionObject()
         val modifierCompanionClassRef = modifierCompanionClass?.symbol
@@ -48,7 +58,7 @@ class JetpackComposeTracingIrExtension(
         if (modifierCompanionClass == null || modifierCompanionClassRef == null) {
             messageCollector.report(
                 CompilerMessageSeverity.WARNING,
-                "No definition of androidx.compose.ui.Modifier found, " +
+                "No type definition of androidx.compose.ui.Modifier found, " +
                     "Sentry Kotlin Compiler plugin won't run. " +
                     "Please ensure you're applying to plugin to a compose-enabled project."
             )
