@@ -6,6 +6,12 @@
 
 - Only apply Jetpack Compose instrumentation if `Modifier` class is available ([#727](https://github.com/getsentry/sentry-android-gradle-plugin/pull/727))
 
+### Dependencies
+
+- Bump CLI from v2.32.1 to v2.32.2 ([#732](https://github.com/getsentry/sentry-android-gradle-plugin/pull/732))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2322)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.32.1...2.32.2)
+
 ## 4.9.0
 
 ### Fixes
