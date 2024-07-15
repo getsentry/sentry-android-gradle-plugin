@@ -15,7 +15,7 @@
   SentryAndroid.init(context) { options ->
    
     // Currently under experimental options:
-    options.experimental.sessionReplay.sessionSampleRate = 1.0
+    options.experimental.sessionReplay.sessionSampleRate = 1.0 // We suggest 0.1 in production (10% sessions sampled)
     options.experimental.sessionReplay.errorSampleRate = 1.0
   
     // To change default redaction behavior (defaults to true)
