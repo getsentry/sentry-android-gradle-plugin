@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+### Features
+
+- Session Replay Public Beta ([#3339](https://github.com/getsentry/sentry-java/pull/3339))
+
+  The Gradle plugin pulls in the `io.sentry:sentry-android:7.12.0` dependency and enables Session Replay through it. To enable Replay use the `sessionReplay.sessionSampleRate` or `sessionReplay.errorSampleRate` experimental options.
+
+  ```kotlin
+  import io.sentry.SentryReplayOptions
+  import io.sentry.android.core.SentryAndroid
+
+  SentryAndroid.init(context) { options ->
+   
+    // Currently under experimental options:
+    options.experimental.sessionReplay.sessionSampleRate = 1.0
+    options.experimental.sessionReplay.errorSampleRate = 1.0
+  
+    // To change default redaction behavior (defaults to true)
+    options.experimental.sessionReplay.redactAllImages = true
+    options.experimental.sessionReplay.redactAllText = true
+  
+    // To change quality of the recording (defaults to MEDIUM)
+    options.experimental.sessionReplay.quality = SentryReplayOptions.SentryReplayQuality.MEDIUM // (LOW|MEDIUM|HIGH)
+  }
+  ```
+
+  To learn more visit [Sentry's Mobile Session Replay](https://docs.sentry.io/product/explore/session-replay/mobile/) documentation page.
+
 ### Fixes
 
 - Only apply Jetpack Compose instrumentation if `Modifier` class is available ([#727](https://github.com/getsentry/sentry-android-gradle-plugin/pull/727))
