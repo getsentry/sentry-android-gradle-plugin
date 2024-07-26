@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix plugin for spring-dependency-management 1.1.6 ([#741](https://github.com/getsentry/sentry-android-gradle-plugin/pull/741))
+
 ## 4.10.0
 
 ### Features
