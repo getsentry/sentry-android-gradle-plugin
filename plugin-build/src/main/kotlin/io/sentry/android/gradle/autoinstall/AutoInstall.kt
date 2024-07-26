@@ -48,6 +48,11 @@ private val strategies = listOf(
 fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boolean) {
     configurations.named("implementation").configure { configuration ->
         configuration.withDependencies { dependencies ->
+
+            project.dependencies.components { component ->
+                strategies.forEach { it.register(component) }
+            }
+
             // if autoInstallation is disabled, the autoInstallState will contain initial values
             // which all default to false, hence, the integrations won't be installed as well
             if (extension.autoInstallation.enabled.get()) {
@@ -68,9 +73,6 @@ fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boo
                 }
             }
         }
-    }
-    project.dependencies.components { component ->
-        strategies.forEach { it.register(component) }
     }
 }
 
