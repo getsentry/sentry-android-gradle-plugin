@@ -16,7 +16,7 @@ object BuildPluginsVersion {
     const val BUILDCONFIG = "3.1.0"
 
     const val SPRING_BOOT = "2.7.4"
-    const val SPRING_DEP_MANAGEMENT = "1.0.11.RELEASE"
+    const val SPRING_DEP_MANAGEMENT = "1.1.6"
 
 	// proguard does not support AGP 8 yet
     fun isProguardApplicable(): Boolean = VersionNumber.parse(AGP).major < 8
