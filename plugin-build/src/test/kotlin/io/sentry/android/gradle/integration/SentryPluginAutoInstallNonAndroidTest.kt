@@ -522,6 +522,38 @@ class SentryPluginAutoInstallNonAndroidTest :
         assertFalse { "FAILED" in result.output }
     }
 
+    @Test
+    fun `works with spring dependency management`() {
+        assumeThat(getJavaVersion() >= 17, `is`(true))
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+                id "java"
+                id "io.sentry.jvm.gradle"
+                id "io.spring.dependency-management" version "1.1.6"
+            }
+            dependencies {
+              implementation 'org.springframework.boot:spring-boot-starter:3.3.2'
+              implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+            }
+
+            sentry.autoInstallation.enabled = true
+            sentry.autoInstallation.sentryVersion = "7.12.0"
+            """.trimIndent()
+        )
+
+        val result = runListDependenciesTask()
+
+        assertFalse { "io.sentry:sentry-spring:7.12.0" in result.output }
+        assertFalse { "io.sentry:sentry-spring-boot:7.12.0" in result.output }
+        assertTrue { "io.sentry:sentry-spring-jakarta:7.12.0" in result.output }
+        assertTrue { "io.sentry:sentry-spring-boot-jakarta:7.12.0" in result.output }
+        assertTrue { "io.sentry:sentry-okhttp:7.12.0" in result.output }
+        // ensure all dependencies could be resolved
+        assertFalse { "FAILED" in result.output }
+    }
+
     private fun runListDependenciesTask() = runner
         .appendArguments("app:dependencies")
         .build()

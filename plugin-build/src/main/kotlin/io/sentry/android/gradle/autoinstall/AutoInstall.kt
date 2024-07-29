@@ -32,10 +32,6 @@ private val strategies = listOf(
     TimberInstallStrategy.Registrar,
     FragmentInstallStrategy.Registrar,
     ComposeInstallStrategy.Registrar,
-    Spring5InstallStrategy.Registrar,
-    Spring6InstallStrategy.Registrar,
-    SpringBoot2InstallStrategy.Registrar,
-    SpringBoot3InstallStrategy.Registrar,
     LogbackInstallStrategy.Registrar,
     Log4j2InstallStrategy.Registrar,
     JdbcInstallStrategy.Registrar,
@@ -45,9 +41,21 @@ private val strategies = listOf(
     WarnOnOverrideStrategy.Registrar
 )
 
+private val delayedStrategies = listOf(
+    Spring5InstallStrategy.Registrar,
+    Spring6InstallStrategy.Registrar,
+    SpringBoot2InstallStrategy.Registrar,
+    SpringBoot3InstallStrategy.Registrar,
+)
+
 fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boolean) {
     configurations.named("implementation").configure { configuration ->
         configuration.withDependencies { dependencies ->
+
+            project.dependencies.components { component ->
+                delayedStrategies.forEach { it.register(component) }
+            }
+
             // if autoInstallation is disabled, the autoInstallState will contain initial values
             // which all default to false, hence, the integrations won't be installed as well
             if (extension.autoInstallation.enabled.get()) {
