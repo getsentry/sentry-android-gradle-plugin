@@ -73,9 +73,11 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
                 output?.let { task.output.set(it) }
                 task.withSentryTelemetry(extension, sentryTelemetryProvider)
                 task.proguardMappingFileHash.set(
-                    proguardMappingFile?.map {
-                        it.files.joinToString { file ->
-                            if (file.exists()) file.contentHash() else STATIC_HASH
+                    proguardMappingFile?.flatMap {
+                        project.provider {
+                            it.files.joinToString { file ->
+                                if (file.exists()) file.contentHash() else STATIC_HASH
+                            }
                         }
                     } ?: project.provider { STATIC_HASH }
                 )
