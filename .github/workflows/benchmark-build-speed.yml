@@ -33,7 +33,7 @@ jobs:
           ./benchmark-build-speed.sh
 
       - name: Upload results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ github.sha }}
           path: ${{ github.workspace }}/scripts/benchmark/results/
