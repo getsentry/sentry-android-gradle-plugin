@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Lazily link generated uuid task with minify task ([#745](https://github.com/getsentry/sentry-android-gradle-plugin/pull/745))
+
 ## 4.10.0
 
 ### Features
