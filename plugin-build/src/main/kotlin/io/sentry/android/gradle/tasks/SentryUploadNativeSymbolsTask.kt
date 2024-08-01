@@ -11,10 +11,17 @@ import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.SentryVariant
 import java.io.File
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskProvider
 
 abstract class SentryUploadNativeSymbolsTask : SentryCliExecTask() {
@@ -29,8 +36,8 @@ abstract class SentryUploadNativeSymbolsTask : SentryCliExecTask() {
     @get:Input
     abstract val includeNativeSources: Property<Boolean>
 
-    @get:Internal
-    abstract val variantName: Property<String>
+    @get:InputFiles
+    abstract val nativeLibsDir: ConfigurableFileCollection
 
     override fun getArguments(args: MutableList<String>) {
         args.add("debug-files")
@@ -40,16 +47,7 @@ abstract class SentryUploadNativeSymbolsTask : SentryCliExecTask() {
             args.add("--no-upload")
         }
 
-        val sep = File.separator
-
-        // eg absoluteProjectFolderPath/build/intermediates/merged_native_libs/{variantName}
-        // where {variantName} could be debug/release...
-        args.add(
-            File(
-                project.buildDir,
-                "intermediates${sep}merged_native_libs${sep}${variantName.get()}"
-            ).absolutePath
-        )
+        args.add(nativeLibsDir.asPath)
 
         // Only include sources if includeNativeSources is enabled, as this is opt-in feature
         if (includeNativeSources.get()) {
@@ -74,6 +72,10 @@ abstract class SentryUploadNativeSymbolsTask : SentryCliExecTask() {
             autoUploadNativeSymbols: Property<Boolean>,
             taskSuffix: String = "",
         ): TaskProvider<SentryUploadNativeSymbolsTask> {
+            val nativeLibsDir = File(
+                project.buildDir,
+                "intermediates${File.separator}merged_native_libs${File.separator}${variantName}"
+            )
             val uploadSentryNativeSymbolsTask = project.tasks.register(
                 "uploadSentryNativeSymbolsFor$taskSuffix",
                 SentryUploadNativeSymbolsTask::class.java
@@ -84,12 +86,12 @@ abstract class SentryUploadNativeSymbolsTask : SentryCliExecTask() {
                 task.cliExecutable.set(cliExecutable)
                 task.sentryProperties.set(sentryProperties?.let { file -> project.file(file) })
                 task.includeNativeSources.set(includeNativeSources)
-                task.variantName.set(variantName)
                 task.sentryOrganization.set(sentryOrg)
                 task.sentryProject.set(sentryProject)
                 task.sentryAuthToken.set(sentryAuthToken)
                 task.sentryUrl.set(sentryUrl)
                 task.sentryTelemetryService.set(sentryTelemetryProvider)
+                task.nativeLibsDir.setFrom(nativeLibsDir)
                 task.asSentryCliExec()
                 task.withSentryTelemetry(extension, sentryTelemetryProvider)
             }

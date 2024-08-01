@@ -234,4 +234,37 @@ class SentryPluginConfigurationCacheTest :
         val run = runner.build()
         assertTrue(run.output) { "BUILD SUCCESSFUL" in run.output }
     }
+
+    @Test
+    fun `native symbols upload task respects configuration cache`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+            }
+
+            sentry {
+              includeNativeSources = true
+              uploadNativeSymbols = true
+              autoUploadProguardMapping = false
+              autoInstallation.enabled = false
+              telemetry = false
+            }
+            """.trimIndent()
+        )
+        runner.appendArguments(":app:assembleRelease")
+            .appendArguments("--configuration-cache")
+
+        val output = runner.build().output
+        assertTrue { "Configuration cache entry stored." in output }
+
+        val outputWithConfigCache = runner.build().output
+        assertTrue { "Configuration cache entry reused." in outputWithConfigCache }
+    }
 }
