@@ -130,10 +130,9 @@ abstract class BaseSentryPluginTest(
             .withArguments("--stacktrace")
             .withPluginClasspath()
             .withGradleVersion(gradleVersion)
-            .forwardOutput()
 //            .withDebug(true)
-//            .forwardStdOutput(writer)
-//            .forwardStdError(writer)
+            .forwardStdOutput(writer)
+            .forwardStdError(writer)
 
         if (SemVer.parse(gradleVersion) < GradleVersions.VERSION_7_5) {
             // for newer Gradle versions transforms are unlocked at config time instead of a task
