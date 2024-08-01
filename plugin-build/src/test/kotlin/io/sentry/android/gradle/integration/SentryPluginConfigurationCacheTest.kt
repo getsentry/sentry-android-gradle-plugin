@@ -237,6 +237,12 @@ class SentryPluginConfigurationCacheTest :
 
     @Test
     fun `native symbols upload task respects configuration cache`() {
+        assumeThat(
+            "SentryUploadNativeSymbolsTask only supports " +
+                "configuration cache from Gradle 7.5 onwards",
+            GradleVersions.CURRENT >= GradleVersions.VERSION_7_5,
+            `is`(true)
+        )
         appBuildFile.writeText(
             // language=Groovy
             """
@@ -252,6 +258,7 @@ class SentryPluginConfigurationCacheTest :
             sentry {
               includeNativeSources = true
               uploadNativeSymbols = true
+              includeProguardMapping = false
               autoUploadProguardMapping = false
               autoInstallation.enabled = false
               telemetry = false
