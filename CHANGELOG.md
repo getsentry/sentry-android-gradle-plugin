@@ -6,6 +6,7 @@
 
 - Fix plugin for spring-dependency-management 1.1.6 ([#741](https://github.com/getsentry/sentry-android-gradle-plugin/pull/741))
 - Make `SentryUploadNativeSymbolsTask` configuration-cache compatible ([#747](https://github.com/getsentry/sentry-android-gradle-plugin/pull/747))
+- Fix `permission denied` error when extracting sentry-cli concurrently ([#748](https://github.com/getsentry/sentry-android-gradle-plugin/pull/748))
 
 ### Dependencies
 
