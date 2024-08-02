@@ -78,10 +78,6 @@ abstract class SentryUploadNativeSymbolsTask : SentryCliExecTask() {
             autoUploadNativeSymbols: Property<Boolean>,
             taskSuffix: String = "",
         ): TaskProvider<SentryUploadNativeSymbolsTask> {
-            val nativeLibsDir = File(
-                project.buildDir,
-                "intermediates${File.separator}merged_native_libs${File.separator}$variantName"
-            )
             val uploadSentryNativeSymbolsTask = project.tasks.register(
                 "uploadSentryNativeSymbolsFor$taskSuffix",
                 SentryUploadNativeSymbolsTask::class.java
