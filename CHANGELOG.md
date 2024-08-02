@@ -4,7 +4,14 @@
 
 ### Fixes
 
+- Fix plugin for spring-dependency-management 1.1.6 ([#741](https://github.com/getsentry/sentry-android-gradle-plugin/pull/741))
 - Lazily link generated uuid task with minify task ([#745](https://github.com/getsentry/sentry-android-gradle-plugin/pull/745))
+
+### Dependencies
+
+- Bump CLI from v2.32.2 to v2.33.0 ([#738](https://github.com/getsentry/sentry-android-gradle-plugin/pull/738))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2330)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.32.2...2.33.0)
 
 ## 4.10.0
 
