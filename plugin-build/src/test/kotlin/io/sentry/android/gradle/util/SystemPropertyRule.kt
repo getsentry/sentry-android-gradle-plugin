@@ -10,30 +10,24 @@ import org.junit.runners.model.Statement
  */
 class SystemPropertyRule : TestRule {
 
-    private val retain = mutableMapOf<String, String?>()
+  private val retain = mutableMapOf<String, String?>()
 
-    override fun apply(statement: Statement, description: Description): Statement {
-        return object : Statement() {
-            override fun evaluate() {
-                val annotation = description
-                    .annotations
-                    .filterIsInstance<WithSystemProperty>()
-                    .firstOrNull()
+  override fun apply(statement: Statement, description: Description): Statement {
+    return object : Statement() {
+      override fun evaluate() {
+        val annotation =
+          description.annotations.filterIsInstance<WithSystemProperty>().firstOrNull()
 
-                annotation?.keys?.forEachIndexed { index, key ->
-                    System.getProperty(key).let { oldProperty ->
-                        retain[key] = oldProperty
-                    }
-                    System.setProperty(key, annotation.values[index])
-                }
-                try {
-                    statement.evaluate()
-                } finally {
-                    retain.forEach { (key, value) ->
-                        System.setProperty(key, value)
-                    }
-                }
-            }
+        annotation?.keys?.forEachIndexed { index, key ->
+          System.getProperty(key).let { oldProperty -> retain[key] = oldProperty }
+          System.setProperty(key, annotation.values[index])
         }
+        try {
+          statement.evaluate()
+        } finally {
+          retain.forEach { (key, value) -> System.setProperty(key, value) }
+        }
+      }
     }
+  }
 }

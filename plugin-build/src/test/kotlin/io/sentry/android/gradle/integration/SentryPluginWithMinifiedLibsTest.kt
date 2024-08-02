@@ -6,13 +6,13 @@ import org.gradle.util.GradleVersion
 import org.junit.Test
 
 class SentryPluginWithMinifiedLibsTest :
-    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
+  BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
-    @Test
-    fun `does not break when there is a minified jar dependency`() {
-        appBuildFile.appendText(
-            // language=Groovy
-            """
+  @Test
+  fun `does not break when there is a minified jar dependency`() {
+    appBuildFile.appendText(
+      // language=Groovy
+      """
             dependencies {
               implementation 'io.sentry:sentry-android-core:${BuildConfig.SdkVersion}'
               implementation 'com.google.android.play:core-ktx:1.8.1'
@@ -27,15 +27,14 @@ class SentryPluginWithMinifiedLibsTest :
             }
 
             sentry.tracingInstrumentation.forceInstrumentDependencies = true
-            """.trimIndent()
-        )
+            """
+        .trimIndent()
+    )
 
-        val result = runner
-            .appendArguments("app:assembleDebug")
-            .build()
+    val result = runner.appendArguments("app:assembleDebug").build()
 
-        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
-    }
+    assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
+  }
 
-    override val additionalRootProjectConfig: String = ""
+  override val additionalRootProjectConfig: String = ""
 }

@@ -5,12 +5,12 @@ import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
 
 class AnalyzingVisitor(
-    apiVersion: Int,
-    private val nextVisitor: (List<MethodNode>) -> ClassVisitor
+  apiVersion: Int,
+  private val nextVisitor: (List<MethodNode>) -> ClassVisitor,
 ) : ClassNode(apiVersion) {
 
-    override fun visitEnd() {
-        super.visitEnd()
-        accept(nextVisitor(methods))
-    }
+  override fun visitEnd() {
+    super.visitEnd()
+    accept(nextVisitor(methods))
+  }
 }

@@ -9,13 +9,13 @@ import org.junit.Assume.assumeThat
 import org.junit.Test
 
 class SentryPluginAutoInstallNonAndroidTest :
-    BaseSentryNonAndroidPluginTest(GradleVersion.current().version) {
+  BaseSentryNonAndroidPluginTest(GradleVersion.current().version) {
 
-    @Test
-    fun `adds sentry dependency`() {
-        appBuildFile.writeText(
-            // language=Groovy
-            """
+  @Test
+  fun `adds sentry dependency`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -24,21 +24,20 @@ class SentryPluginAutoInstallNonAndroidTest :
             sentry {
               autoInstallation.enabled = true
             }
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-        assertTrue {
-            "io.sentry:sentry:$SENTRY_SDK_VERSION" in result.output
-        }
-    }
-
-    @Test
-    fun `does not do anything when autoinstall is disabled`() {
-        assumeThat(getJavaVersion() >= 17, `is`(true))
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+    assertTrue { "io.sentry:sentry:$SENTRY_SDK_VERSION" in result.output }
+  }
+
+  @Test
+  fun `does not do anything when autoinstall is disabled`() {
+    assumeThat(getJavaVersion() >= 17, `is`(true))
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -51,30 +50,29 @@ class SentryPluginAutoInstallNonAndroidTest :
             }
 
             sentry.autoInstallation.enabled = false
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-        assertFalse { "io.sentry:sentry:$SENTRY_SDK_VERSION" in result.output }
-        assertFalse { "io.sentry:sentry-spring:$SENTRY_SDK_VERSION" in result.output }
-        assertFalse { "io.sentry:sentry-spring-jakarta:$SENTRY_SDK_VERSION" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot:$SENTRY_SDK_VERSION" in result.output }
-        assertFalse {
-            "io.sentry:sentry-spring-boot-jakarta:$SENTRY_SDK_VERSION" in result.output
-        }
-        assertFalse { "io.sentry:sentry-logback:$SENTRY_SDK_VERSION" in result.output }
-        assertFalse { "io.sentry:sentry-log4j2:$SENTRY_SDK_VERSION" in result.output }
-
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `uses user-provided sentryVersion when sentry is not available in direct deps`() {
-        assumeThat(getJavaVersion() >= 17, `is`(true))
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+    assertFalse { "io.sentry:sentry:$SENTRY_SDK_VERSION" in result.output }
+    assertFalse { "io.sentry:sentry-spring:$SENTRY_SDK_VERSION" in result.output }
+    assertFalse { "io.sentry:sentry-spring-jakarta:$SENTRY_SDK_VERSION" in result.output }
+    assertFalse { "io.sentry:sentry-spring-boot:$SENTRY_SDK_VERSION" in result.output }
+    assertFalse { "io.sentry:sentry-spring-boot-jakarta:$SENTRY_SDK_VERSION" in result.output }
+    assertFalse { "io.sentry:sentry-logback:$SENTRY_SDK_VERSION" in result.output }
+    assertFalse { "io.sentry:sentry-log4j2:$SENTRY_SDK_VERSION" in result.output }
+
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `uses user-provided sentryVersion when sentry is not available in direct deps`() {
+    assumeThat(getJavaVersion() >= 17, `is`(true))
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -90,27 +88,28 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry:6.28.0" in result.output }
-        assertTrue { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
-        assertTrue { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
-        assertTrue { "io.sentry:sentry-logback:6.28.0" in result.output }
-        assertTrue { "io.sentry:sentry-log4j2:6.28.0" in result.output }
-        assertTrue { "io.sentry:sentry-jdbc:6.10.0" in result.output }
-
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `logback is added`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry:6.28.0" in result.output }
+    assertTrue { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
+    assertTrue { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
+    assertTrue { "io.sentry:sentry-logback:6.28.0" in result.output }
+    assertTrue { "io.sentry:sentry-log4j2:6.28.0" in result.output }
+    assertTrue { "io.sentry:sentry-jdbc:6.10.0" in result.output }
+
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `logback is added`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -121,21 +120,22 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-logback:6.28.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `log4j2 is added`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-logback:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `log4j2 is added`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -146,22 +146,23 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-log4j2:6.28.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `jdbc is added for spring-jdbc`() {
-        assumeThat(getJavaVersion() >= 17, `is`(true))
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-log4j2:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `jdbc is added for spring-jdbc`() {
+    assumeThat(getJavaVersion() >= 17, `is`(true))
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -172,21 +173,22 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `jdbc is added for hsql`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `jdbc is added for hsql`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -197,21 +199,22 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `jdbc is added for mysql`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `jdbc is added for mysql`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -222,21 +225,22 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `jdbc is added for mariadb`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `jdbc is added for mariadb`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -247,21 +251,22 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `jdbc is added for postgres`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `jdbc is added for postgres`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -272,21 +277,22 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `jdbc is added for oracle ojdbc5`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `jdbc is added for oracle ojdbc5`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -297,21 +303,22 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `jdbc is added for oracle ojdbc11`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `jdbc is added for oracle ojdbc11`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -322,21 +329,22 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `kotlin-extensions is added`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-jdbc:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `kotlin-extensions is added`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -347,21 +355,22 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-kotlin-extensions:6.28.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `spring is added for Spring 5`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-kotlin-extensions:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `spring is added for Spring 5`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -372,25 +381,26 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-spring:6.28.0" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot:6.28.0" in result.output }
-        assertFalse { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `spring-jakarta is added for Spring 6`() {
-        assumeThat(getJavaVersion() >= 17, `is`(true))
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-spring:6.28.0" in result.output }
+    assertFalse { "io.sentry:sentry-spring-boot:6.28.0" in result.output }
+    assertFalse { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
+    assertFalse { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `spring-jakarta is added for Spring 6`() {
+    assumeThat(getJavaVersion() >= 17, `is`(true))
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -401,24 +411,25 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertFalse { "io.sentry:sentry-spring:6.28.0" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot:6.28.0" in result.output }
-        assertTrue { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `spring-boot-starter is added for Spring Boot 2`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertFalse { "io.sentry:sentry-spring:6.28.0" in result.output }
+    assertFalse { "io.sentry:sentry-spring-boot:6.28.0" in result.output }
+    assertTrue { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
+    assertFalse { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `spring-boot-starter is added for Spring Boot 2`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -429,25 +440,26 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-spring:6.28.0" in result.output }
-        assertTrue { "io.sentry:sentry-spring-boot:6.28.0" in result.output }
-        assertFalse { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `spring-boot-starter-jakarta is added for Spring Boot 3`() {
-        assumeThat(getJavaVersion() >= 17, `is`(true))
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-spring:6.28.0" in result.output }
+    assertTrue { "io.sentry:sentry-spring-boot:6.28.0" in result.output }
+    assertFalse { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
+    assertFalse { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `spring-boot-starter-jakarta is added for Spring Boot 3`() {
+    assumeThat(getJavaVersion() >= 17, `is`(true))
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -458,24 +470,25 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.28.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertFalse { "io.sentry:sentry-spring:6.28.0" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot:6.28.0" in result.output }
-        assertTrue { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
-        assertTrue { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `quartz is added`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertFalse { "io.sentry:sentry-spring:6.28.0" in result.output }
+    assertFalse { "io.sentry:sentry-spring-boot:6.28.0" in result.output }
+    assertTrue { "io.sentry:sentry-spring-jakarta:6.28.0" in result.output }
+    assertTrue { "io.sentry:sentry-spring-boot-jakarta:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `quartz is added`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -486,21 +499,22 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.30.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-quartz:6.30.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `spring-boot version is respected and not overridden when a direct dep`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-quartz:6.30.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `spring-boot version is respected and not overridden when a direct dep`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -512,22 +526,23 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.34.0"
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertFalse { "io.sentry:sentry-spring-boot:6.30.0 -> 6.34.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `works with spring dependency management`() {
-        assumeThat(getJavaVersion() >= 17, `is`(true))
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertFalse { "io.sentry:sentry-spring-boot:6.30.0 -> 6.34.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `works with spring dependency management`() {
+    assumeThat(getJavaVersion() >= 17, `is`(true))
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
                 id "java"
                 id "io.sentry.jvm.gradle"
@@ -540,34 +555,33 @@ class SentryPluginAutoInstallNonAndroidTest :
 
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "7.12.0"
-            """.trimIndent()
-        )
+            """
+        .trimIndent()
+    )
 
-        val result = runListDependenciesTask()
+    val result = runListDependenciesTask()
 
-        assertFalse { "io.sentry:sentry-spring:7.12.0" in result.output }
-        assertFalse { "io.sentry:sentry-spring-boot:7.12.0" in result.output }
-        assertTrue { "io.sentry:sentry-spring-jakarta:7.12.0" in result.output }
-        assertTrue { "io.sentry:sentry-spring-boot-jakarta:7.12.0" in result.output }
-        assertTrue { "io.sentry:sentry-okhttp:7.12.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
+    assertFalse { "io.sentry:sentry-spring:7.12.0" in result.output }
+    assertFalse { "io.sentry:sentry-spring-boot:7.12.0" in result.output }
+    assertTrue { "io.sentry:sentry-spring-jakarta:7.12.0" in result.output }
+    assertTrue { "io.sentry:sentry-spring-boot-jakarta:7.12.0" in result.output }
+    assertTrue { "io.sentry:sentry-okhttp:7.12.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  private fun runListDependenciesTask() = runner.appendArguments("app:dependencies").build()
+
+  private fun getJavaVersion(): Int {
+    var version = System.getProperty("java.version")
+    if (version.startsWith("1.")) {
+      version = version.substring(2, 3)
+    } else {
+      val dot = version.indexOf(".")
+      if (dot != -1) {
+        version = version.substring(0, dot)
+      }
     }
-
-    private fun runListDependenciesTask() = runner
-        .appendArguments("app:dependencies")
-        .build()
-
-    private fun getJavaVersion(): Int {
-        var version = System.getProperty("java.version")
-        if (version.startsWith("1.")) {
-            version = version.substring(2, 3)
-        } else {
-            val dot = version.indexOf(".")
-            if (dot != -1) {
-                version = version.substring(0, dot)
-            }
-        }
-        return version.toInt()
-    }
+    return version.toInt()
+  }
 }

@@ -15,59 +15,50 @@ import proguard.gradle.plugin.android.dsl.ProGuardAndroidExtension
 
 internal object SentryPluginUtils {
 
-    fun withLogging(
-        logger: Logger,
-        varName: String,
-        initializer: () -> TaskProvider<Task>?
-    ) = initializer().also {
-        logger.info { "$varName is ${it?.name}" }
-    }
+  fun withLogging(logger: Logger, varName: String, initializer: () -> TaskProvider<Task>?) =
+    initializer().also { logger.info { "$varName is ${it?.name}" } }
 
-    fun String.capitalizeUS() = if (isEmpty()) {
-        ""
+  fun String.capitalizeUS() =
+    if (isEmpty()) {
+      ""
     } else {
-        substring(0, 1).toUpperCase(Locale.US) + substring(1)
+      substring(0, 1).toUpperCase(Locale.US) + substring(1)
     }
 
-    fun isMinificationEnabled(
-        project: Project,
-        variant: SentryVariant,
-        dexguardEnabled: Boolean = false
-    ): Boolean {
-        if (dexguardEnabled) {
-            var isConfiguredWithGuardsquareProguard = false
-            project.plugins.withId("com.guardsquare.proguard") {
-                val proguardExtension = project.extensions.getByType(
-                    ProGuardAndroidExtension::class.java
-                )
-                val variantConfiguration = proguardExtension.configurations.findByName(variant.name)
-                isConfiguredWithGuardsquareProguard = variantConfiguration != null
-            }
-            val isConfiguredWithGuardsquareDexguard = isDexguardEnabledForVariant(
-                project,
-                variant.name
-            )
-            if (isConfiguredWithGuardsquareProguard || isConfiguredWithGuardsquareDexguard) {
-                return true
-            }
-        }
-        return variant.isMinifyEnabled
+  fun isMinificationEnabled(
+    project: Project,
+    variant: SentryVariant,
+    dexguardEnabled: Boolean = false,
+  ): Boolean {
+    if (dexguardEnabled) {
+      var isConfiguredWithGuardsquareProguard = false
+      project.plugins.withId("com.guardsquare.proguard") {
+        val proguardExtension = project.extensions.getByType(ProGuardAndroidExtension::class.java)
+        val variantConfiguration = proguardExtension.configurations.findByName(variant.name)
+        isConfiguredWithGuardsquareProguard = variantConfiguration != null
+      }
+      val isConfiguredWithGuardsquareDexguard = isDexguardEnabledForVariant(project, variant.name)
+      if (isConfiguredWithGuardsquareProguard || isConfiguredWithGuardsquareDexguard) {
+        return true
+      }
     }
+    return variant.isMinifyEnabled
+  }
 
-    fun getAndDeleteFile(property: Provider<RegularFile>): File {
-        val file = property.get().asFile
-        file.delete()
-        return file
-    }
+  fun getAndDeleteFile(property: Provider<RegularFile>): File {
+    val file = property.get().asFile
+    file.delete()
+    return file
+  }
 
-    fun isVariantAllowed(
-        extension: SentryPluginExtension,
-        variantName: String,
-        flavorName: String?,
-        buildType: String?
-    ): Boolean {
-        return variantName !in extension.ignoredVariants.get() &&
-            flavorName !in extension.ignoredFlavors.get() &&
-            buildType !in extension.ignoredBuildTypes.get()
-    }
+  fun isVariantAllowed(
+    extension: SentryPluginExtension,
+    variantName: String,
+    flavorName: String?,
+    buildType: String?,
+  ): Boolean {
+    return variantName !in extension.ignoredVariants.get() &&
+      flavorName !in extension.ignoredFlavors.get() &&
+      buildType !in extension.ignoredBuildTypes.get()
+  }
 }

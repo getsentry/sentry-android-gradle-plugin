@@ -7,18 +7,19 @@ import org.gradle.util.GradleVersion
 import org.junit.Test
 
 class SentryPluginKotlinCompilerTest :
-    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
+  BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
-    override val additionalBuildClasspath: String =
-        """
+  override val additionalBuildClasspath: String =
+    """
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.20"
-        """.trimIndent()
+        """
+      .trimIndent()
 
-    @Test
-    fun `does not break for simple compose apps`() {
-        appBuildFile.writeText(
-            // language=Groovy
-            """
+  @Test
+  fun `does not break for simple compose apps`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "com.android.application"
               id "kotlin-android"
@@ -56,15 +57,14 @@ class SentryPluginKotlinCompilerTest :
             sentry {
               autoUploadProguardMapping = false
             }
-            """.trimIndent()
-        )
+            """
+        .trimIndent()
+    )
 
-        testProjectDir.withDummyComposeFile()
+    testProjectDir.withDummyComposeFile()
 
-        val result = runner
-            .appendArguments("app:assembleRelease")
-            .build()
+    val result = runner.appendArguments("app:assembleRelease").build()
 
-        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
-    }
+    assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
+  }
 }

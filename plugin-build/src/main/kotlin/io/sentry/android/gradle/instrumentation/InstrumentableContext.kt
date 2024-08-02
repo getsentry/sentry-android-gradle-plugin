@@ -8,12 +8,12 @@ import com.android.build.gradle.internal.instrumentation.ClassesDataCache
 import com.android.build.gradle.internal.instrumentation.ClassesHierarchyResolver
 
 data class MethodContext(
-    val access: Int,
-    val name: String?,
-    val descriptor: String?,
-    val signature: String?,
-    val exceptions: List<String>?
+  val access: Int,
+  val name: String?,
+  val descriptor: String?,
+  val signature: String?,
+  val exceptions: List<String>?,
 )
 
 fun ClassData.toClassContext() =
-    ClassContextImpl(this, ClassesHierarchyResolver.Builder(ClassesDataCache()).build())
+  ClassContextImpl(this, ClassesHierarchyResolver.Builder(ClassesDataCache()).build())

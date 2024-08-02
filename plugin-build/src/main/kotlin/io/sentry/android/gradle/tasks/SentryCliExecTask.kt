@@ -16,117 +16,99 @@ import org.gradle.api.tasks.Optional
 
 abstract class SentryCliExecTask : Exec() {
 
-    @get:Input
-    @get:Optional
-    abstract val debug: Property<Boolean>
+  @get:Input @get:Optional abstract val debug: Property<Boolean>
 
-    @get:Input
-    abstract val cliExecutable: Property<String>
+  @get:Input abstract val cliExecutable: Property<String>
 
-    @get:InputFile
-    @get:Optional
-    abstract val sentryProperties: RegularFileProperty
+  @get:InputFile @get:Optional abstract val sentryProperties: RegularFileProperty
 
-    @get:Input
-    @get:Optional
-    abstract val sentryOrganization: Property<String>
+  @get:Input @get:Optional abstract val sentryOrganization: Property<String>
 
-    @get:Input
-    @get:Optional
-    abstract val sentryProject: Property<String>
+  @get:Input @get:Optional abstract val sentryProject: Property<String>
 
-    @get:Input
-    @get:Optional
-    abstract val sentryAuthToken: Property<String>
+  @get:Input @get:Optional abstract val sentryAuthToken: Property<String>
 
-    @get:Input
-    @get:Optional
-    abstract val sentryUrl: Property<String>
+  @get:Input @get:Optional abstract val sentryUrl: Property<String>
 
-    @get:Internal
-    abstract val sentryTelemetryService: Property<SentryTelemetryService>
+  @get:Internal abstract val sentryTelemetryService: Property<SentryTelemetryService>
 
-    private val buildDirectory: Provider<File> = project.layout.buildDirectory.asFile
+  private val buildDirectory: Provider<File> = project.layout.buildDirectory.asFile
 
-    override fun exec() {
-        computeCommandLineArgs().let {
-            commandLine(it)
-            logger.info { "cli args: $it" }
-        }
-        setSentryPropertiesEnv()
-        setSentryAuthTokenEnv()
-        super.exec()
+  override fun exec() {
+    computeCommandLineArgs().let {
+      commandLine(it)
+      logger.info { "cli args: $it" }
+    }
+    setSentryPropertiesEnv()
+    setSentryAuthTokenEnv()
+    super.exec()
+  }
+
+  abstract fun getArguments(args: MutableList<String>)
+
+  private fun preArgs(): List<String> {
+    val args = mutableListOf<String>()
+
+    sentryUrl.orNull?.let {
+      args.add("--url")
+      args.add(it)
     }
 
-    abstract fun getArguments(args: MutableList<String>)
-
-    private fun preArgs(): List<String> {
-        val args = mutableListOf<String>()
-
-        sentryUrl.orNull?.let {
-            args.add("--url")
-            args.add(it)
-        }
-
-        if (debug.getOrElse(false)) {
-            args.add("--log-level=debug")
-        }
-
-        sentryTelemetryService.orNull?.traceCli()?.let { args.addAll(it) }
-
-        return args
+    if (debug.getOrElse(false)) {
+      args.add("--log-level=debug")
     }
 
-    private fun postArgs(args: MutableList<String>): List<String> {
-        sentryOrganization.orNull?.let {
-            args.add("--org")
-            args.add(it)
-        }
+    sentryTelemetryService.orNull?.traceCli()?.let { args.addAll(it) }
 
-        sentryProject.orNull?.let {
-            args.add("--project")
-            args.add(it)
-        }
-        return args
+    return args
+  }
+
+  private fun postArgs(args: MutableList<String>): List<String> {
+    sentryOrganization.orNull?.let {
+      args.add("--org")
+      args.add(it)
     }
 
-    /**
-     * Computes the full list of arguments for the task
-     */
-    fun computeCommandLineArgs(): List<String> {
-        val args = mutableListOf<String>()
-        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            args.add(0, "cmd")
-            args.add(1, "/c")
-        }
+    sentryProject.orNull?.let {
+      args.add("--project")
+      args.add(it)
+    }
+    return args
+  }
 
-        val cliPath = SentryCliProvider.maybeExtractFromResources(
-            buildDirectory.get(),
-            cliExecutable.get()
-        )
-        args.add(cliPath)
-        args.addAll(preArgs())
-
-        getArguments(args)
-
-        return postArgs(args)
+  /** Computes the full list of arguments for the task */
+  fun computeCommandLineArgs(): List<String> {
+    val args = mutableListOf<String>()
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+      args.add(0, "cmd")
+      args.add(1, "/c")
     }
 
-    internal fun setSentryPropertiesEnv() {
-        val sentryProperties = sentryProperties.orNull
-        if (sentryProperties != null) {
-            environment("SENTRY_PROPERTIES", sentryProperties)
-        } else {
-            logger.info { "propsFile is null" }
-        }
-    }
+    val cliPath =
+      SentryCliProvider.maybeExtractFromResources(buildDirectory.get(), cliExecutable.get())
+    args.add(cliPath)
+    args.addAll(preArgs())
 
-    internal fun setSentryAuthTokenEnv() {
-        val sentryAuthToken = sentryAuthToken.orNull
-        if (sentryAuthToken != null) {
-            environment("SENTRY_AUTH_TOKEN", sentryAuthToken)
-        } else {
-            logger.info { "sentryAuthToken is null" }
-        }
+    getArguments(args)
+
+    return postArgs(args)
+  }
+
+  internal fun setSentryPropertiesEnv() {
+    val sentryProperties = sentryProperties.orNull
+    if (sentryProperties != null) {
+      environment("SENTRY_PROPERTIES", sentryProperties)
+    } else {
+      logger.info { "propsFile is null" }
     }
+  }
+
+  internal fun setSentryAuthTokenEnv() {
+    val sentryAuthToken = sentryAuthToken.orNull
+    if (sentryAuthToken != null) {
+      environment("SENTRY_AUTH_TOKEN", sentryAuthToken)
+    } else {
+      logger.info { "sentryAuthToken is null" }
+    }
+  }
 }

@@ -27,89 +27,81 @@ import org.gradle.api.tasks.TaskProvider
 
 abstract class BundleSourcesTask : SentryCliExecTask() {
 
-    init {
-        group = SENTRY_GROUP
-        description = "Creates a Sentry source bundle file."
+  init {
+    group = SENTRY_GROUP
+    description = "Creates a Sentry source bundle file."
 
-        @Suppress("LeakingThis")
-        onlyIf {
-            includeSourceContext.getOrElse(false) &&
-                !sourceDir.asFileTree.isEmpty
-        }
+    @Suppress("LeakingThis")
+    onlyIf { includeSourceContext.getOrElse(false) && !sourceDir.asFileTree.isEmpty }
+  }
+
+  @get:Input abstract val includeSourceContext: Property<Boolean>
+
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  @get:InputDirectory
+  abstract val sourceDir: DirectoryProperty
+
+  @get:InputFile abstract val bundleIdFile: RegularFileProperty
+
+  @get:OutputDirectory abstract val output: DirectoryProperty
+
+  override fun getArguments(args: MutableList<String>) {
+    val bundleId = readBundleIdFromFile(bundleIdFile.get().asFile)
+
+    args.add("debug-files")
+    args.add("bundle-jvm")
+    args.add("--output=${output.asFile.get().absolutePath}")
+    args.add("--debug-id=$bundleId")
+
+    args.add(sourceDir.get().asFile.absolutePath)
+  }
+
+  companion object {
+    internal fun readBundleIdFromFile(file: File): String {
+      val props = PropertiesUtil.load(file)
+      val bundleId: String? = props.getProperty(SENTRY_BUNDLE_ID_PROPERTY)
+      check(bundleId != null) { "$SENTRY_BUNDLE_ID_PROPERTY property is missing" }
+      return bundleId
     }
 
-    @get:Input
-    abstract val includeSourceContext: Property<Boolean>
-
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:InputDirectory
-    abstract val sourceDir: DirectoryProperty
-
-    @get:InputFile
-    abstract val bundleIdFile: RegularFileProperty
-
-    @get:OutputDirectory
-    abstract val output: DirectoryProperty
-
-    override fun getArguments(args: MutableList<String>) {
-        val bundleId = readBundleIdFromFile(bundleIdFile.get().asFile)
-
-        args.add("debug-files")
-        args.add("bundle-jvm")
-        args.add("--output=${output.asFile.get().absolutePath}")
-        args.add("--debug-id=$bundleId")
-
-        args.add(sourceDir.get().asFile.absolutePath)
-    }
-
-    companion object {
-        internal fun readBundleIdFromFile(file: File): String {
-            val props = PropertiesUtil.load(file)
-            val bundleId: String? = props.getProperty(SENTRY_BUNDLE_ID_PROPERTY)
-            check(bundleId != null) {
-                "$SENTRY_BUNDLE_ID_PROPERTY property is missing"
-            }
-            return bundleId
+    fun register(
+      project: Project,
+      extension: SentryPluginExtension,
+      sentryTelemetryProvider: Provider<SentryTelemetryService>?,
+      variant: SentryVariant,
+      generateDebugIdTask: TaskProvider<GenerateBundleIdTask>,
+      collectSourcesTask: TaskProvider<CollectSourcesTask>,
+      output: Provider<Directory>,
+      debug: Property<Boolean>,
+      cliExecutable: Provider<String>,
+      sentryOrg: Provider<String>,
+      sentryProject: Provider<String>,
+      sentryAuthToken: Property<String>,
+      sentryUrl: Property<String>,
+      includeSourceContext: Property<Boolean>,
+      taskSuffix: String = "",
+    ): TaskProvider<BundleSourcesTask> {
+      return project.tasks.register(
+        "sentryBundleSources$taskSuffix",
+        BundleSourcesTask::class.java,
+      ) { task ->
+        task.debug.set(debug)
+        task.sentryOrganization.set(sentryOrg)
+        task.sentryProject.set(sentryProject)
+        task.sentryAuthToken.set(sentryAuthToken)
+        task.sentryUrl.set(sentryUrl)
+        task.sourceDir.set(collectSourcesTask.flatMap { it.output })
+        task.cliExecutable.set(cliExecutable)
+        SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)?.let {
+          task.sentryProperties.set(File(it))
         }
-
-        fun register(
-            project: Project,
-            extension: SentryPluginExtension,
-            sentryTelemetryProvider: Provider<SentryTelemetryService>?,
-            variant: SentryVariant,
-            generateDebugIdTask: TaskProvider<GenerateBundleIdTask>,
-            collectSourcesTask: TaskProvider<CollectSourcesTask>,
-            output: Provider<Directory>,
-            debug: Property<Boolean>,
-            cliExecutable: Provider<String>,
-            sentryOrg: Provider<String>,
-            sentryProject: Provider<String>,
-            sentryAuthToken: Property<String>,
-            sentryUrl: Property<String>,
-            includeSourceContext: Property<Boolean>,
-            taskSuffix: String = ""
-        ): TaskProvider<BundleSourcesTask> {
-            return project.tasks.register(
-                "sentryBundleSources$taskSuffix",
-                BundleSourcesTask::class.java
-            ) { task ->
-                task.debug.set(debug)
-                task.sentryOrganization.set(sentryOrg)
-                task.sentryProject.set(sentryProject)
-                task.sentryAuthToken.set(sentryAuthToken)
-                task.sentryUrl.set(sentryUrl)
-                task.sourceDir.set(collectSourcesTask.flatMap { it.output })
-                task.cliExecutable.set(cliExecutable)
-                SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)?.let {
-                    task.sentryProperties.set(File(it))
-                }
-                task.bundleIdFile.set(generateDebugIdTask.flatMap { it.outputFile })
-                task.output.set(output)
-                task.includeSourceContext.set(includeSourceContext)
-                sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
-                task.asSentryCliExec()
-                task.withSentryTelemetry(extension, sentryTelemetryProvider)
-            }
-        }
+        task.bundleIdFile.set(generateDebugIdTask.flatMap { it.outputFile })
+        task.output.set(output)
+        task.includeSourceContext.set(includeSourceContext)
+        sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
+        task.asSentryCliExec()
+        task.withSentryTelemetry(extension, sentryTelemetryProvider)
+      }
     }
+  }
 }

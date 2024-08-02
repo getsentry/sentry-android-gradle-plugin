@@ -5,14 +5,13 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.gradle.util.GradleVersion
 
-class SentryPluginNonAndroidTest :
-    BaseSentryNonAndroidPluginTest(GradleVersion.current().version) {
+class SentryPluginNonAndroidTest : BaseSentryNonAndroidPluginTest(GradleVersion.current().version) {
 
-    @Test
-    fun `telemetry can be disabled`() {
-        appBuildFile.writeText(
-            // language=Groovy
-            """
+  @Test
+  fun `telemetry can be disabled`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "java"
               id "io.sentry.jvm.gradle"
@@ -30,23 +29,22 @@ class SentryPluginNonAndroidTest :
             sentry {
                 telemetry = false
             }
-            """.trimIndent()
-        )
-
-        val result = runner
-            .appendArguments("app:assemble", "--info")
-            .build()
-
-        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
-        assertTrue(result.output) { "Sentry telemetry has been disabled." in result.output }
-        assertFalse(result.output) { "sentry-cli" in result.output }
-    }
-
-    @Test
-    fun `telemetry is enabled by default`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runner.appendArguments("app:assemble", "--info").build()
+
+    assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
+    assertTrue(result.output) { "Sentry telemetry has been disabled." in result.output }
+    assertFalse(result.output) { "sentry-cli" in result.output }
+  }
+
+  @Test
+  fun `telemetry is enabled by default`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "java"
               id "io.sentry.jvm.gradle"
@@ -60,14 +58,13 @@ class SentryPluginNonAndroidTest :
               implementation 'org.postgresql:postgresql:42.6.0'
               implementation 'com.graphql-java:graphql-java:17.3'
             }
-            """.trimIndent()
-        )
+            """
+        .trimIndent()
+    )
 
-        val result = runner
-            .appendArguments("app:assemble", "--info")
-            .build()
+    val result = runner.appendArguments("app:assemble", "--info").build()
 
-        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
-        assertTrue(result.output) { "Sentry telemetry is enabled." in result.output }
-    }
+    assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
+    assertTrue(result.output) { "Sentry telemetry is enabled." in result.output }
+  }
 }

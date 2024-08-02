@@ -9,87 +9,91 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
 class SourceContext {
-    companion object {
-        fun register(
-            project: Project,
-            extension: SentryPluginExtension,
-            sentryTelemetryProvider: Provider<SentryTelemetryService>?,
-            variant: SentryVariant,
-            paths: OutputPaths,
-            sourceFiles: Provider<out Collection<Directory>>?,
-            cliExecutable: Provider<String>,
-            sentryOrg: String?,
-            sentryProject: String?,
-            taskSuffix: String
-        ): SourceContextTasks {
-            val generateBundleIdTask = GenerateBundleIdTask.register(
-                project,
-                extension,
-                sentryTelemetryProvider,
-                sourceFiles,
-                output = paths.bundleIdDir,
-                extension.includeSourceContext,
-                taskSuffix
-            )
+  companion object {
+    fun register(
+      project: Project,
+      extension: SentryPluginExtension,
+      sentryTelemetryProvider: Provider<SentryTelemetryService>?,
+      variant: SentryVariant,
+      paths: OutputPaths,
+      sourceFiles: Provider<out Collection<Directory>>?,
+      cliExecutable: Provider<String>,
+      sentryOrg: String?,
+      sentryProject: String?,
+      taskSuffix: String,
+    ): SourceContextTasks {
+      val generateBundleIdTask =
+        GenerateBundleIdTask.register(
+          project,
+          extension,
+          sentryTelemetryProvider,
+          sourceFiles,
+          output = paths.bundleIdDir,
+          extension.includeSourceContext,
+          taskSuffix,
+        )
 
-            val collectSourcesTask = CollectSourcesTask.register(
-                project,
-                extension,
-                sentryTelemetryProvider,
-                sourceFiles,
-                output = paths.sourceDir,
-                extension.includeSourceContext,
-                taskSuffix
-            )
+      val collectSourcesTask =
+        CollectSourcesTask.register(
+          project,
+          extension,
+          sentryTelemetryProvider,
+          sourceFiles,
+          output = paths.sourceDir,
+          extension.includeSourceContext,
+          taskSuffix,
+        )
 
-            val bundleSourcesTask = BundleSourcesTask.register(
-                project,
-                extension,
-                sentryTelemetryProvider,
-                variant,
-                generateBundleIdTask,
-                collectSourcesTask,
-                output = paths.bundleDir,
-                extension.debug,
-                cliExecutable,
-                sentryOrg?.let { project.provider { it } } ?: extension.org,
-                sentryProject?.let { project.provider { it } } ?: extension.projectName,
-                extension.authToken,
-                extension.url,
-                extension.includeSourceContext,
-                taskSuffix
-            )
+      val bundleSourcesTask =
+        BundleSourcesTask.register(
+          project,
+          extension,
+          sentryTelemetryProvider,
+          variant,
+          generateBundleIdTask,
+          collectSourcesTask,
+          output = paths.bundleDir,
+          extension.debug,
+          cliExecutable,
+          sentryOrg?.let { project.provider { it } } ?: extension.org,
+          sentryProject?.let { project.provider { it } } ?: extension.projectName,
+          extension.authToken,
+          extension.url,
+          extension.includeSourceContext,
+          taskSuffix,
+        )
 
-            val uploadSourceBundleTask = UploadSourceBundleTask.register(
-                project,
-                extension,
-                sentryTelemetryProvider,
-                variant,
-                bundleSourcesTask,
-                extension.debug,
-                cliExecutable,
-                extension.autoUploadSourceContext,
-                sentryOrg?.let { project.provider { it } } ?: extension.org,
-                sentryProject?.let { project.provider { it } } ?: extension.projectName,
-                extension.authToken,
-                extension.url,
-                extension.includeSourceContext,
-                taskSuffix
-            )
+      val uploadSourceBundleTask =
+        UploadSourceBundleTask.register(
+          project,
+          extension,
+          sentryTelemetryProvider,
+          variant,
+          bundleSourcesTask,
+          extension.debug,
+          cliExecutable,
+          extension.autoUploadSourceContext,
+          sentryOrg?.let { project.provider { it } } ?: extension.org,
+          sentryProject?.let { project.provider { it } } ?: extension.projectName,
+          extension.authToken,
+          extension.url,
+          extension.includeSourceContext,
+          taskSuffix,
+        )
 
-            return SourceContextTasks(
-                generateBundleIdTask,
-                collectSourcesTask,
-                bundleSourcesTask,
-                uploadSourceBundleTask
-            )
-        }
+      return SourceContextTasks(
+        generateBundleIdTask,
+        collectSourcesTask,
+        bundleSourcesTask,
+        uploadSourceBundleTask,
+      )
     }
+  }
 
-    class SourceContextTasks(
-        val generateBundleIdTask: TaskProvider<GenerateBundleIdTask>,
-        val collectSourcesTask: TaskProvider<CollectSourcesTask>,
-        val bundleSourcesTask: TaskProvider<BundleSourcesTask>,
-        val uploadSourceBundleTask: TaskProvider<UploadSourceBundleTask>
-    )
+  class SourceContextTasks(
+    val generateBundleIdTask: TaskProvider<GenerateBundleIdTask>,
+    val collectSourcesTask: TaskProvider<CollectSourcesTask>,
+    val bundleSourcesTask: TaskProvider<BundleSourcesTask>,
+    val uploadSourceBundleTask: TaskProvider<UploadSourceBundleTask>,
+  )
 }

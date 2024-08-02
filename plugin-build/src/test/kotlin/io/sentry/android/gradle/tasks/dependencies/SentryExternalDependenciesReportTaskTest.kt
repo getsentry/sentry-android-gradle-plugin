@@ -12,71 +12,73 @@ import org.junit.rules.TemporaryFolder
 
 class SentryExternalDependenciesReportTaskTest {
 
-    @get:Rule
-    val tempDir = TemporaryFolder()
+  @get:Rule val tempDir = TemporaryFolder()
 
-    @Test
-    fun `flattens transitive dependencies into a single sorted list`() {
-        val project = createRegularProject()
-        val output = tempDir.newFolder("dependencies")
+  @Test
+  fun `flattens transitive dependencies into a single sorted list`() {
+    val project = createRegularProject()
+    val output = tempDir.newFolder("dependencies")
 
-        val task: TaskProvider<SentryExternalDependenciesReportTask> = project.tasks.register(
-            "testDependenciesReport",
-            SentryExternalDependenciesReportTask::class.java
-        ) {
-            it.includeReport.set(true)
-            it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
-            it.output.set(project.layout.dir(project.provider { output }))
-        }
+    val task: TaskProvider<SentryExternalDependenciesReportTask> =
+      project.tasks.register(
+        "testDependenciesReport",
+        SentryExternalDependenciesReportTask::class.java,
+      ) {
+        it.includeReport.set(true)
+        it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
+        it.output.set(project.layout.dir(project.provider { output }))
+      }
 
-        task.get().action()
+    task.get().action()
 
-        output.verifyContents()
-    }
+    output.verifyContents()
+  }
 
-    @Test
-    fun `skips flat jars`() {
-        val project = createProjectWithFlatJars()
-        val output = tempDir.newFolder("dependencies")
+  @Test
+  fun `skips flat jars`() {
+    val project = createProjectWithFlatJars()
+    val output = tempDir.newFolder("dependencies")
 
-        val task: TaskProvider<SentryExternalDependenciesReportTask> = project.tasks.register(
-            "testDependenciesReport",
-            SentryExternalDependenciesReportTask::class.java
-        ) {
-            it.includeReport.set(true)
-            it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
-            it.output.set(project.layout.dir(project.provider { output }))
-        }
+    val task: TaskProvider<SentryExternalDependenciesReportTask> =
+      project.tasks.register(
+        "testDependenciesReport",
+        SentryExternalDependenciesReportTask::class.java,
+      ) {
+        it.includeReport.set(true)
+        it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
+        it.output.set(project.layout.dir(project.provider { output }))
+      }
 
-        task.get().action()
+    task.get().action()
 
-        val outputFile = File(output, SENTRY_DEPENDENCIES_REPORT_OUTPUT)
-        assertEquals("", outputFile.readText())
-    }
+    val outputFile = File(output, SENTRY_DEPENDENCIES_REPORT_OUTPUT)
+    assertEquals("", outputFile.readText())
+  }
 
-    @Test
-    fun `skips local modules and projects`() {
-        val project = createMultiModuleProject()
-        val output = tempDir.newFolder("dependencies")
+  @Test
+  fun `skips local modules and projects`() {
+    val project = createMultiModuleProject()
+    val output = tempDir.newFolder("dependencies")
 
-        val task: TaskProvider<SentryExternalDependenciesReportTask> = project.tasks.register(
-            "testDependenciesReport",
-            SentryExternalDependenciesReportTask::class.java
-        ) {
-            it.includeReport.set(true)
-            it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
-            it.output.set(project.layout.dir(project.provider { output }))
-        }
+    val task: TaskProvider<SentryExternalDependenciesReportTask> =
+      project.tasks.register(
+        "testDependenciesReport",
+        SentryExternalDependenciesReportTask::class.java,
+      ) {
+        it.includeReport.set(true)
+        it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
+        it.output.set(project.layout.dir(project.provider { output }))
+      }
 
-        task.get().action()
+    task.get().action()
 
-        val outputFile = File(output, SENTRY_DEPENDENCIES_REPORT_OUTPUT)
-        assertEquals("", outputFile.readText())
-    }
+    val outputFile = File(output, SENTRY_DEPENDENCIES_REPORT_OUTPUT)
+    assertEquals("", outputFile.readText())
+  }
 
-    private fun File.verifyContents() {
-        assertEquals(
-            """
+  private fun File.verifyContents() {
+    assertEquals(
+      """
             androidx.annotation:annotation:1.1.0
             androidx.arch.core:core-common:2.1.0
             androidx.collection:collection:1.0.0
@@ -88,64 +90,64 @@ class SentryExternalDependenciesReportTaskTest {
             androidx.versionedparcelable:versionedparcelable:1.1.0
             io.sentry:sentry-android-core:6.5.0
             io.sentry:sentry:6.5.0
-            """.trimIndent(),
-            File(this, SENTRY_DEPENDENCIES_REPORT_OUTPUT).readText()
-        )
+            """
+        .trimIndent(),
+      File(this, SENTRY_DEPENDENCIES_REPORT_OUTPUT).readText(),
+    )
+  }
+
+  private fun createRegularProject(): Project {
+    with(ProjectBuilder.builder().build()) {
+      plugins.apply("java")
+      plugins.apply("io.sentry.android.gradle")
+
+      repositories.mavenCentral()
+      repositories.google()
+
+      dependencies.add("implementation", "androidx.activity:activity:1.2.0")
+      dependencies.add("implementation", "io.sentry:sentry-android-core:6.5.0")
+      return this
     }
+  }
 
-    private fun createRegularProject(): Project {
-        with(ProjectBuilder.builder().build()) {
-            plugins.apply("java")
-            plugins.apply("io.sentry.android.gradle")
+  private fun createProjectWithFlatJars(): Project {
+    with(ProjectBuilder.builder().build()) {
+      plugins.apply("java")
+      plugins.apply("io.sentry.android.gradle")
 
-            repositories.mavenCentral()
-            repositories.google()
+      mkdir("libs")
+      file("libs/local.jar").apply { createNewFile() }
 
-            dependencies.add("implementation", "androidx.activity:activity:1.2.0")
-            dependencies.add("implementation", "io.sentry:sentry-android-core:6.5.0")
-            return this
-        }
+      repositories.flatDir { it.dir("libs") }
+
+      dependencies.add("implementation", ":local")
+      return this
     }
+  }
 
-    private fun createProjectWithFlatJars(): Project {
-        with(ProjectBuilder.builder().build()) {
-            plugins.apply("java")
-            plugins.apply("io.sentry.android.gradle")
+  private fun createMultiModuleProject(): Project {
+    with(ProjectBuilder.builder().build()) {
+      mkdir("module")
+      val module =
+        ProjectBuilder.builder()
+          .withName("module")
+          .withProjectDir(file("module"))
+          .withParent(this)
+          .build()
 
-            mkdir("libs")
-            file("libs/local.jar").apply { createNewFile() }
+      mkdir("app")
+      val app =
+        ProjectBuilder.builder()
+          .withName("app")
+          .withProjectDir(file("app"))
+          .withParent(this)
+          .build()
+      app.plugins.apply("java")
+      app.plugins.apply("io.sentry.android.gradle")
 
-            repositories.flatDir { it.dir("libs") }
+      app.dependencies.add("implementation", app.dependencies.project(mapOf("path" to ":module")))
 
-            dependencies.add("implementation", ":local")
-            return this
-        }
+      return app
     }
-
-    private fun createMultiModuleProject(): Project {
-        with(ProjectBuilder.builder().build()) {
-            mkdir("module")
-            val module = ProjectBuilder.builder()
-                .withName("module")
-                .withProjectDir(file("module"))
-                .withParent(this)
-                .build()
-
-            mkdir("app")
-            val app = ProjectBuilder.builder()
-                .withName("app")
-                .withProjectDir(file("app"))
-                .withParent(this)
-                .build()
-            app.plugins.apply("java")
-            app.plugins.apply("io.sentry.android.gradle")
-
-            app.dependencies.add(
-                "implementation",
-                app.dependencies.project(mapOf("path" to ":module"))
-            )
-
-            return app
-        }
-    }
+  }
 }

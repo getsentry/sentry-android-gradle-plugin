@@ -1,5 +1,5 @@
 package androidx.sqlite.db
 
 interface SupportSQLiteOpenHelper {
-    abstract class Callback
+  abstract class Callback
 }

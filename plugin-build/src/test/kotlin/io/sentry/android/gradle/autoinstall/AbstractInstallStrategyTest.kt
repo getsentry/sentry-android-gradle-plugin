@@ -12,41 +12,38 @@ import org.junit.Test
 import org.slf4j.Logger
 
 class AbstractInstallStrategyTest {
-    class Fixture {
-        val logger = CapturingTestLogger()
-        val metadataDetails = mock<ComponentMetadataDetails>()
-        val metadataContext = mock<ComponentMetadataContext> {
-            whenever(it.details).thenReturn(metadataDetails)
-        }
+  class Fixture {
+    val logger = CapturingTestLogger()
+    val metadataDetails = mock<ComponentMetadataDetails>()
+    val metadataContext =
+      mock<ComponentMetadataContext> { whenever(it.details).thenReturn(metadataDetails) }
 
-        fun getSut(): AbstractInstallStrategy {
-            with(AutoInstallState.getInstance()) {
-                this.enabled = false
-            }
-            return RandomInstallStrategy(logger)
-        }
+    fun getSut(): AbstractInstallStrategy {
+      with(AutoInstallState.getInstance()) { this.enabled = false }
+      return RandomInstallStrategy(logger)
     }
+  }
 
-    private val fixture = Fixture()
+  private val fixture = Fixture()
 
-    @Test
-    fun `when autoInstallation is disabled does nothing`() {
-        val sut = fixture.getSut()
-        sut.execute(fixture.metadataContext)
+  @Test
+  fun `when autoInstallation is disabled does nothing`() {
+    val sut = fixture.getSut()
+    sut.execute(fixture.metadataContext)
 
-        assertTrue {
-            fixture.logger.capturedMessage ==
-                "[sentry] random-module won't be installed because autoInstallation is disabled"
-        }
-        verify(fixture.metadataContext, never()).details
+    assertTrue {
+      fixture.logger.capturedMessage ==
+        "[sentry] random-module won't be installed because autoInstallation is disabled"
     }
+    verify(fixture.metadataContext, never()).details
+  }
 
-    private class RandomInstallStrategy(
-        logger: Logger,
-        override val sentryModuleId: String = "random-module"
-    ) : AbstractInstallStrategy() {
-        init {
-            this.logger = logger
-        }
+  private class RandomInstallStrategy(
+    logger: Logger,
+    override val sentryModuleId: String = "random-module",
+  ) : AbstractInstallStrategy() {
+    init {
+      this.logger = logger
     }
+  }
 }

@@ -25,13 +25,13 @@ import org.gradle.api.services.BuildServiceParameters
 import org.gradle.api.services.BuildServiceRegistry
 
 fun <ServiceT : BuildService<ParamsT>, ParamsT : BuildServiceParameters> getBuildService(
-    buildServiceRegistry: BuildServiceRegistry,
-    buildServiceClass: Class<ServiceT>
+  buildServiceRegistry: BuildServiceRegistry,
+  buildServiceClass: Class<ServiceT>,
 ): Provider<ServiceT> {
-    val serviceName = getBuildServiceName(buildServiceClass)
-    return buildServiceRegistry.registerIfAbsent(serviceName, buildServiceClass) {
-        throw IllegalStateException("Service $serviceName is not registered.")
-    }
+  val serviceName = getBuildServiceName(buildServiceClass)
+  return buildServiceRegistry.registerIfAbsent(serviceName, buildServiceClass) {
+    throw IllegalStateException("Service $serviceName is not registered.")
+  }
 }
 
 /*

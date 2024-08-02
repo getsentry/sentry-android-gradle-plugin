@@ -19,189 +19,161 @@ import org.junit.rules.TemporaryFolder
 
 class SentryCliProviderTest {
 
-    @get:Rule
-    val testProjectDir = TemporaryFolder()
+  @get:Rule val testProjectDir = TemporaryFolder()
 
-    @get:Rule
-    val systemPropertyRule = SystemPropertyRule()
+  @get:Rule val systemPropertyRule = SystemPropertyRule()
 
-    @Test
-    fun `getSentryPropertiesPath returns local properties file`() {
-        val project = ProjectBuilder
-            .builder()
-            .withProjectDir(testProjectDir.root)
-            .build()
+  @Test
+  fun `getSentryPropertiesPath returns local properties file`() {
+    val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
 
-        testProjectDir.newFile("sentry.properties")
+    testProjectDir.newFile("sentry.properties")
 
-        assertEquals(
-            project.file("sentry.properties").path,
-            getSentryPropertiesPath(project.projectDir, project.rootDir)
-        )
-    }
+    assertEquals(
+      project.file("sentry.properties").path,
+      getSentryPropertiesPath(project.projectDir, project.rootDir),
+    )
+  }
 
-    @Test
-    fun `getSentryPropertiesPath fallbacks to top level properties file`() {
-        val topLevelProject = ProjectBuilder
-            .builder()
-            .withProjectDir(testProjectDir.root)
-            .build()
+  @Test
+  fun `getSentryPropertiesPath fallbacks to top level properties file`() {
+    val topLevelProject = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
 
-        val project = ProjectBuilder
-            .builder()
-            .withParent(topLevelProject)
-            .build()
+    val project = ProjectBuilder.builder().withParent(topLevelProject).build()
 
-        testProjectDir.newFile("sentry.properties")
+    testProjectDir.newFile("sentry.properties")
 
-        assertEquals(
-            topLevelProject.file("sentry.properties").path,
-            getSentryPropertiesPath(project.projectDir, project.rootDir)
-        )
-    }
+    assertEquals(
+      topLevelProject.file("sentry.properties").path,
+      getSentryPropertiesPath(project.projectDir, project.rootDir),
+    )
+  }
 
-    @Test
-    fun `getSentryPropertiesPath returns null if no properties file is found`() {
-        val project = ProjectBuilder
-            .builder()
-            .withProjectDir(testProjectDir.root)
-            .build()
+  @Test
+  fun `getSentryPropertiesPath returns null if no properties file is found`() {
+    val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
 
-        assertNull(getSentryPropertiesPath(project.projectDir, project.rootDir))
-    }
+    assertNull(getSentryPropertiesPath(project.projectDir, project.rootDir))
+  }
 
-    @Test
-    fun `searchCliInPropertiesFile returns cli-executable correctly`() {
-        val project = ProjectBuilder
-            .builder()
-            .withProjectDir(testProjectDir.root)
-            .build()
+  @Test
+  fun `searchCliInPropertiesFile returns cli-executable correctly`() {
+    val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
 
-        testProjectDir.newFile("sentry.properties").apply {
-            writeText("cli.executable=vim")
+    testProjectDir.newFile("sentry.properties").apply { writeText("cli.executable=vim") }
+
+    assertEquals("vim", searchCliInPropertiesFile(project.projectDir, project.rootDir))
+  }
+
+  @Test
+  fun `searchCliInPropertiesFile ignores other fields`() {
+    val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
+
+    testProjectDir.newFile("sentry.properties").apply { writeText("another=field") }
+
+    assertNull(searchCliInPropertiesFile(project.projectDir, project.rootDir))
+  }
+
+  @Test
+  fun `searchCliInPropertiesFile returns null for empty file`() {
+    val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
+
+    testProjectDir.newFile("sentry.properties")
+
+    assertNull(searchCliInPropertiesFile(project.projectDir, project.rootDir))
+  }
+
+  @Test
+  fun `searchCliInPropertiesFile returns null for missing file`() {
+    val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
+
+    assertNull(searchCliInPropertiesFile(project.projectDir, project.rootDir))
+  }
+
+  @Test
+  fun `searchCliInResources finds the file correctly`() {
+    val resourcePath = "./dummy-bin/dummy-sentry-cli"
+    val resourceFile =
+      javaClass
+        .getResource(".")
+        ?.let { File(it.file, resourcePath) }
+        ?.apply {
+          parentFile.mkdirs()
+          createNewFile()
         }
 
-        assertEquals("vim", searchCliInPropertiesFile(project.projectDir, project.rootDir))
-    }
+    val foundPath = getResourceUrl(resourcePath)
+    assertNotNull(foundPath)
+    assertTrue(foundPath.endsWith("${File.separator}dummy-bin${File.separator}dummy-sentry-cli"))
 
-    @Test
-    fun `searchCliInPropertiesFile ignores other fields`() {
-        val project = ProjectBuilder
-            .builder()
-            .withProjectDir(testProjectDir.root)
-            .build()
+    resourceFile?.delete()
+  }
 
-        testProjectDir.newFile("sentry.properties").apply {
-            writeText("another=field")
+  @Test
+  fun `searchCliInResources returns null if file does not exist`() {
+    val resourcePath = "./dummy-bin/i-dont-exist"
+
+    assertNull(getResourceUrl(resourcePath))
+  }
+
+  @Test
+  fun `loadCliFromResourcesToTemp finds the file correctly`() {
+    val resourcePath = "./dummy-bin/dummy-sentry-cli"
+    val resourceFile =
+      javaClass
+        .getResource(".")
+        ?.let { File(it.file, resourcePath) }
+        ?.apply {
+          parentFile.mkdirs()
+          createNewFile()
+          writeText("echo \"This is just a dummy script\"")
         }
 
-        assertNull(searchCliInPropertiesFile(project.projectDir, project.rootDir))
-    }
+    val outputFile = File("bin", "output-bin")
+    val loadedPath = extractCliFromResources(resourcePath, outputFile)
+    assertNotNull(loadedPath)
 
-    @Test
-    fun `searchCliInPropertiesFile returns null for empty file`() {
-        val project = ProjectBuilder
-            .builder()
-            .withProjectDir(testProjectDir.root)
-            .build()
+    val binContent = File(loadedPath).readText()
+    assertEquals("echo \"This is just a dummy script\"", binContent)
 
-        testProjectDir.newFile("sentry.properties")
+    resourceFile?.delete()
+    outputFile.delete()
+  }
 
-        assertNull(searchCliInPropertiesFile(project.projectDir, project.rootDir))
-    }
+  @Test
+  fun `loadCliFromResourcesToTemp returns null if file does not exist`() {
+    val resourcePath = "./dummy-bin/i-dont-exist"
 
-    @Test
-    fun `searchCliInPropertiesFile returns null for missing file`() {
-        val project = ProjectBuilder
-            .builder()
-            .withProjectDir(testProjectDir.root)
-            .build()
+    assertNull(extractCliFromResources(resourcePath, File(".")))
+  }
 
-        assertNull(searchCliInPropertiesFile(project.projectDir, project.rootDir))
-    }
+  @Test
+  @WithSystemProperty(["os.name"], ["mac"])
+  fun `getCliSuffix on mac returns Darwin-universal`() {
+    assertEquals("Darwin-universal", getCliSuffix())
+  }
 
-    @Test
-    fun `searchCliInResources finds the file correctly`() {
-        val resourcePath = "./dummy-bin/dummy-sentry-cli"
-        val resourceFile = javaClass.getResource(".")
-            ?.let { File(it.file, resourcePath) }
-            ?.apply {
-                parentFile.mkdirs()
-                createNewFile()
-            }
+  @Test
+  @WithSystemProperty(["os.name", "os.arch"], ["linux", "amd64"])
+  fun `getCliSuffix on linux amd64 returns Linux-x86_64`() {
+    assertEquals("Linux-x86_64", getCliSuffix())
+  }
 
-        val foundPath = getResourceUrl(resourcePath)
-        assertNotNull(foundPath)
-        assertTrue(
-            foundPath.endsWith("${File.separator}dummy-bin${File.separator}dummy-sentry-cli")
-        )
+  @Test
+  @WithSystemProperty(["os.name", "os.arch"], ["linux", "armV7"])
+  fun `getCliSuffix on linux armV7 returns Linux-armV7`() {
+    assertEquals("Linux-armV7", getCliSuffix())
+  }
 
-        resourceFile?.delete()
-    }
+  @Test
+  @WithSystemProperty(["os.name"], ["windows"])
+  fun `getCliSuffix on win returns Windows-i686`() {
+    assertEquals("Windows-i686.exe", getCliSuffix())
+  }
 
-    @Test
-    fun `searchCliInResources returns null if file does not exist`() {
-        val resourcePath = "./dummy-bin/i-dont-exist"
-
-        assertNull(getResourceUrl(resourcePath))
-    }
-
-    @Test
-    fun `loadCliFromResourcesToTemp finds the file correctly`() {
-        val resourcePath = "./dummy-bin/dummy-sentry-cli"
-        val resourceFile = javaClass.getResource(".")
-            ?.let { File(it.file, resourcePath) }
-            ?.apply {
-                parentFile.mkdirs()
-                createNewFile()
-                writeText("echo \"This is just a dummy script\"")
-            }
-
-        val outputFile = File("bin", "output-bin")
-        val loadedPath = extractCliFromResources(resourcePath, outputFile)
-        assertNotNull(loadedPath)
-
-        val binContent = File(loadedPath).readText()
-        assertEquals("echo \"This is just a dummy script\"", binContent)
-
-        resourceFile?.delete()
-        outputFile.delete()
-    }
-
-    @Test
-    fun `loadCliFromResourcesToTemp returns null if file does not exist`() {
-        val resourcePath = "./dummy-bin/i-dont-exist"
-
-        assertNull(extractCliFromResources(resourcePath, File(".")))
-    }
-
-    @Test
-    @WithSystemProperty(["os.name"], ["mac"])
-    fun `getCliSuffix on mac returns Darwin-universal`() {
-        assertEquals("Darwin-universal", getCliSuffix())
-    }
-
-    @Test
-    @WithSystemProperty(["os.name", "os.arch"], ["linux", "amd64"])
-    fun `getCliSuffix on linux amd64 returns Linux-x86_64`() {
-        assertEquals("Linux-x86_64", getCliSuffix())
-    }
-
-    @Test
-    @WithSystemProperty(["os.name", "os.arch"], ["linux", "armV7"])
-    fun `getCliSuffix on linux armV7 returns Linux-armV7`() {
-        assertEquals("Linux-armV7", getCliSuffix())
-    }
-
-    @Test
-    @WithSystemProperty(["os.name"], ["windows"])
-    fun `getCliSuffix on win returns Windows-i686`() {
-        assertEquals("Windows-i686.exe", getCliSuffix())
-    }
-
-    @Test
-    @WithSystemProperty(["os.name"], ["¯\\_(ツ)_/¯"])
-    fun `getCliSuffix on an unknown platform returns null`() {
-        assertNull(getCliSuffix())
-    }
+  @Test
+  @WithSystemProperty(["os.name"], ["¯\\_(ツ)_/¯"])
+  fun `getCliSuffix on an unknown platform returns null`() {
+    assertNull(getCliSuffix())
+  }
 }
