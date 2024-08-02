@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 @AutoService(CommandLineProcessor::class)
 class SentryKotlinCompilerPluginCommandLineProcessor : CommandLineProcessor {
 
-    override val pluginId: String = "io.sentry.kotlin.compiler"
+  override val pluginId: String = "io.sentry.kotlin.compiler"
 
-    override val pluginOptions: Collection<CliOption> = emptyList()
+  override val pluginOptions: Collection<CliOption> = emptyList()
 }

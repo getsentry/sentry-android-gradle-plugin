@@ -25,7 +25,8 @@ import org.gradle.api.artifacts.DependencySet
 
 internal const val SENTRY_GROUP = "io.sentry"
 
-private val strategies = listOf(
+private val strategies =
+  listOf(
     AndroidOkHttpInstallStrategy.Registrar,
     OkHttpInstallStrategy.Registrar,
     SQLiteInstallStrategy.Registrar,
@@ -38,91 +39,82 @@ private val strategies = listOf(
     GraphqlInstallStrategy.Registrar,
     QuartzInstallStrategy.Registrar,
     KotlinExtensionsInstallStrategy.Registrar,
-    WarnOnOverrideStrategy.Registrar
-)
+    WarnOnOverrideStrategy.Registrar,
+  )
 
-private val delayedStrategies = listOf(
+private val delayedStrategies =
+  listOf(
     Spring5InstallStrategy.Registrar,
     Spring6InstallStrategy.Registrar,
     SpringBoot2InstallStrategy.Registrar,
     SpringBoot3InstallStrategy.Registrar,
-)
+  )
 
 fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boolean) {
-    configurations.named("implementation").configure { configuration ->
-        configuration.withDependencies { dependencies ->
+  configurations.named("implementation").configure { configuration ->
+    configuration.withDependencies { dependencies ->
+      project.dependencies.components { component ->
+        delayedStrategies.forEach { it.register(component) }
+      }
 
-            project.dependencies.components { component ->
-                delayedStrategies.forEach { it.register(component) }
+      // if autoInstallation is disabled, the autoInstallState will contain initial values
+      // which all default to false, hence, the integrations won't be installed as well
+      if (extension.autoInstallation.enabled.get()) {
+        val sentryVersion = dependencies.findSentryVersion(isAndroid)
+        with(AutoInstallState.getInstance(gradle)) {
+          val sentryArtifactId =
+            if (isAndroid) {
+              SentryModules.SENTRY_ANDROID.name
+            } else {
+              SentryModules.SENTRY.name
             }
-
-            // if autoInstallation is disabled, the autoInstallState will contain initial values
-            // which all default to false, hence, the integrations won't be installed as well
-            if (extension.autoInstallation.enabled.get()) {
-                val sentryVersion = dependencies.findSentryVersion(isAndroid)
-                with(AutoInstallState.getInstance(gradle)) {
-                    val sentryArtifactId = if (isAndroid) {
-                        SentryModules.SENTRY_ANDROID.name
-                    } else {
-                        SentryModules.SENTRY.name
-                    }
-                    this.sentryVersion = installSentrySdk(
-                        sentryVersion,
-                        dependencies,
-                        sentryArtifactId,
-                        extension
-                    )
-                    this.enabled = true
-                }
-            }
+          this.sentryVersion =
+            installSentrySdk(sentryVersion, dependencies, sentryArtifactId, extension)
+          this.enabled = true
         }
+      }
     }
-    project.dependencies.components { component ->
-        strategies.forEach { it.register(component) }
-    }
+  }
+  project.dependencies.components { component -> strategies.forEach { it.register(component) } }
 }
 
 private fun Project.installSentrySdk(
-    sentryVersion: String?,
-    dependencies: DependencySet,
-    sentryArtifactId: String,
-    extension: SentryPluginExtension
+  sentryVersion: String?,
+  dependencies: DependencySet,
+  sentryArtifactId: String,
+  extension: SentryPluginExtension,
 ): String {
-    return if (sentryVersion == null) {
-        val userDefinedVersion = extension.autoInstallation.sentryVersion.get()
-        val sentryAndroidDep =
-            this.dependencies.create("$SENTRY_GROUP:$sentryArtifactId:$userDefinedVersion")
-        dependencies.add(sentryAndroidDep)
-        logger.info {
-            "$sentryArtifactId was successfully installed with version: $userDefinedVersion"
-        }
-        userDefinedVersion
-    } else {
-        logger.info {
-            "$sentryArtifactId won't be installed because it was already installed directly"
-        }
-        sentryVersion
-    }
+  return if (sentryVersion == null) {
+    val userDefinedVersion = extension.autoInstallation.sentryVersion.get()
+    val sentryAndroidDep =
+      this.dependencies.create("$SENTRY_GROUP:$sentryArtifactId:$userDefinedVersion")
+    dependencies.add(sentryAndroidDep)
+    logger.info { "$sentryArtifactId was successfully installed with version: $userDefinedVersion" }
+    userDefinedVersion
+  } else {
+    logger.info { "$sentryArtifactId won't be installed because it was already installed directly" }
+    sentryVersion
+  }
 }
 
 private fun DependencySet.findSentryVersion(isAndroid: Boolean): String? =
-    if (isAndroid) {
-        find {
-            it.group == SENTRY_GROUP &&
-                (
-                    it.name == SentryModules.SENTRY_ANDROID_CORE.name ||
-                        it.name == SentryModules.SENTRY_ANDROID.name ||
-                        it.name == SentryModules.SENTRY_BOM.name
-                    ) && it.version != null
-        }?.version
-    } else {
-        find {
-            it.group == SENTRY_GROUP &&
-                (
-                    it.name == SentryModules.SENTRY.name ||
-                        it.name == SentryModules.SENTRY_SPRING_BOOT2.name ||
-                        it.name == SentryModules.SENTRY_SPRING_BOOT3.name ||
-                        it.name == SentryModules.SENTRY_BOM.name
-                    ) && it.version != null
-        }?.version
-    }
+  if (isAndroid) {
+    find {
+        it.group == SENTRY_GROUP &&
+          (it.name == SentryModules.SENTRY_ANDROID_CORE.name ||
+            it.name == SentryModules.SENTRY_ANDROID.name ||
+            it.name == SentryModules.SENTRY_BOM.name) &&
+          it.version != null
+      }
+      ?.version
+  } else {
+    find {
+        it.group == SENTRY_GROUP &&
+          (it.name == SentryModules.SENTRY.name ||
+            it.name == SentryModules.SENTRY_SPRING_BOOT2.name ||
+            it.name == SentryModules.SENTRY_SPRING_BOOT3.name ||
+            it.name == SentryModules.SENTRY_BOM.name) &&
+          it.version != null
+      }
+      ?.version
+  }

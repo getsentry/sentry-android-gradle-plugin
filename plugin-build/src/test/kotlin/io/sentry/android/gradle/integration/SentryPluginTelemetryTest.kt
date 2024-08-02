@@ -7,33 +7,32 @@ import kotlin.test.assertTrue
 import org.gradle.util.GradleVersion
 
 class SentryPluginTelemetryTest :
-    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
+  BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
-    @Test
-    fun `telemetry can be disabled`() {
-        appBuildFile.appendText(
-            // language=Groovy
-            """
+  @Test
+  fun `telemetry can be disabled`() {
+    appBuildFile.appendText(
+      // language=Groovy
+      """
             sentry {
               telemetry = false
             }
-            """.trimIndent()
-        )
-
-        val result = runner
-            .appendArguments("app:assembleDebug", "--info")
-            .build()
-
-        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
-        assertTrue(result.output) { "Sentry telemetry has been disabled." in result.output }
-        assertFalse(result.output) { "sentry-cli" in result.output }
-    }
-
-    @Test
-    fun `telemetry is enabled by default`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runner.appendArguments("app:assembleDebug", "--info").build()
+
+    assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
+    assertTrue(result.output) { "Sentry telemetry has been disabled." in result.output }
+    assertFalse(result.output) { "sentry-cli" in result.output }
+  }
+
+  @Test
+  fun `telemetry is enabled by default`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "com.android.application"
               id "io.sentry.android.gradle"
@@ -42,13 +41,12 @@ class SentryPluginTelemetryTest :
             android {
               namespace 'com.example'
             }
-            """.trimIndent()
-        )
-        val result = runner
-            .appendArguments("app:assembleDebug", "--info")
-            .build()
+            """
+        .trimIndent()
+    )
+    val result = runner.appendArguments("app:assembleDebug", "--info").build()
 
-        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
-        assertTrue(result.output) { "Sentry telemetry is enabled." in result.output }
-    }
+    assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
+    assertTrue(result.output) { "Sentry telemetry is enabled." in result.output }
+  }
 }

@@ -21,54 +21,52 @@ import org.junit.Test
 import org.slf4j.Logger
 
 class FragmentInstallStrategyTest {
-    class Fixture {
-        val logger = CapturingTestLogger()
-        val dependencies = mock<DirectDependenciesMetadata>()
-        val metadataDetails = mock<ComponentMetadataDetails>()
-        val metadataContext = mock<ComponentMetadataContext> {
-            whenever(it.details).thenReturn(metadataDetails)
-            val metadata = mock<VariantMetadata>()
-            doAnswer {
-                (it.arguments[0] as Action<DirectDependenciesMetadata>).execute(dependencies)
-            }.whenever(metadata).withDependencies(any<Action<DirectDependenciesMetadata>>())
+  class Fixture {
+    val logger = CapturingTestLogger()
+    val dependencies = mock<DirectDependenciesMetadata>()
+    val metadataDetails = mock<ComponentMetadataDetails>()
+    val metadataContext =
+      mock<ComponentMetadataContext> {
+        whenever(it.details).thenReturn(metadataDetails)
+        val metadata = mock<VariantMetadata>()
+        doAnswer { (it.arguments[0] as Action<DirectDependenciesMetadata>).execute(dependencies) }
+          .whenever(metadata)
+          .withDependencies(any<Action<DirectDependenciesMetadata>>())
 
-            doAnswer {
-                // trigger the callback registered in tests
-                (it.arguments[0] as Action<VariantMetadata>).execute(metadata)
-            }.whenever(metadataDetails).allVariants(any<Action<VariantMetadata>>())
-        }
+        doAnswer {
+            // trigger the callback registered in tests
+            (it.arguments[0] as Action<VariantMetadata>).execute(metadata)
+          }
+          .whenever(metadataDetails)
+          .allVariants(any<Action<VariantMetadata>>())
+      }
 
-        fun getSut(): FragmentInstallStrategy {
-            val id = mock<ModuleVersionIdentifier> {
-                whenever(it.version).doReturn("1.3.5")
-            }
-            whenever(metadataDetails.id).thenReturn(id)
+    fun getSut(): FragmentInstallStrategy {
+      val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn("1.3.5") }
+      whenever(metadataDetails.id).thenReturn(id)
 
-            with(AutoInstallState.getInstance()) {
-                this.enabled = true
-                this.sentryVersion = "5.6.1"
-            }
-            return FragmentInstallStrategyImpl(logger)
-        }
+      with(AutoInstallState.getInstance()) {
+        this.enabled = true
+        this.sentryVersion = "5.6.1"
+      }
+      return FragmentInstallStrategyImpl(logger)
     }
+  }
 
-    private val fixture = Fixture()
+  private val fixture = Fixture()
 
-    @Test
-    fun `installs sentry-android-fragment with info message`() {
-        val sut = fixture.getSut()
-        sut.execute(fixture.metadataContext)
+  @Test
+  fun `installs sentry-android-fragment with info message`() {
+    val sut = fixture.getSut()
+    sut.execute(fixture.metadataContext)
 
-        assertTrue {
-            fixture.logger.capturedMessage ==
-                "[sentry] sentry-android-fragment was successfully installed with version: 5.6.1"
-        }
-        verify(fixture.dependencies).add(
-            check<String> {
-                assertEquals("io.sentry:sentry-android-fragment:5.6.1", it)
-            }
-        )
+    assertTrue {
+      fixture.logger.capturedMessage ==
+        "[sentry] sentry-android-fragment was successfully installed with version: 5.6.1"
     }
+    verify(fixture.dependencies)
+      .add(check<String> { assertEquals("io.sentry:sentry-android-fragment:5.6.1", it) })
+  }
 
-    private class FragmentInstallStrategyImpl(logger: Logger) : FragmentInstallStrategy(logger)
+  private class FragmentInstallStrategyImpl(logger: Logger) : FragmentInstallStrategy(logger)
 }

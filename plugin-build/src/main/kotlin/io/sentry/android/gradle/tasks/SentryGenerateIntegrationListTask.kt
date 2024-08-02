@@ -18,55 +18,44 @@ import org.gradle.api.tasks.TaskAction
 @CacheableTask
 abstract class SentryGenerateIntegrationListTask : DefaultTask() {
 
-    companion object {
-        const val ATTR_INTEGRATIONS = "io.sentry.gradle-plugin-integrations"
+  companion object {
+    const val ATTR_INTEGRATIONS = "io.sentry.gradle-plugin-integrations"
+  }
+
+  init {
+    description = "Writes enabled integrations to AndroidManifest.xml"
+  }
+
+  // we only care about contents
+  @get:PathSensitive(NONE) @get:InputFile abstract val mergedManifest: RegularFileProperty
+
+  @get:OutputFile abstract val updatedManifest: RegularFileProperty
+
+  @get:Input abstract val integrations: SetProperty<String>
+
+  @TaskAction
+  fun writeIntegrationListToManifest() {
+    logger.info { "SentryGenerateIntegrationListTask - outputFile: ${updatedManifest.get()}" }
+    val integrations = integrations.get()
+    val manifestFile = mergedManifest.asFile.get()
+    val updatedManifestFile = updatedManifest.asFile.get()
+
+    if (integrations.isNotEmpty()) {
+      val manifestWriter = ManifestWriter()
+      val integrationsList = integrations.toList().sorted().joinToString(",")
+      manifestWriter.writeMetaData(
+        manifestFile,
+        updatedManifestFile,
+        ATTR_INTEGRATIONS,
+        integrationsList,
+      )
+    } else {
+      logger.info { "No Integrations present, copying input manifest to output" }
+      Files.copy(
+        manifestFile.toPath(),
+        updatedManifestFile.toPath(),
+        StandardCopyOption.REPLACE_EXISTING,
+      )
     }
-
-    init {
-        description = "Writes enabled integrations to AndroidManifest.xml"
-    }
-
-    // we only care about contents
-    @get:PathSensitive(NONE)
-    @get:InputFile
-    abstract val mergedManifest: RegularFileProperty
-
-    @get:OutputFile
-    abstract val updatedManifest: RegularFileProperty
-
-    @get:Input
-    abstract val integrations: SetProperty<String>
-
-    @TaskAction
-    fun writeIntegrationListToManifest() {
-        logger.info {
-            "SentryGenerateIntegrationListTask - outputFile: ${updatedManifest.get()}"
-        }
-        val integrations = integrations.get()
-        val manifestFile = mergedManifest.asFile.get()
-        val updatedManifestFile = updatedManifest.asFile.get()
-
-        if (integrations.isNotEmpty()) {
-            val manifestWriter = ManifestWriter()
-            val integrationsList = integrations
-                .toList()
-                .sorted()
-                .joinToString(",")
-            manifestWriter.writeMetaData(
-                manifestFile,
-                updatedManifestFile,
-                ATTR_INTEGRATIONS,
-                integrationsList
-            )
-        } else {
-            logger.info {
-                "No Integrations present, copying input manifest to output"
-            }
-            Files.copy(
-                manifestFile.toPath(),
-                updatedManifestFile.toPath(),
-                StandardCopyOption.REPLACE_EXISTING
-            )
-        }
-    }
+  }
 }

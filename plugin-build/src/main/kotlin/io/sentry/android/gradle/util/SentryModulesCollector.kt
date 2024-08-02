@@ -9,56 +9,55 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.provider.Provider
 
 fun Project.collectModules(
-    configurationName: String,
-    variantName: String,
-    sentryModulesService: Provider<SentryModulesService>
+  configurationName: String,
+  variantName: String,
+  sentryModulesService: Provider<SentryModulesService>,
 ) {
-    val configProvider = try {
-        configurations.named(configurationName)
+  val configProvider =
+    try {
+      configurations.named(configurationName)
     } catch (e: UnknownDomainObjectException) {
-        logger.warn {
-            "Unable to find configuration $configurationName for variant $variantName."
-        }
-        sentryModulesService.get().sentryModules = emptyMap()
-        sentryModulesService.get().externalModules = emptyMap()
-        return
+      logger.warn { "Unable to find configuration $configurationName for variant $variantName." }
+      sentryModulesService.get().sentryModules = emptyMap()
+      sentryModulesService.get().externalModules = emptyMap()
+      return
     }
 
-    configProvider.configure { configuration ->
-        configuration.incoming.afterResolve {
-            val allModules = it.resolutionResult.allComponents.versionMap(logger)
-            val sentryModules = allModules.filter { (identifier, _) ->
-                identifier.group == "io.sentry"
-            }.toMap()
+  configProvider.configure { configuration ->
+    configuration.incoming.afterResolve {
+      val allModules = it.resolutionResult.allComponents.versionMap(logger)
+      val sentryModules =
+        allModules.filter { (identifier, _) -> identifier.group == "io.sentry" }.toMap()
 
-            val externalModules = allModules.filter { (identifier, _) ->
-                identifier.group != "io.sentry"
-            }.toMap()
+      val externalModules =
+        allModules.filter { (identifier, _) -> identifier.group != "io.sentry" }.toMap()
 
-            logger.info {
-                "Detected Sentry modules $sentryModules " +
-                    "for variant: $variantName, config: $configurationName"
-            }
-            sentryModulesService.get().sentryModules = sentryModules
-            sentryModulesService.get().externalModules = externalModules
-        }
+      logger.info {
+        "Detected Sentry modules $sentryModules " +
+          "for variant: $variantName, config: $configurationName"
+      }
+      sentryModulesService.get().sentryModules = sentryModules
+      sentryModulesService.get().externalModules = externalModules
     }
+  }
 }
 
-private fun Set<ResolvedComponentResult>.versionMap(logger: Logger):
-    List<Pair<ModuleIdentifier, SemVer>> {
-    return mapNotNull {
-        it.moduleVersion?.let { moduleVersion ->
-            val identifier = moduleVersion.module
-            val version = it.moduleVersion?.version ?: ""
-            val semver = try {
-                SemVer.parse(version)
-            } catch (e: Throwable) {
-                logger.info { "Unable to parse version $version of $identifier" }
-                SemVer()
-            }
-            return@mapNotNull Pair(identifier, semver)
+private fun Set<ResolvedComponentResult>.versionMap(
+  logger: Logger
+): List<Pair<ModuleIdentifier, SemVer>> {
+  return mapNotNull {
+    it.moduleVersion?.let { moduleVersion ->
+      val identifier = moduleVersion.module
+      val version = it.moduleVersion?.version ?: ""
+      val semver =
+        try {
+          SemVer.parse(version)
+        } catch (e: Throwable) {
+          logger.info { "Unable to parse version $version of $identifier" }
+          SemVer()
         }
-        null
+      return@mapNotNull Pair(identifier, semver)
     }
+    null
+  }
 }

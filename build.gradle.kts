@@ -22,6 +22,10 @@ subprojects {
                 ktfmt(BuildPluginsVersion.KTFMT).googleStyle()
                 targetExclude("**/generated/**")
             }
+            kotlinGradle {
+                ktfmt(BuildPluginsVersion.KTFMT).googleStyle()
+                targetExclude("**/generated/**")
+            }
         }
     }
 }

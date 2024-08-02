@@ -9,13 +9,13 @@ import org.gradle.util.GradleVersion
 import org.junit.Test
 
 class SentryPluginAutoInstallTest :
-    BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
+  BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
-    @Test
-    fun `adds sentry-android dependency`() {
-        appBuildFile.writeText(
-            // language=Groovy
-            """
+  @Test
+  fun `adds sentry-android dependency`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "com.android.application"
               id "io.sentry.android.gradle"
@@ -29,20 +29,19 @@ class SentryPluginAutoInstallTest :
               includeProguardMapping = false
               autoInstallation.enabled = true
             }
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-        assertTrue {
-            "io.sentry:sentry-android:$SENTRY_SDK_VERSION" in result.output
-        }
-    }
-
-    @Test
-    fun `adds integrations and overrides directly user-defined versions with what -core has`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+    assertTrue { "io.sentry:sentry-android:$SENTRY_SDK_VERSION" in result.output }
+  }
+
+  @Test
+  fun `adds integrations and overrides directly user-defined versions with what -core has`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "com.android.application"
               id "io.sentry.android.gradle"
@@ -70,26 +69,27 @@ class SentryPluginAutoInstallTest :
               autoInstallation.enabled = true
               includeDependenciesReport = false
             }
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-        assertFalse { "io.sentry:sentry-android:6.34.0" in result.output }
-        assertTrue { "io.sentry:sentry-android-timber:6.34.0" in result.output }
-        assertTrue { "io.sentry:sentry-android-fragment:6.34.0" in result.output }
-        assertTrue { "io.sentry:sentry-android-okhttp:6.31.0 -> 6.34.0" in result.output }
-        assertTrue { "io.sentry:sentry-android-sqlite:6.21.0 -> 6.34.0" in result.output }
-        assertFalse { "io.sentry:sentry-compose-android:6.34.0" in result.output }
-
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `does not do anything when autoinstall is disabled`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+    assertFalse { "io.sentry:sentry-android:6.34.0" in result.output }
+    assertTrue { "io.sentry:sentry-android-timber:6.34.0" in result.output }
+    assertTrue { "io.sentry:sentry-android-fragment:6.34.0" in result.output }
+    assertTrue { "io.sentry:sentry-android-okhttp:6.31.0 -> 6.34.0" in result.output }
+    assertTrue { "io.sentry:sentry-android-sqlite:6.21.0 -> 6.34.0" in result.output }
+    assertFalse { "io.sentry:sentry-compose-android:6.34.0" in result.output }
+
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `does not do anything when autoinstall is disabled`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "com.android.application"
               id "io.sentry.android.gradle"
@@ -107,25 +107,26 @@ class SentryPluginAutoInstallTest :
 
             sentry.autoInstallation.enabled = false
             sentry.includeProguardMapping = false
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-        assertFalse { "io.sentry:sentry-android:$SENTRY_SDK_VERSION" in result.output }
-        assertFalse { "io.sentry:sentry-android-timber:$SENTRY_SDK_VERSION" in result.output }
-        assertFalse { "io.sentry:sentry-android-fragment:$SENTRY_SDK_VERSION" in result.output }
-        assertFalse { "io.sentry:sentry-android-okhttp:$SENTRY_SDK_VERSION" in result.output }
-        assertFalse { "io.sentry:sentry-android-sqlite:$SENTRY_SDK_VERSION" in result.output }
-
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `uses user-provided sentryVersion when sentry-android is not available in direct deps`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+    assertFalse { "io.sentry:sentry-android:$SENTRY_SDK_VERSION" in result.output }
+    assertFalse { "io.sentry:sentry-android-timber:$SENTRY_SDK_VERSION" in result.output }
+    assertFalse { "io.sentry:sentry-android-fragment:$SENTRY_SDK_VERSION" in result.output }
+    assertFalse { "io.sentry:sentry-android-okhttp:$SENTRY_SDK_VERSION" in result.output }
+    assertFalse { "io.sentry:sentry-android-sqlite:$SENTRY_SDK_VERSION" in result.output }
+
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `uses user-provided sentryVersion when sentry-android is not available in direct deps`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "com.android.application"
               id "io.sentry.android.gradle"
@@ -144,25 +145,26 @@ class SentryPluginAutoInstallTest :
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.31.0"
             sentry.includeProguardMapping = false
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-android:6.31.0" in result.output }
-        assertTrue { "io.sentry:sentry-android-timber:6.31.0" in result.output }
-        assertTrue { "io.sentry:sentry-android-okhttp:6.31.0" in result.output }
-        assertTrue { "io.sentry:sentry-android-fragment:5.4.0 -> 6.31.0" in result.output }
-
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `compose is not added for lower sentry versions`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-android:6.31.0" in result.output }
+    assertTrue { "io.sentry:sentry-android-timber:6.31.0" in result.output }
+    assertTrue { "io.sentry:sentry-android-okhttp:6.31.0" in result.output }
+    assertTrue { "io.sentry:sentry-android-fragment:5.4.0 -> 6.31.0" in result.output }
+
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `compose is not added for lower sentry versions`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "com.android.application"
               id "io.sentry.android.gradle"
@@ -179,20 +181,21 @@ class SentryPluginAutoInstallTest :
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.6.0"
             sentry.includeProguardMapping = false
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertFalse { "io.sentry:sentry-compose-android:6.6.0" in result.output }
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `compose is added with when sentry version 6_7_0 or above is used`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertFalse { "io.sentry:sentry-compose-android:6.6.0" in result.output }
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `compose is added with when sentry version 6_7_0 or above is used`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "com.android.application"
               id "io.sentry.android.gradle"
@@ -209,21 +212,22 @@ class SentryPluginAutoInstallTest :
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.7.0"
             sentry.includeProguardMapping = false
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-compose-android:6.7.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `sqlite is not added for lower sentry versions`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-compose-android:6.7.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `sqlite is not added for lower sentry versions`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "com.android.application"
               id "io.sentry.android.gradle"
@@ -240,20 +244,21 @@ class SentryPluginAutoInstallTest :
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.20.0"
             sentry.includeProguardMapping = false
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertFalse { "io.sentry:sentry-android-sqlite:6.20.0" in result.output }
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `sqlite is added with when sentry version 6_21_0 or above is used`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertFalse { "io.sentry:sentry-android-sqlite:6.20.0" in result.output }
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `sqlite is added with when sentry version 6_21_0 or above is used`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "com.android.application"
               id "io.sentry.android.gradle"
@@ -270,21 +275,22 @@ class SentryPluginAutoInstallTest :
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.21.0"
             sentry.includeProguardMapping = false
-            """.trimIndent()
-        )
-
-        val result = runListDependenciesTask()
-
-        assertTrue { "io.sentry:sentry-android-sqlite:6.21.0" in result.output }
-        // ensure all dependencies could be resolved
-        assertFalse { "FAILED" in result.output }
-    }
-
-    @Test
-    fun `warns about overriding user-defined sentry dependencies`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-android-sqlite:6.21.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `warns about overriding user-defined sentry dependencies`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "com.android.application"
               id "io.sentry.android.gradle"
@@ -301,27 +307,32 @@ class SentryPluginAutoInstallTest :
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.21.0"
             sentry.includeProguardMapping = false
-            """.trimIndent()
-        )
-
-        moduleBuildFile.appendText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    moduleBuildFile.appendText(
+      // language=Groovy
+      """
             dependencies {
               implementation 'io.sentry:sentry-android-core:6.0.0'
             }
-            """.trimIndent()
-        )
-
-        val result = runner.appendArguments("app:assembleDebug").build()
-        assertTrue { "WARNING: Version of 'io.sentry:sentry-android-core' was overridden from '6.0.0' to '6.21.0' by the Sentry Gradle plugin. If you want to use the older version, you can add `autoInstallation.sentryVersion.set(\"6.0.0\")` in the `sentry {}` plugin configuration block" in result.output }
-    }
-
-    @Test
-    fun `considers sentry-bom as a core version`() {
-        appBuildFile.writeText(
-            // language=Groovy
             """
+        .trimIndent()
+    )
+
+    val result = runner.appendArguments("app:assembleDebug").build()
+    assertTrue {
+      "WARNING: Version of 'io.sentry:sentry-android-core' was overridden from '6.0.0' to '6.21.0' by the Sentry Gradle plugin. If you want to use the older version, you can add `autoInstallation.sentryVersion.set(\"6.0.0\")` in the `sentry {}` plugin configuration block" in
+        result.output
+    }
+  }
+
+  @Test
+  fun `considers sentry-bom as a core version`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "com.android.application"
               id "io.sentry.android.gradle"
@@ -339,17 +350,19 @@ class SentryPluginAutoInstallTest :
             sentry.autoInstallation.enabled = true
             sentry.autoInstallation.sentryVersion = "6.32.0"
             sentry.includeProguardMapping = false
-            """.trimIndent()
-        )
+            """
+        .trimIndent()
+    )
 
-        val result = runListDependenciesTask()
-        // since we consider sentry-bom now, the plugin should not add sentry-android:6.32.0 at all
-        assertFalse { "io.sentry:sentry-android:6.32.0 -> 7.0.0" in result.output }
-    }
+    val result = runListDependenciesTask()
+    // since we consider sentry-bom now, the plugin should not add sentry-android:6.32.0 at all
+    assertFalse { "io.sentry:sentry-android:6.32.0 -> 7.0.0" in result.output }
+  }
 
-    private fun runListDependenciesTask() = runner
-        .appendArguments("app:dependencies")
-        .appendArguments("--configuration")
-        .appendArguments("debugRuntimeClasspath")
-        .build()
+  private fun runListDependenciesTask() =
+    runner
+      .appendArguments("app:dependencies")
+      .appendArguments("--configuration")
+      .appendArguments("debugRuntimeClasspath")
+      .build()
 }

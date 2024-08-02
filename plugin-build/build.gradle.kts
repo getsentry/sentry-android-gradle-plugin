@@ -11,25 +11,26 @@ import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("dev.gradleplugins.groovy-gradle-plugin") version BuildPluginsVersion.GROOVY_REDISTRIBUTED
-    kotlin("jvm") version BuildPluginsVersion.KOTLIN
-    id("distribution")
-    id("org.jetbrains.dokka") version BuildPluginsVersion.DOKKA
-    id("java-gradle-plugin")
-    id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
-    id("com.diffplug.spotless") version BuildPluginsVersion.SPOTLESS
-    // we need this plugin in order to include .aar dependencies into a pure java project, which the gradle plugin is
-    id("io.sentry.android.gradle.aar2jar")
-    id("com.github.johnrengelman.shadow") version BuildPluginsVersion.SHADOW
-    id("com.github.gmazzo.buildconfig") version BuildPluginsVersion.BUILDCONFIG
+  id("dev.gradleplugins.groovy-gradle-plugin") version BuildPluginsVersion.GROOVY_REDISTRIBUTED
+  kotlin("jvm") version BuildPluginsVersion.KOTLIN
+  id("distribution")
+  id("org.jetbrains.dokka") version BuildPluginsVersion.DOKKA
+  id("java-gradle-plugin")
+  id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
+  id("com.diffplug.spotless") version BuildPluginsVersion.SPOTLESS
+  // we need this plugin in order to include .aar dependencies into a pure java project, which the
+  // gradle plugin is
+  id("io.sentry.android.gradle.aar2jar")
+  id("com.github.johnrengelman.shadow") version BuildPluginsVersion.SHADOW
+  id("com.github.gmazzo.buildconfig") version BuildPluginsVersion.BUILDCONFIG
 }
 
 allprojects {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        google()
-    }
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    google()
+  }
 }
 
 BootstrapAndroidSdk.locateAndroidSdk(project, extra)
@@ -40,315 +41,294 @@ val testImplementationAar by configurations.getting // this converts .aar into .
 val agp70: SourceSet by sourceSets.creating
 val agp74: SourceSet by sourceSets.creating
 
-val shade: Configuration by configurations.creating {
+val shade: Configuration by
+  configurations.creating {
     isCanBeConsumed = false
     isCanBeResolved = true
-}
+  }
 
 val fixtureClasspath: Configuration by configurations.creating
 
 dependencies {
-    agp70.compileOnlyConfigurationName(Libs.GRADLE_API)
-    agp70.compileOnlyConfigurationName(Libs.agp("7.0.4"))
-    agp70.compileOnlyConfigurationName(project(":common"))
+  agp70.compileOnlyConfigurationName(Libs.GRADLE_API)
+  agp70.compileOnlyConfigurationName(Libs.agp("7.0.4"))
+  agp70.compileOnlyConfigurationName(project(":common"))
 
-    agp74.compileOnlyConfigurationName(Libs.GRADLE_API)
-    agp74.compileOnlyConfigurationName(Libs.agp("7.4.0"))
-    agp74.compileOnlyConfigurationName(project(":common"))
+  agp74.compileOnlyConfigurationName(Libs.GRADLE_API)
+  agp74.compileOnlyConfigurationName(Libs.agp("7.4.0"))
+  agp74.compileOnlyConfigurationName(project(":common"))
 
-    compileOnly(Libs.GRADLE_API)
-    compileOnly(Libs.AGP)
-    compileOnly(agp70.output)
-    compileOnly(agp74.output)
-    compileOnly(Libs.PROGUARD)
+  compileOnly(Libs.GRADLE_API)
+  compileOnly(Libs.AGP)
+  compileOnly(agp70.output)
+  compileOnly(agp74.output)
+  compileOnly(Libs.PROGUARD)
 
-    implementation(Libs.ASM)
-    implementation(Libs.ASM_COMMONS)
+  implementation(Libs.ASM)
+  implementation(Libs.ASM_COMMONS)
 
-    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:${KotlinCompilerVersion.VERSION}")
+  compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:${KotlinCompilerVersion.VERSION}")
 
-    implementation(Libs.SENTRY)
+  implementation(Libs.SENTRY)
 
-    // compileOnly since we'll be shading the common dependency into the final jar
-    // but we still need to be able to compile it (this also excludes it from .pom)
-    compileOnly(project(":common"))
-    shade(project(":common"))
+  // compileOnly since we'll be shading the common dependency into the final jar
+  // but we still need to be able to compile it (this also excludes it from .pom)
+  compileOnly(project(":common"))
+  shade(project(":common"))
 
-    testImplementation(gradleTestKit())
-    testImplementation(kotlin("test"))
-    testImplementation(Libs.AGP)
-    testImplementation(agp70.output)
-    testImplementation(agp74.output)
-    testImplementation(project(":common"))
-    fixtureClasspath(agp70.output)
-    fixtureClasspath(agp74.output)
-    fixtureClasspath(project(":common"))
-    testImplementation(Libs.PROGUARD)
-    testImplementation(Libs.JUNIT)
-    testImplementation(Libs.MOCKITO_KOTLIN)
+  testImplementation(gradleTestKit())
+  testImplementation(kotlin("test"))
+  testImplementation(Libs.AGP)
+  testImplementation(agp70.output)
+  testImplementation(agp74.output)
+  testImplementation(project(":common"))
+  fixtureClasspath(agp70.output)
+  fixtureClasspath(agp74.output)
+  fixtureClasspath(project(":common"))
+  testImplementation(Libs.PROGUARD)
+  testImplementation(Libs.JUNIT)
+  testImplementation(Libs.MOCKITO_KOTLIN)
 
-    testImplementation(Libs.ASM)
-    testImplementation(Libs.ASM_COMMONS)
+  testImplementation(Libs.ASM)
+  testImplementation(Libs.ASM_COMMONS)
 
-    // we need these dependencies for tests, because the bytecode verifier also analyzes superclasses
-    testImplementationAar(Libs.SQLITE)
-    testImplementationAar(Libs.SQLITE_FRAMEWORK)
-    testRuntimeOnly(files(androidSdkPath))
-    testImplementationAar(Libs.SENTRY_ANDROID)
-    testImplementationAar(Libs.SENTRY_ANDROID_OKHTTP)
-    testImplementationAar(Libs.SENTRY_OKHTTP)
+  // we need these dependencies for tests, because the bytecode verifier also analyzes superclasses
+  testImplementationAar(Libs.SQLITE)
+  testImplementationAar(Libs.SQLITE_FRAMEWORK)
+  testRuntimeOnly(files(androidSdkPath))
+  testImplementationAar(Libs.SENTRY_ANDROID)
+  testImplementationAar(Libs.SENTRY_ANDROID_OKHTTP)
+  testImplementationAar(Libs.SENTRY_OKHTTP)
 
-    // Needed to read contents from APK/Source Bundles
-    testImplementation(Libs.ARSC_LIB)
-    testImplementation(Libs.ZIP4J)
+  // Needed to read contents from APK/Source Bundles
+  testImplementation(Libs.ARSC_LIB)
+  testImplementation(Libs.ZIP4J)
 
-    testRuntimeOnly(
-        files(
-            serviceOf<ModuleRegistry>().getModule("gradle-tooling-api-builders")
-                .classpath.asFiles.first()
-        )
+  testRuntimeOnly(
+    files(
+      serviceOf<ModuleRegistry>().getModule("gradle-tooling-api-builders").classpath.asFiles.first()
     )
+  )
 }
 
 configure<JavaPluginExtension> {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
 }
 
 // We need to compile Groovy first and let Kotlin depend on it.
 // See https://docs.gradle.org/6.1-rc-1/release-notes.html#compilation-order
 tasks.withType<GroovyCompile>().configureEach {
-    sourceCompatibility = JavaVersion.VERSION_11.toString()
-    targetCompatibility = JavaVersion.VERSION_11.toString()
+  sourceCompatibility = JavaVersion.VERSION_11.toString()
+  targetCompatibility = JavaVersion.VERSION_11.toString()
 
-    // we don't need the groovy compile task for compatibility source sets
-    val ignoreTask = name.contains("agp", ignoreCase = true)
-    isEnabled = !ignoreTask
-    if (!ignoreTask) {
-        classpath = sourceSets["main"].compileClasspath
-    }
+  // we don't need the groovy compile task for compatibility source sets
+  val ignoreTask = name.contains("agp", ignoreCase = true)
+  isEnabled = !ignoreTask
+  if (!ignoreTask) {
+    classpath = sourceSets["main"].compileClasspath
+  }
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-    if (!name.contains("agp", ignoreCase = true)) {
-        libraries.from.addAll(files(sourceSets["main"].groovy.classesDirectory))
-    }
+  if (!name.contains("agp", ignoreCase = true)) {
+    libraries.from.addAll(files(sourceSets["main"].groovy.classesDirectory))
+  }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
-        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn", "-Xjvm-default=enable")
-        languageVersion = "1.4"
-        apiVersion = "1.4"
-    }
+  kotlinOptions {
+    jvmTarget = JavaVersion.VERSION_11.toString()
+    freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn", "-Xjvm-default=enable")
+    languageVersion = "1.4"
+    apiVersion = "1.4"
+  }
 }
 
 // Append any extra dependencies to the test fixtures via a custom configuration classpath. This
 // allows us to apply additional plugins in a fixture while still leveraging dependency resolution
 // and de-duplication semantics.
 tasks.named("pluginUnderTestMetadata").configure {
-    (this as PluginUnderTestMetadata).pluginClasspath.from(fixtureClasspath)
+  (this as PluginUnderTestMetadata).pluginClasspath.from(fixtureClasspath)
 }
 
 tasks.named("test").configure {
-    require(this is Test)
-    maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+  require(this is Test)
+  maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
 
-    // Cap JVM args per test
-    minHeapSize = "128m"
-    maxHeapSize = "1g"
+  // Cap JVM args per test
+  minHeapSize = "128m"
+  maxHeapSize = "1g"
 
-    filter {
-        excludeTestsMatching("io.sentry.android.gradle.integration.*")
-    }
+  filter { excludeTestsMatching("io.sentry.android.gradle.integration.*") }
 }
 
 tasks.register<Test>("integrationTest").configure {
-    group = "verification"
-    description = "Runs the integration tests"
+  group = "verification"
+  description = "Runs the integration tests"
 
-    maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+  maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
 
-    // Cap JVM args per test
-    minHeapSize = "128m"
-    maxHeapSize = "1g"
+  // Cap JVM args per test
+  minHeapSize = "128m"
+  maxHeapSize = "1g"
 
-    jvmArgs = listOf(
-        "--add-opens=java.base/java.lang=ALL-UNNAMED",
-        "--add-opens=java.base/java.io=ALL-UNNAMED",
-        "--add-opens=java.base/java.util=ALL-UNNAMED",
-        "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED",
-        "--add-opens=java.base/java.net=ALL-UNNAMED",
-        "--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED"
+  jvmArgs =
+    listOf(
+      "--add-opens=java.base/java.lang=ALL-UNNAMED",
+      "--add-opens=java.base/java.io=ALL-UNNAMED",
+      "--add-opens=java.base/java.util=ALL-UNNAMED",
+      "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED",
+      "--add-opens=java.base/java.net=ALL-UNNAMED",
+      "--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED",
     )
 
-    filter {
-        includeTestsMatching("io.sentry.android.gradle.integration.*")
-    }
+  filter { includeTestsMatching("io.sentry.android.gradle.integration.*") }
 }
 
 gradlePlugin {
-    plugins {
-        register("sentryPlugin") {
-            id = "io.sentry.android.gradle"
-            implementationClass = "io.sentry.android.gradle.SentryPlugin"
-        }
-        register("kotlinCompilerPlugin") {
-            id = "io.sentry.kotlin.compiler.gradle"
-            implementationClass = "io.sentry.kotlin.gradle.SentryKotlinCompilerGradlePlugin"
-        }
-        register("sentryJvmPlugin") {
-            id = "io.sentry.jvm.gradle"
-            implementationClass = "io.sentry.jvm.gradle.SentryJvmPlugin"
-        }
+  plugins {
+    register("sentryPlugin") {
+      id = "io.sentry.android.gradle"
+      implementationClass = "io.sentry.android.gradle.SentryPlugin"
     }
+    register("kotlinCompilerPlugin") {
+      id = "io.sentry.kotlin.compiler.gradle"
+      implementationClass = "io.sentry.kotlin.gradle.SentryKotlinCompilerGradlePlugin"
+    }
+    register("sentryJvmPlugin") {
+      id = "io.sentry.jvm.gradle"
+      implementationClass = "io.sentry.jvm.gradle.SentryJvmPlugin"
+    }
+  }
 }
 
 tasks.withType<Jar> {
-    from(agp70.output)
-    from(agp74.output)
+  from(agp70.output)
+  from(agp74.output)
 }
 
 tasks.withType<ShadowJar> {
-    archiveClassifier.set("")
-    configurations = listOf(project.configurations.getByName("shade"))
+  archiveClassifier.set("")
+  configurations = listOf(project.configurations.getByName("shade"))
 
-    exclude("/kotlin/**")
-    exclude("/groovy**")
-    exclude("/org/**")
+  exclude("/kotlin/**")
+  exclude("/groovy**")
+  exclude("/org/**")
 }
 
 artifacts {
-    runtimeOnly(tasks.named("shadowJar"))
-    archives(tasks.named("shadowJar"))
+  runtimeOnly(tasks.named("shadowJar"))
+  archives(tasks.named("shadowJar"))
 }
 
 spotless {
-    kotlin {
-        ktfmt(BuildPluginsVersion.KTFMT).googleStyle()
-        targetExclude("**/generated/**")
-    }
+  kotlin {
+    ktfmt(BuildPluginsVersion.KTFMT).googleStyle()
+    targetExclude("**/generated/**")
+  }
+  kotlinGradle {
+    ktfmt(BuildPluginsVersion.KTFMT).googleStyle()
+    targetExclude("**/generated/**")
+  }
 }
 
 val sep = File.separator
 
 distributions {
-    main {
-        contents {
-            from("build${sep}libs")
-            from("build${sep}publications${sep}maven")
-        }
+  main {
+    contents {
+      from("build${sep}libs")
+      from("build${sep}publications${sep}maven")
     }
-    create("sentryPluginMarker") {
-        contents {
-            from("build${sep}publications${sep}sentryPluginPluginMarkerMaven")
-        }
-    }
-    create("sentryKotlinCompilerPluginMarker") {
-        contents {
-            from("build${sep}publications${sep}kotlinCompilerPluginPluginMarkerMaven")
-        }
-    }
-    create("sentryJvmPluginMarker") {
-        contents {
-            from("build${sep}publications${sep}sentryJvmPluginPluginMarkerMaven")
-        }
-    }
+  }
+  create("sentryPluginMarker") {
+    contents { from("build${sep}publications${sep}sentryPluginPluginMarkerMaven") }
+  }
+  create("sentryKotlinCompilerPluginMarker") {
+    contents { from("build${sep}publications${sep}kotlinCompilerPluginPluginMarkerMaven") }
+  }
+  create("sentryJvmPluginMarker") {
+    contents { from("build${sep}publications${sep}sentryJvmPluginPluginMarkerMaven") }
+  }
 }
 
-apply {
-    plugin("com.vanniktech.maven.publish")
-}
+apply { plugin("com.vanniktech.maven.publish") }
 
 val publish = extensions.getByType(MavenPublishPluginExtension::class.java)
+
 // signing is done when uploading files to MC
 // via gpg:sign-and-deploy-file (release.kts)
 publish.releaseSigningEnabled = false
 
 tasks.named("distZip") {
-    dependsOn("publishToMavenLocal")
-    onlyIf {
-        inputs.sourceFiles.isEmpty.not().also {
-            require(it) { "No distribution to zip." }
-        }
-    }
+  dependsOn("publishToMavenLocal")
+  onlyIf { inputs.sourceFiles.isEmpty.not().also { require(it) { "No distribution to zip." } } }
 }
 
 tasks.withType<Test> {
-    testLogging {
-        events = setOf(
-            TestLogEvent.SKIPPED,
-            TestLogEvent.PASSED,
-            TestLogEvent.FAILED
-        )
-        showStandardStreams = true
-    }
+  testLogging {
+    events = setOf(TestLogEvent.SKIPPED, TestLogEvent.PASSED, TestLogEvent.FAILED)
+    showStandardStreams = true
+  }
 }
 
-val downloadSentryCLI = tasks.register<Exec>("downloadSentryCLI") {
-    onlyIf {
-        shouldDownloadSentryCli()
-    }
-    doFirst {
-        logger.lifecycle("Downloading Sentry CLI...")
-    }
+val downloadSentryCLI =
+  tasks.register<Exec>("downloadSentryCLI") {
+    onlyIf { shouldDownloadSentryCli() }
+    doFirst { logger.lifecycle("Downloading Sentry CLI...") }
     executable("sh")
     workingDir("../plugin-build")
     args("-c", "./download-sentry-cli.sh")
-}
+  }
 
-tasks.named("processResources").configure {
-    dependsOn(downloadSentryCLI)
-}
+tasks.named("processResources").configure { dependsOn(downloadSentryCLI) }
 
 /**
- * Checks whether the sentry-cli.properties matches the copy in `./src/main/resources/bin/`.
- * If it doesn't, the CLI should be re-downloaded.
+ * Checks whether the sentry-cli.properties matches the copy in `./src/main/resources/bin/`. If it
+ * doesn't, the CLI should be re-downloaded.
  */
 fun shouldDownloadSentryCli(): Boolean {
-    val cliDir: Array<File> = File(
-        "$projectDir/src/main/resources/bin/"
-    ).listFiles() ?: emptyArray()
-    val expectedSpec = File("$projectDir/sentry-cli.properties")
-    val actualSpec = File("$projectDir/src/main/resources/bin/sentry-cli.properties")
-    return when {
-        cliDir.size <= 2 -> {
-            logger.lifecycle("Sentry CLI is missing")
-            true
-        }
-
-        !actualSpec.exists() -> {
-            logger.lifecycle("Sentry CLI version specification is missing")
-            true
-        }
-
-        expectedSpec.readText() != actualSpec.readText() -> {
-            logger.lifecycle("Downloaded Sentry CLI version specification doesn't match")
-            true
-        }
-
-        else -> false
+  val cliDir: Array<File> = File("$projectDir/src/main/resources/bin/").listFiles() ?: emptyArray()
+  val expectedSpec = File("$projectDir/sentry-cli.properties")
+  val actualSpec = File("$projectDir/src/main/resources/bin/sentry-cli.properties")
+  return when {
+    cliDir.size <= 2 -> {
+      logger.lifecycle("Sentry CLI is missing")
+      true
     }
+
+    !actualSpec.exists() -> {
+      logger.lifecycle("Sentry CLI version specification is missing")
+      true
+    }
+
+    expectedSpec.readText() != actualSpec.readText() -> {
+      logger.lifecycle("Downloaded Sentry CLI version specification doesn't match")
+      true
+    }
+
+    else -> false
+  }
 }
 
 buildConfig {
-    useKotlinOutput()
-    packageName("io.sentry")
-    className("BuildConfig")
+  useKotlinOutput()
+  packageName("io.sentry")
+  className("BuildConfig")
 
-    buildConfigField("String", "Version", provider { "\"${project.version}\"" })
-    buildConfigField("String", "SdkVersion", provider { "\"${project.property("sdk_version")}\"" })
-    buildConfigField("String", "AgpVersion", provider { "\"${BuildPluginsVersion.AGP}\"" })
-    buildConfigField(
-        "String",
-        "CliVersion",
-        provider {
-            "\"${Properties().apply {
+  buildConfigField("String", "Version", provider { "\"${project.version}\"" })
+  buildConfigField("String", "SdkVersion", provider { "\"${project.property("sdk_version")}\"" })
+  buildConfigField("String", "AgpVersion", provider { "\"${BuildPluginsVersion.AGP}\"" })
+  buildConfigField(
+    "String",
+    "CliVersion",
+    provider {
+      "\"${Properties().apply {
                 load(
                     FileInputStream(File("$projectDir/sentry-cli.properties"))
                 )
             }.getProperty("version")}\""
-        }
-    )
+    },
+  )
 }
 
 tasks.register<ASMifyTask>("asmify")
