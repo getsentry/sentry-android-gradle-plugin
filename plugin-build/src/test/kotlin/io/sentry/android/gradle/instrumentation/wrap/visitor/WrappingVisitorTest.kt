@@ -184,7 +184,6 @@ class WrappingVisitorTest {
         descriptor = "(Ljava/lang/String;)V",
         isInterface = false,
       )
-    /* ktlint-disable experimental:argument-list-wrapping */
     fixture
       .getSut(replacements = mapOf(Replacement.FileInputStream.STRING))
       .visitMethodInsn(
@@ -194,7 +193,6 @@ class WrappingVisitorTest {
         methodVisit.descriptor,
         methodVisit.isInterface,
       )
-    /* ktlint-enable experimental:argument-list-wrapping */
 
     assertEquals(fixture.visitor.methodVisits.size, 2)
     // store original arguments

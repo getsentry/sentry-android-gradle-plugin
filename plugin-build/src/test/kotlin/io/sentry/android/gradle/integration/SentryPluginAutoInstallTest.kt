@@ -1,4 +1,3 @@
-// ktlint-disable max-line-length
 package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig

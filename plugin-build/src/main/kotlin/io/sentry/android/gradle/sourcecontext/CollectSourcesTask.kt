@@ -83,11 +83,9 @@ internal class SourceCollector {
           val targetFile = outDir.resolve(File(relativePath))
           if (sourceFile.isFile) {
             if (relativePath.isBlank()) {
-              /* ktlint-disable max-line-length */
               SentryPlugin.logger.debug {
                 "Skipping ${sourceFile.absolutePath} as the plugin was unable to determine a relative path for it."
               }
-              /* ktlint-enable max-line-length */
             } else {
               SentryPlugin.logger.debug {
                 "Copying file ${sourceFile.absolutePath} " + "to ${targetFile.absolutePath}"

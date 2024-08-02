@@ -80,7 +80,6 @@ private fun isR8Minified(classReader: ClassReader): Boolean {
  * See https://github.com/getsentry/sentry-android-gradle-plugin/issues/360 and
  * https://github.com/getsentry/sentry-android-gradle-plugin/issues/359#issuecomment-1193782500
  */
-/* ktlint-disable max-line-length */
 private val MINIFIED_CLASSNAME_REGEX =
   """^(((([a-zA-z])\4{1,}|[a-zA-Z]{1,2})([0-9]{1,})?(([a-zA-Z])\7{1,})?)|([a-zA-Z]([0-9])?))(${'\\'}${'$'}((((\w)\14{1,}|[a-zA-Z]{1,2})([0-9]{1,})?(([a-zA-Z])\17{1,})?)|(\w([0-9])?)))*${'$'}"""
     .toRegex()
@@ -93,7 +92,6 @@ private val MINIFIED_CLASSNAME_SENTRY_REGEX =
   """^(([\w\${'$'}]\/[\w\${'$'}]{1,2})|([\w\${'$'}]{2}\/[\w\${'$'}]\/[\w\${'$'}]))(\/|${'$'})"""
     .toRegex()
 
-/* ktlint-enable max-line-length */
 
 fun classNameLooksMinified(simpleClassName: String, fullClassName: String): Boolean {
   return simpleClassName.isNotEmpty() &&

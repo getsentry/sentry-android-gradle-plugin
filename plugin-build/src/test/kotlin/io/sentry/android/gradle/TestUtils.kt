@@ -23,7 +23,6 @@ import net.lingala.zip4j.io.inputstream.ZipInputStream
 import org.gradle.api.Project
 import org.junit.rules.TemporaryFolder
 
-/* ktlint-disable max-line-length */
 private val ASSET_PATTERN_PROGUARD =
   Regex(
     """^io\.sentry\.ProguardUuids=([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$"""
@@ -36,7 +35,6 @@ private val ASSET_PATTERN_SOURCE_CONTEXT =
       .trimMargin()
   )
 
-/* ktlint-enable max-line-length */
 
 internal fun verifyProguardUuid(
   rootFile: File,
@@ -48,7 +46,6 @@ internal fun verifyProguardUuid(
   val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant$signedStr.apk")
   val sentryProperties =
     if (inGeneratedFolder) {
-      /* ktlint-disable max-line-length experimental:argument-list-wrapping */
       val propsFile =
         if (AgpVersions.isAGP74) {
           rootFile.resolve(
@@ -62,7 +59,6 @@ internal fun verifyProguardUuid(
               "/sentry/debug-meta-properties/$variant/sentry-debug-meta.properties"
           )
         }
-      /* ktlint-enable max-line-length experimental:argument-list-wrapping */
       if (propsFile.exists()) propsFile.readText() else ""
     } else {
       extractZip(apk, "assets/sentry-debug-meta.properties")

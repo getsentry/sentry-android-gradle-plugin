@@ -39,13 +39,11 @@ data class SemVer(
 ) : Comparable<SemVer>, Serializable {
 
   companion object {
-    /* ktlint-disable max-line-length */
     val pattern =
       Regex(
         """(0|[1-9]\d*)?(?:\.)?(0|[1-9]\d*)?(?:\.)?(0|[1-9]\d*)?(?:-([\dA-z\-]+(?:\.[\dA-z\-]+)*))?(?:\+([\dA-z\-]+(?:\.[\dA-z\-]+)*))?"""
       )
 
-    /* ktlint-enable max-line-length */
 
     /**
      * Parse the version string to [SemVer] data object.

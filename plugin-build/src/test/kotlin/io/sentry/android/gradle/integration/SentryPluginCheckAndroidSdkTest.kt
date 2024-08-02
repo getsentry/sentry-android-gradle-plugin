@@ -23,7 +23,6 @@ class SentryPluginCheckAndroidSdkTest :
     // we query the SdkStateHolder intentionally so the build fails, which confirms that the
     // service was not registered
     val result = runner.appendArguments("app:tasks").buildAndFail()
-    /* ktlint-disable max-line-length */
     assertTrue {
       result.output.contains(
         Regex(
@@ -31,7 +30,6 @@ class SentryPluginCheckAndroidSdkTest :
         )
       )
     }
-    /* ktlint-enable max-line-length */
   }
 
   @Test

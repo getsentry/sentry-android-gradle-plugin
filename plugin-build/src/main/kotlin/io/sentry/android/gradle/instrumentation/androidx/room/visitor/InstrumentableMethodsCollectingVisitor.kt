@@ -52,7 +52,6 @@ class InstrumentableMethodsCollectingVisitor(
           // this means that either it's a SELECT query wrapped into a transaction
           // or some unknown to us usecase for instrumentation and we rather skip it
           if (methodNode in methodsToInstrument) {
-            /* ktlint-disable max-line-length */
             val prevType = methodsToInstrument[methodNode]
             type =
               when {
@@ -69,7 +68,6 @@ class InstrumentableMethodsCollectingVisitor(
                   null
                 }
               }
-            /* ktlint-enable max-line-length */
           }
 
           if (type != null) {
