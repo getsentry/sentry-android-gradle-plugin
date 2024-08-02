@@ -10,7 +10,7 @@ dependencies {
 spotless {
     kotlin {
         ktfmt(BuildPluginsVersion.KTFMT).googleStyle()
-        targetExclude("**/generated/**", "**/kotlin/**")
+        targetExclude("**/generated/**")
     }
 }
 

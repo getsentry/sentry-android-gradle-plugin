@@ -3,7 +3,7 @@ plugins {
     kotlin("kapt") version "1.9.24"
     id("distribution")
     id("com.vanniktech.maven.publish") version "0.17.0"
-    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
+    id("com.diffplug.spotless") version "7.0.0.BETA1"
 }
 
 allprojects {
@@ -13,16 +13,10 @@ allprojects {
     }
 }
 
-ktlint {
-    debug.set(false)
-    verbose.set(true)
-    android.set(true)
-    outputToConsole.set(true)
-    ignoreFailures.set(false)
-    enableExperimentalRules.set(true)
-    filter {
-        exclude("**/generated/**")
-        include("**/kotlin/**")
+spotless {
+    kotlin {
+        ktfmt("0.51").googleStyle()
+        targetExclude("**/generated/**")
     }
 }
 

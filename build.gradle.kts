@@ -26,11 +26,11 @@ subprojects {
     }
 }
 
-//tasks.register("clean", Delete::class.java) {
-//    delete(rootProject.buildDir)
-//    dependsOn(gradle.includedBuild("plugin-build").task(":clean"))
-//    dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":clean"))
-//}
+tasks.withType<Delete>().configureEach {
+    delete(rootProject.buildDir)
+    dependsOn(gradle.includedBuild("plugin-build").task(":clean"))
+    dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":clean"))
+}
 
 tasks.register("integrationTest") {
     group = "verification"
@@ -55,9 +55,11 @@ tasks.register("preMerge") {
 }
 
 tasks.getByName("spotlessCheck") {
+    dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":spotlessCheck"))
     dependsOn(gradle.includedBuild("plugin-build").task(":spotlessCheck"))
 }
 
 tasks.getByName("spotlessApply") {
+    dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":spotlessApply"))
     dependsOn(gradle.includedBuild("plugin-build").task(":spotlessApply"))
 }
