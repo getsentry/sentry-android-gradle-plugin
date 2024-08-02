@@ -11,11 +11,9 @@ import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.SentryVariant
 import java.io.File
 import org.gradle.api.Project
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskProvider
 
