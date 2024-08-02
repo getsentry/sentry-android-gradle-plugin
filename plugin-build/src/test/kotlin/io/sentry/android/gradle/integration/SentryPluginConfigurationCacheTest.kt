@@ -224,11 +224,35 @@ class SentryPluginConfigurationCacheTest :
             `is`(true)
         )
 
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+            }
+
+            sentry {
+              includeNativeSources = true
+              uploadNativeSymbols = true
+              includeProguardMapping = true
+              autoUploadProguardMapping = true
+              autoInstallation.enabled = false
+              telemetry = false
+            }
+            """.trimIndent()
+        )
+
         val runner = runner.withArguments(
             "--configuration-cache",
             "--build-cache",
             ":app:clean",
-            ":app:assembleRelease"
+            ":app:assembleRelease",
+            "--stacktrace"
         )
 
         val run = runner.build()
