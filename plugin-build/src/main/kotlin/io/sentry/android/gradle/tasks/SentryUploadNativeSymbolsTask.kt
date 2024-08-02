@@ -11,11 +11,9 @@ import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.SentryVariant
 import java.io.File
 import org.gradle.api.Project
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskProvider
 
@@ -78,10 +76,6 @@ abstract class SentryUploadNativeSymbolsTask : SentryCliExecTask() {
             autoUploadNativeSymbols: Property<Boolean>,
             taskSuffix: String = "",
         ): TaskProvider<SentryUploadNativeSymbolsTask> {
-            val nativeLibsDir = File(
-                project.buildDir,
-                "intermediates${File.separator}merged_native_libs${File.separator}$variantName"
-            )
             val uploadSentryNativeSymbolsTask = project.tasks.register(
                 "uploadSentryNativeSymbolsFor$taskSuffix",
                 SentryUploadNativeSymbolsTask::class.java
