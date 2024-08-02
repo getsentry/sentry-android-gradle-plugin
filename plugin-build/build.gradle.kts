@@ -17,7 +17,7 @@ plugins {
     id("org.jetbrains.dokka") version BuildPluginsVersion.DOKKA
     id("java-gradle-plugin")
     id("com.vanniktech.maven.publish") version BuildPluginsVersion.MAVEN_PUBLISH apply false
-    id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
+    id("com.diffplug.spotless") version BuildPluginsVersion.SPOTLESS
     // we need this plugin in order to include .aar dependencies into a pure java project, which the gradle plugin is
     id("io.sentry.android.gradle.aar2jar")
     id("com.github.johnrengelman.shadow") version BuildPluginsVersion.SHADOW
@@ -222,20 +222,10 @@ artifacts {
     archives(tasks.named("shadowJar"))
 }
 
-ktlint {
-    debug.set(false)
-    verbose.set(true)
-    android.set(true)
-    outputToConsole.set(true)
-    ignoreFailures.set(false)
-    enableExperimentalRules.set(true)
-    filter {
-        exclude("**/generated/**")
-        include("**/kotlin/**")
-        // see https://github.com/JLLeitschuh/ktlint-gradle/issues/522#issuecomment-958756817
-        exclude { entry ->
-            entry.file.toString().contains("generated")
-        }
+spotless {
+    kotlin {
+        ktfmt(BuildPluginsVersion.KTFMT).googleStyle()
+        targetExclude("**/generated/**", "**/kotlin/**")
     }
 }
 

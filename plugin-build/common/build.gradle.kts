@@ -1,22 +1,16 @@
 plugins {
     kotlin("jvm")
-    id("org.jlleitschuh.gradle.ktlint")
+    id("com.diffplug.spotless")
 }
 
 dependencies {
     compileOnly(Libs.GRADLE_API)
 }
 
-ktlint {
-    debug.set(false)
-    verbose.set(true)
-    android.set(true)
-    outputToConsole.set(true)
-    ignoreFailures.set(false)
-    enableExperimentalRules.set(true)
-    filter {
-        exclude("**/generated/**")
-        include("**/kotlin/**")
+spotless {
+    kotlin {
+        ktfmt(BuildPluginsVersion.KTFMT).googleStyle()
+        targetExclude("**/generated/**", "**/kotlin/**")
     }
 }
 

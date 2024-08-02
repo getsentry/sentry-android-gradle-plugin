@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN apply false
     id("com.android.application") version BuildPluginsVersion.AGP apply false
-    id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
+    id("com.diffplug.spotless") version BuildPluginsVersion.SPOTLESS
 }
 
 allprojects {
@@ -13,28 +13,24 @@ allprojects {
 
 subprojects {
     apply {
-        plugin("org.jlleitschuh.gradle.ktlint")
+        plugin("com.diffplug.spotless")
     }
 
-    ktlint {
-        debug.set(false)
-        verbose.set(true)
-        android.set(true)
-        outputToConsole.set(true)
-        ignoreFailures.set(false)
-        enableExperimentalRules.set(true)
-        filter {
-            exclude("**/generated/**")
-            include("**/kotlin/**")
+    if (name != "examples") {
+        spotless {
+            kotlin {
+                ktfmt(BuildPluginsVersion.KTFMT).googleStyle()
+                targetExclude("**/generated/**", "**/kotlin/**")
+            }
         }
     }
 }
 
-tasks.register("clean", Delete::class.java) {
-    delete(rootProject.buildDir)
-    dependsOn(gradle.includedBuild("plugin-build").task(":clean"))
-    dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":clean"))
-}
+//tasks.register("clean", Delete::class.java) {
+//    delete(rootProject.buildDir)
+//    dependsOn(gradle.includedBuild("plugin-build").task(":clean"))
+//    dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":clean"))
+//}
 
 tasks.register("integrationTest") {
     group = "verification"
@@ -58,10 +54,10 @@ tasks.register("preMerge") {
     dependsOn(gradle.includedBuild("plugin-build").task(":check"))
 }
 
-tasks.getByName("ktlintFormat") {
-    dependsOn(gradle.includedBuild("plugin-build").task(":ktlintFormat"))
+tasks.getByName("spotlessCheck") {
+    dependsOn(gradle.includedBuild("plugin-build").task(":spotlessCheck"))
 }
 
-tasks.getByName("ktlintCheck") {
-    dependsOn(gradle.includedBuild("plugin-build").task(":ktlintCheck"))
+tasks.getByName("spotlessApply") {
+    dependsOn(gradle.includedBuild("plugin-build").task(":spotlessApply"))
 }
