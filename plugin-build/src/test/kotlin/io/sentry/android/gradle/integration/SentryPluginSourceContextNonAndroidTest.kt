@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.integration
 
 import io.sentry.android.gradle.util.GradleVersions
+import io.sentry.android.gradle.util.SkipOnForksRule
 import io.sentry.android.gradle.verifySourceBundleContents
 import io.sentry.android.gradle.withDummyCustomFile
 import io.sentry.android.gradle.withDummyJavaFile
@@ -11,10 +12,14 @@ import org.gradle.testkit.runner.TaskOutcome.SKIPPED
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assume.assumeThat
+import org.junit.Rule
 import org.junit.Test
 
 class SentryPluginSourceContextNonAndroidTest :
     BaseSentryNonAndroidPluginTest(GradleVersion.current().version) {
+
+    @get:Rule
+    val skipOnForksRule = SkipOnForksRule()
 
     @Test
     fun `skips bundle and upload tasks if no sources`() {
