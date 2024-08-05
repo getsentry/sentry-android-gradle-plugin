@@ -5,6 +5,7 @@ import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.contentHash
 import io.sentry.android.gradle.util.info
+import java.util.UUID
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
@@ -15,7 +16,6 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.work.DisableCachingByDefault
-import java.util.UUID
 
 @DisableCachingByDefault
 abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
@@ -67,8 +67,9 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
             ) { task ->
                 output?.let { task.output.set(it) }
                 task.withSentryTelemetry(extension, sentryTelemetryProvider)
-                if (proguardMappingFile != null)
+                if (proguardMappingFile != null) {
                     task.proguardMappingFiles.from(proguardMappingFile)
+                }
                 task.outputs.upToDateWhen { false }
             }
             return generateUuidTask

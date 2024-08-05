@@ -115,7 +115,6 @@ class SentryPluginTest :
         assertEquals(uuid1, uuid2)
     }
 
-
     @Test
     fun `does not regenerate UUID every build`() {
         runner.appendArguments(":app:assembleRelease")
