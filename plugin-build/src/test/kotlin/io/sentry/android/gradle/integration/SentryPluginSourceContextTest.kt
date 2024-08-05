@@ -3,6 +3,7 @@ package io.sentry.android.gradle.integration
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.util.GradleVersions
+import io.sentry.android.gradle.util.SkipOnForksRule
 import io.sentry.android.gradle.verifySourceBundleContents
 import io.sentry.android.gradle.withDummyComposeFile
 import io.sentry.android.gradle.withDummyCustomFile
@@ -18,10 +19,14 @@ import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assume.assumeThat
+import org.junit.Rule
 import org.junit.Test
 
 class SentryPluginSourceContextTest :
     BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
+
+    @get:Rule
+    val skipOnForksRule = SkipOnForksRule()
 
     @Test
     fun `skips bundle and upload tasks if no sources`() {
