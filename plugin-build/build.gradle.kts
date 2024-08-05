@@ -94,7 +94,7 @@ dependencies {
     testImplementationAar(Libs.SQLITE)
     testImplementationAar(Libs.SQLITE_FRAMEWORK)
     testRuntimeOnly(files(androidSdkPath))
-    testImplementation(Libs.SENTRY_ANDROID)
+    testImplementationAar(Libs.SENTRY_ANDROID)
     testImplementationAar(Libs.SENTRY_ANDROID_OKHTTP)
     testImplementationAar(Libs.SENTRY_OKHTTP)
 
