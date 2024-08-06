@@ -153,6 +153,7 @@ internal object SentryCliProvider {
     /**
      * Tries to extract the sentry-cli from resources if the computedCliPath does not exist.
      */
+    @Synchronized
     internal fun maybeExtractFromResources(buildDir: File, cliPath: String): String {
         val cli = File(cliPath)
         if (!cli.exists()) {

@@ -5,12 +5,17 @@
 ### Fixes
 
 - Fix plugin for spring-dependency-management 1.1.6 ([#741](https://github.com/getsentry/sentry-android-gradle-plugin/pull/741))
+- Make `SentryUploadNativeSymbolsTask` configuration-cache compatible ([#747](https://github.com/getsentry/sentry-android-gradle-plugin/pull/747))
+- Fix `permission denied` error when extracting sentry-cli concurrently ([#748](https://github.com/getsentry/sentry-android-gradle-plugin/pull/748))
 
 ### Dependencies
 
-- Bump CLI from v2.32.2 to v2.33.0 ([#738](https://github.com/getsentry/sentry-android-gradle-plugin/pull/738))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2330)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.32.2...2.33.0)
+- Bump CLI from v2.32.2 to v2.33.1 ([#738](https://github.com/getsentry/sentry-android-gradle-plugin/pull/738), [#751](https://github.com/getsentry/sentry-android-gradle-plugin/pull/751))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2331)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.32.2...2.33.1)
+- Bump Android SDK from v7.12.0 to v7.13.0 ([#746](https://github.com/getsentry/sentry-android-gradle-plugin/pull/746))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7130)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.12.0...7.13.0)
 
 ## 4.10.0
 
