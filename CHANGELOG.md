@@ -7,6 +7,8 @@
 - Fix plugin for spring-dependency-management 1.1.6 ([#741](https://github.com/getsentry/sentry-android-gradle-plugin/pull/741))
 - Make `SentryUploadNativeSymbolsTask` configuration-cache compatible ([#747](https://github.com/getsentry/sentry-android-gradle-plugin/pull/747))
 - Fix `permission denied` error when extracting sentry-cli concurrently ([#748](https://github.com/getsentry/sentry-android-gradle-plugin/pull/748))
+- Make `SentryGenerateProguardUuidTask` produce deterministic output based on the mapping file contents ([#750](https://github.com/getsentry/sentry-android-gradle-plugin/pull/748))
+  - This disables caching for the `SentryGenerateProguardUuidTask` task in favour of deterministic UUID generation. The task will always run but will always produce the same UUID for the same mapping file.
 
 ### Dependencies
 

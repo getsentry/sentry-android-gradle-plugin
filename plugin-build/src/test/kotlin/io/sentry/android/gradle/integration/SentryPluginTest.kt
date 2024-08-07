@@ -13,7 +13,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome
-import org.gradle.testkit.runner.TaskOutcome.FROM_CACHE
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThrows
@@ -44,6 +43,76 @@ class SentryPluginTest :
         configuredTasks.remove(":app:clean")
 
         assertTrue(configuredTasks.isEmpty(), configuredTasks.joinToString("\n"))
+    }
+
+    @Test
+    fun `generates the same UUID when mapping file stays the same with rerun tasks`() {
+        runner.appendArguments(":app:assembleRelease")
+
+        val sourceDir = File(testProjectDir.root, "app/src/main/java/com/example").apply {
+            mkdirs()
+        }
+
+        val manifest = File(testProjectDir.root, "app/src/main/AndroidManifest.xml")
+        manifest.writeText(
+            """
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application>
+                    <activity android:name=".MainActivity"/>
+                </application>
+            </manifest>
+            """.trimIndent()
+        )
+
+        val sourceFile = File(sourceDir, "MainActivity.java")
+        sourceFile.createNewFile()
+        sourceFile.writeText(
+            """
+            package com.example;
+            import android.app.Activity;
+            import android.os.Bundle;
+
+            public class MainActivity extends Activity {
+                @Override
+                protected void onCreate(Bundle savedInstanceState) {
+                    super.onCreate(savedInstanceState);
+                    hello();
+                }
+
+               public void hello() {
+                    System.out.println("Hello");
+                }
+            }
+            """.trimIndent()
+        )
+
+        runner.appendArguments(":app:assembleRelease").build()
+        val uuid1 = verifyProguardUuid(testProjectDir.root)
+
+        sourceFile.writeText(
+            """
+            package com.example;
+            import android.app.Activity;
+            import android.os.Bundle;
+
+            public class MainActivity extends Activity {
+                @Override
+                protected void onCreate(Bundle savedInstanceState) {
+                    super.onCreate(savedInstanceState);
+                    hello();
+                }
+
+               public void hello() {
+                    System.out.println("Hello2");
+                }
+            }
+            """.trimIndent()
+        )
+
+        runner.appendArguments(":app:assembleRelease", "--rerun-tasks").build()
+        val uuid2 = verifyProguardUuid(testProjectDir.root)
+
+        assertEquals(uuid1, uuid2)
     }
 
     @Test
@@ -198,14 +267,8 @@ class SentryPluginTest :
             """.trimIndent()
         )
 
-        val build = runner.appendArguments(":app:assembleRelease").build()
+        runner.appendArguments(":app:assembleRelease").build()
         val uuid2 = verifyProguardUuid(testProjectDir.root)
-
-        assertEquals(
-            TaskOutcome.UP_TO_DATE,
-            build.task(":app:generateSentryProguardUuidRelease")?.outcome,
-            build.output
-        )
 
         assertEquals(uuid1, uuid2)
     }
@@ -863,39 +926,6 @@ class SentryPluginTest :
         val uuid2 = verifyProguardUuid(testProjectDir.root, inGeneratedFolder = true)
         assertFalse { "minifyReleaseWithR8" in result2.output }
 
-        assertEquals(uuid1, uuid2)
-    }
-
-    @Test
-    fun `caches uuid-generating tasks`() {
-        // first build it so it gets cached
-        runner.withArguments(":app:assembleRelease", "--build-cache").build()
-        val uuid1 = verifyProguardUuid(testProjectDir.root)
-
-        // this should erase the build folder so the tasks are not up-to-date
-        runner.withArguments("clean").build()
-
-        // this should restore the entry from cache as the mapping file hasn't changed
-        val build = runner.withArguments("app:assembleRelease", "--build-cache").build()
-        val uuid2 = verifyProguardUuid(testProjectDir.root)
-
-        assertEquals(
-            FROM_CACHE,
-            build.task(":app:generateSentryProguardUuidRelease")?.outcome,
-            build.output
-        )
-        assertEquals(
-            FROM_CACHE,
-            build.task(":app:generateSentryDebugMetaPropertiesRelease")?.outcome
-                ?: build.task(":app:injectSentryDebugMetaPropertiesIntoAssetsRelease")?.outcome,
-            build.output
-        )
-        assertEquals(
-            FROM_CACHE,
-            build.task(":app:releaseSentryGenerateIntegrationListTask")?.outcome,
-            build.output
-        )
-        // should be the same uuid
         assertEquals(uuid1, uuid2)
     }
 

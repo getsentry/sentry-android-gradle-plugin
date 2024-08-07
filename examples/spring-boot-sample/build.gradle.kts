@@ -51,6 +51,6 @@ tasks.withType<KotlinCompile> {
 
 sentry {
     debug.set(true)
-    includeSourceContext.set(true)
+    includeSourceContext.set(CI.canAutoUpload())
     additionalSourceDirsForSourceContext.set(setOf("testsrc"))
 }

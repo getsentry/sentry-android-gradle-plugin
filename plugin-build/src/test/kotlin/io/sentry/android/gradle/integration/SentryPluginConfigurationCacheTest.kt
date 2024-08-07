@@ -210,6 +210,11 @@ class SentryPluginConfigurationCacheTest :
 
     @Test
     fun `sentry-cli is recovered when clean is executed before assemble`() {
+        assumeThat(
+            "Sentry native symbols upload only supported when SENTRY_AUTH_TOKEN is present",
+            System.getenv("SENTRY_AUTH_TOKEN").isNullOrEmpty(),
+            `is`(false)
+        )
         // configuration cache doesn't seem to work well on older Gradle/AGP combinations
         // producing the following output:
         //
@@ -261,6 +266,11 @@ class SentryPluginConfigurationCacheTest :
 
     @Test
     fun `native symbols upload task respects configuration cache`() {
+        assumeThat(
+            "Sentry native symbols upload only supported when SENTRY_AUTH_TOKEN is present",
+            System.getenv("SENTRY_AUTH_TOKEN").isNullOrEmpty(),
+            `is`(false)
+        )
         assumeThat(
             "SentryUploadNativeSymbolsTask only supports " +
                 "configuration cache from Gradle 7.5 onwards",
