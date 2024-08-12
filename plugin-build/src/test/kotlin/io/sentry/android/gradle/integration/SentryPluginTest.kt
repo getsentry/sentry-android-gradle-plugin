@@ -18,6 +18,7 @@ import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThrows
 import org.junit.Assume.assumeThat
 import org.junit.Test
+import java.util.EnumSet
 
 class SentryPluginTest :
     BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
@@ -638,6 +639,43 @@ class SentryPluginTest :
     }
 
     @Test
+    fun `changing instrumentation features invalidates cache`() {
+        val enumSetInitial = EnumSet.allOf(InstrumentationFeature::class.java)
+        val enumSetWithoutOkHttp = EnumSet.allOf(InstrumentationFeature::class.java) - InstrumentationFeature.OKHTTP
+        val dependencies = setOf(
+            "com.squareup.okhttp3:okhttp:3.14.9",
+            "io.sentry:sentry-android-okhttp:6.6.0"
+        )
+
+        val secondBuildFile = File(appBuildFile.parentFile, "secondBuild")
+        appBuildFile.copyTo(secondBuildFile)
+
+        applyTracingInstrumentation(dependencies = dependencies, features = enumSetInitial, debug = true, forceInstrumentDependencies = false)
+
+        runner
+            .appendArguments("clean", ":app:assembleDebug", "--info")
+            .build()
+
+        // since it's an integration test, we just test that the log file was created for the class
+        // meaning our CommonClassVisitor has visited and instrumented it
+        val debugOutput =
+            testProjectDir.root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
+        assertTrue { debugOutput.exists() && debugOutput.length() > 0 }
+
+        appBuildFile.writeText(secondBuildFile.readText())
+
+        applyTracingInstrumentation(dependencies = dependencies, features = enumSetWithoutOkHttp, debug = true, forceInstrumentDependencies = false)
+
+        runner.build()
+
+        // since it's an integration test, we just test that the log file was created for the class
+        // meaning our CommonClassVisitor has visited and instrumented it
+        val debugOutput2 =
+            testProjectDir.root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
+        assertTrue { !debugOutput2.exists() }
+    }
+
+    @Test
     fun `includes flattened list of dependencies into the APK, excluding non-external deps`() {
         appBuildFile.appendText(
             // language=Groovy
@@ -999,7 +1037,8 @@ class SentryPluginTest :
         dependencies: Set<String> = emptySet(),
         debug: Boolean = false,
         excludes: Set<String> = emptySet(),
-        sdkVersion: String = "7.1.0"
+        sdkVersion: String = "7.1.0",
+        forceInstrumentDependencies: Boolean = true
     ) {
         appBuildFile.appendText(
             // language=Groovy
@@ -1012,7 +1051,7 @@ class SentryPluginTest :
                 sentry {
                   autoUploadProguardMapping = false
                   tracingInstrumentation {
-                    forceInstrumentDependencies = true
+                    forceInstrumentDependencies = $forceInstrumentDependencies
                     enabled = $tracingInstrumentation
                     debug = $debug
                     features = [${features.joinToString { "${it::class.java.canonicalName}.${it.name}" }}]
