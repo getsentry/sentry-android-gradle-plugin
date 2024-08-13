@@ -65,10 +65,7 @@ abstract class SpanAddingClassVisitorFactory :
 
         @get:Internal
         var _instrumentable: ClassInstrumentable?
-
-
-        // TODO test if this fixes the caching issue
-        //
+        
         @get:Input
         val features: SetProperty<InstrumentationFeature>
 

@@ -206,8 +206,12 @@ fun AndroidComponentsExtension<*, *, *>.configure(
 
                     params.sentryModulesService.setDisallowChanges(sentryModulesService)
                     params.features.setDisallowChanges(extension.tracingInstrumentation.features)
-                    params.logcatEnabled.setDisallowChanges(extension.tracingInstrumentation.logcat.enabled)
-                    params.appStartEnabled.setDisallowChanges(extension.tracingInstrumentation.appStart.enabled)
+                    params.logcatEnabled.setDisallowChanges(
+                        extension.tracingInstrumentation.logcat.enabled
+                    )
+                    params.appStartEnabled.setDisallowChanges(
+                        extension.tracingInstrumentation.appStart.enabled
+                    )
                     params.tmpDir.set(tmpDir)
                 }
 

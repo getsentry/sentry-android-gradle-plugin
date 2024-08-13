@@ -8,6 +8,7 @@ import io.sentry.android.gradle.verifyDependenciesReportAndroid
 import io.sentry.android.gradle.verifyIntegrationList
 import io.sentry.android.gradle.verifyProguardUuid
 import java.io.File
+import java.util.EnumSet
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
@@ -18,7 +19,6 @@ import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThrows
 import org.junit.Assume.assumeThat
 import org.junit.Test
-import java.util.EnumSet
 
 class SentryPluginTest :
     BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
@@ -641,7 +641,8 @@ class SentryPluginTest :
     @Test
     fun `changing instrumentation features invalidates cache`() {
         val enumSetInitial = EnumSet.allOf(InstrumentationFeature::class.java)
-        val enumSetWithoutOkHttp = EnumSet.allOf(InstrumentationFeature::class.java) - InstrumentationFeature.OKHTTP
+        val enumSetWithoutOkHttp =
+            EnumSet.allOf(InstrumentationFeature::class.java) - InstrumentationFeature.OKHTTP
         val dependencies = setOf(
             "com.squareup.okhttp3:okhttp:3.14.9",
             "io.sentry:sentry-android-okhttp:6.6.0"
@@ -650,7 +651,12 @@ class SentryPluginTest :
         val secondBuildFile = File(appBuildFile.parentFile, "secondBuild")
         appBuildFile.copyTo(secondBuildFile)
 
-        applyTracingInstrumentation(dependencies = dependencies, features = enumSetInitial, debug = true, forceInstrumentDependencies = false)
+        applyTracingInstrumentation(
+            dependencies = dependencies,
+            features = enumSetInitial,
+            debug = true,
+            forceInstrumentDependencies = false
+        )
 
         runner
             .appendArguments("clean", ":app:assembleDebug", "--info")
@@ -664,7 +670,12 @@ class SentryPluginTest :
 
         appBuildFile.writeText(secondBuildFile.readText())
 
-        applyTracingInstrumentation(dependencies = dependencies, features = enumSetWithoutOkHttp, debug = true, forceInstrumentDependencies = false)
+        applyTracingInstrumentation(
+            dependencies = dependencies,
+            features = enumSetWithoutOkHttp,
+            debug = true,
+            forceInstrumentDependencies = false
+        )
 
         runner.build()
 
