@@ -65,7 +65,7 @@ abstract class SpanAddingClassVisitorFactory :
 
         @get:Internal
         var _instrumentable: ClassInstrumentable?
-        
+
         @get:Input
         val features: SetProperty<InstrumentationFeature>
 
