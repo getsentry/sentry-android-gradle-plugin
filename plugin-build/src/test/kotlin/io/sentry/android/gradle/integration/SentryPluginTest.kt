@@ -655,11 +655,11 @@ class SentryPluginTest :
             dependencies = dependencies,
             features = enumSetInitial,
             debug = true,
-            forceInstrumentDependencies = false
+            forceInstrumentDependencies = true
         )
 
         runner
-            .appendArguments("clean", ":app:assembleDebug", "--info")
+            .appendArguments("clean", ":app:assembleDebug")
             .build()
 
         // since it's an integration test, we just test that the log file was created for the class
