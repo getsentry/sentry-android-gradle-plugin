@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Invalidate instrumentation cache when changing instrumentation features ([#753](https://github.com/getsentry/sentry-android-gradle-plugin/pull/753))
+
 ## 4.11.0
 
 ### Fixes
