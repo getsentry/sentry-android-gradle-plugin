@@ -655,18 +655,19 @@ class SentryPluginTest :
             dependencies = dependencies,
             features = enumSetInitial,
             debug = true,
-            forceInstrumentDependencies = true
+            forceInstrumentDependencies = false
         )
 
-        runner
-            .appendArguments("clean", ":app:assembleDebug")
+        // Enable build cache to be able to test that changing the feature set actually reruns the instrumentation task
+        val buildOne = runner
+            .appendArguments("clean", ":app:assembleDebug", "--info", "--build-cache")
             .build()
 
-        // since it's an integration test, we just test that the log file was created for the class
-        // meaning our CommonClassVisitor has visited and instrumented it
-        val debugOutput =
-            testProjectDir.root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
-        assertTrue { debugOutput.exists() && debugOutput.length() > 0 }
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "AndroidXSQLiteDatabase, AndroidXSQLiteStatement, AndroidXRoomDao, " +
+                "OkHttp, WrappingInstrumentable, RemappingInstrumentable)" in buildOne.output
+        }
 
         appBuildFile.writeText(secondBuildFile.readText())
 
@@ -677,13 +678,13 @@ class SentryPluginTest :
             forceInstrumentDependencies = false
         )
 
-        runner.build()
+        val buildTwo = runner.build()
 
-        // since it's an integration test, we just test that the log file was created for the class
-        // meaning our CommonClassVisitor has visited and instrumented it
-        val debugOutput2 =
-            testProjectDir.root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
-        assertTrue { !debugOutput2.exists() }
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "AndroidXSQLiteDatabase, AndroidXSQLiteStatement, AndroidXRoomDao, " +
+                "WrappingInstrumentable, RemappingInstrumentable)" in buildTwo.output
+        }
     }
 
     @Test
