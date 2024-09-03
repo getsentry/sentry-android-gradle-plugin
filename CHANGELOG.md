@@ -6,6 +6,12 @@
 
 - Invalidate instrumentation cache when changing instrumentation features ([#753](https://github.com/getsentry/sentry-android-gradle-plugin/pull/753))
 
+### Dependencies
+
+- Bump Android SDK from v7.13.0 to v7.14.0 ([#754](https://github.com/getsentry/sentry-android-gradle-plugin/pull/754))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7140)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.13.0...7.14.0)
+
 ## 4.11.0
 
 ### Fixes
