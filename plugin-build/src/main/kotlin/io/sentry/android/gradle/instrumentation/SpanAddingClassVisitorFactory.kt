@@ -5,6 +5,7 @@ import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.SentryPlugin
+import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
@@ -29,6 +30,7 @@ import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
@@ -63,6 +65,15 @@ abstract class SpanAddingClassVisitorFactory :
 
         @get:Internal
         var _instrumentable: ClassInstrumentable?
+
+        @get:Input
+        val features: SetProperty<InstrumentationFeature>
+
+        @get:Input
+        val logcatEnabled: Property<Boolean>
+
+        @get:Input
+        val appStartEnabled: Property<Boolean>
     }
 
     private val instrumentable: ClassInstrumentable
