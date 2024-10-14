@@ -1,4 +1,17 @@
 # This is used by the action https://github.com/dorny/paths-filter
 
 high_risk_code: &high_risk_code
-  - ".github/file-filters.yml"
+  # Visitor classes (bytecode manipulation)
+  - "plugin-build/src/main/kotlin/io/sentry/android/gradle/instrumentation/AbstractSpanAddingMethodVisitor.kt"
+  - "plugin-build/src/main/kotlin/io/sentry/android/gradle/instrumentation/androidx/compose/visitor/RememberNavControllerMethodVisitor.kt"
+  - "plugin-build/src/main/kotlin/io/sentry/android/gradle/instrumentation/androidx/room/visitor/AndroidXRoomDaoVisitor.kt"
+  - "plugin-build/src/main/kotlin/io/sentry/android/gradle/instrumentation/androidx/room/visitor/InstrumentableMethodsCollectingVisitor.kt"
+  - "plugin-build/src/main/kotlin/io/sentry/android/gradle/instrumentation/androidx/sqlite/database/visitor/ExecSqlMethodVisitor.kt"
+  - "plugin-build/src/main/kotlin/io/sentry/android/gradle/instrumentation/androidx/sqlite/database/visitor/QueryMethodVisitor.kt"
+  - "plugin-build/src/main/kotlin/io/sentry/android/gradle/instrumentation/androidx/sqlite/statement/visitor/ExecuteStatementMethodVisitor.kt"
+  - "plugin-build/src/main/kotlin/io/sentry/android/gradle/instrumentation/androidx/sqlite/visitor/SQLiteOpenHelperMethodVisitor.kt"
+  - "plugin-build/src/main/kotlin/io/sentry/android/gradle/instrumentation/appstart/ApplicationMethodVisitor.kt"
+  - "plugin-build/src/main/kotlin/io/sentry/android/gradle/instrumentation/appstart/ContentProviderMethodVisitor.kt"
+  - "plugin-build/src/main/kotlin/io/sentry/android/gradle/instrumentation/logcat/LogcatClassVisitor.kt"
+  - "plugin-build/src/main/kotlin/io/sentry/android/gradle/instrumentation/okhttp/visitor/OkHttpEventListenerMethodVisitor.kt"
+  - "plugin-build/src/main/kotlin/io/sentry/android/gradle/instrumentation/wrap/visitor/WrappingVisitor.kt"
