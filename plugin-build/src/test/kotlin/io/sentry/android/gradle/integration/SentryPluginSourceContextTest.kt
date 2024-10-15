@@ -44,6 +44,13 @@ class SentryPluginSourceContextTest :
               buildFeatures {
                 buildConfig false
               }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
+              }
             }
 
             sentry {
@@ -82,6 +89,13 @@ class SentryPluginSourceContextTest :
 
               buildFeatures {
                 buildConfig false
+              }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
               }
             }
 
@@ -139,6 +153,13 @@ class SentryPluginSourceContextTest :
               buildFeatures {
                 buildConfig false
               }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
+              }
             }
 
             sentry {
@@ -195,6 +216,13 @@ class SentryPluginSourceContextTest :
 
               buildFeatures {
                 buildConfig true
+              }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
               }
             }
 
@@ -273,6 +301,13 @@ class SentryPluginSourceContextTest :
               buildFeatures {
                 buildConfig true
               }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
+              }
             }
 
             sentry {
@@ -337,6 +372,13 @@ class SentryPluginSourceContextTest :
               buildFeatures {
                 buildConfig false
               }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
+              }
             }
 
             sentry {
@@ -392,6 +434,13 @@ class SentryPluginSourceContextTest :
 
               buildFeatures {
                 buildConfig false
+              }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
               }
             }
 
