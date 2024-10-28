@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add AutoInstallStrategy for graphql-22 ([#781](https://github.com/getsentry/sentry-android-gradle-plugin/pull/781))
+
 ## 4.12.0
 
 ### Fixes
