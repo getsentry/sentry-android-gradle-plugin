@@ -3,6 +3,7 @@ package io.sentry.android.gradle.autoinstall
 import io.sentry.android.gradle.autoinstall.compose.ComposeInstallStrategy
 import io.sentry.android.gradle.autoinstall.fragment.FragmentInstallStrategy
 import io.sentry.android.gradle.autoinstall.graphql.GraphqlInstallStrategy
+import io.sentry.android.gradle.autoinstall.graphql.Graphql22InstallStrategy
 import io.sentry.android.gradle.autoinstall.jdbc.JdbcInstallStrategy
 import io.sentry.android.gradle.autoinstall.kotlin.KotlinExtensionsInstallStrategy
 import io.sentry.android.gradle.autoinstall.log4j2.Log4j2InstallStrategy
@@ -36,6 +37,7 @@ private val strategies = listOf(
     Log4j2InstallStrategy.Registrar,
     JdbcInstallStrategy.Registrar,
     GraphqlInstallStrategy.Registrar,
+    Graphql22InstallStrategy.Registrar,
     QuartzInstallStrategy.Registrar,
     KotlinExtensionsInstallStrategy.Registrar,
     WarnOnOverrideStrategy.Registrar
