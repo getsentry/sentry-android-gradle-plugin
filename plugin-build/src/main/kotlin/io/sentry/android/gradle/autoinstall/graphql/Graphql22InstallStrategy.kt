@@ -24,9 +24,7 @@ abstract class Graphql22InstallStrategy : AbstractInstallStrategy {
     override val sentryModuleId: String get() = SENTRY_GRAPHQL_ID
 
     override val minSupportedThirdPartyVersion: SemVer get() = MIN_SUPPORTED_VERSION
-
-    // prior versions could cause circular dependencies
-    // due to having graphql as implementation dependency
+    
     override val minSupportedSentryVersion: SemVer get() = SemVer(8, 0, 0)
 
     companion object Registrar : InstallStrategyRegistrar {
