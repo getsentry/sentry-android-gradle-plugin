@@ -3,8 +3,6 @@ package io.sentry.android.gradle.autoinstall.graphql
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.autoinstall.AbstractInstallStrategy
 import io.sentry.android.gradle.autoinstall.InstallStrategyRegistrar
-import io.sentry.android.gradle.autoinstall.spring.Spring5InstallStrategy
-import io.sentry.android.gradle.autoinstall.spring.Spring5InstallStrategy.Registrar
 import io.sentry.android.gradle.util.SemVer
 import javax.inject.Inject
 import org.gradle.api.artifacts.dsl.ComponentMetadataHandler

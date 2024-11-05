@@ -9,7 +9,6 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
-import io.sentry.android.gradle.util.SemVer
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.gradle.api.Action
