@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add AutoInstallStrategy for graphql-22 ([#781](https://github.com/getsentry/sentry-android-gradle-plugin/pull/781))
+
 ### Dependencies
 
 - Bump CLI from v2.38.0 to v2.38.2 ([#786](https://github.com/getsentry/sentry-android-gradle-plugin/pull/786))
