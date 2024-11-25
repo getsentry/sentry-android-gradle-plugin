@@ -5,6 +5,8 @@
 ### Features
 
 - Add AutoInstallStrategy for graphql-22 ([#781](https://github.com/getsentry/sentry-android-gradle-plugin/pull/781))
+- New experimental option to upload proguard mappings chunked. Set the env variable to try it out: `export SENTRY_EXPERIMENTAL_PROGUARD_CHUNK_UPLOAD=1`
+  - This should prevent intermittent `502: Bad Gateway` errors when uploading proguard mappings
 
 ### Dependencies
 
