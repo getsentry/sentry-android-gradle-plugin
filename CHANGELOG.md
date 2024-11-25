@@ -5,12 +5,14 @@
 ### Features
 
 - Add AutoInstallStrategy for graphql-22 ([#781](https://github.com/getsentry/sentry-android-gradle-plugin/pull/781))
+- New experimental option to upload proguard mappings chunked. Set the env variable to try it out: `export SENTRY_EXPERIMENTAL_PROGUARD_CHUNK_UPLOAD=1`
+  - This should prevent intermittent `502: Bad Gateway` errors when uploading proguard mappings
 
 ### Dependencies
 
-- Bump CLI from v2.38.0 to v2.38.2 ([#786](https://github.com/getsentry/sentry-android-gradle-plugin/pull/786))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2382)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.38.0...2.38.2)
+- Bump CLI from v2.38.0 to v2.39.0 ([#786](https://github.com/getsentry/sentry-android-gradle-plugin/pull/786), [#791](https://github.com/getsentry/sentry-android-gradle-plugin/pull/791))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2390)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.38.0...2.39.0)
 
 ## 4.13.0
 
