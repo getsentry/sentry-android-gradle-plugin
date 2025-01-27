@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+# Unreleased
+
+### Fixes
+
+- Ensure DexGuard flavor/buildtype mapping files are respected as well ([#822](https://github.com/getsentry/sentry-android-gradle-plugin/pull/822))
 
 ### Dependencies
 
