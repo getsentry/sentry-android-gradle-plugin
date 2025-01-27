@@ -110,7 +110,7 @@ jobs:
           arguments: integrationTest
 
       - name: Upload Test Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-AGP${{ matrix.agp }}-Gradle${{ matrix.gradle }}
           path: plugin-build/build/reports/tests/
