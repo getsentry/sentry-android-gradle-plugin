@@ -6,6 +6,12 @@
 
 - Ensure DexGuard flavor/buildtype mapping files are respected as well ([#822](https://github.com/getsentry/sentry-android-gradle-plugin/pull/822))
 
+### Dependencies
+
+- Bump CLI from v2.39.1 to v2.41.1 ([#818](https://github.com/getsentry/sentry-android-gradle-plugin/pull/818))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2411)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.39.1...2.41.1)
+
 ## 4.14.1
 
 ### Dependencies
