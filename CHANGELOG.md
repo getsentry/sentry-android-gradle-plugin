@@ -1,6 +1,12 @@
 # Changelog
 
-# Unreleased
+## Unreleased
+
+### Intro
+
+Version 5.0 of the `sentry-android-gradle-plugin` uses the latest major version of the Java/Android SDK (`8.0.0`).
+We plan to do another major release within the next few months, which will contain more functional changes.
+You can see what exactly we're planning and track progress in [#825](https://github.com/getsentry/sentry-android-gradle-plugin/issues/825).
 
 ### Fixes
 
