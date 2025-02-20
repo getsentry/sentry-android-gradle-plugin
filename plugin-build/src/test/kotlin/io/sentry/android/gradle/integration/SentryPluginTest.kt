@@ -300,6 +300,11 @@ class SentryPluginTest :
 
     @Test
     fun `injectSentryDebugMetaProperties task deletes the output folder before writing`() {
+        assumeThat(
+            "InjectSentryDebugMetaPropertiesTask only runs from AGP 7.4.0 onwards",
+            SemVer.parse(androidGradlePluginVersion) >= AgpVersions.VERSION_7_4_0,
+            `is`(true)
+        )
         runner.appendArguments(":app:assembleRelease")
 
         val firstBuild = runner.build()
