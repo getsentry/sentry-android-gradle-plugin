@@ -299,7 +299,7 @@ class SentryPluginTest :
     }
 
     @Test
-    fun `generateSentryDebugMetaProperties task deletes the output folder before writing`() {
+    fun `injectSentryDebugMetaProperties task deletes the output folder before writing`() {
         runner.appendArguments(":app:assembleRelease")
 
         val firstBuild = runner.build()
