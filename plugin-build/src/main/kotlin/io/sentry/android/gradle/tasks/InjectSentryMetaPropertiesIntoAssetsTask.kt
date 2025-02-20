@@ -18,6 +18,7 @@
 package io.sentry.android.gradle.tasks
 
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.sourcecontext.getAndDelete
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.PropertiesUtil
@@ -73,11 +74,8 @@ abstract class InjectSentryMetaPropertiesIntoAssetsTask : DefaultTask() {
     @TaskAction
     fun taskAction() {
         val input = inputDir.get().asFile
-        val output = outputDir.get().asFile
-
-        if (!output.exists()) {
-            output.mkdirs()
-        }
+        val output = outputDir.getAndDelete()
+        output.mkdirs()
 
         input.copyRecursively(output, overwrite = true)
 

@@ -299,6 +299,34 @@ class SentryPluginTest :
     }
 
     @Test
+    fun `generateSentryDebugMetaProperties task deletes the output folder before writing`() {
+        runner.appendArguments(":app:assembleRelease")
+
+        val firstBuild = runner.build()
+
+        assertEquals(
+            TaskOutcome.SUCCESS,
+            firstBuild.task(":app:injectSentryDebugMetaPropertiesIntoAssetsRelease")?.outcome
+        )
+
+        val assetsOutput = File(
+            testProjectDir.root,
+            "app/build/intermediates/assets/release/" +
+                "injectSentryDebugMetaPropertiesIntoAssetsRelease"
+        )
+        val dummyAsset = File(assetsOutput, "foo.txt").also { it.writeText("test") }
+
+        val subsequentBuild = runner.appendArguments("--rerun-tasks").build()
+        assertEquals(
+            TaskOutcome.SUCCESS,
+            subsequentBuild.task(":app:injectSentryDebugMetaPropertiesIntoAssetsRelease")?.outcome
+        )
+
+        assertTrue(subsequentBuild.output) { "BUILD SUCCESSFUL" in subsequentBuild.output }
+        assertFalse(dummyAsset.exists())
+    }
+
+    @Test
     fun `does not include a UUID in the APK`() {
         // isMinifyEnabled is disabled by default in debug builds
         runner
