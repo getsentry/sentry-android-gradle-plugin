@@ -6,7 +6,6 @@ import java.io.FileInputStream
 import java.util.Properties
 import org.gradle.api.internal.classpath.ModuleRegistry
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.gradle.configurationcache.extensions.serviceOf
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -101,13 +100,6 @@ dependencies {
     // Needed to read contents from APK/Source Bundles
     testImplementation(Libs.ARSC_LIB)
     testImplementation(Libs.ZIP4J)
-
-    testRuntimeOnly(
-        files(
-            serviceOf<ModuleRegistry>().getModule("gradle-tooling-api-builders")
-                .classpath.asFiles.first()
-        )
-    )
 }
 
 configure<JavaPluginExtension> {
