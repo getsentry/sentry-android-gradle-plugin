@@ -40,4 +40,3 @@ includeBuild("plugin-build") {
     }
 }
 includeBuild("sentry-kotlin-compiler-plugin")
-include(":examples:assetpack")
