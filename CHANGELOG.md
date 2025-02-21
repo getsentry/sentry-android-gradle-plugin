@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Ensure `InjectSentryDebugMetaPropertiesTask` deletes the output folder before writing into it ([#838](https://github.com/getsentry/sentry-android-gradle-plugin/pull/838))
+
 ### Dependencies
 
 - Bump CLI from v2.41.1 to v2.42.1 ([#837](https://github.com/getsentry/sentry-android-gradle-plugin/pull/837))
