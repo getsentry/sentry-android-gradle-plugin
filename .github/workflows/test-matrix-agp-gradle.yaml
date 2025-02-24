@@ -57,6 +57,7 @@ jobs:
     name: Test Matrix - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
     env:
       VERSION_AGP: ${{ matrix.agp }}
+      VERSION_GROOVY: ${{ matrix.groovy }}
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
     steps:
