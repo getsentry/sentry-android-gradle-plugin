@@ -156,6 +156,8 @@ tasks.named("test").configure {
 tasks.register<Test>("integrationTest").configure {
     group = "verification"
     description = "Runs the integration tests"
+    // for some reason Gradle > 8.10 doesn't pick up the pluginUnderTestMetadata classpath, so we
+    // need to add it manually
     classpath += layout.files(
         project.layout.buildDirectory.get().toString() + "/pluginUnderTestMetadata"
     )
