@@ -51,7 +51,7 @@ jobs:
             groovy: "1.7.1"
           - agp: "8.10.0-alpha05"
             gradle: "8.11.1"
-            java: "21"
+            java: "17"
             groovy: "1.7.1"
 
     name: Test Matrix - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
