@@ -4,7 +4,6 @@ import io.sentry.android.gradle.internal.ASMifyTask
 import io.sentry.android.gradle.internal.BootstrapAndroidSdk
 import java.io.FileInputStream
 import java.util.Properties
-import org.gradle.api.internal.classpath.ModuleRegistry
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -157,6 +156,9 @@ tasks.named("test").configure {
 tasks.register<Test>("integrationTest").configure {
     group = "verification"
     description = "Runs the integration tests"
+    classpath += layout.files(
+        project.layout.buildDirectory.get().toString() + "/pluginUnderTestMetadata"
+    )
 
     maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
 
@@ -176,6 +178,7 @@ tasks.register<Test>("integrationTest").configure {
     filter {
         includeTestsMatching("io.sentry.android.gradle.integration.*")
     }
+    dependsOn(tasks.withType<PluginUnderTestMetadata>())
 }
 
 gradlePlugin {
