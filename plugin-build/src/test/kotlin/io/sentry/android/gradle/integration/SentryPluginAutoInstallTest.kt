@@ -3,6 +3,7 @@ package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
+import org.gradle.testkit.runner.BuildResult
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.gradle.util.GradleVersion
@@ -347,9 +348,57 @@ class SentryPluginAutoInstallTest :
         assertFalse { "io.sentry:sentry-android:6.32.0 -> 7.0.0" in result.output }
     }
 
-    private fun runListDependenciesTask() = runner
-        .appendArguments("app:dependencies")
-        .appendArguments("--configuration")
-        .appendArguments("debugRuntimeClasspath")
-        .build()
+    @Test
+    fun `considers sentry-opentelemetry-agentless as a core version`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+                id "java"
+                id "io.sentry.jvm.gradle"
+            }
+
+            dependencies {
+              implementation 'io.sentry:sentry-opentelemetry-agentless:8.0.0'
+            }
+
+            sentry.autoInstallation.enabled = true
+            sentry.autoInstallation.sentryVersion = "8.1.0"
+            """.trimIndent()
+        )
+
+        val result = runListDependenciesTask(extraArguments = listOf("--configuration", "runtimeClasspath"))
+        assertTrue { "io.sentry:sentry:8.0.0" in result.output }
+    }
+
+    @Test
+    fun `considers sentry-opentelemetry-agentless-spring as a core version`() {
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+                id "java"
+                id "io.sentry.jvm.gradle"
+            }
+
+            dependencies {
+              implementation 'io.sentry:sentry-opentelemetry-agentless-spring:8.0.0'
+            }
+
+            sentry.autoInstallation.enabled = true
+            sentry.autoInstallation.sentryVersion = "8.1.0"
+            """.trimIndent()
+        )
+
+        val result = runListDependenciesTask(extraArguments = listOf("--configuration", "runtimeClasspath"))
+        assertTrue { "io.sentry:sentry:8.0.0" in result.output }
+    }
+
+    private fun runListDependenciesTask(extraArguments: List<String> = listOf("--configuration", "debugRuntimeClasspath")): BuildResult {
+        var runner = runner.appendArguments("app:dependencies")
+        for (arg in extraArguments) {
+            runner = runner.appendArguments(arg)
+        }
+        return runner.build()!!
+    }
 }

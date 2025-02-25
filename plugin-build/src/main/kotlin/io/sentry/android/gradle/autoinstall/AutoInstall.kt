@@ -124,7 +124,9 @@ private fun DependencySet.findSentryVersion(isAndroid: Boolean): String? =
                     it.name == SentryModules.SENTRY.name ||
                         it.name == SentryModules.SENTRY_SPRING_BOOT2.name ||
                         it.name == SentryModules.SENTRY_SPRING_BOOT3.name ||
-                        it.name == SentryModules.SENTRY_BOM.name
+                        it.name == SentryModules.SENTRY_BOM.name ||
+                        it.name == SentryModules.SENTRY_OPENTELEMETRY_AGENTLESS.name ||
+                        it.name == SentryModules.SENTRY_OPENTELEMETRY_AGENTLESS_SPRING.name
                     ) && it.version != null
         }?.version
     }
