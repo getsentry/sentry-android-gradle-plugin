@@ -366,7 +366,9 @@ class SentryPluginAutoInstallTest :
             """.trimIndent()
         )
 
-        val result = runListDependenciesTask(extraArguments = listOf("--configuration", "runtimeClasspath"))
+        val result = runListDependenciesTask(
+            extraArguments = listOf("--configuration", "runtimeClasspath")
+        )
         assertTrue { "io.sentry:sentry:8.0.0" in result.output }
     }
 
@@ -389,11 +391,15 @@ class SentryPluginAutoInstallTest :
             """.trimIndent()
         )
 
-        val result = runListDependenciesTask(extraArguments = listOf("--configuration", "runtimeClasspath"))
+        val result = runListDependenciesTask(
+            extraArguments = listOf("--configuration", "runtimeClasspath")
+        )
         assertTrue { "io.sentry:sentry:8.0.0" in result.output }
     }
 
-    private fun runListDependenciesTask(extraArguments: List<String> = listOf("--configuration", "debugRuntimeClasspath")) = runner
+    private fun runListDependenciesTask(
+        extraArguments: List<String> = listOf("--configuration", "debugRuntimeClasspath")
+    ) = runner
         .appendArguments("app:dependencies")
         .appendArguments(*extraArguments.toTypedArray())
         .build()
