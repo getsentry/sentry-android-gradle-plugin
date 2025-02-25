@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Avoid excessive sentry-cli search logs at `info` level ([#842](https://github.com/getsentry/sentry-android-gradle-plugin/pull/842))
+
 ### Dependencies
 
 - Bump CLI from v2.41.1 to v2.42.1 ([#837](https://github.com/getsentry/sentry-android-gradle-plugin/pull/837))
