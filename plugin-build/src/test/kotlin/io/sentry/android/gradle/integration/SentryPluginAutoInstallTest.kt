@@ -394,11 +394,8 @@ class SentryPluginAutoInstallTest :
         assertTrue { "io.sentry:sentry:8.0.0" in result.output }
     }
 
-    private fun runListDependenciesTask(extraArguments: List<String> = listOf("--configuration", "debugRuntimeClasspath")): BuildResult {
-        var runner = runner.appendArguments("app:dependencies")
-        for (arg in extraArguments) {
-            runner = runner.appendArguments(arg)
-        }
-        return runner.build()!!
-    }
+    private fun runListDependenciesTask(extraArguments: List<String> = listOf("--configuration", "debugRuntimeClasspath")) = runner
+        .appendArguments("app:dependencies")
+        .appendArguments(*extraArguments.toTypedArray())
+        .build()
 }
