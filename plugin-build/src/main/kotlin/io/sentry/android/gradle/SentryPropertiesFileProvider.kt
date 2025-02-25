@@ -58,8 +58,7 @@ internal object SentryPropertiesFileProvider {
         }
         possibleFiles.add("${rootDir}${sep}$FILENAME")
 
-        return possibleFiles.distinct().asSequence()
-            .onEach { project.logger.info { "Looking for $FILENAME at: $it" } }
+        return possibleFiles.distinct()
             .firstOrNull { File(it).exists() }
             ?.also { project.logger.info { "Found $FILENAME at: $it" } }
     }
