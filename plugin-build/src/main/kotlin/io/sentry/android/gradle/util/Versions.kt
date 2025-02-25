@@ -122,4 +122,12 @@ internal object SentryModules {
         "io.sentry",
         "sentry-bom"
     )
+    internal val SENTRY_OPENTELEMETRY_AGENTLESS = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-opentelemetry-agentless"
+    )
+    internal val SENTRY_OPENTELEMETRY_AGENTLESS_SPRING = DefaultModuleIdentifier.newId(
+        "io.sentry",
+        "sentry-opentelemetry-agentless-spring"
+    )
 }
