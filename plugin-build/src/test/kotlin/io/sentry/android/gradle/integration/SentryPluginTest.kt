@@ -299,6 +299,39 @@ class SentryPluginTest :
     }
 
     @Test
+    fun `injectSentryDebugMetaProperties task deletes the output folder before writing`() {
+        assumeThat(
+            "InjectSentryDebugMetaPropertiesTask only runs from AGP 7.4.0 onwards",
+            SemVer.parse(androidGradlePluginVersion) >= AgpVersions.VERSION_7_4_0,
+            `is`(true)
+        )
+        runner.appendArguments(":app:assembleRelease")
+
+        val firstBuild = runner.build()
+
+        assertEquals(
+            TaskOutcome.SUCCESS,
+            firstBuild.task(":app:injectSentryDebugMetaPropertiesIntoAssetsRelease")?.outcome
+        )
+
+        val assetsOutput = File(
+            testProjectDir.root,
+            "app/build/intermediates/assets/release/" +
+                "injectSentryDebugMetaPropertiesIntoAssetsRelease"
+        )
+        val dummyAsset = File(assetsOutput, "foo.txt").also { it.writeText("test") }
+
+        val subsequentBuild = runner.appendArguments("--rerun-tasks").build()
+        assertEquals(
+            TaskOutcome.SUCCESS,
+            subsequentBuild.task(":app:injectSentryDebugMetaPropertiesIntoAssetsRelease")?.outcome
+        )
+
+        assertTrue(subsequentBuild.output) { "BUILD SUCCESSFUL" in subsequentBuild.output }
+        assertFalse(dummyAsset.exists())
+    }
+
+    @Test
     fun `does not include a UUID in the APK`() {
         // isMinifyEnabled is disabled by default in debug builds
         runner
