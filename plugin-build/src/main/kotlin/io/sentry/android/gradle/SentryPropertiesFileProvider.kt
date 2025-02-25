@@ -1,5 +1,6 @@
 package io.sentry.android.gradle
 
+import io.sentry.android.gradle.util.debug
 import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.SentryVariant
 import java.io.File
@@ -59,6 +60,7 @@ internal object SentryPropertiesFileProvider {
         possibleFiles.add("${rootDir}${sep}$FILENAME")
 
         return possibleFiles.distinct()
+            .onEach { project.logger.debug { "Looking for $FILENAME at: $it" } }
             .firstOrNull { File(it).exists() }
             ?.also { project.logger.info { "Found $FILENAME at: $it" } }
     }
