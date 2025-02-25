@@ -27,14 +27,6 @@ android {
             proguardFiles.add(getDefaultProguardFile("proguard-android-optimize.txt"))
             signingConfig = signingConfigs.getByName("debug")
         }
-        create("dark") {
-            initWith(getByName("debug"))
-            isMinifyEnabled = false
-        }
-        create("stage") {
-            initWith(getByName("debug"))
-            isMinifyEnabled = false
-        }
     }
 
     flavorDimensions += "environment"
@@ -43,18 +35,6 @@ android {
         create("staging") {
             dimension = "environment"
             versionNameSuffix = "-staging"
-        }
-        create("mpay") {
-            dimension = "environment"
-            versionNameSuffix = "-mpay"
-        }
-        create("gpay") {
-            dimension = "environment"
-            versionNameSuffix = "-gpay"
-        }
-        create("bpay") {
-            dimension = "environment"
-            versionNameSuffix = "-bpay"
         }
     }
 
