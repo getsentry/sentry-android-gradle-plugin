@@ -9,6 +9,7 @@
 ### Fixes
 
 - Ensure `InjectSentryDebugMetaPropertiesTask` deletes the output folder before writing into it ([#838](https://github.com/getsentry/sentry-android-gradle-plugin/pull/838))
+- Avoid excessive sentry-cli search logs at `info` level ([#842](https://github.com/getsentry/sentry-android-gradle-plugin/pull/842))
 
 ### Dependencies
 
