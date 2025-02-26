@@ -60,20 +60,14 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ matrix.java }}
 
-#      - name: Run ./gradlew (Fixes Gradle < 7.4)
-#        continue-on-error: true
-#        uses: gradle/gradle-build-action@7e48093f71aa12588241894ff3695e83c4b5e4b0 # pin@v2.4.2
-#        with:
-#          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-#          gradle-version: ${{ matrix.gradle }}
-#          arguments: tasks
-
-      - name: Build the Release variant
-        uses: gradle/gradle-build-action@7e48093f71aa12588241894ff3695e83c4b5e4b0 # pin@v2.4.2
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@aa23778d2dc6f6556fcc7164e99babbd8c3134e4 # pin@v3
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           gradle-version: ${{ matrix.gradle }}
-          arguments: assembleRelease
+
+      - name: Build the Release variant
+        run: ./gradlew assembleRelease
 
       - name: Check sentry-debug-meta.properties inside APKs
         run: |
@@ -85,11 +79,7 @@ jobs:
           rm -r output
 
       - name: Build the Release Bundle variant
-        uses: gradle/gradle-build-action@7e48093f71aa12588241894ff3695e83c4b5e4b0 # pin@v2.4.2
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          gradle-version: ${{ matrix.gradle }}
-          arguments: bundleRelease
+        run: ./gradlew bundleRelease
 
       - name: Check sentry-debug-meta.properties inside App Bundle
         run: |
@@ -101,13 +91,7 @@ jobs:
           rm -r output
 
       - name: Run Integration Tests
-        uses: gradle/gradle-build-action@7e48093f71aa12588241894ff3695e83c4b5e4b0 # pin@v2.4.2
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          gradle-version: ${{ matrix.gradle }}
-          gradle-home-cache-includes: |
-            **/.gradle-test-kit/caches
-          arguments: integrationTest
+        run: ./gradlew integrationTest
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v3

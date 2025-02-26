@@ -31,7 +31,7 @@ jobs:
           java-version: '17'
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@7e48093f71aa12588241894ff3695e83c4b5e4b0 # pin@v2.4.2
+        uses: gradle/actions/setup-gradle@aa23778d2dc6f6556fcc7164e99babbd8c3134e4 # pin@v3
 
       - name: Run Gradle tasks
         if: runner.os != 'Windows'
