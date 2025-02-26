@@ -34,7 +34,8 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@9e8d0789d4a0fa9ceb6b1738f7e269594bdd67f0 # pin@v2
         with:
-          languages: 'java'
+          languages: 'java-kotlin'
+          build-mode: manual
 
       - name: Build Gradle Plugin
         run: |
