@@ -65,7 +65,7 @@ dependencies {
 
     testImplementation(libs.kotlinJunit)
     testImplementation(libs.kotlinCompilerEmbeddable)
-    testImplementation(libs.kotlinCompilTesting)
+    testImplementation(libs.kotlinCompileTesting)
     testImplementation(libs.composeDesktop)
 }
 
