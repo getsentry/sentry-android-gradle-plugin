@@ -65,10 +65,3 @@ tasks.getByName("ktlintFormat") {
 tasks.getByName("ktlintCheck") {
     dependsOn(gradle.includedBuild("plugin-build").task(":ktlintCheck"))
 }
-
-tasks.register("buildForCodeQL") {
-    group = "verification"
-    description = "Builds the project for CodeQL analysis"
-
-    dependsOn(gradle.includedBuild("plugin-build").task(":testClasses"))
-}
