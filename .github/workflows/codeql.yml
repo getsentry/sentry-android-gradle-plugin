@@ -34,14 +34,13 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@9e8d0789d4a0fa9ceb6b1738f7e269594bdd67f0 # pin@v2
         with:
-          config-file: ./.github/codeql/codeql-config.yml
+          source-root: ${{ github.workspace }}/plugin-build
           languages: 'java-kotlin'
           build-mode: manual
 
       - name: Build Gradle Plugin
         run: |
-          cd plugin-build
-          ./gradlew testClasses --no-daemon --no-build-cache
+          ./gradlew buildForCodeQL --no-daemon --no-build-cache
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@9e8d0789d4a0fa9ceb6b1738f7e269594bdd67f0 # pin@v2
