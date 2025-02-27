@@ -16,15 +16,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        agp: [ "7.0.4" ]
-        gradle: [ "7.2" ]
+        agp: [ "7.2.1" ]
+        gradle: [ "7.4" ]
         java: [ "11" ]
         groovy: [ "1.2" ]
         include:
-          - agp: "7.2.1"
-            gradle: "7.4"
-            java: "11"
-            groovy: "1.2"
           - agp: "7.3.0"
             gradle: "7.5"
             java: "11"
