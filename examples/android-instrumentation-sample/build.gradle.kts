@@ -1,7 +1,7 @@
 plugins {
-    id("com.android.application")
-    kotlin("android")
-    kotlin("kapt")
+    alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP
+    alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.kapt)
     id("io.sentry.android.gradle")
 }
 
@@ -78,28 +78,28 @@ kotlin {
 // }
 
 dependencies {
-    implementation(Samples.AndroidX.recyclerView)
-    implementation(Samples.AndroidX.lifecycle)
-    implementation(Samples.AndroidX.appcompat)
+    implementation(libs.sample.androidx.recyclerView)
+    implementation(libs.sample.androidx.lifecycle)
+    implementation(libs.sample.androidx.appcompat)
 
-    implementation(Samples.AndroidX.composeRuntime)
-    implementation(Samples.AndroidX.composeActivity)
-    implementation(Samples.AndroidX.composeFoundation)
-    implementation(Samples.AndroidX.composeFoundationLayout)
-    implementation(Samples.AndroidX.composeNavigation)
+    implementation(libs.sample.androidx.composeRuntime)
+    implementation(libs.sample.androidx.composeActivity)
+    implementation(libs.sample.androidx.composeFoundation)
+    implementation(libs.sample.androidx.composeFoundationLayout)
+    implementation(libs.sample.androidx.composeNavigation)
 
-    implementation(Samples.Coroutines.core)
-    implementation(Samples.Coroutines.android)
+    implementation(libs.sample.coroutines.core)
+    implementation(libs.sample.coroutines.android)
 
-    implementation(Samples.Room.runtime)
-    implementation(Samples.Room.ktx)
-    implementation(Samples.Room.rxjava)
+    implementation(libs.sample.room.runtime)
+    implementation(libs.sample.room.ktx)
+    implementation(libs.sample.room.rxjava)
 
-    implementation(Samples.Timber.timber)
-    implementation(Samples.Fragment.fragmentKtx)
+    implementation(libs.sample.timber.timber)
     implementation(project(":examples:android-room-lib"))
+    implementation(libs.sample.fragment.fragmentKtx)
 
-    kapt(Samples.Room.compiler)
+    kapt(libs.sample.room.compiler)
 }
 
 sentry {

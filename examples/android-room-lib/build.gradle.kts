@@ -1,6 +1,6 @@
 plugins {
-    id("com.android.library")
-    kotlin("android")
+    alias(libs.plugins.androidLibrary) version BuildPluginsVersion.AGP
+    alias(libs.plugins.kotlinAndroid)
 }
 
 android {
@@ -17,14 +17,14 @@ android {
 }
 
 dependencies {
-    implementation(Samples.Coroutines.core)
-    implementation(Samples.Coroutines.android)
+    implementation(libs.sample.coroutines.core)
+    implementation(libs.sample.coroutines.android)
 
-    implementation(Samples.Room.runtime)
-    implementation(Samples.Room.ktx)
+    implementation(libs.sample.room.runtime)
+    implementation(libs.sample.room.ktx)
 
     // this is here for test purposes, to ensure that transitive dependencies are also recognized
     // by our auto-installation
-    api(Samples.Retrofit.retrofit)
-    api(Samples.Retrofit.retrofitGson)
+    api(libs.sample.retrofit.retrofit)
+    api(libs.sample.retrofit.retrofitGson)
 }
