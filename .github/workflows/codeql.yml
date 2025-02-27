@@ -36,7 +36,6 @@ jobs:
         with:
           source-root: ${{ github.workspace }}/plugin-build
           languages: 'java-kotlin'
-          build-mode: manual
 
       - name: Build Gradle Plugin
         run: |
