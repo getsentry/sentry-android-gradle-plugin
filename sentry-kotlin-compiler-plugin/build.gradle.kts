@@ -69,6 +69,10 @@ dependencies {
     testImplementation(libs.composeDesktop)
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 plugins.withId("com.vanniktech.maven.publish.base") {
     configure<PublishingExtension> {
         repositories {

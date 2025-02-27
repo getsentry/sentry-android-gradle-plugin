@@ -2,11 +2,13 @@ package io.sentry.android.gradle.autoinstall
 
 import io.sentry.android.gradle.autoinstall.compose.ComposeInstallStrategy
 import io.sentry.android.gradle.autoinstall.fragment.FragmentInstallStrategy
+import io.sentry.android.gradle.autoinstall.graphql.Graphql22InstallStrategy
 import io.sentry.android.gradle.autoinstall.graphql.GraphqlInstallStrategy
 import io.sentry.android.gradle.autoinstall.jdbc.JdbcInstallStrategy
 import io.sentry.android.gradle.autoinstall.kotlin.KotlinExtensionsInstallStrategy
 import io.sentry.android.gradle.autoinstall.log4j2.Log4j2InstallStrategy
 import io.sentry.android.gradle.autoinstall.logback.LogbackInstallStrategy
+import io.sentry.android.gradle.autoinstall.okhttp.AndroidOkHttpInstallStrategy
 import io.sentry.android.gradle.autoinstall.okhttp.OkHttpInstallStrategy
 import io.sentry.android.gradle.autoinstall.override.WarnOnOverrideStrategy
 import io.sentry.android.gradle.autoinstall.quartz.QuartzInstallStrategy
@@ -25,27 +27,37 @@ import org.gradle.api.artifacts.DependencySet
 internal const val SENTRY_GROUP = "io.sentry"
 
 private val strategies = listOf(
+    AndroidOkHttpInstallStrategy.Registrar,
     OkHttpInstallStrategy.Registrar,
     SQLiteInstallStrategy.Registrar,
     TimberInstallStrategy.Registrar,
     FragmentInstallStrategy.Registrar,
     ComposeInstallStrategy.Registrar,
-    Spring5InstallStrategy.Registrar,
-    Spring6InstallStrategy.Registrar,
-    SpringBoot2InstallStrategy.Registrar,
-    SpringBoot3InstallStrategy.Registrar,
     LogbackInstallStrategy.Registrar,
     Log4j2InstallStrategy.Registrar,
     JdbcInstallStrategy.Registrar,
     GraphqlInstallStrategy.Registrar,
+    Graphql22InstallStrategy.Registrar,
     QuartzInstallStrategy.Registrar,
     KotlinExtensionsInstallStrategy.Registrar,
     WarnOnOverrideStrategy.Registrar
 )
 
+private val delayedStrategies = listOf(
+    Spring5InstallStrategy.Registrar,
+    Spring6InstallStrategy.Registrar,
+    SpringBoot2InstallStrategy.Registrar,
+    SpringBoot3InstallStrategy.Registrar,
+)
+
 fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boolean) {
     configurations.named("implementation").configure { configuration ->
         configuration.withDependencies { dependencies ->
+
+            project.dependencies.components { component ->
+                delayedStrategies.forEach { it.register(component) }
+            }
+
             // if autoInstallation is disabled, the autoInstallState will contain initial values
             // which all default to false, hence, the integrations won't be installed as well
             if (extension.autoInstallation.enabled.get()) {
@@ -112,7 +124,9 @@ private fun DependencySet.findSentryVersion(isAndroid: Boolean): String? =
                     it.name == SentryModules.SENTRY.name ||
                         it.name == SentryModules.SENTRY_SPRING_BOOT2.name ||
                         it.name == SentryModules.SENTRY_SPRING_BOOT3.name ||
-                        it.name == SentryModules.SENTRY_BOM.name
+                        it.name == SentryModules.SENTRY_BOM.name ||
+                        it.name == SentryModules.SENTRY_OPENTELEMETRY_AGENTLESS.name ||
+                        it.name == SentryModules.SENTRY_OPENTELEMETRY_AGENTLESS_SPRING.name
                     ) && it.version != null
         }?.version
     }

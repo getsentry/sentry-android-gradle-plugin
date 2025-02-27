@@ -3,6 +3,7 @@ package io.sentry.android.gradle.integration
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.util.GradleVersions
+import io.sentry.android.gradle.util.SkipOnForksRule
 import io.sentry.android.gradle.verifySourceBundleContents
 import io.sentry.android.gradle.withDummyComposeFile
 import io.sentry.android.gradle.withDummyCustomFile
@@ -18,10 +19,14 @@ import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assume.assumeThat
+import org.junit.Rule
 import org.junit.Test
 
 class SentryPluginSourceContextTest :
     BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
+
+    @get:Rule
+    val skipOnForksRule = SkipOnForksRule()
 
     @Test
     fun `skips bundle and upload tasks if no sources`() {
@@ -38,6 +43,13 @@ class SentryPluginSourceContextTest :
 
               buildFeatures {
                 buildConfig false
+              }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
               }
             }
 
@@ -77,6 +89,13 @@ class SentryPluginSourceContextTest :
 
               buildFeatures {
                 buildConfig false
+              }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
               }
             }
 
@@ -134,6 +153,13 @@ class SentryPluginSourceContextTest :
               buildFeatures {
                 buildConfig false
               }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
+              }
             }
 
             sentry {
@@ -190,6 +216,13 @@ class SentryPluginSourceContextTest :
 
               buildFeatures {
                 buildConfig true
+              }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
               }
             }
 
@@ -266,7 +299,14 @@ class SentryPluginSourceContextTest :
               namespace 'com.example'
 
               buildFeatures {
-                buildConfig false
+                buildConfig true
+              }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
               }
             }
 
@@ -298,6 +338,12 @@ class SentryPluginSourceContextTest :
             "files/_/_/com/example/Example.jvm",
             ktContents
         )
+        // do not bundle build config
+        verifySourceBundleContents(
+            testProjectDir.root,
+            "files/_/_/com/example/BuildConfig.jvm",
+            ""
+        )
     }
 
     @Test
@@ -325,6 +371,13 @@ class SentryPluginSourceContextTest :
 
               buildFeatures {
                 buildConfig false
+              }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
               }
             }
 
@@ -381,6 +434,13 @@ class SentryPluginSourceContextTest :
 
               buildFeatures {
                 buildConfig false
+              }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
               }
             }
 

@@ -20,7 +20,7 @@ import org.gradle.api.artifacts.VariantMetadata
 import org.junit.Test
 import org.slf4j.Logger
 
-class GraphqlInstallStrategyTest {
+class Graphql22InstallStrategyTest {
     class Fixture {
         val logger = CapturingTestLogger()
         val dependencies = mock<DirectDependenciesMetadata>()
@@ -39,8 +39,8 @@ class GraphqlInstallStrategyTest {
         }
 
         fun getSut(
-            graphqlVersion: String = "2.0.0"
-        ): GraphqlInstallStrategy {
+            graphqlVersion: String = "22.0"
+        ): Graphql22InstallStrategy {
             val id = mock<ModuleVersionIdentifier> {
                 whenever(it.version).doReturn(graphqlVersion)
             }
@@ -48,9 +48,9 @@ class GraphqlInstallStrategyTest {
 
             with(AutoInstallState.getInstance()) {
                 this.enabled = true
-                this.sentryVersion = "6.25.2"
+                this.sentryVersion = "8.0.0"
             }
-            return GraphqlInstallStrategyImpl(logger)
+            return Graphql22InstallStrategyImpl(logger)
         }
     }
 
@@ -63,27 +63,27 @@ class GraphqlInstallStrategyTest {
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-graphql was successfully installed with version: 6.25.2"
+                "[sentry] sentry-graphql-22 was successfully installed with version: 8.0.0"
         }
         verify(fixture.dependencies).add(
             com.nhaarman.mockitokotlin2.check<String> {
-                assertEquals("io.sentry:sentry-graphql:6.25.2", it)
+                assertEquals("io.sentry:sentry-graphql-22:8.0.0", it)
             }
         )
     }
 
     @Test
-    fun `when graphql version is too high logs a message and does nothing`() {
-        val sut = fixture.getSut(graphqlVersion = "22.1")
+    fun `when graphql version is too low logs a message and does nothing`() {
+        val sut = fixture.getSut(graphqlVersion = "21.9")
         sut.execute(fixture.metadataContext)
 
         assertTrue {
             fixture.logger.capturedMessage ==
-                "[sentry] sentry-graphql won't be installed because the current " +
-                "version is higher than the maximum supported version (21.9999.9999)"
+                "[sentry] sentry-graphql-22 won't be installed because the current " +
+                "version is lower than the minimum supported version (22.0.0)"
         }
         verify(fixture.metadataDetails, never()).allVariants(any())
     }
 
-    private class GraphqlInstallStrategyImpl(logger: Logger) : GraphqlInstallStrategy(logger)
+    private class Graphql22InstallStrategyImpl(logger: Logger) : Graphql22InstallStrategy(logger)
 }

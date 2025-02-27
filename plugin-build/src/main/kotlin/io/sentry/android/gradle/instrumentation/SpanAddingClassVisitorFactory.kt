@@ -5,6 +5,7 @@ import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.SentryPlugin
+import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
@@ -23,10 +24,13 @@ import io.sentry.android.gradle.instrumentation.util.isMinifiedClass
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.util.SemVer
+import io.sentry.android.gradle.util.SentryModules
+import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
@@ -61,6 +65,15 @@ abstract class SpanAddingClassVisitorFactory :
 
         @get:Internal
         var _instrumentable: ClassInstrumentable?
+
+        @get:Input
+        val features: SetProperty<InstrumentationFeature>
+
+        @get:Input
+        val logcatEnabled: Property<Boolean>
+
+        @get:Input
+        val appStartEnabled: Property<Boolean>
     }
 
     private val instrumentable: ClassInstrumentable
@@ -85,6 +98,11 @@ abstract class SpanAddingClassVisitorFactory :
                 "okhttp"
             )
             val okHttpVersion = externalModules.getOrDefault(okHttpModule, SemVer())
+            val sentryOkhttpVersion = sentryModules.getOrDefault(
+                SentryModules.SENTRY_OKHTTP,
+                SemVer()
+            )
+            val useSentryAndroidOkHttp = sentryOkhttpVersion < SentryVersions.VERSION_OKHTTP
 
             SentryPlugin.logger.info { "Read sentry modules: $sentryModules" }
 
@@ -104,10 +122,10 @@ abstract class SpanAddingClassVisitorFactory :
                         sentryModulesService.isNewDatabaseInstrEnabled() ||
                             sentryModulesService.isOldDatabaseInstrEnabled()
                     },
-                    OkHttpEventListener(okHttpVersion).takeIf {
+                    OkHttpEventListener(useSentryAndroidOkHttp, okHttpVersion).takeIf {
                         sentryModulesService.isOkHttpListenerInstrEnabled()
                     },
-                    OkHttp().takeIf {
+                    OkHttp(useSentryAndroidOkHttp).takeIf {
                         sentryModulesService.isOkHttpInstrEnabled()
                     },
                     WrappingInstrumentable().takeIf {

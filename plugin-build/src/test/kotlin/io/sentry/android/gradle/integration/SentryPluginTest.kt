@@ -8,12 +8,12 @@ import io.sentry.android.gradle.verifyDependenciesReportAndroid
 import io.sentry.android.gradle.verifyIntegrationList
 import io.sentry.android.gradle.verifyProguardUuid
 import java.io.File
+import java.util.EnumSet
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome
-import org.gradle.testkit.runner.TaskOutcome.FROM_CACHE
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThrows
@@ -44,6 +44,76 @@ class SentryPluginTest :
         configuredTasks.remove(":app:clean")
 
         assertTrue(configuredTasks.isEmpty(), configuredTasks.joinToString("\n"))
+    }
+
+    @Test
+    fun `generates the same UUID when mapping file stays the same with rerun tasks`() {
+        runner.appendArguments(":app:assembleRelease")
+
+        val sourceDir = File(testProjectDir.root, "app/src/main/java/com/example").apply {
+            mkdirs()
+        }
+
+        val manifest = File(testProjectDir.root, "app/src/main/AndroidManifest.xml")
+        manifest.writeText(
+            """
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application>
+                    <activity android:name=".MainActivity"/>
+                </application>
+            </manifest>
+            """.trimIndent()
+        )
+
+        val sourceFile = File(sourceDir, "MainActivity.java")
+        sourceFile.createNewFile()
+        sourceFile.writeText(
+            """
+            package com.example;
+            import android.app.Activity;
+            import android.os.Bundle;
+
+            public class MainActivity extends Activity {
+                @Override
+                protected void onCreate(Bundle savedInstanceState) {
+                    super.onCreate(savedInstanceState);
+                    hello();
+                }
+
+               public void hello() {
+                    System.out.println("Hello");
+                }
+            }
+            """.trimIndent()
+        )
+
+        runner.appendArguments(":app:assembleRelease").build()
+        val uuid1 = verifyProguardUuid(testProjectDir.root)
+
+        sourceFile.writeText(
+            """
+            package com.example;
+            import android.app.Activity;
+            import android.os.Bundle;
+
+            public class MainActivity extends Activity {
+                @Override
+                protected void onCreate(Bundle savedInstanceState) {
+                    super.onCreate(savedInstanceState);
+                    hello();
+                }
+
+               public void hello() {
+                    System.out.println("Hello2");
+                }
+            }
+            """.trimIndent()
+        )
+
+        runner.appendArguments(":app:assembleRelease", "--rerun-tasks").build()
+        val uuid2 = verifyProguardUuid(testProjectDir.root)
+
+        assertEquals(uuid1, uuid2)
     }
 
     @Test
@@ -198,14 +268,8 @@ class SentryPluginTest :
             """.trimIndent()
         )
 
-        val build = runner.appendArguments(":app:assembleRelease").build()
+        runner.appendArguments(":app:assembleRelease").build()
         val uuid2 = verifyProguardUuid(testProjectDir.root)
-
-        assertEquals(
-            TaskOutcome.UP_TO_DATE,
-            build.task(":app:generateSentryProguardUuidRelease")?.outcome,
-            build.output
-        )
 
         assertEquals(uuid1, uuid2)
     }
@@ -232,6 +296,39 @@ class SentryPluginTest :
         )
 
         assertTrue(subsequentBuild.output) { "BUILD SUCCESSFUL" in subsequentBuild.output }
+    }
+
+    @Test
+    fun `injectSentryDebugMetaProperties task deletes the output folder before writing`() {
+        assumeThat(
+            "InjectSentryDebugMetaPropertiesTask only runs from AGP 7.4.0 onwards",
+            SemVer.parse(androidGradlePluginVersion) >= AgpVersions.VERSION_7_4_0,
+            `is`(true)
+        )
+        runner.appendArguments(":app:assembleRelease")
+
+        val firstBuild = runner.build()
+
+        assertEquals(
+            TaskOutcome.SUCCESS,
+            firstBuild.task(":app:injectSentryDebugMetaPropertiesIntoAssetsRelease")?.outcome
+        )
+
+        val assetsOutput = File(
+            testProjectDir.root,
+            "app/build/intermediates/assets/release/" +
+                "injectSentryDebugMetaPropertiesIntoAssetsRelease"
+        )
+        val dummyAsset = File(assetsOutput, "foo.txt").also { it.writeText("test") }
+
+        val subsequentBuild = runner.appendArguments("--rerun-tasks").build()
+        assertEquals(
+            TaskOutcome.SUCCESS,
+            subsequentBuild.task(":app:injectSentryDebugMetaPropertiesIntoAssetsRelease")?.outcome
+        )
+
+        assertTrue(subsequentBuild.output) { "BUILD SUCCESSFUL" in subsequentBuild.output }
+        assertFalse(dummyAsset.exists())
     }
 
     @Test
@@ -575,6 +672,55 @@ class SentryPluginTest :
     }
 
     @Test
+    fun `changing instrumentation features invalidates cache`() {
+        val enumSetInitial = EnumSet.allOf(InstrumentationFeature::class.java)
+        val enumSetWithoutOkHttp =
+            EnumSet.allOf(InstrumentationFeature::class.java) - InstrumentationFeature.OKHTTP
+        val dependencies = setOf(
+            "com.squareup.okhttp3:okhttp:3.14.9",
+            "io.sentry:sentry-android-okhttp:6.6.0"
+        )
+
+        val secondBuildFile = File(appBuildFile.parentFile, "secondBuild")
+        appBuildFile.copyTo(secondBuildFile)
+
+        applyTracingInstrumentation(
+            dependencies = dependencies,
+            features = enumSetInitial,
+            debug = true,
+            forceInstrumentDependencies = false
+        )
+
+        // Enable build cache to be able to test that changing the feature set actually reruns the instrumentation task
+        val buildOne = runner
+            .appendArguments("clean", ":app:assembleDebug", "--info", "--build-cache")
+            .build()
+
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "AndroidXSQLiteDatabase, AndroidXSQLiteStatement, AndroidXRoomDao, " +
+                "OkHttp, WrappingInstrumentable, RemappingInstrumentable)" in buildOne.output
+        }
+
+        appBuildFile.writeText(secondBuildFile.readText())
+
+        applyTracingInstrumentation(
+            dependencies = dependencies,
+            features = enumSetWithoutOkHttp,
+            debug = true,
+            forceInstrumentDependencies = false
+        )
+
+        val buildTwo = runner.build()
+
+        assertTrue {
+            "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+                "AndroidXSQLiteDatabase, AndroidXSQLiteStatement, AndroidXRoomDao, " +
+                "WrappingInstrumentable, RemappingInstrumentable)" in buildTwo.output
+        }
+    }
+
+    @Test
     fun `includes flattened list of dependencies into the APK, excluding non-external deps`() {
         appBuildFile.appendText(
             // language=Groovy
@@ -867,36 +1013,35 @@ class SentryPluginTest :
     }
 
     @Test
-    fun `caches uuid-generating tasks`() {
-        // first build it so it gets cached
-        runner.withArguments(":app:assembleRelease", "--build-cache").build()
-        val uuid1 = verifyProguardUuid(testProjectDir.root)
+    fun `copyFlutterAssetsDebug is wired up`() {
+        assumeThat(
+            "We only wire up the copyFlutterAssets task " +
+                "if the transform API (AGP >= 7.4.0) is used",
+            SemVer.parse(androidGradlePluginVersion) >= AgpVersions.VERSION_7_4_0,
+            `is`(true)
+        )
 
-        // this should erase the build folder so the tasks are not up-to-date
-        runner.withArguments("clean").build()
+        // when a flutter project is detected
+        appBuildFile.appendText(
+            // language=Groovy
+            """
+            tasks.register("copyFlutterAssetsDebug") {
+                doFirst {
+                    println("Hello World")
+                }
+            }
+            """.trimIndent()
+        )
 
-        // this should restore the entry from cache as the mapping file hasn't changed
-        val build = runner.withArguments("app:assembleRelease", "--build-cache").build()
-        val uuid2 = verifyProguardUuid(testProjectDir.root)
+        // then InjectSentryMetaPropertiesIntoAssetsTask should depend on it
+        // and thus copyFlutterAssetsDebug should be executed as part of assembleDebug
+        val build = runner.withArguments(":app:assembleDebug").build()
 
         assertEquals(
-            FROM_CACHE,
-            build.task(":app:generateSentryProguardUuidRelease")?.outcome,
+            TaskOutcome.SUCCESS,
+            build.task(":app:copyFlutterAssetsDebug")?.outcome,
             build.output
         )
-        assertEquals(
-            FROM_CACHE,
-            build.task(":app:generateSentryDebugMetaPropertiesRelease")?.outcome
-                ?: build.task(":app:injectSentryDebugMetaPropertiesIntoAssetsRelease")?.outcome,
-            build.output
-        )
-        assertEquals(
-            FROM_CACHE,
-            build.task(":app:releaseSentryGenerateIntegrationListTask")?.outcome,
-            build.output
-        )
-        // should be the same uuid
-        assertEquals(uuid1, uuid2)
     }
 
     private fun applyUploadNativeSymbols() {
@@ -937,7 +1082,8 @@ class SentryPluginTest :
         dependencies: Set<String> = emptySet(),
         debug: Boolean = false,
         excludes: Set<String> = emptySet(),
-        sdkVersion: String = "7.1.0"
+        sdkVersion: String = "7.1.0",
+        forceInstrumentDependencies: Boolean = true
     ) {
         appBuildFile.appendText(
             // language=Groovy
@@ -950,7 +1096,7 @@ class SentryPluginTest :
                 sentry {
                   autoUploadProguardMapping = false
                   tracingInstrumentation {
-                    forceInstrumentDependencies = true
+                    forceInstrumentDependencies = $forceInstrumentDependencies
                     enabled = $tracingInstrumentation
                     debug = $debug
                     features = [${features.joinToString { "${it::class.java.canonicalName}.${it.name}" }}]

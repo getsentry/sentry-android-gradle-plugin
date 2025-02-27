@@ -44,8 +44,8 @@ data class AndroidVariant70(
             val kotlinDirs = variant.sourceSets.flatMap {
                 it.kotlinDirectories.map { kotlinDir -> projectDir.dir(kotlinDir.absolutePath) }
             }
-            (kotlinDirs + javaDirs).filterBuildConfig().toSet()
-        }.zip(additionalSources) { javaKotlin, other -> javaKotlin + other }
+            (kotlinDirs + javaDirs + additionalSources.get()).filterBuildConfig().toSet()
+        }
     }
 }
 

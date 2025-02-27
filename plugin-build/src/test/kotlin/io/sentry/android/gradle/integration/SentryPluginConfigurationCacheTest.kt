@@ -210,6 +210,11 @@ class SentryPluginConfigurationCacheTest :
 
     @Test
     fun `sentry-cli is recovered when clean is executed before assemble`() {
+        assumeThat(
+            "Sentry native symbols upload only supported when SENTRY_AUTH_TOKEN is present",
+            System.getenv("SENTRY_AUTH_TOKEN").isNullOrEmpty(),
+            `is`(false)
+        )
         // configuration cache doesn't seem to work well on older Gradle/AGP combinations
         // producing the following output:
         //
@@ -224,14 +229,83 @@ class SentryPluginConfigurationCacheTest :
             `is`(true)
         )
 
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+            }
+
+            sentry {
+              includeNativeSources = true
+              uploadNativeSymbols = true
+              includeProguardMapping = true
+              autoUploadProguardMapping = true
+              autoInstallation.enabled = false
+              telemetry = false
+            }
+            """.trimIndent()
+        )
+
         val runner = runner.withArguments(
             "--configuration-cache",
             "--build-cache",
             ":app:clean",
-            ":app:assembleRelease"
+            ":app:assembleRelease",
+            "--stacktrace"
         )
 
         val run = runner.build()
         assertTrue(run.output) { "BUILD SUCCESSFUL" in run.output }
+    }
+
+    @Test
+    fun `native symbols upload task respects configuration cache`() {
+        assumeThat(
+            "Sentry native symbols upload only supported when SENTRY_AUTH_TOKEN is present",
+            System.getenv("SENTRY_AUTH_TOKEN").isNullOrEmpty(),
+            `is`(false)
+        )
+        assumeThat(
+            "SentryUploadNativeSymbolsTask only supports " +
+                "configuration cache from Gradle 7.5 onwards",
+            GradleVersions.CURRENT >= GradleVersions.VERSION_7_5,
+            `is`(true)
+        )
+        appBuildFile.writeText(
+            // language=Groovy
+            """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+            }
+
+            sentry {
+              includeNativeSources = true
+              uploadNativeSymbols = true
+              includeProguardMapping = false
+              autoUploadProguardMapping = false
+              autoInstallation.enabled = false
+              telemetry = false
+            }
+            """.trimIndent()
+        )
+        runner.appendArguments(":app:assembleRelease")
+            .appendArguments("--configuration-cache")
+
+        val output = runner.build().output
+        assertTrue { "Configuration cache entry stored." in output }
+
+        val outputWithConfigCache = runner.build().output
+        assertTrue { "Configuration cache entry reused." in outputWithConfigCache }
     }
 }

@@ -1,8 +1,219 @@
 # Changelog
 
+
+
 ## Unreleased
 
-- Migrate Dependencies to Gradle version catalog ([#712](https://github.com/getsentry/sentry-android-gradle-plugin/pull/712))
+### Features
+
+- Allow `sentry-opentelemetry-agentless` and `sentry-opentelemetry-agentless-spring` to determine the SDK version to install ([#841](https://github.com/getsentry/sentry-android-gradle-plugin/pull/841))
+
+### Fixes
+
+- Ensure `InjectSentryDebugMetaPropertiesTask` deletes the output folder before writing into it ([#838](https://github.com/getsentry/sentry-android-gradle-plugin/pull/838))
+- Avoid excessive sentry-cli search logs at `info` level ([#842](https://github.com/getsentry/sentry-android-gradle-plugin/pull/842))
+
+### Internal
+
+- Switch to a newer `setup-gradle` github action ([#654](https://github.com/getsentry/sentry-android-gradle-plugin/pull/654))
+
+### Dependencies
+
+- Bump CLI from v2.41.1 to v2.42.2 ([#837](https://github.com/getsentry/sentry-android-gradle-plugin/pull/837), [#840](https://github.com/getsentry/sentry-android-gradle-plugin/pull/840))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2422)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.41.1...2.42.2)
+- Bump Android SDK from v8.2.0 to v8.3.0 ([#844](https://github.com/getsentry/sentry-android-gradle-plugin/pull/844))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#830)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.2.0...8.3.0)
+
+## 5.2.0
+
+### Dependencies
+
+- Bump Android SDK from v8.1.0 to v8.2.0 ([#835](https://github.com/getsentry/sentry-android-gradle-plugin/pull/835))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#820)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.1.0...8.2.0)
+
+## 5.1.0
+
+### Dependencies
+
+- Bump Android SDK from v8.0.0 to v8.1.0 ([#832](https://github.com/getsentry/sentry-android-gradle-plugin/pull/832))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#810)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.0.0...8.1.0)
+
+## 5.0.0
+
+### Intro
+
+Version 5.0 of the `sentry-android-gradle-plugin` uses the latest major version of the Java/Android SDK (`8.0.0`).
+We plan to do another major release within the next few months, which will contain more functional changes.
+You can see what exactly we're planning and track progress in [#825](https://github.com/getsentry/sentry-android-gradle-plugin/issues/825).
+
+### Fixes
+
+- Ensure DexGuard flavor/buildtype mapping files are respected as well ([#822](https://github.com/getsentry/sentry-android-gradle-plugin/pull/822))
+
+### Dependencies
+
+- Bump CLI from v2.39.1 to v2.41.1 ([#818](https://github.com/getsentry/sentry-android-gradle-plugin/pull/818))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2411)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.39.1...2.41.1)
+- Bump Android SDK from v7.18.0 to v8.0.0 ([#817](https://github.com/getsentry/sentry-android-gradle-plugin/pull/817))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#800)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.18.0...8.0.0)
+
+## 4.14.1
+
+### Dependencies
+
+- Bump CLI from v2.39.0 to v2.39.1 ([#792](https://github.com/getsentry/sentry-android-gradle-plugin/pull/792))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2391)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.39.0...2.39.1)
+
+## 4.14.0
+
+### Features
+
+- Add AutoInstallStrategy for graphql-22 ([#781](https://github.com/getsentry/sentry-android-gradle-plugin/pull/781))
+- New experimental option to upload proguard mappings chunked. Set the env variable to try it out: `export SENTRY_EXPERIMENTAL_PROGUARD_CHUNK_UPLOAD=1`
+  - This should prevent intermittent `502: Bad Gateway` errors when uploading proguard mappings
+
+### Dependencies
+
+- Bump CLI from v2.38.0 to v2.39.0 ([#786](https://github.com/getsentry/sentry-android-gradle-plugin/pull/786), [#791](https://github.com/getsentry/sentry-android-gradle-plugin/pull/791))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2390)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.38.0...2.39.0)
+- Bump Android SDK from v7.16.0 to v7.18.0 ([#788](https://github.com/getsentry/sentry-android-gradle-plugin/pull/788))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7180)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.16.0...7.18.0)
+
+## 4.13.0
+
+### Dependencies
+
+- Bump CLI from v2.37.0 to v2.38.0 ([#777](https://github.com/getsentry/sentry-android-gradle-plugin/pull/777))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2380)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.37.0...2.38.0)
+- Bump Android SDK from v7.15.0 to v7.16.0 ([#778](https://github.com/getsentry/sentry-android-gradle-plugin/pull/778))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7160)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.15.0...7.16.0)
+
+## 4.12.0
+
+### Fixes
+
+- Invalidate instrumentation cache when changing instrumentation features ([#753](https://github.com/getsentry/sentry-android-gradle-plugin/pull/753))
+
+### Dependencies
+
+- Bump Android SDK from v7.13.0 to v7.15.0 ([#754](https://github.com/getsentry/sentry-android-gradle-plugin/pull/754), [#775](https://github.com/getsentry/sentry-android-gradle-plugin/pull/775))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7150)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.13.0...7.15.0)
+- Bump CLI from v2.33.1 to v2.37.0 ([#757](https://github.com/getsentry/sentry-android-gradle-plugin/pull/757), [#761](https://github.com/getsentry/sentry-android-gradle-plugin/pull/761), [#773](https://github.com/getsentry/sentry-android-gradle-plugin/pull/773))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2370)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.33.1...2.37.0)
+
+## 4.11.0
+
+### Fixes
+
+- Fix plugin for spring-dependency-management 1.1.6 ([#741](https://github.com/getsentry/sentry-android-gradle-plugin/pull/741))
+- Make `SentryUploadNativeSymbolsTask` configuration-cache compatible ([#747](https://github.com/getsentry/sentry-android-gradle-plugin/pull/747))
+- Fix `permission denied` error when extracting sentry-cli concurrently ([#748](https://github.com/getsentry/sentry-android-gradle-plugin/pull/748))
+- Make `SentryGenerateProguardUuidTask` produce deterministic output based on the mapping file contents ([#750](https://github.com/getsentry/sentry-android-gradle-plugin/pull/748))
+  - This disables caching for the `SentryGenerateProguardUuidTask` task in favour of deterministic UUID generation. The task will always run but will always produce the same UUID for the same mapping file.
+
+### Dependencies
+
+- Bump CLI from v2.32.2 to v2.33.1 ([#738](https://github.com/getsentry/sentry-android-gradle-plugin/pull/738), [#751](https://github.com/getsentry/sentry-android-gradle-plugin/pull/751))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2331)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.32.2...2.33.1)
+- Bump Android SDK from v7.12.0 to v7.13.0 ([#746](https://github.com/getsentry/sentry-android-gradle-plugin/pull/746))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7130)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.12.0...7.13.0)
+
+## 4.10.0
+
+### Features
+
+- Session Replay Public Beta ([#3339](https://github.com/getsentry/sentry-java/pull/3339))
+
+  The Gradle plugin pulls in the `io.sentry:sentry-android:7.12.0` dependency and enables Session Replay through it. To enable Replay use the `sessionReplay.sessionSampleRate` or `sessionReplay.errorSampleRate` experimental options.
+
+  ```kotlin
+  import io.sentry.SentryReplayOptions
+  import io.sentry.android.core.SentryAndroid
+
+  SentryAndroid.init(context) { options ->
+   
+    // Currently under experimental options:
+    options.experimental.sessionReplay.sessionSampleRate = 1.0 // We suggest 0.1 in production (10% sessions sampled)
+    options.experimental.sessionReplay.errorSampleRate = 1.0
+  
+    // To change default redaction behavior (defaults to true)
+    options.experimental.sessionReplay.redactAllImages = true
+    options.experimental.sessionReplay.redactAllText = true
+  
+    // To change quality of the recording (defaults to MEDIUM)
+    options.experimental.sessionReplay.quality = SentryReplayOptions.SentryReplayQuality.MEDIUM // (LOW|MEDIUM|HIGH)
+  }
+  ```
+
+  To learn more visit [Sentry's Mobile Session Replay](https://docs.sentry.io/product/explore/session-replay/mobile/) documentation page.
+
+### Fixes
+
+- Only apply Jetpack Compose instrumentation if `Modifier` class is available ([#727](https://github.com/getsentry/sentry-android-gradle-plugin/pull/727))
+
+### Dependencies
+
+- Bump CLI from v2.32.1 to v2.32.2 ([#732](https://github.com/getsentry/sentry-android-gradle-plugin/pull/732))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2322)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.32.1...2.32.2)
+- Bump Android SDK from v7.11.0 to v7.12.0 ([#731](https://github.com/getsentry/sentry-android-gradle-plugin/pull/731))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7120)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.11.0...7.12.0)
+
+## 4.9.0
+
+### Fixes
+
+- Auto install and instrument sentry-okhttp instead of sentry-android-okhttp on v7+ ([#724](https://github.com/getsentry/sentry-android-gradle-plugin/pull/724))
+- Fix source bundles with configuration cache on AGP 8+ ([#725](https://github.com/getsentry/sentry-android-gradle-plugin/pull/725)) 
+
+### Dependencies
+
+- Bump Android SDK from v7.10.0 to v7.11.0 ([#726](https://github.com/getsentry/sentry-android-gradle-plugin/pull/726))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7110)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.10.0...7.11.0)
+
+## 4.8.0
+
+### Fixes
+
+- Add missing copyFlutterAssets task dependency for Flutter ([#723](https://github.com/getsentry/sentry-android-gradle-plugin/pull/723))
+
+### Dependencies
+
+- Bump Android SDK from v7.9.0 to v7.10.0 ([#721](https://github.com/getsentry/sentry-android-gradle-plugin/pull/721))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7100)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.9.0...7.10.0)
+- Bump CLI from v2.31.2 to v2.32.1 ([#717](https://github.com/getsentry/sentry-android-gradle-plugin/pull/717))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2321)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.31.2...2.32.1)
+
+## 4.7.1
+
+### Fixes
+
+- Fix support for Kotlin K2 compiler plugin ([#720](https://github.com/getsentry/sentry-android-gradle-plugin/pull/720))
+
+## 4.7.0
+
+### Features
+
+- Add support for Kotlin K2 compiler plugin ([#716](https://github.com/getsentry/sentry-android-gradle-plugin/pull/716))
 
 ## 4.6.0
 

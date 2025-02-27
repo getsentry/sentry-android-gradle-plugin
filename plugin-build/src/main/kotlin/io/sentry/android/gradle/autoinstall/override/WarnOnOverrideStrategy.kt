@@ -67,6 +67,7 @@ abstract class WarnOnOverrideStrategy : ComponentMetadataRule {
             SentryModules.SENTRY_ANDROID_FRAGMENT,
             SentryModules.SENTRY_ANDROID_NAVIGATION,
             SentryModules.SENTRY_ANDROID_TIMBER,
+            SentryModules.SENTRY_OKHTTP,
             SentryModules.SENTRY_KOTLIN_EXTENSIONS,
             SentryModules.SENTRY_GRAPHQL,
             SentryModules.SENTRY_JDBC,

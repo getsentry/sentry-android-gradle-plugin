@@ -122,15 +122,51 @@ internal object SentryTasksProvider {
             if (isDexguardAvailable(project)) {
                 // For DexGuard the mapping file can either be inside the /apk or the /bundle folder
                 // (depends on the task that generated it).
-                val mappingDir = "outputs${sep}dexguard${sep}mapping$sep"
+                // In addition, newer versions of DexGuard seems
+                // to use <flavorName>/<buildType> instead of <flavorName><BuildType>
+
+                val basePath = listOf<String>(
+                    "outputs",
+                    "dexguard",
+                    "mapping"
+                )
+
                 val fileCollection = project.files(
                     File(
                         project.buildDir,
-                        "${mappingDir}apk${sep}${variant.name}${sep}mapping.txt"
+                        basePath.plus(listOf("apk", variant.name, "mapping.txt"))
+                            .joinToString(sep),
                     ),
                     File(
                         project.buildDir,
-                        "${mappingDir}bundle${sep}${variant.name}${sep}mapping.txt"
+                        basePath.plus(listOf("bundle", variant.name, "mapping.txt"))
+                            .joinToString(sep),
+                    ),
+                    File(
+                        project.buildDir,
+                        basePath.plus(
+                            listOf(
+                                "apk",
+                                variant.flavorName,
+                                variant.buildTypeName,
+                                "mapping.txt"
+                            )
+                        )
+                            .filterNotNull()
+                            .joinToString(sep)
+                    ),
+                    File(
+                        project.buildDir,
+                        basePath.plus(
+                            listOf(
+                                "bundle",
+                                variant.flavorName,
+                                variant.buildTypeName,
+                                "mapping.txt"
+                            )
+                        )
+                            .filterNotNull()
+                            .joinToString(sep)
                     )
                 )
                 return project.provider { fileCollection }
