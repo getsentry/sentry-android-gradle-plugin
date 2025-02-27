@@ -13,6 +13,10 @@
   - Proguard UUID task now depends on the proguard mapping file. I.e. it will only run if the mapping file has changed
   - Source context tasks now depend on source file changes, if there are no source changes, the tasks won't run
 
+### Internal
+
+- Switch to a newer `setup-gradle` github action ([#654](https://github.com/getsentry/sentry-android-gradle-plugin/pull/654))
+
 ### Dependencies
 
 - Bump CLI from v2.25.0 to v2.28.0 ([#638](https://github.com/getsentry/sentry-android-gradle-plugin/pull/638), [#640](https://github.com/getsentry/sentry-android-gradle-plugin/pull/640), [#642](https://github.com/getsentry/sentry-android-gradle-plugin/pull/642), [#647](https://github.com/getsentry/sentry-android-gradle-plugin/pull/647), [#652](https://github.com/getsentry/sentry-android-gradle-plugin/pull/652))
