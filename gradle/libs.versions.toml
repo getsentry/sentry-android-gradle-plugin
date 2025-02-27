@@ -4,7 +4,7 @@ agp = "7.4.0"
 
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
 sqlite = "2.1.0"
-sentry = "6.31.0"
+sentry = "7.0.0"
 
 sampleCoroutines = "1.5.2"
 sampleRoom = "2.5.0"
@@ -52,6 +52,7 @@ sqliteFramework = { group = "androidx.sqlite", name = "sqlite-framework", versio
 sentry = { group = "io.sentry", name = "sentry", version.ref = "sentry" }
 sentryAndroid = { group = "io.sentry", name = "sentry-android", version.ref = "sentry" }
 sentryAndroidOkhttp = { group = "io.sentry", name = "sentry-android-okhttp", version.ref = "sentry" }
+sentryOkhttp = { group = "io.sentry", name = "sentry-okhttp", version.ref = "sentry" }
 
 # test
 mockitoKotlin = { group = "com.nhaarman.mockitokotlin2", name = "mockito-kotlin", version = "2.2.0" }

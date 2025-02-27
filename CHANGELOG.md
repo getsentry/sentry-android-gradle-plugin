@@ -1,7 +1,5 @@
 # Changelog
 
-
-
 ## Unreleased
 
 ### Features

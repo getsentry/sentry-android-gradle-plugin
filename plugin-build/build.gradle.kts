@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    alias(libs.plugins.groovyGradlePlugin)
+    alias(libs.plugins.groovyGradlePlugin) version BuildPluginsVersion.GROOVY_REDISTRIBUTED
     alias(libs.plugins.kotlin)
     id("distribution")
     alias(libs.plugins.dokka)
@@ -55,7 +55,7 @@ dependencies {
     agp74.compileOnlyConfigurationName(project(":common"))
 
     compileOnly(libs.gradleApi)
-    compileOnly(libs.agp)
+    compileOnly(Libs.AGP)
     compileOnly(agp70.output)
     compileOnly(agp74.output)
     compileOnly(libs.proguard)
@@ -74,7 +74,7 @@ dependencies {
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
-    testImplementation(libs.agp)
+    testImplementation(Libs.AGP)
     testImplementation(agp70.output)
     testImplementation(agp74.output)
     testImplementation(project(":common"))
@@ -94,7 +94,7 @@ dependencies {
     testRuntimeOnly(files(androidSdkPath))
     testImplementationAar(libs.sentryAndroid)
     testImplementationAar(libs.sentryAndroidOkhttp)
-    testImplementationAar(Libs.SENTRY_OKHTTP)
+    testImplementationAar(libs.sentryOkhttp)
 
     // Needed to read contents from APK/Source Bundles
     testImplementation(libs.arscLib)
