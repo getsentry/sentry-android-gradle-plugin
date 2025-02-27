@@ -11,6 +11,10 @@
 - Ensure `InjectSentryDebugMetaPropertiesTask` deletes the output folder before writing into it ([#838](https://github.com/getsentry/sentry-android-gradle-plugin/pull/838))
 - Avoid excessive sentry-cli search logs at `info` level ([#842](https://github.com/getsentry/sentry-android-gradle-plugin/pull/842))
 
+### Internal
+
+- Switch to a newer `setup-gradle` github action ([#654](https://github.com/getsentry/sentry-android-gradle-plugin/pull/654))
+
 ### Dependencies
 
 - Bump CLI from v2.41.1 to v2.42.2 ([#837](https://github.com/getsentry/sentry-android-gradle-plugin/pull/837), [#840](https://github.com/getsentry/sentry-android-gradle-plugin/pull/840))
@@ -305,10 +309,6 @@ You can see what exactly we're planning and track progress in [#825](https://git
 - Proguard and source context tasks don't run on every build ([#634](https://github.com/getsentry/sentry-android-gradle-plugin/pull/634))
   - Proguard UUID task now depends on the proguard mapping file. I.e. it will only run if the mapping file has changed
   - Source context tasks now depend on source file changes, if there are no source changes, the tasks won't run
-
-### Internal
-
-- Switch to a newer `setup-gradle` github action ([#654](https://github.com/getsentry/sentry-android-gradle-plugin/pull/654))
 
 ### Dependencies
 
