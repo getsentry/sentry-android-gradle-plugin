@@ -228,7 +228,7 @@ private fun ApplicationVariant.configureSourceBundleTasks(
             taskSuffix
         )
 
-        if (variant.buildTypeName == "release") {
+        if (extension.autoUploadSourceContextBuildTypes.get().contains(variant.buildTypeName)) {
             sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, variant)
         }
 
