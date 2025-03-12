@@ -115,12 +115,10 @@ class SentryPluginConfigurationCacheTest :
             .find { it.startsWith("[sentry] Read sentry modules:") }
             ?.substringAfter("[sentry] Read sentry modules:")
             ?.trim()
-        /* ktlint-disable max-line-length */
         assertEquals(
             "{io.sentry:sentry-android-core=6.30.0, io.sentry:sentry=6.30.0, io.sentry:sentry-android-okhttp=6.30.0}",
             readSentryModules
         )
-        /* ktlint-enable max-line-length */
     }
 
     @Test

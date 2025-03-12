@@ -18,13 +18,11 @@ class RememberNavControllerMethodVisitor(
     instrumentableContext.name,
     instrumentableContext.descriptor
 ) {
-    /* ktlint-disable max-line-length */
     private val replacement = Replacement(
         "Lio/sentry/compose/SentryNavigationIntegrationKt;",
         "withSentryObservableEffect",
         "(Landroidx/navigation/NavHostController;Landroidx/compose/runtime/Composer;I)Landroidx/navigation/NavHostController;"
     )
-    /* ktlint-enable max-line-length */
 
     override fun onMethodExit(opcode: Int) {
         // NavHostController is the return value;

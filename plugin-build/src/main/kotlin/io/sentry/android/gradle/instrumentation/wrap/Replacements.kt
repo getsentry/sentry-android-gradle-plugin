@@ -1,4 +1,3 @@
-// ktlint-disable filename
 package io.sentry.android.gradle.instrumentation.wrap
 
 data class Replacement(

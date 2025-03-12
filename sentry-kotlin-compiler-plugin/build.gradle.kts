@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kapt) version "1.9.24"
     id("distribution")
     alias(libs.plugins.mavenPublish)
-    alias(libs.plugins.ktlint)
+    alias(libs.plugins.spotless)
 }
 
 allprojects {
@@ -13,16 +13,11 @@ allprojects {
     }
 }
 
-ktlint {
-    debug.set(false)
-    verbose.set(true)
-    android.set(true)
-    outputToConsole.set(true)
-    ignoreFailures.set(false)
-    enableExperimentalRules.set(true)
-    filter {
-        exclude("**/generated/**")
-        include("**/kotlin/**")
+
+spotless {
+    kotlin {
+        ktfmt(libs.versions.ktfmt).googleStyle()
+        targetExclude("**/generated/**")
     }
 }
 

@@ -67,7 +67,6 @@ class TrackAdapter : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
             val context = holder.row.context
             val track = data[holder.bindingAdapterPosition]
 
-            /* ktlint-disable experimental:argument-list-wrapping */
             AlertDialog.Builder(context)
                 .setTitle("Choose File API")
                 .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
@@ -91,7 +90,6 @@ class TrackAdapter : RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
                     )
                     dialog.dismiss()
                 }.show()
-            /* ktlint-enable experimental:argument-list-wrapping */
         }
     }
 

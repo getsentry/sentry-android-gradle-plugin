@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kapt) apply false
     alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP apply false
     alias(libs.plugins.androidLibrary) version BuildPluginsVersion.AGP apply false
-    alias(libs.plugins.ktlint)
+    alias(libs.plugins.spotless)
 }
 
 allprojects {
@@ -16,19 +16,15 @@ allprojects {
 
 subprojects {
     apply {
-        plugin("org.jlleitschuh.gradle.ktlint")
+        plugin("com.diffplug.spotless")
     }
 
-    ktlint {
-        debug.set(false)
-        verbose.set(true)
-        android.set(true)
-        outputToConsole.set(true)
-        ignoreFailures.set(false)
-        enableExperimentalRules.set(true)
-        filter {
-            exclude("**/generated/**")
-            include("**/kotlin/**")
+    if (name != "examples") {
+        spotless {
+            kotlin {
+                ktfmt(libs.versions.ktfmt).googleStyle()
+                targetExclude("**/generated/**")
+            }
         }
     }
 }
@@ -61,10 +57,12 @@ tasks.register("preMerge") {
     dependsOn(gradle.includedBuild("plugin-build").task(":check"))
 }
 
-tasks.getByName("ktlintFormat") {
-    dependsOn(gradle.includedBuild("plugin-build").task(":ktlintFormat"))
+tasks.getByName("spotlessCheck") {
+    dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":spotlessCheck"))
+    dependsOn(gradle.includedBuild("plugin-build").task(":spotlessCheck"))
 }
 
-tasks.getByName("ktlintCheck") {
-    dependsOn(gradle.includedBuild("plugin-build").task(":ktlintCheck"))
+tasks.getByName("spotlessApply") {
+    dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":spotlessApply"))
+    dependsOn(gradle.includedBuild("plugin-build").task(":spotlessApply"))
 }

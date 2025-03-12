@@ -1,4 +1,3 @@
-// ktlint-disable max-line-length
 package io.sentry.android.gradle.autoinstall.override
 
 import com.nhaarman.mockitokotlin2.doReturn

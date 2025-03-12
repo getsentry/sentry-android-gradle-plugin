@@ -1,22 +1,16 @@
 plugins {
     alias(libs.plugins.kotlin)
-    alias(libs.plugins.ktlint)
+    alias(libs.plugins.spotless)
 }
 
 dependencies {
     compileOnly(libs.gradleApi)
 }
 
-ktlint {
-    debug.set(false)
-    verbose.set(true)
-    android.set(true)
-    outputToConsole.set(true)
-    ignoreFailures.set(false)
-    enableExperimentalRules.set(true)
-    filter {
-        exclude("**/generated/**")
-        include("**/kotlin/**")
+spotless {
+    kotlin {
+        ktfmt(libs.versions.ktfmt).googleStyle()
+        targetExclude("**/generated/**")
     }
 }
 
