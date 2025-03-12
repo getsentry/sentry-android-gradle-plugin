@@ -12,16 +12,17 @@ allprojects {
         google()
         mavenCentral()
     }
-}
-
-subprojects {
-    apply {
-        plugin("com.diffplug.spotless")
-    }
+    apply { plugin("com.diffplug.spotless") }
 
     if (name != "examples") {
         spotless {
-            kotlin {
+            if (name != rootProject.name) {
+                kotlin {
+                    ktfmt(libs.versions.ktfmt.get()).googleStyle()
+                    targetExclude("**/generated/**")
+                }
+            }
+            kotlinGradle {
                 ktfmt(libs.versions.ktfmt.get()).googleStyle()
                 targetExclude("**/generated/**")
             }

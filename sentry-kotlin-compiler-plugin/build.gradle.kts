@@ -19,6 +19,10 @@ spotless {
         ktfmt(libs.versions.ktfmt.get()).googleStyle()
         targetExclude("**/generated/**")
     }
+    kotlinGradle {
+        ktfmt(libs.versions.ktfmt.get()).googleStyle()
+        targetExclude("**/generated/**")
+    }
 }
 
 val sep = File.separator
