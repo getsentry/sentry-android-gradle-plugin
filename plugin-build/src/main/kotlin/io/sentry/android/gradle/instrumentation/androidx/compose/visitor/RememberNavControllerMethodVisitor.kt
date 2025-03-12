@@ -8,36 +8,35 @@ import org.objectweb.asm.commons.AdviceAdapter
 import org.objectweb.asm.commons.Method
 
 class RememberNavControllerMethodVisitor(
-    apiVersion: Int,
-    originalVisitor: MethodVisitor,
-    instrumentableContext: MethodContext
-) : AdviceAdapter(
+  apiVersion: Int,
+  originalVisitor: MethodVisitor,
+  instrumentableContext: MethodContext,
+) :
+  AdviceAdapter(
     apiVersion,
     originalVisitor,
     instrumentableContext.access,
     instrumentableContext.name,
-    instrumentableContext.descriptor
-) {
-    private val replacement = Replacement(
-        "Lio/sentry/compose/SentryNavigationIntegrationKt;",
-        "withSentryObservableEffect",
-        "(Landroidx/navigation/NavHostController;Landroidx/compose/runtime/Composer;I)Landroidx/navigation/NavHostController;"
+    instrumentableContext.descriptor,
+  ) {
+  private val replacement =
+    Replacement(
+      "Lio/sentry/compose/SentryNavigationIntegrationKt;",
+      "withSentryObservableEffect",
+      "(Landroidx/navigation/NavHostController;Landroidx/compose/runtime/Composer;I)Landroidx/navigation/NavHostController;",
     )
 
-    override fun onMethodExit(opcode: Int) {
-        // NavHostController is the return value;
-        // thus it's already on top of stack
+  override fun onMethodExit(opcode: Int) {
+    // NavHostController is the return value;
+    // thus it's already on top of stack
 
-        // Composer $composer
-        loadArg(1)
+    // Composer $composer
+    loadArg(1)
 
-        // int $changed
-        loadArg(2)
+    // int $changed
+    loadArg(2)
 
-        invokeStatic(
-            Type.getType(replacement.owner),
-            Method(replacement.name, replacement.descriptor)
-        )
-        super.onMethodExit(opcode)
-    }
+    invokeStatic(Type.getType(replacement.owner), Method(replacement.name, replacement.descriptor))
+    super.onMethodExit(opcode)
+  }
 }

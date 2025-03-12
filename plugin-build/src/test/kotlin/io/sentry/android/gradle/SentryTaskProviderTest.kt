@@ -25,287 +25,257 @@ import org.junit.rules.TemporaryFolder
 
 class SentryTaskProviderTest {
 
-    @get:Rule
-    val testProjectDir = TemporaryFolder()
+  @get:Rule val testProjectDir = TemporaryFolder()
 
-    @Test
-    fun `getTransformerTask returns null for missing task`() {
-        val project = ProjectBuilder.builder().build()
+  @Test
+  fun `getTransformerTask returns null for missing task`() {
+    val project = ProjectBuilder.builder().build()
 
-        assertNull(getMinifyTask(project, "debug"))
-    }
+    assertNull(getMinifyTask(project, "debug"))
+  }
 
-    @Test
-    fun `getTransformerTask returns transform task for standalone Proguard with opt-in`() {
-        val (project, task) = getTestProjectWithTask(
-            "transformClassesAndResourcesWithProguardTransformForDebug"
-        )
+  @Test
+  fun `getTransformerTask returns transform task for standalone Proguard with opt-in`() {
+    val (project, task) =
+      getTestProjectWithTask("transformClassesAndResourcesWithProguardTransformForDebug")
 
+    assertEquals(task, getMinifyTask(project, "debug", dexguardEnabled = true)!!.get())
+  }
+
+  @Test
+  fun `getTransformerTask returns null for standalone Proguard without opt-in`() {
+    val (project, _) =
+      getTestProjectWithTask("transformClassesAndResourcesWithProguardTransformForDebug")
+
+    assertNull(getMinifyTask(project, "debug", dexguardEnabled = false))
+  }
+
+  @Test
+  fun `getTransformerTask returns minify for R8`() {
+    val (project, task) = getTestProjectWithTask("minifyDebugWithR8")
+
+    assertEquals(task, getMinifyTask(project, "debug")!!.get())
+  }
+
+  @Test
+  fun `getTransformerTask returns minify for embedded Proguard`() {
+    val (project, task) = getTestProjectWithTask("minifyDebugWithProguard")
+
+    assertEquals(task, getMinifyTask(project, "debug")!!.get())
+  }
+
+  @Test
+  fun `getTransformerTask gives standalone Proguard priority with opt-in`() {
+    val (project, _) = getTestProjectWithTask("minifyDebugWithR8")
+    project.tasks.register("transformClassesAndResourcesWithProguardTransformForDebug")
+
+    assertEquals(
+      "transformClassesAndResourcesWithProguardTransformForDebug",
+      getMinifyTask(project, "debug", dexguardEnabled = true)!!.name,
+    )
+  }
+
+  @Test
+  fun `getTransformerTask ignores standalone Proguard priority without opt-in`() {
+    val (project, r8task) = getTestProjectWithTask("minifyDebugWithR8")
+    project.tasks.register("transformClassesAndResourcesWithProguardTransformForDebug")
+
+    assertEquals(r8task, getMinifyTask(project, "debug", dexguardEnabled = false)!!.get())
+  }
+
+  @Test
+  fun `getPreBundleTask returns null for missing task`() {
+    val project = ProjectBuilder.builder().build()
+
+    assertNull(getPreBundleTask(project, "debug")?.get())
+  }
+
+  @Test
+  fun `getPreBundleTask returns correct task`() {
+    val (project, task) = getTestProjectWithTask("buildDebugPreBundle")
+
+    assertEquals(task, getPreBundleTask(project, "debug")?.get())
+  }
+
+  @Test
+  fun `getBundleTask returns null for missing task`() {
+    val project = ProjectBuilder.builder().build()
+
+    assertNull(getBundleTask(project, "debug")?.get())
+  }
+
+  @Test
+  fun `getBundleTask returns correct task`() {
+    val (project, task) = getTestProjectWithTask("bundleDebug")
+
+    assertEquals(task, getBundleTask(project, "debug")?.get())
+  }
+
+  @Test
+  fun `getPackageBundleTask returns null for missing task`() {
+    val project = ProjectBuilder.builder().build()
+
+    assertNull(getPackageBundleTask(project, "debug")?.get())
+  }
+
+  @Test
+  fun `getPackageBundleTask returns package bundle task`() {
+    val (project, task) = getTestProjectWithTask("packageDebugBundle")
+
+    assertEquals(task, getPackageBundleTask(project, "debug")?.get())
+  }
+
+  @Test
+  fun `getAssembleTaskProvider works correctly for all the variants AGP70`() {
+    val (project, android) = getAndroidExtFromProject()
+
+    android.applicationVariants.configureEach {
+      if (it.name == "debug") {
         assertEquals(
-            task,
-            getMinifyTask(
-                project,
-                "debug",
-                dexguardEnabled = true
-            )!!.get()
+          "assembleDebug",
+          getAssembleTaskProvider(project, AndroidVariant70(it))?.get()?.name,
         )
-    }
-
-    @Test
-    fun `getTransformerTask returns null for standalone Proguard without opt-in`() {
-        val (project, _) = getTestProjectWithTask(
-            "transformClassesAndResourcesWithProguardTransformForDebug"
-        )
-
-        assertNull(
-            getMinifyTask(
-                project,
-                "debug",
-                dexguardEnabled = false
-            )
-        )
-    }
-
-    @Test
-    fun `getTransformerTask returns minify for R8`() {
-        val (project, task) = getTestProjectWithTask("minifyDebugWithR8")
-
-        assertEquals(task, getMinifyTask(project, "debug")!!.get())
-    }
-
-    @Test
-    fun `getTransformerTask returns minify for embedded Proguard`() {
-        val (project, task) = getTestProjectWithTask("minifyDebugWithProguard")
-
-        assertEquals(task, getMinifyTask(project, "debug")!!.get())
-    }
-
-    @Test
-    fun `getTransformerTask gives standalone Proguard priority with opt-in`() {
-        val (project, _) = getTestProjectWithTask("minifyDebugWithR8")
-        project.tasks.register("transformClassesAndResourcesWithProguardTransformForDebug")
-
+      } else {
         assertEquals(
-            "transformClassesAndResourcesWithProguardTransformForDebug",
-            getMinifyTask(
-                project,
-                "debug",
-                dexguardEnabled = true
-            )!!.name
+          "assembleRelease",
+          getAssembleTaskProvider(project, AndroidVariant70(it))?.get()?.name,
         )
+      }
     }
+  }
 
-    @Test
-    fun `getTransformerTask ignores standalone Proguard priority without opt-in`() {
-        val (project, r8task) = getTestProjectWithTask("minifyDebugWithR8")
-        project.tasks.register("transformClassesAndResourcesWithProguardTransformForDebug")
+  @Test
+  fun `getAssembleTaskProvider falls back to findTask if assembleProvider is null`() {
+    val (project, android) = getAndroidExtFromProject()
 
+    android.applicationVariants.configureEach {
+      val sentryVariant =
+        object : SentryVariant by AndroidVariant70(it) {
+          override val assembleProvider: TaskProvider<out Task>?
+            get() = null
+        }
+      if (it.name == "debug") {
+        assertEquals("assembleDebug", getAssembleTaskProvider(project, sentryVariant)?.get()?.name)
+      } else {
         assertEquals(
-            r8task,
-            getMinifyTask(
-                project,
-                "debug",
-                dexguardEnabled = false
-            )!!.get()
+          "assembleRelease",
+          getAssembleTaskProvider(project, sentryVariant)?.get()?.name,
         )
+      }
     }
+  }
 
-    @Test
-    fun `getPreBundleTask returns null for missing task`() {
-        val project = ProjectBuilder.builder().build()
+  @Test
+  fun `getInstallTaskProvider works correctly for all the variants AGP70`() {
+    val (project, android) = getAndroidExtFromProject()
 
-        assertNull(getPreBundleTask(project, "debug")?.get())
+    android.applicationVariants.configureEach {
+      if (it.name == "debug") {
+        assertEquals(
+          "installDebug",
+          getInstallTaskProvider(project, AndroidVariant70(it))?.get()?.name,
+        )
+      }
     }
+  }
 
-    @Test
-    fun `getPreBundleTask returns correct task`() {
-        val (project, task) = getTestProjectWithTask("buildDebugPreBundle")
+  @Test
+  fun `getInstallTaskProvider falls back to findTask if assembleProvider is null`() {
+    val (project, android) = getAndroidExtFromProject()
 
-        assertEquals(task, getPreBundleTask(project, "debug")?.get())
-    }
-
-    @Test
-    fun `getBundleTask returns null for missing task`() {
-        val project = ProjectBuilder.builder().build()
-
-        assertNull(getBundleTask(project, "debug")?.get())
-    }
-
-    @Test
-    fun `getBundleTask returns correct task`() {
-        val (project, task) = getTestProjectWithTask("bundleDebug")
-
-        assertEquals(task, getBundleTask(project, "debug")?.get())
-    }
-
-    @Test
-    fun `getPackageBundleTask returns null for missing task`() {
-        val project = ProjectBuilder.builder().build()
-
-        assertNull(getPackageBundleTask(project, "debug")?.get())
-    }
-
-    @Test
-    fun `getPackageBundleTask returns package bundle task`() {
-        val (project, task) = getTestProjectWithTask("packageDebugBundle")
-
-        assertEquals(task, getPackageBundleTask(project, "debug")?.get())
-    }
-
-    @Test
-    fun `getAssembleTaskProvider works correctly for all the variants AGP70`() {
-        val (project, android) = getAndroidExtFromProject()
-
-        android.applicationVariants.configureEach {
-            if (it.name == "debug") {
-                assertEquals(
-                    "assembleDebug",
-                    getAssembleTaskProvider(project, AndroidVariant70(it))?.get()?.name
-                )
-            } else {
-                assertEquals(
-                    "assembleRelease",
-                    getAssembleTaskProvider(project, AndroidVariant70(it))?.get()?.name
-                )
-            }
+    android.applicationVariants.configureEach {
+      val sentryVariant =
+        object : SentryVariant by AndroidVariant70(it) {
+          override val installProvider: TaskProvider<out Task>?
+            get() = null
         }
+      if (it.name == "debug") {
+        assertEquals("installDebug", getInstallTaskProvider(project, sentryVariant)?.get()?.name)
+      }
     }
+  }
 
-    @Test
-    fun `getAssembleTaskProvider falls back to findTask if assembleProvider is null`() {
-        val (project, android) = getAndroidExtFromProject()
+  @Test
+  fun `getMergeAssetsProvider works correctly for all the variants`() {
+    val (_, android) = getAndroidExtFromProject()
 
-        android.applicationVariants.configureEach {
-            val sentryVariant = object : SentryVariant by AndroidVariant70(it) {
-                override val assembleProvider: TaskProvider<out Task>? get() = null
-            }
-            if (it.name == "debug") {
-                assertEquals(
-                    "assembleDebug",
-                    getAssembleTaskProvider(project, sentryVariant)?.get()?.name
-                )
-            } else {
-                assertEquals(
-                    "assembleRelease",
-                    getAssembleTaskProvider(project, sentryVariant)?.get()?.name
-                )
-            }
-        }
+    android.applicationVariants.configureEach {
+      if (it.name == "debug") {
+        assertEquals("mergeDebugAssets", getMergeAssetsProvider(it)?.get()?.name)
+      } else {
+        assertEquals("mergeReleaseAssets", getMergeAssetsProvider(it)?.get()?.name)
+      }
     }
+  }
 
-    @Test
-    fun `getInstallTaskProvider works correctly for all the variants AGP70`() {
-        val (project, android) = getAndroidExtFromProject()
+  @Test
+  fun `getPackageProvider works correctly for all the variants`() {
+    val (_, android) = getAndroidExtFromProject()
 
-        android.applicationVariants.configureEach {
-            if (it.name == "debug") {
-                assertEquals(
-                    "installDebug",
-                    getInstallTaskProvider(project, AndroidVariant70(it))?.get()?.name
-                )
-            }
-        }
+    android.applicationVariants.configureEach {
+      if (it.name == "debug") {
+        assertEquals("packageDebug", getPackageProvider(AndroidVariant70(it))?.name)
+      } else {
+        assertEquals("packageRelease", getPackageProvider(AndroidVariant70(it))?.name)
+      }
     }
+  }
 
-    @Test
-    fun `getInstallTaskProvider falls back to findTask if assembleProvider is null`() {
-        val (project, android) = getAndroidExtFromProject()
+  @Test
+  fun `getLintVitalAnalyze returns null for missing task`() {
+    val project = ProjectBuilder.builder().build()
 
-        android.applicationVariants.configureEach {
-            val sentryVariant = object : SentryVariant by AndroidVariant70(it) {
-                override val installProvider: TaskProvider<out Task>? get() = null
-            }
-            if (it.name == "debug") {
-                assertEquals(
-                    "installDebug",
-                    getInstallTaskProvider(project, sentryVariant)?.get()?.name
-                )
-            }
-        }
-    }
+    assertNull(getLintVitalAnalyzeProvider(project, "debug")?.get())
+  }
 
-    @Test
-    fun `getMergeAssetsProvider works correctly for all the variants`() {
-        val (_, android) = getAndroidExtFromProject()
+  @Test
+  fun `getLintVitalAnalyze returns correct task`() {
+    val (project, task) = getTestProjectWithTask("lintVitalAnalyzeDebug")
 
-        android.applicationVariants.configureEach {
-            if (it.name == "debug") {
-                assertEquals("mergeDebugAssets", getMergeAssetsProvider(it)?.get()?.name)
-            } else {
-                assertEquals("mergeReleaseAssets", getMergeAssetsProvider(it)?.get()?.name)
-            }
-        }
-    }
+    assertEquals(task, getLintVitalAnalyzeProvider(project, "debug")?.get())
+  }
 
-    @Test
-    fun `getPackageProvider works correctly for all the variants`() {
-        val (_, android) = getAndroidExtFromProject()
+  @Test
+  fun `getLintVitalReport returns null for missing task`() {
+    val project = ProjectBuilder.builder().build()
 
-        android.applicationVariants.configureEach {
-            if (it.name == "debug") {
-                assertEquals("packageDebug", getPackageProvider(AndroidVariant70(it))?.name)
-            } else {
-                assertEquals("packageRelease", getPackageProvider(AndroidVariant70(it))?.name)
-            }
-        }
-    }
+    assertNull(getLintVitalReportProvider(project, "debug")?.get())
+  }
 
-    @Test
-    fun `getLintVitalAnalyze returns null for missing task`() {
-        val project = ProjectBuilder.builder().build()
+  @Test
+  fun `getLintVitalReport returns correct task`() {
+    val (project, task) = getTestProjectWithTask("lintVitalReportDebug")
 
-        assertNull(getLintVitalAnalyzeProvider(project, "debug")?.get())
-    }
+    assertEquals(task, getLintVitalReportProvider(project, "debug")?.get())
+  }
 
-    @Test
-    fun `getLintVitalAnalyze returns correct task`() {
-        val (project, task) = getTestProjectWithTask("lintVitalAnalyzeDebug")
+  @Test
+  fun `getProcessResources returns null for missing task`() {
+    val project = ProjectBuilder.builder().build()
 
-        assertEquals(task, getLintVitalAnalyzeProvider(project, "debug")?.get())
-    }
+    assertNull(getProcessResourcesProvider(project)?.get())
+  }
 
-    @Test
-    fun `getLintVitalReport returns null for missing task`() {
-        val project = ProjectBuilder.builder().build()
+  @Test
+  fun `getProcessResources returns correct task`() {
+    val (project, task) = getTestProjectWithTask("processResources")
 
-        assertNull(getLintVitalReportProvider(project, "debug")?.get())
-    }
+    assertEquals(task, getProcessResourcesProvider(project)?.get())
+  }
 
-    @Test
-    fun `getLintVitalReport returns correct task`() {
-        val (project, task) = getTestProjectWithTask("lintVitalReportDebug")
+  private fun getAndroidExtFromProject(): Pair<Project, AppExtension> {
+    val project = ProjectBuilder.builder().build()
+    project.plugins.apply("com.android.application")
+    val android =
+      project.extensions.getByType(AppExtension::class.java).apply { compileSdkVersion(30) }
 
-        assertEquals(task, getLintVitalReportProvider(project, "debug")?.get())
-    }
+    // This forces the project to be evaluated
+    project.getTasksByName("assembleDebug", false)
+    return project to android
+  }
 
-    @Test
-    fun `getProcessResources returns null for missing task`() {
-        val project = ProjectBuilder.builder().build()
-
-        assertNull(getProcessResourcesProvider(project)?.get())
-    }
-
-    @Test
-    fun `getProcessResources returns correct task`() {
-        val (project, task) = getTestProjectWithTask("processResources")
-
-        assertEquals(task, getProcessResourcesProvider(project)?.get())
-    }
-
-    private fun getAndroidExtFromProject(): Pair<Project, AppExtension> {
-        val project = ProjectBuilder.builder().build()
-        project.plugins.apply("com.android.application")
-        val android = project.extensions.getByType(AppExtension::class.java).apply {
-            compileSdkVersion(30)
-        }
-
-        // This forces the project to be evaluated
-        project.getTasksByName("assembleDebug", false)
-        return project to android
-    }
-
-    private fun getTestProjectWithTask(taskName: String): Pair<Project, Task> {
-        val project = ProjectBuilder.builder().build()
-        return project to project.tasks.register(taskName).get()
-    }
+  private fun getTestProjectWithTask(taskName: String): Pair<Project, Task> {
+    val project = ProjectBuilder.builder().build()
+    return project to project.tasks.register(taskName).get()
+  }
 }

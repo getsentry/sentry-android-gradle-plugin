@@ -13,16 +13,14 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 @AutoService(CompilerPluginRegistrar::class)
 class SentryKotlinCompilerPlugin : CompilerPluginRegistrar() {
 
-    override val supportsK2: Boolean
-        get() = true
+  override val supportsK2: Boolean
+    get() = true
 
-    override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
-        val messageCollector = configuration.get(
-            CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY,
-            MessageCollector.NONE
-        )
-        IrGenerationExtension.registerExtension(
-            extension = JetpackComposeTracingIrExtension(messageCollector)
-        )
-    }
+  override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
+    val messageCollector =
+      configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
+    IrGenerationExtension.registerExtension(
+      extension = JetpackComposeTracingIrExtension(messageCollector)
+    )
+  }
 }

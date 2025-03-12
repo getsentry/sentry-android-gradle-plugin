@@ -21,17 +21,15 @@ package io.sentry.android.gradle.instrumentation.util
 
 import java.lang.reflect.Field
 
-/**
- * Gets all fields of the given class and its parents (if any).
- */
+/** Gets all fields of the given class and its parents (if any). */
 internal val Class<*>.allFields: List<Field>
-    get() {
-        val allFields = mutableListOf<Field>()
-        var currentClass: Class<*>? = this
-        while (currentClass != null) {
-            val declaredFields = currentClass.declaredFields
-            allFields += declaredFields
-            currentClass = currentClass.superclass
-        }
-        return allFields
+  get() {
+    val allFields = mutableListOf<Field>()
+    var currentClass: Class<*>? = this
+    while (currentClass != null) {
+      val declaredFields = currentClass.declaredFields
+      allFields += declaredFields
+      currentClass = currentClass.superclass
     }
+    return allFields
+  }

@@ -16,44 +16,44 @@ import org.junit.rules.TemporaryFolder
 
 @Suppress("FunctionName")
 abstract class BaseSentryPluginTest(
-    protected val androidGradlePluginVersion: String,
-    private val gradleVersion: String
+  protected val androidGradlePluginVersion: String,
+  private val gradleVersion: String,
 ) {
-    @get:Rule
-    val testProjectDir = TemporaryFolder()
+  @get:Rule val testProjectDir = TemporaryFolder()
 
-    private val outputStream = ByteArrayOutputStream()
-    private val writer = OutputStreamWriter(SynchronizedOutputStream(outputStream))
+  private val outputStream = ByteArrayOutputStream()
+  private val writer = OutputStreamWriter(SynchronizedOutputStream(outputStream))
 
-    @get:Rule
-    val printBuildOutputOnFailureRule = PrintBuildOutputOnFailureRule(outputStream)
+  @get:Rule val printBuildOutputOnFailureRule = PrintBuildOutputOnFailureRule(outputStream)
 
-    private val projectTemplateFolder = File("src/test/resources/testFixtures/appTestProject")
-    private val mavenTestRepoPath = File("./../build/mavenTestRepo")
+  private val projectTemplateFolder = File("src/test/resources/testFixtures/appTestProject")
+  private val mavenTestRepoPath = File("./../build/mavenTestRepo")
 
-    private lateinit var rootBuildFile: File
-    protected lateinit var appBuildFile: File
-    protected lateinit var moduleBuildFile: File
-    protected lateinit var sentryPropertiesFile: File
-    protected lateinit var runner: GradleRunner
+  private lateinit var rootBuildFile: File
+  protected lateinit var appBuildFile: File
+  protected lateinit var moduleBuildFile: File
+  protected lateinit var sentryPropertiesFile: File
+  protected lateinit var runner: GradleRunner
 
-    protected open val additionalRootProjectConfig: String = ""
-    protected open val additionalBuildClasspath: String = ""
+  protected open val additionalRootProjectConfig: String = ""
+  protected open val additionalBuildClasspath: String = ""
 
-    @Before
-    fun setup() {
-        projectTemplateFolder.copyRecursively(testProjectDir.root)
+  @Before
+  fun setup() {
+    projectTemplateFolder.copyRecursively(testProjectDir.root)
 
-        val pluginClasspath = PluginUnderTestMetadataReading.readImplementationClasspath()
-            .joinToString(separator = ", ") { "\"$it\"" }
-            .replace(File.separator, "/")
+    val pluginClasspath =
+      PluginUnderTestMetadataReading.readImplementationClasspath()
+        .joinToString(separator = ", ") { "\"$it\"" }
+        .replace(File.separator, "/")
 
-        appBuildFile = File(testProjectDir.root, "app/build.gradle")
-        moduleBuildFile = File(testProjectDir.root, "module/build.gradle")
-        sentryPropertiesFile = File(testProjectDir.root, "sentry.properties")
-        rootBuildFile = testProjectDir.writeFile("build.gradle") {
-            // language=Groovy
-            """
+    appBuildFile = File(testProjectDir.root, "app/build.gradle")
+    moduleBuildFile = File(testProjectDir.root, "module/build.gradle")
+    sentryPropertiesFile = File(testProjectDir.root, "sentry.properties")
+    rootBuildFile =
+      testProjectDir.writeFile("build.gradle") {
+        // language=Groovy
+        """
             import io.sentry.android.gradle.autoinstall.AutoInstallState
             import io.sentry.android.gradle.util.GradleVersions
 
@@ -122,43 +122,45 @@ abstract class BaseSentryPluginTest(
                 commandLine 'find', project.gradle.gradleUserHomeDir, '-type', 'f', '-name', 'transforms-3.lock', '-delete'
               }
             }
-            """.trimIndent()
-        }
+            """
+          .trimIndent()
+      }
 
-        runner = GradleRunner.create()
-            .withProjectDir(testProjectDir.root)
-            .withArguments("--stacktrace")
-            .withPluginClasspath()
-            .withGradleVersion(gradleVersion)
-//            .withDebug(true)
-            .forwardStdOutput(writer)
-            .forwardStdError(writer)
+    runner =
+      GradleRunner.create()
+        .withProjectDir(testProjectDir.root)
+        .withArguments("--stacktrace")
+        .withPluginClasspath()
+        .withGradleVersion(gradleVersion)
+        //            .withDebug(true)
+        .forwardStdOutput(writer)
+        .forwardStdError(writer)
 
-        if (SemVer.parse(gradleVersion) < GradleVersions.VERSION_7_5) {
-            // for newer Gradle versions transforms are unlocked at config time instead of a task
-            runner.appendArguments("unlockTransforms").build()
-        }
+    if (SemVer.parse(gradleVersion) < GradleVersions.VERSION_7_5) {
+      // for newer Gradle versions transforms are unlocked at config time instead of a task
+      runner.appendArguments("unlockTransforms").build()
     }
+  }
 
-    @After
-    fun teardown() {
-        try {
-            runner.appendArguments("app:cleanupAutoInstallState").build()
-        } catch (ignored: Throwable) {
-            // may fail if we are relying on BuildFinishesListener, but we don't care here
-        }
+  @After
+  fun teardown() {
+    try {
+      runner.appendArguments("app:cleanupAutoInstallState").build()
+    } catch (ignored: Throwable) {
+      // may fail if we are relying on BuildFinishesListener, but we don't care here
     }
+  }
 
-    companion object {
+  companion object {
 
-        internal fun GradleRunner.appendArguments(vararg arguments: String) =
-            withArguments(this.arguments + arguments)
+    internal fun GradleRunner.appendArguments(vararg arguments: String) =
+      withArguments(this.arguments + arguments)
 
-        private fun TemporaryFolder.writeFile(fileName: String, text: () -> String): File {
-            val file = File(root, fileName)
-            file.parentFile.mkdirs()
-            file.writeText(text())
-            return file
-        }
+    private fun TemporaryFolder.writeFile(fileName: String, text: () -> String): File {
+      val file = File(root, fileName)
+      file.parentFile.mkdirs()
+      file.writeText(text())
+      return file
     }
+  }
 }

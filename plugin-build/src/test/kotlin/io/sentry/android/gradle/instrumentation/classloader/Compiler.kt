@@ -11,30 +11,29 @@ import javax.tools.StandardJavaFileManager
 import javax.tools.ToolProvider
 
 fun compileClass(fqName: String, source: String): ByteArrayOutputStream {
-    val baos = ByteArrayOutputStream()
-    val simpleJavaFileObject =
-        object : SimpleJavaFileObject(
-            URI.create("$fqName.java"),
-            JavaFileObject.Kind.SOURCE
-        ) {
-            override fun getCharContent(ignoreEncodingErrors: Boolean) = source
+  val baos = ByteArrayOutputStream()
+  val simpleJavaFileObject =
+    object : SimpleJavaFileObject(URI.create("$fqName.java"), JavaFileObject.Kind.SOURCE) {
+      override fun getCharContent(ignoreEncodingErrors: Boolean) = source
 
-            override fun openOutputStream() = baos
-        }
-
-    val javaFileManager = object : ForwardingJavaFileManager<StandardJavaFileManager>(
-        ToolProvider.getSystemJavaCompiler().getStandardFileManager(null, null, null)
-    ) {
-        override fun getJavaFileForOutput(
-            location: JavaFileManager.Location?,
-            className: String?,
-            kind: JavaFileObject.Kind?,
-            sibling: FileObject?
-        ) = simpleJavaFileObject
+      override fun openOutputStream() = baos
     }
 
-    ToolProvider.getSystemJavaCompiler()
-        .getTask(null, javaFileManager, null, null, null, listOf(simpleJavaFileObject))
-        .call()
-    return baos
+  val javaFileManager =
+    object :
+      ForwardingJavaFileManager<StandardJavaFileManager>(
+        ToolProvider.getSystemJavaCompiler().getStandardFileManager(null, null, null)
+      ) {
+      override fun getJavaFileForOutput(
+        location: JavaFileManager.Location?,
+        className: String?,
+        kind: JavaFileObject.Kind?,
+        sibling: FileObject?,
+      ) = simpleJavaFileObject
+    }
+
+  ToolProvider.getSystemJavaCompiler()
+    .getTask(null, javaFileManager, null, null, null, listOf(simpleJavaFileObject))
+    .call()
+  return baos
 }
