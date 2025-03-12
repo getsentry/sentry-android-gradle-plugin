@@ -6,6 +6,5 @@ import org.gradle.api.tasks.OutputDirectory
 
 abstract class DirectoryOutputTask : DefaultTask() {
 
-    @get:OutputDirectory
-    abstract val output: DirectoryProperty
+  @get:OutputDirectory abstract val output: DirectoryProperty
 }

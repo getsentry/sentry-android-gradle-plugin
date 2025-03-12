@@ -5,13 +5,13 @@ import org.gradle.util.GradleVersion
 import org.junit.Test
 
 class SentryPluginWithDependencyCollectorsNonAndroidTest :
-    BaseSentryNonAndroidPluginTest(GradleVersion.current().version) {
+  BaseSentryNonAndroidPluginTest(GradleVersion.current().version) {
 
-    @Test
-    fun `does not break when there are plugins that collect dependencies applied`() {
-        appBuildFile.writeText(
-            // language=Groovy
-            """
+  @Test
+  fun `does not break when there are plugins that collect dependencies applied`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
             plugins {
               id "java"
               id "io.sentry.jvm.gradle"
@@ -31,18 +31,18 @@ class SentryPluginWithDependencyCollectorsNonAndroidTest :
               autoUploadProguardMapping = false
               autoInstallation.enabled = true
             }
-            """.trimIndent()
-        )
+            """
+        .trimIndent()
+    )
 
-        val result = runner
-            .appendArguments("app:collectDependencies")
-            .build()
+    val result = runner.appendArguments("app:collectDependencies").build()
 
-        assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
-    }
+    assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
+  }
 
-    override val additionalBuildClasspath: String =
-        """
+  override val additionalBuildClasspath: String =
+    """
         classpath 'com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:10.6.1'
-        """.trimIndent()
+        """
+      .trimIndent()
 }

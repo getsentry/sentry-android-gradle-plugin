@@ -1,7 +1,7 @@
 .PHONY: format clean preMerge stop all
 
 format:
-	./gradlew ktlintFormat
+	./gradlew spotlessApply
 
 clean:
 	./gradlew clean

@@ -3,6 +3,7 @@ kotlin = "1.8.20"
 agp = "7.4.0"
 
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
+ktfmt = "0.51"
 sqlite = "2.1.0"
 sentry = "7.0.0"
 
@@ -17,7 +18,7 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version = "1.8.10" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "10.2.1" }
+spotless = { id = "com.diffplug.spotless", version = "7.0.0" }
 groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.2" }
 shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }
 # do not upgrade `mavenPublish` to 0.18.0, it does not generate the pom-default.xml and module.json under

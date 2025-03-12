@@ -11,32 +11,32 @@ import org.slf4j.Logger
 // @CacheableRule
 abstract class LogbackInstallStrategy : AbstractInstallStrategy {
 
-    constructor(logger: Logger) : super() {
-        this.logger = logger
+  constructor(logger: Logger) : super() {
+    this.logger = logger
+  }
+
+  @Suppress("unused") // used by Gradle
+  @Inject // inject is needed to avoid Gradle error
+  constructor() : this(SentryPlugin.logger)
+
+  override val sentryModuleId: String
+    get() = SENTRY_LOGBACK_ID
+
+  override val minSupportedThirdPartyVersion: SemVer
+    get() = MIN_SUPPORTED_VERSION
+
+  override val minSupportedSentryVersion: SemVer
+    get() = SemVer(6, 25, 2)
+
+  companion object Registrar : InstallStrategyRegistrar {
+    private const val LOGBACK_GROUP = "ch.qos.logback"
+    private const val LOGBACK_ID = "logback-classic"
+    internal const val SENTRY_LOGBACK_ID = "sentry-logback"
+
+    private val MIN_SUPPORTED_VERSION = SemVer(1, 0, 0)
+
+    override fun register(component: ComponentMetadataHandler) {
+      component.withModule("$LOGBACK_GROUP:$LOGBACK_ID", LogbackInstallStrategy::class.java) {}
     }
-
-    @Suppress("unused") // used by Gradle
-    @Inject // inject is needed to avoid Gradle error
-    constructor() : this(SentryPlugin.logger)
-
-    override val sentryModuleId: String get() = SENTRY_LOGBACK_ID
-
-    override val minSupportedThirdPartyVersion: SemVer get() = MIN_SUPPORTED_VERSION
-
-    override val minSupportedSentryVersion: SemVer get() = SemVer(6, 25, 2)
-
-    companion object Registrar : InstallStrategyRegistrar {
-        private const val LOGBACK_GROUP = "ch.qos.logback"
-        private const val LOGBACK_ID = "logback-classic"
-        internal const val SENTRY_LOGBACK_ID = "sentry-logback"
-
-        private val MIN_SUPPORTED_VERSION = SemVer(1, 0, 0)
-
-        override fun register(component: ComponentMetadataHandler) {
-            component.withModule(
-                "$LOGBACK_GROUP:$LOGBACK_ID",
-                LogbackInstallStrategy::class.java
-            ) {}
-        }
-    }
+  }
 }

@@ -25,17 +25,14 @@ import org.gradle.api.attributes.Attribute
 
 private val attributeKey: Attribute<String> = Attribute.of("artifactType", String::class.java)
 
-fun Configuration.artifactsFor(
-    attrValue: String
-) = externalArtifactViewOf(attrValue)
-    .artifacts
+fun Configuration.artifactsFor(attrValue: String) = externalArtifactViewOf(attrValue).artifacts
 
-fun Configuration.externalArtifactViewOf(
-    attrValue: String
-): ArtifactView = incoming.artifactView { view ->
+fun Configuration.externalArtifactViewOf(attrValue: String): ArtifactView =
+  incoming.artifactView { view ->
     view.attributes.attribute(attributeKey, attrValue)
     // If some dependency doesn't have the expected attribute, don't fail. Continue!
     view.lenient(true)
-    // Only resolve external dependencies! Without this, all project dependencies will get _compiled_.
+    // Only resolve external dependencies! Without this, all project dependencies will get
+    // _compiled_.
     view.componentFilter { id -> id is ModuleComponentIdentifier }
-}
+  }

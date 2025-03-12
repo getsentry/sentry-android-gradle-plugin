@@ -10,31 +10,32 @@ import org.slf4j.Logger
 
 abstract class ComposeInstallStrategy : AbstractInstallStrategy {
 
-    constructor(logger: Logger) : super() {
-        this.logger = logger
+  constructor(logger: Logger) : super() {
+    this.logger = logger
+  }
+
+  @Suppress("unused") // used by Gradle
+  @Inject // inject is needed to avoid Gradle error
+  constructor() : this(SentryPlugin.logger)
+
+  override val sentryModuleId: String
+    get() = SENTRY_COMPOSE_ID
+
+  override val minSupportedSentryVersion: SemVer
+    get() = SemVer(6, 7, 0)
+
+  override val minSupportedThirdPartyVersion: SemVer
+    get() = SemVer(1, 0, 0)
+
+  companion object Registrar : InstallStrategyRegistrar {
+
+    internal const val SENTRY_COMPOSE_ID = "sentry-compose-android"
+
+    override fun register(component: ComponentMetadataHandler) {
+      component.withModule(
+        "androidx.compose.runtime:runtime",
+        ComposeInstallStrategy::class.java,
+      ) {}
     }
-
-    @Suppress("unused") // used by Gradle
-    @Inject // inject is needed to avoid Gradle error
-    constructor() : this(SentryPlugin.logger)
-
-    override val sentryModuleId: String get() = SENTRY_COMPOSE_ID
-
-    override val minSupportedSentryVersion: SemVer
-        get() = SemVer(6, 7, 0)
-
-    override val minSupportedThirdPartyVersion: SemVer
-        get() = SemVer(1, 0, 0)
-
-    companion object Registrar : InstallStrategyRegistrar {
-
-        internal const val SENTRY_COMPOSE_ID = "sentry-compose-android"
-
-        override fun register(component: ComponentMetadataHandler) {
-            component.withModule(
-                "androidx.compose.runtime:runtime",
-                ComposeInstallStrategy::class.java
-            ) {}
-        }
-    }
+  }
 }

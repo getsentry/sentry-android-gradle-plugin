@@ -9,27 +9,26 @@ import org.junit.rules.TemporaryFolder
 
 class SentryTelemetryServiceTest {
 
-    @get:Rule
-    val testProjectDir = TemporaryFolder()
+  @get:Rule val testProjectDir = TemporaryFolder()
 
-    @Suppress("UnstableApiUsage")
-    @Test
-    fun `SentryCliInfoValueSource returns empty string when no auth token is present`() {
-        val project = ProjectBuilder
-            .builder()
-            .withProjectDir(testProjectDir.root)
-            .build()
+  @Suppress("UnstableApiUsage")
+  @Test
+  fun `SentryCliInfoValueSource returns empty string when no auth token is present`() {
+    val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
 
-        val cliPath = SentryCliProvider
-            .getCliResourcesExtractionPath(project.layout.buildDirectory.asFile.get())
+    val cliPath =
+      SentryCliProvider.getCliResourcesExtractionPath(project.layout.buildDirectory.asFile.get())
 
-        val infoOutput = project.providers.of(SentryCliInfoValueSource::class.java) { cliVS ->
-            cliVS.parameters.buildDirectory.set(project.buildDir)
-            cliVS.parameters.cliExecutable.set(cliPath.absolutePath)
-            // sets an empty/invalid auth token
-            cliVS.parameters.authToken.set("")
-        }.get()
+    val infoOutput =
+      project.providers
+        .of(SentryCliInfoValueSource::class.java) { cliVS ->
+          cliVS.parameters.buildDirectory.set(project.buildDir)
+          cliVS.parameters.cliExecutable.set(cliPath.absolutePath)
+          // sets an empty/invalid auth token
+          cliVS.parameters.authToken.set("")
+        }
+        .get()
 
-        assertEquals("", infoOutput)
-    }
+    assertEquals("", infoOutput)
+  }
 }

@@ -5,6 +5,7 @@
 ### Internal
 
 - Migrate Dependencies to Gradle version catalog ([#712](https://github.com/getsentry/sentry-android-gradle-plugin/pull/712))
+- Integrate spotless + ktfmt instead of ktlint ([#849](https://github.com/getsentry/sentry-android-gradle-plugin/pull/849))
 
 ## 5.3.0
 

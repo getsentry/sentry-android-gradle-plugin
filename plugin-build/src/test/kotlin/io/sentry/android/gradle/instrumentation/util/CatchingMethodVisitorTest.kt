@@ -9,73 +9,72 @@ import org.objectweb.asm.Opcodes
 
 class CatchingMethodVisitorTest {
 
-    class Fixture {
-        private val throwingVisitor = ThrowingMethodVisitor()
-        val handler = CapturingExceptionHandler()
-        val logger = CapturingTestLogger()
+  class Fixture {
+    private val throwingVisitor = ThrowingMethodVisitor()
+    val handler = CapturingExceptionHandler()
+    val logger = CapturingTestLogger()
 
-        private val methodContext =
-            MethodContext(Opcodes.ACC_PUBLIC, "someMethod", null, null, null)
-        val sut
-            get() = CatchingMethodVisitor(
-                Opcodes.ASM7,
-                throwingVisitor,
-                "SomeClass",
-                methodContext,
-                handler,
-                logger
-            )
+    private val methodContext = MethodContext(Opcodes.ACC_PUBLIC, "someMethod", null, null, null)
+    val sut
+      get() =
+        CatchingMethodVisitor(
+          Opcodes.ASM7,
+          throwingVisitor,
+          "SomeClass",
+          methodContext,
+          handler,
+          logger,
+        )
+  }
+
+  private val fixture = Fixture()
+
+  @Test
+  fun `forwards exception to ExceptionHandler`() {
+    try {
+      fixture.sut.visitMaxs(0, 0)
+    } catch (ignored: Throwable) {} finally {
+      assertEquals(fixture.handler.capturedException!!.message, "This method throws!")
     }
+  }
 
-    private val fixture = Fixture()
+  @Test(expected = CustomException::class)
+  fun `rethrows exception`() {
+    fixture.sut.visitMaxs(0, 0)
+  }
 
-    @Test
-    fun `forwards exception to ExceptionHandler`() {
-        try {
-            fixture.sut.visitMaxs(0, 0)
-        } catch (ignored: Throwable) {
-        } finally {
-            assertEquals(fixture.handler.capturedException!!.message, "This method throws!")
-        }
-    }
-
-    @Test(expected = CustomException::class)
-    fun `rethrows exception`() {
-        fixture.sut.visitMaxs(0, 0)
-    }
-
-    @Test
-    fun `prints message to log`() {
-        try {
-            fixture.sut.visitMaxs(0, 0)
-        } catch (ignored: Throwable) {
-        } finally {
-            assertEquals(fixture.logger.capturedThrowable!!.message, "This method throws!")
-            assertEquals(
-                fixture.logger.capturedMessage,
-                """
+  @Test
+  fun `prints message to log`() {
+    try {
+      fixture.sut.visitMaxs(0, 0)
+    } catch (ignored: Throwable) {} finally {
+      assertEquals(fixture.logger.capturedThrowable!!.message, "This method throws!")
+      assertEquals(
+        fixture.logger.capturedMessage,
+        """
                 [sentry] Error while instrumenting SomeClass.someMethod null.
                 Please report this issue at https://github.com/getsentry/sentry-android-gradle-plugin/issues
-                """.trimIndent()
-            )
-        }
+                """
+          .trimIndent(),
+      )
     }
+  }
 }
 
 class CustomException : RuntimeException("This method throws!")
 
 class ThrowingMethodVisitor : MethodVisitor(Opcodes.ASM7) {
 
-    override fun visitMaxs(maxStack: Int, maxLocals: Int) {
-        throw CustomException()
-    }
+  override fun visitMaxs(maxStack: Int, maxLocals: Int) {
+    throw CustomException()
+  }
 }
 
 class CapturingExceptionHandler : ExceptionHandler {
 
-    var capturedException: Throwable? = null
+  var capturedException: Throwable? = null
 
-    override fun handle(exception: Throwable) {
-        capturedException = exception
-    }
+  override fun handle(exception: Throwable) {
+    capturedException = exception
+  }
 }
