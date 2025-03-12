@@ -22,14 +22,14 @@ subprojects {
     if (name != "examples") {
         spotless {
             kotlin {
-                ktfmt(libs.versions.ktfmt).googleStyle()
+                ktfmt(libs.versions.ktfmt.get()).googleStyle()
                 targetExclude("**/generated/**")
             }
         }
     }
 }
 
-tasks.register("clean", Delete::class.java) {
+tasks.withType<Delete>().configureEach {
     delete(rootProject.buildDir)
     dependsOn(gradle.includedBuild("plugin-build").task(":clean"))
     dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":clean"))

@@ -16,7 +16,7 @@ allprojects {
 
 spotless {
     kotlin {
-        ktfmt(libs.versions.ktfmt).googleStyle()
+        ktfmt(libs.versions.ktfmt.get()).googleStyle()
         targetExclude("**/generated/**")
     }
 }
