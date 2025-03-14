@@ -7,6 +7,12 @@
 - Migrate Dependencies to Gradle version catalog ([#712](https://github.com/getsentry/sentry-android-gradle-plugin/pull/712))
 - Integrate spotless + ktfmt instead of ktlint ([#849](https://github.com/getsentry/sentry-android-gradle-plugin/pull/849))
 
+### Dependencies
+
+- Bump CLI from v2.42.2 to v2.42.3 ([#851](https://github.com/getsentry/sentry-android-gradle-plugin/pull/851))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2423)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.42.2...2.42.3)
+
 ## 5.3.0
 
 ### Features
