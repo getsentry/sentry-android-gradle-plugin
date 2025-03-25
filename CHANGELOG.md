@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Kotlin Compiler Plugin: Fix API incompatibility with Kotlin 2.1.20 ([#857](https://github.com/getsentry/sentry-android-gradle-plugin/pull/857))
+
 ### Internal
 
 - Migrate Dependencies to Gradle version catalog ([#712](https://github.com/getsentry/sentry-android-gradle-plugin/pull/712))
