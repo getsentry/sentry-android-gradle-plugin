@@ -1,7 +1,4 @@
-plugins {
-  alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP
-  id("io.sentry.android.gradle")
-}
+plugins { alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP }
 
 android {
   compileSdk = LibsVersion.SDK_VERSION
