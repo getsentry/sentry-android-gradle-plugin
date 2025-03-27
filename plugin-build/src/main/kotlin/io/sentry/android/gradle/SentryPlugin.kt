@@ -36,8 +36,10 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
       runCatching { extraProperties.get(SENTRY_PROJECT_PARAMETER).toString() }.getOrNull()
 
     val extension = SentryPluginExtension.of(project)
-    AndroidAppSubplugin(project, extension)
-      .apply(buildEvents, sentryOrgParameter, sentryProjectParameter)
+    project.pluginManager.withPlugin("com.android.application") {
+      AndroidAppSubplugin(project, extension)
+        .apply(buildEvents, sentryOrgParameter, sentryProjectParameter)
+    }
   }
 
   private fun Project.checkAgpApplied() {
