@@ -13,8 +13,10 @@ import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.SentryPluginUtils
 import io.sentry.android.gradle.util.hookWithAssembleTasks
 import io.sentry.android.gradle.util.info
+import io.sentry.gradle.SENTRY_ORG_PARAMETER
+import io.sentry.gradle.SENTRY_PROJECT_PARAMETER
 import io.sentry.gradle.common.JavaVariant
-import java.io.File
+import io.sentry.gradle.sep
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import org.gradle.api.Plugin
@@ -35,7 +37,7 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
   private val configuredForJavaProject = AtomicBoolean(false)
 
   override fun apply(project: Project) {
-    val extension = project.extensions.create("sentry", SentryPluginExtension::class.java, project)
+    val extension = SentryPluginExtension.of(project)
 
     project.pluginManager.withPlugin("org.gradle.java") {
       if (configuredForJavaProject.getAndSet(true)) {
@@ -54,11 +56,9 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
       val extraProperties = project.extensions.getByName("ext") as ExtraPropertiesExtension
 
       val sentryOrgParameter =
-        runCatching { extraProperties.get(SentryPlugin.SENTRY_ORG_PARAMETER).toString() }
-          .getOrNull()
+        runCatching { extraProperties.get(SENTRY_ORG_PARAMETER).toString() }.getOrNull()
       val sentryProjectParameter =
-        runCatching { extraProperties.get(SentryPlugin.SENTRY_PROJECT_PARAMETER).toString() }
-          .getOrNull()
+        runCatching { extraProperties.get(SENTRY_PROJECT_PARAMETER).toString() }.getOrNull()
 
       val sentryTelemetryProvider = SentryTelemetryService.register(project)
       project.gradle.taskGraph.whenReady {
@@ -134,9 +134,5 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
 
       project.installDependencies(extension, false)
     }
-  }
-
-  companion object {
-    internal val sep = File.separator
   }
 }
