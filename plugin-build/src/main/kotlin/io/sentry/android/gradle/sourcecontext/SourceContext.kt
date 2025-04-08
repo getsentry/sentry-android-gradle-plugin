@@ -5,6 +5,7 @@ import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.gradle.common.SentryVariant
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
+import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
@@ -14,25 +15,15 @@ class SourceContext {
       project: Project,
       extension: SentryPluginExtension,
       sentryTelemetryProvider: Provider<SentryTelemetryService>?,
-      variant: SentryVariant,
-      paths: OutputPaths,
-      sourceFiles: Provider<out Collection<Directory>>?,
+      variant: SentryVariant?,
+      paths: RootOutputPaths,
+      bundleId: Provider<FileCollection>,
+      sourceFiles: Provider<FileCollection>?,
       cliExecutable: Provider<String>,
       sentryOrg: String?,
       sentryProject: String?,
       taskSuffix: String,
     ): SourceContextTasks {
-      val generateBundleIdTask =
-        GenerateBundleIdTask.register(
-          project,
-          extension,
-          sentryTelemetryProvider,
-          sourceFiles,
-          output = paths.bundleIdDir,
-          extension.includeSourceContext,
-          taskSuffix,
-        )
-
       val collectSourcesTask =
         CollectSourcesTask.register(
           project,
@@ -50,7 +41,7 @@ class SourceContext {
           extension,
           sentryTelemetryProvider,
           variant,
-          generateBundleIdTask,
+          bundleId,
           collectSourcesTask,
           output = paths.bundleDir,
           extension.debug,
@@ -82,7 +73,6 @@ class SourceContext {
         )
 
       return SourceContextTasks(
-        generateBundleIdTask,
         collectSourcesTask,
         bundleSourcesTask,
         uploadSourceBundleTask,
@@ -91,7 +81,6 @@ class SourceContext {
   }
 
   class SourceContextTasks(
-    val generateBundleIdTask: TaskProvider<GenerateBundleIdTask>,
     val collectSourcesTask: TaskProvider<CollectSourcesTask>,
     val bundleSourcesTask: TaskProvider<BundleSourcesTask>,
     val uploadSourceBundleTask: TaskProvider<UploadSourceBundleTask>,

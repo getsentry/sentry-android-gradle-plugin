@@ -9,6 +9,7 @@ import io.sentry.android.gradle.SentryTasksProvider.getLintVitalAnalyzeProvider
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalReportProvider
 import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
@@ -92,7 +93,7 @@ fun AppExtension.configure(
       val sourceFiles = sentryVariant?.sources(project, additionalSourcesProvider)
 
       val tasksGeneratingProperties = mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
-      val sourceContextTasks =
+      val bundleIds =
         variant.configureSourceBundleTasks(
           project,
           extension,
@@ -102,7 +103,7 @@ fun AppExtension.configure(
           sentryOrg,
           sentryProject,
         )
-      sourceContextTasks?.let { tasksGeneratingProperties.add(it.generateBundleIdTask) }
+      bundleIds?.let { tasksGeneratingProperties.add(it) }
 
       variant.configureDependenciesTask(
         project,
@@ -209,7 +210,7 @@ private fun ApplicationVariant.configureSourceBundleTasks(
   cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
-): SourceContext.SourceContextTasks? {
+): TaskProvider<GenerateBundleIdTask>?  {
   if (isAGP74) {
     project.logger.info {
       "Not configuring deprecated AppExtension for ${AgpVersions.CURRENT}, " +
@@ -221,25 +222,36 @@ private fun ApplicationVariant.configureSourceBundleTasks(
     val variant = AndroidVariant70(this)
     val taskSuffix = name.capitalized
 
-    val sourceContextTasks =
-      SourceContext.register(
+    val generateBundleIdTask =
+      GenerateBundleIdTask.register(
         project,
         extension,
         sentryTelemetryProvider,
-        variant,
-        paths,
         sourceFiles,
-        cliExecutable,
-        sentryOrg,
-        sentryProject,
+        output = paths.bundleIdDir,
+        extension.includeSourceContext,
         taskSuffix,
       )
 
-    if (variant.buildTypeName == "release") {
-      sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, variant)
-    }
+//    val sourceContextTasks =
+//      SourceContext.register(
+//        project,
+//        extension,
+//        sentryTelemetryProvider,
+//        variant,
+//        paths,
+//        sourceFiles,
+//        cliExecutable,
+//        sentryOrg,
+//        sentryProject,
+//        taskSuffix,
+//      )
+//
+//    if (variant.buildTypeName == "release") {
+//      sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, variant)
+//    }
 
-    return sourceContextTasks
+    return generateBundleIdTask
   } else {
     return null
   }

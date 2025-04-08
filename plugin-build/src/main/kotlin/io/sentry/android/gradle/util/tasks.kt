@@ -11,7 +11,11 @@ import io.sentry.android.gradle.util.SentryPluginUtils.withLogging
 import io.sentry.gradle.common.SentryVariant
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.RegularFile
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
+import java.io.File
 
 fun TaskProvider<out Task>.hookWithMinifyTasks(
   project: Project,
@@ -55,4 +59,27 @@ fun TaskProvider<out Task>.hookWithAssembleTasks(project: Project, variant: Sent
     // if its a bundle aab, assemble might not be executed, so we hook into bundle task
     bundleTask?.configure { it.finalizedBy(this) }
   }
+}
+
+fun Project.hookWithSourceContextTasks(variant: SentryVariant) {
+  // we need to wait for project evaluation to have all tasks available, otherwise the new
+  // AndroidComponentsExtension is configured too early to look up for the tasks
+  afterEvaluate {
+    val bundleTask =
+      withLogging(logger, "bundleTask") { getBundleTask(this, variant.name) }
+    getAssembleTaskProvider(this, variant)?.configure { it.finalizedBy("sentryUploadSourceBundle") }
+    getInstallTaskProvider(this, variant)?.configure { it.finalizedBy("sentryUploadSourceBundle") }
+    // if its a bundle aab, assemble might not be executed, so we hook into bundle task
+    bundleTask?.configure { it.finalizedBy("sentryUploadSourceBundle") }
+  }
+}
+
+internal fun Provider<RegularFile>.getAndDelete(): File {
+  val file = get().asFile
+  if (file.isDirectory) {
+    file.deleteRecursively()
+  } else {
+    file.delete()
+  }
+  return file
 }

@@ -1,3 +1,5 @@
+import org.gradle.configurationcache.extensions.capitalized
+
 plugins {
   alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP
   alias(libs.plugins.kotlinAndroid)
@@ -58,6 +60,10 @@ android {
 
   composeOptions { kotlinCompilerExtensionVersion = "1.4.6" }
 
+  lint {
+    checkReleaseBuilds = false
+  }
+
   testOptions.unitTests.isIncludeAndroidResources = true
 }
 
@@ -107,4 +113,21 @@ sentry {
   telemetryDsn.set(CI.SENTRY_SDKS_DSN)
 
   tracingInstrumentation { forceInstrumentDependencies.set(true) }
+}
+
+androidComponents {
+  onVariants {
+    if (it.buildType == "release") {
+      tasks.withType(OutgoingVariantsReportTask::class.java).configureEach {
+        dependsOn("generate${it.name.capitalized()}BuildConfig")
+        mustRunAfter("generate${it.name.capitalized()}BuildConfig")
+//        dependsOn("compile${it.name.capitalized()}Aidl")
+//        mustRunAfter("compile${it.name.capitalized()}Aidl")
+        dependsOn("compile${it.name.capitalized()}Renderscript")
+        mustRunAfter("compile${it.name.capitalized()}Renderscript")
+        dependsOn("compile${it.name.capitalized()}Kotlin")
+        mustRunAfter("compile${it.name.capitalized()}Kotlin")
+      }
+    }
+  }
 }

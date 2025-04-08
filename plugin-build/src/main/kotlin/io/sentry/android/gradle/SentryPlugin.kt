@@ -38,7 +38,7 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
     val extension = SentryPluginExtension.of(project)
     project.pluginManager.withPlugin("com.android.application") {
       AndroidAppSubplugin(project, extension)
-        .apply(buildEvents, sentryOrgParameter, sentryProjectParameter)
+        .apply(buildEvents, sentryOrgParameter, sentryProjectParameter, null)
     }
   }
 

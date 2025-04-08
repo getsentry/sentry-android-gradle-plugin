@@ -83,21 +83,21 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
         }
       val sourceFiles = javaVariant.sources(project, additionalSourcesProvider)
 
-      val sourceContextTasks =
-        SourceContext.register(
-          project,
-          extension,
-          sentryTelemetryProvider,
-          javaVariant,
-          outputPaths,
-          sourceFiles,
-          cliExecutable,
-          sentryOrgParameter,
-          sentryProjectParameter,
-          "Java",
-        )
-
-      sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, javaVariant)
+//      val sourceContextTasks =
+//        SourceContext.register(
+//          project,
+//          extension,
+//          sentryTelemetryProvider,
+//          javaVariant,
+//          outputPaths,
+//          sourceFiles,
+//          cliExecutable,
+//          sentryOrgParameter,
+//          sentryProjectParameter,
+//          "Java",
+//        )
+//
+//      sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, javaVariant)
 
       javaExtension.sourceSets.getByName("main").resources { sourceSet ->
         sourceSet.srcDir(sentryResDir)
@@ -108,7 +108,7 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
           project,
           extension,
           sentryTelemetryProvider,
-          listOf(sourceContextTasks.generateBundleIdTask),
+          listOf(),
           sentryResDir,
           "java",
         )

@@ -18,9 +18,9 @@ internal object SentryPropertiesFileProvider {
    * @return A [String] for the path if sentry.properties is found or null otherwise
    */
   @JvmStatic
-  fun getPropertiesFilePath(project: Project, variant: SentryVariant): String? {
-    val flavorName = variant.flavorName.orEmpty()
-    val buildTypeName = variant.buildTypeName.orEmpty()
+  fun getPropertiesFilePath(project: Project, variant: SentryVariant?): String? {
+    val flavorName = variant?.flavorName.orEmpty()
+    val buildTypeName = variant?.buildTypeName.orEmpty()
 
     val projDir = project.projectDir
     val rootDir = project.rootDir
@@ -39,9 +39,10 @@ internal object SentryPropertiesFileProvider {
     possibleFiles.add("${projDir}${sep}$FILENAME")
 
     // Other flavors dirs
-    possibleFiles.addAll(
-      variant.productFlavors.map { "${projDir}${sep}src${sep}${it}${sep}$FILENAME" }
-    )
+    val flavorDirs = variant?.productFlavors?.map { "${projDir}${sep}src${sep}${it}${sep}$FILENAME" }
+    if (!flavorDirs.isNullOrEmpty()) {
+      possibleFiles.addAll(flavorDirs)
+    }
 
     // Root project dirs
     possibleFiles.add("${rootDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME")

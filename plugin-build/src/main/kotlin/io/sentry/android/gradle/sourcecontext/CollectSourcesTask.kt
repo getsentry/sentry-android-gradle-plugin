@@ -12,6 +12,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -43,7 +44,17 @@ abstract class CollectSourcesTask : DirectoryOutputTask() {
   fun action() {
     val outDir = output.getAndDelete()
     outDir.mkdirs()
-    SourceCollector().collectSources(outDir, sourceDirs)
+    sourceDirs.singleFile.forEachLine { line ->
+      val (sourceFileInRoot, sourceFileInBundle) = line.split(":")
+      val sourceFile = File(sourceFileInRoot)
+      if (sourceFile.isFile) {
+        val targetFile = outDir.resolve(sourceFileInBundle)
+        SentryPlugin.logger.debug {
+          "Copying file ${sourceFile.absolutePath} " + "to ${targetFile.absolutePath}"
+        }
+        sourceFile.copyTo(targetFile, true)
+      }
+    }
   }
 
   companion object {
@@ -51,7 +62,7 @@ abstract class CollectSourcesTask : DirectoryOutputTask() {
       project: Project,
       extension: SentryPluginExtension,
       sentryTelemetryProvider: Provider<SentryTelemetryService>?,
-      sourceDirs: Provider<out Collection<Directory>>?,
+      sourceDirs: Provider<FileCollection>?,
       output: Provider<Directory>,
       includeSourceContext: Property<Boolean>,
       taskSuffix: String = "",
@@ -104,16 +115,6 @@ internal class SourceCollector {
 }
 
 internal fun DirectoryProperty.getAndDelete(): File {
-  val file = get().asFile
-  if (file.isDirectory) {
-    file.deleteRecursively()
-  } else {
-    file.delete()
-  }
-  return file
-}
-
-internal fun RegularFileProperty.getAndDelete(): File {
   val file = get().asFile
   if (file.isDirectory) {
     file.deleteRecursively()

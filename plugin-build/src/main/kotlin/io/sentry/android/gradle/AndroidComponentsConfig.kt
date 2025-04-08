@@ -10,6 +10,7 @@ import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppExtension
+import com.android.build.gradle.internal.tasks.factory.dependsOn
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
@@ -17,8 +18,10 @@ import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
+import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask
 import io.sentry.android.gradle.sourcecontext.OutputPaths
-import io.sentry.android.gradle.sourcecontext.SourceContext
+import io.sentry.android.gradle.sourcecontext.SourceContext.SourceContextTasks
+import io.sentry.android.gradle.sourcecontext.configureRepublishSourcesTask
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
 import io.sentry.android.gradle.tasks.InjectSentryMetaPropertiesIntoAssetsTask
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
@@ -39,7 +42,10 @@ import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.collectModules
 import io.sentry.android.gradle.util.hookWithAssembleTasks
 import io.sentry.android.gradle.util.hookWithMinifyTasks
+import io.sentry.android.gradle.util.hookWithSourceContextTasks
 import io.sentry.android.gradle.util.info
+import io.sentry.gradle.artifacts.Publisher
+import io.sentry.gradle.artifacts.SgpArtifacts
 import io.sentry.gradle.sep
 import java.io.File
 import org.gradle.api.Project
@@ -49,13 +55,16 @@ import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 
-fun AndroidComponentsExtension<*, *, *>.configure(
+internal fun AndroidComponentsExtension<*, *, *>.configure(
   project: Project,
   extension: SentryPluginExtension,
   buildEvents: BuildEventListenerRegistryInternal,
   cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
+  bundleIdPublisher: Publisher<SgpArtifacts>,
+  sourceFilesPublisher: Publisher<SgpArtifacts>,
+  sourceContextTasks: SourceContextTasks?
 ) {
   // temp folder for sentry-related stuff
   val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
@@ -79,21 +88,21 @@ fun AndroidComponentsExtension<*, *, *>.configure(
             project.layout.projectDirectory.dir(it)
           }
         }
-      val sourceFiles = sentryVariant?.sources(project, additionalSourcesProvider)
+      val sourceRoots = sentryVariant?.sources(project, additionalSourcesProvider)
 
       val tasksGeneratingProperties = mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
-      val sourceContextTasks =
+      val generateBundleIdTask =
         variant.configureSourceBundleTasks(
           project,
           extension,
           sentryTelemetryProvider,
           paths,
-          sourceFiles,
+          sourceRoots,
           cliExecutable,
           sentryOrg,
           sentryProject,
         )
-      sourceContextTasks?.let { tasksGeneratingProperties.add(it.generateBundleIdTask) }
+      generateBundleIdTask?.let { tasksGeneratingProperties.add(it) }
 
       val generateProguardUuidTask =
         variant.configureProguardMappingsTasks(
@@ -248,6 +257,30 @@ fun AndroidComponentsExtension<*, *, *>.configure(
           )
         }
       }
+
+      if (variant.buildType == "release") {
+        val sourceRootsTask = sentryVariant?.configureRepublishSourcesTask(
+          project,
+          extension,
+          sentryTelemetryProvider,
+          extension.includeSourceContext,
+          sourceRoots,
+          paths.explodedSourcesPath
+        )
+//        sourceContextTasks?.collectSourcesTask?.dependsOn(sourceRootsTask)
+        sentryVariant?.let {
+          sourceContextTasks?.uploadSourceBundleTask?.hookWithAssembleTasks(project, it)
+        }
+
+        generateBundleIdTask?.flatMap {
+          it.output.file(GenerateBundleIdTask.SENTRY_BUNDLE_ID_OUTPUT)
+        }?.let {
+          bundleIdPublisher.publish(it)
+        }
+        sourceRootsTask?.flatMap { it.output }?.let {
+          sourceFilesPublisher.publish(it)
+        }
+      }
     }
   }
 }
@@ -286,31 +319,42 @@ private fun Variant.configureSourceBundleTasks(
   cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
-): SourceContext.SourceContextTasks? {
+): TaskProvider<GenerateBundleIdTask>? {
   if (extension.includeSourceContext.get()) {
     if (isAGP74) {
       val taskSuffix = name.capitalized
       val variant = AndroidVariant74(this)
 
-      val sourceContextTasks =
-        SourceContext.register(
+      val generateBundleIdTask =
+        GenerateBundleIdTask.register(
           project,
           extension,
           sentryTelemetryProvider,
-          variant,
-          paths,
           sourceFiles,
-          cliExecutable,
-          sentryOrg,
-          sentryProject,
+          output = paths.bundleIdDir,
+          extension.includeSourceContext,
           taskSuffix,
         )
 
-      if (variant.buildTypeName == "release") {
-        sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, variant)
-      }
+//      val sourceContextTasks =
+//        SourceContext.register(
+//          project,
+//          extension,
+//          sentryTelemetryProvider,
+//          variant,
+//          paths,
+//          sourceFiles,
+//          cliExecutable,
+//          sentryOrg,
+//          sentryProject,
+//          taskSuffix,
+//        )
+//
+//      if (variant.buildTypeName == "release") {
+//        sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, variant)
+//      }
 
-      return sourceContextTasks
+      return generateBundleIdTask
     } else {
       project.logger.info {
         "Not configuring AndroidComponentsExtension for ${AgpVersions.CURRENT}, since it " +

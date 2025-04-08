@@ -76,3 +76,12 @@ tasks.getByName("spotlessApply") {
   dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":spotlessApply"))
   dependsOn(gradle.includedBuild("plugin-build").task(":spotlessApply"))
 }
+
+sentry {
+  debug.set(true)
+  includeSourceContext.set(CI.canAutoUpload())
+  autoUploadSourceContext.set(CI.canAutoUpload())
+
+  org.set("sentry-sdks")
+  projectName.set("sentry-android")
+}

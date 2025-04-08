@@ -6,7 +6,10 @@ import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.cliExecutableProvider
 import io.sentry.android.gradle.configure
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.sourcecontext.SourceContext.SourceContextTasks
 import io.sentry.android.gradle.util.AgpVersions
+import io.sentry.gradle.artifacts.Publisher.Companion.interProjectPublisher
+import io.sentry.gradle.artifacts.SgpArtifacts
 import org.gradle.api.Project
 import org.gradle.api.tasks.StopExecutionException
 import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
@@ -15,10 +18,21 @@ class AndroidAppSubplugin(
   private val project: Project,
   private val extension: SentryPluginExtension,
 ) {
+
+  private val bundleIdPublisher = interProjectPublisher(
+    project = project,
+    artifact = SgpArtifacts.Kind.BUNDLE_ID,
+  )
+  private val sourceFilesPublisher = interProjectPublisher(
+    project = project,
+    artifact = SgpArtifacts.Kind.SOURCE_ROOTS,
+  )
+
   fun apply(
     buildEvents: BuildEventListenerRegistryInternal,
     sentryOrgParameter: String?,
     sentryProjectParameter: String?,
+    sourceContextTasks: SourceContextTasks?,
   ) =
     project.run {
       checkAgpVersion()
@@ -35,6 +49,9 @@ class AndroidAppSubplugin(
         cliExecutable,
         sentryOrgParameter,
         sentryProjectParameter,
+        bundleIdPublisher,
+        sourceFilesPublisher,
+        sourceContextTasks
       )
 
       // old API configuration

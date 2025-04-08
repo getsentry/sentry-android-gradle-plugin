@@ -12,14 +12,17 @@ import io.sentry.android.gradle.util.asSentryCliExec
 import io.sentry.gradle.common.SentryVariant
 import java.io.File
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -41,12 +44,14 @@ abstract class BundleSourcesTask : SentryCliExecTask() {
   @get:InputDirectory
   abstract val sourceDir: DirectoryProperty
 
-  @get:InputFile abstract val bundleIdFile: RegularFileProperty
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  @get:InputFiles
+  abstract val bundleIdFile: ConfigurableFileCollection
 
   @get:OutputDirectory abstract val output: DirectoryProperty
 
   override fun getArguments(args: MutableList<String>) {
-    val bundleId = readBundleIdFromFile(bundleIdFile.get().asFile)
+    val bundleId = readBundleIdFromFile(bundleIdFile.singleFile)
 
     args.add("debug-files")
     args.add("bundle-jvm")
@@ -68,8 +73,8 @@ abstract class BundleSourcesTask : SentryCliExecTask() {
       project: Project,
       extension: SentryPluginExtension,
       sentryTelemetryProvider: Provider<SentryTelemetryService>?,
-      variant: SentryVariant,
-      generateDebugIdTask: TaskProvider<GenerateBundleIdTask>,
+      variant: SentryVariant?,
+      bundleId: Provider<FileCollection>,
       collectSourcesTask: TaskProvider<CollectSourcesTask>,
       output: Provider<Directory>,
       debug: Property<Boolean>,
@@ -95,7 +100,7 @@ abstract class BundleSourcesTask : SentryCliExecTask() {
         SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)?.let {
           task.sentryProperties.set(File(it))
         }
-        task.bundleIdFile.set(generateDebugIdTask.flatMap { it.outputFile })
+        task.bundleIdFile.setFrom(bundleId)
         task.output.set(output)
         task.includeSourceContext.set(includeSourceContext)
         sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }

@@ -59,7 +59,7 @@ abstract class UploadSourceBundleTask : SentryCliExecTask() {
       project: Project,
       extension: SentryPluginExtension,
       sentryTelemetryProvider: Provider<SentryTelemetryService>?,
-      variant: SentryVariant,
+      variant: SentryVariant?,
       bundleSourcesTask: TaskProvider<BundleSourcesTask>,
       debug: Property<Boolean>,
       cliExecutable: Provider<String>,
