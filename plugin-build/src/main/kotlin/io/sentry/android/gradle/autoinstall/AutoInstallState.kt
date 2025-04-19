@@ -1,6 +1,6 @@
 package io.sentry.android.gradle.autoinstall
 
-import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
+import io.sentry.gradle.SENTRY_SDK_VERSION
 import java.io.Serializable
 import org.gradle.api.invocation.Gradle
 import org.jetbrains.annotations.TestOnly

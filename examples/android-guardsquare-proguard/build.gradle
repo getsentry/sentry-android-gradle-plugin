@@ -12,7 +12,6 @@ buildscript {
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'io.sentry.android.gradle'
 if (BuildPluginsVersion.INSTANCE.isProguardApplicable()) {
     apply plugin: 'com.guardsquare.proguard'
 }
