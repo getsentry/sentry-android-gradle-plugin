@@ -28,7 +28,7 @@ abstract class SentryModulesService :
   @set:Synchronized
   var externalModules: Map<ModuleIdentifier, SemVer> = emptyMap()
 
-  fun retrieveEnabledInstrumentationFeatures(): Set<String> {
+  fun retrieveEnabledInstrumentationFeatures(project: Project): Provider<Set<String>> {
     val features =
       parameters.features
         .get()
@@ -52,7 +52,7 @@ abstract class SentryModulesService :
       features.add("DexGuard")
     }
 
-    return features
+    return project.provider { features }
   }
 
   private fun isInstrumentationEnabled(feature: InstrumentationFeature): Boolean {
