@@ -6,12 +6,15 @@ import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
+import io.sentry.android.gradle.verifyIntegrationList
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.gradle.testkit.runner.TaskOutcome
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
+import org.jetbrains.kotlin.gradle.report.TaskExecutionState.UP_TO_DATE
 import org.junit.Assume.assumeThat
 import org.junit.Test
 
@@ -305,5 +308,62 @@ class SentryPluginConfigurationCacheTest :
 
     val outputWithConfigCache = runner.build().output
     assertTrue { "Configuration cache entry reused." in outputWithConfigCache }
+  }
+
+  @Test
+  fun `generate integration list task respects configuration cache`() {
+    assumeThat(
+      "SentryGenerateIntegrationListTask only supports " +
+        "configuration cache from Gradle 7.5 onwards",
+      GradleVersions.CURRENT >= GradleVersions.VERSION_7_5,
+      `is`(true),
+    )
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+            }
+
+            sentry {
+              includeNativeSources = false
+              uploadNativeSymbols = false
+              includeProguardMapping = false
+              autoUploadProguardMapping = false
+              tracingInstrumentation.features = []
+              telemetry = false
+            }
+            """
+        .trimIndent()
+    )
+    runner.appendArguments(":app:assembleDebug").appendArguments("--configuration-cache")
+
+    val firstBuild = runner.build().output
+    assertTrue { "Configuration cache entry stored." in firstBuild }
+
+    val integrationsFirst = verifyIntegrationList(testProjectDir.root, "debug", signed = false)
+    assertEquals(
+      listOf("AppStartInstrumentation", "LogcatInstrumentation"),
+      integrationsFirst.sorted(),
+    )
+
+    // second build should reuse config cache and tasks should be up-to-date as nothing changed
+    val secondBuild = runner.build()
+    assertEquals(
+      TaskOutcome.UP_TO_DATE,
+      secondBuild.task(":app:debugSentryGenerateIntegrationListTask")?.outcome,
+    )
+    assertTrue { "Configuration cache entry reused." in secondBuild.output }
+
+    val integrationsSecond = verifyIntegrationList(testProjectDir.root, "debug", signed = false)
+    assertEquals(
+      listOf("AppStartInstrumentation", "LogcatInstrumentation"),
+      integrationsSecond.sorted(),
+    )
   }
 }

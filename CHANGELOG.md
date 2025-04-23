@@ -5,6 +5,7 @@
 ### Fixes
 
 - Kotlin Compiler Plugin: Fix API incompatibility with Kotlin 2.1.20 ([#857](https://github.com/getsentry/sentry-android-gradle-plugin/pull/857))
+- Make `SentryGenerateIntegrationListTask` configuration-cache compatible ([#866](https://github.com/getsentry/sentry-android-gradle-plugin/pull/866))
 
 ### Internal
 

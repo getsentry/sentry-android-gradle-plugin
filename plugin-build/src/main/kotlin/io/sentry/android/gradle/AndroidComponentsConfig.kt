@@ -29,7 +29,6 @@ import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
-import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.transforms.MetaInfStripTransform
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.AgpVersions.isAGP74
@@ -204,18 +203,13 @@ fun AndroidComponentsExtension<*, *, *>.configure(
         }
 
         val manifestUpdater =
-          project.tasks.register(
-            "${variant.name}SentryGenerateIntegrationListTask",
-            SentryGenerateIntegrationListTask::class.java,
-          ) {
-            it.integrations.set(
-              sentryModulesService.map { service ->
-                service.retrieveEnabledInstrumentationFeatures()
-              }
-            )
-            it.usesService(sentryModulesService)
-            it.withSentryTelemetry(extension, sentryTelemetryProvider)
-          }
+          SentryGenerateIntegrationListTask.register(
+            project,
+            extension,
+            sentryTelemetryProvider,
+            sentryModulesService,
+            variant.name,
+          )
 
         variant.artifacts
           .use(manifestUpdater)
