@@ -1,6 +1,6 @@
 plugins {
-  alias(libs.plugins.kotlin) version "1.9.24"
-  alias(libs.plugins.kapt) version "1.9.24"
+  alias(libs.plugins.kotlin) version "2.1.20"
+  alias(libs.plugins.kapt) version "2.1.20"
   id("distribution")
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.spotless)
