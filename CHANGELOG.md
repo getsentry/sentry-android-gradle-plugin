@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix another API incompatibility Kotlin 2.1.20 ([#871](https://github.com/getsentry/sentry-android-gradle-plugin/pull/871))
+
 ## 5.4.0
 
 ### Fixes
