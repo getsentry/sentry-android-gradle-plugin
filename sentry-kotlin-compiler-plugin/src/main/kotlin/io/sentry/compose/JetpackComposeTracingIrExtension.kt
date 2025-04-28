@@ -213,7 +213,7 @@ class JetpackComposeTracingIrExtension(private val messageCollector: MessageColl
             val sentryTagCall = generateSentryTagCall(builder, composableName)
 
             // Modifier.then()
-            val thenCall = builder.irCall(modifierThen, modifierType)
+            val thenCall = builder.irCall(modifierThen, type = modifierType)
             thenCall.putValueArgument(0, expression)
             thenCall.dispatchReceiver = sentryTagCall
 
