@@ -18,9 +18,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Generate Compat Matrix
         run: |
-          matrix="$(kotlin scripts/generate-compat-matrix.main.kts)"
-          echo $matrix
-          echo "::set-output name=matrix::${matrix}"   
+          echo "matrix=$(kotlin scripts/generate-compat-matrix.main.kts)" >> "$GITHUB_OUTPUT"   
+          cat "$GITHUB_OUTPUT"
 
   publish-dry-run:
     needs: generate-matrix
