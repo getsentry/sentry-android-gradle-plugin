@@ -22,7 +22,7 @@ jobs:
         run: |
           matrix=$(kotlin scripts/generate-compat-matrix.main.kts) 
           echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"   
-          ${matrix} | jq
+          echo "${matrix}" | jq
 
   publish-dry-run:
     needs: generate-matrix
