@@ -33,70 +33,62 @@ jobs:
   publish-dry-run:
     needs: generate-matrix
     runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false
-#      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
 
     name: Test Matrix - AGP - Gradle
-#    env:
-#      VERSION_AGP: ${{ matrix.agp }}
-#      VERSION_GROOVY: ${{ matrix.groovy }}
-#      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+    env:
+      VERSION_AGP: ${{ matrix.agp }}
+      VERSION_GROOVY: ${{ matrix.groovy }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - name: Debug Matrix Output
-        run: |
-          echo "${{ needs.generate-matrix.outputs.matrix }}"
+      - name: Setup Java Version
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java }}
 
-      - name: Test
-        run: |
-          echo "${{ fromJson(needs.generate-matrix.outputs.matrix) }}"
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@aa23778d2dc6f6556fcc7164e99babbd8c3134e4 # pin@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          gradle-version: ${{ matrix.gradle }}
 
-#      - name: Setup Java Version
-#        uses: actions/setup-java@v3
-#        with:
-#          distribution: 'temurin'
-#          java-version: ${{ matrix.java }}
-#
-#      - name: Setup Gradle
-#        uses: gradle/actions/setup-gradle@aa23778d2dc6f6556fcc7164e99babbd8c3134e4 # pin@v4
-#        with:
-#          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-#          gradle-version: ${{ matrix.gradle }}
-#
-#      - name: Build the Release variant
-#        run: gradle assembleRelease
-#
-#      - name: Check sentry-debug-meta.properties inside APKs
-#        run: |
-#          unzip ./examples/android-gradle/build/outputs/apk/release/android-gradle-release-unsigned.apk -d output
-#          cat output/assets/sentry-debug-meta.properties
-#          rm -r output
-#          unzip ./examples/android-gradle-kts/build/outputs/apk/release/android-gradle-kts-release-unsigned.apk -d output
-#          cat output/assets/sentry-debug-meta.properties
-#          rm -r output
-#
-#      - name: Build the Release Bundle variant
-#        run: gradle bundleRelease
-#
-#      - name: Check sentry-debug-meta.properties inside App Bundle
-#        run: |
-#          unzip ./examples/android-gradle/build/outputs/bundle/release/android-gradle-release.aab -d output
-#          cat output/base/assets/sentry-debug-meta.properties
-#          rm -r output
-#          unzip ./examples/android-gradle-kts/build/outputs/bundle/release/android-gradle-kts-release.aab -d output
-#          cat output/base/assets/sentry-debug-meta.properties
-#          rm -r output
-#
-#      - name: Run Integration Tests
-#        run: gradle integrationTest
-#
-#      - name: Upload Test Results
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: test-results-AGP${{ matrix.agp }}-Gradle${{ matrix.gradle }}
-#          path: plugin-build/build/reports/tests/
-#        if: always()
+      - name: Build the Release variant
+        run: gradle assembleRelease
+
+      - name: Check sentry-debug-meta.properties inside APKs
+        run: |
+          unzip ./examples/android-gradle/build/outputs/apk/release/android-gradle-release-unsigned.apk -d output
+          cat output/assets/sentry-debug-meta.properties
+          rm -r output
+          unzip ./examples/android-gradle-kts/build/outputs/apk/release/android-gradle-kts-release-unsigned.apk -d output
+          cat output/assets/sentry-debug-meta.properties
+          rm -r output
+
+      - name: Build the Release Bundle variant
+        run: gradle bundleRelease
+
+      - name: Check sentry-debug-meta.properties inside App Bundle
+        run: |
+          unzip ./examples/android-gradle/build/outputs/bundle/release/android-gradle-release.aab -d output
+          cat output/base/assets/sentry-debug-meta.properties
+          rm -r output
+          unzip ./examples/android-gradle-kts/build/outputs/bundle/release/android-gradle-kts-release.aab -d output
+          cat output/base/assets/sentry-debug-meta.properties
+          rm -r output
+
+      - name: Run Integration Tests
+        run: gradle integrationTest
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-AGP${{ matrix.agp }}-Gradle${{ matrix.gradle }}
+          path: plugin-build/build/reports/tests/
+        if: always()
