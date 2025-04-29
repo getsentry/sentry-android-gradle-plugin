@@ -11,44 +11,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Generate Compat Matrix
+        run: |
+          echo "matrix=$(kotlin scripts/generate-compat-matrix.main.kts)" >> "$GITHUB_OUTPUT"          
+
   publish-dry-run:
+    needs: generate-matrix
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        agp: [ "7.2.1" ]
-        gradle: [ "7.4" ]
-        java: [ "11" ]
-        groovy: [ "1.2" ]
-        include:
-          - agp: "7.3.0"
-            gradle: "7.5"
-            java: "11"
-            groovy: "1.2"
-          - agp: "7.4.0"
-            gradle: "7.6"
-            java: "11"
-            groovy: "1.2"
-          - agp: "8.0.0"
-            gradle: "8.0.2"
-            java: "17"
-            groovy: "1.2"
-          - agp: "8.6.1"
-            gradle: "8.7"
-            java: "17"
-            groovy: "1.2"
-          - agp: "8.8.1"
-            gradle: "8.11.1"
-            java: "17"
-            groovy: "1.7.1"
-          - agp: "8.9.0-rc02"
-            gradle: "8.11.1"
-            java: "17"
-            groovy: "1.7.1"
-          - agp: "8.10.0-alpha05"
-            gradle: "8.11.1"
-            java: "17"
-            groovy: "1.7.1"
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
 
     name: Test Matrix - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
     env:
