@@ -24,23 +24,37 @@ jobs:
   publish-dry-run:
     needs: generate-matrix
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    steps:
+      - name: Debug Matrix
+        run: |
+          echo "AGP Version: ${{ matrix.agp }}"
+          echo "Gradle Version: ${{ matrix.gradle }}"
+          echo "Java Version: ${{ matrix.java }}"
+          echo "Groovy Version: ${{ matrix.groovy }}"
+
+#  publish-dry-run:
+#    needs: generate-matrix
+#    runs-on: ubuntu-latest
 #    strategy:
 #      fail-fast: false
 #      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
 
-    name: Test Matrix - AGP - Gradle
+#    name: Test Matrix - AGP - Gradle
 #    env:
 #      VERSION_AGP: ${{ matrix.agp }}
 #      VERSION_GROOVY: ${{ matrix.groovy }}
 #      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-
-      - name: Test
-        run: |
-          echo "${{ fromJson(needs.generate-matrix.outputs) }}"
+#    steps:
+#      - name: Checkout Repo
+#        uses: actions/checkout@v3
+#
+#      - name: Test
+#        run: |
+#          echo "${{ fromJson(needs.generate-matrix.outputs) }}"
 
 #      - name: Setup Java Version
 #        uses: actions/setup-java@v3
