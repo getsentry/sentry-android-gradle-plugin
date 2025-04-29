@@ -17,6 +17,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Generate Compat Matrix
+        id: generate-matrix
         run: |
           echo "matrix=$(kotlin scripts/generate-compat-matrix.main.kts)" >> "$GITHUB_OUTPUT"   
           cat "$GITHUB_OUTPUT"
