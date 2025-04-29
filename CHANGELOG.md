@@ -4,7 +4,16 @@
 
 ### Fixes
 
-- Fix another API incompatibility Kotlin 2.1.20 ([#871](https://github.com/getsentry/sentry-android-gradle-plugin/pull/871))
+- Fix another API incompatibility with Kotlin 2.1.20 ([#871](https://github.com/getsentry/sentry-android-gradle-plugin/pull/871))
+
+### Dependencies
+
+- Bump CLI from v2.43.0 to v2.43.1 ([#872](https://github.com/getsentry/sentry-android-gradle-plugin/pull/872))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2431)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.43.0...2.43.1)
+- Bump Android SDK from v8.9.0 to v8.10.0 ([#870](https://github.com/getsentry/sentry-android-gradle-plugin/pull/870))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8100)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.9.0...8.10.0)
 
 ## 5.4.0
 
