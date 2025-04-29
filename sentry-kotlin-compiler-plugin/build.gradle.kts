@@ -2,15 +2,15 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  alias(libs.plugins.kotlin) version "2.1.20"
-  alias(libs.plugins.kapt) version "2.1.20"
+  alias(libs.plugins.kotlin) version "2.1.0"
+  alias(libs.plugins.kapt) version "2.1.0"
   id("distribution")
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.spotless)
 }
 
-val kotlin19: SourceSet by sourceSets.creating
-val kotlin21: SourceSet by sourceSets.creating
+val kotlin1920: SourceSet by sourceSets.creating
+val kotlin2120: SourceSet by sourceSets.creating
 
 allprojects {
   repositories {
@@ -68,12 +68,14 @@ dependencies {
   testImplementation(libs.kotlinCompilerEmbeddable)
   testImplementation(libs.kotlinCompileTesting)
   testImplementation(libs.composeDesktop)
+  testImplementation(kotlin1920.output)
+  testImplementation(kotlin2120.output)
 
-  kotlin19.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.9.24")
-  kotlin21.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.1.20")
+  kotlin1920.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.9.24")
+  kotlin2120.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.1.20")
 
-  compileOnly(kotlin19.output)
-  compileOnly(kotlin21.output)
+  compileOnly(kotlin1920.output)
+  compileOnly(kotlin2120.output)
 }
 
 kapt { correctErrorTypes = true }
@@ -90,8 +92,8 @@ plugins.withId("com.vanniktech.maven.publish.base") {
 }
 
 tasks.withType<Jar> {
-  from(kotlin19.output)
-  from(kotlin21.output)
+  from(kotlin1920.output)
+  from(kotlin2120.output)
 }
 
 tasks.withType<KotlinCompile>().configureEach {

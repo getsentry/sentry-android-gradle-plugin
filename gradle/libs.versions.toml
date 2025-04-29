@@ -42,7 +42,7 @@ kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-comp
 autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.0.1" }
 autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.0.1" }
 kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
-kotlinCompileTesting = { group = "com.github.tschuchortdev", name = "kotlin-compile-testing", version = "1.6.0" }
+kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.7.0" }
 composeDesktop = { group = "org.jetbrains.compose.desktop", name = "desktop", version = "1.6.10" }
 
 # bytecode instrumentation
