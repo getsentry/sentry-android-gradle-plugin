@@ -12,14 +12,16 @@ concurrency:
 
 jobs:
   generate-matrix:
+    name: Generate Compat Matrix
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Generate Compat Matrix
+        id: generate-matrix
         run: |
           echo "matrix=$(kotlin scripts/generate-compat-matrix.main.kts)" >> "$GITHUB_OUTPUT"   
-          cat "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT" | jq
 
   publish-dry-run:
     needs: generate-matrix
@@ -40,7 +42,7 @@ jobs:
 
       - name: Test
         run: |
-          echo "$(needs.generate-matrix.outputs)"
+          echo "${{ fromJson(needs.generate-matrix.outputs.matrix) }}"
 
 #      - name: Setup Java Version
 #        uses: actions/setup-java@v3
