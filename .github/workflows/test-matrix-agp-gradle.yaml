@@ -20,8 +20,9 @@ jobs:
       - name: Generate Compat Matrix
         id: generate-matrix
         run: |
-          echo "matrix=$(kotlin scripts/generate-compat-matrix.main.kts)" >> "$GITHUB_OUTPUT"   
-          cat "$GITHUB_OUTPUT" | jq
+          matrix=$(kotlin scripts/generate-compat-matrix.main.kts) 
+          echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"   
+          ${matrix} | jq
 
   publish-dry-run:
     needs: generate-matrix
