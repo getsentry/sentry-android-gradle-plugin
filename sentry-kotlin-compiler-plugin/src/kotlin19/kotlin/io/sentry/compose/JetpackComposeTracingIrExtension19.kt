@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
-import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
+import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGetObjectValue
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrFunction
@@ -15,8 +15,6 @@ import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrComposite
 import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
-import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.createType
 import org.jetbrains.kotlin.ir.util.companionObject
@@ -26,11 +24,12 @@ import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
 
 // required only for Kotlin 2.0.0
 // @UnsafeDuringIrConstructionAPI
-class JetpackComposeTracingIrExtension(private val messageCollector: MessageCollector) :
+class JetpackComposeTracingIrExtension19(private val messageCollector: MessageCollector) :
   IrGenerationExtension {
 
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
@@ -215,7 +214,7 @@ class JetpackComposeTracingIrExtension(private val messageCollector: MessageColl
             val sentryTagCall = generateSentryTagCall(builder, composableName)
 
             // Modifier.then()
-            val thenCall = irCall(pluginContext, builder, modifierThen, modifierType)
+            val thenCall = builder.irCall(modifierThen, type = modifierType)
             thenCall.putValueArgument(0, expression)
             thenCall.dispatchReceiver = sentryTagCall
 
@@ -228,7 +227,7 @@ class JetpackComposeTracingIrExtension(private val messageCollector: MessageColl
           composableName: String,
         ): IrCall {
           val sentryTagCall =
-            irCall(pluginContext, builder, sentryModifierTagFunctionRef, modifierType).also {
+            builder.irCall(sentryModifierTagFunctionRef, type = modifierType).also {
               it.extensionReceiver =
                 builder.irGetObjectValue(
                   type = modifierCompanionClassRef.createType(false, emptyList()),
@@ -245,27 +244,9 @@ class JetpackComposeTracingIrExtension(private val messageCollector: MessageColl
 }
 
 fun FqName.classId(name: String): ClassId {
-  return ClassId(this, org.jetbrains.kotlin.name.Name.identifier(name))
+  return ClassId(this, Name.identifier(name))
 }
 
 fun ClassId.callableId(name: String): CallableId {
-  return CallableId(this, org.jetbrains.kotlin.name.Name.identifier(name))
-}
-
-fun irCall(
-  pluginContext: IrPluginContext,
-  builder: IrBuilderWithScope,
-  callee: IrSimpleFunctionSymbol,
-  type: IrType,
-): IrCall {
-  val version = pluginContext.languageVersionSettings.languageVersion
-
-  return if (version.major > 2 || (version.major == 2 && version.minor >= 1)) {
-    // 2.1.20 removed some optional parameters, causing API incompatibility
-    // e.g. java.lang.NoSuchMethodError
-    // see https://github.com/JetBrains/kotlin/commit/dd508452c414a0ee8082aa6f76d664271cb38f2f
-    Kotlin21.createIrCall(builder, callee, type)
-  } else {
-    Kotlin19.createIrCall(builder, callee, type)
-  }
+  return CallableId(this, Name.identifier(name))
 }
