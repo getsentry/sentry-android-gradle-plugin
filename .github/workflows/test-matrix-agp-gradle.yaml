@@ -41,6 +41,9 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
+      - name: Debug Matrix Output
+        run: echo "${{ needs.generate-matrix.outputs.matrix }}"
+
       - name: Test
         run: |
           echo "${{ fromJson(needs.generate-matrix.outputs.matrix) }}"
