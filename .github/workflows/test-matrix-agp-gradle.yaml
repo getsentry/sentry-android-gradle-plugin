@@ -40,7 +40,7 @@ jobs:
 
       - name: Test
         run: |
-          echo "${{ fromJson(needs.generate-matrix.outputs.matrix) }}"
+          echo "${{ fromJson(needs.generate-matrix.outputs) }}"
 
 #      - name: Setup Java Version
 #        uses: actions/setup-java@v3
