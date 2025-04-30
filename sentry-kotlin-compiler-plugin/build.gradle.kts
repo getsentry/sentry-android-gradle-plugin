@@ -96,6 +96,10 @@ tasks.withType<Jar> {
   from(kotlin2120.output)
 }
 
+// see
+// https://youtrack.jetbrains.com/issue/KTIJ-24311/task-current-target-is-17-and-kaptGenerateStubsProductionDebugKotlin-task-current-target-is-1.8-jvm-target-compatibility-should
+kotlin { jvmToolchain(11) }
+
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
     jvmTarget = JavaVersion.VERSION_11.toString()
