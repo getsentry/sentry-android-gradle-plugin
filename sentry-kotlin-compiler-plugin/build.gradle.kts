@@ -98,7 +98,7 @@ tasks.withType<Jar> {
 
 tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
-    jvmTarget = JavaVersion.VERSION_17.toString()
+    jvmTarget = JavaVersion.VERSION_11.toString()
     languageVersion = "1.9"
     apiVersion = "1.9"
   }
