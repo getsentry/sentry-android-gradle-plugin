@@ -1,7 +1,7 @@
 plugins {
   alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP
   alias(libs.plugins.kotlinAndroid)
-  alias(libs.plugins.kapt)
+  alias(libs.plugins.ksp)
   id("io.sentry.android.gradle")
 }
 
@@ -86,13 +86,12 @@ dependencies {
 
   implementation(libs.sample.room.runtime)
   implementation(libs.sample.room.ktx)
-  implementation(libs.sample.room.rxjava)
 
   implementation(libs.sample.timber.timber)
   implementation(project(":examples:android-room-lib"))
   implementation(libs.sample.fragment.fragmentKtx)
 
-  kapt(libs.sample.room.compiler)
+  ksp(libs.sample.room.compiler)
 }
 
 sentry {
