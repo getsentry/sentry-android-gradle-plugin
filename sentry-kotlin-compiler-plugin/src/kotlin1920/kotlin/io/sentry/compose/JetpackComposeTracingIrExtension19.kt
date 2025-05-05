@@ -24,11 +24,12 @@ import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
 
 // required only for Kotlin 2.0.0
 // @UnsafeDuringIrConstructionAPI
-class JetpackComposeTracingIrExtension(private val messageCollector: MessageCollector) :
+class JetpackComposeTracingIrExtension19(private val messageCollector: MessageCollector) :
   IrGenerationExtension {
 
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
@@ -213,7 +214,7 @@ class JetpackComposeTracingIrExtension(private val messageCollector: MessageColl
             val sentryTagCall = generateSentryTagCall(builder, composableName)
 
             // Modifier.then()
-            val thenCall = builder.irCall(modifierThen, modifierType)
+            val thenCall = builder.irCall(modifierThen, type = modifierType)
             thenCall.putValueArgument(0, expression)
             thenCall.dispatchReceiver = sentryTagCall
 
@@ -226,7 +227,7 @@ class JetpackComposeTracingIrExtension(private val messageCollector: MessageColl
           composableName: String,
         ): IrCall {
           val sentryTagCall =
-            builder.irCall(sentryModifierTagFunctionRef, modifierType).also {
+            builder.irCall(sentryModifierTagFunctionRef, type = modifierType).also {
               it.extensionReceiver =
                 builder.irGetObjectValue(
                   type = modifierCompanionClassRef.createType(false, emptyList()),
@@ -243,9 +244,9 @@ class JetpackComposeTracingIrExtension(private val messageCollector: MessageColl
 }
 
 fun FqName.classId(name: String): ClassId {
-  return ClassId(this, org.jetbrains.kotlin.name.Name.identifier(name))
+  return ClassId(this, Name.identifier(name))
 }
 
 fun ClassId.callableId(name: String): CallableId {
-  return CallableId(this, org.jetbrains.kotlin.name.Name.identifier(name))
+  return CallableId(this, Name.identifier(name))
 }

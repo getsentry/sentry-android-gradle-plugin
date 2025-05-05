@@ -1,6 +1,7 @@
 package io.sentry.compose
 
 import androidx.compose.ui.Modifier
+import com.tschuchort.compiletesting.JvmCompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import io.sentry.SentryKotlinCompilerPlugin
@@ -84,7 +85,7 @@ class JetpackComposeInstrumentationTest {
     fun compileFile(
       file: SourceFile,
       includeFakeSentryModifier: Boolean = true,
-    ): KotlinCompilation.Result {
+    ): JvmCompilationResult {
       val result =
         KotlinCompilation()
           .apply {
@@ -110,7 +111,7 @@ class JetpackComposeInstrumentationTest {
      * calls, and they don't fail during execution
      */
     fun execute(
-      compilation: KotlinCompilation.Result,
+      compilation: JvmCompilationResult,
       className: String = "io.sentry.samples.Example",
       method: String,
       methodArgTypes: List<String> = emptyList(),

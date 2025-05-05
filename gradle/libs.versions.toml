@@ -36,13 +36,13 @@ proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.1
 # this allows us to develop against a fixed version of Gradle, as opposed to depending on the
 # locally available version. kotlin-gradle-plugin follows the same approach.
 # More info: https://docs.nokee.dev/manual/gradle-plugin-development-plugin.html
-gradleApi = { group = "dev.gradleplugins", name = "gradle-api", version = "7.6" }
+gradleApi = { group = "dev.gradleplugins", name = "gradle-api", version = "7.6.4" }
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable" }
 autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.0.1" }
 autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.0.1" }
 kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
-kotlinCompileTesting = { group = "com.github.tschuchortdev", name = "kotlin-compile-testing", version = "1.6.0" }
+kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.7.0" }
 composeDesktop = { group = "org.jetbrains.compose.desktop", name = "desktop", version = "1.6.10" }
 
 # bytecode instrumentation

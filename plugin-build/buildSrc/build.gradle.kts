@@ -18,7 +18,7 @@ sourceSets {
 // we cannot use the version from Dependencies.kt because it's not available at this moment, the
 // proper way to share the dependency notation is to use libs.versions.toml, but that's for later
 dependencies {
-    compileOnly("dev.gradleplugins:gradle-api:7.6")
+    compileOnly("dev.gradleplugins:gradle-api:7.6.4")
 }
 
 gradlePlugin {
