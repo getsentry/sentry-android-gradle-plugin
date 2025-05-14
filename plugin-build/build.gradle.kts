@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  alias(libs.plugins.groovyGradlePlugin) version BuildPluginsVersion.GROOVY_REDISTRIBUTED
+  alias(libs.plugins.groovyGradlePlugin)
   alias(libs.plugins.kotlin)
   id("distribution")
   alias(libs.plugins.dokka)

@@ -19,7 +19,7 @@ kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotli
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version = "1.8.10" }
 spotless = { id = "com.diffplug.spotless", version = "7.0.0" }
-groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.2" }
+groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.9.0" }
 shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }
 # do not upgrade `mavenPublish` to 0.18.0, it does not generate the pom-default.xml and module.json under
 # build/publications/maven
