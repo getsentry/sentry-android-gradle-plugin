@@ -1,8 +1,8 @@
 import org.gradle.util.VersionNumber
 
 object BuildPluginsVersion {
-    val AGP = System.getenv("VERSION_AGP") ?: "7.4.0"
-    val GROOVY_REDISTRIBUTED = System.getenv("VERSION_GROOVY") ?: "1.2"
+    val AGP = System.getenv("VERSION_AGP") ?: "8.8.1"
+    val GROOVY_REDISTRIBUTED = System.getenv("VERSION_GROOVY") ?: "1.7.1"
 
 	// proguard does not support AGP 8 yet
     fun isProguardApplicable(): Boolean = VersionNumber.parse(AGP).major < 8
