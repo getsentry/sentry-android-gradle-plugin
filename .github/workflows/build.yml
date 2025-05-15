@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current commit (${{ github.sha }})
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@9f79b5fa2c0d6f1157051630d2fb45b9f10ca6a5 # pin@v4
