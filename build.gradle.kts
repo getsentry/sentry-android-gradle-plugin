@@ -9,10 +9,6 @@ plugins {
 }
 
 allprojects {
-  repositories {
-    google()
-    mavenCentral()
-  }
   apply { plugin("com.diffplug.spotless") }
 
   if (name != "examples") {

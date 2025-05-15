@@ -20,10 +20,10 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@aa23778d2dc6f6556fcc7164e99babbd8c3134e4 # pin@v4
+        uses: gradle/actions/setup-gradle@9f79b5fa2c0d6f1157051630d2fb45b9f10ca6a5 # pin@v4
 
       - name: Build the Release variant
         run: ./gradlew assembleRelease --no-build-cache | tee gradle.log
