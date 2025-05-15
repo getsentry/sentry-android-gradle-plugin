@@ -23,14 +23,6 @@ plugins {
   alias(libs.plugins.buildConfig)
 }
 
-allprojects {
-  repositories {
-    mavenLocal()
-    mavenCentral()
-    google()
-  }
-}
-
 BootstrapAndroidSdk.locateAndroidSdk(project, extra)
 
 val androidSdkPath: String? by extra

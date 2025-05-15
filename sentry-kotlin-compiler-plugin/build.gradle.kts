@@ -12,13 +12,6 @@ plugins {
 val kotlin1920: SourceSet by sourceSets.creating
 val kotlin2120: SourceSet by sourceSets.creating
 
-allprojects {
-  repositories {
-    google()
-    mavenCentral()
-  }
-}
-
 spotless {
   kotlin {
     ktfmt(libs.versions.ktfmt.get()).googleStyle()
@@ -51,11 +44,6 @@ publish.releaseSigningEnabled = false
 tasks.named("distZip") {
   dependsOn("publishToMavenLocal")
   onlyIf { inputs.sourceFiles.isEmpty.not().also { require(it) { "No distribution to zip." } } }
-}
-
-repositories {
-  google()
-  maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
 dependencies {

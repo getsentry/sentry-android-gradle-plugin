@@ -17,8 +17,6 @@ java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 java.targetCompatibility = JavaVersion.VERSION_1_8
 
-repositories { mavenCentral() }
-
 dependencies {
   implementation(libs.sample.springBoot.starterSecurity)
   implementation(libs.sample.springBoot.starterWeb)

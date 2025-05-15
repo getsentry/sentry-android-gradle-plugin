@@ -22,6 +22,14 @@ pluginManagement {
   }
 }
 
+dependencyResolutionManagement {
+  repositories {
+    mavenCentral()
+    google()
+  }
+  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+}
+
 rootProject.name = ("sentry-android-gradle-plugin-composite-build")
 
 include(":examples:android-gradle")
