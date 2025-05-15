@@ -5,6 +5,7 @@ plugins {
   alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP apply false
   alias(libs.plugins.androidLibrary) version BuildPluginsVersion.AGP apply false
   alias(libs.plugins.spotless)
+  id("io.sentry.gradle")
 }
 
 allprojects {
