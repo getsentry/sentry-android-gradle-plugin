@@ -44,10 +44,6 @@ include(":examples:multi-module-sample:spring-boot-in-multi-module-sample")
 
 include(":examples:multi-module-sample:spring-boot-in-multi-module-sample2")
 
-includeBuild("plugin-build") {
-  dependencySubstitution {
-    substitute(module("io.sentry:sentry-android-gradle-plugin")).using(project(":"))
-  }
-}
+includeBuild("plugin-build")
 
 includeBuild("sentry-kotlin-compiler-plugin")

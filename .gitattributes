@@ -1,0 +1,21 @@
+* text eol=lf
+
+# These are explicitly windows files and should use crlf
+*.bat           text eol=crlf
+
+# These files are text and should be normalized (Convert crlf => lf)
+*.bash          text eol=lf
+*.css           text diff=css
+*.htm           text diff=html
+*.html          text diff=html
+*.java          text diff=java
+*.sh            text eol=lf
+
+# These files are binary and should be left untouched
+# (binary is a macro for -text -diff)
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.jar           binary
+*.class         binary
+*.db            binary
