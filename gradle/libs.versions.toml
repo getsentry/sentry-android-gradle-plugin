@@ -26,13 +26,13 @@ shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.17.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
-buildConfig = { id = "com.github.gmazzo.buildconfig", version = "3.1.0" }
+buildConfig = { id = "com.github.gmazzo.buildconfig", version = "4.2.0" }
 springBoot = { id = "org.springframework.boot", version = "2.7.4" }
 springDependencyManagement = { id = "io.spring.dependency-management", version = "1.0.11.RELEASE" }
 
 [libraries]
 junit = { group = "junit", name = "junit", version = "4.13.2" }
-proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.1.0" }
+proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.6.0" }
 # this allows us to develop against a fixed version of Gradle, as opposed to depending on the
 # locally available version. kotlin-gradle-plugin follows the same approach.
 # More info: https://docs.nokee.dev/manual/gradle-plugin-development-plugin.html
