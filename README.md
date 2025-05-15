@@ -12,9 +12,9 @@ _Bad software is everywhere, and we're tired of it. Sentry is on a mission to he
 
 Gradle Plugin for Sentry Android
 ===========
-[![build](https://github.com/getsentry/sentry-android-gradle-plugin/workflows/Test%20Publishing%20UUID%20Dry%20Run/badge.svg?branch=main)](https://github.com/getsentry/sentry-android-gradle-plugin/actions?query=branch%3Amain)
-[![build](https://github.com/getsentry/sentry-android-gradle-plugin/workflows/Test%20Publishing%20UUID/badge.svg?branch=main)](https://github.com/getsentry/sentry-android-gradle-plugin/actions?query=branch%3Amain)
-[![build](https://github.com/getsentry/sentry-android-gradle-plugin/workflows/Pre%20Merge%20Checks/badge.svg?branch=main)](https://github.com/getsentry/sentry-android-gradle-plugin/actions?query=branch%3Amain)
+[![Build](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/test-matrix-agp-gradle.yaml/badge.svg)](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/test-matrix-agp-gradle.yaml)
+[![Publishing](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/test-publish.yaml/badge.svg?branch=main)](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/test-publish.yaml)
+[![Checks](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/pre-merge.yaml/badge.svg)](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/pre-merge.yaml)
 
 Upload proguard, debug files, and more.
 
