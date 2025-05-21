@@ -319,3 +319,10 @@ buildConfig {
 }
 
 tasks.register<ASMifyTask>("asmify")
+
+tasks.named("check").configure { dependsOn(tasks.named("validatePlugins")) }
+
+tasks.withType<ValidatePlugins>().configureEach {
+  failOnWarning.set(true)
+  enableStricterValidation.set(true)
+}

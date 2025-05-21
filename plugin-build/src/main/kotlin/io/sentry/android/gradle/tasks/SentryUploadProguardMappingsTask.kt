@@ -16,8 +16,12 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.work.DisableCachingByDefault
 
+@DisableCachingByDefault(because = "Uploads should not be cached")
 abstract class SentryUploadProguardMappingsTask : SentryCliExecTask() {
 
   init {
@@ -33,9 +37,13 @@ abstract class SentryUploadProguardMappingsTask : SentryCliExecTask() {
     outputs.upToDateWhen { true }
   }
 
-  @get:InputFile abstract val uuidFile: RegularFileProperty
+  @get:InputFile
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  abstract val uuidFile: RegularFileProperty
 
-  @get:InputFiles abstract var mappingsFiles: Provider<FileCollection>
+  @get:InputFiles
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  abstract var mappingsFiles: Provider<FileCollection>
 
   @get:Input abstract val autoUploadProguardMapping: Property<Boolean>
 
