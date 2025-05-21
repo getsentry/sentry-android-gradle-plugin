@@ -15,8 +15,12 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.work.DisableCachingByDefault
 
+@DisableCachingByDefault(because = "Uploads should not be cached")
 abstract class UploadSourceBundleTask : SentryCliExecTask() {
 
   init {
@@ -38,7 +42,9 @@ abstract class UploadSourceBundleTask : SentryCliExecTask() {
 
   @get:Input abstract val includeSourceContext: Property<Boolean>
 
-  @get:InputDirectory abstract val sourceBundleDir: DirectoryProperty
+  @get:InputDirectory
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  abstract val sourceBundleDir: DirectoryProperty
 
   @get:Input abstract val autoUploadSourceContext: Property<Boolean>
 
