@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+### Fixes
+
 - Enable caching for BundleSourcesTask ([#894](https://github.com/getsentry/sentry-android-gradle-plugin/pull/894)
 
 ### Dependencies
