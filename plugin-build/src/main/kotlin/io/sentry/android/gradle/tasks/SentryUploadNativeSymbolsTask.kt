@@ -16,7 +16,9 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.work.DisableCachingByDefault
 
+@DisableCachingByDefault(because = "Uploads should not be cached")
 abstract class SentryUploadNativeSymbolsTask : SentryCliExecTask() {
 
   init {
