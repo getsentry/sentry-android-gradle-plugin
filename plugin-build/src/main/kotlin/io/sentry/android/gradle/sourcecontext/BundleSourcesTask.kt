@@ -44,7 +44,7 @@ abstract class BundleSourcesTask : SentryCliExecTask() {
   abstract val sourceDir: DirectoryProperty
 
   @get:InputFile
-  @get:PathSensitive(PathSensitivity.RELATIVE)
+  @get:PathSensitive(PathSensitivity.NONE)
   abstract val bundleIdFile: RegularFileProperty
 
   @get:OutputDirectory abstract val output: DirectoryProperty
