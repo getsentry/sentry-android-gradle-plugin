@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump Android SDK from v8.12.0 to v8.13.1 ([#895](https://github.com/getsentry/sentry-android-gradle-plugin/pull/895))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8131)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.12.0...8.13.1)
+
 ## 5.6.0
 
 ### Dependencies
