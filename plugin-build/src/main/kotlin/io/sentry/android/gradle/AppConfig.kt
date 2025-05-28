@@ -3,7 +3,6 @@ package io.sentry.android.gradle
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariant
-import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalAnalyzeProvider
@@ -30,6 +29,7 @@ import io.sentry.android.gradle.util.hookWithAssembleTasks
 import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.hookWithPackageTasks
 import io.sentry.android.gradle.util.info
+import io.sentry.gradle.sep
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
