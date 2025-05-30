@@ -24,6 +24,7 @@ import io.sentry.android.gradle.tasks.InjectSentryMetaPropertiesIntoAssetsTask
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
 import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
+import io.sentry.android.gradle.tasks.SentryMobileAppTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
@@ -346,13 +347,33 @@ private fun Variant.configureProguardMappingsTasks(
         releaseInfo = releaseInfo,
       )
 
-    generateUuidTask.hookWithMinifyTasks(
-      project,
-      name,
-      dexguardEnabled && GroovyCompat.isDexguardEnabledForVariant(project, name),
-    )
+        val uploadAppTask = SentryMobileAppTask.register(
+            project = project,
+            extension,
+            sentryTelemetryProvider,
+            debug = extension.debug,
+            cliExecutable = cliExecutable,
+            sentryProperties = sentryProps,
+            generateUuidTask = generateUuidTask,
+            mappingFiles = getMappingFileProvider(project, variant, dexguardEnabled),
+//            appArchive = paths.appArchive,
+            sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
+            sentryProject = sentryProject?.let { project.provider { it } } ?: extension.projectName,
+            sentryAuthToken = extension.authToken,
+            sentryUrl = extension.url,
+            autoUploadProguardMapping = extension.autoUploadProguardMapping,
+            taskSuffix = name.capitalized,
+            releaseInfo = releaseInfo,
+        )
+
+      generateUuidTask.hookWithMinifyTasks(
+        project,
+        name,
+        dexguardEnabled && GroovyCompat.isDexguardEnabledForVariant(project, name),
+      )
 
     uploadMappingsTask.hookWithAssembleTasks(project, variant)
+        uploadAppTask.hookWithAssembleTasks(project, variant)
 
     return generateUuidTask
   } else {
