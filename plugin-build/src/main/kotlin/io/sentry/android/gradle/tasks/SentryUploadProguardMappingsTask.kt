@@ -37,9 +37,7 @@ abstract class SentryUploadProguardMappingsTask : SentryCliExecTask() {
     outputs.upToDateWhen { true }
   }
 
-  @get:InputFile
-  @get:PathSensitive(PathSensitivity.RELATIVE)
-  abstract val uuidFile: RegularFileProperty
+  @get:InputFile @get:PathSensitive(PathSensitivity.NONE) abstract val uuidFile: RegularFileProperty
 
   @get:InputFiles
   @get:PathSensitive(PathSensitivity.RELATIVE)
