@@ -29,8 +29,8 @@ abstract class SentryMobileAppTask : SentryCliExecTask() {
     @get:Input
     abstract val autoUploadProguardMapping: Property<Boolean>
 
-//    @get:InputFile @get:Optional
-//    abstract val appArchive: RegularFileProperty
+    @get:InputFile @get:Optional
+    abstract val appArchive: RegularFileProperty
 
     @get:Input abstract val releaseInfo: Property<ReleaseInfo>
 
@@ -51,8 +51,8 @@ abstract class SentryMobileAppTask : SentryCliExecTask() {
             }
 
         args.add("mobile-app")
-//        args.add("--app")
-//        args.add(appArchive.get().asFile.absolutePath)
+        args.add("--app")
+        args.add(appArchive.get().asFile.absolutePath)
         args.add("--uuid")
         args.add(uuid)
         args.add(mappingFile.toString())
@@ -82,7 +82,7 @@ abstract class SentryMobileAppTask : SentryCliExecTask() {
             extension: SentryPluginExtension,
             sentryTelemetryProvider: Provider<SentryTelemetryService>?,
             debug: Property<Boolean>,
-//            appArchive: RegularFileProperty,
+            appArchive: RegularFileProperty,
             cliExecutable: Provider<String>,
             sentryProperties: String?,
             generateUuidTask: Provider<SentryGenerateProguardUuidTask>,
@@ -107,7 +107,7 @@ abstract class SentryMobileAppTask : SentryCliExecTask() {
                     task.sentryProperties.set(sentryProperties?.let { file -> project.file(file) })
                     task.uuidFile.set(generateUuidTask.flatMap { it.outputFile })
                     task.mappingsFiles = mappingFiles
-//                    task.appArchive = appArchive
+                    task.appArchive = appArchive
                     task.autoUploadProguardMapping.set(autoUploadProguardMapping)
                     task.sentryOrganization.set(sentryOrg)
                     task.sentryProject.set(sentryProject)
