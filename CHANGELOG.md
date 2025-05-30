@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Enable caching for BundleSourcesTask ([#894](https://github.com/getsentry/sentry-android-gradle-plugin/pull/894)
+
 ### Dependencies
 
 - Bump Android SDK from v8.12.0 to v8.13.2 ([#896](https://github.com/getsentry/sentry-android-gradle-plugin/pull/896))
