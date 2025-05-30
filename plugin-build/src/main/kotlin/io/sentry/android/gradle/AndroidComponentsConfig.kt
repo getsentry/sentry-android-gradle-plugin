@@ -356,7 +356,7 @@ private fun Variant.configureProguardMappingsTasks(
             sentryProperties = sentryProps,
             generateUuidTask = generateUuidTask,
             mappingFiles = getMappingFileProvider(project, variant, dexguardEnabled),
-//            appArchive = paths.appArchive,
+            appArchive = paths.appArchive,
             sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
             sentryProject = sentryProject?.let { project.provider { it } } ?: extension.projectName,
             sentryAuthToken = extension.authToken,
@@ -373,7 +373,7 @@ private fun Variant.configureProguardMappingsTasks(
       )
 
     uploadMappingsTask.hookWithAssembleTasks(project, variant)
-        uploadAppTask.hookWithAssembleTasks(project, variant)
+      uploadAppTask.hookWithAssembleTasks(project, variant)
 
     return generateUuidTask
   } else {
