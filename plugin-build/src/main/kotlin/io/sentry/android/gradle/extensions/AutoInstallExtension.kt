@@ -1,6 +1,6 @@
 package io.sentry.android.gradle.extensions
 
-import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
+import io.sentry.gradle.SENTRY_SDK_VERSION
 import javax.inject.Inject
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property

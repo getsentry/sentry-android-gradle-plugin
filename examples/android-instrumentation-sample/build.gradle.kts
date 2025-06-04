@@ -2,7 +2,6 @@ plugins {
   alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP
   alias(libs.plugins.kotlinAndroid)
   alias(libs.plugins.kapt)
-  id("io.sentry.android.gradle")
 }
 
 // useful for local debugging of the androidx.sqlite lib

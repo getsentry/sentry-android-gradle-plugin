@@ -11,7 +11,6 @@ import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
-import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
@@ -40,6 +39,7 @@ import io.sentry.android.gradle.util.collectModules
 import io.sentry.android.gradle.util.hookWithAssembleTasks
 import io.sentry.android.gradle.util.hookWithMinifyTasks
 import io.sentry.android.gradle.util.info
+import io.sentry.gradle.sep
 import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.file.Directory

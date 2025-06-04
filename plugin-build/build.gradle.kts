@@ -175,6 +175,10 @@ tasks.register<Test>("integrationTest").configure {
 
 gradlePlugin {
   plugins {
+    register("sentryRootPlugin") {
+      id = "io.sentry.gradle"
+      implementationClass = "io.sentry.gradle.SentryRootPlugin"
+    }
     register("sentryPlugin") {
       id = "io.sentry.android.gradle"
       implementationClass = "io.sentry.android.gradle.SentryPlugin"

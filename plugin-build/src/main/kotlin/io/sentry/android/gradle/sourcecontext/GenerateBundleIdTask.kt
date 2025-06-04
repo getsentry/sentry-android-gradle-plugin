@@ -27,7 +27,7 @@ abstract class GenerateBundleIdTask : PropertiesFileOutputTask() {
 
   init {
     description =
-      "Generates a unique build ID to be used " + "when bundling sources for upload to Sentry"
+      "Generates a unique build ID to be used when bundling sources for upload to Sentry"
 
     @Suppress("LeakingThis") onlyIf { includeSourceContext.getOrElse(false) }
   }

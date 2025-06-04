@@ -194,4 +194,9 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
    */
   val telemetryDsn: Property<String> =
     objects.property(String::class.java).convention(SENTRY_SAAS_DSN)
+
+  internal companion object {
+    fun of(project: Project): SentryPluginExtension =
+      project.extensions.create("sentry", SentryPluginExtension::class.java, project)
+  }
 }
