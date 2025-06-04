@@ -1,5 +1,4 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.vanniktech.maven.publish.MavenPublishPluginExtension
 import io.sentry.android.gradle.internal.ASMifyTask
 import io.sentry.android.gradle.internal.BootstrapAndroidSdk
 import java.io.FileInputStream
@@ -14,7 +13,7 @@ plugins {
   id("distribution")
   alias(libs.plugins.dokka)
   id("java-gradle-plugin")
-  alias(libs.plugins.mavenPublish) apply false
+  alias(libs.plugins.mavenPublish)
   alias(libs.plugins.spotless)
   // we need this plugin in order to include .aar dependencies into a pure java project, which the
   // gradle plugin is
@@ -239,14 +238,6 @@ distributions {
     contents { from("build${sep}publications${sep}sentryJvmPluginPluginMarkerMaven") }
   }
 }
-
-apply { plugin("com.vanniktech.maven.publish") }
-
-val publish = extensions.getByType(MavenPublishPluginExtension::class.java)
-
-// signing is done when uploading files to MC
-// via gpg:sign-and-deploy-file (release.kts)
-publish.releaseSigningEnabled = false
 
 tasks.named("distZip") {
   dependsOn("publishToMavenLocal")
