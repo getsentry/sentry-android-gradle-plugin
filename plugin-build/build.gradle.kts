@@ -192,6 +192,10 @@ tasks.named("distZip") {
   onlyIf { inputs.sourceFiles.isEmpty.not().also { require(it) { "No distribution to zip." } } }
 }
 
+tasks.named("sentryJvmPluginMarkerDistTar").configure {
+    dependsOn("generatePomFileForSentryJvmPluginPluginMarkerMavenPublication")
+}
+
 tasks.withType<Test>().configureEach {
   testLogging {
     events = setOf(TestLogEvent.SKIPPED, TestLogEvent.PASSED, TestLogEvent.FAILED)
