@@ -192,9 +192,22 @@ tasks.named("distZip") {
   onlyIf { inputs.sourceFiles.isEmpty.not().also { require(it) { "No distribution to zip." } } }
 }
 
+tasks.named("distTar").configure {
+    dependsOn("dokkaJavadocJar", "jar", "shadowJar", "generateMetadataFileForMavenPublication", "generatePomFileForMavenPublication", "javaSourcesJar")
+}
+
 tasks.named("sentryJvmPluginMarkerDistTar").configure {
+    dependsOn("generatePomFileForSentryJvmPluginPluginMarkerMavenPublication", "generatePomFileForKotlinCompilerPluginPluginMarkerMavenPublication")
+}
+
+tasks.named("sentryJvmPluginMarkerDistZip").configure {
     dependsOn("generatePomFileForSentryJvmPluginPluginMarkerMavenPublication")
 }
+tasks.named("dokkaHtml").configure {
+    dependsOn("compileGroovy")
+}
+
+
 
 tasks.withType<Test>().configureEach {
   testLogging {
