@@ -21,8 +21,6 @@ dokka = { id = "org.jetbrains.dokka", version = "1.8.10" }
 spotless = { id = "com.diffplug.spotless", version = "7.0.0" }
 groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.2" }
 shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }
-# do not upgrade `mavenPublish` to 0.18.0, it does not generate the pom-default.xml and module.json under
-# build/publications/maven
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }

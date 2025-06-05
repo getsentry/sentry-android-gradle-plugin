@@ -13,7 +13,7 @@ plugins {
   id("distribution")
   alias(libs.plugins.dokka)
   id("java-gradle-plugin")
-  alias(libs.plugins.mavenPublish) apply false
+  alias(libs.plugins.mavenPublish)
   alias(libs.plugins.spotless)
   // we need this plugin in order to include .aar dependencies into a pure java project, which the
   // gradle plugin is
@@ -225,7 +225,7 @@ distributions {
   main {
     contents {
       from("build${sep}libs")
-      from("build${sep}publications${sep}maven")
+      from("build${sep}publications${sep}pluginMaven")
     }
   }
   create("sentryPluginMarker") {
@@ -238,8 +238,6 @@ distributions {
     contents { from("build${sep}publications${sep}sentryJvmPluginPluginMarkerMaven") }
   }
 }
-
-apply { plugin("com.vanniktech.maven.publish") }
 
 tasks.named("distZip") {
   dependsOn("publishToMavenLocal")
