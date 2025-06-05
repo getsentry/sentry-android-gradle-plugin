@@ -154,6 +154,7 @@ gradlePlugin {
       implementationClass = "io.sentry.jvm.gradle.SentryJvmPlugin"
     }
   }
+  testSourceSets(sourceSets.test.get())
 }
 
 spotless {
