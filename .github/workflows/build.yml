@@ -49,7 +49,7 @@ jobs:
       - name: Verify artifact contents
         shell: bash
         run: |
-          zipfile=$(ls -1 plugin-build/build/distributions | grep -v "PluginMarker")
+          zipfile=$(ls -1 plugin-build/build/distributions | grep -v "PluginMarker" | grep -v ".tar")
           filename=${zipfile/\.zip/}
           unzip plugin-build/build/distributions/$filename.zip -d /tmp
           find /tmp/$filename | grep "pom-default.xml"
