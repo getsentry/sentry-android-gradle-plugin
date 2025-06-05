@@ -1,6 +1,6 @@
 [versions]
 kotlin = "1.8.20"
-agp = "8.8.1"
+agp = "8.10.1"
 
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
 ktfmt = "0.51"
@@ -29,7 +29,7 @@ springDependencyManagement = { id = "io.spring.dependency-management", version =
 
 [libraries]
 junit = { group = "junit", name = "junit", version = "4.13.2" }
-proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.5.0" }
+proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.1.0" }
 # this allows us to develop against a fixed version of Gradle, as opposed to depending on the
 # locally available version. kotlin-gradle-plugin follows the same approach.
 # More info: https://docs.nokee.dev/manual/gradle-plugin-development-plugin.html
