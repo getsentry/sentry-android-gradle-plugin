@@ -189,12 +189,12 @@ gradlePlugin {
   }
 }
 
-tasks.withType<Jar> {
+tasks.withType<Jar>().configureEach {
   from(agp70.output)
   from(agp74.output)
 }
 
-tasks.withType<ShadowJar> {
+tasks.withType<ShadowJar>().configureEach {
   archiveClassifier.set("")
   configurations = listOf(project.configurations.getByName("shade"))
 
@@ -244,7 +244,7 @@ tasks.named("distZip") {
   onlyIf { inputs.sourceFiles.isEmpty.not().also { require(it) { "No distribution to zip." } } }
 }
 
-tasks.withType<Test> {
+tasks.withType<Test>().configureEach {
   testLogging {
     events = setOf(TestLogEvent.SKIPPED, TestLogEvent.PASSED, TestLogEvent.FAILED)
     showStandardStreams = true
