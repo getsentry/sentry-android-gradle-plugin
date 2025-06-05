@@ -62,12 +62,12 @@ tasks.register("preMerge") {
   dependsOn(gradle.includedBuild("plugin-build").task(":check"))
 }
 
-tasks.getByName("spotlessCheck") {
+tasks.named("spotlessCheck") {
   dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":spotlessCheck"))
   dependsOn(gradle.includedBuild("plugin-build").task(":spotlessCheck"))
 }
 
-tasks.getByName("spotlessApply") {
+tasks.named("spotlessApply") {
   dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":spotlessApply"))
   dependsOn(gradle.includedBuild("plugin-build").task(":spotlessApply"))
 }

@@ -72,7 +72,7 @@ plugins.withId("com.vanniktech.maven.publish.base") {
   }
 }
 
-tasks.withType<Jar> {
+tasks.withType<Jar>().configureEach {
   from(kotlin1920.output)
   from(kotlin2120.output)
 }
