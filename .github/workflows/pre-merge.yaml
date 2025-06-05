@@ -45,7 +45,7 @@ jobs:
         if: always()
 
       - name: Build the Debug variant
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug
 
       - name: Build the Release variant
-        run: ./gradlew assembleRelease --no-daemon
+        run: ./gradlew assembleRelease
