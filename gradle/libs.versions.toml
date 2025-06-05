@@ -23,7 +23,7 @@ groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = 
 shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }
 # do not upgrade `mavenPublish` to 0.18.0, it does not generate the pom-default.xml and module.json under
 # build/publications/maven
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.21.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 buildConfig = { id = "com.github.gmazzo.buildconfig", version = "4.2.0" }
