@@ -249,9 +249,9 @@ tasks.named("distTar").configure {
     "dokkaJavadocJar",
     "jar",
     "shadowJar",
-    "generateMetadataFileForMavenPublication",
-    "generatePomFileForMavenPublication",
-    "javaSourcesJar",
+    "sourcesJar",
+    "generateMetadataFileForPluginMavenPublication",
+    "generatePomFileForPluginMavenPublication",
   )
 }
 
