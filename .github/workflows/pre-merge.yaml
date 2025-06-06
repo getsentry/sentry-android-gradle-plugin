@@ -44,8 +44,5 @@ jobs:
           path: plugin-build/build/reports/tests/
         if: always()
 
-      - name: Build the Debug variant
-        run: ./gradlew assembleDebug
-
-      - name: Build the Release variant
-        run: ./gradlew assembleRelease
+      - name: Build the Debug and Release variants
+        run: ./gradlew assembleDebug assembleRelease

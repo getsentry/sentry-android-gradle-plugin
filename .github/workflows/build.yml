@@ -28,15 +28,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build Gradle Plugin distribution artifacts
-        run: |
-          cd plugin-build
-          make all
-
-      - name: Build Kotlin Compiler artifacts
-        run: |
-          cd sentry-kotlin-compiler-plugin
-          make all
+      - name: Build Gradle Plugin and Kotlin Compiler Plugin distribution artifacts
+        run: ./gradlew :plugin-build:assemble :sentry-kotlin-compiler-plugin:assemble
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
