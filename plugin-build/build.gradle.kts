@@ -133,9 +133,8 @@ tasks.named("pluginUnderTestMetadata").configure {
   (this as PluginUnderTestMetadata).pluginClasspath.from(fixtureClasspath)
 }
 
-tasks.named("test").configure {
-  require(this is Test)
-  maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+tasks.withType<Test>().named("test").configure {
+  maxParallelForks = 2
 
   // Cap JVM args per test
   minHeapSize = "128m"
@@ -150,9 +149,9 @@ tasks.register<Test>("integrationTest").configure {
   // for some reason Gradle > 8.10 doesn't pick up the pluginUnderTestMetadata classpath, so we
   // need to add it manually
   classpath +=
-    layout.files(project.layout.buildDirectory.get().toString() + "/pluginUnderTestMetadata")
+    layout.files(project.layout.buildDirectory.dir("pluginUnderTestMetadata"))
 
-  maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+  maxParallelForks = 2
 
   // Cap JVM args per test
   minHeapSize = "128m"
@@ -196,7 +195,7 @@ tasks.withType<Jar>().configureEach {
 
 tasks.withType<ShadowJar>().configureEach {
   archiveClassifier.set("")
-  configurations = listOf(project.configurations.getByName("shade"))
+  configurations = listOf(shade)
 
   exclude("/kotlin/**")
   exclude("/groovy**")
