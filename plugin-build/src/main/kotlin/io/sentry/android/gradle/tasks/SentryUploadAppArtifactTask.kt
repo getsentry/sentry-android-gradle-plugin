@@ -19,7 +19,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskProvider
 import java.io.File
 
-abstract class SentryMobileAppTask : SentryCliExecTask() {
+abstract class SentryUploadAppArtifactTask : SentryCliExecTask() {
 
     @get:InputFile abstract val uuidFile: RegularFileProperty
 
@@ -94,11 +94,11 @@ abstract class SentryMobileAppTask : SentryCliExecTask() {
             autoUploadProguardMapping: Property<Boolean>,
             taskSuffix: String = "",
             releaseInfo: ReleaseInfo,
-        ): TaskProvider<SentryMobileAppTask> {
+        ): TaskProvider<SentryUploadAppArtifactTask> {
             val uploadMobileAppTask =
                 project.tasks.register(
                     "uploadSentryMobileApp$taskSuffix",
-                    SentryMobileAppTask::class.java,
+                    SentryUploadAppArtifactTask::class.java,
                 ) { task ->
                     task.dependsOn(generateUuidTask)
                     task.workingDir(project.rootDir)

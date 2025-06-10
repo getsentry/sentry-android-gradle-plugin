@@ -24,7 +24,7 @@ import io.sentry.android.gradle.tasks.InjectSentryMetaPropertiesIntoAssetsTask
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
 import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
-import io.sentry.android.gradle.tasks.SentryMobileAppTask
+import io.sentry.android.gradle.tasks.SentryUploadAppArtifactTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
@@ -347,7 +347,7 @@ private fun Variant.configureProguardMappingsTasks(
         releaseInfo = releaseInfo,
       )
 
-        val uploadAppTask = SentryMobileAppTask.register(
+        val uploadAppTask = SentryUploadAppArtifactTask.register(
             project = project,
             extension,
             sentryTelemetryProvider,
