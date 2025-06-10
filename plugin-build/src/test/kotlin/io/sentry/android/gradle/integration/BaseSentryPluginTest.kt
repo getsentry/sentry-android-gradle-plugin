@@ -1,8 +1,6 @@
 package io.sentry.android.gradle.integration
 
-import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.PrintBuildOutputOnFailureRule
-import io.sentry.android.gradle.util.SemVer
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.OutputStreamWriter
@@ -111,17 +109,11 @@ abstract class BaseSentryPluginTest(
               }
             }
 
-            if (GradleVersions.INSTANCE.CURRENT >= GradleVersions.INSTANCE.VERSION_7_5) {
                 // unlock transforms because we're running tests in parallel therefore they may conflict
                 print(providers.exec {
                   commandLine 'find', project.gradle.gradleUserHomeDir, '-type', 'f', '-name', 'transforms-3.lock', '-delete'
                   ignoreExitValue true
                 }.standardOutput.asText.get())
-            } else {
-              tasks.register('unlockTransforms', Exec) {
-                commandLine 'find', project.gradle.gradleUserHomeDir, '-type', 'f', '-name', 'transforms-3.lock', '-delete'
-              }
-            }
             """
           .trimIndent()
       }
@@ -135,11 +127,6 @@ abstract class BaseSentryPluginTest(
         //            .withDebug(true)
         .forwardStdOutput(writer)
         .forwardStdError(writer)
-
-    if (SemVer.parse(gradleVersion) < GradleVersions.VERSION_7_5) {
-      // for newer Gradle versions transforms are unlocked at config time instead of a task
-      runner.appendArguments("unlockTransforms").build()
-    }
   }
 
   @After
