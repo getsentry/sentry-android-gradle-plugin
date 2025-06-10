@@ -25,23 +25,25 @@ class SentryExternalDependenciesReportTaskTest {
         SentryExternalDependenciesReportTaskV2::class.java,
       ) {
         it.includeReport.set(true)
-          it.artifactIds.set(listOf("androidx.annotation:annotation",
-              "androidx.arch.core:core-common",
-              "androidx.collection:collection",
-              "androidx.core:core",
-              "androidx.lifecycle:lifecycle-common-java8",
-              "androidx.lifecycle:lifecycle-common",
-              "androidx.lifecycle:lifecycle-process",
-              "androidx.lifecycle:lifecycle-runtime",
-              "androidx.versionedparcelable:versionedparcelable",
-              "io.sentry:sentry-android-core",
-              "io.sentry:sentry"))
+        it.artifactIds.set(
+          listOf(
+            "androidx.annotation:annotation",
+            "androidx.arch.core:core-common",
+            "androidx.collection:collection",
+            "androidx.core:core",
+            "androidx.lifecycle:lifecycle-common-java8",
+            "androidx.lifecycle:lifecycle-common",
+            "androidx.lifecycle:lifecycle-process",
+            "androidx.lifecycle:lifecycle-runtime",
+            "androidx.versionedparcelable:versionedparcelable",
+            "io.sentry:sentry-android-core",
+            "io.sentry:sentry",
+          )
+        )
         it.output.set(project.layout.dir(project.provider { output }))
       }
 
     task.get().action()
-    val outputFile = File(output, SENTRY_DEPENDENCIES_REPORT_OUTPUT)
-      println(outputFile.readText())
 
     output.verifyContents()
   }
