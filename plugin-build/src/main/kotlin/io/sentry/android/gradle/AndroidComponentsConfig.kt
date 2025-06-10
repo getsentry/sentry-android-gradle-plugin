@@ -29,8 +29,6 @@ import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
-import io.sentry.android.gradle.util.AgpVersions
-import io.sentry.android.gradle.util.AgpVersions.isAGP74
 import io.sentry.android.gradle.util.GroovyCompat
 import io.sentry.android.gradle.util.ReleaseInfo
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
@@ -38,7 +36,6 @@ import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.collectModules
 import io.sentry.android.gradle.util.hookWithAssembleTasks
 import io.sentry.android.gradle.util.hookWithMinifyTasks
-import io.sentry.android.gradle.util.info
 import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
@@ -59,7 +56,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
   val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
   tmpDir.mkdirs()
 
-  configureVariants { variant ->
+  onVariants { variant ->
     if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
       val paths = OutputPaths(project, variant.name)
 
@@ -229,7 +226,7 @@ private fun Variant.configureTelemetry(
   sentryOrg: String?,
   buildEvents: BuildEventListenerRegistryInternal,
 ): Provider<SentryTelemetryService> {
-  val variant = if (isAGP74) AndroidVariant74(this) else null
+  val variant = AndroidVariant74(this)
   val sentryTelemetryProvider = SentryTelemetryService.register(project)
   project.gradle.taskGraph.whenReady {
     sentryTelemetryProvider.get().start {
@@ -258,36 +255,28 @@ private fun Variant.configureSourceBundleTasks(
   sentryProject: String?,
 ): SourceContext.SourceContextTasks? {
   if (extension.includeSourceContext.get()) {
-    if (isAGP74) {
-      val taskSuffix = name.capitalized
-      val variant = AndroidVariant74(this)
+    val taskSuffix = name.capitalized
+    val variant = AndroidVariant74(this)
 
-      val sourceContextTasks =
-        SourceContext.register(
-          project,
-          extension,
-          sentryTelemetryProvider,
-          variant,
-          paths,
-          sourceFiles,
-          cliExecutable,
-          sentryOrg,
-          sentryProject,
-          taskSuffix,
-        )
+    val sourceContextTasks =
+      SourceContext.register(
+        project,
+        extension,
+        sentryTelemetryProvider,
+        variant,
+        paths,
+        sourceFiles,
+        cliExecutable,
+        sentryOrg,
+        sentryProject,
+        taskSuffix,
+      )
 
-      if (variant.buildTypeName == "release") {
-        sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, variant)
-      }
-
-      return sourceContextTasks
-    } else {
-      project.logger.info {
-        "Not configuring AndroidComponentsExtension for ${AgpVersions.CURRENT}, since it " +
-          "does not have new addGeneratedSourceDirectory API"
-      }
-      return null
+    if (variant.buildTypeName == "release") {
+      sourceContextTasks.uploadSourceBundleTask.hookWithAssembleTasks(project, variant)
     }
+
+    return sourceContextTasks
   } else {
     return null
   }
@@ -298,28 +287,21 @@ private fun Variant.configureDependenciesTask(
   extension: SentryPluginExtension,
   sentryTelemetryProvider: Provider<SentryTelemetryService>,
 ) {
-  if (isAGP74) {
-    if (extension.includeDependenciesReport.get()) {
-      val reportDependenciesTask =
-        SentryExternalDependenciesReportTaskFactory.register(
-          project = project,
-          extension,
-          sentryTelemetryProvider,
-          configurationName = "${name}RuntimeClasspath",
-          attributeValueJar = "android-classes",
-          includeReport = extension.includeDependenciesReport,
-          taskSuffix = name.capitalized,
-        )
-      configureGeneratedSourcesFor74(
-        variant = this,
-        reportDependenciesTask to DirectoryOutputTask::output,
+  if (extension.includeDependenciesReport.get()) {
+    val reportDependenciesTask =
+      SentryExternalDependenciesReportTaskFactory.register(
+        project = project,
+        extension,
+        sentryTelemetryProvider,
+        configurationName = "${name}RuntimeClasspath",
+        attributeValueJar = "android-classes",
+        includeReport = extension.includeDependenciesReport,
+        taskSuffix = name.capitalized,
       )
-    }
-  } else {
-    project.logger.info {
-      "Not configuring AndroidComponentsExtension for ${AgpVersions.CURRENT}, since it does" +
-        "not have new addGeneratedSourceDirectory API"
-    }
+    configureGeneratedSourcesFor74(
+      variant = this,
+      reportDependenciesTask to DirectoryOutputTask::output,
+    )
   }
 }
 
@@ -332,60 +314,52 @@ private fun Variant.configureProguardMappingsTasks(
   sentryOrg: String?,
   sentryProject: String?,
 ): TaskProvider<SentryGenerateProguardUuidTask>? {
-  if (isAGP74) {
-    val variant = AndroidVariant74(this)
-    val sentryProps = getPropertiesFilePath(project, variant)
-    val dexguardEnabled = extension.dexguardEnabled.get()
-    val isMinifyEnabled = isMinificationEnabled(project, variant, dexguardEnabled)
+  val variant = AndroidVariant74(this)
+  val sentryProps = getPropertiesFilePath(project, variant)
+  val dexguardEnabled = extension.dexguardEnabled.get()
+  val isMinifyEnabled = isMinificationEnabled(project, variant, dexguardEnabled)
 
-    if (isMinifyEnabled && extension.includeProguardMapping.get()) {
-      val generateUuidTask =
-        SentryGenerateProguardUuidTask.register(
-          project = project,
-          extension,
-          sentryTelemetryProvider,
-          proguardMappingFile = getMappingFileProvider(project, variant, dexguardEnabled),
-          taskSuffix = name.capitalized,
-          output = paths.proguardUuidDir,
-        )
-
-      val releaseInfo = getReleaseInfo(project, this)
-      val uploadMappingsTask =
-        SentryUploadProguardMappingsTask.register(
-          project = project,
-          extension,
-          sentryTelemetryProvider,
-          debug = extension.debug,
-          cliExecutable = cliExecutable,
-          generateUuidTask = generateUuidTask,
-          sentryProperties = sentryProps,
-          mappingFiles = getMappingFileProvider(project, variant, dexguardEnabled),
-          autoUploadProguardMapping = extension.autoUploadProguardMapping,
-          sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
-          sentryProject = sentryProject?.let { project.provider { it } } ?: extension.projectName,
-          sentryAuthToken = extension.authToken,
-          sentryUrl = extension.url,
-          taskSuffix = name.capitalized,
-          releaseInfo = releaseInfo,
-        )
-
-      generateUuidTask.hookWithMinifyTasks(
-        project,
-        name,
-        dexguardEnabled && GroovyCompat.isDexguardEnabledForVariant(project, name),
+  if (isMinifyEnabled && extension.includeProguardMapping.get()) {
+    val generateUuidTask =
+      SentryGenerateProguardUuidTask.register(
+        project = project,
+        extension,
+        sentryTelemetryProvider,
+        proguardMappingFile = getMappingFileProvider(project, variant, dexguardEnabled),
+        taskSuffix = name.capitalized,
+        output = paths.proguardUuidDir,
       )
 
-      uploadMappingsTask.hookWithAssembleTasks(project, variant)
+    val releaseInfo = getReleaseInfo(project, this)
+    val uploadMappingsTask =
+      SentryUploadProguardMappingsTask.register(
+        project = project,
+        extension,
+        sentryTelemetryProvider,
+        debug = extension.debug,
+        cliExecutable = cliExecutable,
+        generateUuidTask = generateUuidTask,
+        sentryProperties = sentryProps,
+        mappingFiles = getMappingFileProvider(project, variant, dexguardEnabled),
+        autoUploadProguardMapping = extension.autoUploadProguardMapping,
+        sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
+        sentryProject = sentryProject?.let { project.provider { it } } ?: extension.projectName,
+        sentryAuthToken = extension.authToken,
+        sentryUrl = extension.url,
+        taskSuffix = name.capitalized,
+        releaseInfo = releaseInfo,
+      )
 
-      return generateUuidTask
-    } else {
-      return null
-    }
+    generateUuidTask.hookWithMinifyTasks(
+      project,
+      name,
+      dexguardEnabled && GroovyCompat.isDexguardEnabledForVariant(project, name),
+    )
+
+    uploadMappingsTask.hookWithAssembleTasks(project, variant)
+
+    return generateUuidTask
   } else {
-    project.logger.info {
-      "Not configuring AndroidComponentsExtension for ${AgpVersions.CURRENT}, since it does" +
-        "not have new addGeneratedSourceDirectory API"
-    }
     return null
   }
 }
@@ -405,14 +379,6 @@ private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
     excludes,
     instrumentationParamsConfig,
   )
-}
-
-/**
- * onVariants method in AGP 7.4.0 has a binary incompatibility with the prior versions, hence we
- * have to distinguish here, although the compatibility sources would look exactly the same.
- */
-private fun AndroidComponentsExtension<*, *, *>.configureVariants(callback: (Variant) -> Unit) {
-  onVariants74(this, callback)
 }
 
 private fun getReleaseInfo(project: Project, variant: Variant): ReleaseInfo {

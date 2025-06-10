@@ -4,7 +4,6 @@ import com.android.build.gradle.AppExtension
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalAnalyzeProvider
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalReportProvider
-import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
 import io.sentry.android.gradle.SentryTasksProvider.getMinifyTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
@@ -118,19 +117,6 @@ class SentryTaskProviderTest {
     val (project, task) = getTestProjectWithTask("packageDebugBundle")
 
     assertEquals(task, getPackageBundleTask(project, "debug")?.get())
-  }
-
-  @Test
-  fun `getMergeAssetsProvider works correctly for all the variants`() {
-    val (_, android) = getAndroidExtFromProject()
-
-    android.applicationVariants.configureEach {
-      if (it.name == "debug") {
-        assertEquals("mergeDebugAssets", getMergeAssetsProvider(it)?.get()?.name)
-      } else {
-        assertEquals("mergeReleaseAssets", getMergeAssetsProvider(it)?.get()?.name)
-      }
-    }
   }
 
   @Test
