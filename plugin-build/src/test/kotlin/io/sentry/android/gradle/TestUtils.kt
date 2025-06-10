@@ -6,7 +6,6 @@ import com.reandroid.lib.apk.ApkModule
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
 import io.sentry.android.gradle.testutil.forceEvaluate
-import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.gradle.common.SentryVariant
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -44,18 +43,11 @@ internal fun verifyProguardUuid(
   val sentryProperties =
     if (inGeneratedFolder) {
       val propsFile =
-        if (AgpVersions.isAGP74) {
-          rootFile.resolve(
-            "app/build/generated/assets" +
-              "/generateSentryDebugMetaProperties${variant.capitalized}" +
-              "/sentry-debug-meta.properties"
-          )
-        } else {
-          rootFile.resolve(
-            "app/build/generated/assets" +
-              "/sentry/debug-meta-properties/$variant/sentry-debug-meta.properties"
-          )
-        }
+        rootFile.resolve(
+          "app/build/generated/assets" +
+            "/generateSentryDebugMetaProperties${variant.capitalized}" +
+            "/sentry-debug-meta.properties"
+        )
       if (propsFile.exists()) propsFile.readText() else ""
     } else {
       extractZip(apk, "assets/sentry-debug-meta.properties")

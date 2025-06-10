@@ -22,7 +22,7 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
     if (AgpVersions.CURRENT < AgpVersions.VERSION_7_4_0) {
       throw StopExecutionException(
         """
-                Using io.sentry.android.gradle:3+ with Android Gradle Plugin < 7.4 is not supported.
+                Using io.sentry.android.gradle:5+ with Android Gradle Plugin < 7.4 is not supported.
                 Either upgrade the AGP version to 7.4+, or use an earlier version of the Sentry
                 Android Gradle Plugin. For more information check our migration guide
                 https://docs.sentry.io/platforms/android/migration/#migrating-from-iosentrysentry-android-gradle-plugin-2x-to-iosentrysentry-android-gradle-plugin-300
