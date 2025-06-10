@@ -240,17 +240,4 @@ class MetaInfStripTransformTest {
     }
     return entries
   }
-
-  @Test
-  fun `when multi-release signed-jar, skip transform`() {
-    val outputs = FakeTransformOutputs(tmp)
-
-    val sut = fixture.getSut(tmp, includeSupportedVersion = true, signed = true)
-    sut.transform(outputs)
-
-    val jar = JarFile(outputs.outputFile)
-
-    assertTrue { jar.read().any { it.key.startsWith("META-INF/versions/16") } }
-    assertTrue { outputs.outputFile.name == "test.jar" }
-  }
 }

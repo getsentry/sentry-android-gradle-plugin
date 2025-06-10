@@ -1,7 +1,6 @@
 package io.sentry.android.gradle
 
 import com.android.build.api.variant.AndroidComponentsExtension
-import com.android.build.gradle.AppExtension
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
@@ -15,17 +14,16 @@ import org.gradle.api.tasks.StopExecutionException
 import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 import org.slf4j.LoggerFactory
 
-@Suppress("UnstableApiUsage")
 abstract class SentryPlugin
 @Inject
 constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugin<Project> {
 
   override fun apply(project: Project) {
-    if (AgpVersions.CURRENT < AgpVersions.VERSION_7_0_0) {
+    if (AgpVersions.CURRENT < AgpVersions.VERSION_7_4_0) {
       throw StopExecutionException(
         """
-                Using io.sentry.android.gradle:3+ with Android Gradle Plugin < 7 is not supported.
-                Either upgrade the AGP version to 7+, or use an earlier version of the Sentry
+                Using io.sentry.android.gradle:3+ with Android Gradle Plugin < 7.4 is not supported.
+                Either upgrade the AGP version to 7.4+, or use an earlier version of the Sentry
                 Android Gradle Plugin. For more information check our migration guide
                 https://docs.sentry.io/platforms/android/migration/#migrating-from-iosentrysentry-android-gradle-plugin-2x-to-iosentrysentry-android-gradle-plugin-300
                 """
@@ -46,7 +44,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
     val extension = project.extensions.create("sentry", SentryPluginExtension::class.java, project)
 
     project.pluginManager.withPlugin("com.android.application") {
-      val oldAGPExtension = project.extensions.getByType(AppExtension::class.java)
       val androidComponentsExt =
         project.extensions.getByType(AndroidComponentsExtension::class.java)
       val cliExecutable = project.cliExecutableProvider()
@@ -66,16 +63,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
         cliExecutable,
         sentryOrgParameter,
         sentryProjectParameter,
-      )
-
-      // old API configuration
-      oldAGPExtension.configure(
-        project,
-        extension,
-        cliExecutable,
-        sentryOrgParameter,
-        sentryProjectParameter,
-        buildEvents,
       )
 
       project.installDependencies(extension, true)

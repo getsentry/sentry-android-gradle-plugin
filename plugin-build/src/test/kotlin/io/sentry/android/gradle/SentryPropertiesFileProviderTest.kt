@@ -21,7 +21,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
     val (project, _) = createTestAndroidProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
     createTestFile(project.projectDir, "src${sep}debug${sep}sentry.properties")
 
-    val variant = project.retrieveAndroidVariant(agpVersion, "debug")
+    val variant = project.retrieveAndroidVariant("debug")
 
     assertEquals("42", File(getPropertiesFilePath(project, variant)!!).readText())
   }
@@ -31,7 +31,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
     val (project, _) = createTestAndroidProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
     createTestFile(project.projectDir, "sentry.properties")
 
-    val variant = project.retrieveAndroidVariant(agpVersion, "release")
+    val variant = project.retrieveAndroidVariant("release")
 
     assertEquals("42", File(getPropertiesFilePath(project, variant)!!).readText())
   }
@@ -46,7 +46,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
       }
     createTestFile(project.projectDir, "src${sep}lite${sep}sentry.properties")
 
-    val variant = project.retrieveAndroidVariant(agpVersion, "liteDebug")
+    val variant = project.retrieveAndroidVariant("liteDebug")
 
     assertEquals("42", File(getPropertiesFilePath(project, variant)!!).readText())
   }
@@ -61,7 +61,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
       }
     createTestFile(project.projectDir, "src${sep}lite${sep}debug${sep}sentry.properties")
 
-    val variant = project.retrieveAndroidVariant(agpVersion, "liteDebug")
+    val variant = project.retrieveAndroidVariant("liteDebug")
 
     assertEquals("42", File(getPropertiesFilePath(project, variant)!!).readText())
   }
@@ -76,7 +76,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
       }
     createTestFile(project.projectDir, "src${sep}debug${sep}lite${sep}sentry.properties")
 
-    val variant = project.retrieveAndroidVariant(agpVersion, "liteDebug")
+    val variant = project.retrieveAndroidVariant("liteDebug")
 
     assertEquals("42", File(getPropertiesFilePath(project, variant)!!).readText())
   }
@@ -91,7 +91,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
       }
     createTestFile(project.projectDir, "src${sep}liteApi30${sep}sentry.properties")
 
-    val variant = project.retrieveAndroidVariant(agpVersion, "liteApi30Debug")
+    val variant = project.retrieveAndroidVariant("liteApi30Debug")
 
     assertEquals("42", File(getPropertiesFilePath(project, variant)!!).readText())
   }
@@ -106,7 +106,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
       }
     createTestFile(project.projectDir, "src${sep}api30${sep}sentry.properties")
 
-    val variant = project.retrieveAndroidVariant(agpVersion, "liteApi30Debug")
+    val variant = project.retrieveAndroidVariant("liteApi30Debug")
 
     assertEquals("42", File(getPropertiesFilePath(project, variant)!!).readText())
   }
@@ -121,7 +121,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
       )
     createTestFile(rootProject.projectDir, "sentry.properties")
 
-    val variant = project.retrieveAndroidVariant(agpVersion, "release")
+    val variant = project.retrieveAndroidVariant("release")
 
     assertEquals("42", File(getPropertiesFilePath(project, variant)!!).readText())
   }
@@ -136,7 +136,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
       )
     createTestFile(rootProject.projectDir, "src${sep}debug${sep}sentry.properties")
 
-    val variant = project.retrieveAndroidVariant(agpVersion, "debug")
+    val variant = project.retrieveAndroidVariant("debug")
 
     assertEquals("42", File(getPropertiesFilePath(project, variant)!!).readText())
   }
@@ -154,7 +154,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
       }
     createTestFile(rootProject.projectDir, "src${sep}lite${sep}sentry.properties")
 
-    val variant = project.retrieveAndroidVariant(agpVersion, "liteDebug")
+    val variant = project.retrieveAndroidVariant("liteDebug")
 
     assertEquals("42", File(getPropertiesFilePath(project, variant)!!).readText())
   }
@@ -172,7 +172,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
       }
     createTestFile(rootProject.projectDir, "src${sep}lite${sep}debug${sep}sentry.properties")
 
-    val variant = project.retrieveAndroidVariant(agpVersion, "liteDebug")
+    val variant = project.retrieveAndroidVariant("liteDebug")
 
     assertEquals("42", File(getPropertiesFilePath(project, variant)!!).readText())
   }
@@ -190,7 +190,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
       }
     createTestFile(rootProject.projectDir, "src${sep}debug${sep}lite${sep}sentry.properties")
 
-    val variant = project.retrieveAndroidVariant(agpVersion, "liteDebug")
+    val variant = project.retrieveAndroidVariant("liteDebug")
 
     assertEquals("42", File(getPropertiesFilePath(project, variant)!!).readText())
   }
@@ -205,6 +205,6 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
   companion object {
     @Parameterized.Parameters(name = "AGP {0}")
     @JvmStatic
-    fun parameters() = listOf(AgpVersions.VERSION_7_0_0, AgpVersions.VERSION_7_4_0)
+    fun parameters() = listOf(AgpVersions.VERSION_7_4_0)
   }
 }
