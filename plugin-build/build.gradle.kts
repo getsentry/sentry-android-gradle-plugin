@@ -148,8 +148,7 @@ tasks.register<Test>("integrationTest").configure {
   description = "Runs the integration tests"
   // for some reason Gradle > 8.10 doesn't pick up the pluginUnderTestMetadata classpath, so we
   // need to add it manually
-  classpath +=
-    layout.files(project.layout.buildDirectory.dir("pluginUnderTestMetadata"))
+  classpath += layout.files(project.layout.buildDirectory.dir("pluginUnderTestMetadata"))
 
   maxParallelForks = 2
 
