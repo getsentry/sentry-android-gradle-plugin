@@ -105,6 +105,12 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     autoInstallationAction.execute(autoInstallation)
   }
 
+  val sizeAnalysis: SizeAnalysisExtension = objects.newInstance(SizeAnalysisExtension::class.java)
+
+  fun sizeAnalaysis(sizeAnalysisAction: Action<SizeAnalysisExtension>) {
+    sizeAnalysisAction.execute(sizeAnalysis)
+  }
+
   /**
    * Disables or enables the reporting of dependencies metadata for Sentry. If enabled the plugin
    * will collect external dependencies and will take care of uploading them to Sentry as part of

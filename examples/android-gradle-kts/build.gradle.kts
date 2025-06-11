@@ -12,9 +12,9 @@ android {
     versionName = "1.0"
   }
   buildTypes {
-    getByName("release") {
+    release {
       isMinifyEnabled = true
-      proguardFiles.add(getDefaultProguardFile("proguard-android-optimize.txt"))
+      proguardFiles += getDefaultProguardFile("proguard-android-optimize.txt")
     }
   }
   namespace = "com.example.sampleapp"
@@ -22,6 +22,8 @@ android {
 
 sentry {
   autoUploadProguardMapping.set(CI.canAutoUpload())
+  debug.set(true)
+  sizeAnalysis.enabled.set(true)
 
   telemetryDsn.set(CI.SENTRY_SDKS_DSN)
   tracingInstrumentation { enabled.set(false) }

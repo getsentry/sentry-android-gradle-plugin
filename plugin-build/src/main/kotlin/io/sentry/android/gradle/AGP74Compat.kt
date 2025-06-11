@@ -45,6 +45,8 @@ data class AndroidVariant74(private val variant: Variant) : SentryVariant {
     val bundle: Provider<RegularFile> = variant.artifacts.get(SingleArtifact.BUNDLE)
     val apk: Provider<Directory> = variant.artifacts.get(SingleArtifact.APK)
 
+  val artifacts = variant.artifacts
+
   override fun mappingFileProvider(project: Project): Provider<FileCollection> =
     project.provider {
       project.files(variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE))
