@@ -65,11 +65,10 @@ fun AndroidComponentsExtension<*, *, *>.configure(
   tmpDir.mkdirs()
 
   configureVariants { variant ->
+    val sentryTelemetryProvider =
+      variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
     if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
       val paths = OutputPaths(project, variant.name)
-
-      val sentryTelemetryProvider =
-        variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
 
       variant.configureDependenciesTask(project, extension, sentryTelemetryProvider)
 
@@ -109,15 +108,6 @@ fun AndroidComponentsExtension<*, *, *>.configure(
           sentryProject,
         )
       generateProguardUuidTask?.let { tasksGeneratingProperties.add(it) }
-
-      variant.configureUploadAppTasks(
-        project,
-        extension,
-        sentryTelemetryProvider,
-        cliExecutable,
-        sentryOrg,
-        sentryProject
-      )
 
       sentryVariant?.configureNativeSymbolsTask(
         project,
@@ -255,6 +245,16 @@ fun AndroidComponentsExtension<*, *, *>.configure(
           )
         }
       }
+    }
+    if (extension.sizeAnalysis.enabled.get() == true) {
+      variant.configureUploadAppTasks(
+        project,
+        extension,
+        sentryTelemetryProvider,
+        cliExecutable,
+        sentryOrg,
+        sentryProject
+      )
     }
   }
 }
