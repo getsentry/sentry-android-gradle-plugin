@@ -42,8 +42,8 @@ data class AndroidVariant74(private val variant: Variant) : SentryVariant {
   override val installProvider: TaskProvider<out Task>?
     get() = (variant as? VariantImpl<*>)?.taskContainer?.installTask
 
-    val bundle: Provider<RegularFile> = variant.artifacts.get(SingleArtifact.BUNDLE)
-    val apk: Provider<Directory> = variant.artifacts.get(SingleArtifact.APK)
+  val bundle: Provider<RegularFile> = variant.artifacts.get(SingleArtifact.BUNDLE)
+  val apk: Provider<Directory> = variant.artifacts.get(SingleArtifact.APK)
 
   val artifacts = variant.artifacts
 

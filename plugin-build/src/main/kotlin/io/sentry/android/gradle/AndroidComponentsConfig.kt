@@ -225,7 +225,7 @@ fun AndroidComponentsExtension<*, *, *>.configure(
         sentryTelemetryProvider,
         cliExecutable,
         sentryOrg,
-        sentryProject
+        sentryProject,
       )
     }
   }
@@ -383,31 +383,27 @@ fun Variant.configureUploadAppTasks(
 ): Pair<TaskProvider<SentryUploadAppArtifactTask>, TaskProvider<SentryUploadAppArtifactTask>> {
   val variant = AndroidVariant74(this)
   val sentryProps = getPropertiesFilePath(project, variant)
-  val (uploadBundleTask, uploadApkTask) = SentryUploadAppArtifactTask.register(
-    project = project,
-    extension,
-    sentryTelemetryProvider,
-    debug = extension.debug,
-    cliExecutable = cliExecutable,
-    appBundle = variant.bundle,
-    apk = variant.apk,
-    sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
-    sentryProject = sentryProject?.let { project.provider { it } } ?: extension.projectName,
-    sentryAuthToken = extension.authToken,
-    sentryUrl = extension.url,
-    sentryProperties = sentryProps,
-    taskSuffix = name.capitalized,
-  )
+  val (uploadBundleTask, uploadApkTask) =
+    SentryUploadAppArtifactTask.register(
+      project = project,
+      extension,
+      sentryTelemetryProvider,
+      debug = extension.debug,
+      cliExecutable = cliExecutable,
+      appBundle = variant.bundle,
+      apk = variant.apk,
+      sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
+      sentryProject = sentryProject?.let { project.provider { it } } ?: extension.projectName,
+      sentryAuthToken = extension.authToken,
+      sentryUrl = extension.url,
+      sentryProperties = sentryProps,
+      taskSuffix = name.capitalized,
+    )
   project.afterEvaluate {
-    getBundleTask(project, variant.name)!!.configure {
-      it.finalizedBy(uploadBundleTask)
-    }
-    getAssembleTaskProvider(project, variant)!!.configure {
-      it.finalizedBy(uploadApkTask)
-    }
+    getBundleTask(project, variant.name)!!.configure { it.finalizedBy(uploadBundleTask) }
+    getAssembleTaskProvider(project, variant)!!.configure { it.finalizedBy(uploadApkTask) }
   }
   return uploadBundleTask to uploadApkTask
-
 }
 
 private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
