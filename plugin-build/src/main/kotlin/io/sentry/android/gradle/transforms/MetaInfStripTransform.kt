@@ -1,7 +1,5 @@
 package io.sentry.android.gradle.transforms
 
-import io.sentry.android.gradle.SentryPlugin
-import io.sentry.android.gradle.util.warn
 import java.io.File
 import java.nio.file.Files
 import java.util.jar.Attributes
@@ -67,20 +65,6 @@ abstract class MetaInfStripTransform : TransformAction<MetaInfStripTransform.Par
             // we deal with the manifest as a last step, since we need to know if there
             // any multi-release entries remained
             continue
-          }
-
-          if (jarEntry.isSignatureEntry) {
-            SentryPlugin.logger.warn {
-              """
-                            Signed Multirelease Jar (${jarFile.name}) found, skipping transform.
-                            This might lead to auto-instrumentation issues due to a bug in AGP (https://issuetracker.google.com/issues/206655905).
-                            Please update to AGP >= 7.1.2 (https://developer.android.com/studio/releases/gradle-plugin) in order to keep using `autoInstrumentation` option.
-                            """
-                .trimIndent()
-            }
-            tmpOutputFile.delete()
-            outputs.file(inputArtifact)
-            return
           }
 
           if (jarEntry.name.startsWith(versionsDir, ignoreCase = true)) {

@@ -1,23 +1,17 @@
 package io.sentry.android.gradle
 
 import com.android.build.gradle.AppExtension
-import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
-import io.sentry.android.gradle.SentryTasksProvider.getInstallTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalAnalyzeProvider
 import io.sentry.android.gradle.SentryTasksProvider.getLintVitalReportProvider
-import io.sentry.android.gradle.SentryTasksProvider.getMergeAssetsProvider
 import io.sentry.android.gradle.SentryTasksProvider.getMinifyTask
 import io.sentry.android.gradle.SentryTasksProvider.getPackageBundleTask
-import io.sentry.android.gradle.SentryTasksProvider.getPackageProvider
 import io.sentry.android.gradle.SentryTasksProvider.getPreBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getProcessResourcesProvider
-import io.sentry.gradle.common.SentryVariant
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.tasks.TaskProvider
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
@@ -123,102 +117,6 @@ class SentryTaskProviderTest {
     val (project, task) = getTestProjectWithTask("packageDebugBundle")
 
     assertEquals(task, getPackageBundleTask(project, "debug")?.get())
-  }
-
-  @Test
-  fun `getAssembleTaskProvider works correctly for all the variants AGP70`() {
-    val (project, android) = getAndroidExtFromProject()
-
-    android.applicationVariants.configureEach {
-      if (it.name == "debug") {
-        assertEquals(
-          "assembleDebug",
-          getAssembleTaskProvider(project, AndroidVariant70(it))?.get()?.name,
-        )
-      } else {
-        assertEquals(
-          "assembleRelease",
-          getAssembleTaskProvider(project, AndroidVariant70(it))?.get()?.name,
-        )
-      }
-    }
-  }
-
-  @Test
-  fun `getAssembleTaskProvider falls back to findTask if assembleProvider is null`() {
-    val (project, android) = getAndroidExtFromProject()
-
-    android.applicationVariants.configureEach {
-      val sentryVariant =
-        object : SentryVariant by AndroidVariant70(it) {
-          override val assembleProvider: TaskProvider<out Task>?
-            get() = null
-        }
-      if (it.name == "debug") {
-        assertEquals("assembleDebug", getAssembleTaskProvider(project, sentryVariant)?.get()?.name)
-      } else {
-        assertEquals(
-          "assembleRelease",
-          getAssembleTaskProvider(project, sentryVariant)?.get()?.name,
-        )
-      }
-    }
-  }
-
-  @Test
-  fun `getInstallTaskProvider works correctly for all the variants AGP70`() {
-    val (project, android) = getAndroidExtFromProject()
-
-    android.applicationVariants.configureEach {
-      if (it.name == "debug") {
-        assertEquals(
-          "installDebug",
-          getInstallTaskProvider(project, AndroidVariant70(it))?.get()?.name,
-        )
-      }
-    }
-  }
-
-  @Test
-  fun `getInstallTaskProvider falls back to findTask if assembleProvider is null`() {
-    val (project, android) = getAndroidExtFromProject()
-
-    android.applicationVariants.configureEach {
-      val sentryVariant =
-        object : SentryVariant by AndroidVariant70(it) {
-          override val installProvider: TaskProvider<out Task>?
-            get() = null
-        }
-      if (it.name == "debug") {
-        assertEquals("installDebug", getInstallTaskProvider(project, sentryVariant)?.get()?.name)
-      }
-    }
-  }
-
-  @Test
-  fun `getMergeAssetsProvider works correctly for all the variants`() {
-    val (_, android) = getAndroidExtFromProject()
-
-    android.applicationVariants.configureEach {
-      if (it.name == "debug") {
-        assertEquals("mergeDebugAssets", getMergeAssetsProvider(it)?.get()?.name)
-      } else {
-        assertEquals("mergeReleaseAssets", getMergeAssetsProvider(it)?.get()?.name)
-      }
-    }
-  }
-
-  @Test
-  fun `getPackageProvider works correctly for all the variants`() {
-    val (_, android) = getAndroidExtFromProject()
-
-    android.applicationVariants.configureEach {
-      if (it.name == "debug") {
-        assertEquals("packageDebug", getPackageProvider(AndroidVariant70(it))?.name)
-      } else {
-        assertEquals("packageRelease", getPackageProvider(AndroidVariant70(it))?.name)
-      }
-    }
   }
 
   @Test

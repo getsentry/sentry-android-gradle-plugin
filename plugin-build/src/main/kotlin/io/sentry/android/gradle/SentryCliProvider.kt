@@ -5,7 +5,6 @@ package io.sentry.android.gradle
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryCliValueSource.Params
 import io.sentry.android.gradle.SentryPlugin.Companion.logger
-import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.error
 import io.sentry.android.gradle.util.info
 import java.io.File
@@ -177,21 +176,11 @@ abstract class SentryCliValueSource : ValueSource<String, Params> {
 }
 
 fun Project.cliExecutableProvider(): Provider<String> {
-  return if (GradleVersions.CURRENT >= GradleVersions.VERSION_7_5) {
-    // config-cache compatible way to retrieve the cli path, it properly gets invalidated when
-    // e.g. switching branches
-    providers.of(SentryCliValueSource::class.java) {
-      it.parameters.projectDir.set(project.projectDir)
-      it.parameters.projectBuildDir.set(project.layout.buildDirectory.asFile.get())
-      it.parameters.rootProjDir.set(project.rootDir)
-    }
-  } else {
-    return provider {
-      SentryCliProvider.getSentryCliPath(
-        project.projectDir,
-        project.layout.buildDirectory.asFile.get(),
-        project.rootDir,
-      )
-    }
+  // config-cache compatible way to retrieve the cli path, it properly gets invalidated when
+  // e.g. switching branches
+  return providers.of(SentryCliValueSource::class.java) {
+    it.parameters.projectDir.set(project.projectDir)
+    it.parameters.projectBuildDir.set(project.layout.buildDirectory.asFile.get())
+    it.parameters.rootProjDir.set(project.rootDir)
   }
 }

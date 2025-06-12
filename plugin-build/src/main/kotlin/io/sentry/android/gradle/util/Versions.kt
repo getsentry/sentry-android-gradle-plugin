@@ -6,19 +6,13 @@ import org.gradle.util.GradleVersion
 
 internal object AgpVersions {
   val CURRENT: SemVer = SemVer.parse(Version.ANDROID_GRADLE_PLUGIN_VERSION)
-  val VERSION_7_1_2: SemVer = SemVer.parse("7.1.2")
-  val VERSION_7_0_0: SemVer = SemVer.parse("7.0.0")
   val VERSION_7_4_0: SemVer = SemVer.parse("7.4.0-rc01")
-  val isAGP74: Boolean
-    get() = isAGP74(CURRENT)
 
   fun isAGP74(current: SemVer) = current >= VERSION_7_4_0
 }
 
 internal object GradleVersions {
   val CURRENT: SemVer = SemVer.parse(GradleVersion.current().version)
-  val VERSION_7_4: SemVer = SemVer.parse("7.4")
-  val VERSION_7_5: SemVer = SemVer.parse("7.5")
   val VERSION_8_0: SemVer = SemVer.parse("8.0")
 }
 
