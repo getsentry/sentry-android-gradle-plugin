@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.sentry.android.gradle.internal.ASMifyTask
 import io.sentry.android.gradle.internal.BootstrapAndroidSdk
 import java.io.FileInputStream
@@ -29,11 +30,11 @@ val testImplementationAar by configurations.getting // this converts .aar into .
 val agp70: SourceSet by sourceSets.creating
 val agp74: SourceSet by sourceSets.creating
 
-// val shade: Configuration by
-//  configurations.creating {
-//    isCanBeConsumed = false
-//    isCanBeResolved = true
-//  }
+val shade: Configuration by
+  configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+  }
 
 val fixtureClasspath: Configuration by configurations.creating
 
@@ -61,8 +62,8 @@ dependencies {
 
   // compileOnly since we'll be shading the common dependency into the final jar
   // but we still need to be able to compile it (this also excludes it from .pom)
-  //  compileOnly(project(":common"))
-  implementation(project(":common"))
+  compileOnly(project(":common"))
+  shade(project(":common"))
 
   testImplementation(gradleTestKit())
   testImplementation(kotlin("test"))
@@ -76,6 +77,7 @@ dependencies {
   testImplementation(libs.proguard)
   testImplementation(libs.junit)
   testImplementation(libs.mockitoKotlin)
+  testImplementation(libs.truth)
 
   testImplementation(libs.asm)
   testImplementation(libs.asmCommons)
@@ -191,19 +193,19 @@ tasks.withType<Jar>().configureEach {
   from(agp74.output)
 }
 
-// tasks.withType<ShadowJar>().configureEach {
-//  archiveClassifier.set("")
-//  configurations = listOf(shade)
+tasks.withType<ShadowJar>().configureEach {
+  archiveClassifier.set("")
+  configurations = listOf(shade)
 
-//  exclude("/kotlin/**")
-//  exclude("/groovy**")
-//  exclude("/org/**")
-// }
+  exclude("/kotlin/**")
+  exclude("/groovy**")
+  exclude("/org/**")
+}
 
-// artifacts {
-//  runtimeOnly(tasks.named("shadowJar"))
-//  archives(tasks.named("shadowJar"))
-// }
+artifacts {
+  runtimeOnly(tasks.named("shadowJar"))
+  archives(tasks.named("shadowJar"))
+}
 
 spotless {
   kotlin {
