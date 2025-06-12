@@ -23,8 +23,6 @@ android {
 
 sentry {
   autoUploadProguardMapping = CI.INSTANCE.canAutoUpload()
-  debug= true
-  sizeAnalysis.enabled = true
 
   telemetryDsn = CI.INSTANCE.SENTRY_SDKS_DSN
   tracingInstrumentation {

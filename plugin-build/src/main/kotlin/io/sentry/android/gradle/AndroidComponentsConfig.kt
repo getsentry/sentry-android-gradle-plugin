@@ -60,10 +60,10 @@ fun AndroidComponentsExtension<*, *, *>.configure(
   tmpDir.mkdirs()
 
   onVariants { variant ->
-    val sentryTelemetryProvider =
-      variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
     if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
       val paths = OutputPaths(project, variant.name)
+      val sentryTelemetryProvider =
+        variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
 
       variant.configureDependenciesTask(project, extension, sentryTelemetryProvider)
 
@@ -219,6 +219,8 @@ fun AndroidComponentsExtension<*, *, *>.configure(
       }
     }
     if (extension.sizeAnalysis.enabled.get() == true) {
+      val sentryTelemetryProvider =
+        variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
       variant.configureUploadAppTasks(
         project,
         extension,
@@ -373,6 +375,9 @@ private fun Variant.configureProguardMappingsTasks(
   }
 }
 
+/**
+ * Configure the upload AAB and APK tasks and set them up as finalizers on the respective producer tasks
+ */
 fun Variant.configureUploadAppTasks(
   project: Project,
   extension: SentryPluginExtension,
@@ -399,6 +404,7 @@ fun Variant.configureUploadAppTasks(
       sentryProperties = sentryProps,
       taskSuffix = name.capitalized,
     )
+  // TODO we can use the listToArtifacts API in AGP 8.3+ https://github.com/android/gradle-recipes/tree/agp-8.10/listenToArtifacts
   project.afterEvaluate {
     getBundleTask(project, variant.name)!!.configure { it.finalizedBy(uploadBundleTask) }
     getAssembleTaskProvider(project, variant)!!.configure { it.finalizedBy(uploadApkTask) }

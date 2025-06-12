@@ -1,16 +1,16 @@
 package io.sentry.android.gradle.tasks
 
-import io.sentry.android.gradle.util.ReleaseInfo
-import java.util.UUID
+import com.google.common.truth.FailureMetadata
+import com.google.common.truth.Subject
+import com.google.common.truth.Truth.assertAbout
+import com.google.common.truth.Truth.assertThat
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.internal.impldep.org.junit.Assert.assertThrows
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
@@ -20,11 +20,14 @@ class SentryUploadAppArtifactTaskTest {
 
   @get:Rule val tempDir = TemporaryFolder()
 
+  val dummyApkName = "dummy/folder/app.apk"
+  val dummyAabName = "dummy/folder/app.aab"
+
   @Test
-  fun `cli-executable is set correctly`() {
+  fun `apk args set correctly`() {
     val project = createProject()
 
-    val apkFile = createApkDirProvider(project, "dummy/folder/app.apk")
+    val apkFile = project.apkDirProvider(dummyApkName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
         it.cliExecutable.set("sentry-cli")
@@ -33,84 +36,36 @@ class SentryUploadAppArtifactTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("sentry-cli" in args)
-    assertTrue("mobile-app" in args)
-    assertTrue("upload" in args)
-    assertFalse("--no-upload" in args)
+    assertThat(args).contains("sentry-cli")
+    assertThat(args).contains("mobile-app")
+    assertThat(args).contains("upload")
+    assertThatStrings(args).containsEndingWith(dummyApkName)
   }
 
   @Test
-  fun `with no version code cli-executable is set correctly`() {
-    val randomUuid = UUID.randomUUID()
+  fun `aab args set correctly`() {
     val project = createProject()
-    val releaseInfo = ReleaseInfo("com.test", "1.0.0")
 
-    val apkDir = createApkDirProvider(project, "dummy/folder/mapping.txt")
+    val aabFile = project.aabFileProvider(dummyAabName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
         it.cliExecutable.set("sentry-cli")
-        it.apk.set(apkDir)
+        it.bundle.set(aabFile)
       }
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("sentry-cli" in args)
-    assertTrue("upload-proguard" in args)
-    assertTrue("--uuid" in args)
-    assertTrue(randomUuid.toString() in args)
-    assertTrue(apkDir.get().toString() in args)
-    assertTrue("--app-id" in args)
-    assertTrue(releaseInfo.applicationId in args)
-    assertTrue("--version" in args)
-    assertTrue(releaseInfo.versionName in args)
-    assertFalse("--version-code" in args)
-    assertFalse("--no-upload" in args)
-    assertFalse("--log-level=debug" in args)
-  }
-
-  @Test
-  fun `with multiple mappingFiles picks the first existing file`() {
-    val project = createProject()
-
-    val apkDir = createApkDirProvider(project, "dummy/folder/missing-mapping.txt")
-    val existingFile =
-      project.file("dummy/folder/existing-mapping.txt").apply {
-        parentFile.mkdirs()
-        writeText("dummy-file")
-      }
-
-    val task: TaskProvider<SentryUploadAppArtifactTask> =
-      project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
-        it.apk.set(apkDir)
-      }
-
-    val args = task.get().computeCommandLineArgs()
-
-    assertTrue(existingFile.toString() in args, "Observed args: $args")
-  }
-
-  @Test
-  fun `--auto-upload is set correctly`() {
-    val project = createProject()
-
-    val apkDir = createApkDirProvider(project, "dummy/folder/mapping.txt")
-    val task: TaskProvider<SentryUploadAppArtifactTask> =
-      project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
-        it.apk.set(apkDir)
-      }
-
-    val args = task.get().computeCommandLineArgs()
-
-    assertTrue("--no-upload" in args)
+    assertThat(args).contains("sentry-cli")
+    assertThat(args).contains("mobile-app")
+    assertThat(args).contains("upload")
+    assertThatStrings(args).containsEndingWith(dummyAabName)
   }
 
   @Test
   fun `--log-level=debug is set correctly`() {
     val project = createProject()
 
-    val apkDir = createApkDirProvider(project, "dummy/folder/mapping.txt")
+    val apkDir = project.apkDirProvider(dummyApkName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
         it.cliExecutable.set("sentry-cli")
@@ -120,7 +75,8 @@ class SentryUploadAppArtifactTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("--log-level=debug" in args)
+    assertThat(args).contains("--log-level=debug")
+    assertThatStrings(args).containsEndingWith(dummyApkName)
   }
 
   @Test
@@ -148,7 +104,7 @@ class SentryUploadAppArtifactTaskTest {
 
     task.get().setSentryPropertiesEnv()
 
-    assertNull(task.get().environment["SENTRY_PROPERTIES"])
+    assertThat(task.get().environment).doesNotContainKey("SENTRY_PROPERTIES")
   }
 
   @Test
@@ -161,13 +117,13 @@ class SentryUploadAppArtifactTaskTest {
 
     task.get().setSentryAuthTokenEnv()
 
-    assertEquals("<token>", task.get().environment["SENTRY_AUTH_TOKEN"].toString())
+    assertThat(task.get().environment["SENTRY_AUTH_TOKEN"].toString()).contains("<token>")
   }
 
   @Test
   fun `with sentryUrl sets --url`() {
     val project = createProject()
-    val apkDir = createApkDirProvider(project, "dummy/folder/mapping.txt")
+    val apkDir = project.apkDirProvider(dummyApkName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
         it.sentryUrl.set("https://some-host.sentry.io")
@@ -177,15 +133,16 @@ class SentryUploadAppArtifactTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("--url" in args)
-    assertTrue("https://some-host.sentry.io" in args)
+    assertThat(args).contains("--url")
+    assertThat(args).contains("https://some-host.sentry.io")
+    assertThatStrings(args).containsEndingWith(dummyApkName)
   }
 
   @Test
   fun `with sentryOrganization adds --org`() {
     val project = createProject()
 
-    val apkDir = createApkDirProvider(project, "dummy/folder/mapping.txt")
+    val apkDir = project.apkDirProvider(dummyApkName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
         it.cliExecutable.set("sentry-cli")
@@ -195,15 +152,15 @@ class SentryUploadAppArtifactTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("--org" in args)
-    assertTrue("dummy-org" in args)
+    assertThat(args).contains("--org")
+    assertThat(args).contains("dummy-org")
   }
 
   @Test
   fun `with sentryProject adds --project`() {
     val project = createProject()
 
-    val apkDir = createApkDirProvider(project, "dummy/folder/mapping.txt")
+    val apkDir = project.apkDirProvider(dummyApkName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
         it.cliExecutable.set("sentry-cli")
@@ -213,28 +170,119 @@ class SentryUploadAppArtifactTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("--project" in args)
-    assertTrue("dummy-proj" in args)
+    assertThat(args).contains("--project")
+    assertThat(args).contains("dummy-proj")
+  }
+
+  @Test
+  fun `throws exception when bundle file does not exist`() {
+    val project = createProject()
+    val nonExistentBundle = project.layout.buildDirectory.file("nonexistent/bundle.aab")
+    val task: TaskProvider<SentryUploadAppArtifactTask> =
+      project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.cliExecutable.set("sentry-cli")
+        it.bundle.set(nonExistentBundle)
+      }
+
+    val exception =
+      assertThrows(IllegalStateException::class.java) { task.get().computeCommandLineArgs() }
+
+    assertThat(exception.message).startsWith("Bundle file does not exist:")
+  }
+
+  @Test
+  fun `throws exception when apk directory does not exist`() {
+    val project = createProject()
+    val nonExistentApkDir = project.layout.buildDirectory.dir("nonexistent/apk")
+    val task: TaskProvider<SentryUploadAppArtifactTask> =
+      project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.cliExecutable.set("sentry-cli")
+        it.apk.set(nonExistentApkDir)
+      }
+
+    val exception =
+      assertThrows(IllegalStateException::class.java) { task.get().computeCommandLineArgs() }
+
+    assertThat(exception.message).startsWith("APK directory does not exist:")
+  }
+
+  @Test
+  fun `throws exception when apk directory exists but contains no apk files`() {
+    val project = createProject()
+    val emptyApkDir = project.layout.buildDirectory.dir("empty/apk")
+    // Create the directory but don't add any APK files
+    emptyApkDir.get().asFile.mkdirs()
+    val task: TaskProvider<SentryUploadAppArtifactTask> =
+      project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.cliExecutable.set("sentry-cli")
+        it.apk.set(emptyApkDir)
+      }
+
+    val exception =
+      assertThrows(IllegalStateException::class.java) { task.get().computeCommandLineArgs() }
+
+    assertThat(exception.message).startsWith("No APK file exists in directory:")
+  }
+
+  @Test
+  fun `throws exception when neither bundle nor apk is set`() {
+    val project = createProject()
+    val task: TaskProvider<SentryUploadAppArtifactTask> =
+      project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.cliExecutable.set("sentry-cli")
+      }
+
+    val exception =
+      assertThrows(IllegalStateException::class.java) { task.get().computeCommandLineArgs() }
+
+    assertThat(exception.message).isEqualTo("No bundle or apk found")
   }
 
   private fun createProject(): Project {
     with(ProjectBuilder.builder().build()) {
+      plugins.apply("com.android.application")
       plugins.apply("io.sentry.android.gradle")
       return this
     }
   }
 
-  private fun createFakeUuid(
-    project: Project,
-    uuid: UUID = UUID.randomUUID(),
-  ): Provider<RegularFile> {
-    val file =
-      tempDir.newFile("sentry-debug-meta.properties").apply {
-        writeText("io.sentry.ProguardUuids=$uuid")
-      }
-    return project.layout.file(project.provider { file })
+  private fun Project.apkDirProvider(path: String): Provider<Directory> {
+    val apkFileProvider = project.layout.buildDirectory.dir(path)
+    apkFileProvider.get().asFile.parentFile.mkdirs()
+    apkFileProvider.get().asFile.createNewFile()
+    return apkFileProvider
   }
 
-  private fun createApkDirProvider(project: Project, path: String): Provider<Directory> =
-    project.layout.buildDirectory.dir(path)
+  private fun Project.aabFileProvider(path: String): Provider<RegularFile> {
+    val aabFile = project.layout.buildDirectory.file(path)
+    aabFile.get().asFile.parentFile.mkdirs()
+    aabFile.get().asFile.createNewFile()
+    return aabFile
+  }
+}
+
+class StringListSubject
+private constructor(metadata: FailureMetadata, private val actual: List<String>?) :
+  Subject(metadata, actual) {
+
+  fun containsEndingWith(suffix: String) {
+    if (actual == null) {
+      failWithActual("expected to contain a string ending with", suffix)
+      return
+    }
+
+    if (actual.none { it.endsWith(suffix) }) {
+      failWithActual("expected to contain a string ending with", suffix)
+    }
+  }
+
+  companion object {
+    fun strings(): Factory<StringListSubject, List<String>> {
+      return Factory { metadata, actual -> StringListSubject(metadata, actual) }
+    }
+  }
+}
+
+fun assertThatStrings(values: List<String>): StringListSubject {
+  return assertAbout(StringListSubject.strings()).that(values)
 }

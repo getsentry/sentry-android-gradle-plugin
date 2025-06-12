@@ -45,6 +45,7 @@ kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", vers
 kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.7.1" }
 truth = { module = "com.google.truth:truth", version = "1.4.4" }
 composeDesktop = { group = "org.jetbrains.compose.desktop", name = "desktop", version = "1.6.10" }
+truth = { module = "com.google.truth:truth", version = "1.4.4" }
 
 # bytecode instrumentation
 asm = { group = "org.ow2.asm", name = "asm-util", version.ref = "asm" }

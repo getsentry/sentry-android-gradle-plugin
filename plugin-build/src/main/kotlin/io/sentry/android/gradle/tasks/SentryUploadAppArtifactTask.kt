@@ -37,13 +37,33 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
   override fun getArguments(args: MutableList<String>) {
     args.add("mobile-app")
     args.add("upload")
-    if (bundle.isPresent && bundle.get().asFile.exists()) {
-      args.add(bundle.get().asFile.path)
-    } else if (apk.isPresent && apk.get().asFile.exists()) {
-      // find *.apk inside apk input directory
-      val path = apk.get().asFileTree.find { file -> file.name.endsWith(".apk") }!!.path
-      args.add(path)
+
+    val bundleFile = bundle.orNull?.asFile
+    if (bundleFile != null) {
+      if (bundleFile.exists()) {
+        args.add(bundleFile.path)
+        return
+      } else {
+        throw IllegalStateException("Bundle file does not exist: ${bundleFile.path}")
+      }
     }
+
+    val apkDir = apk.orNull?.asFile
+    if (apkDir != null) {
+      if (apkDir.exists()) {
+        val apkFile = apkDir.walkTopDown().find { it.isFile && it.name.endsWith(".apk") }
+        if (apkFile != null) {
+          args.add(apkFile.path)
+          return
+        } else {
+          throw IllegalStateException("No APK file exists in directory: ${apkDir.path}")
+        }
+      } else {
+        throw IllegalStateException("APK directory does not exist: ${apkDir.path}")
+      }
+    }
+
+    throw IllegalStateException("No bundle or apk found")
   }
 
   companion object {
