@@ -1,7 +1,6 @@
 package io.sentry.android.gradle.tasks
 
 import io.sentry.android.gradle.util.ReleaseInfo
-import java.io.File
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -13,7 +12,6 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -28,10 +26,7 @@ class SentryUploadAppArtifactTaskTest {
 
     val apkFile = createApkDirProvider(project, "dummy/folder/app.apk")
     val task: TaskProvider<SentryUploadAppArtifactTask> =
-      project.tasks.register(
-        "testUploadAppArtifact",
-        SentryUploadAppArtifactTask::class.java,
-      ) {
+      project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
         it.cliExecutable.set("sentry-cli")
         it.apk.set(apkFile)
       }
@@ -52,10 +47,7 @@ class SentryUploadAppArtifactTaskTest {
 
     val apkDir = createApkDirProvider(project, "dummy/folder/mapping.txt")
     val task: TaskProvider<SentryUploadAppArtifactTask> =
-      project.tasks.register(
-        "testUploadAppArtifact",
-          SentryUploadAppArtifactTask::class.java,
-      ) {
+      project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
         it.cliExecutable.set("sentry-cli")
         it.apk.set(apkDir)
       }
@@ -80,11 +72,7 @@ class SentryUploadAppArtifactTaskTest {
   fun `with multiple mappingFiles picks the first existing file`() {
     val project = createProject()
 
-    val apkDir =
-      createApkDirProvider(
-        project,
-        "dummy/folder/missing-mapping.txt",
-      )
+    val apkDir = createApkDirProvider(project, "dummy/folder/missing-mapping.txt")
     val existingFile =
       project.file("dummy/folder/existing-mapping.txt").apply {
         parentFile.mkdirs()
@@ -92,10 +80,7 @@ class SentryUploadAppArtifactTaskTest {
       }
 
     val task: TaskProvider<SentryUploadAppArtifactTask> =
-      project.tasks.register(
-        "testUploadAppArtifact",
-        SentryUploadAppArtifactTask::class.java,
-      ) {
+      project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
         it.cliExecutable.set("sentry-cli")
         it.apk.set(apkDir)
       }
@@ -111,10 +96,7 @@ class SentryUploadAppArtifactTaskTest {
 
     val apkDir = createApkDirProvider(project, "dummy/folder/mapping.txt")
     val task: TaskProvider<SentryUploadAppArtifactTask> =
-      project.tasks.register(
-        "testUploadProguardMapping",
-        SentryUploadAppArtifactTask::class.java,
-      ) {
+      project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
         it.cliExecutable.set("sentry-cli")
         it.apk.set(apkDir)
       }
@@ -130,10 +112,7 @@ class SentryUploadAppArtifactTaskTest {
 
     val apkDir = createApkDirProvider(project, "dummy/folder/mapping.txt")
     val task: TaskProvider<SentryUploadAppArtifactTask> =
-      project.tasks.register(
-        "testUploadProguardMapping",
-        SentryUploadAppArtifactTask::class.java,
-      ) {
+      project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
         it.cliExecutable.set("sentry-cli")
         it.apk.set(apkDir)
         it.debug.set(true)
@@ -149,10 +128,7 @@ class SentryUploadAppArtifactTaskTest {
     val project = createProject()
     val propertiesFile = project.file("dummy/folder/sentry.properties")
     val task: TaskProvider<SentryUploadAppArtifactTask> =
-      project.tasks.register(
-        "testUploadProguardMapping",
-        SentryUploadAppArtifactTask::class.java,
-      ) {
+      project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
         it.sentryProperties.set(propertiesFile)
       }
 
@@ -168,10 +144,7 @@ class SentryUploadAppArtifactTaskTest {
   fun `without sentryProperties file SENTRY_PROPERTIES is not set`() {
     val project = createProject()
     val task: TaskProvider<SentryUploadAppArtifactTask> =
-      project.tasks.register(
-        "testUploadProguardMapping",
-        SentryUploadAppArtifactTask::class.java,
-      )
+      project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java)
 
     task.get().setSentryPropertiesEnv()
 
@@ -182,10 +155,7 @@ class SentryUploadAppArtifactTaskTest {
   fun `with sentryAuthToken env variable is set correctly`() {
     val project = createProject()
     val task: TaskProvider<SentryUploadAppArtifactTask> =
-      project.tasks.register(
-        "testUploadProguardMapping",
-        SentryUploadAppArtifactTask::class.java,
-      ) {
+      project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
         it.sentryAuthToken.set("<token>")
       }
 
@@ -199,10 +169,7 @@ class SentryUploadAppArtifactTaskTest {
     val project = createProject()
     val apkDir = createApkDirProvider(project, "dummy/folder/mapping.txt")
     val task: TaskProvider<SentryUploadAppArtifactTask> =
-      project.tasks.register(
-        "testUploadProguardMapping",
-        SentryUploadAppArtifactTask::class.java,
-      ) {
+      project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
         it.sentryUrl.set("https://some-host.sentry.io")
         it.cliExecutable.set("sentry-cli")
         it.apk.set(apkDir)
@@ -220,10 +187,7 @@ class SentryUploadAppArtifactTaskTest {
 
     val apkDir = createApkDirProvider(project, "dummy/folder/mapping.txt")
     val task: TaskProvider<SentryUploadAppArtifactTask> =
-      project.tasks.register(
-        "testUploadProguardMapping",
-        SentryUploadAppArtifactTask::class.java,
-      ) {
+      project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
         it.cliExecutable.set("sentry-cli")
         it.apk.set(apkDir)
         it.sentryOrganization.set("dummy-org")
@@ -241,10 +205,7 @@ class SentryUploadAppArtifactTaskTest {
 
     val apkDir = createApkDirProvider(project, "dummy/folder/mapping.txt")
     val task: TaskProvider<SentryUploadAppArtifactTask> =
-      project.tasks.register(
-        "testUploadProguardMapping",
-        SentryUploadAppArtifactTask::class.java,
-      ) {
+      project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
         it.cliExecutable.set("sentry-cli")
         it.apk.set(apkDir)
         it.sentryProject.set("dummy-proj")
@@ -274,8 +235,6 @@ class SentryUploadAppArtifactTaskTest {
     return project.layout.file(project.provider { file })
   }
 
-  private fun createApkDirProvider(
-    project: Project,
-    path: String,
-  ): Provider<Directory> = project.layout.buildDirectory.dir(path)
+  private fun createApkDirProvider(project: Project, path: String): Provider<Directory> =
+    project.layout.buildDirectory.dir(path)
 }
