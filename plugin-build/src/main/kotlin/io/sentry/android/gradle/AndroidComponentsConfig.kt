@@ -245,18 +245,16 @@ fun AndroidComponentsExtension<*, *, *>.configure(
           )
         }
       }
-    }
-    if (extension.sizeAnalysis.enabled.get() == true) {
-      val sentryTelemetryProvider =
-        variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
-      variant.configureUploadAppTasks(
-        project,
-        extension,
-        sentryTelemetryProvider,
-        cliExecutable,
-        sentryOrg,
-        sentryProject,
-      )
+      if (extension.sizeAnalysis.enabled.get() == true) {
+        variant.configureUploadAppTasks(
+          project,
+          extension,
+          sentryTelemetryProvider,
+          cliExecutable,
+          sentryOrg,
+          sentryProject,
+        )
+      }
     }
   }
 }
