@@ -217,18 +217,16 @@ fun AndroidComponentsExtension<*, *, *>.configure(
           )
           .toTransform(SingleArtifact.MERGED_MANIFEST)
       }
-    }
-    if (extension.sizeAnalysis.enabled.get() == true) {
-      val sentryTelemetryProvider =
-        variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
-      variant.configureUploadAppTasks(
-        project,
-        extension,
-        sentryTelemetryProvider,
-        cliExecutable,
-        sentryOrg,
-        sentryProject,
-      )
+      if (extension.sizeAnalysis.enabled.get() == true) {
+        variant.configureUploadAppTasks(
+          project,
+          extension,
+          sentryTelemetryProvider,
+          cliExecutable,
+          sentryOrg,
+          sentryProject,
+        )
+      }
     }
   }
 }
@@ -361,11 +359,11 @@ private fun Variant.configureProguardMappingsTasks(
         releaseInfo = releaseInfo,
       )
 
-      generateUuidTask.hookWithMinifyTasks(
-        project,
-        name,
-        dexguardEnabled && GroovyCompat.isDexguardEnabledForVariant(project, name),
-      )
+    generateUuidTask.hookWithMinifyTasks(
+      project,
+      name,
+      dexguardEnabled && GroovyCompat.isDexguardEnabledForVariant(project, name),
+    )
 
     uploadMappingsTask.hookWithAssembleTasks(project, variant)
 
@@ -376,7 +374,8 @@ private fun Variant.configureProguardMappingsTasks(
 }
 
 /**
- * Configure the upload AAB and APK tasks and set them up as finalizers on the respective producer tasks
+ * Configure the upload AAB and APK tasks and set them up as finalizers on the respective producer
+ * tasks
  */
 fun Variant.configureUploadAppTasks(
   project: Project,
@@ -404,7 +403,8 @@ fun Variant.configureUploadAppTasks(
       sentryProperties = sentryProps,
       taskSuffix = name.capitalized,
     )
-  // TODO we can use the listToArtifacts API in AGP 8.3+ https://github.com/android/gradle-recipes/tree/agp-8.10/listenToArtifacts
+  // TODO we can use the listToArtifacts API in AGP 8.3+
+  // https://github.com/android/gradle-recipes/tree/agp-8.10/listenToArtifacts
   project.afterEvaluate {
     getBundleTask(project, variant.name)!!.configure { it.finalizedBy(uploadBundleTask) }
     getAssembleTaskProvider(project, variant)!!.configure { it.finalizedBy(uploadApkTask) }
