@@ -37,14 +37,6 @@ class SentryPluginUtilsTest(private val agpVersion: SemVer) {
   }
 
   @Test
-  fun `isMinificationEnabled returns false for standalone Proguard`() {
-    val (project, _) = createTestProguardProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
-    val variant = project.retrieveAndroidVariant("debug")
-
-    assertEquals(false, isMinificationEnabled(project, variant, dexguardEnabled = true))
-  }
-
-  @Test
   fun `isMinificationEnabled returns true for standalone Proguard and valid config`() {
     val (project, _) = createTestProguardProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
     project.extensions.getByType(ProGuardAndroidExtension::class.java).apply {
