@@ -27,17 +27,17 @@ class SentryExternalDependenciesReportTaskTest {
         it.includeReport.set(true)
         it.artifactIds.set(
           listOf(
-            "androidx.annotation:annotation",
-            "androidx.arch.core:core-common",
-            "androidx.collection:collection",
-            "androidx.core:core",
-            "androidx.lifecycle:lifecycle-common-java8",
-            "androidx.lifecycle:lifecycle-common",
-            "androidx.lifecycle:lifecycle-process",
-            "androidx.lifecycle:lifecycle-runtime",
-            "androidx.versionedparcelable:versionedparcelable",
-            "io.sentry:sentry-android-core",
-            "io.sentry:sentry",
+            "androidx.annotation:annotation:1.1.0",
+            "androidx.arch.core:core-common:2.1.0",
+            "androidx.collection:collection:1.0.0",
+            "androidx.core:core:1.3.2",
+            "androidx.lifecycle:lifecycle-common-java8:2.2.0",
+            "androidx.lifecycle:lifecycle-common:2.2.0",
+            "androidx.lifecycle:lifecycle-process:2.2.0",
+            "androidx.lifecycle:lifecycle-runtime:2.2.0",
+            "androidx.versionedparcelable:versionedparcelable:1.1.0",
+            "io.sentry:sentry-android-core:6.5.0",
+            "io.sentry:sentry:6.5.0",
           )
         )
         it.output.set(project.layout.dir(project.provider { output }))
@@ -91,17 +91,17 @@ class SentryExternalDependenciesReportTaskTest {
   private fun File.verifyContents() {
     assertEquals(
       """
-            androidx.annotation:annotation
-            androidx.arch.core:core-common
-            androidx.collection:collection
-            androidx.core:core
-            androidx.lifecycle:lifecycle-common
-            androidx.lifecycle:lifecycle-common-java8
-            androidx.lifecycle:lifecycle-process
-            androidx.lifecycle:lifecycle-runtime
-            androidx.versionedparcelable:versionedparcelable
-            io.sentry:sentry
-            io.sentry:sentry-android-core
+            androidx.annotation:annotation:1.1.0
+            androidx.arch.core:core-common:2.1.0
+            androidx.collection:collection:1.0.0
+            androidx.core:core:1.3.2
+            androidx.lifecycle:lifecycle-common-java8:2.2.0
+            androidx.lifecycle:lifecycle-common:2.2.0
+            androidx.lifecycle:lifecycle-process:2.2.0
+            androidx.lifecycle:lifecycle-runtime:2.2.0
+            androidx.versionedparcelable:versionedparcelable:1.1.0
+            io.sentry:sentry-android-core:6.5.0
+            io.sentry:sentry:6.5.0
             """
         .trimIndent(),
       File(this, SENTRY_DEPENDENCIES_REPORT_OUTPUT).readText(),
