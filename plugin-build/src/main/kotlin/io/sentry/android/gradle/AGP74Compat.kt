@@ -83,15 +83,6 @@ data class AndroidVariant74(private val variant: Variant) : SentryVariant {
   }
 }
 
-fun <T : Task> configureGeneratedSourcesFor74(
-  variant: Variant,
-  vararg tasks: Pair<TaskProvider<out T>, (T) -> DirectoryProperty>,
-) {
-  tasks.forEach { (task, output) ->
-    variant.sources.assets?.addGeneratedSourceDirectory(task, output)
-  }
-}
-
 fun <T : InstrumentationParameters> configureInstrumentationFor74(
   variant: Variant,
   classVisitorFactoryImplClass: Class<out AsmClassVisitorFactory<T>>,

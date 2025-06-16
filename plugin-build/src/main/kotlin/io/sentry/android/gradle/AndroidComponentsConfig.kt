@@ -20,14 +20,13 @@ import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
-import io.sentry.android.gradle.tasks.DirectoryOutputTask
 import io.sentry.android.gradle.tasks.InjectSentryMetaPropertiesIntoAssetsTask
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
 import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
-import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
+import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.GroovyCompat
 import io.sentry.android.gradle.util.ReleaseInfo
@@ -289,7 +288,7 @@ private fun Variant.configureDependenciesTask(
 ) {
   if (extension.includeDependenciesReport.get()) {
     val reportDependenciesTask =
-      SentryExternalDependenciesReportTaskFactory.register(
+      SentryExternalDependenciesReportTaskV2.register(
         project = project,
         extension,
         sentryTelemetryProvider,
@@ -298,10 +297,7 @@ private fun Variant.configureDependenciesTask(
         includeReport = extension.includeDependenciesReport,
         taskSuffix = name.capitalized,
       )
-    configureGeneratedSourcesFor74(
-      variant = this,
-      reportDependenciesTask to DirectoryOutputTask::output,
-    )
+    sources.assets?.addGeneratedSourceDirectory(reportDependenciesTask) { task -> task.output }
   }
 }
 
