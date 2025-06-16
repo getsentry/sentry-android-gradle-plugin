@@ -21,6 +21,7 @@
 - Bump Android SDK from v8.12.0 to v8.14.0 ([#919](https://github.com/getsentry/sentry-android-gradle-plugin/pull/919))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8140)
   - [diff](https://github.com/getsentry/sentry-java/compare/8.12.0...8.14.0)
+- Set build default Gradle Version to 8.14.2 ([#891](https://github.com/getsentry/sentry-android-gradle-plugin/pull/891))
 
 ## 5.7.0
 
