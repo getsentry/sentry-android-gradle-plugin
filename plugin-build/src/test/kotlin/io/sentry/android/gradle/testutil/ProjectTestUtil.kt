@@ -15,6 +15,7 @@ fun createTestAndroidProject(
   val appExtension =
     project.extensions.getByType(AppExtension::class.java).apply {
       compileSdkVersion(30)
+      namespace = "com.example.app"
       this.block()
     }
   if (forceEvaluate) {
@@ -33,6 +34,7 @@ fun createTestProguardProject(
   val appExtension =
     project.extensions.getByType(AppExtension::class.java).apply {
       compileSdkVersion(30)
+      namespace = "com.example.app"
       this.block()
     }
   project.plugins.apply("com.guardsquare.proguard")
