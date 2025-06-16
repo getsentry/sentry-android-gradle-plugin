@@ -19,13 +19,27 @@ class SentryExternalDependenciesReportTaskTest {
     val project = createRegularProject()
     val output = tempDir.newFolder("dependencies")
 
-    val task: TaskProvider<SentryExternalDependenciesReportTask> =
+    val task: TaskProvider<SentryExternalDependenciesReportTaskV2> =
       project.tasks.register(
         "testDependenciesReport",
-        SentryExternalDependenciesReportTask::class.java,
+        SentryExternalDependenciesReportTaskV2::class.java,
       ) {
         it.includeReport.set(true)
-        it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
+        it.artifactIds.set(
+          listOf(
+            "androidx.annotation:annotation:1.1.0",
+            "androidx.arch.core:core-common:2.1.0",
+            "androidx.collection:collection:1.0.0",
+            "androidx.core:core:1.3.2",
+            "androidx.lifecycle:lifecycle-common-java8:2.2.0",
+            "androidx.lifecycle:lifecycle-common:2.2.0",
+            "androidx.lifecycle:lifecycle-process:2.2.0",
+            "androidx.lifecycle:lifecycle-runtime:2.2.0",
+            "androidx.versionedparcelable:versionedparcelable:1.1.0",
+            "io.sentry:sentry-android-core:6.5.0",
+            "io.sentry:sentry:6.5.0",
+          )
+        )
         it.output.set(project.layout.dir(project.provider { output }))
       }
 
@@ -39,13 +53,12 @@ class SentryExternalDependenciesReportTaskTest {
     val project = createProjectWithFlatJars()
     val output = tempDir.newFolder("dependencies")
 
-    val task: TaskProvider<SentryExternalDependenciesReportTask> =
+    val task: TaskProvider<SentryExternalDependenciesReportTaskV2> =
       project.tasks.register(
         "testDependenciesReport",
-        SentryExternalDependenciesReportTask::class.java,
+        SentryExternalDependenciesReportTaskV2::class.java,
       ) {
         it.includeReport.set(true)
-        it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
         it.output.set(project.layout.dir(project.provider { output }))
       }
 
@@ -60,13 +73,12 @@ class SentryExternalDependenciesReportTaskTest {
     val project = createMultiModuleProject()
     val output = tempDir.newFolder("dependencies")
 
-    val task: TaskProvider<SentryExternalDependenciesReportTask> =
+    val task: TaskProvider<SentryExternalDependenciesReportTaskV2> =
       project.tasks.register(
         "testDependenciesReport",
-        SentryExternalDependenciesReportTask::class.java,
+        SentryExternalDependenciesReportTaskV2::class.java,
       ) {
         it.includeReport.set(true)
-        it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
         it.output.set(project.layout.dir(project.provider { output }))
       }
 

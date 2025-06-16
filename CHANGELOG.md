@@ -6,6 +6,10 @@
 
 - Enable caching for BundleSourcesTask ([#894](https://github.com/getsentry/sentry-android-gradle-plugin/pull/894)
 
+### Breaking Changes
+
+- Drop support for Android Gradle Plugin 7.3.X and below. To continue to use 7.3.X and below use Sentry Android Gradle Plugin 5.7.0. ([#911](https://github.com/getsentry/sentry-android-gradle-plugin/pull/911))
+
 ### Dependencies
 
 - Bump Android SDK from v8.12.0 to v8.13.3 ([#896](https://github.com/getsentry/sentry-android-gradle-plugin/pull/896), [#914](https://github.com/getsentry/sentry-android-gradle-plugin/pull/914))

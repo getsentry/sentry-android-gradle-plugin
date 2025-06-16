@@ -27,9 +27,6 @@ BootstrapAndroidSdk.locateAndroidSdk(project, extra)
 val androidSdkPath: String? by extra
 val testImplementationAar by configurations.getting // this converts .aar into .jar dependencies
 
-val agp70: SourceSet by sourceSets.creating
-val agp74: SourceSet by sourceSets.creating
-
 val shade: Configuration by
   configurations.creating {
     isCanBeConsumed = false
@@ -39,18 +36,8 @@ val shade: Configuration by
 val fixtureClasspath: Configuration by configurations.creating
 
 dependencies {
-  agp70.compileOnlyConfigurationName(libs.gradleApi)
-  agp70.compileOnlyConfigurationName(Libs.agp("7.0.4"))
-  agp70.compileOnlyConfigurationName(project(":common"))
-
-  agp74.compileOnlyConfigurationName(libs.gradleApi)
-  agp74.compileOnlyConfigurationName(Libs.agp("7.4.0"))
-  agp74.compileOnlyConfigurationName(project(":common"))
-
   compileOnly(libs.gradleApi)
   compileOnly(Libs.AGP)
-  compileOnly(agp70.output)
-  compileOnly(agp74.output)
   compileOnly(libs.proguard)
 
   implementation(libs.asm)
@@ -68,11 +55,7 @@ dependencies {
   testImplementation(gradleTestKit())
   testImplementation(kotlin("test"))
   testImplementation(Libs.AGP)
-  testImplementation(agp70.output)
-  testImplementation(agp74.output)
   testImplementation(project(":common"))
-  fixtureClasspath(agp70.output)
-  fixtureClasspath(agp74.output)
   fixtureClasspath(project(":common"))
   testImplementation(libs.proguard)
   testImplementation(libs.junit)
@@ -185,11 +168,6 @@ gradlePlugin {
       implementationClass = "io.sentry.jvm.gradle.SentryJvmPlugin"
     }
   }
-}
-
-tasks.withType<Jar>().configureEach {
-  from(agp70.output)
-  from(agp74.output)
 }
 
 tasks.withType<ShadowJar>().configureEach {
