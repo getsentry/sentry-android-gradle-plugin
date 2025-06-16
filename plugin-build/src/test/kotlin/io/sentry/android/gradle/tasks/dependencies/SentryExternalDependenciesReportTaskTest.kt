@@ -1,6 +1,6 @@
 package io.sentry.android.gradle.tasks.dependencies
 
-import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory.SENTRY_DEPENDENCIES_REPORT_OUTPUT
+import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2.Companion.SENTRY_DEPENDENCIES_REPORT_OUTPUT
 import java.io.File
 import kotlin.test.assertEquals
 import org.gradle.api.Project
