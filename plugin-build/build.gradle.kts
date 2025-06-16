@@ -154,7 +154,6 @@ gradlePlugin {
       implementationClass = "io.sentry.jvm.gradle.SentryJvmPlugin"
     }
   }
-  testSourceSets(sourceSets.test.get())
 }
 
 spotless {
@@ -197,7 +196,6 @@ tasks.named("distTar").configure {
   dependsOn(
     "dokkaJavadocJar",
     "jar",
-    "shadowJar",
     "sourcesJar",
     "generateMetadataFileForPluginMavenPublication",
     "generatePomFileForPluginMavenPublication",
