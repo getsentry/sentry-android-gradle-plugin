@@ -9,5 +9,3 @@ dependencyResolutionManagement {
 
   repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
 }
-
-include(":common")

@@ -1,4 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.sentry.android.gradle.internal.ASMifyTask
 import io.sentry.android.gradle.internal.BootstrapAndroidSdk
 import java.io.FileInputStream
@@ -18,7 +17,6 @@ plugins {
   // we need this plugin in order to include .aar dependencies into a pure java project, which the
   // gradle plugin is
   id("io.sentry.android.gradle.aar2jar")
-  alias(libs.plugins.shadow)
   alias(libs.plugins.buildConfig)
 }
 
@@ -26,12 +24,6 @@ BootstrapAndroidSdk.locateAndroidSdk(project, extra)
 
 val androidSdkPath: String? by extra
 val testImplementationAar by configurations.getting // this converts .aar into .jar dependencies
-
-val shade: Configuration by
-  configurations.creating {
-    isCanBeConsumed = false
-    isCanBeResolved = true
-  }
 
 val fixtureClasspath: Configuration by configurations.creating
 
@@ -47,16 +39,9 @@ dependencies {
 
   implementation(libs.sentry)
 
-  // compileOnly since we'll be shading the common dependency into the final jar
-  // but we still need to be able to compile it (this also excludes it from .pom)
-  compileOnly(project(":common"))
-  shade(project(":common"))
-
   testImplementation(gradleTestKit())
   testImplementation(kotlin("test"))
   testImplementation(Libs.AGP)
-  testImplementation(project(":common"))
-  fixtureClasspath(project(":common"))
   testImplementation(libs.proguard)
   testImplementation(libs.junit)
   testImplementation(libs.mockitoKotlin)
@@ -168,20 +153,6 @@ gradlePlugin {
       implementationClass = "io.sentry.jvm.gradle.SentryJvmPlugin"
     }
   }
-}
-
-tasks.withType<ShadowJar>().configureEach {
-  archiveClassifier.set("")
-  configurations = listOf(shade)
-
-  exclude("/kotlin/**")
-  exclude("/groovy**")
-  exclude("/org/**")
-}
-
-artifacts {
-  runtimeOnly(tasks.named("shadowJar"))
-  archives(tasks.named("shadowJar"))
 }
 
 spotless {
