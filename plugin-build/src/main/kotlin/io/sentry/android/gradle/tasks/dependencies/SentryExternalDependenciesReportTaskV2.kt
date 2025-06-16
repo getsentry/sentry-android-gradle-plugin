@@ -67,7 +67,7 @@ abstract class SentryExternalDependenciesReportTaskV2 : DirectoryOutputTask() {
               .filterIsInstance<ModuleComponentIdentifier>()
               // and those that have proper version defined (e.g. flat jars don't have it)
               .filter { id -> id.version.isNotEmpty() }
-              .map { id -> id.displayName }
+              .map { component -> "${component.group}:${component.module}:${component.version}" }
           }
         task.artifactIds.set(artifactIds)
         task.includeReport.set(includeReport)
