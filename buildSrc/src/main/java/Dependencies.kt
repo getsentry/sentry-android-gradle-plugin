@@ -16,7 +16,7 @@ object LibsVersion {
 object Libs {
     fun agp(version: String) = "com.android.tools.build:gradle:$version"
     val AGP = "com.android.tools.build:gradle:${BuildPluginsVersion.AGP}"
-    const val PROGUARD = "com.guardsquare:proguard-gradle:7.1.0"
+    const val PROGUARD = "com.guardsquare:proguard-gradle:7.5.0"
 }
 
 object CI {
