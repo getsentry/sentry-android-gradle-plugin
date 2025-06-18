@@ -8,21 +8,22 @@ import io.sentry.samples.instrumentation.data.TracksDatabase
 
 class SampleApp : Application() {
 
-    companion object {
-        lateinit var database: TracksDatabase
-            private set
+  companion object {
+    lateinit var database: TracksDatabase
+      private set
 
-        lateinit var analytics: SharedPreferences
-            private set
-    }
+    lateinit var analytics: SharedPreferences
+      private set
+  }
 
-    override fun onCreate() {
-        super.onCreate()
-        database = Room.databaseBuilder(this, TracksDatabase::class.java, "tracks.db")
-            .createFromAsset("tracks.db")
-            .fallbackToDestructiveMigration()
-            .build()
+  override fun onCreate() {
+    super.onCreate()
+    database =
+      Room.databaseBuilder(this, TracksDatabase::class.java, "tracks.db")
+        .createFromAsset("tracks.db")
+        .fallbackToDestructiveMigration()
+        .build()
 
-        analytics = getSharedPreferences("analytics", Context.MODE_PRIVATE)
-    }
+    analytics = getSharedPreferences("analytics", Context.MODE_PRIVATE)
+  }
 }

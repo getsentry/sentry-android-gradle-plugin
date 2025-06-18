@@ -12,29 +12,22 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 abstract class TracksDao {
 
-    @Query("SELECT * FROM track ORDER BY TrackId DESC")
-    abstract fun all(): Flow<List<Track>>
+  @Query("SELECT * FROM track ORDER BY TrackId DESC") abstract fun all(): Flow<List<Track>>
 
-    @Query(
-        "SELECT * FROM Track WHERE AlbumId = (SELECT AlbumId FROM Album WHERE ArtistId = " +
-            "(SELECT ArtistId from Artist WHERE Name = :bandName))"
-    )
-    abstract fun allByArtist(bandName: String): List<Track>
+  @Query(
+    "SELECT * FROM Track WHERE AlbumId = (SELECT AlbumId FROM Album WHERE ArtistId = " +
+      "(SELECT ArtistId from Artist WHERE Name = :bandName))"
+  )
+  abstract fun allByArtist(bandName: String): List<Track>
 
-    @Transaction
-    @Query("SELECT COUNT(*) FROM Track")
-    abstract suspend fun count(): Int
+  @Transaction @Query("SELECT COUNT(*) FROM Track") abstract suspend fun count(): Int
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun insert(track: Track): Long
+  @Insert(onConflict = OnConflictStrategy.REPLACE) abstract suspend fun insert(track: Track): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun insertAll(vararg tracks: Track)
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  abstract suspend fun insertAll(vararg tracks: Track)
 
-    @Update(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun update(track: Track)
+  @Update(onConflict = OnConflictStrategy.REPLACE) abstract suspend fun update(track: Track)
 
-    @Transaction
-    @Delete
-    abstract suspend fun delete(track: Track)
+  @Transaction @Delete abstract suspend fun delete(track: Track)
 }

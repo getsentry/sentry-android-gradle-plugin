@@ -1,28 +1,20 @@
 plugins {
-    `kotlin-dsl`
-    id("java-gradle-plugin")
-    kotlin("jvm") version "1.8.20"
+  `kotlin-dsl`
+  id("java-gradle-plugin")
+  kotlin("jvm") version "1.8.20"
 }
 
-repositories {
-    mavenCentral()
-}
+repositories { mavenCentral() }
 
-sourceSets {
-    main {
-        java.srcDir("../../buildSrc/src/main/java")
-    }
-}
+sourceSets { main { java.srcDir("../../buildSrc/src/main/java") } }
 
-dependencies {
-    compileOnly(libs.gradleApi)
-}
+dependencies { compileOnly(libs.gradleApi) }
 
 gradlePlugin {
-    plugins {
-        register("aar2jarPlugin") {
-            id = "io.sentry.android.gradle.aar2jar"
-            implementationClass = "io.sentry.android.gradle.internal.Aar2JarPlugin"
-        }
+  plugins {
+    register("aar2jarPlugin") {
+      id = "io.sentry.android.gradle.aar2jar"
+      implementationClass = "io.sentry.android.gradle.internal.Aar2JarPlugin"
     }
+  }
 }

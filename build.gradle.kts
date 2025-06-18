@@ -15,12 +15,12 @@ allprojects {
       if (name != rootProject.name) {
         kotlin {
           ktfmt(libs.versions.ktfmt.get()).googleStyle()
-          targetExclude("**/generated/**")
+          target("**/*.kt")
         }
       }
       kotlinGradle {
         ktfmt(libs.versions.ktfmt.get()).googleStyle()
-        targetExclude("**/generated/**")
+        target("**/*.kts")
       }
     }
   }

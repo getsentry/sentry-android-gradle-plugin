@@ -9,15 +9,15 @@ import retrofit2.http.Path
 
 interface TrackService {
 
-    @GET("v3/{uuid}")
-    suspend fun tracks(@Path("uuid") uuid: String): List<Track>
+  @GET("v3/{uuid}") suspend fun tracks(@Path("uuid") uuid: String): List<Track>
 
-    companion object {
-        private val retrofit = Retrofit.Builder()
-            .baseUrl("https://run.mocky.io/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+  companion object {
+    private val retrofit =
+      Retrofit.Builder()
+        .baseUrl("https://run.mocky.io/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
 
-        val instance = retrofit.create<TrackService>()
-    }
+    val instance = retrofit.create<TrackService>()
+  }
 }
