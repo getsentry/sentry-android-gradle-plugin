@@ -40,6 +40,7 @@ autoService = { group = "com.google.auto.service", name = "auto-service", versio
 autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.0.1" }
 kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
 kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.7.0" }
+truth = { module = "com.google.truth:truth", version = "1.4.4" }
 composeDesktop = { group = "org.jetbrains.compose.desktop", name = "desktop", version = "1.6.10" }
 
 # bytecode instrumentation
