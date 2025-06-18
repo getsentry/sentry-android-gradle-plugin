@@ -1,8 +1,8 @@
 package io.sentry.android.gradle.tasks.dependencies
 
+import com.google.common.truth.Truth.assertThat
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2.Companion.SENTRY_DEPENDENCIES_REPORT_OUTPUT
 import java.io.File
-import kotlin.test.assertEquals
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.testfixtures.ProjectBuilder
@@ -65,7 +65,7 @@ class SentryExternalDependenciesReportTaskTest {
     task.get().action()
 
     val outputFile = File(output, SENTRY_DEPENDENCIES_REPORT_OUTPUT)
-    assertEquals("", outputFile.readText())
+    assertThat(outputFile.readText()).isEqualTo("")
   }
 
   @Test
@@ -85,12 +85,13 @@ class SentryExternalDependenciesReportTaskTest {
     task.get().action()
 
     val outputFile = File(output, SENTRY_DEPENDENCIES_REPORT_OUTPUT)
-    assertEquals("", outputFile.readText())
+    assertThat(outputFile.readText()).isEqualTo("")
   }
 
   private fun File.verifyContents() {
-    assertEquals(
-      """
+    assertThat(File(this, SENTRY_DEPENDENCIES_REPORT_OUTPUT).readText())
+      .isEqualTo(
+        """
             androidx.annotation:annotation:1.1.0
             androidx.arch.core:core-common:2.1.0
             androidx.collection:collection:1.0.0
@@ -103,9 +104,8 @@ class SentryExternalDependenciesReportTaskTest {
             io.sentry:sentry-android-core:6.5.0
             io.sentry:sentry:6.5.0
             """
-        .trimIndent(),
-      File(this, SENTRY_DEPENDENCIES_REPORT_OUTPUT).readText(),
-    )
+          .trimIndent()
+      )
   }
 
   private fun createRegularProject(): Project {

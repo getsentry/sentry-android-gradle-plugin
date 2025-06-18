@@ -16,6 +16,10 @@
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8133)
   - [diff](https://github.com/getsentry/sentry-java/compare/8.12.0...8.13.3)
 
+### Internal
+
+- Add Google Truth for easier to debug assertions in tests ([#920](https://github.com/getsentry/sentry-android-gradle-plugin/pull/920))
+
 ## 5.7.0
 
 ### Dependencies

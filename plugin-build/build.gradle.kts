@@ -45,6 +45,7 @@ dependencies {
   testImplementation(libs.proguard)
   testImplementation(libs.junit)
   testImplementation(libs.mockitoKotlin)
+  testImplementation(libs.truth)
 
   testImplementation(libs.asm)
   testImplementation(libs.asmCommons)
