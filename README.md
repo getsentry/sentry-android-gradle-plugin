@@ -12,9 +12,9 @@ _Bad software is everywhere, and we're tired of it. Sentry is on a mission to he
 
 Gradle Plugin for Sentry Android
 ===========
-[![Build](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/test-matrix-agp-gradle.yaml/badge.svg)](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/test-matrix-agp-gradle.yaml)
+[![Build](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/build.yml)
 [![Publishing](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/test-publish.yaml/badge.svg?branch=main)](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/test-publish.yaml)
-[![Checks](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/pre-merge.yaml/badge.svg)](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/pre-merge.yaml)
+[![Checks](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/pre-merge.yaml/badge.svg?branch=main)](https://github.com/getsentry/sentry-android-gradle-plugin/actions/workflows/pre-merge.yaml)
 
 Upload proguard, debug files, and more.
 
