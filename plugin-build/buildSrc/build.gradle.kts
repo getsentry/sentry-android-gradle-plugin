@@ -1,6 +1,6 @@
 plugins {
-    `kotlin-dsl`
-    id("java-gradle-plugin")
+  `kotlin-dsl`
+  id("java-gradle-plugin")
 }
 
 repositories { mavenCentral() }
