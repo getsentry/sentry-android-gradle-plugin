@@ -12,9 +12,9 @@ android {
     versionName = "1.0"
   }
   buildTypes {
-    getByName("release") {
+    release {
       isMinifyEnabled = true
-      proguardFiles.add(getDefaultProguardFile("proguard-android-optimize.txt"))
+      proguardFiles += getDefaultProguardFile("proguard-android-optimize.txt")
     }
   }
   namespace = "com.example.sampleapp"
