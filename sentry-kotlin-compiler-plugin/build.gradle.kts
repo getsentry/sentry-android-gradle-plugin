@@ -15,11 +15,11 @@ val kotlin2120: SourceSet by sourceSets.creating
 spotless {
   kotlin {
     ktfmt(libs.versions.ktfmt.get()).googleStyle()
-    targetExclude("**/generated/**")
+    target("**/*.kt")
   }
   kotlinGradle {
+    target("**/*.kts")
     ktfmt(libs.versions.ktfmt.get()).googleStyle()
-    targetExclude("**/generated/**")
   }
 }
 

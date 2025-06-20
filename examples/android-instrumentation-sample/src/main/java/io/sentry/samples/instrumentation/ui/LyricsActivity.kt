@@ -15,47 +15,50 @@ import java.io.File
 
 @SuppressLint("SetTextI18n")
 class LyricsActivity : ComponentActivity() {
-    private lateinit var lyricsInput: EditText
-    private lateinit var filesystem: Filesystem
-    private lateinit var track: Track
+  private lateinit var lyricsInput: EditText
+  private lateinit var filesystem: Filesystem
+  private lateinit var track: Track
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_lyrics)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_lyrics)
 
-        val transaction = Sentry.startTransaction(
-            "Track Interaction",
-            "ui.action.lyrics",
-            TransactionOptions().apply { isBindToScope = true }
+    val transaction =
+      Sentry.startTransaction(
+        "Track Interaction",
+        "ui.action.lyrics",
+        TransactionOptions().apply { isBindToScope = true },
+      )
+
+    lyricsInput = findViewById(R.id.lyrics)
+    val toolbar = findViewById<Toolbar>(R.id.toolbar)
+
+    track = intent.getSerializableExtra(TRACK_EXTRA_KEY) as Track
+    filesystem = intent.getSerializableExtra(FILESYSTEM_EXTRA_KEY) as Filesystem
+    toolbar.title = "Lyrics for ${track.name}"
+
+    val dir = File("$filesDir${File.separatorChar}lyrics")
+    dir.mkdirs()
+
+    lyricsInput.setText(filesystem.read(this, "${track.id}.txt"))
+    transaction.finish(SpanStatus.OK)
+  }
+
+  override fun onBackPressed() {
+    val transaction =
+      Sentry.getSpan()
+        ?: Sentry.startTransaction(
+          "Track Interaction",
+          "ui.action.lyrics_finish",
+          TransactionOptions().apply { isBindToScope = true },
         )
+    filesystem.write(this, "${track.id}.txt", lyricsInput.text.toString())
+    transaction.finish(SpanStatus.OK)
+    super.onBackPressed()
+  }
 
-        lyricsInput = findViewById(R.id.lyrics)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-
-        track = intent.getSerializableExtra(TRACK_EXTRA_KEY) as Track
-        filesystem = intent.getSerializableExtra(FILESYSTEM_EXTRA_KEY) as Filesystem
-        toolbar.title = "Lyrics for ${track.name}"
-
-        val dir = File("$filesDir${File.separatorChar}lyrics")
-        dir.mkdirs()
-
-        lyricsInput.setText(filesystem.read(this, "${track.id}.txt"))
-        transaction.finish(SpanStatus.OK)
-    }
-
-    override fun onBackPressed() {
-        val transaction = Sentry.getSpan() ?: Sentry.startTransaction(
-            "Track Interaction",
-            "ui.action.lyrics_finish",
-            TransactionOptions().apply { isBindToScope = true }
-        )
-        filesystem.write(this, "${track.id}.txt", lyricsInput.text.toString())
-        transaction.finish(SpanStatus.OK)
-        super.onBackPressed()
-    }
-
-    companion object {
-        const val TRACK_EXTRA_KEY = "LyricsActivity.Track"
-        const val FILESYSTEM_EXTRA_KEY = "LyricsActivity.Filesystem"
-    }
+  companion object {
+    const val TRACK_EXTRA_KEY = "LyricsActivity.Track"
+    const val FILESYSTEM_EXTRA_KEY = "LyricsActivity.Filesystem"
+  }
 }
