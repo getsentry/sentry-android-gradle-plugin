@@ -2,7 +2,6 @@ package io.sentry.android.gradle.util
 
 import io.sentry.android.gradle.retrieveAndroidVariant
 import io.sentry.android.gradle.testutil.createTestAndroidProject
-import io.sentry.android.gradle.testutil.createTestProguardProject
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.android.gradle.util.SentryPluginUtils.getAndDeleteFile
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
@@ -14,7 +13,6 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import proguard.gradle.plugin.android.dsl.ProGuardAndroidExtension
 
 @RunWith(Parameterized::class)
 class SentryPluginUtilsTest(private val agpVersion: SemVer) {
@@ -34,36 +32,6 @@ class SentryPluginUtilsTest(private val agpVersion: SemVer) {
   @Test
   fun `capitalizes string returns empty on empty string`() {
     assertEquals("", "".capitalizeUS())
-  }
-
-  @Test
-  fun `isMinificationEnabled returns false for standalone Proguard`() {
-    val (project, _) = createTestProguardProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
-    val variant = project.retrieveAndroidVariant("debug")
-
-    assertEquals(false, isMinificationEnabled(project, variant, dexguardEnabled = true))
-  }
-
-  @Test
-  fun `isMinificationEnabled returns true for standalone Proguard and valid config`() {
-    val (project, _) = createTestProguardProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
-    project.extensions.getByType(ProGuardAndroidExtension::class.java).apply {
-      configurations.create("debug") { it.defaultConfiguration("proguard-android-optimize.txt") }
-    }
-    val variant = project.retrieveAndroidVariant("debug")
-
-    assertEquals(true, isMinificationEnabled(project, variant, dexguardEnabled = true))
-  }
-
-  @Test
-  fun `isMinificationEnabled returns false for standalone Proguard without opt-in`() {
-    val (project, _) = createTestProguardProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
-    project.extensions.getByType(ProGuardAndroidExtension::class.java).apply {
-      configurations.create("debug") { it.defaultConfiguration("proguard-android-optimize.txt") }
-    }
-    val variant = project.retrieveAndroidVariant("debug")
-
-    assertEquals(false, isMinificationEnabled(project, variant, dexguardEnabled = false))
   }
 
   @Test

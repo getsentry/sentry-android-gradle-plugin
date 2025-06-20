@@ -1,7 +1,6 @@
 plugins {
   `kotlin-dsl`
   id("java-gradle-plugin")
-  kotlin("jvm") version "1.8.20"
 }
 
 repositories { mavenCentral() }
