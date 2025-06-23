@@ -1,7 +1,9 @@
+import com.vanniktech.maven.publish.tasks.JavadocJar
 import io.sentry.android.gradle.internal.ASMifyTask
 import io.sentry.android.gradle.internal.BootstrapAndroidSdk
 import java.util.Properties
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
@@ -357,4 +359,12 @@ plugins.withId("com.vanniktech.maven.publish.base") {
       }
     }
   }
+}
+
+tasks.withType<DokkaTask>().configureEach {
+  notCompatibleWithConfigurationCache("Cannot serialize configuration")
+}
+
+tasks.withType<JavadocJar>().configureEach {
+  notCompatibleWithConfigurationCache("Cannot serialize configuration")
 }
