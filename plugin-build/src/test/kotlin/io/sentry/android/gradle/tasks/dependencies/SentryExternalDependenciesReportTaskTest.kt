@@ -1,8 +1,8 @@
 package io.sentry.android.gradle.tasks.dependencies
 
-import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory.SENTRY_DEPENDENCIES_REPORT_OUTPUT
+import com.google.common.truth.Truth.assertThat
+import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2.Companion.SENTRY_DEPENDENCIES_REPORT_OUTPUT
 import java.io.File
-import kotlin.test.assertEquals
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.testfixtures.ProjectBuilder
@@ -19,13 +19,27 @@ class SentryExternalDependenciesReportTaskTest {
     val project = createRegularProject()
     val output = tempDir.newFolder("dependencies")
 
-    val task: TaskProvider<SentryExternalDependenciesReportTask> =
+    val task: TaskProvider<SentryExternalDependenciesReportTaskV2> =
       project.tasks.register(
         "testDependenciesReport",
-        SentryExternalDependenciesReportTask::class.java,
+        SentryExternalDependenciesReportTaskV2::class.java,
       ) {
         it.includeReport.set(true)
-        it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
+        it.artifactIds.set(
+          listOf(
+            "androidx.annotation:annotation:1.1.0",
+            "androidx.arch.core:core-common:2.1.0",
+            "androidx.collection:collection:1.0.0",
+            "androidx.core:core:1.3.2",
+            "androidx.lifecycle:lifecycle-common-java8:2.2.0",
+            "androidx.lifecycle:lifecycle-common:2.2.0",
+            "androidx.lifecycle:lifecycle-process:2.2.0",
+            "androidx.lifecycle:lifecycle-runtime:2.2.0",
+            "androidx.versionedparcelable:versionedparcelable:1.1.0",
+            "io.sentry:sentry-android-core:6.5.0",
+            "io.sentry:sentry:6.5.0",
+          )
+        )
         it.output.set(project.layout.dir(project.provider { output }))
       }
 
@@ -39,20 +53,19 @@ class SentryExternalDependenciesReportTaskTest {
     val project = createProjectWithFlatJars()
     val output = tempDir.newFolder("dependencies")
 
-    val task: TaskProvider<SentryExternalDependenciesReportTask> =
+    val task: TaskProvider<SentryExternalDependenciesReportTaskV2> =
       project.tasks.register(
         "testDependenciesReport",
-        SentryExternalDependenciesReportTask::class.java,
+        SentryExternalDependenciesReportTaskV2::class.java,
       ) {
         it.includeReport.set(true)
-        it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
         it.output.set(project.layout.dir(project.provider { output }))
       }
 
     task.get().action()
 
     val outputFile = File(output, SENTRY_DEPENDENCIES_REPORT_OUTPUT)
-    assertEquals("", outputFile.readText())
+    assertThat(outputFile.readText()).isEqualTo("")
   }
 
   @Test
@@ -60,25 +73,25 @@ class SentryExternalDependenciesReportTaskTest {
     val project = createMultiModuleProject()
     val output = tempDir.newFolder("dependencies")
 
-    val task: TaskProvider<SentryExternalDependenciesReportTask> =
+    val task: TaskProvider<SentryExternalDependenciesReportTaskV2> =
       project.tasks.register(
         "testDependenciesReport",
-        SentryExternalDependenciesReportTask::class.java,
+        SentryExternalDependenciesReportTaskV2::class.java,
       ) {
         it.includeReport.set(true)
-        it.setRuntimeConfiguration(project.configurations.getByName("runtimeClasspath"))
         it.output.set(project.layout.dir(project.provider { output }))
       }
 
     task.get().action()
 
     val outputFile = File(output, SENTRY_DEPENDENCIES_REPORT_OUTPUT)
-    assertEquals("", outputFile.readText())
+    assertThat(outputFile.readText()).isEqualTo("")
   }
 
   private fun File.verifyContents() {
-    assertEquals(
-      """
+    assertThat(File(this, SENTRY_DEPENDENCIES_REPORT_OUTPUT).readText())
+      .isEqualTo(
+        """
             androidx.annotation:annotation:1.1.0
             androidx.arch.core:core-common:2.1.0
             androidx.collection:collection:1.0.0
@@ -91,9 +104,8 @@ class SentryExternalDependenciesReportTaskTest {
             io.sentry:sentry-android-core:6.5.0
             io.sentry:sentry:6.5.0
             """
-        .trimIndent(),
-      File(this, SENTRY_DEPENDENCIES_REPORT_OUTPUT).readText(),
-    )
+          .trimIndent()
+      )
   }
 
   private fun createRegularProject(): Project {

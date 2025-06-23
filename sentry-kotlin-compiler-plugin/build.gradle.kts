@@ -15,11 +15,11 @@ val kotlin2120: SourceSet by sourceSets.creating
 spotless {
   kotlin {
     ktfmt(libs.versions.ktfmt.get()).googleStyle()
-    targetExclude("**/generated/**")
+    target("**/*.kt")
   }
   kotlinGradle {
+    target("**/*.kts")
     ktfmt(libs.versions.ktfmt.get()).googleStyle()
-    targetExclude("**/generated/**")
   }
 }
 
@@ -33,13 +33,6 @@ distributions {
     }
   }
 }
-
-val publish =
-  extensions.getByType(com.vanniktech.maven.publish.MavenPublishPluginExtension::class.java)
-
-// signing is done when uploading files to MC
-// via gpg:sign-and-deploy-file (release.kts)
-publish.releaseSigningEnabled = false
 
 tasks.named("distZip") {
   dependsOn("publishToMavenLocal")
@@ -79,7 +72,7 @@ plugins.withId("com.vanniktech.maven.publish.base") {
   }
 }
 
-tasks.withType<Jar> {
+tasks.withType<Jar>().configureEach {
   from(kotlin1920.output)
   from(kotlin2120.output)
 }

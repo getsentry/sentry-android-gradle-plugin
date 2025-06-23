@@ -1,7 +1,5 @@
 package io.sentry.android.gradle
 
-import com.android.build.gradle.api.ApplicationVariant
-import com.android.build.gradle.tasks.MergeSourceSetFolders
 import io.sentry.android.gradle.util.GroovyCompat.isDexguardAvailable
 import io.sentry.android.gradle.util.SentryPluginUtils.capitalizeUS
 import io.sentry.gradle.common.SentryVariant
@@ -88,15 +86,6 @@ internal object SentryTasksProvider {
   @JvmStatic
   fun getInstallTaskProvider(project: Project, variant: SentryVariant): TaskProvider<out Task>? =
     variant.installProvider ?: project.findTask(listOf("install${variant.name.capitalized}"))
-
-  /**
-   * Returns the merge asset provider
-   *
-   * @return the provider if found or null otherwise
-   */
-  @JvmStatic
-  fun getMergeAssetsProvider(variant: ApplicationVariant): TaskProvider<MergeSourceSetFolders>? =
-    variant.mergeAssetsProvider
 
   /**
    * Returns the mapping file provider

@@ -22,61 +22,53 @@ import androidx.navigation.compose.rememberNavController
 
 class ComposeActivity : ComponentActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            val navController = rememberNavController()
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContent {
+      val navController = rememberNavController()
 
-            NavHost(
-                navController = navController,
-                startDestination = Destination.Home.route
-            ) {
-                val pillShape = RoundedCornerShape(50)
+      NavHost(navController = navController, startDestination = Destination.Home.route) {
+        val pillShape = RoundedCornerShape(50)
 
-                composable(Destination.Home.route) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        BasicText(
-                            modifier = Modifier
-                                .border(2.dp, Color.Gray, pillShape)
-                                .clip(pillShape)
-                                .clickable {
-                                    navController.navigate(Destination.Details.route)
-                                }
-                                .padding(24.dp),
-                            text = "Home. Tap to go to Details."
-                        )
-                    }
-                }
-                composable(Destination.Details.route) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        BasicText(
-                            modifier = Modifier
-                                .border(2.dp, Color.Gray, pillShape)
-                                .clip(pillShape)
-                                .clickable {
-                                    navController.popBackStack()
-                                }
-                                .padding(24.dp),
-                            text = "Details. Tap or press back to return."
-                        )
-                    }
-                }
-            }
+        composable(Destination.Home.route) {
+          Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+          ) {
+            BasicText(
+              modifier =
+                Modifier.border(2.dp, Color.Gray, pillShape)
+                  .clip(pillShape)
+                  .clickable { navController.navigate(Destination.Details.route) }
+                  .padding(24.dp),
+              text = "Home. Tap to go to Details.",
+            )
+          }
         }
+        composable(Destination.Details.route) {
+          Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+          ) {
+            BasicText(
+              modifier =
+                Modifier.border(2.dp, Color.Gray, pillShape)
+                  .clip(pillShape)
+                  .clickable { navController.popBackStack() }
+                  .padding(24.dp),
+              text = "Details. Tap or press back to return.",
+            )
+          }
+        }
+      }
     }
+  }
 
-    sealed class Destination(
-        val route: String
-    ) {
-        object Home : Destination("home")
-        object Details : Destination("details")
-    }
+  sealed class Destination(val route: String) {
+    object Home : Destination("home")
+
+    object Details : Destination("details")
+  }
 }

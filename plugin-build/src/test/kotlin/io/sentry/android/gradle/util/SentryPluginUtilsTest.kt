@@ -39,7 +39,7 @@ class SentryPluginUtilsTest(private val agpVersion: SemVer) {
   @Test
   fun `isMinificationEnabled returns false for standalone Proguard`() {
     val (project, _) = createTestProguardProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
-    val variant = project.retrieveAndroidVariant(agpVersion, "debug")
+    val variant = project.retrieveAndroidVariant("debug")
 
     assertEquals(false, isMinificationEnabled(project, variant, dexguardEnabled = true))
   }
@@ -50,7 +50,7 @@ class SentryPluginUtilsTest(private val agpVersion: SemVer) {
     project.extensions.getByType(ProGuardAndroidExtension::class.java).apply {
       configurations.create("debug") { it.defaultConfiguration("proguard-android-optimize.txt") }
     }
-    val variant = project.retrieveAndroidVariant(agpVersion, "debug")
+    val variant = project.retrieveAndroidVariant("debug")
 
     assertEquals(true, isMinificationEnabled(project, variant, dexguardEnabled = true))
   }
@@ -61,7 +61,7 @@ class SentryPluginUtilsTest(private val agpVersion: SemVer) {
     project.extensions.getByType(ProGuardAndroidExtension::class.java).apply {
       configurations.create("debug") { it.defaultConfiguration("proguard-android-optimize.txt") }
     }
-    val variant = project.retrieveAndroidVariant(agpVersion, "debug")
+    val variant = project.retrieveAndroidVariant("debug")
 
     assertEquals(false, isMinificationEnabled(project, variant, dexguardEnabled = false))
   }
@@ -69,7 +69,7 @@ class SentryPluginUtilsTest(private val agpVersion: SemVer) {
   @Test
   fun `isMinificationEnabled returns false for debug builds`() {
     val (project, _) = createTestAndroidProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
-    val variant = project.retrieveAndroidVariant(agpVersion, "debug")
+    val variant = project.retrieveAndroidVariant("debug")
 
     assertEquals(false, isMinificationEnabled(project, variant))
   }
@@ -88,6 +88,6 @@ class SentryPluginUtilsTest(private val agpVersion: SemVer) {
   companion object {
     @Parameterized.Parameters(name = "AGP {0}")
     @JvmStatic
-    fun parameters() = listOf(AgpVersions.VERSION_7_0_0, AgpVersions.VERSION_7_4_0)
+    fun parameters() = listOf(AgpVersions.VERSION_7_4_0)
   }
 }

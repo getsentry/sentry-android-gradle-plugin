@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Enable caching for BundleSourcesTask ([#894](https://github.com/getsentry/sentry-android-gradle-plugin/pull/894)
+
+### Breaking Changes
+
+- Drop support for Android Gradle Plugin 7.3.X and below. To continue to use 7.3.X and below use Sentry Android Gradle Plugin 5.7.0. ([#911](https://github.com/getsentry/sentry-android-gradle-plugin/pull/911))
+
+### Internal
+
+- Add Google Truth for easier to debug assertions in tests ([#920](https://github.com/getsentry/sentry-android-gradle-plugin/pull/920))
+
 ## 5.8.0
 
 ### Dependencies

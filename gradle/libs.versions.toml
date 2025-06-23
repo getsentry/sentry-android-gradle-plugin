@@ -18,12 +18,9 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version = "1.8.10" }
-spotless = { id = "com.diffplug.spotless", version = "7.0.0" }
+spotless = { id = "com.diffplug.spotless", version = "7.0.4" }
 groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.2" }
-shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }
-# do not upgrade `mavenPublish` to 0.18.0, it does not generate the pom-default.xml and module.json under
-# build/publications/maven
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.17.0" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 buildConfig = { id = "com.github.gmazzo.buildconfig", version = "4.2.0" }
@@ -43,6 +40,7 @@ autoService = { group = "com.google.auto.service", name = "auto-service", versio
 autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.0.1" }
 kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
 kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.7.0" }
+truth = { module = "com.google.truth:truth", version = "1.4.4" }
 composeDesktop = { group = "org.jetbrains.compose.desktop", name = "desktop", version = "1.6.10" }
 
 # bytecode instrumentation

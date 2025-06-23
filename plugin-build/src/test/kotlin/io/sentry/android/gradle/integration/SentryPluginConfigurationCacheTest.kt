@@ -23,12 +23,6 @@ class SentryPluginConfigurationCacheTest :
 
   @Test
   fun `dependency collector task respects configuration cache`() {
-    assumeThat(
-      "SentryExternalDependenciesReportTask only supports " +
-        "configuration cache from Gradle 7.5 onwards",
-      GradleVersions.CURRENT >= GradleVersions.VERSION_7_5,
-      `is`(true),
-    )
     appBuildFile.writeText(
       // language=Groovy
       """
@@ -272,12 +266,6 @@ class SentryPluginConfigurationCacheTest :
       System.getenv("SENTRY_AUTH_TOKEN").isNullOrEmpty(),
       `is`(false),
     )
-    assumeThat(
-      "SentryUploadNativeSymbolsTask only supports " +
-        "configuration cache from Gradle 7.5 onwards",
-      GradleVersions.CURRENT >= GradleVersions.VERSION_7_5,
-      `is`(true),
-    )
     appBuildFile.writeText(
       // language=Groovy
       """
@@ -312,12 +300,6 @@ class SentryPluginConfigurationCacheTest :
 
   @Test
   fun `generate integration list task respects configuration cache`() {
-    assumeThat(
-      "SentryGenerateIntegrationListTask only supports " +
-        "configuration cache from Gradle 7.5 onwards",
-      GradleVersions.CURRENT >= GradleVersions.VERSION_7_5,
-      `is`(true),
-    )
     appBuildFile.writeText(
       // language=Groovy
       """

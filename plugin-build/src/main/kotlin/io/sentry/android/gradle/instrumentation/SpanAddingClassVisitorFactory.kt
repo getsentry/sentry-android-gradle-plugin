@@ -36,7 +36,6 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.objectweb.asm.ClassVisitor
 
-@Suppress("UnstableApiUsage")
 abstract class SpanAddingClassVisitorFactory :
   AsmClassVisitorFactory<SpanAddingClassVisitorFactory.SpanAddingParameters> {
 

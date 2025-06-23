@@ -1,13 +1,10 @@
-.PHONY: clean compile all dist
-
-clean:
-	./gradlew clean
+.PHONY: compile all dist
 
 compile:
 	./gradlew assemble
 
 # build distribution artifacts
 dist:
-	./gradlew distZip --no-daemon --no-parallel
+	./gradlew distZip --no-parallel
 
-all: clean compile dist
+all: compile dist

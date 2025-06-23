@@ -8,7 +8,7 @@ import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
-import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory
+import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.SentryPluginUtils
 import io.sentry.android.gradle.util.hookWithAssembleTasks
@@ -114,7 +114,7 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
         )
 
       val reportDependenciesTask =
-        SentryExternalDependenciesReportTaskFactory.register(
+        SentryExternalDependenciesReportTaskV2.register(
           project = project,
           extension,
           sentryTelemetryProvider,

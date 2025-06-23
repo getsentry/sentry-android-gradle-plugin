@@ -34,9 +34,9 @@ dependencies {
   }
 }
 
-tasks.withType<Test> { useJUnitPlatform() }
+tasks.withType<Test>().configureEach { useJUnitPlatform() }
 
-tasks.withType<KotlinCompile> {
+tasks.withType<KotlinCompile>().configureEach {
   kotlinOptions {
     freeCompilerArgs = listOf("-Xjsr305=strict")
     jvmTarget = JavaVersion.VERSION_1_8.toString()

@@ -2,13 +2,10 @@ package io.sentry.android.gradle
 
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
-import com.android.build.gradle.AppExtension
 import com.reandroid.lib.apk.ApkModule
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
 import io.sentry.android.gradle.testutil.forceEvaluate
-import io.sentry.android.gradle.util.AgpVersions
-import io.sentry.android.gradle.util.SemVer
 import io.sentry.gradle.common.SentryVariant
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -46,18 +43,11 @@ internal fun verifyProguardUuid(
   val sentryProperties =
     if (inGeneratedFolder) {
       val propsFile =
-        if (AgpVersions.isAGP74) {
-          rootFile.resolve(
-            "app/build/generated/assets" +
-              "/generateSentryDebugMetaProperties${variant.capitalized}" +
-              "/sentry-debug-meta.properties"
-          )
-        } else {
-          rootFile.resolve(
-            "app/build/generated/assets" +
-              "/sentry/debug-meta-properties/$variant/sentry-debug-meta.properties"
-          )
-        }
+        rootFile.resolve(
+          "app/build/generated/assets" +
+            "/generateSentryDebugMetaProperties${variant.capitalized}" +
+            "/sentry-debug-meta.properties"
+        )
       if (propsFile.exists()) propsFile.readText() else ""
     } else {
       extractZip(apk, "assets/sentry-debug-meta.properties")
@@ -172,21 +162,13 @@ private fun readZippedContent(zipInputStream: ZipInputStream): String {
   return stringContent
 }
 
-fun Project.retrieveAndroidVariant(agpVersion: SemVer, variantName: String): SentryVariant {
-  return if (AgpVersions.isAGP74(agpVersion)) {
-    var debug: Variant? = null
-    val extension = project.extensions.getByType(AndroidComponentsExtension::class.java)
-    extension.onVariants(extension.selector().withName(variantName)) { debug = it }
-    project.forceEvaluate()
+fun Project.retrieveAndroidVariant(variantName: String): SentryVariant {
+  var debug: Variant? = null
+  val extension = project.extensions.getByType(AndroidComponentsExtension::class.java)
+  extension.onVariants(extension.selector().withName(variantName)) { debug = it }
+  project.forceEvaluate()
 
-    return AndroidVariant74(debug!!)
-  } else {
-    val variant =
-      project.extensions.getByType(AppExtension::class.java).applicationVariants.first {
-        it.name == variantName
-      }
-    AndroidVariant70(variant)
-  }
+  return AndroidVariant74(debug!!)
 }
 
 fun TemporaryFolder.withDummyComposeFile(): String {

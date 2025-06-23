@@ -1,17 +1,7 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath Libs.AGP
-        classpath "io.sentry:sentry-android-gradle-plugin"
-    }
+plugins {
+    id("com.android.application")
+    id("io.sentry.android.gradle")
 }
-
-apply plugin: 'com.android.application'
-apply plugin: 'io.sentry.android.gradle'
 
 android {
     compileSdk = LibsVersion.SDK_VERSION
@@ -37,7 +27,6 @@ android {
 }
 
 if (System.getenv("AUTO_UPLOAD")) {
-    apply plugin: 'io.sentry.android.gradle'
     sentry {
         autoUploadProguardMapping = false
         uploadNativeSymbols = true
