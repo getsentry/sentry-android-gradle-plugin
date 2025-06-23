@@ -1,6 +1,6 @@
 [versions]
 kotlin = "1.8.20"
-agp = "7.4.0"
+agp = "8.10.1"
 
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
 ktfmt = "0.51"
@@ -19,7 +19,7 @@ kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotli
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version = "1.8.10" }
 spotless = { id = "com.diffplug.spotless", version = "7.0.4" }
-groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.2" }
+groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.7.1" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
@@ -33,7 +33,9 @@ proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.5
 # this allows us to develop against a fixed version of Gradle, as opposed to depending on the
 # locally available version. kotlin-gradle-plugin follows the same approach.
 # More info: https://docs.nokee.dev/manual/gradle-plugin-development-plugin.html
-gradleApi = { group = "dev.gradleplugins", name = "gradle-api", version = "7.6.4" }
+# The latest version is 8.11.1 https://github.com/gradle-plugins/gradle-api/issues/6
+# 8.8 or higher fails groovy compilation
+gradleApi = { group = "dev.gradleplugins", name = "gradle-api", version = "8.7" }
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable" }
 autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.0.1" }

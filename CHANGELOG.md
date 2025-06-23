@@ -14,6 +14,10 @@
 
 - Add Google Truth for easier to debug assertions in tests ([#920](https://github.com/getsentry/sentry-android-gradle-plugin/pull/920))
 
+### Dependencies
+
+- Set build default Gradle Version to 8.14.2 ([#891](https://github.com/getsentry/sentry-android-gradle-plugin/pull/891))
+
 ## 5.8.0
 
 ### Dependencies
