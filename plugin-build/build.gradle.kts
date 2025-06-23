@@ -1,8 +1,10 @@
+import com.vanniktech.maven.publish.tasks.JavadocJar
 import io.sentry.android.gradle.internal.ASMifyTask
 import io.sentry.android.gradle.internal.BootstrapAndroidSdk
 import java.io.FileInputStream
 import java.util.Properties
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -303,4 +305,12 @@ tasks.named("check").configure { dependsOn(tasks.named("validatePlugins")) }
 tasks.withType<ValidatePlugins>().configureEach {
   failOnWarning.set(true)
   enableStricterValidation.set(true)
+}
+
+tasks.withType<DokkaTask>().configureEach {
+  notCompatibleWithConfigurationCache("Cannot serialize configuration")
+}
+
+tasks.withType<JavadocJar>().configureEach {
+  notCompatibleWithConfigurationCache("Cannot serialize configuration")
 }
