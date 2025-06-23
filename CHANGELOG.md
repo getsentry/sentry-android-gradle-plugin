@@ -10,15 +10,17 @@
 
 - Drop support for Android Gradle Plugin 7.3.X and below. To continue to use 7.3.X and below use Sentry Android Gradle Plugin 5.7.0. ([#911](https://github.com/getsentry/sentry-android-gradle-plugin/pull/911))
 
-### Dependencies
-
-- Bump Android SDK from v8.12.0 to v8.14.0 ([#896](https://github.com/getsentry/sentry-android-gradle-plugin/pull/896), [#914](https://github.com/getsentry/sentry-android-gradle-plugin/pull/914), [#919](https://github.com/getsentry/sentry-android-gradle-plugin/pull/919))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8140)
-  - [diff](https://github.com/getsentry/sentry-java/compare/8.12.0...8.14.0)
-
 ### Internal
 
 - Add Google Truth for easier to debug assertions in tests ([#920](https://github.com/getsentry/sentry-android-gradle-plugin/pull/920))
+
+## 5.8.0
+
+### Dependencies
+
+- Bump Android SDK from v8.12.0 to v8.14.0 ([#919](https://github.com/getsentry/sentry-android-gradle-plugin/pull/919))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8140)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.12.0...8.14.0)
 
 ## 5.7.0
 
