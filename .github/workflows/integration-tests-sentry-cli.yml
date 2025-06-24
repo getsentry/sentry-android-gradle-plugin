@@ -22,7 +22,7 @@ jobs:
           python-version: '3.10.5'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@9f79b5fa2c0d6f1157051630d2fb45b9f10ca6a5 # pin@v4
+        uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # pin@v4
 
       - name: Set up Java
         uses: actions/setup-java@v4

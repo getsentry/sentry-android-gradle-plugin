@@ -7,7 +7,6 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.build.api.instrumentation.InstrumentationScope
-import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.CanMinifyCode
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.impl.ApplicationVariantImpl
@@ -84,15 +83,6 @@ data class AndroidVariant74(private val variant: Variant) : SentryVariant {
   }
 }
 
-fun <T : Task> configureGeneratedSourcesFor74(
-  variant: Variant,
-  vararg tasks: Pair<TaskProvider<out T>, (T) -> DirectoryProperty>,
-) {
-  tasks.forEach { (task, output) ->
-    variant.sources.assets?.addGeneratedSourceDirectory(task, output)
-  }
-}
-
 fun <T : InstrumentationParameters> configureInstrumentationFor74(
   variant: Variant,
   classVisitorFactoryImplClass: Class<out AsmClassVisitorFactory<T>>,
@@ -108,11 +98,4 @@ fun <T : InstrumentationParameters> configureInstrumentationFor74(
   )
   variant.instrumentation.setAsmFramesComputationMode(mode)
   variant.instrumentation.excludes.set(excludes)
-}
-
-fun onVariants74(
-  androidComponentsExt: AndroidComponentsExtension<*, *, *>,
-  callback: (Variant) -> Unit,
-) {
-  androidComponentsExt.onVariants(callback = callback)
 }

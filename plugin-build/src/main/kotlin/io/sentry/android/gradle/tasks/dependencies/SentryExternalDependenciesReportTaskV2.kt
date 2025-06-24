@@ -2,7 +2,6 @@ package io.sentry.android.gradle.tasks.dependencies
 
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
-import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskFactory.SENTRY_DEPENDENCIES_REPORT_OUTPUT
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.artifactsFor
@@ -34,7 +33,6 @@ abstract class SentryExternalDependenciesReportTaskV2 : DirectoryOutputTask() {
   @TaskAction
   fun action() {
     val outputDir = output.get().asFile
-    outputDir.mkdirs()
 
     val dependencies = artifactIds.get().toSortedSet()
 
@@ -43,13 +41,16 @@ abstract class SentryExternalDependenciesReportTaskV2 : DirectoryOutputTask() {
   }
 
   companion object {
+
+    internal const val SENTRY_DEPENDENCIES_REPORT_OUTPUT = "sentry-external-modules.txt"
+
     fun register(
       project: Project,
       extension: SentryPluginExtension,
       sentryTelemetryProvider: Provider<SentryTelemetryService>,
       configurationName: String,
       attributeValueJar: String,
-      output: Provider<Directory>?,
+      output: Provider<Directory>? = null,
       includeReport: Provider<Boolean>,
       taskSuffix: String = "",
     ): TaskProvider<SentryExternalDependenciesReportTaskV2> {

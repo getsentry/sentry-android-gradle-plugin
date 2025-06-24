@@ -1,5 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.vanniktech.maven.publish.MavenPublishPluginExtension
 import io.sentry.android.gradle.internal.ASMifyTask
 import io.sentry.android.gradle.internal.BootstrapAndroidSdk
 import java.io.FileInputStream
@@ -14,12 +12,11 @@ plugins {
   id("distribution")
   alias(libs.plugins.dokka)
   id("java-gradle-plugin")
-  alias(libs.plugins.mavenPublish) apply false
+  alias(libs.plugins.mavenPublish)
   alias(libs.plugins.spotless)
   // we need this plugin in order to include .aar dependencies into a pure java project, which the
   // gradle plugin is
   id("io.sentry.android.gradle.aar2jar")
-  alias(libs.plugins.shadow)
   alias(libs.plugins.buildConfig)
 }
 
@@ -28,30 +25,11 @@ BootstrapAndroidSdk.locateAndroidSdk(project, extra)
 val androidSdkPath: String? by extra
 val testImplementationAar by configurations.getting // this converts .aar into .jar dependencies
 
-val agp70: SourceSet by sourceSets.creating
-val agp74: SourceSet by sourceSets.creating
-
-val shade: Configuration by
-  configurations.creating {
-    isCanBeConsumed = false
-    isCanBeResolved = true
-  }
-
 val fixtureClasspath: Configuration by configurations.creating
 
 dependencies {
-  agp70.compileOnlyConfigurationName(libs.gradleApi)
-  agp70.compileOnlyConfigurationName(Libs.agp("7.0.4"))
-  agp70.compileOnlyConfigurationName(project(":common"))
-
-  agp74.compileOnlyConfigurationName(libs.gradleApi)
-  agp74.compileOnlyConfigurationName(Libs.agp("7.4.0"))
-  agp74.compileOnlyConfigurationName(project(":common"))
-
   compileOnly(libs.gradleApi)
   compileOnly(Libs.AGP)
-  compileOnly(agp70.output)
-  compileOnly(agp74.output)
   compileOnly(libs.proguard)
 
   implementation(libs.asm)
@@ -61,23 +39,13 @@ dependencies {
 
   implementation(libs.sentry)
 
-  // compileOnly since we'll be shading the common dependency into the final jar
-  // but we still need to be able to compile it (this also excludes it from .pom)
-  compileOnly(project(":common"))
-  shade(project(":common"))
-
   testImplementation(gradleTestKit())
   testImplementation(kotlin("test"))
   testImplementation(Libs.AGP)
-  testImplementation(agp70.output)
-  testImplementation(agp74.output)
-  testImplementation(project(":common"))
-  fixtureClasspath(agp70.output)
-  fixtureClasspath(agp74.output)
-  fixtureClasspath(project(":common"))
   testImplementation(libs.proguard)
   testImplementation(libs.junit)
   testImplementation(libs.mockitoKotlin)
+  testImplementation(libs.truth)
 
   testImplementation(libs.asm)
   testImplementation(libs.asmCommons)
@@ -134,9 +102,8 @@ tasks.named("pluginUnderTestMetadata").configure {
   (this as PluginUnderTestMetadata).pluginClasspath.from(fixtureClasspath)
 }
 
-tasks.named("test").configure {
-  require(this is Test)
-  maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+tasks.withType<Test>().named("test").configure {
+  maxParallelForks = 2
 
   // Cap JVM args per test
   minHeapSize = "128m"
@@ -150,10 +117,9 @@ tasks.register<Test>("integrationTest").configure {
   description = "Runs the integration tests"
   // for some reason Gradle > 8.10 doesn't pick up the pluginUnderTestMetadata classpath, so we
   // need to add it manually
-  classpath +=
-    layout.files(project.layout.buildDirectory.get().toString() + "/pluginUnderTestMetadata")
+  classpath += layout.files(project.layout.buildDirectory.dir("pluginUnderTestMetadata"))
 
-  maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+  maxParallelForks = 2
 
   // Cap JVM args per test
   minHeapSize = "128m"
@@ -190,33 +156,14 @@ gradlePlugin {
   }
 }
 
-tasks.withType<Jar> {
-  from(agp70.output)
-  from(agp74.output)
-}
-
-tasks.withType<ShadowJar> {
-  archiveClassifier.set("")
-  configurations = listOf(project.configurations.getByName("shade"))
-
-  exclude("/kotlin/**")
-  exclude("/groovy**")
-  exclude("/org/**")
-}
-
-artifacts {
-  runtimeOnly(tasks.named("shadowJar"))
-  archives(tasks.named("shadowJar"))
-}
-
 spotless {
   kotlin {
     ktfmt(libs.versions.ktfmt.get()).googleStyle()
-    targetExclude("**/generated/**")
+    target("**/*.kt")
   }
   kotlinGradle {
     ktfmt(libs.versions.ktfmt.get()).googleStyle()
-    targetExclude("**/generated/**")
+    target("**/*.kts")
   }
 }
 
@@ -226,7 +173,7 @@ distributions {
   main {
     contents {
       from("build${sep}libs")
-      from("build${sep}publications${sep}maven")
+      from("build${sep}publications${sep}pluginMaven")
     }
   }
   create("sentryPluginMarker") {
@@ -240,20 +187,51 @@ distributions {
   }
 }
 
-apply { plugin("com.vanniktech.maven.publish") }
-
-val publish = extensions.getByType(MavenPublishPluginExtension::class.java)
-
-// signing is done when uploading files to MC
-// via gpg:sign-and-deploy-file (release.kts)
-publish.releaseSigningEnabled = false
-
 tasks.named("distZip") {
   dependsOn("publishToMavenLocal")
   onlyIf { inputs.sourceFiles.isEmpty.not().also { require(it) { "No distribution to zip." } } }
 }
 
-tasks.withType<Test> {
+tasks.named("distTar").configure {
+  dependsOn(
+    "dokkaJavadocJar",
+    "jar",
+    "sourcesJar",
+    "generateMetadataFileForPluginMavenPublication",
+    "generatePomFileForPluginMavenPublication",
+  )
+}
+
+tasks.named("sentryJvmPluginMarkerDistTar").configure {
+  dependsOn(
+    "generatePomFileForSentryJvmPluginPluginMarkerMavenPublication",
+    "generatePomFileForKotlinCompilerPluginPluginMarkerMavenPublication",
+  )
+}
+
+tasks.named("sentryJvmPluginMarkerDistZip").configure {
+  dependsOn("generatePomFileForSentryJvmPluginPluginMarkerMavenPublication")
+}
+
+tasks.named("dokkaHtml").configure { dependsOn("compileGroovy") }
+
+tasks.named("sentryKotlinCompilerPluginMarkerDistTar").configure {
+  dependsOn("generatePomFileForKotlinCompilerPluginPluginMarkerMavenPublication")
+}
+
+tasks.named("sentryKotlinCompilerPluginMarkerDistZip").configure {
+  dependsOn("generatePomFileForKotlinCompilerPluginPluginMarkerMavenPublication")
+}
+
+tasks.named("sentryPluginMarkerDistTar").configure {
+  dependsOn("generatePomFileForSentryPluginPluginMarkerMavenPublication")
+}
+
+tasks.named("sentryPluginMarkerDistZip").configure {
+  dependsOn("generatePomFileForSentryPluginPluginMarkerMavenPublication")
+}
+
+tasks.withType<Test>().configureEach {
   testLogging {
     events = setOf(TestLogEvent.SKIPPED, TestLogEvent.PASSED, TestLogEvent.FAILED)
     showStandardStreams = true
@@ -319,3 +297,10 @@ buildConfig {
 }
 
 tasks.register<ASMifyTask>("asmify")
+
+tasks.named("check").configure { dependsOn(tasks.named("validatePlugins")) }
+
+tasks.withType<ValidatePlugins>().configureEach {
+  failOnWarning.set(true)
+  enableStricterValidation.set(true)
+}

@@ -26,7 +26,6 @@
 
 package io.sentry.android.gradle.util
 
-import io.sentry.android.gradle.util.SemVer.Companion.equals
 import java.io.Serializable
 import kotlin.math.min
 

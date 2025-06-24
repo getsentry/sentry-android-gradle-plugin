@@ -1,14 +1,11 @@
 package io.sentry.android.gradle.tasks
 
+import com.google.common.truth.Truth.assertThat
 import io.sentry.android.gradle.sourcecontext.BundleSourcesTask
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
 import java.io.File
 import java.util.Properties
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
@@ -40,15 +37,15 @@ class BundleSourcesTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("sentry-cli" in args)
-    assertTrue("debug-files" in args)
-    assertTrue("bundle-jvm" in args)
-    assertTrue(sourceDir.absolutePath in args)
-    assertTrue("--output=${outDir.absolutePath}" in args)
+    assertThat(args).contains("sentry-cli")
+    assertThat(args).contains("debug-files")
+    assertThat(args).contains("bundle-jvm")
+    assertThat(args).contains(sourceDir.absolutePath)
+    assertThat(args).contains("--output=${outDir.absolutePath}")
 
-    assertFalse("--org" in args)
-    assertFalse("--project" in args)
-    assertFalse("--log-level=debug" in args)
+    assertThat(args).doesNotContain("--org")
+    assertThat(args).doesNotContain("--project")
+    assertThat(args).doesNotContain("--log-level=debug")
   }
 
   @Test
@@ -69,7 +66,7 @@ class BundleSourcesTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("--log-level=debug" in args)
+    assertThat(args).contains("--log-level=debug")
   }
 
   @Test
@@ -91,10 +88,8 @@ class BundleSourcesTaskTest {
 
     task.get().setSentryPropertiesEnv()
 
-    assertEquals(
-      propertiesFile.absolutePath,
-      task.get().environment["SENTRY_PROPERTIES"].toString(),
-    )
+    assertThat(task.get().environment["SENTRY_PROPERTIES"].toString())
+      .isEqualTo(propertiesFile.toString())
   }
 
   @Test
@@ -115,7 +110,7 @@ class BundleSourcesTaskTest {
 
     task.get().setSentryAuthTokenEnv()
 
-    assertEquals("<token>", task.get().environment["SENTRY_AUTH_TOKEN"].toString())
+    assertThat(task.get().environment).containsEntry("SENTRY_AUTH_TOKEN", "<token>")
   }
 
   @Test
@@ -135,7 +130,7 @@ class BundleSourcesTaskTest {
 
     task.get().setSentryPropertiesEnv()
 
-    assertNull(task.get().environment["SENTRY_PROPERTIES"])
+    assertThat(task.get().environment).doesNotContainKey("SENTRY_PROPERTIES")
   }
 
   @Test
@@ -156,8 +151,8 @@ class BundleSourcesTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("--org" in args)
-    assertTrue("dummy-org" in args)
+    assertThat(args).contains("--org")
+    assertThat(args).contains("dummy-org")
   }
 
   @Test
@@ -178,8 +173,8 @@ class BundleSourcesTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("--project" in args)
-    assertTrue("dummy-proj" in args)
+    assertThat(args).contains("--project")
+    assertThat(args).contains("dummy-proj")
   }
 
   @Test
@@ -187,7 +182,7 @@ class BundleSourcesTaskTest {
     val expected = "8c776014-bb25-11eb-8529-0242ac130003"
     val input = tempDir.newFile().apply { writeText("$SENTRY_BUNDLE_ID_PROPERTY=$expected") }
     val actual = BundleSourcesTask.readBundleIdFromFile(input)
-    assertEquals(expected, actual)
+    assertThat(actual).isEqualTo(expected)
   }
 
   @Test
@@ -195,7 +190,7 @@ class BundleSourcesTaskTest {
     val expected = "8c776014-bb25-11eb-8529-0242ac130003"
     val input = tempDir.newFile().apply { writeText(" $SENTRY_BUNDLE_ID_PROPERTY=$expected\n") }
     val actual = BundleSourcesTask.readBundleIdFromFile(input)
-    assertEquals(expected, actual)
+    assertThat(actual).isEqualTo(expected)
   }
 
   @Test
@@ -238,8 +233,8 @@ class BundleSourcesTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("--url" in args)
-    assertTrue("https://some-host.sentry.io" in args)
+    assertThat(args).contains("--url")
+    assertThat(args).contains("https://some-host.sentry.io")
   }
 
   private fun createProject(): Project {

@@ -54,13 +54,12 @@ jobs:
           java-version: ${{ matrix.java }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@9f79b5fa2c0d6f1157051630d2fb45b9f10ca6a5 # pin@v4
+        uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # pin@v4
         with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           gradle-version: ${{ matrix.gradle }}
 
-      - name: Build the Release variant
-        run: gradle assembleRelease
+      - name: Build the Release variants and integrationTest
+        run: gradle assembleRelease bundleRelease integrationTest
 
       - name: Check sentry-debug-meta.properties inside APKs
         run: |
@@ -71,9 +70,6 @@ jobs:
           cat output/assets/sentry-debug-meta.properties
           rm -r output
 
-      - name: Build the Release Bundle variant
-        run: gradle bundleRelease
-
       - name: Check sentry-debug-meta.properties inside App Bundle
         run: |
           unzip ./examples/android-gradle/build/outputs/bundle/release/android-gradle-release.aab -d output
@@ -82,9 +78,6 @@ jobs:
           unzip ./examples/android-gradle-kts/build/outputs/bundle/release/android-gradle-kts-release.aab -d output
           cat output/base/assets/sentry-debug-meta.properties
           rm -r output
-
-      - name: Run Integration Tests
-        run: gradle integrationTest
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4

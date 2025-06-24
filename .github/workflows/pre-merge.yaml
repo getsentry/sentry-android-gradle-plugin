@@ -31,7 +31,7 @@ jobs:
           java-version: '17'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@9f79b5fa2c0d6f1157051630d2fb45b9f10ca6a5 # pin@v4
+        uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # pin@v4
 
       - name: Run Gradle tasks
         if: runner.os != 'Windows'
@@ -44,8 +44,5 @@ jobs:
           path: plugin-build/build/reports/tests/
         if: always()
 
-      - name: Build the Debug variant
-        run: ./gradlew assembleDebug --no-daemon
-
-      - name: Build the Release variant
-        run: ./gradlew assembleRelease --no-daemon
+      - name: Build the Debug and Release variants
+        run: ./gradlew assemble

@@ -8,7 +8,4 @@ import androidx.room.PrimaryKey
 // the goal is just that auto instrumentation works for transitive dependencies,
 // so the FavoritesDao methods get instrumented too.
 @Entity(tableName = "Favorite")
-data class Favorite(
-    @PrimaryKey @ColumnInfo(name = "FavoriteId")
-    val id: Long,
-)
+data class Favorite(@PrimaryKey @ColumnInfo(name = "FavoriteId") val id: Long)

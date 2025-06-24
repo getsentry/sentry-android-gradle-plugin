@@ -20,7 +20,6 @@ import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryCliInfoValueSource.InfoParams
 import io.sentry.android.gradle.telemetry.SentryCliVersionValueSource.VersionParams
 import io.sentry.android.gradle.util.AgpVersions
-import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.SentryCliException
 import io.sentry.android.gradle.util.error
 import io.sentry.android.gradle.util.getBuildServiceName
@@ -254,7 +253,7 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
 
       // if telemetry is disabled we don't even need to exec sentry-cli as telemetry service
       // will be no-op
-      if (isExecAvailable() && isTelemetryEnabled) {
+      if (isTelemetryEnabled) {
         paramsWithExecAvailable(project, cliExecutable, extension, variant, org, buildType, tags)
           ?.let {
             return it
@@ -345,10 +344,6 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
         getBuildServiceName(SentryTelemetryService::class.java),
         SentryTelemetryService::class.java,
       ) {}
-    }
-
-    private fun isExecAvailable(): Boolean {
-      return GradleVersions.CURRENT >= GradleVersions.VERSION_7_5
     }
 
     private fun extraTagsFromExtension(
