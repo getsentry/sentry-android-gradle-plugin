@@ -1,2 +1,0 @@
-# LineNumberTable is needed otherwise the mapping file will be discarded.
--keepattributes LineNumberTable,SourceFile

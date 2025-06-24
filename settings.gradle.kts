@@ -20,8 +20,6 @@ include(":examples:android-gradle")
 
 include(":examples:android-gradle-kts")
 
-include(":examples:android-guardsquare-proguard")
-
 include(":examples:android-ndk")
 
 include(":examples:android-instrumentation-sample")
