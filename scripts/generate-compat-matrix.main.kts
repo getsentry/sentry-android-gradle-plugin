@@ -45,7 +45,7 @@ class GenerateMatrix : CliktCommand() {
      * - Latest stable
      * - Pre-release alpha
      * - Pre-release beta/rc
-     * - Previous latest major
+     * - Latest version from previous major release
      */
     @Suppress("SwallowedException", "TooGenericExceptionCaught")
     val agpVersions = try {
