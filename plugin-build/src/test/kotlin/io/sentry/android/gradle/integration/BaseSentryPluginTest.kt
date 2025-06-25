@@ -128,14 +128,11 @@ abstract class BaseSentryPluginTest(
   private fun unlockTransforms() {
     val gradleUserHome = File("build/tmp/integrationTest/work/.gradle-test-kit").absolutePath
 
-    val command = listOf(
-      "find", gradleUserHome, "-type", "f", "-name", "transforms-3.lock", "-delete"
-    )
+    val command =
+      listOf("find", gradleUserHome, "-type", "f", "-name", "transforms-3.lock", "-delete")
 
     try {
-      val process = ProcessBuilder(command)
-        .redirectErrorStream(true)
-        .start()
+      val process = ProcessBuilder(command).redirectErrorStream(true).start()
 
       val output = process.inputStream.bufferedReader().readText()
       val exitCode = process.waitFor()
