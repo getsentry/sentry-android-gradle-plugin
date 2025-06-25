@@ -22,12 +22,21 @@ jobs:
       - name: Generate Compat Matrix
         id: generate
         run: |
-          matrix=$(kotlin scripts/generate-compat-matrix.main.kts)
+          # Run the script and capture full output for debugging
+          full_output=$(kotlin scripts/generate-compat-matrix.main.kts)
+          
+          # Show the full output for debugging
+          echo "Full script output:"
+          echo "$full_output"
+          
+          # Extract only the last line (the JSON matrix)
+          matrix=$(echo "$full_output" | tail -n 1)
           
           echo "matrix<<EOF" >> "$GITHUB_OUTPUT"
           echo "$matrix" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
           
+          echo "Parsed matrix:"
           echo "$matrix" | jq
 
   publish-dry-run:
