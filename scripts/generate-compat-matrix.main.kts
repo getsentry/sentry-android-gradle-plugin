@@ -90,11 +90,10 @@ class GenerateMatrix : CliktCommand() {
             put("agp", entry.key.toString())
             // Gradle does not use .patch if it's 0 ¯\_(ツ)_/¯
             val gradle = entry.value
-            val (gradleMajor, gradleMinor, gradlePatch) = gradle
-            
+
             // Check if the Gradle version meets Kotlin's minimum requirement
-            // Use the latest Kotlin version's minimum requirement
-            val kotlinMinGradle = kotlinToGradleMap.entries.find { (kotlin, gradle) -> kotlin.inRange(kotlinVersion) }?.value?.min
+            // Use the current Kotlin version's minimum requirement
+            val kotlinMinGradle = kotlinToGradleMap.entries.find { (kotlin, _) -> kotlin.inRange(kotlinVersion) }?.value?.min
             val finalGradle = if (kotlinMinGradle != null && gradle < kotlinMinGradle) {
               echo("Warning: Gradle ${gradle} for AGP ${entry.key} is below Kotlin minimum ${kotlinMinGradle}")
               kotlinMinGradle
