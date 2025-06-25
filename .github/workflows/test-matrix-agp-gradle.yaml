@@ -1,6 +1,8 @@
 name: Test Matrix
 
 on:
+  schedule:
+    - cron: '0 4 * * *'
   push:
     branches:
       - main
@@ -11,42 +13,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  generate-matrix:
+    name: Generate Compat Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+      - name: Generate Compat Matrix
+        id: generate
+        run: |
+          # Run the script and capture full output for debugging
+          full_output=$(kotlin scripts/generate-compat-matrix.main.kts)
+          
+          # Show the full output for debugging
+          echo "Full script output:"
+          echo "$full_output"
+          
+          # Extract only the last line (the JSON matrix)
+          matrix=$(echo "$full_output" | tail -n 1)
+          
+          echo "matrix<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$matrix" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          
+          echo "Parsed matrix:"
+          echo "$matrix" | jq
+
   publish-dry-run:
+    needs: generate-matrix
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        agp: [ "7.4.0" ]
-        gradle: [ "7.6.4" ]
-        java: [ "11" ]
-        groovy: [ "1.2" ]
-        include:
-          - agp: "7.4.0"
-            gradle: "7.6.4"
-            java: "11"
-            groovy: "1.2"
-          - agp: "8.0.0"
-            gradle: "8.0.2"
-            java: "17"
-            groovy: "1.2"
-          - agp: "8.6.1"
-            gradle: "8.7"
-            java: "17"
-            groovy: "1.2"
-          - agp: "8.8.1"
-            gradle: "8.14.1"
-            java: "17"
-            groovy: "1.7.1"
-          - agp: "8.9.0"
-            gradle: "8.14.1"
-            java: "17"
-            groovy: "1.7.1"
-          - agp: "8.10.0"
-            gradle: "8.14.1"
-            java: "17"
-            groovy: "1.7.1"
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
 
-    name: Test Matrix - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }}
+    name: Test Matrix - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }} - Java ${{ matrix.java }} - Groovy ${{ matrix.groovy }}
     env:
       VERSION_AGP: ${{ matrix.agp }}
       VERSION_GROOVY: ${{ matrix.groovy }}

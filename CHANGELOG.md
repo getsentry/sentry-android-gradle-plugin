@@ -13,6 +13,7 @@
 ### Internal
 
 - Add Google Truth for easier to debug assertions in tests ([#920](https://github.com/getsentry/sentry-android-gradle-plugin/pull/920))
+- Generate AGP/Gradle compatibility matrix dynamically ([#873](https://github.com/getsentry/sentry-android-gradle-plugin/pull/873))
 
 ### Dependencies
 
