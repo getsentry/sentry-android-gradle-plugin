@@ -1,6 +1,8 @@
 name: Test Matrix
 
 on:
+  schedule:
+    - cron: '0 4 * * *'
   push:
     branches:
       - main
