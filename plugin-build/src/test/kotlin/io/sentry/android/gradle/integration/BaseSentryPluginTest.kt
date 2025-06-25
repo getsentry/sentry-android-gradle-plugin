@@ -118,7 +118,7 @@ abstract class BaseSentryPluginTest(
         .withProjectDir(testProjectDir.root)
         .withArguments("--stacktrace")
         .withPluginClasspath()
-        .witqhGradleVersion(gradleVersion)
+        .withGradleVersion(gradleVersion)
         .forwardOutput()
         //            .withDebug(true)
 //        .forwardStdOutput(writer)
