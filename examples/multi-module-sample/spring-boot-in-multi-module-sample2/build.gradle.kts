@@ -1,5 +1,5 @@
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
   alias(libs.plugins.springBoot)
@@ -36,10 +36,10 @@ dependencies {
 
 tasks.withType<Test>().configureEach { useJUnitPlatform() }
 
-tasks.withType<KotlinCompile>().configureEach {
-  kotlinOptions {
-    freeCompilerArgs = listOf("-Xjsr305=strict")
-    jvmTarget = JavaVersion.VERSION_1_8.toString()
+kotlin {
+  compilerOptions {
+    jvmTarget = JvmTarget.JVM_11
+    freeCompilerArgs.add("-Xjsr305=strict")
   }
 }
 

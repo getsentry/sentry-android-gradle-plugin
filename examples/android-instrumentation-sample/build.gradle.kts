@@ -1,8 +1,11 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
   alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP
   alias(libs.plugins.kotlinAndroid)
   alias(libs.plugins.ksp)
   id("io.sentry.android.gradle")
+  alias(libs.plugins.compose.compiler)
 }
 
 // useful for local debugging of the androidx.sqlite lib
@@ -49,10 +52,9 @@ android {
   }
 
   compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
   }
-  kotlinOptions { jvmTarget = JavaVersion.VERSION_11.toString() }
   namespace = "io.sentry.samples.instrumentation"
 
   buildFeatures { compose = true }
@@ -62,7 +64,10 @@ android {
   testOptions.unitTests.isIncludeAndroidResources = true
 }
 
-kotlin { jvmToolchain(11) }
+kotlin {
+  jvmToolchain(17)
+  compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
+}
 
 // useful, when we want to modify room-generated classes, and then compile them into .class files
 // so room does not re-generate and overwrite our changes
