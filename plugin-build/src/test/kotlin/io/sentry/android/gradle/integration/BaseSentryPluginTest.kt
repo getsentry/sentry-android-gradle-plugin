@@ -121,29 +121,6 @@ abstract class BaseSentryPluginTest(
         //            .withDebug(true)
         .forwardStdOutput(writer)
         .forwardStdError(writer)
-
-    unlockTransforms()
-  }
-
-  private fun unlockTransforms() {
-    val gradleUserHome = File("build/tmp/integrationTest/work/.gradle-test-kit").absolutePath
-
-    val command =
-      listOf("find", gradleUserHome, "-type", "f", "-name", "transforms-3.lock", "-delete")
-
-    try {
-      val process = ProcessBuilder(command).redirectErrorStream(true).start()
-
-      val output = process.inputStream.bufferedReader().readText()
-      val exitCode = process.waitFor()
-
-      if (exitCode != 0) {
-        println(output)
-        System.err.println("Unlock failed with exit code: $exitCode")
-      }
-    } catch (e: Exception) {
-      e.printStackTrace()
-    }
   }
 
   @After
