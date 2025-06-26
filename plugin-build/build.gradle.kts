@@ -119,6 +119,8 @@ tasks.register<Test>("integrationTest").configure {
   // need to add it manually
   classpath += layout.files(project.layout.buildDirectory.dir("pluginUnderTestMetadata"))
 
+  maxParallelForks = 2
+
   // Cap JVM args per test
   minHeapSize = "128m"
   maxHeapSize = "1g"
