@@ -108,12 +108,6 @@ abstract class BaseSentryPluginTest(
                 }
               }
             }
-
-                // unlock transforms because we're running tests in parallel therefore they may conflict
-                print(providers.exec {
-                  commandLine 'find', project.gradle.gradleUserHomeDir, '-type', 'f', '-name', 'transforms-3.lock', '-delete'
-                  ignoreExitValue true
-                }.standardOutput.asText.get())
             """
           .trimIndent()
       }
@@ -127,12 +121,35 @@ abstract class BaseSentryPluginTest(
         //            .withDebug(true)
         .forwardStdOutput(writer)
         .forwardStdError(writer)
+
+    unlockTransforms()
+  }
+
+  private fun unlockTransforms() {
+    val gradleUserHome = File("build/tmp/integrationTest/work/.gradle-test-kit").absolutePath
+
+    val command =
+      listOf("find", gradleUserHome, "-type", "f", "-name", "transforms-3.lock", "-delete")
+
+    try {
+      val process = ProcessBuilder(command).redirectErrorStream(true).start()
+
+      val output = process.inputStream.bufferedReader().readText()
+      val exitCode = process.waitFor()
+
+      if (exitCode != 0) {
+        println(output)
+        System.err.println("Unlock failed with exit code: $exitCode")
+      }
+    } catch (e: Exception) {
+      e.printStackTrace()
+    }
   }
 
   @After
   fun teardown() {
     try {
-      runner.appendArguments("app:cleanupAutoInstallState").build()
+      runner.withArguments("app:cleanupAutoInstallState").build()
     } catch (ignored: Throwable) {
       // may fail if we are relying on BuildFinishesListener, but we don't care here
     }
