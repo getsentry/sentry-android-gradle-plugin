@@ -4,6 +4,8 @@ import java.io.FileInputStream
 import java.util.Properties
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_8
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -86,12 +88,14 @@ tasks.withType<KotlinCompile>().configureEach {
   if (!name.contains("agp", ignoreCase = true)) {
     libraries.from.addAll(files(sourceSets["main"].groovy.classesDirectory))
   }
+}
 
-  kotlinOptions {
-    jvmTarget = JavaVersion.VERSION_11.toString()
-    freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn", "-Xjvm-default=enable")
-    languageVersion = "1.4"
-    apiVersion = "1.4"
+kotlin {
+  compilerOptions {
+    jvmTarget.set(JvmTarget.JVM_11)
+    freeCompilerArgs.addAll("-Xopt-in=kotlin.RequiresOptIn", "-Xjvm-default=all")
+    apiVersion.set(KOTLIN_1_8)
+    languageVersion.set(KOTLIN_1_8)
   }
 }
 

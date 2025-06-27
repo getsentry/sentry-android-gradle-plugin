@@ -1,9 +1,10 @@
 import org.gradle.kotlin.dsl.withType
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
-  alias(libs.plugins.kotlin) version "2.1.0"
-  alias(libs.plugins.kapt) version "2.1.0"
+  alias(libs.plugins.kotlin) version "2.1.20"
+  alias(libs.plugins.kapt) version "2.1.20"
   id("distribution")
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.spotless)
@@ -79,12 +80,11 @@ tasks.withType<Jar>().configureEach {
 
 // see
 // https://youtrack.jetbrains.com/issue/KTIJ-24311/task-current-target-is-17-and-kaptGenerateStubsProductionDebugKotlin-task-current-target-is-1.8-jvm-target-compatibility-should
-kotlin { jvmToolchain(11) }
-
-tasks.withType<KotlinCompile>().configureEach {
-  kotlinOptions {
-    jvmTarget = JavaVersion.VERSION_11.toString()
-    languageVersion = "1.9"
-    apiVersion = "1.9"
+kotlin {
+  jvmToolchain(11)
+  compilerOptions {
+    jvmTarget.set(JvmTarget.JVM_11)
+    apiVersion.set(KotlinVersion.KOTLIN_1_9)
+    languageVersion.set(KotlinVersion.KOTLIN_1_9)
   }
 }
