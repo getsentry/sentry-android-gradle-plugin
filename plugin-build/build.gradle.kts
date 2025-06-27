@@ -63,7 +63,7 @@ dependencies {
   testImplementation(libs.zip4j)
 }
 
-configure<JavaPluginExtension> {
+java {
   sourceCompatibility = JavaVersion.VERSION_11
   targetCompatibility = JavaVersion.VERSION_11
 }
@@ -89,9 +89,8 @@ tasks.withType<KotlinCompile>().configureEach {
 
   kotlinOptions {
     jvmTarget = JavaVersion.VERSION_11.toString()
-    freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn", "-Xjvm-default=enable")
-    languageVersion = "1.4"
-    apiVersion = "1.4"
+    languageVersion = "1.8"
+    apiVersion = "1.8"
   }
 }
 

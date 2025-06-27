@@ -9,6 +9,7 @@
 ### Breaking Changes
 
 - Drop support for Android Gradle Plugin 7.3.X and below. To continue to use 7.3.X and below use Sentry Android Gradle Plugin 5.7.0. ([#911](https://github.com/getsentry/sentry-android-gradle-plugin/pull/911))
+- Minimum supported Kotlin language version is now 1.8 ([#935](https://github.com/getsentry/sentry-android-gradle-plugin/pull/935))
 
 ### Internal
 
