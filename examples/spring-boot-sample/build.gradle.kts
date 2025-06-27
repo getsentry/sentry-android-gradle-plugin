@@ -13,9 +13,10 @@ group = "io.sentry.samples.spring-boot"
 
 version = "0.0.1-SNAPSHOT"
 
-java.sourceCompatibility = JavaVersion.VERSION_1_8
-
-java.targetCompatibility = JavaVersion.VERSION_1_8
+java {
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
+}
 
 dependencies {
   implementation(libs.sample.springBoot.starterSecurity)
@@ -38,7 +39,7 @@ tasks.withType<Test>().configureEach { useJUnitPlatform() }
 
 kotlin {
   compilerOptions {
-    jvmTarget = JvmTarget.JVM_11
+    jvmTarget.set(JvmTarget.JVM_11)
     freeCompilerArgs.add("-Xjsr305=strict")
   }
 }

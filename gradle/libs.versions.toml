@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.2.0"
+kotlin = "1.9.25"
 agp = "8.10.1"
 
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
@@ -8,7 +8,7 @@ sqlite = "2.1.0"
 sentry = "7.0.0"
 
 sampleCoroutines = "1.5.2"
-sampleRoom = "2.7.2"
+sampleRoom = "2.5.0"
 sampleRetrofit = "2.9.0"
 sampleSpringBoot = "2.7.4"
 
@@ -16,9 +16,8 @@ sampleSpringBoot = "2.7.4"
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version = "2.2.0-2.0.2" }
+ksp = { id = "com.google.devtools.ksp", version = "1.9.25-1.0.20" }
 dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
 spotless = { id = "com.diffplug.spotless", version = "7.0.4" }
 groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.7.1" }

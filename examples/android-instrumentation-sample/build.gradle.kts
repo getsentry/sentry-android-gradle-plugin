@@ -5,7 +5,6 @@ plugins {
   alias(libs.plugins.kotlinAndroid)
   alias(libs.plugins.ksp)
   id("io.sentry.android.gradle")
-  alias(libs.plugins.compose.compiler)
 }
 
 // useful for local debugging of the androidx.sqlite lib
@@ -52,21 +51,21 @@ android {
   }
 
   compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
   }
   namespace = "io.sentry.samples.instrumentation"
 
   buildFeatures { compose = true }
 
-  composeOptions { kotlinCompilerExtensionVersion = "1.4.6" }
+  composeOptions { kotlinCompilerExtensionVersion = "1.5.15" }
 
   testOptions.unitTests.isIncludeAndroidResources = true
 }
 
 kotlin {
-  jvmToolchain(17)
-  compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
+  jvmToolchain(11)
+  compilerOptions { jvmTarget.set(JvmTarget.JVM_11) }
 }
 
 // useful, when we want to modify room-generated classes, and then compile them into .class files

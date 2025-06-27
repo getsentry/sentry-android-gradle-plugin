@@ -5,9 +5,16 @@ plugins {
   id("io.sentry.jvm.gradle")
 }
 
+java {
+  toolchain.languageVersion.set(JavaLanguageVersion.of(11))
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
+}
+
 kotlin {
+  jvmToolchain(11)
   compilerOptions {
-    jvmTarget = JvmTarget.JVM_11
+    jvmTarget.set(JvmTarget.JVM_11)
     freeCompilerArgs.add("-Xjsr305=strict")
   }
 }
