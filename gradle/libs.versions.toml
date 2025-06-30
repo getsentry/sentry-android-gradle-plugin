@@ -18,7 +18,7 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version = "1.8.20-1.0.11" }
-dokka = { id = "org.jetbrains.dokka", version = "1.8.10" }
+dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
 spotless = { id = "com.diffplug.spotless", version = "7.0.4" }
 groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.7.1" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
@@ -42,7 +42,7 @@ kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-comp
 autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.0.1" }
 autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.0.1" }
 kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
-kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.7.0" }
+kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.7.1" }
 truth = { module = "com.google.truth:truth", version = "1.4.4" }
 composeDesktop = { group = "org.jetbrains.compose.desktop", name = "desktop", version = "1.6.10" }
 
