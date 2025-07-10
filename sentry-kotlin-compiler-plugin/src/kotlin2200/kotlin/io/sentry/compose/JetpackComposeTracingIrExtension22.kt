@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
 
-// Duplicate of JetpackComposeTracingIrExtension21, compiled against 2.2.0
+// Modified duplicate of JetpackComposeTracingIrExtension21, compiled against 2.2.0
 class JetpackComposeTracingIrExtension22(private val messageCollector: MessageCollector) :
   IrGenerationExtension {
 
