@@ -3,6 +3,7 @@ package io.sentry
 import com.google.auto.service.AutoService
 import io.sentry.compose.JetpackComposeTracingIrExtension19
 import io.sentry.compose.JetpackComposeTracingIrExtension21
+import io.sentry.compose.JetpackComposeTracingIrExtension22
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -31,7 +32,9 @@ class SentryKotlinCompilerPlugin : CompilerPluginRegistrar() {
       }
 
     val extension: IrGenerationExtension =
-      if (version >= SimpleSemanticVersion(2, 1, 20)) {
+      if (version >= SimpleSemanticVersion(2, 2, 0)) {
+        JetpackComposeTracingIrExtension22(messageCollector)
+      } else if (version >= SimpleSemanticVersion(2, 1, 20)) {
         // 2.1.20 removed some optional parameters, causing API incompatibility
         // e.g. java.lang.NoSuchMethodError
         // see https://github.com/JetBrains/kotlin/commit/dd508452c414a0ee8082aa6f76d664271cb38f2f

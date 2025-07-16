@@ -11,6 +11,7 @@ plugins {
 
 val kotlin1920: SourceSet by sourceSets.creating
 val kotlin2120: SourceSet by sourceSets.creating
+val kotlin2200: SourceSet by sourceSets.creating
 
 spotless {
   kotlin {
@@ -58,12 +59,15 @@ dependencies {
   testImplementation(libs.composeDesktop)
   testImplementation(kotlin1920.output)
   testImplementation(kotlin2120.output)
+  testImplementation(kotlin2200.output)
 
   kotlin1920.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.9.24")
   kotlin2120.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.1.20")
+  kotlin2200.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.2.0")
 
   compileOnly(kotlin1920.output)
   compileOnly(kotlin2120.output)
+  compileOnly(kotlin2200.output)
 }
 
 kapt { correctErrorTypes = true }
@@ -82,6 +86,7 @@ plugins.withId("com.vanniktech.maven.publish.base") {
 tasks.withType<Jar> {
   from(kotlin1920.output)
   from(kotlin2120.output)
+  from(kotlin2200.output)
 }
 
 // see
