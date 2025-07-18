@@ -68,6 +68,7 @@ jobs:
         uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # pin@v4
         with:
           gradle-version: ${{ matrix.gradle }}
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Build the Release variants and integrationTest
         run: gradle assembleRelease bundleRelease integrationTest
