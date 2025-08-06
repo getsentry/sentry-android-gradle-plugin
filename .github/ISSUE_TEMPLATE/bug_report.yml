@@ -1,7 +1,6 @@
 name: 🐞 Bug Report
 description: Tell us about something that's not working the way we (probably) intend.
-labels: ["Platform: Android", "bug"]
-type: Bug
+labels: ["Android", "Bug"]
 body:
   - type: input
     id: gradle_version
