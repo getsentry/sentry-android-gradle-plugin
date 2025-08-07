@@ -7,6 +7,17 @@ We suggest opening an issue to discuss bigger changes before investing on a big 
 
 The project currently requires you run JDK version `17` and the Android SDK.
 
+# Overriding `sentry-cli` for local development
+
+If you want to use a local version of the sentry-cli for testing integration with the plugin, you can do so by setting the `cli.executable` property in the `sentry.properties` file of the target project.
+
+Example `sentry.properties` file:
+
+```properties
+cli.executable=/path/to/your/local/sentry-cli
+```
+
+
 # Tests
 
 When running tests locally, some tests might fail due to failed upload of proguard mappings/source

@@ -1,8 +1,6 @@
 package io.sentry.android.gradle.integration
 
-import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.PrintBuildOutputOnFailureRule
-import io.sentry.android.gradle.util.SemVer
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.OutputStreamWriter
@@ -110,18 +108,6 @@ abstract class BaseSentryPluginTest(
                 }
               }
             }
-
-            if (GradleVersions.INSTANCE.CURRENT >= GradleVersions.INSTANCE.VERSION_7_5) {
-                // unlock transforms because we're running tests in parallel therefore they may conflict
-                print(providers.exec {
-                  commandLine 'find', project.gradle.gradleUserHomeDir, '-type', 'f', '-name', 'transforms-3.lock', '-delete'
-                  ignoreExitValue true
-                }.standardOutput.asText.get())
-            } else {
-              tasks.register('unlockTransforms', Exec) {
-                commandLine 'find', project.gradle.gradleUserHomeDir, '-type', 'f', '-name', 'transforms-3.lock', '-delete'
-              }
-            }
             """
           .trimIndent()
       }
@@ -136,16 +122,34 @@ abstract class BaseSentryPluginTest(
         .forwardStdOutput(writer)
         .forwardStdError(writer)
 
-    if (SemVer.parse(gradleVersion) < GradleVersions.VERSION_7_5) {
-      // for newer Gradle versions transforms are unlocked at config time instead of a task
-      runner.appendArguments("unlockTransforms").build()
+    unlockTransforms()
+  }
+
+  private fun unlockTransforms() {
+    val gradleUserHome = File("build/tmp/integrationTest/work/.gradle-test-kit").absolutePath
+
+    val command =
+      listOf("find", gradleUserHome, "-type", "f", "-name", "transforms-3.lock", "-delete")
+
+    try {
+      val process = ProcessBuilder(command).redirectErrorStream(true).start()
+
+      val output = process.inputStream.bufferedReader().readText()
+      val exitCode = process.waitFor()
+
+      if (exitCode != 0) {
+        println(output)
+        System.err.println("Unlock failed with exit code: $exitCode")
+      }
+    } catch (e: Exception) {
+      e.printStackTrace()
     }
   }
 
   @After
   fun teardown() {
     try {
-      runner.appendArguments("app:cleanupAutoInstallState").build()
+      runner.withArguments("app:cleanupAutoInstallState").build()
     } catch (ignored: Throwable) {
       // may fail if we are relying on BuildFinishesListener, but we don't care here
     }

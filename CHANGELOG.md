@@ -1,5 +1,32 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Enable caching for BundleSourcesTask ([#894](https://github.com/getsentry/sentry-android-gradle-plugin/pull/894)
+- Add support for Kotlin 2.2.0 for Sentry Kotlin Compiler Plugin ([#944](https://github.com/getsentry/sentry-android-gradle-plugin/pull/944))
+
+### Breaking Changes
+
+- Drop support for Android Gradle Plugin 7.3.X and below. To continue to use 7.3.X and below use Sentry Android Gradle Plugin 5.7.0. ([#911](https://github.com/getsentry/sentry-android-gradle-plugin/pull/911))
+- Minimum supported Kotlin language version is now 1.8 ([#935](https://github.com/getsentry/sentry-android-gradle-plugin/pull/935))
+
+### Internal
+
+- Add Google Truth for easier to debug assertions in tests ([#920](https://github.com/getsentry/sentry-android-gradle-plugin/pull/920))
+- Generate AGP/Gradle compatibility matrix dynamically ([#873](https://github.com/getsentry/sentry-android-gradle-plugin/pull/873))
+
+### Dependencies
+
+- Set build default Gradle Version to 8.14.2 ([#891](https://github.com/getsentry/sentry-android-gradle-plugin/pull/891))
+- Bump Android SDK from v8.14.0 to v8.17.0 ([#936](https://github.com/getsentry/sentry-android-gradle-plugin/pull/936), [#943](https://github.com/getsentry/sentry-android-gradle-plugin/pull/943))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8170)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.14.0...8.17.0)
+- Bump CLI from v2.46.0 to v2.50.2 ([#948](https://github.com/getsentry/sentry-android-gradle-plugin/pull/948))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2502)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.46.0...2.50.2)
+
 ## 5.8.1
 
 ### Fixes

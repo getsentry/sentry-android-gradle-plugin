@@ -8,7 +8,6 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.util.TraceMethodVisitor
 
-@Suppress("UnstableApiUsage")
 class CommonClassVisitor(
   apiVersion: Int,
   classVisitor: ClassVisitor,

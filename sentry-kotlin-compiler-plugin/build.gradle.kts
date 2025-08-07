@@ -1,5 +1,6 @@
 import org.gradle.kotlin.dsl.withType
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
   alias(libs.plugins.kotlin) version "2.1.0"
@@ -16,11 +17,11 @@ val kotlin2200: SourceSet by sourceSets.creating
 spotless {
   kotlin {
     ktfmt(libs.versions.ktfmt.get()).googleStyle()
-    targetExclude("**/generated/**")
+    target("**/*.kt")
   }
   kotlinGradle {
+    target("**/*.kts")
     ktfmt(libs.versions.ktfmt.get()).googleStyle()
-    targetExclude("**/generated/**")
   }
 }
 
@@ -34,13 +35,6 @@ distributions {
     }
   }
 }
-
-val publish =
-  extensions.getByType(com.vanniktech.maven.publish.MavenPublishPluginExtension::class.java)
-
-// signing is done when uploading files to MC
-// via gpg:sign-and-deploy-file (release.kts)
-publish.releaseSigningEnabled = false
 
 tasks.named("distZip") {
   dependsOn("publishToMavenLocal")
@@ -83,7 +77,7 @@ plugins.withId("com.vanniktech.maven.publish.base") {
   }
 }
 
-tasks.withType<Jar> {
+tasks.withType<Jar>().configureEach {
   from(kotlin1920.output)
   from(kotlin2120.output)
   from(kotlin2200.output)
@@ -91,12 +85,11 @@ tasks.withType<Jar> {
 
 // see
 // https://youtrack.jetbrains.com/issue/KTIJ-24311/task-current-target-is-17-and-kaptGenerateStubsProductionDebugKotlin-task-current-target-is-1.8-jvm-target-compatibility-should
-kotlin { jvmToolchain(11) }
-
-tasks.withType<KotlinCompile>().configureEach {
-  kotlinOptions {
-    jvmTarget = JavaVersion.VERSION_11.toString()
-    languageVersion = "1.9"
-    apiVersion = "1.9"
+kotlin {
+  jvmToolchain(11)
+  compilerOptions {
+    jvmTarget.set(JvmTarget.JVM_11)
+    languageVersion.set(KotlinVersion.KOTLIN_1_9)
+    apiVersion.set(KotlinVersion.KOTLIN_1_9)
   }
 }

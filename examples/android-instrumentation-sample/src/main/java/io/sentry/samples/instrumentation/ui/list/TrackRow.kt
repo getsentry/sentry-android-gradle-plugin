@@ -9,22 +9,24 @@ import android.widget.TextView
 import io.sentry.samples.instrumentation.R
 import io.sentry.samples.instrumentation.data.Track
 
-class TrackRow(
-    context: Context,
-    attrs: AttributeSet
-) : LinearLayout(context, attrs) {
+class TrackRow(context: Context, attrs: AttributeSet) : LinearLayout(context, attrs) {
 
-    val deleteButton: View get() = findViewById(R.id.delete_track)
-    val editButton: View get() = findViewById(R.id.edit_track)
-    val infoButton: View get() = findViewById(R.id.track_info)
+  val deleteButton: View
+    get() = findViewById(R.id.delete_track)
 
-    @SuppressLint("SetTextI18n")
-    fun populate(track: Track) {
-        val mins = (track.millis / 1000) / 60
-        val secs = (track.millis / 1000) % 60
+  val editButton: View
+    get() = findViewById(R.id.edit_track)
 
-        findViewById<TextView>(R.id.track_name).text = track.name
-        findViewById<TextView>(R.id.track_duration).text = "${mins}m ${secs}s"
-        findViewById<TextView>(R.id.band_name).text = track.composer
-    }
+  val infoButton: View
+    get() = findViewById(R.id.track_info)
+
+  @SuppressLint("SetTextI18n")
+  fun populate(track: Track) {
+    val mins = (track.millis / 1000) / 60
+    val secs = (track.millis / 1000) % 60
+
+    findViewById<TextView>(R.id.track_name).text = track.name
+    findViewById<TextView>(R.id.track_duration).text = "${mins}m ${secs}s"
+    findViewById<TextView>(R.id.band_name).text = track.composer
+  }
 }

@@ -2,6 +2,7 @@ plugins {
   alias(libs.plugins.kotlin) apply false
   alias(libs.plugins.kotlinAndroid) apply false
   alias(libs.plugins.kapt) apply false
+  alias(libs.plugins.ksp) apply false
   alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP apply false
   alias(libs.plugins.androidLibrary) version BuildPluginsVersion.AGP apply false
   alias(libs.plugins.spotless)
@@ -15,12 +16,12 @@ allprojects {
       if (name != rootProject.name) {
         kotlin {
           ktfmt(libs.versions.ktfmt.get()).googleStyle()
-          targetExclude("**/generated/**")
+          target("**/*.kt")
         }
       }
       kotlinGradle {
         ktfmt(libs.versions.ktfmt.get()).googleStyle()
-        targetExclude("**/generated/**")
+        target("**/*.kts")
       }
     }
   }
@@ -62,12 +63,12 @@ tasks.register("preMerge") {
   dependsOn(gradle.includedBuild("plugin-build").task(":check"))
 }
 
-tasks.getByName("spotlessCheck") {
+tasks.named("spotlessCheck") {
   dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":spotlessCheck"))
   dependsOn(gradle.includedBuild("plugin-build").task(":spotlessCheck"))
 }
 
-tasks.getByName("spotlessApply") {
+tasks.named("spotlessApply") {
   dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":spotlessApply"))
   dependsOn(gradle.includedBuild("plugin-build").task(":spotlessApply"))
 }

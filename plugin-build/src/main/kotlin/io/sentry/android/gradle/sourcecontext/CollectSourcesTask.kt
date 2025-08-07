@@ -12,7 +12,6 @@ import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
@@ -104,16 +103,6 @@ internal class SourceCollector {
 }
 
 internal fun DirectoryProperty.getAndDelete(): File {
-  val file = get().asFile
-  if (file.isDirectory) {
-    file.deleteRecursively()
-  } else {
-    file.delete()
-  }
-  return file
-}
-
-internal fun RegularFileProperty.getAndDelete(): File {
   val file = get().asFile
   if (file.isDirectory) {
     file.deleteRecursively()

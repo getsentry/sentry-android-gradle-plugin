@@ -1,6 +1,6 @@
 [versions]
 kotlin = "1.8.20"
-agp = "7.4.0"
+agp = "8.10.1"
 
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
 ktfmt = "0.51"
@@ -17,13 +17,11 @@ kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
-dokka = { id = "org.jetbrains.dokka", version = "1.8.10" }
-spotless = { id = "com.diffplug.spotless", version = "7.0.0" }
-groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.2" }
-shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }
-# do not upgrade `mavenPublish` to 0.18.0, it does not generate the pom-default.xml and module.json under
-# build/publications/maven
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.17.0" }
+ksp = { id = "com.google.devtools.ksp", version = "1.8.20-1.0.11" }
+dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
+spotless = { id = "com.diffplug.spotless", version = "7.0.4" }
+groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.7.1" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 buildConfig = { id = "com.github.gmazzo.buildconfig", version = "4.2.0" }
@@ -36,13 +34,16 @@ proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.5
 # this allows us to develop against a fixed version of Gradle, as opposed to depending on the
 # locally available version. kotlin-gradle-plugin follows the same approach.
 # More info: https://docs.nokee.dev/manual/gradle-plugin-development-plugin.html
-gradleApi = { group = "dev.gradleplugins", name = "gradle-api", version = "7.6.4" }
+# The latest version is 8.11.1 https://github.com/gradle-plugins/gradle-api/issues/6
+# 8.8 or higher fails groovy compilation
+gradleApi = { group = "dev.gradleplugins", name = "gradle-api", version = "8.7" }
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable" }
 autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.0.1" }
 autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.0.1" }
 kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
-kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.7.0" }
+kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.7.1" }
+truth = { module = "com.google.truth:truth", version = "1.4.4" }
 composeDesktop = { group = "org.jetbrains.compose.desktop", name = "desktop", version = "1.6.10" }
 
 # bytecode instrumentation
@@ -77,7 +78,6 @@ sample-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-c
 sample-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "sampleRoom" }
 sample-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "sampleRoom" }
 sample-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "sampleRoom" }
-sample-room-rxjava = { group = "androidx.room", name = "room-rxjava2", version.ref = "sampleRoom" }
 
 sample-retrofit-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "sampleRetrofit" }
 sample-retrofit-retrofitGson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "sampleRetrofit" }

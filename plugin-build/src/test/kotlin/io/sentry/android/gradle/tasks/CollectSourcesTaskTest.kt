@@ -1,8 +1,8 @@
 package io.sentry.android.gradle.tasks
 
+import com.google.common.truth.Truth.assertThat
 import io.sentry.android.gradle.sourcecontext.SourceCollector
 import java.io.File
-import kotlin.test.assertEquals
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
@@ -35,7 +35,7 @@ class CollectSourcesTaskTest {
     SourceCollector().collectSources(outDir, sourceDirs)
 
     val outSources = outDir.walk().filter { it.isFile }.toList()
-    assertEquals(3, outSources.size)
+    assertThat(outSources).hasSize(3)
   }
 
   private fun createProject(): Project {

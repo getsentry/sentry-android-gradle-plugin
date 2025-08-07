@@ -1,6 +1,6 @@
 name: Blank Issue
 description: Blank Issue. Reserved for maintainers.
-labels: ["Platform: Android"]
+labels: ["Android"]
 body:
   - type: textarea
     id: description
