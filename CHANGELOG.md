@@ -27,6 +27,12 @@
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2502)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.46.0...2.50.2)
 
+## 5.8.1
+
+### Fixes
+
+- Add support for Kotlin 2.2.0 for Sentry Kotlin Compiler Plugin ([#944](https://github.com/getsentry/sentry-android-gradle-plugin/pull/944))
+
 ## 5.8.0
 
 ### Dependencies
