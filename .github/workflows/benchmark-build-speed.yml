@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Checkout Duckduckgo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: duckduckgo/Android
           path: scripts/benchmark/Android
