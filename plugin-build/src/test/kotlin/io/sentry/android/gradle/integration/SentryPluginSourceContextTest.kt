@@ -97,7 +97,6 @@ class SentryPluginSourceContextTest :
               autoUploadProguardMapping = false
               org = "sentry-sdks"
               projectName = "sentry-android"
-              url = "https://some-host.sentry.io"
             }
             """
         .trimIndent()
@@ -149,7 +148,6 @@ class SentryPluginSourceContextTest :
               autoUploadProguardMapping = false
               org = "sentry-sdks"
               projectName = "sentry-android"
-              url = "https://some-host.sentry.io"
             }
             """
         .trimIndent()
@@ -204,7 +202,6 @@ class SentryPluginSourceContextTest :
               additionalSourceDirsForSourceContext = ["src/custom/kotlin"]
               org = "sentry-sdks"
               projectName = "sentry-android"
-              url = "https://some-host.sentry.io"
             }
             """
         .trimIndent()
@@ -220,7 +217,6 @@ class SentryPluginSourceContextTest :
 
     assertTrue(result.output) { "\"--org\" \"sentry-sdks\"" in result.output }
     assertTrue(result.output) { "\"--project\" \"sentry-android\"" in result.output }
-    assertTrue(result.output) { "\"--url\" \"https://some-host.sentry.io\"" in result.output }
     assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
 
     verifySourceBundleContents(testProjectDir.root, "files/_/_/com/example/Example.jvm", ktContents)

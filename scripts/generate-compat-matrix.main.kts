@@ -15,10 +15,10 @@ import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.github.z4kn4fein.semver.Version
 import io.github.z4kn4fein.semver.toVersion
-import org.w3c.dom.Element
+import java.net.URL
 import javax.xml.parsers.DocumentBuilderFactory
 import org.jsoup.Jsoup
-import java.net.URL
+import org.w3c.dom.Element
 
 /** Represents a matrix consumed by GitHub actions */
 class Matrix(val include: List<Map<String, String>>)
@@ -33,8 +33,8 @@ data class VersionRange(val min: Version, val max: Version) {
 class GenerateMatrix : CliktCommand() {
 
   // TODO: introduce params if needed
-//  private val gradleProperties: File by option("--gradle-properties").file().required()
-//  private val versionsToml: File by option("--versions-toml").file().required()
+  //  private val gradleProperties: File by option("--gradle-properties").file().required()
+  //  private val versionsToml: File by option("--versions-toml").file().required()
 
   @OptIn(ExperimentalStdlibApi::class)
   override fun run() {
@@ -48,39 +48,46 @@ class GenerateMatrix : CliktCommand() {
      * - Latest version from previous major release
      */
     @Suppress("SwallowedException", "TooGenericExceptionCaught")
-    val agpVersions = try {
-      fetchAgpVersions()
-    } catch (e: Exception) {
-      print(e.printStackTrace())
-      echo("Error parsing AGP versions")
-      throw ProgramResult(1)
-    }
-
-    val agpToGradle = try {
-      val (legacyVersions, _) = fetchAgpCompatibilityTable(agpVersions, legacy = true)
-      val (currentVersions, latestVersion) = fetchAgpCompatibilityTable(agpVersions)
-      buildMap<Version, Version> {
-        for (agpVersion in agpVersions) {
-          put(agpVersion, legacyVersions[agpVersion] ?: currentVersions[agpVersion] ?: latestVersion)
-        }
+    val agpVersions =
+      try {
+        fetchAgpVersions()
+      } catch (e: Exception) {
+        print(e.printStackTrace())
+        echo("Error parsing AGP versions")
+        throw ProgramResult(1)
       }
-    } catch (e: Exception) {
-      print(e.printStackTrace())
-      echo("Error parsing AGP compatibility table")
-      throw ProgramResult(1)
-    }
+
+    val agpToGradle =
+      try {
+        val (legacyVersions, _) = fetchAgpCompatibilityTable(agpVersions, legacy = true)
+        val (currentVersions, latestVersion) = fetchAgpCompatibilityTable(agpVersions)
+        buildMap<Version, Version> {
+          for (agpVersion in agpVersions) {
+            put(
+              agpVersion,
+              legacyVersions[agpVersion] ?: currentVersions[agpVersion] ?: latestVersion,
+            )
+          }
+        }
+      } catch (e: Exception) {
+        print(e.printStackTrace())
+        echo("Error parsing AGP compatibility table")
+        throw ProgramResult(1)
+      }
 
     // Fetch Kotlin minimum supported Gradle version
-    val kotlinToGradleMap = try {
-      fetchKotlinGradleCompatibility()
-    } catch (e: Exception) {
-      print(e.printStackTrace())
-      echo("Error parsing Kotlin Gradle compatibility")
-      throw ProgramResult(1)
-    }
+    val kotlinToGradleMap =
+      try {
+        fetchKotlinGradleCompatibility()
+      } catch (e: Exception) {
+        print(e.printStackTrace())
+        echo("Error parsing Kotlin Gradle compatibility")
+        throw ProgramResult(1)
+      }
 
     // TODO: for now this is manual, but we could try get it from Gradle's github in the future
-    val gradleToGroovy = mapOf("7.5".toVersion(strict = false) to "1.2", "8.11".toVersion(strict = false) to "1.7.1")
+    val gradleToGroovy =
+      mapOf("7.5".toVersion(strict = false) to "1.2", "8.11".toVersion(strict = false) to "1.7.1")
     // TODO: make it dynamic too
     val kotlinVersion = "2.1.0".toVersion()
     val baseIncludes = buildList {
@@ -93,16 +100,26 @@ class GenerateMatrix : CliktCommand() {
 
             // Check if the Gradle version meets Kotlin's minimum requirement
             // Use the current Kotlin version's minimum requirement
-            val kotlinMinGradle = kotlinToGradleMap.entries.find { (kotlin, _) -> kotlin.inRange(kotlinVersion) }?.value?.min
-            val finalGradle = if (kotlinMinGradle != null && gradle < kotlinMinGradle) {
-              echo("Warning: Gradle ${gradle} for AGP ${entry.key} is below Kotlin minimum ${kotlinMinGradle}")
-              kotlinMinGradle
-            } else {
-              gradle
-            }
-            
+            val kotlinMinGradle =
+              kotlinToGradleMap.entries
+                .find { (kotlin, _) -> kotlin.inRange(kotlinVersion) }
+                ?.value
+                ?.min
+            val finalGradle =
+              if (kotlinMinGradle != null && gradle < kotlinMinGradle) {
+                echo(
+                  "Warning: Gradle ${gradle} for AGP ${entry.key} is below Kotlin minimum ${kotlinMinGradle}"
+                )
+                kotlinMinGradle
+              } else {
+                gradle
+              }
+
             val (finalMajor, finalMinor, finalPatch) = finalGradle
-            put("gradle", if (finalPatch == 0) "${finalMajor}.${finalMinor}" else finalGradle.toString())
+            put(
+              "gradle",
+              if (finalPatch == 0) "${finalMajor}.${finalMinor}" else finalGradle.toString(),
+            )
             // TODO: if needed we can test against different Java versions
             put("java", "17")
             val groovy = gradleToGroovy.entries.findLast { finalGradle >= it.key }?.value
@@ -118,13 +135,12 @@ class GenerateMatrix : CliktCommand() {
 
     val json = moshi.adapter<Matrix>().toJson(Matrix(allIncludes))
 
-    // Example output: {"include":[{"agp":"8.11.0-alpha08","gradle":"8.11.1","java":"17","groovy":"1.7.1"},{"agp":"8.10.0-rc04","gradle":"8.11.1","java":"17","groovy":"1.7.1"},{"agp":"8.9.2","gradle":"8.11.1","java":"17","groovy":"1.7.1"},{"agp":"7.4.2","gradle":"7.5","java":"17","groovy":"1.2"}]}
+    // Example output:
+    // {"include":[{"agp":"8.11.0-alpha08","gradle":"8.11.1","java":"17","groovy":"1.7.1"},{"agp":"8.10.0-rc04","gradle":"8.11.1","java":"17","groovy":"1.7.1"},{"agp":"8.9.2","gradle":"8.11.1","java":"17","groovy":"1.7.1"},{"agp":"7.4.2","gradle":"7.5","java":"17","groovy":"1.2"}]}
     echo(json)
   }
 
-  /**
-   * Add extra configuration
-   */
+  /** Add extra configuration */
   @Suppress("UNUSED_PARAMETER")
   private fun extraIncludes(baseIncludes: List<Map<String, String>>): List<Map<String, String>> {
     return emptyList()
@@ -137,6 +153,7 @@ class GenerateMatrix : CliktCommand() {
 
   /**
    * Fetches Kotlin minimum supported Gradle version mapping from the official Kotlin documentation
+   *
    * @return Map where key is Kotlin version range and value is Gradle version range
    */
   private fun fetchKotlinGradleCompatibility(): Map<VersionRange, VersionRange> {
@@ -144,17 +161,18 @@ class GenerateMatrix : CliktCommand() {
       // Parse the official Kotlin documentation page for compatibility info
       val html = URL("https://kotlinlang.org/docs/gradle-configure-project.html").readText()
       val doc = Jsoup.parse(html)
-      
+
       // Look for the compatibility table
       val tables = doc.select("table")
-      val compatibilityTable = tables.find { table ->
-        val headers = table.select("th").map { it.text() }
-        headers.any { it.contains("KGP version", ignoreCase = true) } &&
-        headers.any { it.contains("Gradle", ignoreCase = true) }
-      }
-      
+      val compatibilityTable =
+        tables.find { table ->
+          val headers = table.select("th").map { it.text() }
+          headers.any { it.contains("KGP version", ignoreCase = true) } &&
+            headers.any { it.contains("Gradle", ignoreCase = true) }
+        }
+
       val kotlinToGradleMap = mutableMapOf<VersionRange, VersionRange>()
-      
+
       if (compatibilityTable != null) {
         val rows = compatibilityTable.select("tr")
         // Skip header row and process all data rows
@@ -163,19 +181,21 @@ class GenerateMatrix : CliktCommand() {
           if (cells.size >= 2) {
             val kotlinVersionRange = cells[0]
             val gradleVersionRange = cells[1]
-            
+
             try {
               val kotlinRange = parseVersionRange(kotlinVersionRange)
               val gradleRange = parseVersionRange(gradleVersionRange)
-              
+
               kotlinToGradleMap[kotlinRange] = gradleRange
             } catch (e: Exception) {
-              echo("Warning: Could not parse Kotlin/Gradle versions: $kotlinVersionRange, $gradleVersionRange - ${e.message}")
+              echo(
+                "Warning: Could not parse Kotlin/Gradle versions: $kotlinVersionRange, $gradleVersionRange - ${e.message}"
+              )
             }
           }
         }
       }
-      
+
       kotlinToGradleMap
     } catch (e: Exception) {
       echo("Warning: Could not fetch Kotlin compatibility from docs: ${e.message}")
@@ -184,8 +204,7 @@ class GenerateMatrix : CliktCommand() {
   }
 
   /**
-   * Parses a version range string and returns a VersionRange object
-   * Examples:
+   * Parses a version range string and returns a VersionRange object Examples:
    * - "2.2.0" -> VersionRange(Version("2.2.0"), Version("2.2.0"))
    * - "2.1.20-2.1.21" -> VersionRange(Version("2.1.20"), Version("2.1.21"))
    * - "7.6.3–8.14" -> VersionRange(Version("7.6.3"), Version("8.14"))
@@ -194,17 +213,17 @@ class GenerateMatrix : CliktCommand() {
     // Check if it's a range or single version
     val rangeSeparators = listOf("–", "-", "—") // different dash types
     val separator = rangeSeparators.find { versionRangeString.contains(it) }
-    
+
     if (separator != null) {
       // It's a range
       val parts = versionRangeString.split(separator, limit = 2)
       if (parts.size == 2) {
         val startVersion = sanitizeVersion(parts[0].trim())
         val endVersion = sanitizeVersion(parts[1].trim())
-        
+
         val start = startVersion.toVersion(strict = false)
         val end = endVersion.toVersion(strict = false)
-        
+
         return VersionRange(start, end)
       } else {
         throw IllegalArgumentException("Invalid range format: $versionRangeString")
@@ -218,8 +237,8 @@ class GenerateMatrix : CliktCommand() {
   }
 
   /**
-   * Sanitizes version strings by removing or converting special characters
-   * that are not compatible with semantic versioning
+   * Sanitizes version strings by removing or converting special characters that are not compatible
+   * with semantic versioning
    */
   private fun sanitizeVersion(versionString: String): String {
     return versionString
@@ -232,7 +251,10 @@ class GenerateMatrix : CliktCommand() {
   private fun fetchAgpVersions(): List<Version> {
     val semvers = mutableListOf<Version>()
     val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-    val document = documentBuilder.parse("https://dl.google.com/dl/android/maven2/com/android/tools/build/group-index.xml")
+    val document =
+      documentBuilder.parse(
+        "https://dl.google.com/dl/android/maven2/com/android/tools/build/group-index.xml"
+      )
     document.documentElement.normalize()
 
     val root = document.documentElement
@@ -248,19 +270,25 @@ class GenerateMatrix : CliktCommand() {
 
     // AGP usually has two pre-releases at the same time
     val latestPreRelease = semvers.last { it.isPreRelease }
-    var secondToLatestPreRelease = semvers.lastOrNull { it.isPreRelease && it.minor == (latestPreRelease.minor - 1) }
+    var secondToLatestPreRelease =
+      semvers.lastOrNull { it.isPreRelease && it.minor == (latestPreRelease.minor - 1) }
     if (secondToLatestPreRelease == null) {
       // this means the previous pre-release is actually in the previous major
-      secondToLatestPreRelease = semvers.last { it.isPreRelease && it.major == (latestPreRelease.major - 1) }
+      secondToLatestPreRelease =
+        semvers.last { it.isPreRelease && it.major == (latestPreRelease.major - 1) }
     }
     val latest = semvers.last { it.isStable }
-    val previousMajorLatest = semvers.last { it.isStable && it.major == (latest.major - 1)}
+    val previousMajorLatest = semvers.last { it.isStable && it.major == (latest.major - 1) }
     return listOf(latestPreRelease, secondToLatestPreRelease, latest, previousMajorLatest)
   }
 
-  private fun fetchAgpCompatibilityTable(agpVersions: List<Version>, legacy: Boolean = false): Pair<Map<Version, Version>, Version> {
+  private fun fetchAgpCompatibilityTable(
+    agpVersions: List<Version>,
+    legacy: Boolean = false,
+  ): Pair<Map<Version, Version>, Version> {
     val gradleVersions = mutableMapOf<Version, Version>()
-    val html = URL("https://developer.android.com/build/releases/gradle-plugin#updating-gradle").readText()
+    val html =
+      URL("https://developer.android.com/build/releases/gradle-plugin#updating-gradle").readText()
     val doc = Jsoup.parse(html)
     val tables = doc.select("table") ?: error("No table found")
     val table = if (legacy) tables[1] else tables[0]
@@ -275,28 +303,33 @@ class GenerateMatrix : CliktCommand() {
     // AGP version (without .patch) - Gradle version
     val agpToGradle = LinkedHashMap<Version, Version>()
     for (row in rows) {
-        val cells = row.select("td").map { it.text() }
-        if (cells.size > 0) {
-          val agp = try {
+      val cells = row.select("td").map { it.text() }
+      if (cells.size > 0) {
+        val agp =
+          try {
             Version.parse(cells[0], strict = false)
           } catch (e: Throwable) {
             // if version cant be parsed, we're probably past the versions we're interested in
             break
           }
-          val gradle = try {
+        val gradle =
+          try {
             Version.parse(cells[1], strict = false)
           } catch (e: Throwable) {
             // if version cant be parsed, we're probably past the versions we're interested in
             break
           }
-          agpToGradle[agp] = gradle
-        }
+        agpToGradle[agp] = gradle
+      }
     }
 
     val latest = agpToGradle.entries.first()
     for (agpVersion in agpVersions) {
-      // the compat table does not contain the .patch part, so we compare major and minor 
-      val entry = agpToGradle.entries.find { it.key.major == agpVersion.major && it.key.minor == agpVersion.minor }
+      // the compat table does not contain the .patch part, so we compare major and minor
+      val entry =
+        agpToGradle.entries.find {
+          it.key.major == agpVersion.major && it.key.minor == agpVersion.minor
+        }
       if (entry != null) {
         gradleVersions[agpVersion] = entry.value
       }
