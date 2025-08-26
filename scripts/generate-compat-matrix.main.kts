@@ -248,7 +248,11 @@ class GenerateMatrix : CliktCommand() {
 
     // AGP usually has two pre-releases at the same time
     val latestPreRelease = semvers.last { it.isPreRelease }
-    val secondToLatestPreRelease = semvers.last { it.isPreRelease && it.minor == (latestPreRelease.minor - 1) }
+    var secondToLatestPreRelease = semvers.lastOrNull { it.isPreRelease && it.minor == (latestPreRelease.minor - 1) }
+    if (secondToLatestPreRelease == null) {
+      // this means the previous pre-release is actually in the previous major
+      secondToLatestPreRelease = semvers.last { it.isPreRelease && it.major == (latestPreRelease.major - 1) }
+    }
     val latest = semvers.last { it.isStable }
     val previousMajorLatest = semvers.last { it.isStable && it.major == (latest.major - 1)}
     return listOf(latestPreRelease, secondToLatestPreRelease, latest, previousMajorLatest)
