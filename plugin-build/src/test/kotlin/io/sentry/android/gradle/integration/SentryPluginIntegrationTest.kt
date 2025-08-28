@@ -7,6 +7,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome
 import org.gradle.util.GradleVersion
+import org.junit.Assume.assumeFalse
 import org.junit.Test
 
 class SentryPluginIntegrationTest :
@@ -14,9 +15,10 @@ class SentryPluginIntegrationTest :
 
   @Test
   fun uploadWithoutSentryCliProperties() {
-    if (System.getenv("SENTRY_URL").isNullOrBlank()) {
-      return // Don't run test if local test server endpoint is not set
-    }
+    assumeFalse(
+      "Integration test server endpoint is not set",
+      System.getenv("SENTRY_URL").isNullOrBlank(),
+    )
     sentryPropertiesFile.writeText("")
     applyAutoUploadProguardMappingWithCredentials()
 
@@ -31,9 +33,10 @@ class SentryPluginIntegrationTest :
 
   @Test
   fun uploadSentryProguardMappingsIntegration() {
-    if (System.getenv("SENTRY_URL").isNullOrBlank()) {
-      return // Don't run test if local test server endpoint is not set
-    }
+    assumeFalse(
+      "Integration test server endpoint is not set",
+      System.getenv("SENTRY_URL").isNullOrBlank(),
+    )
     sentryPropertiesFile.appendText("auth.token=<token>")
     applyAutoUploadProguardMapping()
 
@@ -51,9 +54,10 @@ class SentryPluginIntegrationTest :
 
   @Test
   fun uploadNativeSymbols() {
-    if (System.getenv("SENTRY_URL").isNullOrBlank()) {
-      return // Don't run test if local test server endpoint is not set
-    }
+    assumeFalse(
+      "Integration test server endpoint is not set",
+      System.getenv("SENTRY_URL").isNullOrBlank(),
+    )
     sentryPropertiesFile.appendText("auth.token=<token>")
     applyUploadNativeSymbols()
 
@@ -67,9 +71,10 @@ class SentryPluginIntegrationTest :
 
   @Test
   fun uploadSourceContexts() {
-    if (System.getenv("SENTRY_URL").isNullOrBlank()) {
-      return // Don't run test if local test server endpoint is not set
-    }
+    assumeFalse(
+      "Integration test server endpoint is not set",
+      System.getenv("SENTRY_URL").isNullOrBlank(),
+    )
     sentryPropertiesFile.appendText("auth.token=<token>")
     applyUploadSourceContexts()
 

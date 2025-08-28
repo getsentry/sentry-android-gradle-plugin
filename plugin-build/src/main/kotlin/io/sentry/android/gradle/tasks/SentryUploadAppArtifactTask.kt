@@ -35,7 +35,7 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
   abstract val apk: DirectoryProperty
 
   override fun getArguments(args: MutableList<String>) {
-    args.add("mobile-app")
+    args.add("build")
     args.add("upload")
 
     val bundleFile = bundle.orNull?.asFile

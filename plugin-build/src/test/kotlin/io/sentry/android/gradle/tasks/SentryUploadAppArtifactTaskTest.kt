@@ -37,7 +37,7 @@ class SentryUploadAppArtifactTaskTest {
     val args = task.get().computeCommandLineArgs()
 
     assertThat(args).contains("sentry-cli")
-    assertThat(args).contains("mobile-app")
+    assertThat(args).contains("build")
     assertThat(args).contains("upload")
     assertThatStrings(args).containsEndingWith(dummyApkName)
   }
@@ -56,7 +56,7 @@ class SentryUploadAppArtifactTaskTest {
     val args = task.get().computeCommandLineArgs()
 
     assertThat(args).contains("sentry-cli")
-    assertThat(args).contains("mobile-app")
+    assertThat(args).contains("build")
     assertThat(args).contains("upload")
     assertThatStrings(args).containsEndingWith(dummyAabName)
   }
