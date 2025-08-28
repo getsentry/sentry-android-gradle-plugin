@@ -3,7 +3,6 @@ package io.sentry.android.gradle.integration
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.verifySourceContextId
 import io.sentry.android.gradle.withDummyComposeFile
-import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome
@@ -98,8 +97,6 @@ class SentryPluginIntegrationTest :
       "Integration test server endpoint is not set",
       System.getenv("SENTRY_URL").isNullOrBlank(),
     )
-    // Use alpha for now with `sentry-cli build` functionality.
-    File(testProjectDir.root, "sentry-cli.properties").writeText("version = 2.53.0-alpha")
     sentryPropertiesFile.appendText("auth.token=<token>")
     applySizeAnalysis()
 
