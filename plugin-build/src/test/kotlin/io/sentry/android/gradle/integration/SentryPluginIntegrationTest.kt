@@ -91,6 +91,34 @@ class SentryPluginIntegrationTest :
     assertEquals(uploadedId, bundledId)
   }
 
+  @Test
+  fun uploadSizeAnalysisWithBundleRelease() {
+    assumeFalse(
+      "Integration test server endpoint is not set",
+      System.getenv("SENTRY_URL").isNullOrBlank(),
+    )
+    sentryPropertiesFile.appendText("auth.token=<token>")
+    applySizeAnalysis()
+
+    val build = runner.appendArguments(":app:bundleRelease").build()
+
+    assertEquals(build.task(":app:uploadSentryApkRelease")?.outcome, TaskOutcome.SUCCESS)
+  }
+
+  @Test
+  fun uploadSizeAnalysisWithAssembleRelease() {
+    assumeFalse(
+      "Integration test server endpoint is not set",
+      System.getenv("SENTRY_URL").isNullOrBlank(),
+    )
+    sentryPropertiesFile.appendText("auth.token=<token>")
+    applySizeAnalysis()
+
+    val build = runner.appendArguments(":app:assembleRelease").build()
+
+    assertEquals(build.task(":app:uploadSentryApkRelease")?.outcome, TaskOutcome.SUCCESS)
+  }
+
   private fun applyAutoUploadProguardMapping() {
     appBuildFile.appendText(
       // language=Groovy
@@ -160,6 +188,22 @@ class SentryPluginIntegrationTest :
                   includeProguardMapping = false
                   tracingInstrumentation {
                     enabled = false
+                  }
+                }
+            """
+        .trimIndent()
+    )
+  }
+
+  private fun applySizeAnalysis() {
+    appBuildFile.appendText(
+      // language=Groovy
+      """
+                sentry {
+                  debug = true
+                  includeProguardMapping = false
+                  sizeAnalysis {
+                    enabled = true
                   }
                 }
             """
