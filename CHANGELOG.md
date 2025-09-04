@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add upload functionality for size analysis ([#915](https://github.com/getsentry/sentry-android-gradle-plugin/pull/915))
+
 ### Fixes
 
 - Enable caching for BundleSourcesTask ([#894](https://github.com/getsentry/sentry-android-gradle-plugin/pull/894)
