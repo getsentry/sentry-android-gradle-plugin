@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add upload functionality for size analysis ([#915](https://github.com/getsentry/sentry-android-gradle-plugin/pull/915))
+
 ### Fixes
 
 - Allow kotlin pre-releases in KotlinCompilerPlugin ([#972](https://github.com/getsentry/sentry-android-gradle-plugin/pull/972))

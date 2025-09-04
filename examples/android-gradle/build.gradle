@@ -4,28 +4,28 @@ plugins {
 }
 
 android {
-    compileSdk = LibsVersion.SDK_VERSION
-    defaultConfig {
-        minSdk LibsVersion.MIN_SDK_VERSION
-        targetSdk LibsVersion.SDK_VERSION
-        versionCode = 1
-        versionName = "1.0"
+  compileSdk = LibsVersion.SDK_VERSION
+  defaultConfig {
+    minSdk LibsVersion.MIN_SDK_VERSION
+    targetSdk LibsVersion.SDK_VERSION
+    versionCode = 1
+    versionName = "1.0"
+  }
+  buildTypes {
+    release {
+      minifyEnabled true
+      proguardFiles getDefaultProguardFile(
+        'proguard-android-optimize.txt')
     }
-    buildTypes {
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile(
-              'proguard-android-optimize.txt')
-        }
-    }
-    namespace 'com.example.sampleapp'
+  }
+  namespace 'com.example.sampleapp'
 }
 
 sentry {
-    autoUploadProguardMapping = CI.INSTANCE.canAutoUpload()
+  autoUploadProguardMapping = CI.INSTANCE.canAutoUpload()
 
-    telemetryDsn = CI.INSTANCE.SENTRY_SDKS_DSN
-    tracingInstrumentation {
-        enabled = false
-    }
+  telemetryDsn = CI.INSTANCE.SENTRY_SDKS_DSN
+  tracingInstrumentation {
+      enabled = false
+  }
 }
