@@ -4,6 +4,7 @@
 
 ### Fixes
 
+- Allow kotlin pre-releases in KotlinCompilerPlugin ([#972](https://github.com/getsentry/sentry-android-gradle-plugin/pull/972))
 - Enable caching for BundleSourcesTask ([#894](https://github.com/getsentry/sentry-android-gradle-plugin/pull/894)
 - Add support for Kotlin 2.2.0 for Sentry Kotlin Compiler Plugin ([#944](https://github.com/getsentry/sentry-android-gradle-plugin/pull/944))
 
