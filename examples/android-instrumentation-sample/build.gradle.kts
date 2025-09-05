@@ -11,7 +11,6 @@ if (getKotlinPluginVersion() >= "2.0.0") {
   apply(plugin = "org.jetbrains.kotlin.plugin.compose")
 }
 
-
 // useful for local debugging of the androidx.sqlite lib
 // make sure to checkout the lib from
 // https://github.com/androidx/androidx/tree/androidx-main/sqlite/sqlite-framework
