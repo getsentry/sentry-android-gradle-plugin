@@ -12,6 +12,7 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
@@ -34,9 +35,28 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
   @get:PathSensitive(PathSensitivity.NAME_ONLY)
   abstract val apk: DirectoryProperty
 
+  @get:Input @get:Optional abstract val vcsHeadSha: Property<String>
+  @get:Input @get:Optional abstract val vcsBaseSha: Property<String>
+  @get:Input @get:Optional abstract val vcsProvider: Property<String>
+  @get:Input @get:Optional abstract val vcsHeadRepoName: Property<String>
+  @get:Input @get:Optional abstract val vcsBaseRepoName: Property<String>
+  @get:Input @get:Optional abstract val vcsHeadRef: Property<String>
+  @get:Input @get:Optional abstract val vcsBaseRef: Property<String>
+  @get:Input @get:Optional abstract val vcsPrNumber: Property<Int>
+
   override fun getArguments(args: MutableList<String>) {
     args.add("build")
     args.add("upload")
+
+    // Add VCS parameters if provided
+    vcsHeadSha.orNull?.let { args.addAll(listOf("--head-sha", it)) }
+    vcsBaseSha.orNull?.let { args.addAll(listOf("--base-sha", it)) }
+    vcsProvider.orNull?.let { args.addAll(listOf("--vcs-provider", it)) }
+    vcsHeadRepoName.orNull?.let { args.addAll(listOf("--head-repo-name", it)) }
+    vcsBaseRepoName.orNull?.let { args.addAll(listOf("--base-repo-name", it)) }
+    vcsHeadRef.orNull?.let { args.addAll(listOf("--head-ref", it)) }
+    vcsBaseRef.orNull?.let { args.addAll(listOf("--base-ref", it)) }
+    vcsPrNumber.orNull?.let { args.addAll(listOf("--pr-number", it.toString())) }
 
     val bundleFile = bundle.orNull?.asFile
     if (bundleFile != null) {
@@ -96,6 +116,14 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
           task.sentryProject.set(sentryProject)
           task.sentryAuthToken.set(sentryAuthToken)
           task.sentryUrl.set(sentryUrl)
+          task.vcsHeadSha.set(extension.vcsInfo.headSha)
+          task.vcsBaseSha.set(extension.vcsInfo.baseSha)
+          task.vcsProvider.set(extension.vcsInfo.vcsProvider)
+          task.vcsHeadRepoName.set(extension.vcsInfo.headRepoName)
+          task.vcsBaseRepoName.set(extension.vcsInfo.baseRepoName)
+          task.vcsHeadRef.set(extension.vcsInfo.headRef)
+          task.vcsBaseRef.set(extension.vcsInfo.baseRef)
+          task.vcsPrNumber.set(extension.vcsInfo.prNumber)
           sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
           task.asSentryCliExec()
           task.withSentryTelemetry(extension, sentryTelemetryProvider)
@@ -114,6 +142,14 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
           task.sentryProject.set(sentryProject)
           task.sentryAuthToken.set(sentryAuthToken)
           task.sentryUrl.set(sentryUrl)
+          task.vcsHeadSha.set(extension.vcsInfo.headSha)
+          task.vcsBaseSha.set(extension.vcsInfo.baseSha)
+          task.vcsProvider.set(extension.vcsInfo.vcsProvider)
+          task.vcsHeadRepoName.set(extension.vcsInfo.headRepoName)
+          task.vcsBaseRepoName.set(extension.vcsInfo.baseRepoName)
+          task.vcsHeadRef.set(extension.vcsInfo.headRef)
+          task.vcsBaseRef.set(extension.vcsInfo.baseRef)
+          task.vcsPrNumber.set(extension.vcsInfo.prNumber)
           sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
           task.asSentryCliExec()
           task.withSentryTelemetry(extension, sentryTelemetryProvider)

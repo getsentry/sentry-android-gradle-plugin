@@ -5,6 +5,7 @@
 ### Features
 
 - Add upload functionality for size analysis ([#915](https://github.com/getsentry/sentry-android-gradle-plugin/pull/915))
+- Add VCS info extension for build uploads with customizable version control metadata ([#969](https://github.com/getsentry/sentry-android-gradle-plugin/pull/969))
 
 ### Fixes
 

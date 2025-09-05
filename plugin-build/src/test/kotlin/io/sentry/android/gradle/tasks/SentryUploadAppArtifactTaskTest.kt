@@ -238,6 +238,40 @@ class SentryUploadAppArtifactTaskTest {
     assertThat(exception.message).isEqualTo("No bundle or apk found")
   }
 
+  @Test
+  fun `all vcs parameters are passed to CLI correctly`() {
+    val project = createProject()
+    val apkDir = project.apkDirProvider(dummyApkName)
+    val task: TaskProvider<SentryUploadAppArtifactTask> =
+      project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.cliExecutable.set("sentry-cli")
+        it.apk.set(apkDir)
+        it.vcsHeadSha.set("abc123def456")
+        it.vcsBaseSha.set("def456abc123")
+        it.vcsProvider.set("github")
+        it.vcsHeadRepoName.set("getsentry/sentry-android-gradle-plugin")
+        it.vcsBaseRepoName.set("getsentry/sentry-android-gradle-plugin")
+        it.vcsHeadRef.set("feature-branch")
+        it.vcsBaseRef.set("main")
+        it.vcsPrNumber.set(123)
+      }
+
+    val args = task.get().computeCommandLineArgs()
+
+    assertThat(args).containsAtLeast("--head-sha", "abc123def456").inOrder()
+    assertThat(args).containsAtLeast("--base-sha", "def456abc123").inOrder()
+    assertThat(args).containsAtLeast("--vcs-provider", "github").inOrder()
+    assertThat(args)
+      .containsAtLeast("--head-repo-name", "getsentry/sentry-android-gradle-plugin")
+      .inOrder()
+    assertThat(args)
+      .containsAtLeast("--base-repo-name", "getsentry/sentry-android-gradle-plugin")
+      .inOrder()
+    assertThat(args).containsAtLeast("--head-ref", "feature-branch").inOrder()
+    assertThat(args).containsAtLeast("--base-ref", "main").inOrder()
+    assertThat(args).containsAtLeast("--pr-number", "123").inOrder()
+  }
+
   private fun createProject(): Project {
     with(ProjectBuilder.builder().build()) {
       plugins.apply("com.android.application")
