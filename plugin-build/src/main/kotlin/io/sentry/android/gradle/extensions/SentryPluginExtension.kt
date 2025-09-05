@@ -111,6 +111,13 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     sizeAnalysisAction.execute(sizeAnalysis)
   }
 
+  val vcsInfo: VcsInfoExtension = objects.newInstance(VcsInfoExtension::class.java)
+
+  /** Configure the VCS information for build uploads. */
+  fun vcsInfo(vcsInfoAction: Action<VcsInfoExtension>) {
+    vcsInfoAction.execute(vcsInfo)
+  }
+
   /**
    * Disables or enables the reporting of dependencies metadata for Sentry. If enabled the plugin
    * will collect external dependencies and will take care of uploading them to Sentry as part of
