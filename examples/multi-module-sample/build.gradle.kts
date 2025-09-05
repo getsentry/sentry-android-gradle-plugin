@@ -8,7 +8,7 @@ plugins {
 
 tasks.named<KotlinCompile>("compileKotlin") {
   compilerOptions {
-    freeCompilerArgs = listOf("-Xjsr305=strict")
+    freeCompilerArgs.add("-Xjsr305=strict")
     jvmTarget.set(JvmTarget.JVM_1_8)
   }
 }
