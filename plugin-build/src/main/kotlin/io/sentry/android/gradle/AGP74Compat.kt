@@ -18,6 +18,7 @@ import org.gradle.api.Task
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
+import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
@@ -40,6 +41,11 @@ data class AndroidVariant74(private val variant: Variant) : SentryVariant {
 
   override val installProvider: TaskProvider<out Task>?
     get() = (variant as? VariantImpl<*>)?.taskContainer?.installTask
+
+  val bundle: Provider<RegularFile> = variant.artifacts.get(SingleArtifact.BUNDLE)
+  val apk: Provider<Directory> = variant.artifacts.get(SingleArtifact.APK)
+
+  val artifacts = variant.artifacts
 
   override fun mappingFileProvider(project: Project): Provider<FileCollection> =
     project.provider {

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Features
+
+- Add upload functionality for size analysis ([#915](https://github.com/getsentry/sentry-android-gradle-plugin/pull/915))
+- Add VCS info extension for build uploads with customizable version control metadata ([#969](https://github.com/getsentry/sentry-android-gradle-plugin/pull/969))
+
 ### Fixes
 
 - Enable caching for BundleSourcesTask ([#894](https://github.com/getsentry/sentry-android-gradle-plugin/pull/894)
@@ -23,9 +28,9 @@
 - Bump Android SDK from v8.14.0 to v8.19.1 ([#936](https://github.com/getsentry/sentry-android-gradle-plugin/pull/936), [#943](https://github.com/getsentry/sentry-android-gradle-plugin/pull/943), [#958](https://github.com/getsentry/sentry-android-gradle-plugin/pull/958), [#962](https://github.com/getsentry/sentry-android-gradle-plugin/pull/962))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8191)
   - [diff](https://github.com/getsentry/sentry-java/compare/8.14.0...8.19.1)
-- Bump CLI from v2.46.0 to v2.52.0 ([#948](https://github.com/getsentry/sentry-android-gradle-plugin/pull/948), [#957](https://github.com/getsentry/sentry-android-gradle-plugin/pull/957), [#964](https://github.com/getsentry/sentry-android-gradle-plugin/pull/964))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2520)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.46.0...2.52.0)
+- Bump CLI from v2.46.0 to v2.53.0 ([#948](https://github.com/getsentry/sentry-android-gradle-plugin/pull/948), [#957](https://github.com/getsentry/sentry-android-gradle-plugin/pull/957), [#964](https://github.com/getsentry/sentry-android-gradle-plugin/pull/964), [#970](https://github.com/getsentry/sentry-android-gradle-plugin/pull/970))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2530)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.46.0...2.53.0)
 
 ## 5.9.0
 

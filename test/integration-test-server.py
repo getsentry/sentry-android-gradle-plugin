@@ -29,7 +29,7 @@ class Handler(BaseHTTPRequestHandler):
             self.writeJSON('{"url":"' + uri.geturl() + self.path + '",'
                            '"chunkSize":8388608,"chunksPerRequest":64,"maxFileSize":2147483648,'
                            '"maxRequestSize":33554432,"concurrency":1,"hashAlgorithm":"sha1","compression":["gzip"],'
-                           '"accept":["debug_files","release_files","pdbs","sources","bcsymbolmaps"]}')
+                           '"accept":["debug_files","release_files","pdbs","sources","bcsymbolmaps","preprod_artifacts"]}')
         elif self.isApi('/api/0/organizations/{}/repos/?cursor='.format(apiOrg)):
             self.writeJSONFile("test/assets/repos.json")
         elif self.isApi('/api/0/organizations/{}/releases/{}/previous-with-commits/'.format(apiOrg, version)):
@@ -75,6 +75,18 @@ class Handler(BaseHTTPRequestHandler):
             self.writeJSONFile("test/assets/artifact.json")
         elif self.isApi('/api/0/organizations/{}/releases/{}/assemble/'.format(apiOrg, version)):
             self.writeJSONFile("test/assets/assemble-artifacts-response.json")
+        elif self.isApi('/api/0/projects/{}/{}/files/preprodartifacts/assemble/'.format(apiOrg, apiProject)):
+            # Handle preprod artifacts assemble request
+            # Expected request: {"checksum":"...", "chunks":["..."]}
+            # Expected response: AssembleBuildResponse struct
+            jsonRequest = json.loads(self.body)
+            checksum = jsonRequest.get('checksum', '')
+            artifactUrl = '{}/artifacts/{}'.format(uri.geturl(), checksum)
+            jsonResponse = '{{"state":"ok","missingChunks":[],"artifactUrl":"{}"}}'.format(artifactUrl)
+            self.writeJSON(jsonResponse)
+        elif self.isApi('api/0/organizations/{}/chunk-upload/'.format(apiOrg)):
+            # Handle chunk upload POST requests
+            self.writeJSON('{"state":"ok"}')
         elif self.isApi('/api/0/projects/{}/{}/files/dsyms/'.format(apiOrg, apiProject)):
             self.writeJSONFile("test/assets/debug-info-files.json")
         elif self.isApi('/api/0/projects/{}/{}/files/dsyms/associate/'.format(apiOrg, apiProject)):

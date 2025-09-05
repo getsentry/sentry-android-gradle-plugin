@@ -10,10 +10,13 @@ import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppExtension
+import com.android.build.gradle.internal.crash.afterEvaluate
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
+import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
+import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
@@ -24,6 +27,7 @@ import io.sentry.android.gradle.tasks.InjectSentryMetaPropertiesIntoAssetsTask
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
 import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
+import io.sentry.android.gradle.tasks.SentryUploadAppArtifactTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
@@ -58,7 +62,6 @@ fun AndroidComponentsExtension<*, *, *>.configure(
   onVariants { variant ->
     if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
       val paths = OutputPaths(project, variant.name)
-
       val sentryTelemetryProvider =
         variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
 
@@ -214,6 +217,16 @@ fun AndroidComponentsExtension<*, *, *>.configure(
           )
           .toTransform(SingleArtifact.MERGED_MANIFEST)
       }
+      if (extension.sizeAnalysis.enabled.get() == true) {
+        variant.configureUploadAppTasks(
+          project,
+          extension,
+          sentryTelemetryProvider,
+          cliExecutable,
+          sentryOrg,
+          sentryProject,
+        )
+      }
     }
   }
 }
@@ -358,6 +371,45 @@ private fun Variant.configureProguardMappingsTasks(
   } else {
     return null
   }
+}
+
+/**
+ * Configure the upload AAB and APK tasks and set them up as finalizers on the respective producer
+ * tasks
+ */
+fun Variant.configureUploadAppTasks(
+  project: Project,
+  extension: SentryPluginExtension,
+  sentryTelemetryProvider: Provider<SentryTelemetryService>,
+  cliExecutable: Provider<String>,
+  sentryOrg: String?,
+  sentryProject: String?,
+): Pair<TaskProvider<SentryUploadAppArtifactTask>, TaskProvider<SentryUploadAppArtifactTask>> {
+  val variant = AndroidVariant74(this)
+  val sentryProps = getPropertiesFilePath(project, variant)
+  val (uploadBundleTask, uploadApkTask) =
+    SentryUploadAppArtifactTask.register(
+      project = project,
+      extension,
+      sentryTelemetryProvider,
+      debug = extension.debug,
+      cliExecutable = cliExecutable,
+      appBundle = variant.bundle,
+      apk = variant.apk,
+      sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
+      sentryProject = sentryProject?.let { project.provider { it } } ?: extension.projectName,
+      sentryAuthToken = extension.authToken,
+      sentryUrl = extension.url,
+      sentryProperties = sentryProps,
+      taskSuffix = name.capitalized,
+    )
+  // TODO we can use the listToArtifacts API in AGP 8.3+
+  // https://github.com/android/gradle-recipes/tree/agp-8.10/listenToArtifacts
+  project.afterEvaluate {
+    getBundleTask(project, variant.name)!!.configure { it.finalizedBy(uploadBundleTask) }
+    getAssembleTaskProvider(project, variant)!!.configure { it.finalizedBy(uploadApkTask) }
+  }
+  return uploadBundleTask to uploadApkTask
 }
 
 private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
