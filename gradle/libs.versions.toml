@@ -8,7 +8,7 @@ sqlite = "2.1.0"
 sentry = "7.0.0"
 
 sampleCoroutines = "1.5.2"
-sampleRoom = "2.5.0"
+sampleRoom = "2.7.2"
 sampleRetrofit = "2.9.0"
 sampleSpringBoot = "2.7.4"
 
@@ -17,7 +17,7 @@ kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version = "1.8.20-1.0.11" }
+ksp = { id = "com.google.devtools.ksp", version = "2.1.0-1.0.29" }
 dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
 spotless = { id = "com.diffplug.spotless", version = "7.0.4" }
 groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.7.1" }
@@ -27,6 +27,7 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 buildConfig = { id = "com.github.gmazzo.buildconfig", version = "4.2.0" }
 springBoot = { id = "org.springframework.boot", version = "2.7.4" }
 springDependencyManagement = { id = "io.spring.dependency-management", version = "1.0.11.RELEASE" }
+composeCompiler =  { id = "org.jetbrains.kotlin.plugin.compose", version = "2.1.0" }
 
 [libraries]
 junit = { group = "junit", name = "junit", version = "4.13.2" }

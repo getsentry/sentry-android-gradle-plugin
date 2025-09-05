@@ -3,6 +3,7 @@ plugins {
   alias(libs.plugins.kotlinAndroid) apply false
   alias(libs.plugins.kapt) apply false
   alias(libs.plugins.ksp) apply false
+  alias(libs.plugins.composeCompiler) apply false
   alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP apply false
   alias(libs.plugins.androidLibrary) version BuildPluginsVersion.AGP apply false
   alias(libs.plugins.spotless)

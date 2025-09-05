@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -5,10 +6,10 @@ plugins {
   id("io.sentry.jvm.gradle")
 }
 
-tasks.withType<KotlinCompile>().configureEach {
-  kotlinOptions {
+tasks.named<KotlinCompile>("compileKotlin") {
+  compilerOptions {
     freeCompilerArgs = listOf("-Xjsr305=strict")
-    jvmTarget = JavaVersion.VERSION_1_8.toString()
+    jvmTarget.set(JvmTarget.JVM_1_8)
   }
 }
 

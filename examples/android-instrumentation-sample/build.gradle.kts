@@ -1,8 +1,14 @@
+import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
+
 plugins {
   alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP
   alias(libs.plugins.kotlinAndroid)
   alias(libs.plugins.ksp)
   id("io.sentry.android.gradle")
+}
+
+if (getKotlinPluginVersion() >= "2.0.0") {
+  apply(plugin = "org.jetbrains.kotlin.plugin.compose")
 }
 
 // useful for local debugging of the androidx.sqlite lib
