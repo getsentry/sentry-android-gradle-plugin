@@ -50,7 +50,7 @@ class SentryPluginWithDependencyCollectorsTest :
   override val additionalBuildClasspath: String =
     """
         classpath 'com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:10.6.1'
-        classpath 'com.google.android.gms:oss-licenses-plugin:0.10.6'
+        classpath 'com.google.android.gms:oss-licenses-plugin:0.10.8'
         """
       .trimIndent()
 }
