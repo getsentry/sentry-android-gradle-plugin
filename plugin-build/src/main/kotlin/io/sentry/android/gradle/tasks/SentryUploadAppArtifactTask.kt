@@ -128,9 +128,7 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
           task.vcsBaseRef.set(extension.vcsInfo.baseRef)
           task.vcsPrNumber.set(extension.vcsInfo.prNumber)
           task.buildConfiguration.set(
-            extension.vcsInfo.buildConfiguration.orElse(
-              project.provider { buildVariant }
-            )
+            extension.vcsInfo.buildConfiguration.orElse(project.provider { buildVariant })
           )
           sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
           task.asSentryCliExec()
@@ -159,9 +157,7 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
           task.vcsBaseRef.set(extension.vcsInfo.baseRef)
           task.vcsPrNumber.set(extension.vcsInfo.prNumber)
           task.buildConfiguration.set(
-            extension.vcsInfo.buildConfiguration.orElse(
-              project.provider { buildVariant }
-            )
+            extension.vcsInfo.buildConfiguration.orElse(project.provider { buildVariant })
           )
           sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
           task.asSentryCliExec()
