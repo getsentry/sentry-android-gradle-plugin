@@ -254,6 +254,7 @@ class SentryUploadAppArtifactTaskTest {
         it.vcsHeadRef.set("feature-branch")
         it.vcsBaseRef.set("main")
         it.vcsPrNumber.set(123)
+        it.buildConfiguration.set("debugRelease")
       }
 
     val args = task.get().computeCommandLineArgs()
@@ -270,6 +271,7 @@ class SentryUploadAppArtifactTaskTest {
     assertThat(args).containsAtLeast("--head-ref", "feature-branch").inOrder()
     assertThat(args).containsAtLeast("--base-ref", "main").inOrder()
     assertThat(args).containsAtLeast("--pr-number", "123").inOrder()
+    assertThat(args).containsAtLeast("--build-configuration", "debugRelease").inOrder()
   }
 
   private fun createProject(): Project {
