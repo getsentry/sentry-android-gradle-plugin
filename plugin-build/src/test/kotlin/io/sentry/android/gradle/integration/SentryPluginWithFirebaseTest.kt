@@ -3,8 +3,10 @@ package io.sentry.android.gradle.integration
 import io.sentry.BuildConfig
 import kotlin.test.assertTrue
 import org.gradle.util.GradleVersion
+import org.junit.Ignore
 import org.junit.Test
 
+@Ignore("https://github.com/firebase/firebase-android-sdk/issues/7293")
 class SentryPluginWithFirebaseTest :
   BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
@@ -50,7 +52,7 @@ class SentryPluginWithFirebaseTest :
 
   override val additionalBuildClasspath: String =
     """
-        classpath 'com.google.firebase:perf-plugin:1.4.2'
+        classpath 'com.google.firebase:perf-plugin:2.0.1'
         """
       .trimIndent()
 }
