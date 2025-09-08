@@ -429,8 +429,8 @@ private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
 }
 
 private fun ApplicationVariant.getReleaseInfo(): ReleaseInfo {
-  val applicationId = applicationId.get() ?: namespace.get()
-  val versionName = outputs.firstOrNull()?.versionName?.get() ?: "undefined"
-  val versionCode = outputs.firstOrNull()?.versionCode?.get()
+  val applicationId = applicationId.orNull ?: namespace.get()
+  val versionName = outputs.firstOrNull()?.versionName?.orNull ?: "undefined"
+  val versionCode = outputs.firstOrNull()?.versionCode?.orNull
   return ReleaseInfo(applicationId, versionName, versionCode)
 }
