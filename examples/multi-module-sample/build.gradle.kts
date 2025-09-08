@@ -1,12 +1,11 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   alias(libs.plugins.kotlin)
   id("io.sentry.jvm.gradle")
 }
 
-tasks.named<KotlinCompile>("compileKotlin") {
+kotlin {
   compilerOptions {
     freeCompilerArgs.add("-Xjsr305=strict")
     jvmTarget.set(JvmTarget.JVM_1_8)

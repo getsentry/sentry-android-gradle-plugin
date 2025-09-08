@@ -5,9 +5,7 @@ plugins {
 
 android {
   compileSdk = LibsVersion.SDK_VERSION
-  defaultConfig {
-    minSdk = LibsVersion.MIN_SDK_VERSION
-  }
+  defaultConfig { minSdk = LibsVersion.MIN_SDK_VERSION }
 
   namespace = "io.sentry.android.instrumentation.lib"
 }
