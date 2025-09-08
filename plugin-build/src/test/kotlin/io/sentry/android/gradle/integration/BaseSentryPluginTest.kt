@@ -85,7 +85,7 @@ abstract class BaseSentryPluginTest(
             subprojects {
               pluginManager.withPlugin('com.android.application') {
                 android {
-                  compileSdkVersion 33
+                  compileSdkVersion 34
                   defaultConfig {
                     applicationId "com.example"
                     minSdkVersion 21
