@@ -32,7 +32,7 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
       parseVersion(context.details.id.version)?.let { thirdPartySemVersion ->
         if (thirdPartySemVersion < it) {
           logger.info {
-            "$sentryModuleId won't be installed because the current version is " +
+            "$sentryModuleId won't be installed because the current version ($thirdPartySemVersion) is " +
               "lower than the minimum supported version ($it)"
           }
           return
@@ -43,8 +43,8 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
       parseVersion(context.details.id.version)?.let { thirdPartySemVersion ->
         if (thirdPartySemVersion > it) {
           logger.info {
-            "$sentryModuleId won't be installed because the current version is " +
-              "higher than the maximum supported version ($it)"
+            "$sentryModuleId won't be installed because the current version ($thirdPartySemVersion) " +
+              "is higher than the maximum supported version ($it)"
           }
           return
         }
@@ -57,7 +57,7 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
         if (sentrySemVersion < minSupportedSentryVersion) {
           logger.warn {
             "$sentryModuleId won't be installed because the current sentry version " +
-              "is lower than the minimum supported sentry version " +
+              "($sentrySemVersion) is lower than the minimum supported sentry version " +
               "($minSupportedSentryVersion)"
           }
           return
@@ -78,7 +78,7 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
         if (sentrySemVersion > maxSupportedSentryVersion) {
           logger.debug {
             "$sentryModuleId won't be installed because the current sentry version " +
-              "is higher than the maximum supported sentry version " +
+              "($sentrySemVersion) is higher than the maximum supported sentry version " +
               "($maxSupportedSentryVersion)"
           }
           return

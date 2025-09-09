@@ -67,7 +67,7 @@ class AndroidOkHttpInstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-android-okhttp won't be installed because the current " +
-          "version is lower than the minimum supported version (3.13.0)"
+          "version (3.11.0) is lower than the minimum supported version (3.13.0)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
@@ -80,7 +80,7 @@ class AndroidOkHttpInstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-android-okhttp won't be installed because the current " +
-          "sentry version is higher than the maximum supported sentry version (6.9999.9999)"
+          "sentry version (7.0.0) is higher than the maximum supported sentry version (6.9999.9999)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }

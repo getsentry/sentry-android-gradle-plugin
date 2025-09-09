@@ -63,7 +63,7 @@ class Spring6InstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-spring-jakarta won't be installed because the current " +
-          "version is lower than the minimum supported version (6.0.0)"
+          "version (5.7.4) is lower than the minimum supported version (6.0.0)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }

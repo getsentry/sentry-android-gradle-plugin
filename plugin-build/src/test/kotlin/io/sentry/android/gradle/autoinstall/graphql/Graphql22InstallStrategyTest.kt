@@ -80,7 +80,7 @@ class Graphql22InstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-graphql-22 won't be installed because the current " +
-          "version is lower than the minimum supported version (22.0.0)"
+          "version (21.9.0) is lower than the minimum supported version (22.0.0)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
