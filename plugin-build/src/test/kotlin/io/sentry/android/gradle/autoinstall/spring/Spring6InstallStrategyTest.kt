@@ -69,6 +69,19 @@ class Spring6InstallStrategyTest {
   }
 
   @Test
+  fun `when spring version is too high logs a message and does nothing`() {
+    val sut = fixture.getSut(springVersion = "7.0.0")
+    sut.execute(fixture.metadataContext)
+
+    assertTrue {
+      fixture.logger.capturedMessage ==
+        "[sentry] sentry-spring-jakarta won't be installed because the current " +
+          "version (7.0.0) is higher than the maximum supported version (6.9999.9999)"
+    }
+    verify(fixture.metadataDetails, never()).allVariants(any())
+  }
+
+  @Test
   fun `installs sentry-spring-jakarta with info message`() {
     val sut = fixture.getSut()
     sut.execute(fixture.metadataContext)
