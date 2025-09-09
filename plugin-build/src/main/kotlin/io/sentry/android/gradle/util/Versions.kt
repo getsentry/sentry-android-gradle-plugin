@@ -57,10 +57,13 @@ internal object SentryModules {
   internal val SENTRY_QUARTZ = DefaultModuleIdentifier.newId("io.sentry", "sentry-quartz")
   internal val SENTRY_SPRING5 = DefaultModuleIdentifier.newId("io.sentry", "sentry-spring")
   internal val SENTRY_SPRING6 = DefaultModuleIdentifier.newId("io.sentry", "sentry-spring-jakarta")
+  internal val SENTRY_SPRING7 = DefaultModuleIdentifier.newId("io.sentry", "sentry-spring-7")
   internal val SENTRY_SPRING_BOOT2 =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-spring-boot")
   internal val SENTRY_SPRING_BOOT3 =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-spring-boot-jakarta")
+  internal val SENTRY_SPRING_BOOT4 =
+    DefaultModuleIdentifier.newId("io.sentry", "sentry-spring-boot-4")
   internal val SENTRY_BOM = DefaultModuleIdentifier.newId("io.sentry", "sentry-bom")
   internal val SENTRY_OPENTELEMETRY_AGENTLESS =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-opentelemetry-agentless")

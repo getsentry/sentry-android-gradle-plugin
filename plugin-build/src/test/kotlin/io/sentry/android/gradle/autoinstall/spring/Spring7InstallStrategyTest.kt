@@ -20,7 +20,7 @@ import org.gradle.api.artifacts.VariantMetadata
 import org.junit.Test
 import org.slf4j.Logger
 
-class Spring6InstallStrategyTest {
+class Spring7InstallStrategyTest {
   class Fixture {
     val logger = CapturingTestLogger()
     val dependencies = mock<DirectDependenciesMetadata>()
@@ -41,15 +41,15 @@ class Spring6InstallStrategyTest {
           .allVariants(any<Action<VariantMetadata>>())
       }
 
-    fun getSut(springVersion: String = "6.0.0"): Spring6InstallStrategy {
+    fun getSut(springVersion: String = "7.0.0"): Spring7InstallStrategy {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(springVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
       with(AutoInstallState.getInstance()) {
         this.enabled = true
-        this.sentryVersion = "6.21.0"
+        this.sentryVersion = "8.21.0"
       }
-      return Spring6InstallStrategyImpl(logger)
+      return Spring7InstallStrategyImpl(logger)
     }
   }
 
@@ -57,26 +57,26 @@ class Spring6InstallStrategyTest {
 
   @Test
   fun `when spring version is too low logs a message and does nothing`() {
-    val sut = fixture.getSut(springVersion = "5.7.4")
+    val sut = fixture.getSut(springVersion = "6.7.4")
     sut.execute(fixture.metadataContext)
 
     assertTrue {
       fixture.logger.capturedMessage ==
-        "[sentry] sentry-spring-jakarta won't be installed because the current " +
-          "version (5.7.4) is lower than the minimum supported version (6.0.0)"
+        "[sentry] sentry-spring-7 won't be installed because the current " +
+          "version (6.7.4) is lower than the minimum supported version (7.0.0-M1)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
 
   @Test
   fun `when spring version is too high logs a message and does nothing`() {
-    val sut = fixture.getSut(springVersion = "7.0.0")
+    val sut = fixture.getSut(springVersion = "8.0.0")
     sut.execute(fixture.metadataContext)
 
     assertTrue {
       fixture.logger.capturedMessage ==
-        "[sentry] sentry-spring-jakarta won't be installed because the current " +
-          "version (7.0.0) is higher than the maximum supported version (6.9999.9999)"
+        "[sentry] sentry-spring-7 won't be installed because the current " +
+          "version (8.0.0) is higher than the maximum supported version (7.9999.9999)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
@@ -88,15 +88,15 @@ class Spring6InstallStrategyTest {
 
     assertTrue {
       fixture.logger.capturedMessage ==
-        "[sentry] sentry-spring-jakarta was successfully installed with version: 6.21.0"
+        "[sentry] sentry-spring-7 was successfully installed with version: 8.21.0"
     }
     verify(fixture.dependencies)
       .add(
         com.nhaarman.mockitokotlin2.check<String> {
-          assertEquals("io.sentry:sentry-spring-jakarta:6.21.0", it)
+          assertEquals("io.sentry:sentry-spring-7:8.21.0", it)
         }
       )
   }
 
-  private class Spring6InstallStrategyImpl(logger: Logger) : Spring6InstallStrategy(logger)
+  private class Spring7InstallStrategyImpl(logger: Logger) : Spring7InstallStrategy(logger)
 }
