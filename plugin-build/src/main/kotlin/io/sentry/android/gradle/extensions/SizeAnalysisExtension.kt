@@ -19,6 +19,5 @@ constructor(objects: ObjectFactory, providerFactory: ProviderFactory) {
    * The build configuration to use for the upload. This allows comparison between builds with the
    * same buildConfiguration. If not provided, the build variant will be used.
    */
-  val buildConfiguration: Property<String> =
-    objects.property(String::class.java).convention(null as String?)
+  val buildConfiguration: Property<String> = objects.property(String::class.java)
 }
