@@ -59,11 +59,4 @@ open class VcsInfoExtension @Inject constructor(objects: ObjectFactory) {
    * will be used.
    */
   val prNumber: Property<Int> = objects.property(Int::class.java).convention(null as Int?)
-
-  /**
-   * The build configuration to use for the upload. This allows comparison between builds with the
-   * same buildConfiguration. If not provided, the build variant will be used.
-   */
-  val buildConfiguration: Property<String> =
-    objects.property(String::class.java).convention(null as String?)
 }

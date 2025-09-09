@@ -14,4 +14,11 @@ constructor(objects: ObjectFactory, providerFactory: ProviderFactory) {
     objects
       .property(Boolean::class.java)
       .convention(providerFactory.isCi() && false) // set to false for now otherwise upload fails CI
+
+  /**
+   * The build configuration to use for the upload. This allows comparison between builds with the
+   * same buildConfiguration. If not provided, the build variant will be used.
+   */
+  val buildConfiguration: Property<String> =
+    objects.property(String::class.java).convention(null as String?)
 }
