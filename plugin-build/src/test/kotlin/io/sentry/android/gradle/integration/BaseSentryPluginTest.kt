@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.integration
 
 import io.sentry.android.gradle.util.PrintBuildOutputOnFailureRule
+import io.sentry.android.gradle.util.SemVer
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.OutputStreamWriter
@@ -45,6 +46,9 @@ abstract class BaseSentryPluginTest(
         .joinToString(separator = ", ") { "\"$it\"" }
         .replace(File.separator, "/")
 
+    // AGP 7.x does not work well with SDK 34+ (some R8-related shenanigans)
+    val compileSdkVersion =
+      if (SemVer.parse(androidGradlePluginVersion) < SemVer.parse("8.0.0")) 33 else 34
     appBuildFile = File(testProjectDir.root, "app/build.gradle")
     moduleBuildFile = File(testProjectDir.root, "module/build.gradle")
     sentryPropertiesFile = File(testProjectDir.root, "sentry.properties")
@@ -85,7 +89,7 @@ abstract class BaseSentryPluginTest(
             subprojects {
               pluginManager.withPlugin('com.android.application') {
                 android {
-                  compileSdkVersion 34
+                  compileSdkVersion $compileSdkVersion
                   defaultConfig {
                     applicationId "com.example"
                     minSdkVersion 21
@@ -93,7 +97,7 @@ abstract class BaseSentryPluginTest(
                   buildTypes {
                     release {
                       minifyEnabled true
-                      proguardFiles("src/release/proguard-rules.pro")
+                      proguardFiles("proguard-rules.pro")
                     }
                   }
                   $additionalRootProjectConfig

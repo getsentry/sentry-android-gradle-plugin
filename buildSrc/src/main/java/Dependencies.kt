@@ -6,7 +6,8 @@ object BuildPluginsVersion {
 }
 
 object LibsVersion {
-    const val SDK_VERSION = 34
+    // AGP 7.x does not work well with SDK 34+ (some R8-related shenanigans)
+    val SDK_VERSION = if (VersionNumber.parse(BuildPluginsVersion.AGP).major < 8) 33 else 34
     const val MIN_SDK_VERSION = 21
 }
 
