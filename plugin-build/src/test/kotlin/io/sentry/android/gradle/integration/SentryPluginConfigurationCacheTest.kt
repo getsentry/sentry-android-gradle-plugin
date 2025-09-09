@@ -14,7 +14,6 @@ import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
-import org.jetbrains.kotlin.gradle.report.TaskExecutionState.UP_TO_DATE
 import org.junit.Assume.assumeThat
 import org.junit.Test
 
@@ -59,6 +58,8 @@ class SentryPluginConfigurationCacheTest :
       .appendArguments(":app:assembleDebug")
       .appendArguments("--configuration-cache")
       .appendArguments("--info")
+      // AGP 9.+ adds a stdlib dependency which we don't want to have for deterministic output
+      .appendArguments("-Pandroid.builtInKotlin=false")
 
     val output = runner.build().output
     val deps = verifyDependenciesReportAndroid(testProjectDir.root)

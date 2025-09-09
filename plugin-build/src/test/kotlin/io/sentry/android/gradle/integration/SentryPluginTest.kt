@@ -678,7 +678,10 @@ class SentryPluginTest :
             """
         .trimIndent()
     )
-    runner.appendArguments(":app:assembleDebug")
+    runner
+      .appendArguments(":app:assembleDebug")
+      // AGP 9.+ adds a stdlib dependency which we don't want to have for deterministic output
+      .appendArguments("-Pandroid.builtInKotlin=false")
 
     runner.build()
     val deps = verifyDependenciesReportAndroid(testProjectDir.root)
@@ -704,7 +707,10 @@ class SentryPluginTest :
             """
         .trimIndent()
     )
-    runner.appendArguments(":app:assembleDebug")
+    runner
+      .appendArguments(":app:assembleDebug")
+      // AGP 9.+ adds a stdlib dependency which we don't want to have for deterministic output
+      .appendArguments("-Pandroid.builtInKotlin=false")
 
     runner.build()
     val deps = verifyDependenciesReportAndroid(testProjectDir.root)
