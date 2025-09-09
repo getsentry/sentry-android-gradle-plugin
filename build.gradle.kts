@@ -1,9 +1,13 @@
 import org.gradle.util.internal.VersionNumber
 
-if (VersionNumber.parse(BuildPluginsVersion.AGP).major < 8) {
-  // AGP 7.x has troubles with compileSdk 34 due to some R8 shenanigans, so we have to use a newer
-  // version of R* here
-  buildscript { dependencies { classpath("com.android.tools:r8:8.11.18") } }
+buildscript {
+  if (VersionNumber.parse(BuildPluginsVersion.AGP).major < 8) {
+    // AGP 7.x has troubles with compileSdk 34 due to some R8 shenanigans, so we have to use a newer
+    // version of R* here
+    dependencies {
+      classpath("com.android.tools:r8:8.11.18")
+    }
+  }
 }
 
 plugins {
