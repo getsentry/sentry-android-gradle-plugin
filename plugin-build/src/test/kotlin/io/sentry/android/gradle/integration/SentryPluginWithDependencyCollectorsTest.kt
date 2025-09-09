@@ -28,6 +28,10 @@ class SentryPluginWithDependencyCollectorsTest :
                   minifyEnabled true
                 }
               }
+              
+              lint {
+                checkReleaseBuilds false
+              }
             }
 
             dependencies {
