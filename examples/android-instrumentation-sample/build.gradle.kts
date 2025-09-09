@@ -55,8 +55,8 @@ android {
   }
 
   compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
   }
   namespace = "io.sentry.samples.instrumentation"
 
@@ -67,7 +67,7 @@ android {
   testOptions.unitTests.isIncludeAndroidResources = true
 }
 
-kotlin { jvmToolchain(11) }
+kotlin { jvmToolchain(17) }
 
 // useful, when we want to modify room-generated classes, and then compile them into .class files
 // so room does not re-generate and overwrite our changes
