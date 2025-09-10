@@ -69,6 +69,19 @@ class SpringBoot3InstallStrategyTest {
   }
 
   @Test
+  fun `when spring version is too high logs a message and does nothing`() {
+    val sut = fixture.getSut(springVersion = "4.0.0")
+    sut.execute(fixture.metadataContext)
+
+    assertTrue {
+      fixture.logger.capturedMessage ==
+        "[sentry] sentry-spring-boot-jakarta won't be installed because the current " +
+          "version (4.0.0) is higher than the maximum supported version (3.9999.9999)"
+    }
+    verify(fixture.metadataDetails, never()).allVariants(any())
+  }
+
+  @Test
   fun `installs sentry-spring-boot-jakarta with info message`() {
     val sut = fixture.getSut()
     sut.execute(fixture.metadataContext)

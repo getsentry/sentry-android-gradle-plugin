@@ -14,8 +14,10 @@ import io.sentry.android.gradle.autoinstall.override.WarnOnOverrideStrategy
 import io.sentry.android.gradle.autoinstall.quartz.QuartzInstallStrategy
 import io.sentry.android.gradle.autoinstall.spring.Spring5InstallStrategy
 import io.sentry.android.gradle.autoinstall.spring.Spring6InstallStrategy
+import io.sentry.android.gradle.autoinstall.spring.Spring7InstallStrategy
 import io.sentry.android.gradle.autoinstall.spring.SpringBoot2InstallStrategy
 import io.sentry.android.gradle.autoinstall.spring.SpringBoot3InstallStrategy
+import io.sentry.android.gradle.autoinstall.spring.SpringBoot4InstallStrategy
 import io.sentry.android.gradle.autoinstall.sqlite.SQLiteInstallStrategy
 import io.sentry.android.gradle.autoinstall.timber.TimberInstallStrategy
 import io.sentry.android.gradle.extensions.SentryPluginExtension
@@ -48,8 +50,10 @@ private val delayedStrategies =
   listOf(
     Spring5InstallStrategy.Registrar,
     Spring6InstallStrategy.Registrar,
+    Spring7InstallStrategy.Registrar,
     SpringBoot2InstallStrategy.Registrar,
     SpringBoot3InstallStrategy.Registrar,
+    SpringBoot4InstallStrategy.Registrar,
   )
 
 fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boolean) {
@@ -115,6 +119,7 @@ private fun DependencySet.findSentryVersion(isAndroid: Boolean): String? =
           (it.name == SentryModules.SENTRY.name ||
             it.name == SentryModules.SENTRY_SPRING_BOOT2.name ||
             it.name == SentryModules.SENTRY_SPRING_BOOT3.name ||
+            it.name == SentryModules.SENTRY_SPRING_BOOT4.name ||
             it.name == SentryModules.SENTRY_BOM.name ||
             it.name == SentryModules.SENTRY_OPENTELEMETRY_AGENTLESS.name ||
             it.name == SentryModules.SENTRY_OPENTELEMETRY_AGENTLESS_SPRING.name) &&
