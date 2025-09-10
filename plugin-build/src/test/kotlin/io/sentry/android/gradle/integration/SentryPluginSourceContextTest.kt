@@ -5,9 +5,9 @@ import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.SkipOnForksRule
 import io.sentry.android.gradle.verifySourceBundleContents
-import io.sentry.android.gradle.withDummyComposeFile
 import io.sentry.android.gradle.withDummyCustomFile
 import io.sentry.android.gradle.withDummyJavaFile
+import io.sentry.android.gradle.withDummyKtFile
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -154,7 +154,7 @@ class SentryPluginSourceContextTest :
     )
     val firstBuild = runner.build()
 
-    testProjectDir.withDummyComposeFile()
+    testProjectDir.withDummyKtFile()
 
     val subsequentBuild = runner.build()
 
@@ -209,7 +209,7 @@ class SentryPluginSourceContextTest :
 
     sentryPropertiesFile.writeText("")
 
-    val ktContents = testProjectDir.withDummyComposeFile()
+    val ktContents = testProjectDir.withDummyKtFile()
     val javaContents = testProjectDir.withDummyJavaFile()
     val customContents = testProjectDir.withDummyCustomFile()
 
@@ -281,7 +281,7 @@ class SentryPluginSourceContextTest :
 
     sentryPropertiesFile.writeText("")
 
-    val ktContents = testProjectDir.withDummyComposeFile()
+    val ktContents = testProjectDir.withDummyKtFile()
 
     val result =
       runner.appendArguments("app:assembleRelease").appendArguments("--configuration-cache").build()
@@ -335,7 +335,7 @@ class SentryPluginSourceContextTest :
             """
         .trimIndent()
     )
-    testProjectDir.withDummyComposeFile()
+    testProjectDir.withDummyKtFile()
 
     val firstBuild = runner.build()
 
@@ -389,7 +389,7 @@ class SentryPluginSourceContextTest :
             """
         .trimIndent()
     )
-    testProjectDir.withDummyComposeFile()
+    testProjectDir.withDummyKtFile()
 
     val firstBuild = runner.build()
 
