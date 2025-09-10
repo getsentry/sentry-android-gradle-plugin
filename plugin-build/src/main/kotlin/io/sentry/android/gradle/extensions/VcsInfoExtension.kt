@@ -16,47 +16,44 @@ open class VcsInfoExtension @Inject constructor(objects: ObjectFactory) {
   /**
    * The VCS commit sha to use for the upload. If not provided, the current commit sha will be used.
    */
-  val headSha: Property<String> = objects.property(String::class.java).convention(null as String?)
+  val headSha: Property<String> = objects.property(String::class.java)
 
   /**
    * The VCS commit's base sha to use for the upload. If not provided, the merge-base of the current
    * and remote branch will be used.
    */
-  val baseSha: Property<String> = objects.property(String::class.java).convention(null as String?)
+  val baseSha: Property<String> = objects.property(String::class.java)
 
   /** The VCS provider to use for the upload. If not provided, the current provider will be used. */
-  val vcsProvider: Property<String> =
-    objects.property(String::class.java).convention(null as String?)
+  val vcsProvider: Property<String> = objects.property(String::class.java)
 
   /**
    * The name of the git repository to use for the upload (e.g. organization/repository). If not
    * provided, the current repository will be used.
    */
-  val headRepoName: Property<String> =
-    objects.property(String::class.java).convention(null as String?)
+  val headRepoName: Property<String> = objects.property(String::class.java)
 
   /**
    * The name of the git repository to use for the upload (e.g. organization/repository). If not
    * provided, the current repository will be used.
    */
-  val baseRepoName: Property<String> =
-    objects.property(String::class.java).convention(null as String?)
+  val baseRepoName: Property<String> = objects.property(String::class.java)
 
   /**
    * The reference (branch) to use for the upload. If not provided, the current reference will be
    * used.
    */
-  val headRef: Property<String> = objects.property(String::class.java).convention(null as String?)
+  val headRef: Property<String> = objects.property(String::class.java)
 
   /**
    * The base reference (branch) to use for the upload. If not provided, the merge-base with the
    * remote tracking branch will be used.
    */
-  val baseRef: Property<String> = objects.property(String::class.java).convention(null as String?)
+  val baseRef: Property<String> = objects.property(String::class.java)
 
   /**
    * The pull request number to use for the upload. If not provided, the current pull request number
    * will be used.
    */
-  val prNumber: Property<Int> = objects.property(Int::class.java).convention(null as Int?)
+  val prNumber: Property<Int> = objects.property(Int::class.java)
 }
