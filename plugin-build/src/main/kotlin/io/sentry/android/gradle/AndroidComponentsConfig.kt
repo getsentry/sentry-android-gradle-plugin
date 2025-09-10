@@ -387,6 +387,7 @@ fun Variant.configureUploadAppTasks(
 ): Pair<TaskProvider<SentryUploadAppArtifactTask>, TaskProvider<SentryUploadAppArtifactTask>> {
   val variant = AndroidVariant74(this)
   val sentryProps = getPropertiesFilePath(project, variant)
+  val buildVariant = variant.name
   val (uploadBundleTask, uploadApkTask) =
     SentryUploadAppArtifactTask.register(
       project = project,
@@ -402,6 +403,7 @@ fun Variant.configureUploadAppTasks(
       sentryUrl = extension.url,
       sentryProperties = sentryProps,
       taskSuffix = name.capitalized,
+      buildVariant = buildVariant,
     )
   // TODO we can use the listToArtifacts API in AGP 8.3+
   // https://github.com/android/gradle-recipes/tree/agp-8.10/listenToArtifacts

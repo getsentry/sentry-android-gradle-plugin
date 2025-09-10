@@ -43,6 +43,7 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
   @get:Input @get:Optional abstract val vcsHeadRef: Property<String>
   @get:Input @get:Optional abstract val vcsBaseRef: Property<String>
   @get:Input @get:Optional abstract val vcsPrNumber: Property<Int>
+  @get:Input @get:Optional abstract val buildConfiguration: Property<String>
 
   override fun getArguments(args: MutableList<String>) {
     args.add("build")
@@ -57,6 +58,7 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
     vcsHeadRef.orNull?.let { args.addAll(listOf("--head-ref", it)) }
     vcsBaseRef.orNull?.let { args.addAll(listOf("--base-ref", it)) }
     vcsPrNumber.orNull?.let { args.addAll(listOf("--pr-number", it.toString())) }
+    buildConfiguration.orNull?.let { args.addAll(listOf("--build-configuration", it)) }
 
     val bundleFile = bundle.orNull?.asFile
     if (bundleFile != null) {
@@ -101,6 +103,7 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
       sentryAuthToken: Property<String>,
       sentryUrl: Property<String>,
       taskSuffix: String = "",
+      buildVariant: String = "",
     ): Pair<TaskProvider<SentryUploadAppArtifactTask>, TaskProvider<SentryUploadAppArtifactTask>> {
       val uploadMobileBundleTask =
         project.tasks.register(
@@ -124,6 +127,9 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
           task.vcsHeadRef.set(extension.vcsInfo.headRef)
           task.vcsBaseRef.set(extension.vcsInfo.baseRef)
           task.vcsPrNumber.set(extension.vcsInfo.prNumber)
+          task.buildConfiguration.set(
+            extension.sizeAnalysis.buildConfiguration.orElse(project.provider { buildVariant })
+          )
           sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
           task.asSentryCliExec()
           task.withSentryTelemetry(extension, sentryTelemetryProvider)
@@ -150,6 +156,9 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
           task.vcsHeadRef.set(extension.vcsInfo.headRef)
           task.vcsBaseRef.set(extension.vcsInfo.baseRef)
           task.vcsPrNumber.set(extension.vcsInfo.prNumber)
+          task.buildConfiguration.set(
+            extension.sizeAnalysis.buildConfiguration.orElse(project.provider { buildVariant })
+          )
           sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
           task.asSentryCliExec()
           task.withSentryTelemetry(extension, sentryTelemetryProvider)
