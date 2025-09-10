@@ -64,7 +64,7 @@ class KotlinExtensionsInstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-kotlin-extensions won't be installed because the current " +
-          "version is lower than the minimum supported version (1.6.1)"
+          "version (1.6.0) is lower than the minimum supported version (1.6.1)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }

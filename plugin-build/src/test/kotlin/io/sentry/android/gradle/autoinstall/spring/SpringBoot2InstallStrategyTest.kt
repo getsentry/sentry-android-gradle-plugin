@@ -63,7 +63,7 @@ class SpringBoot2InstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-spring-boot won't be installed because the current " +
-          "version is lower than the minimum supported version (2.1.0)"
+          "version (2.0.0) is lower than the minimum supported version (2.1.0)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
@@ -76,7 +76,7 @@ class SpringBoot2InstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-spring-boot won't be installed because the current " +
-          "version is higher than the maximum supported version (2.9999.9999)"
+          "version (3.0.0) is higher than the maximum supported version (2.9999.9999)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }

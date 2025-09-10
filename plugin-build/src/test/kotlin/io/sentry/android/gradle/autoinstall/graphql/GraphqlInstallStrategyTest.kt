@@ -80,7 +80,7 @@ class GraphqlInstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-graphql won't be installed because the current " +
-          "version is higher than the maximum supported version (21.9999.9999)"
+          "version (22.1.0) is higher than the maximum supported version (21.9999.9999)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
