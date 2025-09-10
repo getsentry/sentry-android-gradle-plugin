@@ -46,9 +46,6 @@ abstract class BaseSentryPluginTest(
         .joinToString(separator = ", ") { "\"$it\"" }
         .replace(File.separator, "/")
 
-    // AGP 7.x does not work well with SDK 34+ (some R8-related shenanigans)
-    val compileSdkVersion =
-      if (SemVer.parse(androidGradlePluginVersion) < SemVer.parse("8.0.0")) 33 else 34
     appBuildFile = File(testProjectDir.root, "app/build.gradle")
     moduleBuildFile = File(testProjectDir.root, "module/build.gradle")
     sentryPropertiesFile = File(testProjectDir.root, "sentry.properties")
@@ -89,7 +86,7 @@ abstract class BaseSentryPluginTest(
             subprojects {
               pluginManager.withPlugin('com.android.application') {
                 android {
-                  compileSdkVersion $compileSdkVersion
+                  compileSdkVersion 34
                   defaultConfig {
                     applicationId "com.example"
                     minSdkVersion 21
