@@ -5,14 +5,17 @@ plugins {
 
 android {
   compileSdk = LibsVersion.SDK_VERSION
-  defaultConfig {
-    minSdk = LibsVersion.MIN_SDK_VERSION
-    targetSdk = LibsVersion.SDK_VERSION
-  }
+  defaultConfig { minSdk = LibsVersion.MIN_SDK_VERSION }
 
-  kotlinOptions { jvmTarget = JavaVersion.VERSION_1_8.toString() }
   namespace = "io.sentry.android.instrumentation.lib"
+
+  compileOptions {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+  }
 }
+
+kotlin { jvmToolchain(17) }
 
 dependencies {
   implementation(libs.sample.coroutines.core)

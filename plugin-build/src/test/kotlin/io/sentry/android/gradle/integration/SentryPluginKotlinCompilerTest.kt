@@ -22,7 +22,6 @@ class SentryPluginKotlinCompilerTest :
       """
             plugins {
               id "com.android.application"
-              id "kotlin-android"
               id "io.sentry.android.gradle"
               id "io.sentry.kotlin.compiler.gradle"
             }
@@ -39,9 +38,6 @@ class SentryPluginKotlinCompilerTest :
               }
               composeOptions {
                 kotlinCompilerExtensionVersion = "1.4.6"
-              }
-              kotlinOptions {
-                jvmTarget = "1.8"
               }
             }
             dependencies {
@@ -63,7 +59,12 @@ class SentryPluginKotlinCompilerTest :
 
     testProjectDir.withDummyComposeFile()
 
-    val result = runner.appendArguments("app:assembleRelease").build()
+    val result =
+      runner
+        .appendArguments("app:assembleRelease")
+        // AGP 9.+ adds a stdlib dependency which we don't want to have for deterministic output
+        .appendArguments("-Pandroid.builtInKotlin=false")
+        .build()
 
     assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
   }

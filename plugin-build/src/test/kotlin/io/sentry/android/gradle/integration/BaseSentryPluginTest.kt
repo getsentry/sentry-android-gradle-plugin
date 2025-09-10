@@ -54,12 +54,19 @@ abstract class BaseSentryPluginTest(
         """
             import io.sentry.android.gradle.autoinstall.AutoInstallState
             import io.sentry.android.gradle.util.GradleVersions
+            import org.gradle.util.internal.VersionNumber
 
             buildscript {
               repositories {
                 google()
                 gradlePluginPortal()
                 mavenCentral()
+                maven {
+                  url 'https://storage.googleapis.com/r8-releases/raw'
+                  content {
+                    includeGroup 'com.android.tools'
+                  }
+                }
               }
               dependencies {
                 classpath 'com.android.tools.build:gradle:$androidGradlePluginVersion'
@@ -67,6 +74,11 @@ abstract class BaseSentryPluginTest(
                 // withPluginClasspath on the Gradle Runner.
                 $additionalBuildClasspath
                 classpath files($pluginClasspath)
+                if (VersionNumber.parse("$androidGradlePluginVersion").major < 8) {
+                  // AGP 7.x has troubles with compileSdk 34 due to some R8 shenanigans, so we have to use a newer
+                  // version of R* here
+                  classpath 'com.android.tools:r8:8.11.18'
+                }
               }
             }
 
@@ -85,7 +97,7 @@ abstract class BaseSentryPluginTest(
             subprojects {
               pluginManager.withPlugin('com.android.application') {
                 android {
-                  compileSdkVersion 33
+                  compileSdkVersion 34
                   defaultConfig {
                     applicationId "com.example"
                     minSdkVersion 21
@@ -93,7 +105,7 @@ abstract class BaseSentryPluginTest(
                   buildTypes {
                     release {
                       minifyEnabled true
-                      proguardFiles("src/release/proguard-rules.pro")
+                      proguardFiles("proguard-rules.pro")
                     }
                   }
                   $additionalRootProjectConfig

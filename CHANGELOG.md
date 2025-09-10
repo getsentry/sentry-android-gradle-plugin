@@ -14,6 +14,7 @@
 - Enable caching for BundleSourcesTask ([#894](https://github.com/getsentry/sentry-android-gradle-plugin/pull/894)
 - Add support for Kotlin 2.2.0 for Sentry Kotlin Compiler Plugin ([#944](https://github.com/getsentry/sentry-android-gradle-plugin/pull/944))
 - Sentry dependencies intended for Spring Boot 3 / Spring 6 will no longer be installed for Spring Boot 4 / Spring 7 ([#980](https://github.com/getsentry/sentry-android-gradle-plugin/pull/980))
+- Allow lazily configured version details for ProGuard mappings ([#974](https://github.com/getsentry/sentry-android-gradle-plugin/pull/974))
 
 ### Breaking Changes
 
