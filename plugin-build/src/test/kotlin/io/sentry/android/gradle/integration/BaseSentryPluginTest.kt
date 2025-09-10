@@ -1,7 +1,6 @@
 package io.sentry.android.gradle.integration
 
 import io.sentry.android.gradle.util.PrintBuildOutputOnFailureRule
-import io.sentry.android.gradle.util.SemVer
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.OutputStreamWriter
@@ -55,12 +54,19 @@ abstract class BaseSentryPluginTest(
         """
             import io.sentry.android.gradle.autoinstall.AutoInstallState
             import io.sentry.android.gradle.util.GradleVersions
+            import org.gradle.util.internal.VersionNumber
 
             buildscript {
               repositories {
                 google()
                 gradlePluginPortal()
                 mavenCentral()
+                maven {
+                  url 'https://storage.googleapis.com/r8-releases/raw'
+                  content {
+                    includeGroup 'com.android.tools'
+                  }
+                }
               }
               dependencies {
                 classpath 'com.android.tools.build:gradle:$androidGradlePluginVersion'
@@ -68,6 +74,11 @@ abstract class BaseSentryPluginTest(
                 // withPluginClasspath on the Gradle Runner.
                 $additionalBuildClasspath
                 classpath files($pluginClasspath)
+                if (VersionNumber.parse("$androidGradlePluginVersion").major < 8) {
+                  // AGP 7.x has troubles with compileSdk 34 due to some R8 shenanigans, so we have to use a newer
+                  // version of R* here
+                  classpath 'com.android.tools:r8:8.11.18'
+                }
               }
             }
 
