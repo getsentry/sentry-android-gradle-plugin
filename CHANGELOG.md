@@ -29,9 +29,9 @@
 ### Dependencies
 
 - Set build default Gradle Version to 8.14.2 ([#891](https://github.com/getsentry/sentry-android-gradle-plugin/pull/891))
-- Bump Android SDK from v8.14.0 to v8.20.0 ([#936](https://github.com/getsentry/sentry-android-gradle-plugin/pull/936), [#943](https://github.com/getsentry/sentry-android-gradle-plugin/pull/943), [#958](https://github.com/getsentry/sentry-android-gradle-plugin/pull/958), [#962](https://github.com/getsentry/sentry-android-gradle-plugin/pull/962), [#967](https://github.com/getsentry/sentry-android-gradle-plugin/pull/967))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8200)
-  - [diff](https://github.com/getsentry/sentry-java/compare/8.14.0...8.20.0)
+- Bump Android SDK from v8.14.0 to v8.21.1 ([#936](https://github.com/getsentry/sentry-android-gradle-plugin/pull/936), [#943](https://github.com/getsentry/sentry-android-gradle-plugin/pull/943), [#958](https://github.com/getsentry/sentry-android-gradle-plugin/pull/958), [#962](https://github.com/getsentry/sentry-android-gradle-plugin/pull/962), [#967](https://github.com/getsentry/sentry-android-gradle-plugin/pull/967), [#981](https://github.com/getsentry/sentry-android-gradle-plugin/pull/981))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8211)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.14.0...8.21.1)
 - Bump CLI from v2.46.0 to v2.53.0 ([#948](https://github.com/getsentry/sentry-android-gradle-plugin/pull/948), [#957](https://github.com/getsentry/sentry-android-gradle-plugin/pull/957), [#964](https://github.com/getsentry/sentry-android-gradle-plugin/pull/964), [#970](https://github.com/getsentry/sentry-android-gradle-plugin/pull/970))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2530)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.46.0...2.53.0)
