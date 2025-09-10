@@ -11,6 +11,11 @@
 
 - Sentry dependencies intended for Spring Boot 3 / Spring 6 will no longer be installed for Spring Boot 4 / Spring 7 ([#980](https://github.com/getsentry/sentry-android-gradle-plugin/pull/980))
 
+### Dependencies
+
+- Bump Android SDK from v8.14.0 to v8.21.1 ([#936](https://github.com/getsentry/sentry-android-gradle-plugin/pull/936), [#943](https://github.com/getsentry/sentry-android-gradle-plugin/pull/943), [#958](https://github.com/getsentry/sentry-android-gradle-plugin/pull/958), [#962](https://github.com/getsentry/sentry-android-gradle-plugin/pull/962), [#967](https://github.com/getsentry/sentry-android-gradle-plugin/pull/967), [#981](https://github.com/getsentry/sentry-android-gradle-plugin/pull/981))
+    - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8211)
+    - [diff](https://github.com/getsentry/sentry-java/compare/8.14.0...8.21.1)
 
 ## 5.10.0
 
