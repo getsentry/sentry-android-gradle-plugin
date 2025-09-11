@@ -42,6 +42,11 @@ class SentryPluginKotlinCompilerPrereleaseTest :
               }
               kotlinOptions {
                 jvmTarget = "1.8"
+
+                freeCompilerArgs += [
+                    "-P",
+                    "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=1.9.20-RC"
+                ]
               }
             }
             dependencies {
