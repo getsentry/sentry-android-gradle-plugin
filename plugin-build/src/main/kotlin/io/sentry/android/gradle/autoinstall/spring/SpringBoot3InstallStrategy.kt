@@ -25,6 +25,9 @@ abstract class SpringBoot3InstallStrategy : AbstractInstallStrategy {
   override val minSupportedThirdPartyVersion: SemVer
     get() = MIN_SUPPORTED_VERSION
 
+  override val maxSupportedThirdPartyVersion: SemVer
+    get() = MAX_SUPPORTED_VERSION
+
   override val minSupportedSentryVersion: SemVer
     get() = SemVer(6, 28, 0)
 
@@ -34,6 +37,7 @@ abstract class SpringBoot3InstallStrategy : AbstractInstallStrategy {
     internal const val SENTRY_SPRING_BOOT_3_ID = "sentry-spring-boot-jakarta"
 
     private val MIN_SUPPORTED_VERSION = SemVer(3, 0, 0)
+    private val MAX_SUPPORTED_VERSION = SemVer(3, 9999, 9999)
 
     override fun register(component: ComponentMetadataHandler) {
       component.withModule(

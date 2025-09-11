@@ -76,8 +76,10 @@ abstract class WarnOnOverrideStrategy : ComponentMetadataRule {
         SentryModules.SENTRY_QUARTZ,
         SentryModules.SENTRY_SPRING5,
         SentryModules.SENTRY_SPRING6,
+        SentryModules.SENTRY_SPRING7,
         SentryModules.SENTRY_SPRING_BOOT2,
         SentryModules.SENTRY_SPRING_BOOT3,
+        SentryModules.SENTRY_SPRING_BOOT4,
       )
 
     override fun register(component: ComponentMetadataHandler) {
