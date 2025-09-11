@@ -76,7 +76,7 @@ class SpringBoot3InstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-spring-boot-jakarta won't be installed because the current " +
-          "version (4.0.0) is higher than the maximum supported version (3.9999.9999)"
+          "version is higher than the maximum supported version (3.9999.9999)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
