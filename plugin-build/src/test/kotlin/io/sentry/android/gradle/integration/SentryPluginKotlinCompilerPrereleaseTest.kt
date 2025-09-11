@@ -11,7 +11,7 @@ class SentryPluginKotlinCompilerPrereleaseTest :
 
   override val additionalBuildClasspath: String =
     """
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.10-RC2"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.20-RC"
         """
       .trimIndent()
 
@@ -25,7 +25,6 @@ class SentryPluginKotlinCompilerPrereleaseTest :
               id "kotlin-android"
               id "io.sentry.android.gradle"
               id "io.sentry.kotlin.compiler.gradle"
-              id "org.jetbrains.kotlin.plugin.compose" version "2.2.10-RC2"
             }
 
             android {
@@ -46,7 +45,7 @@ class SentryPluginKotlinCompilerPrereleaseTest :
               }
             }
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib:2.2.10-RC2"
+                implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.20-RC"
                 implementation "io.sentry:sentry-compose-android:${BuildConfig.SdkVersion}"
 
                 implementation 'androidx.compose.ui:ui:1.4.0'
