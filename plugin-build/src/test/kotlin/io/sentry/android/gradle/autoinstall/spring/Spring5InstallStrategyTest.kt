@@ -63,7 +63,7 @@ class Spring5InstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-spring won't be installed because the current " +
-          "version is lower than the minimum supported version (5.1.2)"
+          "version (5.1.1) is lower than the minimum supported version (5.1.2)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
@@ -76,7 +76,7 @@ class Spring5InstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-spring won't be installed because the current " +
-          "version is higher than the maximum supported version (5.9999.9999)"
+          "version (6.0.0) is higher than the maximum supported version (5.9999.9999)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }

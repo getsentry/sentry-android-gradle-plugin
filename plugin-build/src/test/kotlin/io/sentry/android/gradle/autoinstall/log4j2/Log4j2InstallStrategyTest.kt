@@ -63,7 +63,7 @@ class Log4j2InstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-log4j2 won't be installed because the current " +
-          "version is lower than the minimum supported version (2.0.0)"
+          "version (1.0.0) is lower than the minimum supported version (2.0.0)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }

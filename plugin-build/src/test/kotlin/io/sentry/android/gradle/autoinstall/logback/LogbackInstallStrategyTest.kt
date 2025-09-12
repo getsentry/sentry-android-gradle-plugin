@@ -63,7 +63,7 @@ class LogbackInstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-logback won't be installed because the current " +
-          "version is lower than the minimum supported version (1.0.0)"
+          "version (0.0.1) is lower than the minimum supported version (1.0.0)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }

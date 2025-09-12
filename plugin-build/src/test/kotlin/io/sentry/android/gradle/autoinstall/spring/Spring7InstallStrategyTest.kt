@@ -1,7 +1,6 @@
-package io.sentry.android.gradle.autoinstall.okhttp
+package io.sentry.android.gradle.autoinstall.spring
 
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.check
 import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
@@ -21,7 +20,7 @@ import org.gradle.api.artifacts.VariantMetadata
 import org.junit.Test
 import org.slf4j.Logger
 
-class AndroidOkHttpInstallStrategyTest {
+class Spring7InstallStrategyTest {
   class Fixture {
     val logger = CapturingTestLogger()
     val dependencies = mock<DirectDependenciesMetadata>()
@@ -42,62 +41,62 @@ class AndroidOkHttpInstallStrategyTest {
           .allVariants(any<Action<VariantMetadata>>())
       }
 
-    fun getSut(
-      okHttpVersion: String = "4.9.3",
-      sentryVersion: String = "5.6.1",
-    ): AndroidOkHttpInstallStrategy {
-      val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(okHttpVersion) }
+    fun getSut(springVersion: String = "7.0.0"): Spring7InstallStrategy {
+      val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(springVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
       with(AutoInstallState.getInstance()) {
         this.enabled = true
-        this.sentryVersion = sentryVersion
+        this.sentryVersion = "8.21.0"
       }
-      return AndroidOkHttpInstallStrategyImpl(logger)
+      return Spring7InstallStrategyImpl(logger)
     }
   }
 
   private val fixture = Fixture()
 
   @Test
-  fun `when okhttp version is unsupported logs a message and does nothing`() {
-    val sut = fixture.getSut(okHttpVersion = "3.11.0")
+  fun `when spring version is too low logs a message and does nothing`() {
+    val sut = fixture.getSut(springVersion = "6.7.4")
     sut.execute(fixture.metadataContext)
 
     assertTrue {
       fixture.logger.capturedMessage ==
-        "[sentry] sentry-android-okhttp won't be installed because the current " +
-          "version (3.11.0) is lower than the minimum supported version (3.13.0)"
+        "[sentry] sentry-spring-7 won't be installed because the current " +
+          "version (6.7.4) is lower than the minimum supported version (7.0.0-M1)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
 
   @Test
-  fun `when sentry version is unsupported logs a message and does nothing`() {
-    val sut = fixture.getSut(sentryVersion = "7.0.0")
+  fun `when spring version is too high logs a message and does nothing`() {
+    val sut = fixture.getSut(springVersion = "8.0.0")
     sut.execute(fixture.metadataContext)
 
     assertTrue {
       fixture.logger.capturedMessage ==
-        "[sentry] sentry-android-okhttp won't be installed because the current " +
-          "sentry version (7.0.0) is higher than the maximum supported sentry version (6.9999.9999)"
+        "[sentry] sentry-spring-7 won't be installed because the current " +
+          "version (8.0.0) is higher than the maximum supported version (7.9999.9999)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
 
   @Test
-  fun `installs sentry-android-okhttp with info message`() {
+  fun `installs sentry-spring-jakarta with info message`() {
     val sut = fixture.getSut()
     sut.execute(fixture.metadataContext)
 
     assertTrue {
       fixture.logger.capturedMessage ==
-        "[sentry] sentry-android-okhttp was successfully installed with version: 5.6.1"
+        "[sentry] sentry-spring-7 was successfully installed with version: 8.21.0"
     }
     verify(fixture.dependencies)
-      .add(check<String> { assertEquals("io.sentry:sentry-android-okhttp:5.6.1", it) })
+      .add(
+        com.nhaarman.mockitokotlin2.check<String> {
+          assertEquals("io.sentry:sentry-spring-7:8.21.0", it)
+        }
+      )
   }
 
-  private class AndroidOkHttpInstallStrategyImpl(logger: Logger) :
-    AndroidOkHttpInstallStrategy(logger)
+  private class Spring7InstallStrategyImpl(logger: Logger) : Spring7InstallStrategy(logger)
 }

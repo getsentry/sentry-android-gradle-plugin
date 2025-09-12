@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Fixes
+
+- Allow kotlin pre-releases in KotlinCompilerPlugin ([#972](https://github.com/getsentry/sentry-android-gradle-plugin/pull/972))
+
+## 6.0.0-alpha.1
+
+### Features
+
+- Add upload functionality for size analysis ([#915](https://github.com/getsentry/sentry-android-gradle-plugin/pull/915))
+- Add VCS info extension for build uploads with customizable version control metadata ([#969](https://github.com/getsentry/sentry-android-gradle-plugin/pull/969))
+- Include version in logs if auto install refuses to install a dependency ([#979](https://github.com/getsentry/sentry-android-gradle-plugin/pull/979))
+- Auto install Spring Boot 4 (`sentry-spring-boot-4`) and Spring 7 (`sentry-spring-7`) modules ([#980](https://github.com/getsentry/sentry-android-gradle-plugin/pull/980))
+
 ### Features
 
 - Add upload functionality for size analysis ([#915](https://github.com/getsentry/sentry-android-gradle-plugin/pull/915))
@@ -9,9 +22,10 @@
 
 ### Fixes
 
-- Allow kotlin pre-releases in KotlinCompilerPlugin ([#972](https://github.com/getsentry/sentry-android-gradle-plugin/pull/972))
 - Enable caching for BundleSourcesTask ([#894](https://github.com/getsentry/sentry-android-gradle-plugin/pull/894)
 - Add support for Kotlin 2.2.0 for Sentry Kotlin Compiler Plugin ([#944](https://github.com/getsentry/sentry-android-gradle-plugin/pull/944))
+- Sentry dependencies intended for Spring Boot 3 / Spring 6 will no longer be installed for Spring Boot 4 / Spring 7 ([#980](https://github.com/getsentry/sentry-android-gradle-plugin/pull/980))
+- Allow lazily configured version details for ProGuard mappings ([#974](https://github.com/getsentry/sentry-android-gradle-plugin/pull/974))
 
 ### Breaking Changes
 
@@ -26,9 +40,9 @@
 ### Dependencies
 
 - Set build default Gradle Version to 8.14.2 ([#891](https://github.com/getsentry/sentry-android-gradle-plugin/pull/891))
-- Bump Android SDK from v8.14.0 to v8.20.0 ([#936](https://github.com/getsentry/sentry-android-gradle-plugin/pull/936), [#943](https://github.com/getsentry/sentry-android-gradle-plugin/pull/943), [#958](https://github.com/getsentry/sentry-android-gradle-plugin/pull/958), [#962](https://github.com/getsentry/sentry-android-gradle-plugin/pull/962), [#967](https://github.com/getsentry/sentry-android-gradle-plugin/pull/967))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8200)
-  - [diff](https://github.com/getsentry/sentry-java/compare/8.14.0...8.20.0)
+- Bump Android SDK from v8.14.0 to v8.21.1 ([#936](https://github.com/getsentry/sentry-android-gradle-plugin/pull/936), [#943](https://github.com/getsentry/sentry-android-gradle-plugin/pull/943), [#958](https://github.com/getsentry/sentry-android-gradle-plugin/pull/958), [#962](https://github.com/getsentry/sentry-android-gradle-plugin/pull/962), [#967](https://github.com/getsentry/sentry-android-gradle-plugin/pull/967), [#981](https://github.com/getsentry/sentry-android-gradle-plugin/pull/981))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8211)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.14.0...8.21.1)
 - Bump CLI from v2.46.0 to v2.53.0 ([#948](https://github.com/getsentry/sentry-android-gradle-plugin/pull/948), [#957](https://github.com/getsentry/sentry-android-gradle-plugin/pull/957), [#964](https://github.com/getsentry/sentry-android-gradle-plugin/pull/964), [#970](https://github.com/getsentry/sentry-android-gradle-plugin/pull/970))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2530)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.46.0...2.53.0)

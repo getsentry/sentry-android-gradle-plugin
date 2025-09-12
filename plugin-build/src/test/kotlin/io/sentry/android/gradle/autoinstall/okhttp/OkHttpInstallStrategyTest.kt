@@ -67,7 +67,7 @@ class OkHttpInstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-okhttp won't be installed because the current " +
-          "version is lower than the minimum supported version (3.13.0)"
+          "version (3.11.0) is lower than the minimum supported version (3.13.0)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
@@ -80,7 +80,7 @@ class OkHttpInstallStrategyTest {
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] sentry-okhttp won't be installed because the current sentry " +
-          "version is lower than the minimum supported sentry version (7.0.0)"
+          "version (6.33.0) is lower than the minimum supported sentry version (7.0.0)"
     }
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
