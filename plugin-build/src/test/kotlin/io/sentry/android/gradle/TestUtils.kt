@@ -186,7 +186,7 @@ fun TemporaryFolder.withDummyComposeFile(): String {
             }
         """
       .trimIndent()
-  val sourceFile = File(newFolder("app/src/main/java/com/example/"), "Example.kt")
+  val sourceFile = File(newFolder("app/src/main/kotlin/com/example/"), "Example.kt")
 
   sourceFile.writeText(contents)
   return contents

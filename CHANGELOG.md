@@ -15,11 +15,6 @@
 - Include version in logs if auto install refuses to install a dependency ([#979](https://github.com/getsentry/sentry-android-gradle-plugin/pull/979))
 - Auto install Spring Boot 4 (`sentry-spring-boot-4`) and Spring 7 (`sentry-spring-7`) modules ([#980](https://github.com/getsentry/sentry-android-gradle-plugin/pull/980))
 
-### Features
-
-- Add upload functionality for size analysis ([#915](https://github.com/getsentry/sentry-android-gradle-plugin/pull/915))
-- Add VCS info extension for build uploads with customizable version control metadata ([#969](https://github.com/getsentry/sentry-android-gradle-plugin/pull/969))
-
 ### Fixes
 
 - Enable caching for BundleSourcesTask ([#894](https://github.com/getsentry/sentry-android-gradle-plugin/pull/894)
