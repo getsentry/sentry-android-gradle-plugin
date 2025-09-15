@@ -1,9 +1,11 @@
 package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
+import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.withDummyComposeFile
 import kotlin.test.assertTrue
 import org.gradle.util.GradleVersion
+import org.junit.Assume.assumeFalse
 import org.junit.Test
 
 class SentryPluginKotlinCompilerPrereleaseTest :
@@ -17,6 +19,7 @@ class SentryPluginKotlinCompilerPrereleaseTest :
 
   @Test
   fun `does not break for kotlin prereleases`() {
+    assumeFalse("Not supported on AGP 9.+ yet", SemVer.parse(BuildConfig.AgpVersion).major >= 9)
     appBuildFile.writeText(
       // language=Groovy
       """
