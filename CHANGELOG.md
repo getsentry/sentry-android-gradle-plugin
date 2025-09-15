@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Allow kotlin pre-releases in KotlinCompilerPlugin ([#972](https://github.com/getsentry/sentry-android-gradle-plugin/pull/972))
+
 ## 6.0.0-alpha.1
 
 ### Features
