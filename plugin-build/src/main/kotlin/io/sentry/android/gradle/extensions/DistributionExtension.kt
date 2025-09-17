@@ -6,7 +6,7 @@ import org.gradle.api.provider.SetProperty
 import org.jetbrains.annotations.ApiStatus.Experimental
 
 @Experimental
-open class BuildDistributionExtension
+open class DistributionExtension
 @Inject
 constructor(objects: ObjectFactory) {
 

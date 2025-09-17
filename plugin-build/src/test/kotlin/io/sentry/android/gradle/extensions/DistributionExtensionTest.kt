@@ -5,12 +5,12 @@ import kotlin.test.assertTrue
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
 
-class BuildDistributionExtensionTest {
+class DistributionExtensionTest {
 
   @Test
   fun `enabledFor is empty by default`() {
     val project = ProjectBuilder.builder().build()
-    val extension = project.objects.newInstance(BuildDistributionExtension::class.java)
+    val extension = project.objects.newInstance(DistributionExtension::class.java)
 
     assertTrue(extension.enabledFor.get().isEmpty())
   }
@@ -18,7 +18,7 @@ class BuildDistributionExtensionTest {
   @Test
   fun `enabledFor can be configured with variant names`() {
     val project = ProjectBuilder.builder().build()
-    val extension = project.objects.newInstance(BuildDistributionExtension::class.java)
+    val extension = project.objects.newInstance(DistributionExtension::class.java)
 
     extension.enabledFor.set(setOf("freeDebug", "paidRelease"))
 
