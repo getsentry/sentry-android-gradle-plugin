@@ -6,6 +6,7 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
+import org.jetbrains.annotations.ApiStatus.Experimental
 
 abstract class SentryPluginExtension @Inject constructor(project: Project) {
 
@@ -107,6 +108,7 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
 
   val sizeAnalysis: SizeAnalysisExtension = objects.newInstance(SizeAnalysisExtension::class.java)
 
+  @Experimental
   fun sizeAnalysis(sizeAnalysisAction: Action<SizeAnalysisExtension>) {
     sizeAnalysisAction.execute(sizeAnalysis)
   }

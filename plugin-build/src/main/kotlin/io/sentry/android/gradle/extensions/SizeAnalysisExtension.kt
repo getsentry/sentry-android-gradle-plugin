@@ -5,7 +5,9 @@ import javax.inject.Inject
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
+import org.jetbrains.annotations.ApiStatus.Experimental
 
+@Experimental
 open class SizeAnalysisExtension
 @Inject
 constructor(objects: ObjectFactory, providerFactory: ProviderFactory) {
