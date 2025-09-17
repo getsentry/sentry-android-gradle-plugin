@@ -107,6 +107,7 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
 
   val sizeAnalysis: SizeAnalysisExtension = objects.newInstance(SizeAnalysisExtension::class.java)
 
+  @org.jetbrains.annotations.ApiStatus.Experimental
   fun sizeAnalysis(sizeAnalysisAction: Action<SizeAnalysisExtension>) {
     sizeAnalysisAction.execute(sizeAnalysis)
   }
