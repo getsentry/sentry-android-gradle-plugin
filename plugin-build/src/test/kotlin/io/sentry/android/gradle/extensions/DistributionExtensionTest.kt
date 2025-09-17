@@ -8,20 +8,20 @@ import org.junit.Test
 class DistributionExtensionTest {
 
   @Test
-  fun `enabledFor is empty by default`() {
+  fun `enabledVariants is empty by default`() {
     val project = ProjectBuilder.builder().build()
     val extension = project.objects.newInstance(DistributionExtension::class.java)
 
-    assertTrue(extension.enabledFor.get().isEmpty())
+    assertTrue(extension.enabledVariants.get().isEmpty())
   }
 
   @Test
-  fun `enabledFor can be configured with variant names`() {
+  fun `enabledVariants can be configured with variant names`() {
     val project = ProjectBuilder.builder().build()
     val extension = project.objects.newInstance(DistributionExtension::class.java)
 
-    extension.enabledFor.set(setOf("freeDebug", "paidRelease"))
+    extension.enabledVariants.set(setOf("freeDebug", "paidRelease"))
 
-    assertEquals(setOf("freeDebug", "paidRelease"), extension.enabledFor.get())
+    assertEquals(setOf("freeDebug", "paidRelease"), extension.enabledVariants.get())
   }
 }
