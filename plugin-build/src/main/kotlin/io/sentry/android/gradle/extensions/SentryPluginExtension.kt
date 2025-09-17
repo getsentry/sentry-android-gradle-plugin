@@ -6,6 +6,7 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
+import org.jetbrains.annotations.ApiStatus.Experimental
 
 abstract class SentryPluginExtension @Inject constructor(project: Project) {
 
@@ -113,7 +114,7 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
 
   val distribution: DistributionExtension = objects.newInstance(DistributionExtension::class.java)
 
-  @org.jetbrains.annotations.ApiStatus.Experimental
+  @Experimental
   fun distribution(distributionAction: Action<DistributionExtension>) {
     distributionAction.execute(distribution)
   }
