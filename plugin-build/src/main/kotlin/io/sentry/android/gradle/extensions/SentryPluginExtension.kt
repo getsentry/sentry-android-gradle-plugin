@@ -113,6 +113,13 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     sizeAnalysisAction.execute(sizeAnalysis)
   }
 
+  val distribution: DistributionExtension = objects.newInstance(DistributionExtension::class.java)
+
+  @Experimental
+  fun distribution(distributionAction: Action<DistributionExtension>) {
+    distributionAction.execute(distribution)
+  }
+
   val vcsInfo: VcsInfoExtension = objects.newInstance(VcsInfoExtension::class.java)
 
   /** Configure the VCS information for build uploads. */
