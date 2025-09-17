@@ -111,6 +111,13 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     sizeAnalysisAction.execute(sizeAnalysis)
   }
 
+  val buildDistribution: BuildDistributionExtension = objects.newInstance(BuildDistributionExtension::class.java)
+
+  @org.jetbrains.annotations.ApiStatus.Experimental
+  fun buildDistribution(buildDistributionAction: Action<BuildDistributionExtension>) {
+    buildDistributionAction.execute(buildDistribution)
+  }
+
   val vcsInfo: VcsInfoExtension = objects.newInstance(VcsInfoExtension::class.java)
 
   /** Configure the VCS information for build uploads. */
