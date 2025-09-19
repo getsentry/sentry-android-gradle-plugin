@@ -6,6 +6,12 @@
 
 - Allow kotlin pre-releases in KotlinCompilerPlugin ([#972](https://github.com/getsentry/sentry-android-gradle-plugin/pull/972))
 
+### Dependencies
+
+- Bump CLI from v2.53.0 to v2.54.0 ([#987](https://github.com/getsentry/sentry-android-gradle-plugin/pull/987))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2540)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.53.0...2.54.0)
+
 ## 6.0.0-alpha.1
 
 ### Features
