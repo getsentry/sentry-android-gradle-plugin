@@ -39,13 +39,14 @@ class MainActivity : ComponentActivity() {
       SampleApp.database
         .tracksDao()
         .all()
-        .map {
-          val remote =
-            withContext(Dispatchers.IO) {
-              TrackService.instance.tracks("6188aa82-3102-436a-9a68-513e6ad9efcb")
-            }
-          remote + it
-        }
+        // TODO: this service doesn't work anymore, need to find a replacement
+//        .map {
+//          val remote =
+//            withContext(Dispatchers.IO) {
+//              TrackService.instance.tracks("6188aa82-3102-436a-9a68-513e6ad9efcb")
+//            }
+//          remote + it
+//        }
         .collect {
           (list.adapter as TrackAdapter).populate(it)
           transaction.finish(SpanStatus.OK)

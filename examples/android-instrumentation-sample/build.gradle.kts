@@ -5,6 +5,7 @@ plugins {
   alias(libs.plugins.kotlinAndroid)
   alias(libs.plugins.ksp)
   id("io.sentry.android.gradle")
+  id("io.sentry.kotlin.compiler.gradle")
 }
 
 if (getKotlinPluginVersion() >= "2.0.0") {
