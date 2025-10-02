@@ -42,4 +42,10 @@ include(":examples:multi-module-sample:spring-boot-in-multi-module-sample2")
 
 includeBuild("plugin-build")
 
-includeBuild("sentry-kotlin-compiler-plugin")
+// this is needed so we can use kotlin-compiler-plugin directly in the sample app without publishing
+includeBuild("sentry-kotlin-compiler-plugin") {
+  dependencySubstitution {
+    substitute(module("io.sentry:sentry-kotlin-compiler-plugin"))
+      .using(project(":"))
+  }
+}
