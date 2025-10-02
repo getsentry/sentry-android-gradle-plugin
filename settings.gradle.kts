@@ -45,7 +45,6 @@ includeBuild("plugin-build")
 // this is needed so we can use kotlin-compiler-plugin directly in the sample app without publishing
 includeBuild("sentry-kotlin-compiler-plugin") {
   dependencySubstitution {
-    substitute(module("io.sentry:sentry-kotlin-compiler-plugin"))
-      .using(project(":"))
+    substitute(module("io.sentry:sentry-kotlin-compiler-plugin")).using(project(":"))
   }
 }

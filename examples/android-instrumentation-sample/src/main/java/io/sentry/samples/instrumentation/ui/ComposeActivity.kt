@@ -78,8 +78,7 @@ fun HomeText(navController: NavController, pillShape: RoundedCornerShape) {
 fun DetailsText(navController: NavController, pillShape: RoundedCornerShape) {
   BasicText(
     modifier =
-      Modifier
-        .border(2.dp, Color.Gray, pillShape)
+      Modifier.border(2.dp, Color.Gray, pillShape)
         .clip(pillShape)
         .clickable { navController.popBackStack() }
         .padding(24.dp),
