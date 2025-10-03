@@ -3,6 +3,7 @@ plugins {
   alias(libs.plugins.kotlinAndroid)
   alias(libs.plugins.kapt)
   id("io.sentry.android.gradle")
+  id("io.sentry.kotlin.compiler.gradle")
 }
 
 // useful for local debugging of the androidx.sqlite lib
