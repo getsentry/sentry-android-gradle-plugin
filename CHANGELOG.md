@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix `Modifier.sentryTag()` not found warning ([#997](https://github.com/getsentry/sentry-android-gradle-plugin/pull/997))
+
 ## 6.0.0-alpha.4
 
 ### Dependencies

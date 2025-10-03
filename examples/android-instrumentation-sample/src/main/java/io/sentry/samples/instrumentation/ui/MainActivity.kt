@@ -12,12 +12,8 @@ import io.sentry.SpanStatus
 import io.sentry.TransactionOptions
 import io.sentry.samples.instrumentation.R
 import io.sentry.samples.instrumentation.SampleApp
-import io.sentry.samples.instrumentation.network.TrackService
 import io.sentry.samples.instrumentation.ui.list.TrackAdapter
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,13 +35,14 @@ class MainActivity : ComponentActivity() {
       SampleApp.database
         .tracksDao()
         .all()
-        .map {
-          val remote =
-            withContext(Dispatchers.IO) {
-              TrackService.instance.tracks("6188aa82-3102-436a-9a68-513e6ad9efcb")
-            }
-          remote + it
-        }
+        // TODO: this service doesn't work anymore, need to find a replacement
+        //        .map {
+        //          val remote =
+        //            withContext(Dispatchers.IO) {
+        //              TrackService.instance.tracks("6188aa82-3102-436a-9a68-513e6ad9efcb")
+        //            }
+        //          remote + it
+        //        }
         .collect {
           (list.adapter as TrackAdapter).populate(it)
           transaction.finish(SpanStatus.OK)
