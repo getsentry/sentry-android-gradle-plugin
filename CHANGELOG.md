@@ -1,5 +1,36 @@
 # Changelog
 
+## 5.12.1
+
+### Fixes
+
+- Fix `Modifier.sentryTag()` not found warning ([#997](https://github.com/getsentry/sentry-android-gradle-plugin/pull/997))
+
+## 5.12.0
+
+### Dependencies
+
+- Bump Android SDK from v8.21.1 to v8.22.0 ([#989](https://github.com/getsentry/sentry-android-gradle-plugin/pull/989))
+    - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8220)
+    - [diff](https://github.com/getsentry/sentry-java/compare/8.21.1...8.22.0)
+
+## 5.11.0
+
+### Features
+
+- Auto install Spring Boot 4 (`sentry-spring-boot-4`) and Spring 7 (`sentry-spring-7`) modules ([#980](https://github.com/getsentry/sentry-android-gradle-plugin/pull/980))
+- Include version in dependency auto install messages ([#979](https://github.com/getsentry/sentry-android-gradle-plugin/pull/979))
+
+### Fixes
+
+- Sentry dependencies intended for Spring Boot 3 / Spring 6 will no longer be installed for Spring Boot 4 / Spring 7 ([#980](https://github.com/getsentry/sentry-android-gradle-plugin/pull/980))
+
+### Dependencies
+
+- Bump Android SDK from v8.20.0 to v8.21.1 ([#981](https://github.com/getsentry/sentry-android-gradle-plugin/pull/981))
+    - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8211)
+    - [diff](https://github.com/getsentry/sentry-java/compare/8.20.0...8.21.1)
+
 ## 5.10.0
 
 ### Dependencies
