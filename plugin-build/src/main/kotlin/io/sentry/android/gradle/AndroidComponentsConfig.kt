@@ -395,8 +395,8 @@ private fun ApplicationVariant.configureDistributionPropertiesTask(
       extension = extension,
       sentryTelemetryProvider = sentryTelemetryProvider,
       output = paths.distributionPropertiesDir,
-      buildConfiguration = buildType ?: "unknown",
       taskSuffix = name.capitalized,
+      buildConfiguration = name,
     )
   }
   return null
