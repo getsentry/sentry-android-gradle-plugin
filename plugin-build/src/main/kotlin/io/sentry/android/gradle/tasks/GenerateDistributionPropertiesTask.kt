@@ -64,8 +64,10 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
       ) { task ->
         task.output.set(output)
         task.withSentryTelemetry(extension, sentryTelemetryProvider)
+        // TODO we should check if the org and project are available in sentry.properties
         task.orgSlug.set(extension.org)
         task.projectSlug.set(extension.projectName)
+        // TODO we should have a separate authToken for Build Distribution
         task.orgAuthToken.set(extension.authToken)
         task.buildConfiguration.set(buildConfiguration)
       }
