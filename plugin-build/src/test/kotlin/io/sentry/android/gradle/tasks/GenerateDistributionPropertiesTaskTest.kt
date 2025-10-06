@@ -30,9 +30,12 @@ class GenerateDistributionPropertiesTaskTest {
         extension,
         null,
         project.layout.buildDirectory.dir("dummy/folder/"),
-        "debug",
         "test",
+        "debug",
       )
+
+    val outputDir = File(project.buildDir, "dummy/folder/")
+    outputDir.mkdirs()
 
     task.get().generateProperties()
 
