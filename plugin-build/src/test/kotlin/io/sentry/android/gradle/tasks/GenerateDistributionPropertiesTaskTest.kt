@@ -8,7 +8,6 @@ import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask.Compani
 import io.sentry.android.gradle.util.PropertiesUtil
 import java.io.File
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
