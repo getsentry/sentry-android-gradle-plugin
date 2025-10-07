@@ -2,7 +2,7 @@ package io.sentry.android.gradle.tasks
 
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask.Companion.BUILD_CONFIGURATION_PROPERTY
-import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask.Companion.ORG_AUTH_TOKEN_PROPERTY
+import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask.Companion.DISTRIBUTION_AUTH_TOKEN_PROPERTY
 import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask.Companion.ORG_SLUG_PROPERTY
 import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask.Companion.PROJECT_SLUG_PROPERTY
 import io.sentry.android.gradle.util.PropertiesUtil
@@ -45,7 +45,7 @@ class GenerateDistributionPropertiesTaskTest {
     val props = PropertiesUtil.load(expectedFile)
     assertEquals("test-org", props.getProperty(ORG_SLUG_PROPERTY))
     assertEquals("test-project", props.getProperty(PROJECT_SLUG_PROPERTY))
-    assertEquals("test-token", props.getProperty(ORG_AUTH_TOKEN_PROPERTY))
+    assertEquals("test-token", props.getProperty(DISTRIBUTION_AUTH_TOKEN_PROPERTY))
     assertEquals("debug", props.getProperty(BUILD_CONFIGURATION_PROPERTY))
   }
 

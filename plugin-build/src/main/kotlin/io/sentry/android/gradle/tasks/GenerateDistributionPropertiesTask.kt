@@ -38,7 +38,7 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
     outputFile.get().asFile.writer().use { writer ->
       orgSlug.orNull?.let { writer.appendLine("$ORG_SLUG_PROPERTY=$it") }
       projectSlug.orNull?.let { writer.appendLine("$PROJECT_SLUG_PROPERTY=$it") }
-      orgAuthToken.orNull?.let { writer.appendLine("$ORG_AUTH_TOKEN_PROPERTY=$it") }
+      orgAuthToken.orNull?.let { writer.appendLine("$DISTRIBUTION_AUTH_TOKEN_PROPERTY=$it") }
       writer.appendLine("$BUILD_CONFIGURATION_PROPERTY=${buildConfiguration.get()}")
     }
   }
@@ -47,7 +47,7 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
     internal const val SENTRY_DISTRIBUTION_OUTPUT = "sentry-distribution.properties"
     const val ORG_SLUG_PROPERTY = "io.sentry.distribution.org-slug"
     const val PROJECT_SLUG_PROPERTY = "io.sentry.distribution.project-slug"
-    const val ORG_AUTH_TOKEN_PROPERTY = "io.sentry.distribution.org-auth-token"
+    const val DISTRIBUTION_AUTH_TOKEN_PROPERTY = "io.sentry.distribution.auth-token"
     const val BUILD_CONFIGURATION_PROPERTY = "io.sentry.distribution.build-configuration"
 
     fun register(
