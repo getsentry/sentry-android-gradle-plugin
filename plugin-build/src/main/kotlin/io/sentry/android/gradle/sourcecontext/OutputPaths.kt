@@ -15,4 +15,5 @@ class OutputPaths(private val project: Project, variantName: String) {
   val bundleIdDir = dir("$variantDirectory/bundle-id")
   val sourceDir = dir("$variantDirectory/source-to-bundle")
   val bundleDir = dir("$variantDirectory/source-bundle")
+  val distributionPropertiesDir = dir("$variantDirectory/distribution-properties")
 }

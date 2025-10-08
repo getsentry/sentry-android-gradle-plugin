@@ -22,6 +22,7 @@ import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
+import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask
 import io.sentry.android.gradle.tasks.InjectSentryMetaPropertiesIntoAssetsTask
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
 import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
@@ -102,6 +103,15 @@ fun ApplicationAndroidComponentsExtension.configure(
           sentryProject,
         )
       generateProguardUuidTask?.let { tasksGeneratingProperties.add(it) }
+
+      val generateDistributionPropertiesTask =
+        variant.configureDistributionPropertiesTask(
+          project,
+          extension,
+          sentryTelemetryProvider,
+          paths,
+        )
+      generateDistributionPropertiesTask?.let { tasksGeneratingProperties.add(it) }
 
       sentryVariant.configureNativeSymbolsTask(
         project,
@@ -370,6 +380,26 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
   } else {
     return null
   }
+}
+
+private fun ApplicationVariant.configureDistributionPropertiesTask(
+  project: Project,
+  extension: SentryPluginExtension,
+  sentryTelemetryProvider: Provider<SentryTelemetryService>,
+  paths: OutputPaths,
+): TaskProvider<GenerateDistributionPropertiesTask>? {
+  val variantName = name
+  if (extension.distribution.enabledVariants.get().contains(variantName)) {
+    return GenerateDistributionPropertiesTask.register(
+      project = project,
+      extension = extension,
+      sentryTelemetryProvider = sentryTelemetryProvider,
+      output = paths.distributionPropertiesDir,
+      taskSuffix = name.capitalized,
+      buildConfiguration = name,
+    )
+  }
+  return null
 }
 
 /**
