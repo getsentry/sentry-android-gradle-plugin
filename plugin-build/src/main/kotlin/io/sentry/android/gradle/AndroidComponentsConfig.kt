@@ -110,6 +110,8 @@ fun ApplicationAndroidComponentsExtension.configure(
           extension,
           sentryTelemetryProvider,
           paths,
+          sentryOrg,
+          sentryProject,
         )
       generateDistributionPropertiesTask?.let { tasksGeneratingProperties.add(it) }
 
@@ -387,9 +389,12 @@ private fun ApplicationVariant.configureDistributionPropertiesTask(
   extension: SentryPluginExtension,
   sentryTelemetryProvider: Provider<SentryTelemetryService>,
   paths: OutputPaths,
+  sentryOrg: String?,
+  sentryProject: String?,
 ): TaskProvider<GenerateDistributionPropertiesTask>? {
   val variantName = name
   if (extension.distribution.enabledVariants.get().contains(variantName)) {
+    val variant = AndroidVariant74(this)
     return GenerateDistributionPropertiesTask.register(
       project = project,
       extension = extension,
@@ -397,6 +402,9 @@ private fun ApplicationVariant.configureDistributionPropertiesTask(
       output = paths.distributionPropertiesDir,
       taskSuffix = name.capitalized,
       buildConfiguration = name,
+      sentryOrg = sentryOrg,
+      sentryProject = sentryProject,
+      variant = variant,
     )
   }
   return null

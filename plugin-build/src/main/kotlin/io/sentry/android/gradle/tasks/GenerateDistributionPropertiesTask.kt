@@ -1,8 +1,12 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
+import io.sentry.android.gradle.util.PropertiesUtil
+import io.sentry.gradle.common.SentryVariant
+import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
@@ -57,6 +61,9 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
       output: Provider<Directory>,
       taskSuffix: String,
       buildConfiguration: String,
+      sentryOrg: String? = null,
+      sentryProject: String? = null,
+      variant: SentryVariant? = null,
     ): TaskProvider<GenerateDistributionPropertiesTask> {
       return project.tasks.register(
         "generateSentryDistributionProperties$taskSuffix",
@@ -64,11 +71,37 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
       ) { task ->
         task.output.set(output)
         task.withSentryTelemetry(extension, sentryTelemetryProvider)
-        // TODO we should check if the org and project are available in sentry.properties
-        task.orgSlug.set(extension.org)
-        task.projectSlug.set(extension.projectName)
-        // TODO we should have a separate authToken for Build Distribution
+
+        // Load sentry.properties if available
+        val sentryPropertiesFile =
+          variant?.let { SentryPropertiesFileProvider.getPropertiesFilePath(project, it) }
+        val sentryProperties = sentryPropertiesFile?.let { PropertiesUtil.loadMaybe(File(it)) }
+
+        // Resolve org slug with fallback chain: ext -> extension -> env -> sentry.properties
+        val orgProvider =
+          project.provider {
+            sentryOrg
+              ?: extension.org.orNull
+              ?: System.getenv("SENTRY_ORG")
+              ?: sentryProperties?.getProperty("defaults.org")
+              ?: sentryProperties?.getProperty("org")
+          }
+        task.orgSlug.set(orgProvider)
+
+        // Resolve project slug with fallback chain: ext -> extension -> env -> sentry.properties
+        val projectProvider =
+          project.provider {
+            sentryProject
+              ?: extension.projectName.orNull
+              ?: System.getenv("SENTRY_PROJECT")
+              ?: sentryProperties?.getProperty("defaults.project")
+              ?: sentryProperties?.getProperty("project")
+          }
+        task.projectSlug.set(projectProvider)
+
+        // Auth token only from extension (no fallback)
         task.orgAuthToken.set(extension.authToken)
+
         task.buildConfiguration.set(buildConfiguration)
       }
     }
