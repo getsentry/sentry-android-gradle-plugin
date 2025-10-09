@@ -405,7 +405,7 @@ private fun ApplicationVariant.configureDistributionPropertiesTask(
       val configurationName = "${variantName}Implementation"
       project.dependencies.add(
         configurationName,
-        "${io.sentry.android.gradle.autoinstall.SENTRY_GROUP}:${SentryModules.SENTRY_ANDROID_DISTRIBUTION.name}:$sentryVersion"
+        "${io.sentry.android.gradle.autoinstall.SENTRY_GROUP}:${SentryModules.SENTRY_ANDROID_DISTRIBUTION.name}:$sentryVersion",
       )
       project.logger.info(
         "${SentryModules.SENTRY_ANDROID_DISTRIBUTION.name} was successfully installed for variant $variantName with version: $sentryVersion"
