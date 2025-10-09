@@ -5,9 +5,7 @@ pluginManagement {
     google()
     maven {
       url = uri("https://storage.googleapis.com/r8-releases/raw")
-      content {
-        includeGroup("com.android.tools")
-      }
+      content { includeGroup("com.android.tools") }
     }
   }
 }
