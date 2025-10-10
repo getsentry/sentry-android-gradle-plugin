@@ -47,6 +47,8 @@ internal object SentryModules {
     DefaultModuleIdentifier.newId("io.sentry", "sentry-android-navigation")
   internal val SENTRY_ANDROID_TIMBER =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-android-timber")
+  internal val SENTRY_ANDROID_DISTRIBUTION =
+    DefaultModuleIdentifier.newId("io.sentry", "sentry-android-distribution")
   internal val SENTRY_OKHTTP = DefaultModuleIdentifier.newId("io.sentry", "sentry-okhttp")
   internal val SENTRY_KOTLIN_EXTENSIONS =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-kotlin-extensions")

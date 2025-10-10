@@ -408,6 +408,93 @@ class SentryPluginAutoInstallTest :
     assertTrue { "io.sentry:sentry:8.0.0" in result.output }
   }
 
+  @Test
+  fun `adds sentry-android-distribution when distribution is enabled for variant and autoInstallation is enabled`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+            }
+
+            sentry {
+              includeProguardMapping = false
+              autoInstallation.enabled = true
+              distribution {
+                enabledVariants = ["debug"]
+              }
+            }
+            """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+    assertTrue { "io.sentry:sentry-android:$SENTRY_SDK_VERSION" in result.output }
+    assertTrue { "io.sentry:sentry-android-distribution:$SENTRY_SDK_VERSION" in result.output }
+  }
+
+  @Test
+  fun `does not add sentry-android-distribution when distribution is disabled`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+            }
+
+            sentry {
+              includeProguardMapping = false
+              autoInstallation.enabled = true
+            }
+            """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+    assertTrue { "io.sentry:sentry-android:$SENTRY_SDK_VERSION" in result.output }
+    assertFalse { "io.sentry:sentry-android-distribution:$SENTRY_SDK_VERSION" in result.output }
+  }
+
+  @Test
+  fun `does not add sentry-android-distribution when autoInstallation is disabled`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+            }
+
+            sentry {
+              includeProguardMapping = false
+              autoInstallation.enabled = false
+              distribution {
+                enabledVariants = ["debug"]
+              }
+            }
+            """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+    assertFalse { "io.sentry:sentry-android:$SENTRY_SDK_VERSION" in result.output }
+    assertFalse { "io.sentry:sentry-android-distribution:$SENTRY_SDK_VERSION" in result.output }
+  }
+
   private fun runListDependenciesTask(
     extraArguments: List<String> = listOf("--configuration", "debugRuntimeClasspath")
   ) =

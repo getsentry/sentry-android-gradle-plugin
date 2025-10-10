@@ -34,6 +34,7 @@ import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesRep
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.GroovyCompat
 import io.sentry.android.gradle.util.ReleaseInfo
+import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.collectModules
@@ -395,6 +396,22 @@ private fun ApplicationVariant.configureDistributionPropertiesTask(
   val variantName = name
   if (extension.distribution.enabledVariants.get().contains(variantName)) {
     val variant = AndroidVariant74(this)
+    // Distribution uses a custom auto-install implementation instead of the standard
+    // InstallStrategy approach (see AutoInstall.kt) because it requires variant-specific
+    // installation based on extension.distribution.enabledVariants, whereas other integrations
+    // are installed globally when their dependencies are detected.
+    if (extension.autoInstallation.enabled.get()) {
+      val sentryVersion = extension.autoInstallation.sentryVersion.get()
+      val configurationName = "${variantName}Implementation"
+      project.dependencies.add(
+        configurationName,
+        "${io.sentry.android.gradle.autoinstall.SENTRY_GROUP}:${SentryModules.SENTRY_ANDROID_DISTRIBUTION.name}:$sentryVersion",
+      )
+      project.logger.info(
+        "${SentryModules.SENTRY_ANDROID_DISTRIBUTION.name} was successfully installed for variant $variantName with version: $sentryVersion"
+      )
+    }
+
     return GenerateDistributionPropertiesTask.register(
       project = project,
       extension = extension,
