@@ -28,6 +28,10 @@ import org.gradle.api.artifacts.DependencySet
 
 internal const val SENTRY_GROUP = "io.sentry"
 
+// Note: sentry-android-distribution is not included here because it requires variant-specific
+// installation logic. Unlike other integrations that are installed globally when their
+// dependencies are detected, distribution must be installed per-variant based on
+// extension.distribution.enabledVariants. See AndroidComponentsConfig.configureDistributionPropertiesTask.
 private val strategies =
   listOf(
     AndroidOkHttpInstallStrategy.Registrar,
