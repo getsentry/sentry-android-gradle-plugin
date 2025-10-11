@@ -13,7 +13,7 @@ on:
 jobs:
   cli:
     if: github.repository == 'getsentry/sentry-android-gradle-plugin'
-    uses: getsentry/github-workflows/.github/workflows/updater.yml@v2
+    uses: getsentry/github-workflows/.github/workflows/updater.yml@v3
     with:
       path: plugin-build/sentry-cli.properties
       name: CLI
@@ -24,7 +24,7 @@ jobs:
 
   android:
     if: github.repository == 'getsentry/sentry-android-gradle-plugin'
-    uses: getsentry/github-workflows/.github/workflows/updater.yml@v2
+    uses: getsentry/github-workflows/.github/workflows/updater.yml@v3
     with:
       path: scripts/update-android.sh
       name: Android SDK
