@@ -184,6 +184,65 @@ class GenerateDistributionPropertiesTaskTest {
   }
 
   @Test
+  fun `distribution authToken takes precedence over main authToken`() {
+    val project = createProject()
+    val extension = project.extensions.findByName("sentry") as SentryPluginExtension
+    extension.authToken.set("main-auth-token")
+    extension.distribution.authToken.set("distribution-auth-token")
+
+    val task: TaskProvider<GenerateDistributionPropertiesTask> =
+      GenerateDistributionPropertiesTask.register(
+        project,
+        extension,
+        null,
+        project.layout.buildDirectory.dir("dummy/folder/"),
+        "test",
+        "debug",
+      )
+
+    val outputDir = File(project.buildDir, "dummy/folder/")
+    outputDir.mkdirs()
+
+    task.get().generateProperties()
+
+    val expectedFile = File(project.buildDir, "dummy/folder/sentry-distribution.properties")
+    val props = PropertiesUtil.load(expectedFile)
+
+    // Distribution auth token should be used, not main auth token
+    assertEquals("distribution-auth-token", props.getProperty(DISTRIBUTION_AUTH_TOKEN_PROPERTY))
+  }
+
+  @Test
+  fun `does not fall back to main authToken when distribution authToken is not set`() {
+    val project = createProject()
+    val extension = project.extensions.findByName("sentry") as SentryPluginExtension
+    extension.authToken.set("main-auth-token")
+    // Explicitly set distribution auth token to null to override the env var convention
+    extension.distribution.authToken.set(null as String?)
+
+    val task: TaskProvider<GenerateDistributionPropertiesTask> =
+      GenerateDistributionPropertiesTask.register(
+        project,
+        extension,
+        null,
+        project.layout.buildDirectory.dir("dummy/folder/"),
+        "test",
+        "debug",
+      )
+
+    val outputDir = File(project.buildDir, "dummy/folder/")
+    outputDir.mkdirs()
+
+    task.get().generateProperties()
+
+    val expectedFile = File(project.buildDir, "dummy/folder/sentry-distribution.properties")
+    val props = PropertiesUtil.load(expectedFile)
+
+    // Distribution auth token should not fall back to main auth token
+    assertNull(props.getProperty(DISTRIBUTION_AUTH_TOKEN_PROPERTY))
+  }
+
+  @Test
   fun `handles missing values gracefully`() {
     val project = createProject()
     val extension = project.extensions.findByName("sentry") as SentryPluginExtension
