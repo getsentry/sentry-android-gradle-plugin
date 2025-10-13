@@ -19,6 +19,6 @@ open class DistributionExtension @Inject constructor(objects: ObjectFactory) {
     objects.setProperty(String::class.java).convention(emptySet())
 
   /** Auth token used for distribution operations. */
-  val distributionAuthToken: Property<String> =
-    objects.property(String::class.java).convention(null as String?)
+  val authToken: Property<String> =
+    objects.property(String::class.java).convention(System.getenv("SENTRY_DISTRIBUTION_AUTH_TOKEN"))
 }
