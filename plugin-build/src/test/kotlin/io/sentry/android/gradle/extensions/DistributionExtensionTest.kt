@@ -24,4 +24,22 @@ class DistributionExtensionTest {
 
     assertEquals(setOf("freeDebug", "paidRelease"), extension.enabledVariants.get())
   }
+
+  @Test
+  fun `distributionAuthToken is null by default`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = project.objects.newInstance(DistributionExtension::class.java)
+
+    assertEquals(null, extension.distributionAuthToken.orNull)
+  }
+
+  @Test
+  fun `distributionAuthToken can be configured`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = project.objects.newInstance(DistributionExtension::class.java)
+
+    extension.distributionAuthToken.set("test-token")
+
+    assertEquals("test-token", extension.distributionAuthToken.get())
+  }
 }

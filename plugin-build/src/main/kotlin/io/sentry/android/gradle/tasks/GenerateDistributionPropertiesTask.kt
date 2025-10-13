@@ -117,8 +117,13 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
           }
         task.projectSlug.set(projectProvider)
 
-        // Auth token only from extension (no fallback)
-        task.orgAuthToken.set(extension.authToken)
+        // Resolve distribution auth token with fallback chain: extension -> env
+        val authTokenProvider =
+          project.provider {
+            extension.distribution.distributionAuthToken.orNull
+              ?: System.getenv("SENTRY_DISTRIBUTION_AUTH_TOKEN")
+          }
+        task.orgAuthToken.set(authTokenProvider)
 
         task.buildConfiguration.set(buildConfiguration)
       }

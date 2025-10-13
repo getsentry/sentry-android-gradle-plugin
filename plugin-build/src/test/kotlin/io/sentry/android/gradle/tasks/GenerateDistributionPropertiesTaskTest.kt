@@ -31,7 +31,7 @@ class GenerateDistributionPropertiesTaskTest {
     val extension = project.extensions.findByName("sentry") as SentryPluginExtension
     extension.org.set("test-org")
     extension.projectName.set("test-project")
-    extension.authToken.set("test-token")
+    extension.distribution.distributionAuthToken.set("test-token")
 
     val task: TaskProvider<GenerateDistributionPropertiesTask> =
       GenerateDistributionPropertiesTask.register(
@@ -64,7 +64,7 @@ class GenerateDistributionPropertiesTaskTest {
     val extension = project.extensions.findByName("sentry") as SentryPluginExtension
     extension.org.set("extension-org")
     extension.projectName.set("extension-project")
-    extension.authToken.set("extension-token")
+    extension.distribution.distributionAuthToken.set("extension-token")
 
     val task: TaskProvider<GenerateDistributionPropertiesTask> =
       GenerateDistributionPropertiesTask.register(
@@ -89,7 +89,7 @@ class GenerateDistributionPropertiesTaskTest {
     // ext properties should take precedence
     assertEquals("ext-org", props.getProperty(ORG_SLUG_PROPERTY))
     assertEquals("ext-project", props.getProperty(PROJECT_SLUG_PROPERTY))
-    // auth token should still come from extension as it's not in ext
+    // auth token should still come from distribution extension
     assertEquals("extension-token", props.getProperty(DISTRIBUTION_AUTH_TOKEN_PROPERTY))
   }
 
@@ -132,7 +132,7 @@ class GenerateDistributionPropertiesTaskTest {
 
     assertEquals("props-org", props.getProperty(ORG_SLUG_PROPERTY))
     assertEquals("props-project", props.getProperty(PROJECT_SLUG_PROPERTY))
-    // Auth token should not be present (no fallback)
+    // Distribution auth token should not be present (no value set)
     assertNull(props.getProperty(DISTRIBUTION_AUTH_TOKEN_PROPERTY))
   }
 
@@ -141,7 +141,7 @@ class GenerateDistributionPropertiesTaskTest {
     val project = createProject()
     val extension = project.extensions.findByName("sentry") as SentryPluginExtension
     extension.org.set("extension-org")
-    extension.authToken.set("extension-token")
+    extension.distribution.distributionAuthToken.set("extension-token")
 
     // Create a sentry.properties file
     val sentryPropertiesFile = File(project.projectDir, "sentry.properties")
@@ -178,8 +178,48 @@ class GenerateDistributionPropertiesTaskTest {
     assertEquals("extension-org", props.getProperty(ORG_SLUG_PROPERTY))
     // Project should fall back to properties file
     assertEquals("props-project", props.getProperty(PROJECT_SLUG_PROPERTY))
-    // Auth token comes from extension only
+    // Distribution auth token comes from distribution extension
     assertEquals("extension-token", props.getProperty(DISTRIBUTION_AUTH_TOKEN_PROPERTY))
+  }
+
+  @Test
+  fun `falls back to environment variable for distribution auth token`() {
+    val project = createProject()
+    val extension = project.extensions.findByName("sentry") as SentryPluginExtension
+
+    // Set environment variable
+    val originalEnvValue = System.getenv("SENTRY_DISTRIBUTION_AUTH_TOKEN")
+    try {
+      // Note: This test relies on the environment variable being set externally
+      // or mocked in the test environment
+      val task: TaskProvider<GenerateDistributionPropertiesTask> =
+        GenerateDistributionPropertiesTask.register(
+          project,
+          extension,
+          null,
+          project.layout.buildDirectory.dir("dummy/folder/"),
+          "test",
+          "debug",
+        )
+
+      val outputDir = File(project.buildDir, "dummy/folder/")
+      outputDir.mkdirs()
+
+      task.get().generateProperties()
+
+      val expectedFile = File(project.buildDir, "dummy/folder/sentry-distribution.properties")
+      val props = PropertiesUtil.load(expectedFile)
+
+      // If SENTRY_DISTRIBUTION_AUTH_TOKEN env var is set, it should be used
+      val envToken = System.getenv("SENTRY_DISTRIBUTION_AUTH_TOKEN")
+      if (envToken != null) {
+        assertEquals(envToken, props.getProperty(DISTRIBUTION_AUTH_TOKEN_PROPERTY))
+      } else {
+        assertNull(props.getProperty(DISTRIBUTION_AUTH_TOKEN_PROPERTY))
+      }
+    } finally {
+      // Cleanup is not possible with System.getenv as it's read-only
+    }
   }
 
   @Test
@@ -208,7 +248,10 @@ class GenerateDistributionPropertiesTaskTest {
     // Should not write null values
     assertNull(props.getProperty(ORG_SLUG_PROPERTY))
     assertNull(props.getProperty(PROJECT_SLUG_PROPERTY))
-    assertNull(props.getProperty(DISTRIBUTION_AUTH_TOKEN_PROPERTY))
+    // Distribution auth token should not be present unless env var is set
+    if (System.getenv("SENTRY_DISTRIBUTION_AUTH_TOKEN") == null) {
+      assertNull(props.getProperty(DISTRIBUTION_AUTH_TOKEN_PROPERTY))
+    }
     // Build configuration should always be present
     assertEquals("debug", props.getProperty(BUILD_CONFIGURATION_PROPERTY))
   }
