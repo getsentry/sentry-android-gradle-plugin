@@ -59,6 +59,7 @@ tasks.register("integrationTest") {
 tasks.register("preMerge") {
   description = "Runs all the tests/verification tasks on both top level and included build."
 
+  dependsOn(":check")
   dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":check"))
   dependsOn(
     gradle
