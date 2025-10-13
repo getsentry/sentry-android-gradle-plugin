@@ -117,8 +117,7 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
           }
         task.projectSlug.set(projectProvider)
 
-        // Auth token only from extension (no fallback)
-        task.orgAuthToken.set(extension.authToken)
+        task.orgAuthToken.set(extension.distribution.authToken)
 
         task.buildConfiguration.set(buildConfiguration)
       }

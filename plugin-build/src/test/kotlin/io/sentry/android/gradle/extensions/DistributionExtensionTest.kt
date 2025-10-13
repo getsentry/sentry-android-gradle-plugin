@@ -24,4 +24,23 @@ class DistributionExtensionTest {
 
     assertEquals(setOf("freeDebug", "paidRelease"), extension.enabledVariants.get())
   }
+
+  @Test
+  fun `authToken uses environment variable by default`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = project.objects.newInstance(DistributionExtension::class.java)
+
+    val envToken = System.getenv("SENTRY_DISTRIBUTION_AUTH_TOKEN")
+    assertEquals(envToken, extension.authToken.orNull)
+  }
+
+  @Test
+  fun `authToken can be configured`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = project.objects.newInstance(DistributionExtension::class.java)
+
+    extension.authToken.set("test-token")
+
+    assertEquals("test-token", extension.authToken.get())
+  }
 }
