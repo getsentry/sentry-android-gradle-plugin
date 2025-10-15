@@ -61,8 +61,17 @@ fun ApplicationAndroidComponentsExtension.configure(
   tmpDir.mkdirs()
 
   onVariants { variant ->
+    val paths = OutputPaths(project, variant.name)
+      variant.configureDistributionPropertiesTask(
+        project,
+        extension,
+        null,
+        paths,
+        sentryOrg,
+        sentryProject,
+      )
+
     if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
-      val paths = OutputPaths(project, variant.name)
       val sentryTelemetryProvider =
         variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
 
@@ -104,17 +113,6 @@ fun ApplicationAndroidComponentsExtension.configure(
           sentryProject,
         )
       generateProguardUuidTask?.let { tasksGeneratingProperties.add(it) }
-
-      val generateDistributionPropertiesTask =
-        variant.configureDistributionPropertiesTask(
-          project,
-          extension,
-          sentryTelemetryProvider,
-          paths,
-          sentryOrg,
-          sentryProject,
-        )
-      generateDistributionPropertiesTask?.let { tasksGeneratingProperties.add(it) }
 
       sentryVariant.configureNativeSymbolsTask(
         project,
@@ -388,7 +386,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
 private fun ApplicationVariant.configureDistributionPropertiesTask(
   project: Project,
   extension: SentryPluginExtension,
-  sentryTelemetryProvider: Provider<SentryTelemetryService>,
+  sentryTelemetryProvider: Provider<SentryTelemetryService>?,
   paths: OutputPaths,
   sentryOrg: String?,
   sentryProject: String?,
@@ -412,17 +410,25 @@ private fun ApplicationVariant.configureDistributionPropertiesTask(
       )
     }
 
-    return GenerateDistributionPropertiesTask.register(
-      project = project,
-      extension = extension,
-      sentryTelemetryProvider = sentryTelemetryProvider,
-      output = paths.distributionPropertiesDir,
-      taskSuffix = name.capitalized,
-      buildConfiguration = name,
-      sentryOrg = sentryOrg,
-      sentryProject = sentryProject,
-      variant = variant,
+    val generateDistributionPropertiesTask =
+      GenerateDistributionPropertiesTask.register(
+        project = project,
+        extension = extension,
+        sentryTelemetryProvider = sentryTelemetryProvider,
+        output = paths.distributionPropertiesDir,
+        taskSuffix = name.capitalized,
+        buildConfiguration = name,
+        sentryOrg = sentryOrg,
+        sentryProject = sentryProject,
+        variant = variant,
+      )
+
+    requireNotNull(sources.assets) { "sources.assets must not be null" }.addGeneratedSourceDirectory(
+      generateDistributionPropertiesTask,
+      GenerateDistributionPropertiesTask::output,
     )
+
+    return generateDistributionPropertiesTask
   }
   return null
 }
