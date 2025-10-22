@@ -49,12 +49,6 @@ class SentryUploadProguardMappingTaskTest {
     assertTrue("--uuid" in args)
     assertTrue(randomUuid.toString() in args)
     assertTrue(mappingFile.get().first().toString() in args)
-    assertTrue("--app-id" in args)
-    assertTrue(releaseInfo.applicationId in args)
-    assertTrue("--version" in args)
-    assertTrue(releaseInfo.versionName in args)
-    assertTrue("--version-code" in args)
-    assertTrue(releaseInfo.versionCode.toString() in args)
     assertFalse("--no-upload" in args)
   }
 
@@ -85,11 +79,6 @@ class SentryUploadProguardMappingTaskTest {
     assertTrue("--uuid" in args)
     assertTrue(randomUuid.toString() in args)
     assertTrue(mappingFile.get().first().toString() in args)
-    assertTrue("--app-id" in args)
-    assertTrue(releaseInfo.applicationId in args)
-    assertTrue("--version" in args)
-    assertTrue(releaseInfo.versionName in args)
-    assertFalse("--version-code" in args)
     assertFalse("--no-upload" in args)
     assertFalse("--log-level=debug" in args)
   }

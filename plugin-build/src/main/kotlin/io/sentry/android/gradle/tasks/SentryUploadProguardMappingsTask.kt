@@ -77,17 +77,6 @@ abstract class SentryUploadProguardMappingsTask : SentryCliExecTask() {
     if (!autoUploadProguardMapping.get()) {
       args.add("--no-upload")
     }
-
-    releaseInfo.get().let {
-      it.versionCode?.let { versionCode ->
-        args.add("--version-code")
-        args.add(versionCode.toString())
-      }
-      args.add("--app-id")
-      args.add(it.applicationId)
-      args.add("--version")
-      args.add(it.versionName)
-    }
   }
 
   companion object {
