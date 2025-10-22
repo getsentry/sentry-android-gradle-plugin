@@ -229,7 +229,9 @@ fun ApplicationAndroidComponentsExtension.configure(
           )
           .toTransform(SingleArtifact.MERGED_MANIFEST)
       }
-      if (extension.sizeAnalysis.enabled.get() == true) {
+      val sizeAnalysisEnabled = extension.sizeAnalysis.enabled.get() == true
+      val distributionEnabled = extension.distribution.enabledVariants.get().contains(variant.name)
+      if (sizeAnalysisEnabled || distributionEnabled) {
         variant.configureUploadAppTasks(
           project,
           extension,
