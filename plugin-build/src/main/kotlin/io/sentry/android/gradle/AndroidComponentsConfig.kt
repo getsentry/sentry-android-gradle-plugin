@@ -61,12 +61,27 @@ fun ApplicationAndroidComponentsExtension.configure(
   tmpDir.mkdirs()
 
   onVariants { variant ->
-    if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
-      val paths = OutputPaths(project, variant.name)
-      val sentryTelemetryProvider =
-        variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
+    // Calculate feature enablement early
+    val sizeAnalysisEnabledForVariant = calculateSizeAnalysisEnabled(extension, variant.name)
+    val variantIsAllowed =
+      isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)
+    val distributionEnabledForVariant =
+      variantIsAllowed && extension.distribution.enabledVariants.get().contains(variant.name)
 
-      variant.configureDependenciesTask(project, extension, sentryTelemetryProvider)
+    // Configure telemetry if ANY feature needs it (variant allowed OR size analysis enabled)
+    val sentryTelemetryProvider =
+      if (variantIsAllowed || sizeAnalysisEnabledForVariant) {
+        variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
+      } else {
+        null
+      }
+
+    if (variantIsAllowed) {
+      val paths = OutputPaths(project, variant.name)
+      // sentryTelemetryProvider is guaranteed to be non-null here since variantIsAllowed is true
+      val telemetryProvider = sentryTelemetryProvider!!
+
+      variant.configureDependenciesTask(project, extension, telemetryProvider)
 
       // TODO: do this only once, and all other tasks should be SentryVariant.configureSomething
       val sentryVariant = AndroidVariant74(variant)
@@ -84,7 +99,7 @@ fun ApplicationAndroidComponentsExtension.configure(
         variant.configureSourceBundleTasks(
           project,
           extension,
-          sentryTelemetryProvider,
+          telemetryProvider,
           paths,
           sourceFiles,
           cliExecutable,
@@ -97,7 +112,7 @@ fun ApplicationAndroidComponentsExtension.configure(
         variant.configureProguardMappingsTasks(
           project,
           extension,
-          sentryTelemetryProvider,
+          telemetryProvider,
           paths,
           cliExecutable,
           sentryOrg,
@@ -109,7 +124,7 @@ fun ApplicationAndroidComponentsExtension.configure(
         variant.configureDistributionPropertiesTask(
           project,
           extension,
-          sentryTelemetryProvider,
+          telemetryProvider,
           paths,
           sentryOrg,
           sentryProject,
@@ -119,7 +134,7 @@ fun ApplicationAndroidComponentsExtension.configure(
       sentryVariant.configureNativeSymbolsTask(
         project,
         extension,
-        sentryTelemetryProvider,
+        telemetryProvider,
         cliExecutable,
         sentryOrg,
         sentryProject,
@@ -135,7 +150,7 @@ fun ApplicationAndroidComponentsExtension.configure(
           InjectSentryMetaPropertiesIntoAssetsTask.register(
             project,
             extension,
-            sentryTelemetryProvider,
+            telemetryProvider,
             tasksGeneratingProperties,
             variant.name.capitalized,
           )
@@ -216,7 +231,7 @@ fun ApplicationAndroidComponentsExtension.configure(
           SentryGenerateIntegrationListTask.register(
             project,
             extension,
-            sentryTelemetryProvider,
+            telemetryProvider,
             sentryModulesService,
             variant.name,
           )
@@ -229,18 +244,18 @@ fun ApplicationAndroidComponentsExtension.configure(
           )
           .toTransform(SingleArtifact.MERGED_MANIFEST)
       }
-      val sizeAnalysisEnabled = extension.sizeAnalysis.enabled.get() == true
-      val distributionEnabled = extension.distribution.enabledVariants.get().contains(variant.name)
-      if (sizeAnalysisEnabled || distributionEnabled) {
-        variant.configureUploadAppTasks(
-          project,
-          extension,
-          sentryTelemetryProvider,
-          cliExecutable,
-          sentryOrg,
-          sentryProject,
-        )
-      }
+    }
+
+    // Configure upload tasks if EITHER feature is enabled for this variant
+    if (sizeAnalysisEnabledForVariant || distributionEnabledForVariant) {
+      variant.configureUploadAppTasks(
+        project,
+        extension,
+        sentryTelemetryProvider!!,
+        cliExecutable,
+        sentryOrg,
+        sentryProject,
+      )
     }
   }
 }
@@ -498,4 +513,30 @@ private fun ApplicationVariant.getReleaseInfo(): ReleaseInfo {
     versionCode = null
   }
   return ReleaseInfo(applicationId, versionName, versionCode)
+}
+
+/**
+ * Calculates whether size analysis is enabled for a specific variant.
+ *
+ * Size analysis is enabled if:
+ * 1. The global enabled flag is true, AND
+ * 2. Either enabledVariants is empty (meaning all variants), OR the variant is in enabledVariants
+ *
+ * Note: This function BYPASSES isVariantAllowed. This means size analysis can run on variants
+ * that are globally ignored via ignoredVariants, ignoredBuildTypes, or ignoredFlavors. This is
+ * intentional to provide fine-grained control over which variants have size analysis enabled.
+ */
+private fun calculateSizeAnalysisEnabled(
+  extension: SentryPluginExtension,
+  variantName: String,
+): Boolean {
+  // Master kill-switch check first
+  if (extension.sizeAnalysis.enabled.get() != true) {
+    return false
+  }
+
+  val enabledVariants = extension.sizeAnalysis.enabledVariants.get()
+
+  // Empty set = enable for all variants (backward compatibility)
+  return enabledVariants.isEmpty() || enabledVariants.contains(variantName)
 }
