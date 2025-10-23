@@ -42,10 +42,7 @@ class Handler(BaseHTTPRequestHandler):
         self.flushLogs()
 
     def do_POST(self):
-        if self.isApi('/api/0/projects/{}/{}/files/proguard-artifact-releases/'.format(apiOrg, apiProject)):
-            self.start_response(HTTPStatus.NOT_FOUND)
-        else:
-            self.start_response(HTTPStatus.OK)
+        self.start_response(HTTPStatus.OK)
 
         if self.isApi('api/0/projects/{}/{}/files/difs/assemble/'.format(apiOrg, apiProject)):
             # Request body example:
