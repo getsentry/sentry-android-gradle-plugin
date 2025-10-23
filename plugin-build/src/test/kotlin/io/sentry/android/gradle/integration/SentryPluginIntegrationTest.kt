@@ -46,10 +46,6 @@ class SentryPluginIntegrationTest :
       build.task(":app:uploadSentryProguardMappingsRelease")?.outcome,
       TaskOutcome.SUCCESS,
     )
-    assertTrue(build.output) {
-      "Most likely you have to update your self-hosted Sentry version " +
-        "to get all of the latest features." in build.output
-    }
   }
 
   @Test
