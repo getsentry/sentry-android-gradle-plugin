@@ -14,11 +14,10 @@ constructor(objects: ObjectFactory) {
   /**
    * Controls whether build distribution uploads are enabled.
    *
-   * During EA (Early Access), defaults to false.
-   * Post-GA, defaults to true when running in CI, false otherwise.
+   * Defaults to false.
    */
   val enabled: Property<Boolean> =
-    objects.property(Boolean::class.java).convention(false) // EA default
+    objects.property(Boolean::class.java).convention(false)
 
   /**
    * Set of Android build variants that should have the auto-update SDK added and auth token
