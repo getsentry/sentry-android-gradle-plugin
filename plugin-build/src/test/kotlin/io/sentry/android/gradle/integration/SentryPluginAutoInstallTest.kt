@@ -426,7 +426,8 @@ class SentryPluginAutoInstallTest :
               includeProguardMapping = false
               autoInstallation.enabled = true
               distribution {
-                enabledVariants = ["debug"]
+                enabled = true
+                updateSdkVariants = ["debug"]
               }
             }
             """
@@ -483,7 +484,8 @@ class SentryPluginAutoInstallTest :
               includeProguardMapping = false
               autoInstallation.enabled = false
               distribution {
-                enabledVariants = ["debug"]
+                enabled = true
+                updateSdkVariants = ["debug"]
               }
             }
             """

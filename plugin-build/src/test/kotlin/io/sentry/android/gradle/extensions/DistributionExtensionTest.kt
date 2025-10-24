@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.extensions
 
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
@@ -8,21 +9,39 @@ import org.junit.Test
 class DistributionExtensionTest {
 
   @Test
-  fun `enabledVariants is empty by default`() {
+  fun `enabled is false by default`() {
     val project = ProjectBuilder.builder().build()
     val extension = project.objects.newInstance(DistributionExtension::class.java)
 
-    assertTrue(extension.enabledVariants.get().isEmpty())
+    assertFalse(extension.enabled.get())
   }
 
   @Test
-  fun `enabledVariants can be configured with variant names`() {
+  fun `enabled can be configured`() {
     val project = ProjectBuilder.builder().build()
     val extension = project.objects.newInstance(DistributionExtension::class.java)
 
-    extension.enabledVariants.set(setOf("freeDebug", "paidRelease"))
+    extension.enabled.set(true)
 
-    assertEquals(setOf("freeDebug", "paidRelease"), extension.enabledVariants.get())
+    assertTrue(extension.enabled.get())
+  }
+
+  @Test
+  fun `updateSdkVariants is empty by default`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = project.objects.newInstance(DistributionExtension::class.java)
+
+    assertTrue(extension.updateSdkVariants.get().isEmpty())
+  }
+
+  @Test
+  fun `updateSdkVariants can be configured with variant names`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = project.objects.newInstance(DistributionExtension::class.java)
+
+    extension.updateSdkVariants.set(setOf("freeDebug", "paidRelease"))
+
+    assertEquals(setOf("freeDebug", "paidRelease"), extension.updateSdkVariants.get())
   }
 
   @Test
