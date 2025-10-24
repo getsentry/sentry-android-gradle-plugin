@@ -1,20 +1,25 @@
 package io.sentry.android.gradle.extensions
 
+import io.sentry.android.gradle.util.CiUtils.isCi
 import javax.inject.Inject
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.provider.SetProperty
 import org.jetbrains.annotations.ApiStatus.Experimental
 
 @Experimental
-open class DistributionExtension @Inject constructor(objects: ObjectFactory) {
+open class DistributionExtension
+@Inject
+constructor(objects: ObjectFactory, providerFactory: ProviderFactory) {
 
   /**
    * Controls whether build distribution uploads are enabled.
    *
    * Defaults to false.
    */
-  val enabled: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
+  val enabled: Property<Boolean> =
+    objects.property(Boolean::class.java).convention(providerFactory.isCi() && false)
 
   /**
    * Set of Android build variants that should have the auto-update SDK added and auth token
