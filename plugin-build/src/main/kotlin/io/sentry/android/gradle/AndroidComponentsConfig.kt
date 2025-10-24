@@ -66,7 +66,8 @@ fun ApplicationAndroidComponentsExtension.configure(
     val variantName = variant.name
 
     if (updateSdkVariants.contains(variantName)) {
-      val isVariantAllowed = isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)
+      val isVariantAllowed =
+        isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)
 
       // Check if updateSdkVariants contains a variant that is ignored
       if (!isVariantAllowed) {

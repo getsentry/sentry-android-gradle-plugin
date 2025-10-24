@@ -7,24 +7,21 @@ import org.gradle.api.provider.SetProperty
 import org.jetbrains.annotations.ApiStatus.Experimental
 
 @Experimental
-open class DistributionExtension
-@Inject
-constructor(objects: ObjectFactory) {
+open class DistributionExtension @Inject constructor(objects: ObjectFactory) {
 
   /**
    * Controls whether build distribution uploads are enabled.
    *
    * Defaults to false.
    */
-  val enabled: Property<Boolean> =
-    objects.property(Boolean::class.java).convention(false)
+  val enabled: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
 
   /**
    * Set of Android build variants that should have the auto-update SDK added and auth token
    * embedded.
    *
-   * This must be a subset of variants not in ignoredVariants. It is a build-time error to specify
-   * a variant that is ignored by the Sentry plugin.
+   * This must be a subset of variants not in ignoredVariants. It is a build-time error to specify a
+   * variant that is ignored by the Sentry plugin.
    *
    * Note: This controls auto-update SDK installation only. The [enabled] property controls whether
    * builds are uploaded for distribution.
