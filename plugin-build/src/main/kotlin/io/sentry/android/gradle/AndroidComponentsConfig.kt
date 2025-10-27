@@ -61,6 +61,32 @@ fun ApplicationAndroidComponentsExtension.configure(
   tmpDir.mkdirs()
 
   onVariants { variant ->
+    // Validate distribution configuration for this variant
+    val updateSdkVariants = extension.distribution.updateSdkVariants.get()
+    val variantName = variant.name
+
+    if (updateSdkVariants.contains(variantName)) {
+      val isVariantAllowed =
+        isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)
+
+      // Check if updateSdkVariants contains a variant that is ignored
+      if (!isVariantAllowed) {
+        throw IllegalArgumentException(
+          "Invalid configuration: updateSdkVariants contains variant '$variantName' which is in ignoredVariants. " +
+            "You cannot use the auto-update SDK in variants where the Sentry SDK is disabled."
+        )
+      }
+
+      // Check if updateSdkVariants is set but distribution uploads are disabled
+      val distributionEnabled = extension.distribution.enabled.get()
+      if (!distributionEnabled) {
+        throw IllegalArgumentException(
+          "Invalid configuration: updateSdkVariants contains variant '$variantName' but buildDistribution.enabled is false. " +
+            "It doesn't make sense to embed the auto-update SDK without uploading the build."
+        )
+      }
+    }
+
     if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
       val paths = OutputPaths(project, variant.name)
       val sentryTelemetryProvider =
@@ -230,7 +256,7 @@ fun ApplicationAndroidComponentsExtension.configure(
           .toTransform(SingleArtifact.MERGED_MANIFEST)
       }
       val sizeAnalysisEnabled = extension.sizeAnalysis.enabled.get() == true
-      val distributionEnabled = extension.distribution.enabledVariants.get().contains(variant.name)
+      val distributionEnabled = extension.distribution.enabled.get() == true
       if (sizeAnalysisEnabled || distributionEnabled) {
         variant.configureUploadAppTasks(
           project,
@@ -396,11 +422,13 @@ private fun ApplicationVariant.configureDistributionPropertiesTask(
   sentryProject: String?,
 ): TaskProvider<GenerateDistributionPropertiesTask>? {
   val variantName = name
-  if (extension.distribution.enabledVariants.get().contains(variantName)) {
+  val updateSdkVariants = extension.distribution.updateSdkVariants.get()
+
+  if (updateSdkVariants.contains(variantName)) {
     val variant = AndroidVariant74(this)
     // Distribution uses a custom auto-install implementation instead of the standard
     // InstallStrategy approach (see AutoInstall.kt) because it requires variant-specific
-    // installation based on extension.distribution.enabledVariants, whereas other integrations
+    // installation based on extension.distribution.updateSdkVariants, whereas other integrations
     // are installed globally when their dependencies are detected.
     if (extension.autoInstallation.enabled.get()) {
       val sentryVersion = extension.autoInstallation.sentryVersion.get()
