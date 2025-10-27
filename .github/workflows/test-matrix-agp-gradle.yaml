@@ -91,7 +91,7 @@ jobs:
           rm -r output
 
       - name: Upload Test Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-results-AGP${{ matrix.agp }}-Gradle${{ matrix.gradle }}
           path: plugin-build/build/reports/tests/
