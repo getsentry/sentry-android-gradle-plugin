@@ -76,15 +76,6 @@ fun ApplicationAndroidComponentsExtension.configure(
             "You cannot use the auto-update SDK in variants where the Sentry SDK is disabled."
         )
       }
-
-      // Check if updateSdkVariants is set but distribution uploads are disabled
-      val distributionEnabled = extension.distribution.enabled.get()
-      if (!distributionEnabled) {
-        throw IllegalArgumentException(
-          "Invalid configuration: updateSdkVariants contains variant '$variantName' but buildDistribution.enabled is false. " +
-            "It doesn't make sense to embed the auto-update SDK without uploading the build."
-        )
-      }
     }
 
     if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
