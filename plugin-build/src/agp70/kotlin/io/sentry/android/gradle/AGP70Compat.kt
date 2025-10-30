@@ -6,7 +6,7 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.build.api.instrumentation.InstrumentationScope
-import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.api.ApplicationVariant
 import io.sentry.gradle.common.SentryVariant
@@ -63,8 +63,8 @@ fun <T : InstrumentationParameters> configureInstrumentationFor70(
 }
 
 fun onVariants70(
-  androidComponentsExt: AndroidComponentsExtension<*, *, *>,
-  callback: (Variant) -> Unit,
+  androidComponentsExt: ApplicationAndroidComponentsExtension,
+  callback: (com.android.build.api.variant.ApplicationVariant) -> Unit,
 ) {
   androidComponentsExt.onVariants(callback = callback)
 }
