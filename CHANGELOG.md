@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix compatibility with AGP 9.x when uploading proguard mappings ([#1021](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1021))
+
 ## 5.12.1
 
 ### Fixes
