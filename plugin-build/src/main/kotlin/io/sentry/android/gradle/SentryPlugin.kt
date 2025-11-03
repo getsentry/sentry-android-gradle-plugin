@@ -1,6 +1,6 @@
 package io.sentry.android.gradle
 
-import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.gradle.AppExtension
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.autoinstall.installDependencies
@@ -48,7 +48,7 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
     project.pluginManager.withPlugin("com.android.application") {
       val oldAGPExtension = project.extensions.getByType(AppExtension::class.java)
       val androidComponentsExt =
-        project.extensions.getByType(AndroidComponentsExtension::class.java)
+        project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
       val cliExecutable = project.cliExecutableProvider()
 
       val extraProperties = project.extensions.getByName("ext") as ExtraPropertiesExtension

@@ -87,8 +87,7 @@ class JetpackComposeTracingIrExtension22(private val messageCollector: MessageCo
 
     val sentryModifierClassId = FqName("io.sentry.compose").classId("SentryModifier")
 
-    val sentryModifierCompanionClass =
-      pluginContext.referenceClass(sentryModifierClassId)?.owner?.companionObject()
+    val sentryModifierCompanionClass = pluginContext.referenceClass(sentryModifierClassId)?.owner
 
     val sentryModifierTagFunction = sentryModifierClassId.callableId("sentryTag")
 

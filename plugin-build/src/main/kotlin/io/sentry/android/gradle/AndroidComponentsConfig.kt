@@ -7,9 +7,9 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.build.api.instrumentation.InstrumentationScope
-import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.api.variant.ApplicationVariant
 import com.android.build.api.variant.Variant
-import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
@@ -48,7 +48,7 @@ import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 
-fun AndroidComponentsExtension<*, *, *>.configure(
+fun ApplicationAndroidComponentsExtension.configure(
   project: Project,
   extension: SentryPluginExtension,
   buildEvents: BuildEventListenerRegistryInternal,
@@ -347,7 +347,7 @@ private fun Variant.configureDependenciesTask(
   }
 }
 
-private fun Variant.configureProguardMappingsTasks(
+private fun ApplicationVariant.configureProguardMappingsTasks(
   project: Project,
   extension: SentryPluginExtension,
   sentryTelemetryProvider: Provider<SentryTelemetryService>,
@@ -373,7 +373,7 @@ private fun Variant.configureProguardMappingsTasks(
           output = paths.proguardUuidDir,
         )
 
-      val releaseInfo = getReleaseInfo(project, this)
+      val releaseInfo = getReleaseInfo()
       val uploadMappingsTask =
         SentryUploadProguardMappingsTask.register(
           project = project,
@@ -445,7 +445,9 @@ private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
  * onVariants method in AGP 7.4.0 has a binary incompatibility with the prior versions, hence we
  * have to distinguish here, although the compatibility sources would look exactly the same.
  */
-private fun AndroidComponentsExtension<*, *, *>.configureVariants(callback: (Variant) -> Unit) {
+private fun ApplicationAndroidComponentsExtension.configureVariants(
+  callback: (ApplicationVariant) -> Unit
+) {
   if (isAGP74) {
     onVariants74(this, callback)
   } else {
@@ -453,16 +455,15 @@ private fun AndroidComponentsExtension<*, *, *>.configureVariants(callback: (Var
   }
 }
 
-private fun getReleaseInfo(project: Project, variant: Variant): ReleaseInfo {
-  val appExtension = project.extensions.getByType(AppExtension::class.java)
-  var applicationId = appExtension.defaultConfig.applicationId ?: appExtension.namespace.toString()
-  var versionName = appExtension.defaultConfig.versionName ?: "undefined"
-  var versionCode = appExtension.defaultConfig.versionCode
-  val flavor = appExtension.productFlavors.find { it.name == variant.flavorName }
-  flavor?.applicationId?.let { applicationId = it }
-  flavor?.versionName?.let { versionName = it }
-  flavor?.versionCode?.let { versionCode = it }
-  flavor?.applicationIdSuffix?.let { applicationId += it }
-  flavor?.versionNameSuffix?.let { versionName += it }
+private fun ApplicationVariant.getReleaseInfo(): ReleaseInfo {
+  val applicationId = applicationId.orNull ?: namespace.get()
+  var versionName = outputs.firstOrNull()?.versionName?.orNull
+  if (versionName.isNullOrEmpty()) {
+    versionName = "undefined"
+  }
+  var versionCode = outputs.firstOrNull()?.versionCode?.orNull
+  if (versionCode != null && versionCode < 0) {
+    versionCode = null
+  }
   return ReleaseInfo(applicationId, versionName, versionCode)
 }

@@ -65,11 +65,11 @@ sample-androidx-recyclerView = "androidx.recyclerview:recyclerview:1.2.0"
 sample-androidx-lifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
 sample-androidx-appcompat = "androidx.appcompat:appcompat:1.2.0"
 
-sample-androidx-composeRuntime = "androidx.compose.runtime:runtime:1.1.1"
+sample-androidx-composeRuntime = "androidx.compose.runtime:runtime:1.5.4"
 sample-androidx-composeNavigation = "androidx.navigation:navigation-compose:2.5.2"
 sample-androidx-composeActivity = "androidx.activity:activity-compose:1.4.0"
-sample-androidx-composeFoundation = "androidx.compose.foundation:foundation:1.2.1"
-sample-androidx-composeFoundationLayout = "androidx.compose.foundation:foundation-layout:1.2.1"
+sample-androidx-composeFoundation = "androidx.compose.foundation:foundation:1.5.4"
+sample-androidx-composeFoundationLayout = "androidx.compose.foundation:foundation-layout:1.5.4"
 
 sample-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "sampleCoroutines" }
 sample-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "sampleCoroutines" }

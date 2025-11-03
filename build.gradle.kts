@@ -1,3 +1,9 @@
+buildscript {
+  dependencies {
+    classpath("com.android.tools:r8:8.11.18")
+  }
+}
+
 plugins {
   alias(libs.plugins.kotlin) apply false
   alias(libs.plugins.kotlinAndroid) apply false
