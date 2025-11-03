@@ -98,6 +98,12 @@
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2530)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.46.0...2.53.0)
 
+## 5.12.2
+
+### Fixes
+
+- Fix compatibility with AGP 9.x when uploading proguard mappings ([#1021](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1021))
+
 ## 5.12.1
 
 ### Fixes
