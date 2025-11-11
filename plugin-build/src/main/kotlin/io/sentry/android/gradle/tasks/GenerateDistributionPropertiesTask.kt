@@ -52,7 +52,9 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
     outputFile.get().asFile.writer().use { writer ->
       orgSlug.orNull?.let { writer.appendLine("$ORG_SLUG_PROPERTY=$it") }
       projectSlug.orNull?.let { writer.appendLine("$PROJECT_SLUG_PROPERTY=$it") }
-      distributionAuthToken.orNull?.let { writer.appendLine("$DISTRIBUTION_AUTH_TOKEN_PROPERTY=$it") }
+      distributionAuthToken.orNull?.let {
+        writer.appendLine("$DISTRIBUTION_AUTH_TOKEN_PROPERTY=$it")
+      }
       writer.appendLine("$BUILD_CONFIGURATION_PROPERTY=${buildConfiguration.get()}")
     }
   }
