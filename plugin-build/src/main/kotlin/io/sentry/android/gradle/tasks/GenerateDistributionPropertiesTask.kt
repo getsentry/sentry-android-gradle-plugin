@@ -43,7 +43,7 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
 
   @get:Input abstract val projectSlug: Property<String>
 
-  @get:Input abstract val orgAuthToken: Property<String>
+  @get:Input abstract val distributionAuthToken: Property<String>
 
   @get:Input abstract val buildConfiguration: Property<String>
 
@@ -52,7 +52,9 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
     outputFile.get().asFile.writer().use { writer ->
       orgSlug.orNull?.let { writer.appendLine("$ORG_SLUG_PROPERTY=$it") }
       projectSlug.orNull?.let { writer.appendLine("$PROJECT_SLUG_PROPERTY=$it") }
-      orgAuthToken.orNull?.let { writer.appendLine("$DISTRIBUTION_AUTH_TOKEN_PROPERTY=$it") }
+      distributionAuthToken.orNull?.let {
+        writer.appendLine("$DISTRIBUTION_AUTH_TOKEN_PROPERTY=$it")
+      }
       writer.appendLine("$BUILD_CONFIGURATION_PROPERTY=${buildConfiguration.get()}")
     }
   }
@@ -117,7 +119,7 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
           }
         task.projectSlug.set(projectProvider)
 
-        task.orgAuthToken.set(extension.distribution.authToken)
+        task.distributionAuthToken.set(extension.distribution.authToken)
 
         task.buildConfiguration.set(buildConfiguration)
       }
