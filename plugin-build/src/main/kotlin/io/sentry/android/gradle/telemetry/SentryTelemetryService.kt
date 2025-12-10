@@ -449,6 +449,8 @@ abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
           it.environment("SENTRY_AUTH_TOKEN", authToken)
         }
 
+        it.environment("SENTRY_PIPELINE", "sentry-gradle-plugin/${BuildConfig.Version}")
+
         it.commandLine(args)
         it.standardOutput = stdOutput
         it.errorOutput = errOutput
@@ -490,6 +492,8 @@ abstract class SentryCliVersionValueSource : ValueSource<String, VersionParams> 
 
       args.add("--log-level=error")
       args.add("--version")
+
+      it.environment("SENTRY_PIPELINE", "sentry-gradle-plugin/${BuildConfig.Version}")
 
       it.commandLine(args)
       it.standardOutput = output

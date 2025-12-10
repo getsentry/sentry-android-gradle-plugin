@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.info
@@ -48,6 +49,7 @@ abstract class SentryCliExecTask : Exec() {
     }
     setSentryPropertiesEnv()
     setSentryAuthTokenEnv()
+    setSentryPipelineEnv()
     super.exec()
   }
 
@@ -117,5 +119,9 @@ abstract class SentryCliExecTask : Exec() {
     } else {
       logger.info { "sentryAuthToken is null" }
     }
+  }
+
+  internal fun setSentryPipelineEnv() {
+    environment("SENTRY_PIPELINE", "sentry-gradle-plugin/${BuildConfig.Version}")
   }
 }
