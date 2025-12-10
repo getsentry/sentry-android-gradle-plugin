@@ -7,10 +7,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.tasks.Exec
 import org.gradle.process.ExecSpec
 
-/**
- * Sets the SENTRY_PIPELINE environment variable for sentry-cli invocations.
- * This helps identify the pipeline source in Sentry's analytics.
- */
 fun ExecSpec.setSentryPipelineEnv() {
   environment("SENTRY_PIPELINE", "sentry-gradle-plugin/${BuildConfig.Version}")
 }
