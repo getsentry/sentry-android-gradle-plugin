@@ -3,6 +3,7 @@ package io.sentry.android.gradle.tasks
 import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.info
+import io.sentry.android.gradle.util.setSentryPipelineEnv
 import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.file.RegularFileProperty
@@ -48,6 +49,7 @@ abstract class SentryCliExecTask : Exec() {
     }
     setSentryPropertiesEnv()
     setSentryAuthTokenEnv()
+    setSentryPipelineEnv()
     super.exec()
   }
 
