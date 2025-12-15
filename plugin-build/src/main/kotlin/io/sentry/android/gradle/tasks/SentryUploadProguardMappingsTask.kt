@@ -5,7 +5,6 @@ import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask.Companion.S
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.PropertiesUtil
-import io.sentry.android.gradle.util.ReleaseInfo
 import io.sentry.android.gradle.util.asSentryCliExec
 import java.io.File
 import org.gradle.api.Project
@@ -44,8 +43,6 @@ abstract class SentryUploadProguardMappingsTask : SentryCliExecTask() {
   abstract var mappingsFiles: Provider<FileCollection>
 
   @get:Input abstract val autoUploadProguardMapping: Property<Boolean>
-
-  @get:Input abstract val releaseInfo: Property<ReleaseInfo>
 
   override fun exec() {
     if (!mappingsFiles.isPresent || mappingsFiles.get().isEmpty) {
@@ -102,7 +99,6 @@ abstract class SentryUploadProguardMappingsTask : SentryCliExecTask() {
       sentryUrl: Property<String>,
       autoUploadProguardMapping: Property<Boolean>,
       taskSuffix: String = "",
-      releaseInfo: ReleaseInfo,
     ): TaskProvider<SentryUploadProguardMappingsTask> {
       val uploadSentryProguardMappingsTask =
         project.tasks.register(
@@ -119,7 +115,6 @@ abstract class SentryUploadProguardMappingsTask : SentryCliExecTask() {
           task.autoUploadProguardMapping.set(autoUploadProguardMapping)
           task.sentryOrganization.set(sentryOrg)
           task.sentryProject.set(sentryProject)
-          task.releaseInfo.set(releaseInfo)
           task.sentryAuthToken.set(sentryAuthToken)
           task.sentryUrl.set(sentryUrl)
           sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
