@@ -4,7 +4,7 @@
 
 **Breaking changes**:
 
-sentry-cli 3.0.0 and above only officially supports Sentry SaaS and Sentry self-hosted versions 25.11.1 and higher. While many Sentry CLI features may, in practice, continue working with some older Sentry versions, continued support for Sentry versions older than 25.11.1 is not guaranteed. You can use an older version of the this plugin if you need support for older Sentry self-hosted versions.
+This version introduces sentry-cli 3.0.0. Sentry-cli 3.0.0 and above only officially supports Sentry SaaS and Sentry self-hosted versions 25.11.1 and higher. While many Sentry CLI features may, in practice, continue working with some older Sentry versions, continued support for Sentry versions older than 25.11.1 is not guaranteed. You can use an older version of the this plugin if you need support for older Sentry self-hosted versions.
 
 ### Various fixes & improvements
 
