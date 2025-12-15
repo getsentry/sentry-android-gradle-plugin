@@ -32,7 +32,7 @@ jobs:
         run: ./gradlew :plugin-build:assemble :sentry-kotlin-compiler-plugin:assemble
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ github.sha }}
           path: |
