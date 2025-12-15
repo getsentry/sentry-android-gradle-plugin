@@ -29,7 +29,7 @@ class Handler(BaseHTTPRequestHandler):
             self.writeJSON('{"url":"' + uri.geturl() + self.path + '",'
                            '"chunkSize":8388608,"chunksPerRequest":64,"maxFileSize":2147483648,'
                            '"maxRequestSize":33554432,"concurrency":1,"hashAlgorithm":"sha1","compression":["gzip"],'
-                           '"accept":["debug_files","release_files","pdbs","sources","bcsymbolmaps","preprod_artifacts"]}')
+                           '"accept":["debug_files","release_files","pdbs","sources","bcsymbolmaps","preprod_artifacts","proguard"]}')
         elif self.isApi('/api/0/organizations/{}/repos/?cursor='.format(apiOrg)):
             self.writeJSONFile("test/assets/repos.json")
         elif self.isApi('/api/0/organizations/{}/releases/{}/previous-with-commits/'.format(apiOrg, version)):
