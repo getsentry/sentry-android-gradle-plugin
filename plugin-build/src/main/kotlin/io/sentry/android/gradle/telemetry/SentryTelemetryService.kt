@@ -24,6 +24,7 @@ import io.sentry.android.gradle.util.SentryCliException
 import io.sentry.android.gradle.util.error
 import io.sentry.android.gradle.util.getBuildServiceName
 import io.sentry.android.gradle.util.info
+import io.sentry.android.gradle.util.setSentryPipelineEnv
 import io.sentry.exception.ExceptionMechanismException
 import io.sentry.gradle.common.SentryVariant
 import io.sentry.protocol.Mechanism
@@ -449,6 +450,8 @@ abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
           it.environment("SENTRY_AUTH_TOKEN", authToken)
         }
 
+        it.setSentryPipelineEnv()
+
         it.commandLine(args)
         it.standardOutput = stdOutput
         it.errorOutput = errOutput
@@ -490,6 +493,8 @@ abstract class SentryCliVersionValueSource : ValueSource<String, VersionParams> 
 
       args.add("--log-level=error")
       args.add("--version")
+
+      it.setSentryPipelineEnv()
 
       it.commandLine(args)
       it.standardOutput = output

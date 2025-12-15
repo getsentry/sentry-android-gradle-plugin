@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Various fixes & improvements
+
+- Set SENTRY_PIPELINE environment variable for all sentry-cli invocations ([#1036](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1036))
+
 ### Dependencies
 
 - Bump Android SDK from v8.26.0 to v8.28.0 ([#1032](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1032), [#1034](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1034))

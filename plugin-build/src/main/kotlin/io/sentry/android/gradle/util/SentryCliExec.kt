@@ -1,9 +1,15 @@
 package io.sentry.android.gradle.util
 
+import io.sentry.BuildConfig
 import io.sentry.android.gradle.util.CliFailureReason.OUTDATED
 import java.io.ByteArrayOutputStream
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Exec
+import org.gradle.process.ExecSpec
+
+fun ExecSpec.setSentryPipelineEnv() {
+  environment("SENTRY_PIPELINE", "sentry-gradle-plugin/${BuildConfig.Version}")
+}
 
 /**
  * An ext function for tasks that wrap sentry-cli, which provides common error handling. Must be
