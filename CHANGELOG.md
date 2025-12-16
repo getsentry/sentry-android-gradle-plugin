@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+**Breaking changes**:
+
+This version introduces sentry-cli 3.0.0. Sentry-cli 3.0.0 and above only officially supports Sentry SaaS and Sentry self-hosted versions 25.11.1 and higher. While many Sentry CLI features may, in practice, continue working with some older Sentry versions, continued support for Sentry versions older than 25.11.1 is not guaranteed. You can use an older version of the this plugin if you need support for older Sentry self-hosted versions.
+
 ### Various fixes & improvements
 
 - Set SENTRY_PIPELINE environment variable for all sentry-cli invocations ([#1036](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1036))
@@ -11,9 +15,9 @@
 - Bump Android SDK from v8.26.0 to v8.28.0 ([#1032](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1032), [#1034](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1034))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8280)
   - [diff](https://github.com/getsentry/sentry-java/compare/8.26.0...8.28.0)
-- Bump CLI from v2.58.2 to v2.58.4 ([#1037](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1037), [#1038](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1038))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2584)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.58.2...2.58.4)
+- Bump CLI from v2.58.2 to v3.0.0 ([#1037](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1037), [#1038](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1038), [#1040](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1040))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#300)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.58.2...3.0.0)
 
 ## 6.0.0-beta.2
 

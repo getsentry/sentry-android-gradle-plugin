@@ -33,7 +33,6 @@ import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.GroovyCompat
-import io.sentry.android.gradle.util.ReleaseInfo
 import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
@@ -370,7 +369,6 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
         output = paths.proguardUuidDir,
       )
 
-    val releaseInfo = getReleaseInfo()
     val uploadMappingsTask =
       SentryUploadProguardMappingsTask.register(
         project = project,
@@ -387,7 +385,6 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
         sentryAuthToken = extension.authToken,
         sentryUrl = extension.url,
         taskSuffix = name.capitalized,
-        releaseInfo = releaseInfo,
       )
 
     generateUuidTask.hookWithMinifyTasks(
@@ -504,17 +501,4 @@ private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
     excludes,
     instrumentationParamsConfig,
   )
-}
-
-private fun ApplicationVariant.getReleaseInfo(): ReleaseInfo {
-  val applicationId = applicationId.orNull ?: namespace.get()
-  var versionName = outputs.firstOrNull()?.versionName?.orNull
-  if (versionName.isNullOrEmpty()) {
-    versionName = "undefined"
-  }
-  var versionCode = outputs.firstOrNull()?.versionCode?.orNull
-  if (versionCode != null && versionCode < 0) {
-    versionCode = null
-  }
-  return ReleaseInfo(applicationId, versionName, versionCode)
 }

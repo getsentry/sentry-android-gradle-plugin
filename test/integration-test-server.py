@@ -29,7 +29,7 @@ class Handler(BaseHTTPRequestHandler):
             self.writeJSON('{"url":"' + uri.geturl() + self.path + '",'
                            '"chunkSize":8388608,"chunksPerRequest":64,"maxFileSize":2147483648,'
                            '"maxRequestSize":33554432,"concurrency":1,"hashAlgorithm":"sha1","compression":["gzip"],'
-                           '"accept":["debug_files","release_files","pdbs","sources","bcsymbolmaps","preprod_artifacts"]}')
+                           '"accept":["debug_files","release_files","pdbs","sources","bcsymbolmaps","preprod_artifacts","proguard"]}')
         elif self.isApi('/api/0/organizations/{}/repos/?cursor='.format(apiOrg)):
             self.writeJSONFile("test/assets/repos.json")
         elif self.isApi('/api/0/organizations/{}/releases/{}/previous-with-commits/'.format(apiOrg, version)):
@@ -58,10 +58,12 @@ class Handler(BaseHTTPRequestHandler):
             jsonRequest = json.loads(self.body)
             jsonResponse = '{'
             for key, value in jsonRequest.items():
+                # ProGuard mappings don't have debug_id, use key as uploaded_id instead
+                uploaded_id = value.get('debug_id', key)
                 jsonResponse += '"{}":{{"state":"ok","missingChunks":[],"uploaded_id":"{}"}},'.format(
-                    key, value['debug_id'])
+                    key, uploaded_id)
                 self.log_message('Received: %40s %40s %s', key,
-                                 value['debug_id'], value['name'])
+                                 uploaded_id, value['name'])
             jsonResponse = jsonResponse.rstrip(',') + '}'
             self.writeJSON(jsonResponse)
         elif self.isApi('api/0/projects/{}/{}/releases/'.format(apiOrg, apiProject)):
