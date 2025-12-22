@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fix compatibility with Kotlin 2.3.0 ([#1046](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1046))
+
 ### Dependencies
 
 - Bump CLI from v3.0.0 to v3.0.1 ([#1043](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1043))
