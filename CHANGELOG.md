@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix reproducible builds by writing `sentry-debug-meta.properties` without timestamps ([#876](https://github.com/getsentry/sentry-android-gradle-plugin/pull/876))
+- Skip generating `sentry-debug-meta.properties` when `includeProguardMapping` and `includeSourceContext` are disabled ([#1047](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1047))
+
 ## 6.0.0-rc.1
 
 ### Fixes

@@ -4,9 +4,12 @@ import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SemVer
+import io.sentry.android.gradle.verifyDebugMetaPropertiesNotInApk
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
 import io.sentry.android.gradle.verifyIntegrationList
 import io.sentry.android.gradle.verifyProguardUuid
+import io.sentry.android.gradle.verifySourceContextId
+import io.sentry.android.gradle.withDummyKtFile
 import java.io.File
 import java.util.EnumSet
 import kotlin.test.assertEquals
@@ -360,7 +363,51 @@ class SentryPluginTest :
 
     runner.appendArguments(":app:assembleRelease").build()
 
-    assertThrows(AssertionError::class.java) { verifyProguardUuid(testProjectDir.root) }
+    verifyDebugMetaPropertiesNotInApk(testProjectDir.root)
+  }
+
+  @Test
+  fun `includes source context bundle ID in APK when proguard mapping is disabled but source context is enabled`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
+              }
+            }
+
+            sentry {
+              includeProguardMapping = false
+              includeSourceContext = true
+              autoUploadSourceContext = false
+              autoUploadProguardMapping = false
+              org = "sentry-sdks"
+              projectName = "sentry-android"
+            }
+            """
+        .trimIndent()
+    )
+
+    sentryPropertiesFile.writeText("")
+    testProjectDir.withDummyKtFile()
+
+    runner
+      // run source context tasks but skip upload task (requires auth token)
+      .appendArguments(":app:assembleRelease", "-x", "sentryUploadSourceBundleRelease")
+      .build()
+
+    verifySourceContextId(testProjectDir.root)
   }
 
   @Test
