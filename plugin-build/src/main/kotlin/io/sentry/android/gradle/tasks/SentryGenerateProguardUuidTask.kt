@@ -12,7 +12,10 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.work.DisableCachingByDefault
@@ -29,7 +32,9 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
   override val outputFile: Provider<RegularFile>
     get() = output.file(SENTRY_UUID_OUTPUT)
 
-  @get:Internal abstract val proguardMappingFiles: ConfigurableFileCollection
+  @get:InputFiles
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  abstract val proguardMappingFiles: ConfigurableFileCollection
 
   @TaskAction
   fun generateProperties() {
@@ -40,9 +45,9 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
     // no point for this task to go through all of them.
     // TODO: we'd have to change our SDK in order to support multiple proguard uuids at a time.
     val mappingFile = proguardMappingFiles.files.firstOrNull { it.exists() }
-    val uuid = mappingFile?.let {
-      UUID.nameUUIDFromBytes(it.contentHash().toByteArray())
-    } ?: UUID.randomUUID()
+    val uuid =
+      mappingFile?.let { UUID.nameUUIDFromBytes(it.contentHash().toByteArray()) }
+        ?: UUID.randomUUID()
     outputFile.get().asFile.writer().use { writer ->
       writer.appendLine("$SENTRY_PROGUARD_MAPPING_UUID_PROPERTY=$uuid")
     }
