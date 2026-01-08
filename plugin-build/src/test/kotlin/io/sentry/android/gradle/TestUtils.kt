@@ -32,6 +32,20 @@ private val ASSET_PATTERN_SOURCE_CONTEXT =
       .trimMargin()
   )
 
+internal fun verifyDebugMetaPropertiesNotInApk(
+  rootFile: File,
+  variant: String = "release",
+  signed: Boolean = true,
+) {
+  val signedStr = if (signed) "-unsigned" else ""
+  val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant$signedStr.apk")
+  val sentryProperties = extractZip(apk, "assets/sentry-debug-meta.properties")
+
+  assertTrue("Properties file should NOT be in the APK but was found") {
+    sentryProperties.isBlank()
+  }
+}
+
 internal fun verifyProguardUuid(
   rootFile: File,
   variant: String = "release",
