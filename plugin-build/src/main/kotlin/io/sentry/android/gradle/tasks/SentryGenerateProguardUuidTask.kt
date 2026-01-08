@@ -36,9 +36,13 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
     val outputDir = output.get().asFile
     outputDir.mkdirs()
 
-    val proguardMappingFileHash =
-      proguardMappingFiles.files.joinToString { if (it.isFile) it.contentHash() else STATIC_HASH }
-    val uuid = UUID.nameUUIDFromBytes(proguardMappingFileHash.toByteArray())
+    // SentryUploadProguardMappingsTask also picks up the first existing mapping file, so there's
+    // no point for this task to go through all of them.
+    // TODO: we'd have to change our SDK in order to support multiple proguard uuids at a time.
+    val mappingFile = proguardMappingFiles.files.firstOrNull { it.exists() }
+    val uuid = mappingFile?.let {
+      UUID.nameUUIDFromBytes(it.contentHash().toByteArray())
+    } ?: UUID.randomUUID()
     outputFile.get().asFile.writer().use { writer ->
       writer.appendLine("$SENTRY_PROGUARD_MAPPING_UUID_PROPERTY=$uuid")
     }
@@ -47,7 +51,6 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
   }
 
   companion object {
-    internal const val STATIC_HASH = "<hash>"
     internal const val SENTRY_UUID_OUTPUT = "sentry-proguard-uuid.properties"
     const val SENTRY_PROGUARD_MAPPING_UUID_PROPERTY = "io.sentry.ProguardUuids"
 

@@ -359,12 +359,13 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
   val isMinifyEnabled = isMinificationEnabled(project, variant, dexguardEnabled)
 
   if (isMinifyEnabled && extension.includeProguardMapping.get()) {
+    val mappings = getMappingFileProvider(project, variant, dexguardEnabled)
     val generateUuidTask =
       SentryGenerateProguardUuidTask.register(
         project = project,
         extension,
         sentryTelemetryProvider,
-        proguardMappingFile = getMappingFileProvider(project, variant, dexguardEnabled),
+        proguardMappingFile = mappings,
         taskSuffix = name.capitalized,
         output = paths.proguardUuidDir,
       )
@@ -378,7 +379,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
         cliExecutable = cliExecutable,
         generateUuidTask = generateUuidTask,
         sentryProperties = sentryProps,
-        mappingFiles = getMappingFileProvider(project, variant, dexguardEnabled),
+        mappingFiles = mappings,
         autoUploadProguardMapping = extension.autoUploadProguardMapping,
         sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,
         sentryProject = sentryProject?.let { project.provider { it } } ?: extension.projectName,
