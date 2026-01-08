@@ -6,6 +6,7 @@
 
 - Fix reproducible builds by writing `sentry-debug-meta.properties` without timestamps ([#876](https://github.com/getsentry/sentry-android-gradle-plugin/pull/876))
 - Skip generating `sentry-debug-meta.properties` when `includeProguardMapping` and `includeSourceContext` are disabled ([#1047](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1047))
+- Fix task ordering for Proguard/R8 UUID generation with configuration cache ([#1050](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1050))
 
 ## 6.0.0-rc.1
 
