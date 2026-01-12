@@ -16,7 +16,7 @@ jobs:
     env:
       SENTRY_URL: http://127.0.0.1:8000
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6 # v6 # v2
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: actions/setup-python@v6
         with:
           python-version: '3.10.5'
