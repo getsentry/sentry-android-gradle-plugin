@@ -9,9 +9,9 @@
 
 ### Dependencies
 
-- Bump CLI from v3.0.1 to v3.0.3 ([#1049](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1049))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#303)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/3.0.1...3.0.3)
+- Bump CLI from v3.0.1 to v3.1.0 ([#1049](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1049), [#1052](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1052))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#310)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.0.1...3.1.0)
 
 ## 6.0.0-rc.1
 
