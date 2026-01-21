@@ -74,7 +74,7 @@ abstract class BaseSentryPluginTest(
                 // withPluginClasspath on the Gradle Runner.
                 $additionalBuildClasspath
                 classpath files($pluginClasspath)
-                if ("$androidGradlePluginVersion".substringBefore(".").toInt() < 8) {
+                if ("$androidGradlePluginVersion".split('\\.')[0].toInteger() < 8) {
                   // AGP 7.x has troubles with compileSdk 34 due to some R8 shenanigans, so we have to use a newer
                   // version of R* here
                   classpath 'com.android.tools:r8:8.11.18'
