@@ -32,13 +32,13 @@ import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
+import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.GroovyCompat
 import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.collectModules
 import io.sentry.android.gradle.util.hookWithAssembleTasks
-import io.sentry.android.gradle.util.hookWithMinifyTasks
 import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
@@ -353,7 +353,12 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
   sentryOrg: String?,
   sentryProject: String?,
 ): TaskProvider<SentryGenerateProguardUuidTask>? {
-  val variant = AndroidVariant74(this)
+  val variant =
+    if (AgpVersions.isAGP83(AgpVersions.CURRENT)) {
+      AndroidVariant83(this)
+    } else {
+      AndroidVariant74(this)
+    }
   val sentryProps = getPropertiesFilePath(project, variant)
   val dexguardEnabled = extension.dexguardEnabled.get()
   val isMinifyEnabled = isMinificationEnabled(project, variant, dexguardEnabled)
@@ -388,8 +393,9 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
         taskSuffix = name.capitalized,
       )
 
-    generateUuidTask.hookWithMinifyTasks(
+    variant.wireMappingFileToUuidTask(
       project,
+      generateUuidTask,
       name,
       dexguardEnabled && GroovyCompat.isDexguardEnabledForVariant(project, name),
     )

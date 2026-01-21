@@ -11,11 +11,9 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.work.DisableCachingByDefault
@@ -32,19 +30,26 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
   override val outputFile: Provider<RegularFile>
     get() = output.file(SENTRY_UUID_OUTPUT)
 
-  @get:InputFiles
-  @get:PathSensitive(PathSensitivity.RELATIVE)
-  abstract val proguardMappingFiles: ConfigurableFileCollection
+  // Used by AGP < 8.3 with conventional file paths
+  @get:Internal abstract val fallbackMappingFiles: ConfigurableFileCollection
+
+  // Used by AGP 8.3+ with toListenTo API - this property is wired to the mapping artifact
+  @get:Internal abstract val mappingFile: RegularFileProperty
 
   @TaskAction
   fun generateProperties() {
     val outputDir = output.get().asFile
     outputDir.mkdirs()
 
-    // SentryUploadProguardMappingsTask also picks up the first existing mapping file, so there's
-    // no point for this task to go through all of them.
-    // TODO: we'd have to change our SDK in order to support multiple proguard uuids at a time.
-    val mappingFile = proguardMappingFiles.files.firstOrNull { it.exists() }
+    // Prefer mappingFile (set via toListenTo on AGP 8.3+) over fallbackMappingFiles
+    val mappingFile =
+      if (mappingFile.isPresent) {
+        mappingFile.get().asFile.takeIf { it.exists() }
+      } else {
+        // Fallback for AGP < 8.3: use conventional file paths
+        fallbackMappingFiles.files.firstOrNull { it.exists() }
+      }
+
     val uuid =
       mappingFile?.let { UUID.nameUUIDFromBytes(it.contentHash().toByteArray()) }
         ?: UUID.randomUUID()
@@ -75,7 +80,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
           output?.let { task.output.set(it) }
           task.withSentryTelemetry(extension, sentryTelemetryProvider)
           if (proguardMappingFile != null) {
-            task.proguardMappingFiles.from(proguardMappingFile)
+            task.fallbackMappingFiles.from(proguardMappingFile)
           }
           task.outputs.upToDateWhen { false }
         }
