@@ -491,6 +491,11 @@ abstract class SentryCliVersionValueSource : ValueSource<String, VersionParams> 
 
       val args = mutableListOf(parameters.cliExecutable.get())
 
+      parameters.url.orNull?.let { url ->
+        args.add("--url")
+        args.add(url)
+      }
+
       args.add("--log-level=error")
       args.add("--version")
 

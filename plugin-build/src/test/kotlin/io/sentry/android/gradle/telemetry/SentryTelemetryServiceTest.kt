@@ -2,6 +2,7 @@ package io.sentry.android.gradle.telemetry
 
 import io.sentry.android.gradle.SentryCliProvider
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
@@ -30,5 +31,48 @@ class SentryTelemetryServiceTest {
         .get()
 
     assertEquals("", infoOutput)
+  }
+
+  @Suppress("UnstableApiUsage")
+  @Test
+  fun `SentryCliVersionValueSource returns version without custom URL`() {
+    val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
+
+    val cliPath =
+      SentryCliProvider.getCliResourcesExtractionPath(project.layout.buildDirectory.asFile.get())
+
+    val versionOutput =
+      project.providers
+        .of(SentryCliVersionValueSource::class.java) { cliVS ->
+          cliVS.parameters.buildDirectory.set(project.buildDir)
+          cliVS.parameters.cliExecutable.set(cliPath.absolutePath)
+          // No URL set - should use default Sentry SAAS
+        }
+        .get()
+
+    // Version output should contain sentry-cli version
+    assertTrue(versionOutput.isNotEmpty(), "Version output should not be empty")
+  }
+
+  @Suppress("UnstableApiUsage")
+  @Test
+  fun `SentryCliVersionValueSource works with custom URL`() {
+    val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
+
+    val cliPath =
+      SentryCliProvider.getCliResourcesExtractionPath(project.layout.buildDirectory.asFile.get())
+
+    val versionOutput =
+      project.providers
+        .of(SentryCliVersionValueSource::class.java) { cliVS ->
+          cliVS.parameters.buildDirectory.set(project.buildDir)
+          cliVS.parameters.cliExecutable.set(cliPath.absolutePath)
+          // Set a custom URL for self-hosted Sentry
+          cliVS.parameters.url.set("https://sentry.example.com")
+        }
+        .get()
+
+    // Version output should contain sentry-cli version
+    assertTrue(versionOutput.isNotEmpty(), "Version output should not be empty")
   }
 }
