@@ -37,7 +37,7 @@ proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.5
 # More info: https://docs.nokee.dev/manual/gradle-plugin-development-plugin.html
 # The latest version is 8.11.1 https://github.com/gradle-plugins/gradle-api/issues/6
 # 8.8 or higher fails groovy compilation
-gradleApi = { group = "dev.gradleplugins", name = "gradle-api", version = "8.7" }
+gradleApi = { group = "org.gradle.experimental", name = "gradle-public-api", version = "8.9" }
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable" }
 autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.0.1" }

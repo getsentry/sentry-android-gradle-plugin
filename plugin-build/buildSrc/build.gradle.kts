@@ -3,7 +3,17 @@ plugins {
   id("java-gradle-plugin")
 }
 
-repositories { mavenCentral() }
+repositories {
+  mavenCentral()
+  exclusiveContent {
+    forRepository {
+      maven(url = "https://repo.gradle.org/gradle/libs-releases")
+    }
+    filter {
+      includeGroup("org.gradle.experimental")
+    }
+  }
+}
 
 sourceSets { main { java.srcDir("../../buildSrc/src/main/java") } }
 
