@@ -298,6 +298,13 @@ class GenerateDistributionPropertiesTaskTest {
         project: Project,
         additionalSources: Provider<out Collection<Directory>>,
       ): Provider<out Collection<Directory>> = project.provider { emptyList<Directory>() }
+
+      override fun wireMappingFileToUuidTask(
+        project: Project,
+        task: TaskProvider<out SentryGenerateProguardUuidTask>,
+        variantName: String,
+        dexguardEnabled: Boolean,
+      ) = Unit
     }
   }
 }
