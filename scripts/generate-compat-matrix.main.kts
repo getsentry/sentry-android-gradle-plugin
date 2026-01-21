@@ -288,7 +288,7 @@ class GenerateMatrix : CliktCommand() {
   ): Pair<Map<Version, Version>, Version> {
     val gradleVersions = mutableMapOf<Version, Version>()
     val html =
-      URL("https://developer.android.com/build/releases/gradle-plugin#updating-gradle").readText()
+      URL("https://developer.android.com/build/releases/about-agp").readText()
     val doc = Jsoup.parse(html)
     val tables = doc.select("table") ?: error("No table found")
     val table = if (legacy) tables[1] else tables[0]
