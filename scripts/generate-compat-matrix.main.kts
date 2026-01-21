@@ -95,7 +95,6 @@ class GenerateMatrix : CliktCommand() {
         add(
           buildMap {
             put("agp", entry.key.toString())
-            // Gradle does not use .patch if it's 0 ¯\_(ツ)_/¯
             val gradle = entry.value
 
             // Check if the Gradle version meets Kotlin's minimum requirement
@@ -115,10 +114,11 @@ class GenerateMatrix : CliktCommand() {
                 gradle
               }
 
+            // Gradle does not use .patch if it's 0 ¯\_(ツ)_/¯, but only in Gradle < 9 :D
             val (finalMajor, finalMinor, finalPatch) = finalGradle
             put(
               "gradle",
-              if (finalPatch == 0) "${finalMajor}.${finalMinor}" else finalGradle.toString(),
+              if (finalMajor < 9 && finalPatch == 0) "${finalMajor}.${finalMinor}" else finalGradle.toString(),
             )
             // TODO: if needed we can test against different Java versions
             put("java", "17")
