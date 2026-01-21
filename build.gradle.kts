@@ -1,7 +1,6 @@
-import org.gradle.util.internal.VersionNumber
-
 buildscript {
-  if (VersionNumber.parse(BuildPluginsVersion.AGP).major < 8) {
+  dependencies { classpath("org.apache.commons:commons-compress:1.26.0") }
+  if (BuildPluginsVersion.AGP.substringBefore(".").toInt() < 8) {
     // AGP 7.x has troubles with compileSdk 34 due to some R8 shenanigans, so we have to use a newer
     // version of R* here
     dependencies { classpath("com.android.tools:r8:8.11.18") }

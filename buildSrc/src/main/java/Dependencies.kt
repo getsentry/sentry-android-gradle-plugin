@@ -1,5 +1,3 @@
-import org.gradle.util.internal.VersionNumber
-
 object BuildPluginsVersion {
     val AGP = System.getenv("VERSION_AGP") ?: "8.10.1"
     val GROOVY_REDISTRIBUTED = System.getenv("VERSION_GROOVY") ?: "1.7.1"
