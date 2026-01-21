@@ -118,7 +118,8 @@ class GenerateMatrix : CliktCommand() {
             val (finalMajor, finalMinor, finalPatch) = finalGradle
             put(
               "gradle",
-              if (finalMajor < 9 && finalPatch == 0) "${finalMajor}.${finalMinor}" else finalGradle.toString(),
+              if (finalMajor < 9 && finalPatch == 0) "${finalMajor}.${finalMinor}"
+              else finalGradle.toString(),
             )
             // TODO: if needed we can test against different Java versions
             put("java", "17")
@@ -287,8 +288,7 @@ class GenerateMatrix : CliktCommand() {
     legacy: Boolean = false,
   ): Pair<Map<Version, Version>, Version> {
     val gradleVersions = mutableMapOf<Version, Version>()
-    val html =
-      URL("https://developer.android.com/build/releases/about-agp").readText()
+    val html = URL("https://developer.android.com/build/releases/about-agp").readText()
     val doc = Jsoup.parse(html)
     val tables = doc.select("table") ?: error("No table found")
     val table = if (legacy) tables[1] else tables[0]

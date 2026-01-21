@@ -70,7 +70,7 @@ jobs:
           gradle-version: ${{ matrix.gradle }}
 
       - name: Build the Release variants and integrationTest
-        run: gradle assembleRelease bundleRelease integrationTest
+        run: gradle assembleRelease bundleRelease integrationTest --stacktrace
 
       - name: Check sentry-debug-meta.properties inside APKs
         run: |
