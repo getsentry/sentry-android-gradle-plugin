@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.1.0"
+kotlin = "1.8.20"
 agp = "8.10.1"
 
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
@@ -34,9 +34,6 @@ junit = { group = "junit", name = "junit", version = "4.13.2" }
 proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.5.0" }
 # this allows us to develop against a fixed version of Gradle, as opposed to depending on the
 # locally available version. kotlin-gradle-plugin follows the same approach.
-# More info: https://docs.nokee.dev/manual/gradle-plugin-development-plugin.html
-# The latest version is 8.11.1 https://github.com/gradle-plugins/gradle-api/issues/6
-# 8.8 or higher fails groovy compilation
 gradleApi = { group = "org.gradle.experimental", name = "gradle-public-api", version = "8.9" }
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable" }

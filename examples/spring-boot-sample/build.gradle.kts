@@ -5,8 +5,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   alias(libs.plugins.springBoot)
   alias(libs.plugins.springDependencyManagement)
-  alias(libs.plugins.kotlin)
-  alias(libs.plugins.kotlinSpring)
+  alias(libs.plugins.kotlin) version BuildPluginsVersion.KOTLIN
+  alias(libs.plugins.kotlinSpring) version BuildPluginsVersion.KOTLIN
   id("io.sentry.jvm.gradle")
 }
 

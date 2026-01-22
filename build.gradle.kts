@@ -8,9 +8,9 @@ buildscript {
 }
 
 plugins {
-  alias(libs.plugins.kotlin) apply false
-  alias(libs.plugins.kotlinAndroid) apply false
-  alias(libs.plugins.kapt) apply false
+  alias(libs.plugins.kotlin) version BuildPluginsVersion.KOTLIN apply false
+  alias(libs.plugins.kotlinAndroid) version BuildPluginsVersion.KOTLIN apply false
+  alias(libs.plugins.kapt) version BuildPluginsVersion.KOTLIN apply false
   alias(libs.plugins.ksp) apply false
   alias(libs.plugins.composeCompiler) apply false
   alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP apply false

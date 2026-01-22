@@ -52,6 +52,7 @@ jobs:
     env:
       VERSION_AGP: ${{ matrix.agp }}
       VERSION_GROOVY: ${{ matrix.groovy }}
+      VERSION_KOTLIN: ${{ matrix.kotlin }}
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
     steps:
@@ -70,7 +71,7 @@ jobs:
           gradle-version: ${{ matrix.gradle }}
 
       - name: Build the Release variants and integrationTest
-        run: gradle assembleRelease bundleRelease integrationTest --stacktrace
+        run: gradle assembleRelease bundleRelease integrationTest
 
       - name: Check sentry-debug-meta.properties inside APKs
         run: |

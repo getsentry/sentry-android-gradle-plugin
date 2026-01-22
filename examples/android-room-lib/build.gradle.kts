@@ -1,6 +1,6 @@
 plugins {
   alias(libs.plugins.androidLibrary) version BuildPluginsVersion.AGP
-  alias(libs.plugins.kotlinAndroid)
+  alias(libs.plugins.kotlinAndroid) version BuildPluginsVersion.KOTLIN
 }
 
 android {

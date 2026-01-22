@@ -5,12 +5,12 @@ import java.util.Properties
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_9
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_8
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   groovy
-  alias(libs.plugins.kotlin)
+  alias(libs.plugins.kotlin) version BuildPluginsVersion.KOTLIN
   id("distribution")
   alias(libs.plugins.dokka)
   id("java-gradle-plugin")
@@ -91,8 +91,8 @@ tasks.withType<KotlinCompile>().configureEach {
 
   compilerOptions {
     jvmTarget.set(JVM_11)
-    languageVersion.set(KOTLIN_1_9)
-    apiVersion.set(KOTLIN_1_9)
+    languageVersion.set(KOTLIN_1_8)
+    apiVersion.set(KOTLIN_1_8)
   }
 }
 
