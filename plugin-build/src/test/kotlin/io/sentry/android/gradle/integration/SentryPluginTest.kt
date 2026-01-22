@@ -981,6 +981,17 @@ class SentryPluginTest :
                         includeAndroidResources = true
                     }
                 }
+                buildTypes {
+                    release {
+                        minifyEnabled true
+                    }
+                }
+            }
+
+            androidComponents {
+                beforeVariants(selector().withBuildType("release")) { variantBuilder ->
+                    variantBuilder.enableUnitTest = true
+                }
             }
 
             sentry {
