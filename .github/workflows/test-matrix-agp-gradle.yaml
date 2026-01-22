@@ -48,7 +48,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
 
-    name: Test Matrix - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }} - Java ${{ matrix.java }} - Groovy ${{ matrix.groovy }}
+    name: Test Matrix - AGP ${{ matrix.agp }} - Gradle ${{ matrix.gradle }} - Java ${{ matrix.java }} - Kotlin ${{ matrix.kotlin }}
     env:
       VERSION_AGP: ${{ matrix.agp }}
       VERSION_GROOVY: ${{ matrix.groovy }}
