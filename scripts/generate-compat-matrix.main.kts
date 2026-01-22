@@ -89,7 +89,10 @@ class GenerateMatrix : CliktCommand() {
     val gradleToGroovy =
       mapOf("7.5".toVersion(strict = false) to "1.2", "8.11".toVersion(strict = false) to "1.7.1")
     val gradleToKotlin =
-      mapOf("7.5".toVersion(strict = false) to "1.8.20", "9.0.0".toVersion(strict = false) to "2.1.0")
+      mapOf(
+        "7.5".toVersion(strict = false) to "1.8.20",
+        "9.0.0".toVersion(strict = false) to "2.1.0",
+      )
     // TODO: make it dynamic too
     val kotlinVersion = "2.1.0".toVersion()
     val baseIncludes = buildList {
