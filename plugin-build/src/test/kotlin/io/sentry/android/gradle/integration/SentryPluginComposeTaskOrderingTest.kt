@@ -89,6 +89,7 @@ class SentryPluginComposeTaskOrderingTest :
         .appendArguments("app:assembleRelease")
         .appendArguments("--configuration-cache")
         .appendArguments("-Pandroid.builtInKotlin=false")
+        .appendArguments("-Pandroid.newDsl=false")
         .build()
 
     assertTrue("BUILD SUCCESSFUL" in result.output, "Build should succeed")
