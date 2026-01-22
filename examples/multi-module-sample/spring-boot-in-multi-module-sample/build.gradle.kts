@@ -1,11 +1,12 @@
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   alias(libs.plugins.springBoot)
   alias(libs.plugins.springDependencyManagement)
-  alias(libs.plugins.kotlin)
-  alias(libs.plugins.kotlinSpring)
+  alias(libs.plugins.kotlin) version BuildPluginsVersion.KOTLIN
+  alias(libs.plugins.kotlinSpring) version BuildPluginsVersion.KOTLIN
   id("io.sentry.jvm.gradle")
 }
 
@@ -13,9 +14,9 @@ group = "io.sentry.samples.spring-boot"
 
 version = "0.0.1-SNAPSHOT"
 
-java.sourceCompatibility = JavaVersion.VERSION_1_8
+java.sourceCompatibility = JavaVersion.VERSION_17
 
-java.targetCompatibility = JavaVersion.VERSION_1_8
+java.targetCompatibility = JavaVersion.VERSION_17
 
 dependencies {
   implementation(libs.sample.springBoot.starterSecurity)
@@ -26,6 +27,7 @@ dependencies {
   implementation(libs.sample.springBoot.starter)
   implementation(libs.sample.springBoot.kotlinReflect)
   implementation(libs.sample.springBoot.starterJdbc)
+  implementation(libs.sentrySpringBootJakarta)
   implementation(kotlin(Samples.SpringBoot.kotlinStdLib, KotlinCompilerVersion.VERSION))
 
   runtimeOnly(libs.sample.springBoot.hsqldb)
@@ -37,9 +39,9 @@ dependencies {
 tasks.withType<Test>().configureEach { useJUnitPlatform() }
 
 tasks.withType<KotlinCompile>().configureEach {
-  kotlinOptions {
+  compilerOptions {
     freeCompilerArgs = listOf("-Xjsr305=strict")
-    jvmTarget = JavaVersion.VERSION_1_8.toString()
+    jvmTarget.set(JVM_17)
   }
 }
 

@@ -5,12 +5,12 @@ import com.google.common.truth.Subject
 import com.google.common.truth.Truth.assertAbout
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.internal.impldep.org.junit.Assert.assertThrows
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
@@ -184,8 +184,7 @@ class SentryUploadAppArtifactTaskTest {
         it.bundle.set(nonExistentBundle)
       }
 
-    val exception =
-      assertThrows(IllegalStateException::class.java) { task.get().computeCommandLineArgs() }
+    val exception = assertFailsWith<IllegalStateException> { task.get().computeCommandLineArgs() }
 
     assertThat(exception.message).startsWith("Bundle file does not exist:")
   }
@@ -200,8 +199,7 @@ class SentryUploadAppArtifactTaskTest {
         it.apk.set(nonExistentApkDir)
       }
 
-    val exception =
-      assertThrows(IllegalStateException::class.java) { task.get().computeCommandLineArgs() }
+    val exception = assertFailsWith<IllegalStateException> { task.get().computeCommandLineArgs() }
 
     assertThat(exception.message).startsWith("APK directory does not exist:")
   }
@@ -218,8 +216,7 @@ class SentryUploadAppArtifactTaskTest {
         it.apk.set(emptyApkDir)
       }
 
-    val exception =
-      assertThrows(IllegalStateException::class.java) { task.get().computeCommandLineArgs() }
+    val exception = assertFailsWith<IllegalStateException> { task.get().computeCommandLineArgs() }
 
     assertThat(exception.message).startsWith("No APK file exists in directory:")
   }
@@ -232,8 +229,7 @@ class SentryUploadAppArtifactTaskTest {
         it.cliExecutable.set("sentry-cli")
       }
 
-    val exception =
-      assertThrows(IllegalStateException::class.java) { task.get().computeCommandLineArgs() }
+    val exception = assertFailsWith<IllegalStateException> { task.get().computeCommandLineArgs() }
 
     assertThat(exception.message).isEqualTo("No bundle or apk found")
   }

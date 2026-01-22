@@ -63,7 +63,7 @@ abstract class BaseSentryNonAndroidPluginTest(private val gradleVersion: String)
                 mavenCentral()
               }
               dependencies {
-                classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0'
+                classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0'
                 // This is needed to populate the plugin classpath instead of using
                 // withPluginClasspath on the Gradle Runner.
                 $additionalBuildClasspath
