@@ -10,7 +10,7 @@ sentry = "7.0.0"
 sampleCoroutines = "1.5.2"
 sampleRoom = "2.7.2"
 sampleRetrofit = "2.9.0"
-sampleSpringBoot = "2.7.4"
+sampleSpringBoot = "3.4.1"
 
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -25,8 +25,8 @@ mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 buildConfig = { id = "com.github.gmazzo.buildconfig", version = "4.2.0" }
-springBoot = { id = "org.springframework.boot", version = "2.7.4" }
-springDependencyManagement = { id = "io.spring.dependency-management", version = "1.0.11.RELEASE" }
+springBoot = { id = "org.springframework.boot", version = "3.4.1" }
+springDependencyManagement = { id = "io.spring.dependency-management", version = "1.1.7" }
 composeCompiler =  { id = "org.jetbrains.kotlin.plugin.compose", version = "2.1.0" }
 
 [libraries]
@@ -34,10 +34,7 @@ junit = { group = "junit", name = "junit", version = "4.13.2" }
 proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.5.0" }
 # this allows us to develop against a fixed version of Gradle, as opposed to depending on the
 # locally available version. kotlin-gradle-plugin follows the same approach.
-# More info: https://docs.nokee.dev/manual/gradle-plugin-development-plugin.html
-# The latest version is 8.11.1 https://github.com/gradle-plugins/gradle-api/issues/6
-# 8.8 or higher fails groovy compilation
-gradleApi = { group = "dev.gradleplugins", name = "gradle-api", version = "8.7" }
+gradleApi = { group = "org.gradle.experimental", name = "gradle-public-api", version = "8.9" }
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable" }
 autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.0.1" }
@@ -56,6 +53,7 @@ sentry = { group = "io.sentry", name = "sentry", version.ref = "sentry" }
 sentryAndroid = { group = "io.sentry", name = "sentry-android", version.ref = "sentry" }
 sentryAndroidOkhttp = { group = "io.sentry", name = "sentry-android-okhttp", version.ref = "sentry" }
 sentryOkhttp = { group = "io.sentry", name = "sentry-okhttp", version.ref = "sentry" }
+sentrySpringBootJakarta = { group = "io.sentry", name = "sentry-spring-boot-starter-jakarta", version.ref = "sentry" }
 
 # test
 mockitoKotlin = { group = "com.nhaarman.mockitokotlin2", name = "mockito-kotlin", version = "2.2.0" }

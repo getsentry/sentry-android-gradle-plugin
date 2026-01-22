@@ -4,11 +4,13 @@ import java.io.FileInputStream
 import java.util.Properties
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_8
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  alias(libs.plugins.groovyGradlePlugin) version BuildPluginsVersion.GROOVY_REDISTRIBUTED
-  alias(libs.plugins.kotlin)
+  groovy
+  alias(libs.plugins.kotlin) version BuildPluginsVersion.KOTLIN
   id("distribution")
   alias(libs.plugins.dokka)
   id("java-gradle-plugin")
@@ -87,10 +89,10 @@ tasks.withType<KotlinCompile>().configureEach {
     libraries.from.addAll(files(sourceSets["main"].groovy.classesDirectory))
   }
 
-  kotlinOptions {
-    jvmTarget = JavaVersion.VERSION_11.toString()
-    languageVersion = "1.8"
-    apiVersion = "1.8"
+  compilerOptions {
+    jvmTarget.set(JVM_11)
+    languageVersion.set(KOTLIN_1_8)
+    apiVersion.set(KOTLIN_1_8)
   }
 }
 
@@ -114,6 +116,9 @@ tasks.withType<Test>().named("test").configure {
 tasks.register<Test>("integrationTest").configure {
   group = "verification"
   description = "Runs the integration tests"
+  testClassesDirs = sourceSets["test"].output.classesDirs
+  classpath = sourceSets["test"].runtimeClasspath
+
   // for some reason Gradle > 8.10 doesn't pick up the pluginUnderTestMetadata classpath, so we
   // need to add it manually
   classpath += layout.files(project.layout.buildDirectory.dir("pluginUnderTestMetadata"))

@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  alias(libs.plugins.kotlin)
+  alias(libs.plugins.kotlin) version BuildPluginsVersion.KOTLIN
   id("io.sentry.jvm.gradle")
 }
 
