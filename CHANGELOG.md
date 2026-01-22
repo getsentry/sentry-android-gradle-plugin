@@ -2,13 +2,11 @@
 
 ## Unreleased
 
-## 6.0.0
-
 **Breaking Changes**:
 
 This version introduces sentry-cli 3.0.0. Sentry-cli 3.0.0 and above only officially supports Sentry SaaS and Sentry self-hosted versions 25.11.1 and higher. While many Sentry CLI features may, in practice, continue working with some older Sentry versions, continued support for Sentry versions older than 25.11.1 is not guaranteed. You can use an older version of this plugin if you need support for older Sentry self-hosted versions.
 
-- Drop support for Android Gradle Plugin 7.3.X and below. To continue to use 7.3.X and below use Sentry Android Gradle Plugin 5.7.0. ([#911](https://github.com/getsentry/sentry-android-gradle-plugin/pull/911))
+- Drop support for Android Gradle Plugin 7.3.X and below. To continue to use 7.3.X and below use Sentry Android Gradle Plugin 5.12.x. ([#911](https://github.com/getsentry/sentry-android-gradle-plugin/pull/911))
 - Minimum supported Kotlin language version is now 1.8 ([#935](https://github.com/getsentry/sentry-android-gradle-plugin/pull/935))
 
 ### Features
@@ -38,9 +36,6 @@ This version introduces sentry-cli 3.0.0. Sentry-cli 3.0.0 and above only offici
 - Fix reproducible builds by writing `sentry-debug-meta.properties` without timestamps ([#876](https://github.com/getsentry/sentry-android-gradle-plugin/pull/876))
 - Skip generating `sentry-debug-meta.properties` when `includeProguardMapping` and `includeSourceContext` are disabled ([#1047](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1047))
 - Include root project check in preMerge task ([#1006](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1006))
-
-### Various fixes & improvements
-
 - Set SENTRY_PIPELINE environment variable for all sentry-cli invocations ([#1036](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1036))
 - Stop passing deprecated parameters to sentry-cli ([#1015](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1015))
 - Rename orgAuthToken to distributionAuthToken ([#1025](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1025))
@@ -183,7 +178,7 @@ This version introduces sentry-cli 3.0.0. Sentry-cli 3.0.0 and above only offici
 
 ### Breaking Changes
 
-- Drop support for Android Gradle Plugin 7.3.X and below. To continue to use 7.3.X and below use Sentry Android Gradle Plugin 5.7.0. ([#911](https://github.com/getsentry/sentry-android-gradle-plugin/pull/911))
+- Drop support for Android Gradle Plugin 7.3.X and below. To continue to use 7.3.X and below use Sentry Android Gradle Plugin 5.12.x. ([#911](https://github.com/getsentry/sentry-android-gradle-plugin/pull/911))
 - Minimum supported Kotlin language version is now 1.8 ([#935](https://github.com/getsentry/sentry-android-gradle-plugin/pull/935))
 
 ### Internal
