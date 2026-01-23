@@ -44,7 +44,6 @@ data class AndroidVariant83(
         .toListenTo(SingleArtifact.OBFUSCATION_MAPPING_FILE)
     } else {
       // when dexguard is enabled we still want to go the old way, because AGP API does not apply
-      // there
       delegate.wireMappingFileToUuidTask(project, task, variantName, true)
     }
   }
