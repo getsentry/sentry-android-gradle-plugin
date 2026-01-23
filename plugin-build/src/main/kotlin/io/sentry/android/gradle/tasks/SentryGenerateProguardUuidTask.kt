@@ -11,6 +11,7 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
@@ -29,16 +30,29 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
   override val outputFile: Provider<RegularFile>
     get() = output.file(SENTRY_UUID_OUTPUT)
 
-  @get:Internal abstract val proguardMappingFiles: ConfigurableFileCollection
+  // Used by AGP < 8.3 with conventional file paths
+  @get:Internal abstract val fallbackMappingFiles: ConfigurableFileCollection
+
+  // Used by AGP 8.3+ with toListenTo API - this property is wired to the mapping artifact
+  @get:Internal abstract val mappingFile: RegularFileProperty
 
   @TaskAction
   fun generateProperties() {
     val outputDir = output.get().asFile
     outputDir.mkdirs()
 
-    val proguardMappingFileHash =
-      proguardMappingFiles.files.joinToString { if (it.isFile) it.contentHash() else STATIC_HASH }
-    val uuid = UUID.nameUUIDFromBytes(proguardMappingFileHash.toByteArray())
+    // Prefer mappingFile (set via toListenTo on AGP 8.3+) over fallbackMappingFiles
+    val mappingFile =
+      if (mappingFile.isPresent) {
+        mappingFile.get().asFile.takeIf { it.exists() }
+      } else {
+        // Fallback for AGP < 8.3: use conventional file paths
+        fallbackMappingFiles.files.firstOrNull { it.exists() }
+      }
+
+    val uuid =
+      mappingFile?.let { UUID.nameUUIDFromBytes(it.contentHash().toByteArray()) }
+        ?: UUID.randomUUID()
     outputFile.get().asFile.writer().use { writer ->
       writer.appendLine("$SENTRY_PROGUARD_MAPPING_UUID_PROPERTY=$uuid")
     }
@@ -47,7 +61,6 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
   }
 
   companion object {
-    internal const val STATIC_HASH = "<hash>"
     internal const val SENTRY_UUID_OUTPUT = "sentry-proguard-uuid.properties"
     const val SENTRY_PROGUARD_MAPPING_UUID_PROPERTY = "io.sentry.ProguardUuids"
 
@@ -67,7 +80,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
           output?.let { task.output.set(it) }
           task.withSentryTelemetry(extension, sentryTelemetryProvider)
           if (proguardMappingFile != null) {
-            task.proguardMappingFiles.from(proguardMappingFile)
+            task.fallbackMappingFiles.from(proguardMappingFile)
           }
           task.outputs.upToDateWhen { false }
         }

@@ -1,5 +1,6 @@
 package io.sentry.gradle.common
 
+import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -38,4 +39,11 @@ data class JavaVariant(val project: Project, val javaExtension: JavaPluginExtens
       (javaDirs + additionalSources.get()).filterBuildConfig().toSet()
     }
   }
+
+  override fun wireMappingFileToUuidTask(
+    project: Project,
+    task: TaskProvider<out SentryGenerateProguardUuidTask>,
+    variantName: String,
+    dexguardEnabled: Boolean,
+  ) = Unit
 }

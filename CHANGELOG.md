@@ -28,6 +28,7 @@ This version introduces sentry-cli 3.0.0. Sentry-cli 3.0.0 and above only offici
 - Fix `Modifier.sentryTag()` not found warning ([#997](https://github.com/getsentry/sentry-android-gradle-plugin/pull/997))
 - Fix reproducible builds by writing `sentry-debug-meta.properties` without timestamps ([#876](https://github.com/getsentry/sentry-android-gradle-plugin/pull/876))
 - Skip generating `sentry-debug-meta.properties` when `includeProguardMapping` and `includeSourceContext` are disabled ([#1047](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1047))
+- Fix proguard mapping tasks compatibility with Kotlin/Compose 2.3.0 ([#1054](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1054))
 - Include root project check in preMerge task ([#1006](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1006))
 - Set SENTRY_PIPELINE environment variable for all sentry-cli invocations ([#1036](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1036))
 - Stop passing deprecated parameters to sentry-cli ([#1015](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1015))

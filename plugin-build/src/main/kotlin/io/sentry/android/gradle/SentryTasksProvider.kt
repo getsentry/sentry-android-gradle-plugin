@@ -42,6 +42,19 @@ internal object SentryTasksProvider {
   }
 
   /**
+   * Returns the Compose mapping merge task for the given project and variant. This task is
+   * responsible for merging Compose mapping data with the R8 mapping file. The final mapping file
+   * at build/outputs/mapping/<variant>/mapping.txt is written by this task, not by R8 directly.
+   *
+   * https://github.com/JetBrains/kotlin/blob/b73fc4e8afb382976646fac728e717fd0b1d1c9c/libraries/tools/kotlin-compose-compiler/src/common/kotlin/org/jetbrains/kotlin/compose/compiler/gradle/internal/ComposeAgpMappingFile.kt#L84-L87
+   *
+   * @return the task or null if the Kotlin Compose plugin is not applied or the task doesn't exist
+   */
+  @JvmStatic
+  fun getComposeMappingMergeTask(project: Project, variantName: String): TaskProvider<Task>? =
+    project.findTask(listOf("merge${variantName.capitalized}ComposeMapping"))
+
+  /**
    * Returns the pre bundle task for the given project and variant.
    *
    * @return the task or null otherwise

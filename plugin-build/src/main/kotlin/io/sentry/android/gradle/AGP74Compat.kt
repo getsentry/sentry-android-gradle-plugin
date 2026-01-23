@@ -11,6 +11,9 @@ import com.android.build.api.variant.CanMinifyCode
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.impl.ApplicationVariantImpl
 import com.android.build.api.variant.impl.VariantImpl
+import io.sentry.android.gradle.SentryTasksProvider.getComposeMappingMergeTask
+import io.sentry.android.gradle.SentryTasksProvider.getMinifyTask
+import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.gradle.common.SentryVariant
 import io.sentry.gradle.common.filterBuildConfig
 import org.gradle.api.Project
@@ -48,9 +51,7 @@ data class AndroidVariant74(private val variant: Variant) : SentryVariant {
   val artifacts = variant.artifacts
 
   override fun mappingFileProvider(project: Project): Provider<FileCollection> =
-    project.provider {
-      project.files(variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE))
-    }
+    variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE).map { project.files(it) }
 
   override fun sources(
     project: Project,
@@ -74,6 +75,30 @@ data class AndroidVariant74(private val variant: Variant) : SentryVariant {
         javaProvider.map { java ->
           (java + kotlinProvider.get() + additionalSources.get()).filterBuildConfig().toSet()
         }
+    }
+  }
+
+  override fun wireMappingFileToUuidTask(
+    project: Project,
+    task: TaskProvider<out SentryGenerateProguardUuidTask>,
+    variantName: String,
+    dexguardEnabled: Boolean,
+  ) {
+    // we need to wait for project evaluation to have all tasks available, otherwise the new
+    // AndroidComponentsExtension is configured too early to look up for the tasks
+    project.afterEvaluate {
+      val minifyTask = getMinifyTask(project, variantName, dexguardEnabled)
+
+      // we just hack ourselves into the Proguard/R8/DexGuard task's doLast.
+      minifyTask?.configure { it.finalizedBy(task) }
+
+      // When Kotlin Compose compiler is enabled, the final mapping file is written by
+      // mergeStagingReleaseComposeMapping task, not by R8 directly. We need to hook into that task
+      // as well to ensure the mapping file exists when our UUID task runs.
+      val composeMappingMergeTask = getComposeMappingMergeTask(project, variantName)
+      composeMappingMergeTask?.let { composeTask ->
+        task.configure { generateUuidTask -> generateUuidTask.mustRunAfter(composeTask) }
+      }
     }
   }
 

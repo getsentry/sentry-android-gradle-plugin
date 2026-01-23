@@ -56,13 +56,25 @@ internal fun verifyProguardUuid(
   val apk = rootFile.resolve("app/build/outputs/apk/$variant/app-$variant$signedStr.apk")
   val sentryProperties =
     if (inGeneratedFolder) {
-      val propsFile =
+      // For AGP 7.4.0+, the transform API puts the file in intermediates
+      val intermediatesFile =
+        rootFile.resolve(
+          "app/build/intermediates/assets" +
+            "/$variant/injectSentryDebugMetaPropertiesIntoAssets${variant.capitalized}" +
+            "/sentry-debug-meta.properties"
+        )
+      // For AGP < 7.4.0, check the old generated folder location
+      val generatedFile =
         rootFile.resolve(
           "app/build/generated/assets" +
             "/generateSentryDebugMetaProperties${variant.capitalized}" +
             "/sentry-debug-meta.properties"
         )
-      if (propsFile.exists()) propsFile.readText() else ""
+      when {
+        intermediatesFile.exists() -> intermediatesFile.readText()
+        generatedFile.exists() -> generatedFile.readText()
+        else -> ""
+      }
     } else {
       extractZip(apk, "assets/sentry-debug-meta.properties")
     }

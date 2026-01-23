@@ -1,5 +1,6 @@
 package io.sentry.gradle.common
 
+import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
@@ -33,6 +34,13 @@ interface SentryVariant {
     project: Project,
     additionalSources: Provider<out Collection<Directory>>,
   ): Provider<out Collection<Directory>>
+
+  fun wireMappingFileToUuidTask(
+    project: Project,
+    task: TaskProvider<out SentryGenerateProguardUuidTask>,
+    variantName: String,
+    dexguardEnabled: Boolean,
+  )
 }
 
 fun Collection<Directory>.filterBuildConfig(): Collection<Directory> = filterNot {
