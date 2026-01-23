@@ -97,7 +97,7 @@ data class AndroidVariant74(private val variant: Variant) : SentryVariant {
       // as well to ensure the mapping file exists when our UUID task runs.
       val composeMappingMergeTask = getComposeMappingMergeTask(project, variantName)
       composeMappingMergeTask?.let { composeTask ->
-        task.configure { it.mustRunAfter(composeTask) }
+        task.configure { generateUuidTask -> generateUuidTask.mustRunAfter(composeTask) }
       }
     }
   }
