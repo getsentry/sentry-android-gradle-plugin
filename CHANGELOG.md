@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-**Breaking Changes**:
+### Breaking Changes
 
 This version introduces sentry-cli 3.0.0. Sentry-cli 3.0.0 and above only officially supports Sentry SaaS and Sentry self-hosted versions 25.11.1 and higher. While many Sentry CLI features may, in practice, continue working with some older Sentry versions, continued support for Sentry versions older than 25.11.1 is not guaranteed. You can use an older version of this plugin if you need support for older Sentry self-hosted versions.
 
@@ -11,17 +11,10 @@ This version introduces sentry-cli 3.0.0. Sentry-cli 3.0.0 and above only offici
 
 ### Features
 
-- Add upload functionality for size analysis ([#915](https://github.com/getsentry/sentry-android-gradle-plugin/pull/915))
+- Add upload functionality for [Size Analysis](https://docs.sentry.io/platforms/android/size-analysis/) ([#915](https://github.com/getsentry/sentry-android-gradle-plugin/pull/915))
+- Add upload functionality for [Build Distribution](https://docs.sentry.io/platforms/android/build-distribution/) ([#986](https://github.com/getsentry/sentry-android-gradle-plugin/pull/986))
+- Auto-install for [Auto-Update Build Distribution](https://docs.sentry.io/platforms/android/build-distribution/auto-update/) SDK when enabled for variant ([#1001](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1001))
 - Add VCS info extension for build uploads with customizable version control metadata ([#969](https://github.com/getsentry/sentry-android-gradle-plugin/pull/969))
-- Add buildConfiguration to SizeAnalysisExtension ([#976](https://github.com/getsentry/sentry-android-gradle-plugin/pull/976))
-- Add Distribution API to Sentry Android Gradle Plugin ([#986](https://github.com/getsentry/sentry-android-gradle-plugin/pull/986))
-- Add GenerateDistributionPropertiesTask for distribution options ([#999](https://github.com/getsentry/sentry-android-gradle-plugin/pull/999), [#1000](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1000))
-- Auto-install distribution dependency when enabled for variant ([#1001](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1001))
-- Add dedicated distribution auth token property ([#1007](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1007))
-- Enable build uploads when distribution is enabled ([#1011](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1011))
-- Separate upload and SDK installation controls for distribution ([#1017](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1017))
-- Remove validation requiring distribution.enabled for updateSdkVariants ([#1019](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1019))
-- Mark sizeAnalysis APIs as experimental ([#985](https://github.com/getsentry/sentry-android-gradle-plugin/pull/985))
 - Include version in logs if auto install refuses to install a dependency ([#979](https://github.com/getsentry/sentry-android-gradle-plugin/pull/979))
 - Auto install Spring Boot 4 (`sentry-spring-boot-4`) and Spring 7 (`sentry-spring-7`) modules ([#980](https://github.com/getsentry/sentry-android-gradle-plugin/pull/980))
 
@@ -50,9 +43,9 @@ This version introduces sentry-cli 3.0.0. Sentry-cli 3.0.0 and above only offici
 ### Dependencies
 
 - Set build default Gradle Version to 8.14.2 ([#891](https://github.com/getsentry/sentry-android-gradle-plugin/pull/891))
-- Bump Android SDK from v8.14.0 to v8.30.0 ([#919](https://github.com/getsentry/sentry-android-gradle-plugin/pull/919), [#936](https://github.com/getsentry/sentry-android-gradle-plugin/pull/936), [#943](https://github.com/getsentry/sentry-android-gradle-plugin/pull/943), [#958](https://github.com/getsentry/sentry-android-gradle-plugin/pull/958), [#962](https://github.com/getsentry/sentry-android-gradle-plugin/pull/962), [#967](https://github.com/getsentry/sentry-android-gradle-plugin/pull/967), [#981](https://github.com/getsentry/sentry-android-gradle-plugin/pull/981), [#988](https://github.com/getsentry/sentry-android-gradle-plugin/pull/988), [#996](https://github.com/getsentry/sentry-android-gradle-plugin/pull/996), [#1009](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1009), [#1020](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1020), [#1027](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1027), [#1032](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1032), [#1034](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1034), [#1041](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1041), [#1053](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1053))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8300)
-  - [diff](https://github.com/getsentry/sentry-java/compare/8.14.0...8.30.0)
+- Bump Android SDK from v8.14.0 to v8.31.0 ([#919](https://github.com/getsentry/sentry-android-gradle-plugin/pull/919), [#936](https://github.com/getsentry/sentry-android-gradle-plugin/pull/936), [#943](https://github.com/getsentry/sentry-android-gradle-plugin/pull/943), [#958](https://github.com/getsentry/sentry-android-gradle-plugin/pull/958), [#962](https://github.com/getsentry/sentry-android-gradle-plugin/pull/962), [#967](https://github.com/getsentry/sentry-android-gradle-plugin/pull/967), [#981](https://github.com/getsentry/sentry-android-gradle-plugin/pull/981), [#988](https://github.com/getsentry/sentry-android-gradle-plugin/pull/988), [#996](https://github.com/getsentry/sentry-android-gradle-plugin/pull/996), [#1009](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1009), [#1020](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1020), [#1027](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1027), [#1032](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1032), [#1034](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1034), [#1041](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1041), [#1053](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1053), [#1058](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1058))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8310)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.14.0...8.31.0)
 - Bump CLI from v2.46.0 to v3.1.0 ([#948](https://github.com/getsentry/sentry-android-gradle-plugin/pull/948), [#957](https://github.com/getsentry/sentry-android-gradle-plugin/pull/957), [#964](https://github.com/getsentry/sentry-android-gradle-plugin/pull/964), [#970](https://github.com/getsentry/sentry-android-gradle-plugin/pull/970), [#987](https://github.com/getsentry/sentry-android-gradle-plugin/pull/987), [#990](https://github.com/getsentry/sentry-android-gradle-plugin/pull/990), [#993](https://github.com/getsentry/sentry-android-gradle-plugin/pull/993), [#1002](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1002), [#1014](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1014), [#1024](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1024), [#1028](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1028), [#1037](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1037), [#1038](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1038), [#1040](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1040), [#1043](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1043), [#1049](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1049), [#1052](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1052))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#310)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.46.0...3.1.0)
@@ -71,7 +64,7 @@ This version introduces sentry-cli 3.0.0. Sentry-cli 3.0.0 and above only offici
 
 ## 6.0.0-beta.3
 
-**Breaking changes**:
+### Breaking Changes
 
 This version introduces sentry-cli 3.0.0. Sentry-cli 3.0.0 and above only officially supports Sentry SaaS and Sentry self-hosted versions 25.11.1 and higher. While many Sentry CLI features may, in practice, continue working with some older Sentry versions, continued support for Sentry versions older than 25.11.1 is not guaranteed. You can use an older version of the this plugin if you need support for older Sentry self-hosted versions.
 
