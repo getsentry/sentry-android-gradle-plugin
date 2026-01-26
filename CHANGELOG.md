@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix `SentryCliVersionValueSource` to respect custom URL parameter ([#1057](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1057))
+
 ## 6.0.0
 
 ### Breaking Changes
