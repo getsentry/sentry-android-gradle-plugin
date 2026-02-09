@@ -13,6 +13,7 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -47,6 +48,8 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
 
   @get:Input abstract val buildConfiguration: Property<String>
 
+  @get:Input @get:Optional abstract val installGroups: SetProperty<String>
+
   @TaskAction
   fun generateProperties() {
     outputFile.get().asFile.writer().use { writer ->
@@ -56,6 +59,9 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
         writer.appendLine("$DISTRIBUTION_AUTH_TOKEN_PROPERTY=$it")
       }
       writer.appendLine("$BUILD_CONFIGURATION_PROPERTY=${buildConfiguration.get()}")
+      installGroups.orNull
+        ?.takeIf { it.isNotEmpty() }
+        ?.let { writer.appendLine("$INSTALL_GROUPS_PROPERTY=${it.joinToString(",")}") }
     }
   }
 
@@ -65,6 +71,7 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
     const val PROJECT_SLUG_PROPERTY = "io.sentry.distribution.project-slug"
     const val DISTRIBUTION_AUTH_TOKEN_PROPERTY = "io.sentry.distribution.auth-token"
     const val BUILD_CONFIGURATION_PROPERTY = "io.sentry.distribution.build-configuration"
+    const val INSTALL_GROUPS_PROPERTY = "io.sentry.distribution.install-groups-override"
 
     fun register(
       project: Project,
@@ -122,6 +129,8 @@ abstract class GenerateDistributionPropertiesTask : PropertiesFileOutputTask() {
         task.distributionAuthToken.set(extension.distribution.authToken)
 
         task.buildConfiguration.set(buildConfiguration)
+
+        task.installGroups.set(extension.distribution.installGroups)
       }
     }
   }

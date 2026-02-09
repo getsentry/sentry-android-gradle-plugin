@@ -12,6 +12,7 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
@@ -44,6 +45,7 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
   @get:Input @get:Optional abstract val vcsBaseRef: Property<String>
   @get:Input @get:Optional abstract val vcsPrNumber: Property<Int>
   @get:Input @get:Optional abstract val buildConfiguration: Property<String>
+  @get:Input @get:Optional abstract val installGroups: SetProperty<String>
 
   override fun getArguments(args: MutableList<String>) {
     args.add("build")
@@ -59,6 +61,11 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
     vcsBaseRef.orNull?.let { args.addAll(listOf("--base-ref", it)) }
     vcsPrNumber.orNull?.let { args.addAll(listOf("--pr-number", it.toString())) }
     buildConfiguration.orNull?.let { args.addAll(listOf("--build-configuration", it)) }
+
+    // Add install groups if provided
+    installGroups.orNull
+      ?.takeIf { it.isNotEmpty() }
+      ?.forEach { group -> args.addAll(listOf("--install-group", group)) }
 
     val bundleFile = bundle.orNull?.asFile
     if (bundleFile != null) {
@@ -102,6 +109,7 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
       sentryProject: Provider<String>,
       sentryAuthToken: Property<String>,
       sentryUrl: Property<String>,
+      installGroups: SetProperty<String>,
       taskSuffix: String = "",
       buildVariant: String = "",
     ): Pair<TaskProvider<SentryUploadAppArtifactTask>, TaskProvider<SentryUploadAppArtifactTask>> {
@@ -130,6 +138,7 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
           task.buildConfiguration.set(
             extension.sizeAnalysis.buildConfiguration.orElse(project.provider { buildVariant })
           )
+          task.installGroups.set(installGroups)
           sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
           task.asSentryCliExec()
           task.withSentryTelemetry(extension, sentryTelemetryProvider)
@@ -159,6 +168,7 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
           task.buildConfiguration.set(
             extension.sizeAnalysis.buildConfiguration.orElse(project.provider { buildVariant })
           )
+          task.installGroups.set(installGroups)
           sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
           task.asSentryCliExec()
           task.withSentryTelemetry(extension, sentryTelemetryProvider)

@@ -270,6 +270,41 @@ class SentryUploadAppArtifactTaskTest {
     assertThat(args).containsAtLeast("--build-configuration", "debugRelease").inOrder()
   }
 
+  @Test
+  fun `installGroups parameters are passed to CLI correctly`() {
+    val project = createProject()
+    val apkDir = project.apkDirProvider(dummyApkName)
+    val task: TaskProvider<SentryUploadAppArtifactTask> =
+      project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.cliExecutable.set("sentry-cli")
+        it.apk.set(apkDir)
+        it.installGroups.set(setOf("internal", "beta", "alpha"))
+      }
+
+    val args = task.get().computeCommandLineArgs()
+
+    assertThat(args).contains("--install-group")
+    assertThat(args).containsAtLeast("--install-group", "internal")
+    assertThat(args).containsAtLeast("--install-group", "beta")
+    assertThat(args).containsAtLeast("--install-group", "alpha")
+  }
+
+  @Test
+  fun `empty installGroups does not add CLI args`() {
+    val project = createProject()
+    val apkDir = project.apkDirProvider(dummyApkName)
+    val task: TaskProvider<SentryUploadAppArtifactTask> =
+      project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.cliExecutable.set("sentry-cli")
+        it.apk.set(apkDir)
+        it.installGroups.set(emptySet())
+      }
+
+    val args = task.get().computeCommandLineArgs()
+
+    assertThat(args).doesNotContain("--install-group")
+  }
+
   private fun createProject(): Project {
     with(ProjectBuilder.builder().build()) {
       plugins.apply("com.android.application")

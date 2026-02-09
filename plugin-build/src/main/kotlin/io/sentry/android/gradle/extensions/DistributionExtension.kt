@@ -37,4 +37,18 @@ constructor(objects: ObjectFactory, providerFactory: ProviderFactory) {
   /** Auth token used for distribution operations. */
   val authToken: Property<String> =
     objects.property(String::class.java).convention(System.getenv("SENTRY_DISTRIBUTION_AUTH_TOKEN"))
+
+  /**
+   * Set of install groups to assign to uploaded builds.
+   *
+   * Install groups control which builds can see updates for each other. Only builds with matching
+   * install groups will be offered updates between each other. This is useful for managing separate
+   * distribution channels (e.g., "internal", "beta", "production").
+   *
+   * Multiple groups can be specified. If empty, no install group filtering is applied.
+   *
+   * Defaults to empty set.
+   */
+  val installGroups: SetProperty<String> =
+    objects.setProperty(String::class.java).convention(emptySet())
 }
