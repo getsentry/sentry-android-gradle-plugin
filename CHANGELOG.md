@@ -22,6 +22,7 @@ This version introduces sentry-cli 3.0.0. Sentry-cli 3.0.0 and above only offici
 - Add upload functionality for [Size Analysis](https://docs.sentry.io/platforms/android/size-analysis/) ([#915](https://github.com/getsentry/sentry-android-gradle-plugin/pull/915))
 - Add upload functionality for [Build Distribution](https://docs.sentry.io/platforms/android/build-distribution/) ([#986](https://github.com/getsentry/sentry-android-gradle-plugin/pull/986))
 - Auto-install for [Auto-Update Build Distribution](https://docs.sentry.io/platforms/android/build-distribution/auto-update/) SDK when enabled for variant ([#1001](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1001))
+- Add install groups support for Build Distribution to control update visibility between distribution channels ([#1070](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1070))
 - Add VCS info extension for build uploads with customizable version control metadata ([#969](https://github.com/getsentry/sentry-android-gradle-plugin/pull/969))
 - Include version in logs if auto install refuses to install a dependency ([#979](https://github.com/getsentry/sentry-android-gradle-plugin/pull/979))
 - Auto install Spring Boot 4 (`sentry-spring-boot-4`) and Spring 7 (`sentry-spring-7`) modules ([#980](https://github.com/getsentry/sentry-android-gradle-plugin/pull/980))
