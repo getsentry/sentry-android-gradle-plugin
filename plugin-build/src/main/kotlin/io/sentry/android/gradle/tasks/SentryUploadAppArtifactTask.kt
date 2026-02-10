@@ -61,8 +61,6 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
     vcsBaseRef.orNull?.let { args.addAll(listOf("--base-ref", it)) }
     vcsPrNumber.orNull?.let { args.addAll(listOf("--pr-number", it.toString())) }
     buildConfiguration.orNull?.let { args.addAll(listOf("--build-configuration", it)) }
-
-    // Add install groups if provided
     installGroups.orNull
       ?.takeIf { it.isNotEmpty() }
       ?.forEach { group -> args.addAll(listOf("--install-group", group)) }

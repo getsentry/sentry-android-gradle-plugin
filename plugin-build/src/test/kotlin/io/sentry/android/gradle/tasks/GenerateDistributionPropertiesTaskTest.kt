@@ -302,7 +302,6 @@ class GenerateDistributionPropertiesTaskTest {
 
     val props = PropertiesUtil.load(expectedFile)
 
-    // Verify property exists and contains all groups (order may vary)
     val installGroupsValue = props.getProperty(INSTALL_GROUPS_PROPERTY)
     kotlin.test.assertNotNull(installGroupsValue)
     val groups = installGroupsValue.split(",").toSet()
