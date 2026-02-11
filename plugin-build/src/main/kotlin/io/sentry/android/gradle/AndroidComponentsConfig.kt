@@ -481,6 +481,7 @@ fun Variant.configureUploadAppTasks(
       sentryAuthToken = extension.authToken,
       sentryUrl = extension.url,
       sentryProperties = sentryProps,
+      installGroups = extension.distribution.installGroups,
       taskSuffix = name.capitalized,
       buildVariant = buildVariant,
     )

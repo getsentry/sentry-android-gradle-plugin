@@ -62,4 +62,22 @@ class DistributionExtensionTest {
 
     assertEquals("test-token", extension.authToken.get())
   }
+
+  @Test
+  fun `installGroups is empty by default`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = project.objects.newInstance(DistributionExtension::class.java)
+
+    assertTrue(extension.installGroups.get().isEmpty())
+  }
+
+  @Test
+  fun `installGroups can be configured with group names`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = project.objects.newInstance(DistributionExtension::class.java)
+
+    extension.installGroups.set(setOf("internal", "beta"))
+
+    assertEquals(setOf("internal", "beta"), extension.installGroups.get())
+  }
 }

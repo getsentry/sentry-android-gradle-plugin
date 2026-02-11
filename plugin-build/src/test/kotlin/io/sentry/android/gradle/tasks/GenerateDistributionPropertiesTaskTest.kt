@@ -3,6 +3,7 @@ package io.sentry.android.gradle.tasks
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask.Companion.BUILD_CONFIGURATION_PROPERTY
 import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask.Companion.DISTRIBUTION_AUTH_TOKEN_PROPERTY
+import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask.Companion.INSTALL_GROUPS_PROPERTY
 import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask.Companion.ORG_SLUG_PROPERTY
 import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask.Companion.PROJECT_SLUG_PROPERTY
 import io.sentry.android.gradle.util.PropertiesUtil
@@ -273,6 +274,65 @@ class GenerateDistributionPropertiesTaskTest {
     assertEquals(envToken, props.getProperty(DISTRIBUTION_AUTH_TOKEN_PROPERTY))
     // Build configuration should always be present
     assertEquals("debug", props.getProperty(BUILD_CONFIGURATION_PROPERTY))
+  }
+
+  @Test
+  fun `installGroups is written to properties file as comma-separated list`() {
+    val project = createProject()
+    val extension = project.extensions.findByName("sentry") as SentryPluginExtension
+    extension.distribution.installGroups.set(setOf("internal", "beta", "alpha"))
+
+    val task: TaskProvider<GenerateDistributionPropertiesTask> =
+      GenerateDistributionPropertiesTask.register(
+        project,
+        extension,
+        null,
+        project.layout.buildDirectory.dir("dummy/folder/"),
+        "test",
+        "debug",
+      )
+
+    val outputDir = File(project.buildDir, "dummy/folder/")
+    outputDir.mkdirs()
+
+    task.get().generateProperties()
+
+    val expectedFile = File(project.buildDir, "dummy/folder/sentry-distribution.properties")
+    assertTrue(expectedFile.exists())
+
+    val props = PropertiesUtil.load(expectedFile)
+
+    val installGroupsValue = props.getProperty(INSTALL_GROUPS_PROPERTY)
+    kotlin.test.assertNotNull(installGroupsValue)
+    val groups = installGroupsValue.split(",").toSet()
+    assertEquals(setOf("internal", "beta", "alpha"), groups)
+  }
+
+  @Test
+  fun `empty installGroups does not write property to file`() {
+    val project = createProject()
+    val extension = project.extensions.findByName("sentry") as SentryPluginExtension
+    extension.distribution.installGroups.set(emptySet())
+
+    val task: TaskProvider<GenerateDistributionPropertiesTask> =
+      GenerateDistributionPropertiesTask.register(
+        project,
+        extension,
+        null,
+        project.layout.buildDirectory.dir("dummy/folder/"),
+        "test",
+        "debug",
+      )
+
+    val outputDir = File(project.buildDir, "dummy/folder/")
+    outputDir.mkdirs()
+
+    task.get().generateProperties()
+
+    val expectedFile = File(project.buildDir, "dummy/folder/sentry-distribution.properties")
+    val props = PropertiesUtil.load(expectedFile)
+
+    assertNull(props.getProperty(INSTALL_GROUPS_PROPERTY))
   }
 
   private fun createProject(): Project {

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add install groups support for Build Distribution to control update visibility between distribution channels ([#1070](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1070))
+
 ### Dependencies
 
 - Bump CLI from v3.1.0 to v3.2.0 ([#1068](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1068))
