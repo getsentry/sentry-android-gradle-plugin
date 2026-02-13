@@ -4,7 +4,7 @@ object BuildPluginsVersion {
 }
 
 object LibsVersion {
-    const val SDK_VERSION = 34
+    const val SDK_VERSION = 35
     const val MIN_SDK_VERSION = 21
 }
 
