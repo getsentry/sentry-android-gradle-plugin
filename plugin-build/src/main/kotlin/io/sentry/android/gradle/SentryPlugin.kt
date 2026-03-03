@@ -67,24 +67,20 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
         sentryProjectParameter,
       )
 
-      project.afterEvaluate {
-        if (extension.snapshots.path.isPresent) {
-          val sentryTelemetryProvider = SentryTelemetryService.register(project)
-          SentryUploadSnapshotsTask.register(
-            project = project,
-            extension = extension,
-            sentryTelemetryProvider = sentryTelemetryProvider,
-            debug = extension.debug,
-            cliExecutable = cliExecutable,
-            sentryOrg = sentryOrgParameter?.let { project.provider { it } } ?: extension.org,
-            sentryProject =
-              sentryProjectParameter?.let { project.provider { it } } ?: extension.projectName,
-            sentryAuthToken = extension.authToken,
-            sentryUrl = extension.url,
-            snapshotsPath = extension.snapshots.path,
-          )
-        }
-      }
+      val sentryTelemetryProvider = SentryTelemetryService.register(project)
+      SentryUploadSnapshotsTask.register(
+        project = project,
+        extension = extension,
+        sentryTelemetryProvider = sentryTelemetryProvider,
+        debug = extension.debug,
+        cliExecutable = cliExecutable,
+        sentryOrg = sentryOrgParameter?.let { project.provider { it } } ?: extension.org,
+        sentryProject =
+          sentryProjectParameter?.let { project.provider { it } } ?: extension.projectName,
+        sentryAuthToken = extension.authToken,
+        sentryUrl = extension.url,
+        snapshotsPath = extension.snapshots.path,
+      )
 
       project.installDependencies(extension, true)
     }
