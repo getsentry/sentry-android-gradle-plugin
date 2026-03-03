@@ -4,6 +4,7 @@ import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.tasks.SentryUploadSnapshotsTask
 import io.sentry.android.gradle.util.AgpVersions
 import java.io.File
 import javax.inject.Inject
@@ -64,6 +65,24 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
         sentryOrgParameter,
         sentryProjectParameter,
       )
+
+      project.afterEvaluate {
+        if (extension.snapshots.path.isPresent) {
+          SentryUploadSnapshotsTask.register(
+            project = project,
+            extension = extension,
+            sentryTelemetryProvider = null,
+            debug = extension.debug,
+            cliExecutable = cliExecutable,
+            sentryOrg = sentryOrgParameter?.let { project.provider { it } } ?: extension.org,
+            sentryProject =
+              sentryProjectParameter?.let { project.provider { it } } ?: extension.projectName,
+            sentryAuthToken = extension.authToken,
+            sentryUrl = extension.url,
+            snapshotsPath = extension.snapshots.path,
+          )
+        }
+      }
 
       project.installDependencies(extension, true)
     }
