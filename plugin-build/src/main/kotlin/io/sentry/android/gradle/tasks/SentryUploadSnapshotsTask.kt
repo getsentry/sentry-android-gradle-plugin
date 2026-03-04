@@ -9,6 +9,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -23,6 +24,8 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
     description = "Uploads snapshots to Sentry"
   }
 
+  @get:Input abstract val appId: Property<String>
+
   @get:InputDirectory
   @get:PathSensitive(PathSensitivity.RELATIVE)
   abstract val snapshotsPath: DirectoryProperty
@@ -30,6 +33,8 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
   override fun getArguments(args: MutableList<String>) {
     args.add("build")
     args.add("snapshots")
+    args.add("--app-id")
+    args.add(appId.get())
     args.add(snapshotsPath.get().asFile.absolutePath)
   }
 
@@ -44,6 +49,7 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
       sentryProject: Provider<String>,
       sentryAuthToken: Property<String>,
       sentryUrl: Property<String>,
+      appId: Property<String>,
       snapshotsPath: DirectoryProperty,
     ): TaskProvider<SentryUploadSnapshotsTask> {
       return project.tasks.register(
@@ -57,6 +63,7 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
         task.sentryProject.set(sentryProject)
         task.sentryAuthToken.set(sentryAuthToken)
         task.sentryUrl.set(sentryUrl)
+        task.appId.set(appId)
         task.snapshotsPath.set(snapshotsPath)
         task.sentryTelemetryService.set(sentryTelemetryProvider)
         task.asSentryCliExec()

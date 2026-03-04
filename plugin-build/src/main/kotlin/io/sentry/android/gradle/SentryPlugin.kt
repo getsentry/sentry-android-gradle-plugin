@@ -79,6 +79,7 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
           sentryProjectParameter?.let { project.provider { it } } ?: extension.projectName,
         sentryAuthToken = extension.authToken,
         sentryUrl = extension.url,
+        appId = extension.snapshots.appId,
         snapshotsPath = extension.snapshots.path,
       )
 

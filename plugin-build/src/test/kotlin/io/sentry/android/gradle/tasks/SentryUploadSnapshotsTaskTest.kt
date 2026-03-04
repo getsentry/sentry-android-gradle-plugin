@@ -16,6 +16,7 @@ class SentryUploadSnapshotsTaskTest {
     val task =
       createTestTask {
         it.cliExecutable.set("sentry-cli")
+        it.appId.set("com.example")
         it.snapshotsPath.set(File("/path/to/snapshots"))
       }
 
@@ -24,6 +25,8 @@ class SentryUploadSnapshotsTaskTest {
     assertTrue("sentry-cli" in args)
     assertTrue("build" in args)
     assertTrue("snapshots" in args)
+    assertTrue("--app-id" in args)
+    assertTrue("com.example" in args)
     assertTrue("/path/to/snapshots" in args)
     assertFalse("--log-level=debug" in args)
   }
@@ -33,6 +36,7 @@ class SentryUploadSnapshotsTaskTest {
     val task =
       createTestTask {
         it.cliExecutable.set("sentry-cli")
+        it.appId.set("com.example")
         it.snapshotsPath.set(File("/path/to/snapshots"))
         it.debug.set(true)
       }
@@ -68,6 +72,7 @@ class SentryUploadSnapshotsTaskTest {
       createTestTask {
         it.cliExecutable.set("sentry-cli")
         it.sentryOrganization.set("dummy-org")
+        it.appId.set("com.example")
         it.snapshotsPath.set(File("/path/to/snapshots"))
       }
 
@@ -83,6 +88,7 @@ class SentryUploadSnapshotsTaskTest {
       createTestTask {
         it.cliExecutable.set("sentry-cli")
         it.sentryProject.set("dummy-proj")
+        it.appId.set("com.example")
         it.snapshotsPath.set(File("/path/to/snapshots"))
       }
 
@@ -98,6 +104,7 @@ class SentryUploadSnapshotsTaskTest {
       createTestTask {
         it.cliExecutable.set("sentry-cli")
         it.sentryUrl.set("https://some-host.sentry.io")
+        it.appId.set("com.example")
         it.snapshotsPath.set(File("/path/to/snapshots"))
       }
 
@@ -113,6 +120,7 @@ class SentryUploadSnapshotsTaskTest {
       createTestTask {
         it.cliExecutable.set("sentry-cli")
         it.sentryUrl.set("https://some-host.sentry.io")
+        it.appId.set("com.example")
         it.snapshotsPath.set(File("/path/to/snapshots"))
       }
 
