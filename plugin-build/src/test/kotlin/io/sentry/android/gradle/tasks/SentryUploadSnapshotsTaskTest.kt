@@ -13,12 +13,11 @@ class SentryUploadSnapshotsTaskTest {
 
   @Test
   fun `cli-executable is set correctly`() {
-    val task =
-      createTestTask {
-        it.cliExecutable.set("sentry-cli")
-        it.appId.set("com.example")
-        it.snapshotsPath.set(File("/path/to/snapshots"))
-      }
+    val task = createTestTask {
+      it.cliExecutable.set("sentry-cli")
+      it.appId.set("com.example")
+      it.snapshotsPath.set(File("/path/to/snapshots"))
+    }
 
     val args = task.computeCommandLineArgs()
 
@@ -33,13 +32,12 @@ class SentryUploadSnapshotsTaskTest {
 
   @Test
   fun `--log-level=debug is set correctly`() {
-    val task =
-      createTestTask {
-        it.cliExecutable.set("sentry-cli")
-        it.appId.set("com.example")
-        it.snapshotsPath.set(File("/path/to/snapshots"))
-        it.debug.set(true)
-      }
+    val task = createTestTask {
+      it.cliExecutable.set("sentry-cli")
+      it.appId.set("com.example")
+      it.snapshotsPath.set(File("/path/to/snapshots"))
+      it.debug.set(true)
+    }
 
     val args = task.computeCommandLineArgs()
 
@@ -68,13 +66,12 @@ class SentryUploadSnapshotsTaskTest {
 
   @Test
   fun `with sentryOrganization adds --org`() {
-    val task =
-      createTestTask {
-        it.cliExecutable.set("sentry-cli")
-        it.sentryOrganization.set("dummy-org")
-        it.appId.set("com.example")
-        it.snapshotsPath.set(File("/path/to/snapshots"))
-      }
+    val task = createTestTask {
+      it.cliExecutable.set("sentry-cli")
+      it.sentryOrganization.set("dummy-org")
+      it.appId.set("com.example")
+      it.snapshotsPath.set(File("/path/to/snapshots"))
+    }
 
     val args = task.computeCommandLineArgs()
 
@@ -84,13 +81,12 @@ class SentryUploadSnapshotsTaskTest {
 
   @Test
   fun `with sentryProject adds --project`() {
-    val task =
-      createTestTask {
-        it.cliExecutable.set("sentry-cli")
-        it.sentryProject.set("dummy-proj")
-        it.appId.set("com.example")
-        it.snapshotsPath.set(File("/path/to/snapshots"))
-      }
+    val task = createTestTask {
+      it.cliExecutable.set("sentry-cli")
+      it.sentryProject.set("dummy-proj")
+      it.appId.set("com.example")
+      it.snapshotsPath.set(File("/path/to/snapshots"))
+    }
 
     val args = task.computeCommandLineArgs()
 
@@ -100,13 +96,12 @@ class SentryUploadSnapshotsTaskTest {
 
   @Test
   fun `with sentryUrl adds --url`() {
-    val task =
-      createTestTask {
-        it.cliExecutable.set("sentry-cli")
-        it.sentryUrl.set("https://some-host.sentry.io")
-        it.appId.set("com.example")
-        it.snapshotsPath.set(File("/path/to/snapshots"))
-      }
+    val task = createTestTask {
+      it.cliExecutable.set("sentry-cli")
+      it.sentryUrl.set("https://some-host.sentry.io")
+      it.appId.set("com.example")
+      it.snapshotsPath.set(File("/path/to/snapshots"))
+    }
 
     val args = task.computeCommandLineArgs()
 
@@ -116,13 +111,12 @@ class SentryUploadSnapshotsTaskTest {
 
   @Test
   fun `the --url parameter is placed as the first argument`() {
-    val task =
-      createTestTask {
-        it.cliExecutable.set("sentry-cli")
-        it.sentryUrl.set("https://some-host.sentry.io")
-        it.appId.set("com.example")
-        it.snapshotsPath.set(File("/path/to/snapshots"))
-      }
+    val task = createTestTask {
+      it.cliExecutable.set("sentry-cli")
+      it.sentryUrl.set("https://some-host.sentry.io")
+      it.appId.set("com.example")
+      it.snapshotsPath.set(File("/path/to/snapshots"))
+    }
 
     val args = task.computeCommandLineArgs()
 
