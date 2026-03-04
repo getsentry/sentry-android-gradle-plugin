@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.tasks
 
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
+import io.sentry.android.gradle.cliExecutableProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
@@ -8,7 +9,6 @@ import io.sentry.android.gradle.util.asSentryCliExec
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -42,29 +42,27 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
     fun register(
       project: Project,
       extension: SentryPluginExtension,
-      sentryTelemetryProvider: Provider<SentryTelemetryService>?,
-      debug: Property<Boolean>,
-      cliExecutable: Provider<String>,
-      sentryOrg: Provider<String>,
-      sentryProject: Provider<String>,
-      sentryAuthToken: Property<String>,
-      sentryUrl: Property<String>,
-      appId: Property<String>,
-      snapshotsPath: DirectoryProperty,
+      sentryOrgOverride: String?,
+      sentryProjectOverride: String?,
     ): TaskProvider<SentryUploadSnapshotsTask> {
+      val sentryTelemetryProvider = SentryTelemetryService.register(project)
       return project.tasks.register(
         "sentryUploadSnapshots",
         SentryUploadSnapshotsTask::class.java,
       ) { task ->
         task.workingDir(project.rootDir)
-        task.debug.set(debug)
-        task.cliExecutable.set(cliExecutable)
-        task.sentryOrganization.set(sentryOrg)
-        task.sentryProject.set(sentryProject)
-        task.sentryAuthToken.set(sentryAuthToken)
-        task.sentryUrl.set(sentryUrl)
-        task.appId.set(appId)
-        task.snapshotsPath.set(snapshotsPath)
+        task.debug.set(extension.debug)
+        task.cliExecutable.set(project.cliExecutableProvider())
+        task.sentryOrganization.set(
+          sentryOrgOverride?.let { project.provider { it } } ?: extension.org
+        )
+        task.sentryProject.set(
+          sentryProjectOverride?.let { project.provider { it } } ?: extension.projectName
+        )
+        task.sentryAuthToken.set(extension.authToken)
+        task.sentryUrl.set(extension.url)
+        task.appId.set(extension.snapshots.appId)
+        task.snapshotsPath.set(extension.snapshots.path)
         task.sentryTelemetryService.set(sentryTelemetryProvider)
         task.asSentryCliExec()
         task.withSentryTelemetry(extension, sentryTelemetryProvider)
