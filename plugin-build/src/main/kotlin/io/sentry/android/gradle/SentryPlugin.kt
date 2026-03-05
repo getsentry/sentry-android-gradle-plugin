@@ -67,10 +67,12 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
       )
 
       SentryUploadSnapshotsTask.register(
-        project = project,
-        extension = extension,
-        sentryOrgOverride = sentryOrgParameter,
-        sentryProjectOverride = sentryProjectParameter,
+        project,
+        extension,
+        buildEvents,
+        cliExecutable,
+        sentryOrgParameter,
+        sentryProjectParameter,
       )
 
       project.installDependencies(extension, true)

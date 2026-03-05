@@ -1,7 +1,7 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
-import io.sentry.android.gradle.cliExecutableProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
@@ -9,11 +9,13 @@ import io.sentry.android.gradle.util.asSentryCliExec
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 import org.gradle.work.DisableCachingByDefault
 
 @DisableCachingByDefault(because = "Uploads should not be cached")
@@ -42,17 +44,29 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
     fun register(
       project: Project,
       extension: SentryPluginExtension,
+      buildEvents: BuildEventListenerRegistryInternal,
+      cliExecutable: Provider<String>,
       sentryOrgOverride: String?,
       sentryProjectOverride: String?,
     ): TaskProvider<SentryUploadSnapshotsTask> {
-      val sentryTelemetryProvider = SentryTelemetryService.register(project)
+      val sentryTelemetryProvider =
+        configureTelemetryNoVariant(
+          project,
+          extension,
+          cliExecutable,
+          sentryOrgOverride,
+          buildEvents,
+        )
       return project.tasks.register(
         "sentryUploadSnapshots",
         SentryUploadSnapshotsTask::class.java,
       ) { task ->
         task.workingDir(project.rootDir)
         task.debug.set(extension.debug)
-        task.cliExecutable.set(project.cliExecutableProvider())
+        task.cliExecutable.set(cliExecutable)
+        task.sentryProperties.set(
+          getPropertiesFilePath(project)?.let { file -> project.file(file) }
+        )
         task.sentryOrganization.set(
           sentryOrgOverride?.let { project.provider { it } } ?: extension.org
         )
@@ -69,4 +83,28 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
       }
     }
   }
+}
+
+private fun configureTelemetryNoVariant(
+  project: Project,
+  extension: SentryPluginExtension,
+  cliExecutable: Provider<String>,
+  sentryOrg: String?,
+  buildEvents: BuildEventListenerRegistryInternal,
+): Provider<SentryTelemetryService> {
+  val sentryTelemetryProvider = SentryTelemetryService.register(project)
+  project.gradle.taskGraph.whenReady {
+    sentryTelemetryProvider.get().start {
+      SentryTelemetryService.createParameters(
+        project,
+        null,
+        extension,
+        cliExecutable,
+        sentryOrg,
+        "Android",
+      )
+    }
+    buildEvents.onOperationCompletion(sentryTelemetryProvider)
+  }
+  return sentryTelemetryProvider
 }
