@@ -28,12 +28,19 @@ internal object SentryPropertiesFileProvider {
     val sep = File.separator
 
     // Local Project dirs
-    val possibleFiles = mutableListOf("${projDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME")
+    val possibleFiles = mutableListOf<String>()
+    if (buildTypeName.isNotBlank()) {
+      possibleFiles.add("${projDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME")
+    }
     if (flavorName.isNotBlank()) {
-      possibleFiles.add("${projDir}${sep}src${sep}${buildTypeName}${sep}$flavorName${sep}$FILENAME")
-      possibleFiles.add(
-        "${projDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME"
-      )
+      if (buildTypeName.isNotBlank()) {
+        possibleFiles.add(
+          "${projDir}${sep}src${sep}${buildTypeName}${sep}$flavorName${sep}$FILENAME"
+        )
+        possibleFiles.add(
+          "${projDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME"
+        )
+      }
       possibleFiles.add("${projDir}${sep}src${sep}${flavorName}${sep}$FILENAME")
     }
     possibleFiles.add("${projDir}${sep}$FILENAME")
@@ -45,15 +52,19 @@ internal object SentryPropertiesFileProvider {
     )
 
     // Root project dirs
-    possibleFiles.add("${rootDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME")
+    if (buildTypeName.isNotBlank()) {
+      possibleFiles.add("${rootDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME")
+    }
     if (flavorName.isNotBlank()) {
       possibleFiles.add("${rootDir}${sep}src${sep}${flavorName}${sep}$FILENAME")
-      possibleFiles.add(
-        "${rootDir}${sep}src${sep}${buildTypeName}${sep}${flavorName}${sep}$FILENAME"
-      )
-      possibleFiles.add(
-        "${rootDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME"
-      )
+      if (buildTypeName.isNotBlank()) {
+        possibleFiles.add(
+          "${rootDir}${sep}src${sep}${buildTypeName}${sep}${flavorName}${sep}$FILENAME"
+        )
+        possibleFiles.add(
+          "${rootDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME"
+        )
+      }
     }
     possibleFiles.add("${rootDir}${sep}$FILENAME")
 
