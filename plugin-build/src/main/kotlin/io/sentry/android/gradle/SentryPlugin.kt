@@ -69,7 +69,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
       SentryUploadSnapshotsTask.register(
         project,
         extension,
-        buildEvents,
         cliExecutable,
         sentryOrgParameter,
         sentryProjectParameter,
