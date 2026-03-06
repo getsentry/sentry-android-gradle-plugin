@@ -178,6 +178,28 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
   }
 
   @Test
+  fun `getPropertiesFilePath with null variant finds file inside project folder`() {
+    val (project, _) = createTestAndroidProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
+    createTestFile(project.projectDir, "sentry.properties")
+
+    assertEquals("42", File(getPropertiesFilePath(project)!!).readText())
+  }
+
+  @Test
+  fun `getPropertiesFilePath with null variant skips buildType paths`() {
+    val rootProject = ProjectBuilder.builder().build()
+    val (project, _) =
+      createTestAndroidProject(
+        parent = rootProject,
+        forceEvaluate = !AgpVersions.isAGP74(agpVersion),
+      )
+    // Only place the file under src/debug/ — with null variant this should not be found
+    createTestFile(project.projectDir, "src${sep}debug${sep}sentry.properties")
+
+    assertEquals(null, getPropertiesFilePath(project))
+  }
+
+  @Test
   fun `getPropertiesFilePath finds file inside root buildType flavor folder`() {
     val rootProject = ProjectBuilder.builder().build()
     val (project, _) =

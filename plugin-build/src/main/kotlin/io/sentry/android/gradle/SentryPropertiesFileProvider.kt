@@ -18,9 +18,9 @@ internal object SentryPropertiesFileProvider {
    * @return A [String] for the path if sentry.properties is found or null otherwise
    */
   @JvmStatic
-  fun getPropertiesFilePath(project: Project, variant: SentryVariant): String? {
-    val flavorName = variant.flavorName.orEmpty()
-    val buildTypeName = variant.buildTypeName.orEmpty()
+  fun getPropertiesFilePath(project: Project, variant: SentryVariant? = null): String? {
+    val flavorName = variant?.flavorName.orEmpty()
+    val buildTypeName = variant?.buildTypeName.orEmpty()
 
     val projDir = project.projectDir
     val rootDir = project.rootDir
@@ -28,31 +28,43 @@ internal object SentryPropertiesFileProvider {
     val sep = File.separator
 
     // Local Project dirs
-    val possibleFiles = mutableListOf("${projDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME")
+    val possibleFiles = mutableListOf<String>()
+    if (buildTypeName.isNotBlank()) {
+      possibleFiles.add("${projDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME")
+    }
     if (flavorName.isNotBlank()) {
-      possibleFiles.add("${projDir}${sep}src${sep}${buildTypeName}${sep}$flavorName${sep}$FILENAME")
-      possibleFiles.add(
-        "${projDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME"
-      )
+      if (buildTypeName.isNotBlank()) {
+        possibleFiles.add(
+          "${projDir}${sep}src${sep}${buildTypeName}${sep}$flavorName${sep}$FILENAME"
+        )
+        possibleFiles.add(
+          "${projDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME"
+        )
+      }
       possibleFiles.add("${projDir}${sep}src${sep}${flavorName}${sep}$FILENAME")
     }
     possibleFiles.add("${projDir}${sep}$FILENAME")
 
     // Other flavors dirs
     possibleFiles.addAll(
-      variant.productFlavors.map { "${projDir}${sep}src${sep}${it}${sep}$FILENAME" }
+      variant?.productFlavors?.map { "${projDir}${sep}src${sep}${it}${sep}$FILENAME" }
+        ?: emptyList()
     )
 
     // Root project dirs
-    possibleFiles.add("${rootDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME")
+    if (buildTypeName.isNotBlank()) {
+      possibleFiles.add("${rootDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME")
+    }
     if (flavorName.isNotBlank()) {
       possibleFiles.add("${rootDir}${sep}src${sep}${flavorName}${sep}$FILENAME")
-      possibleFiles.add(
-        "${rootDir}${sep}src${sep}${buildTypeName}${sep}${flavorName}${sep}$FILENAME"
-      )
-      possibleFiles.add(
-        "${rootDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME"
-      )
+      if (buildTypeName.isNotBlank()) {
+        possibleFiles.add(
+          "${rootDir}${sep}src${sep}${buildTypeName}${sep}${flavorName}${sep}$FILENAME"
+        )
+        possibleFiles.add(
+          "${rootDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME"
+        )
+      }
     }
     possibleFiles.add("${rootDir}${sep}$FILENAME")
 

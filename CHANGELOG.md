@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- (Experimental) Add snapshot upload support via `sentryUploadSnapshots` task ([#1091](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1091))
+
 ### Dependencies
 
 - Bump CLI from v3.2.0 to v3.3.0 ([#1084](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1084), [#1090](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1090), [#1093](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1093))
