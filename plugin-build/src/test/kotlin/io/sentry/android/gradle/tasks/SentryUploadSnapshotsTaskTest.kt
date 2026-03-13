@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import com.google.common.truth.Truth.assertThat
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -121,6 +122,58 @@ class SentryUploadSnapshotsTaskTest {
     val args = task.computeCommandLineArgs()
 
     assertEquals(1, args.indexOf("--url"))
+  }
+
+  @Test
+  fun `all vcs parameters are passed to CLI correctly`() {
+    val task = createTestTask {
+      it.cliExecutable.set("sentry-cli")
+      it.appId.set("com.example")
+      it.snapshotsPath.set(File("/path/to/snapshots"))
+      it.vcsHeadSha.set("abc123def456")
+      it.vcsBaseSha.set("def456abc123")
+      it.vcsProvider.set("github")
+      it.vcsHeadRepoName.set("getsentry/sentry-android-gradle-plugin")
+      it.vcsBaseRepoName.set("getsentry/sentry-android-gradle-plugin")
+      it.vcsHeadRef.set("feature-branch")
+      it.vcsBaseRef.set("main")
+      it.vcsPrNumber.set(123)
+    }
+
+    val args = task.computeCommandLineArgs()
+
+    assertThat(args).containsAtLeast("--head-sha", "abc123def456").inOrder()
+    assertThat(args).containsAtLeast("--base-sha", "def456abc123").inOrder()
+    assertThat(args).containsAtLeast("--vcs-provider", "github").inOrder()
+    assertThat(args)
+      .containsAtLeast("--head-repo-name", "getsentry/sentry-android-gradle-plugin")
+      .inOrder()
+    assertThat(args)
+      .containsAtLeast("--base-repo-name", "getsentry/sentry-android-gradle-plugin")
+      .inOrder()
+    assertThat(args).containsAtLeast("--head-ref", "feature-branch").inOrder()
+    assertThat(args).containsAtLeast("--base-ref", "main").inOrder()
+    assertThat(args).containsAtLeast("--pr-number", "123").inOrder()
+  }
+
+  @Test
+  fun `vcs parameters are omitted when not set`() {
+    val task = createTestTask {
+      it.cliExecutable.set("sentry-cli")
+      it.appId.set("com.example")
+      it.snapshotsPath.set(File("/path/to/snapshots"))
+    }
+
+    val args = task.computeCommandLineArgs()
+
+    assertThat(args).doesNotContain("--head-sha")
+    assertThat(args).doesNotContain("--base-sha")
+    assertThat(args).doesNotContain("--vcs-provider")
+    assertThat(args).doesNotContain("--head-repo-name")
+    assertThat(args).doesNotContain("--base-repo-name")
+    assertThat(args).doesNotContain("--head-ref")
+    assertThat(args).doesNotContain("--base-ref")
+    assertThat(args).doesNotContain("--pr-number")
   }
 
   private fun createProject(): Project {

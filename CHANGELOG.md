@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- (Experimental) Wire VCS info extension to snapshot uploads for git metadata support ([#1102](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1102))
+
 ### Dependencies
 
 - Bump CLI from v3.3.2 to v3.3.3 ([#1101](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1101))

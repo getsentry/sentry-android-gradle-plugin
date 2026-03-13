@@ -5,11 +5,11 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 
 /**
- * Configuration for version control system information used in build uploads.
+ * Configuration for version control system information used in build uploads and snapshots.
  *
- * This extension only applies to build upload functionality (e.g., APK/AAB uploads for size
- * analysis) and has no effect on other plugin features such as ProGuard mapping uploads, source
- * context uploads, or instrumentation.
+ * This extension applies to build upload functionality (e.g., APK/AAB uploads for size analysis)
+ * and snapshot uploads. It has no effect on other plugin features such as ProGuard mapping uploads,
+ * source context uploads, or instrumentation.
  */
 open class VcsInfoExtension @Inject constructor(objects: ObjectFactory) {
 
