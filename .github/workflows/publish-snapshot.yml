@@ -1,0 +1,51 @@
+name: Publish Snapshot
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish-snapshot:
+    name: Publish snapshot to Maven Central
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # pin@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Determine snapshot version
+        id: version
+        run: |
+          VERSION=$(grep "^version = " plugin-build/gradle.properties | cut -d' ' -f3)
+          echo "snapshot_version=${VERSION}-SNAPSHOT" >> "$GITHUB_OUTPUT"
+
+      - name: Publish Gradle Plugin snapshot
+        working-directory: plugin-build
+        run: >
+          ../gradlew publishAllPublicationsToMavenCentralSnapshotsRepository
+          -Pversion=${{ steps.version.outputs.snapshot_version }}
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.OSSRH_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.OSSRH_PASSWORD }}
+
+      - name: Publish Kotlin Compiler Plugin snapshot
+        working-directory: sentry-kotlin-compiler-plugin
+        run: >
+          ../gradlew publishAllPublicationsToMavenCentralSnapshotsRepository
+          -PVERSION_NAME=${{ steps.version.outputs.snapshot_version }}
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.OSSRH_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.OSSRH_PASSWORD }}

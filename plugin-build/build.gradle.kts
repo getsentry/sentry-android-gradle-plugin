@@ -323,3 +323,18 @@ tasks.withType<ValidatePlugins>().configureEach {
   failOnWarning.set(true)
   enableStricterValidation.set(true)
 }
+
+plugins.withId("com.vanniktech.maven.publish.base") {
+  configure<PublishingExtension> {
+    repositories {
+      maven {
+        name = "mavenCentralSnapshots"
+        url = uri("https://central.sonatype.com/repository/maven-snapshots/")
+        credentials {
+          username = findProperty("mavenCentralUsername")?.toString()
+          password = findProperty("mavenCentralPassword")?.toString()
+        }
+      }
+    }
+  }
+}
