@@ -29,6 +29,7 @@ import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
 import io.sentry.android.gradle.tasks.SentryUploadAppArtifactTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
+import io.sentry.android.gradle.tasks.SentryUploadSnapshotsTask
 import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
@@ -133,6 +134,15 @@ fun ApplicationAndroidComponentsExtension.configure(
       generateDistributionPropertiesTask?.let { tasksGeneratingProperties.add(it) }
 
       sentryVariant.configureNativeSymbolsTask(
+        project,
+        extension,
+        sentryTelemetryProvider,
+        cliExecutable,
+        sentryOrg,
+        sentryProject,
+      )
+
+      variant.configureSnapshotsTasks(
         project,
         extension,
         sentryTelemetryProvider,
@@ -450,6 +460,30 @@ private fun ApplicationVariant.configureDistributionPropertiesTask(
     )
   }
   return null
+}
+
+private fun ApplicationVariant.configureSnapshotsTasks(
+  project: Project,
+  extension: SentryPluginExtension,
+  sentryTelemetryProvider: Provider<SentryTelemetryService>,
+  cliExecutable: Provider<String>,
+  sentryOrg: String?,
+  sentryProject: String?,
+) {
+  val variant = AndroidVariant74(this)
+  val sentryProps = getPropertiesFilePath(project, variant)
+
+  SentryUploadSnapshotsTask.register(
+    project = project,
+    extension = extension,
+    sentryTelemetryProvider = sentryTelemetryProvider,
+    cliExecutable = cliExecutable,
+    sentryOrgOverride = sentryOrg,
+    sentryProjectOverride = sentryProject,
+    applicationId = applicationId,
+    sentryProperties = sentryProps,
+    taskSuffix = name.capitalized,
+  )
 }
 
 /**

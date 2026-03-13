@@ -127,14 +127,6 @@ abstract class SentryPluginExtension @Inject constructor(project: Project) {
     vcsInfoAction.execute(vcsInfo)
   }
 
-  val snapshots: SnapshotsExtension = objects.newInstance(SnapshotsExtension::class.java)
-
-  /** Configure the snapshots upload. */
-  @Experimental
-  fun snapshots(snapshotsAction: Action<SnapshotsExtension>) {
-    snapshotsAction.execute(snapshots)
-  }
-
   /**
    * Disables or enables the reporting of dependencies metadata for Sentry. If enabled the plugin
    * will collect external dependencies and will take care of uploading them to Sentry as part of

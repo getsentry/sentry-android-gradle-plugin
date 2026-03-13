@@ -4,7 +4,6 @@ import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
-import io.sentry.android.gradle.tasks.SentryUploadSnapshotsTask
 import io.sentry.android.gradle.util.AgpVersions
 import java.io.File
 import javax.inject.Inject
@@ -61,14 +60,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
         project,
         extension,
         buildEvents,
-        cliExecutable,
-        sentryOrgParameter,
-        sentryProjectParameter,
-      )
-
-      SentryUploadSnapshotsTask.register(
-        project,
-        extension,
         cliExecutable,
         sentryOrgParameter,
         sentryProjectParameter,
