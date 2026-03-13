@@ -4,7 +4,6 @@ import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.extensions.SnapshotsExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.slf4j.LoggerFactory
 
 /** Standalone plugin for automatic Compose @Preview snapshot testing via Paparazzi. */
 class SentrySnapshotPlugin : Plugin<Project> {
@@ -23,16 +22,9 @@ class SentrySnapshotPlugin : Plugin<Project> {
   }
 
   private fun configureIfReady(project: Project, extension: SnapshotsExtension) {
-    if (!project.plugins.hasPlugin("app.cash.paparazzi")) {
-      logger.warn(
-        "Sentry Snapshot plugin requires 'app.cash.paparazzi' to be applied. Skipping configuration."
-      )
-      return
+    check(project.plugins.hasPlugin("app.cash.paparazzi")) {
+      "Sentry Snapshot plugin requires 'app.cash.paparazzi' to be applied."
     }
     SnapshotTaskConfigurator.configure(project, extension)
-  }
-
-  companion object {
-    private val logger by lazy { LoggerFactory.getLogger(SentrySnapshotPlugin::class.java) }
   }
 }
