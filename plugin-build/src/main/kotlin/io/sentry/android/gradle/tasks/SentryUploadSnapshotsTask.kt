@@ -15,6 +15,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.options.Option
 import org.gradle.work.DisableCachingByDefault
 
 @DisableCachingByDefault(because = "Uploads should not be cached")
@@ -30,6 +31,11 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
   @get:InputDirectory
   @get:PathSensitive(PathSensitivity.RELATIVE)
   abstract val snapshotsPath: DirectoryProperty
+
+  @Option(option = "snapshots-path", description = "Path to the snapshots directory to upload")
+  fun setSnapshotsPathOption(path: String) {
+    snapshotsPath.set(project.file(path))
+  }
 
   @get:Input @get:Optional abstract val vcsHeadSha: Property<String>
   @get:Input @get:Optional abstract val vcsBaseSha: Property<String>
