@@ -8,8 +8,7 @@ import org.gradle.api.Project
 class SentrySnapshotPlugin : Plugin<Project> {
 
   override fun apply(project: Project) {
-    val extension =
-      project.extensions.create("sentrySnapshots", SnapshotsExtension::class.java)
+    val extension = project.extensions.create("sentrySnapshots", SnapshotsExtension::class.java)
 
     project.afterEvaluate { configureIfReady(project, extension) }
   }
