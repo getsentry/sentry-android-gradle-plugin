@@ -8,9 +8,6 @@ import org.jetbrains.annotations.ApiStatus.Experimental
 @Experimental
 open class SnapshotsExtension @Inject constructor(objects: ObjectFactory) {
 
-  /** Enable automatic snapshot testing for @Preview composables. Defaults to false. */
-  val enabled: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
-
   /** Include private @Preview functions in the scan. Defaults to false. */
   val includePrivatePreviews: Property<Boolean> =
     objects.property(Boolean::class.java).convention(false)
