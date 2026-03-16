@@ -1,8 +1,9 @@
 package io.sentry.android.gradle.tasks
 
-import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.autoinstall.SENTRY_GROUP
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
+import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.asSentryCliExec
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
@@ -14,6 +15,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.options.Option
 import org.gradle.work.DisableCachingByDefault
 
 @DisableCachingByDefault(because = "Uploads should not be cached")
@@ -29,6 +31,11 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
   @get:InputDirectory
   @get:PathSensitive(PathSensitivity.RELATIVE)
   abstract val snapshotsPath: DirectoryProperty
+
+  @Option(option = "snapshots-path", description = "Path to the snapshots directory to upload")
+  fun setSnapshotsPathOption(path: String) {
+    snapshotsPath.set(project.file(path))
+  }
 
   @get:Input @get:Optional abstract val vcsHeadSha: Property<String>
   @get:Input @get:Optional abstract val vcsBaseSha: Property<String>
@@ -61,20 +68,22 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
     fun register(
       project: Project,
       extension: SentryPluginExtension,
+      sentryTelemetryProvider: Provider<SentryTelemetryService>?,
       cliExecutable: Provider<String>,
       sentryOrgOverride: String?,
       sentryProjectOverride: String?,
+      applicationId: Provider<String>,
+      sentryProperties: String?,
+      taskSuffix: String,
     ): TaskProvider<SentryUploadSnapshotsTask> {
       return project.tasks.register(
-        "sentryUploadSnapshots",
+        "sentryUploadSnapshots$taskSuffix",
         SentryUploadSnapshotsTask::class.java,
       ) { task ->
         task.workingDir(project.rootDir)
         task.debug.set(extension.debug)
         task.cliExecutable.set(cliExecutable)
-        task.sentryProperties.set(
-          getPropertiesFilePath(project)?.let { file -> project.file(file) }
-        )
+        task.sentryProperties.set(sentryProperties?.let { project.file(it) })
         task.sentryOrganization.set(
           sentryOrgOverride?.let { project.provider { it } } ?: extension.org
         )
@@ -83,8 +92,7 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
         )
         task.sentryAuthToken.set(extension.authToken)
         task.sentryUrl.set(extension.url)
-        task.appId.set(extension.snapshots.appId)
-        task.snapshotsPath.set(extension.snapshots.path)
+        task.appId.set(applicationId)
         task.vcsHeadSha.set(extension.vcsInfo.headSha)
         task.vcsBaseSha.set(extension.vcsInfo.baseSha)
         task.vcsProvider.set(extension.vcsInfo.vcsProvider)
@@ -93,6 +101,8 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
         task.vcsHeadRef.set(extension.vcsInfo.headRef)
         task.vcsBaseRef.set(extension.vcsInfo.baseRef)
         task.vcsPrNumber.set(extension.vcsInfo.prNumber)
+        sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
+        task.withSentryTelemetry(extension, sentryTelemetryProvider)
         task.asSentryCliExec()
       }
     }
