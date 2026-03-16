@@ -298,6 +298,14 @@ hs_err_pid*
 # Mongo Explorer plugin
 .idea/mongoSettings.xml
 
+# Firebender plugin
+.idea/firebender/
+
+# Other IDE-specific files
+.idea/AndroidProjectSystem.xml
+.idea/deploymentTargetSelector.xml
+.idea/markdown.xml
+
 # Crashlytics plugin (for Android Studio and IntelliJ)
 
 ### AndroidStudio Patch ###

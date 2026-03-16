@@ -66,12 +66,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
       )
 
       project.installDependencies(extension, true)
-
-      project.afterEvaluate {
-        if (extension.snapshots.enabled.get()) {
-          project.pluginManager.apply("io.sentry.android.snapshot")
-        }
-      }
     }
   }
 
