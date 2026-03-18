@@ -6,8 +6,8 @@ import org.gradle.api.provider.Property
 import org.jetbrains.annotations.ApiStatus
 
 /**
- * Experimental extension for configuring Compose @Preview snapshot testing.
- * This API is subject to change and will eventually be merged into the main `sentry` extension.
+ * Experimental extension for configuring Compose @Preview snapshot testing. This API is subject to
+ * change and will eventually be merged into the main `sentry` extension.
  */
 @ApiStatus.Experimental
 abstract class SentrySnapshotExtension(objects: ObjectFactory) {

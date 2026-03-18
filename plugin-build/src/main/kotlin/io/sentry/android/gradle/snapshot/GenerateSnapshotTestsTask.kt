@@ -354,7 +354,8 @@ class $CLASS_NAME(
         }
     }
 }
-""".trimStart()
+"""
+        .trimStart()
     }
   }
 }
