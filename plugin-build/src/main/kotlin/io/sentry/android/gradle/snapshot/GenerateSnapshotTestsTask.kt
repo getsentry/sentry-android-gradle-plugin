@@ -181,36 +181,9 @@ private object DeviceConfigBuilder {
 private val paparazziTestName =
     TestName(packageName = "Paparazzi", className = "Preview", methodName = "Test")
 
-private class PreviewSnapshotVerifier(
-    maxPercentDifference: Double,
+private class TestNameOverrideHandler(
+    private val delegate: SnapshotHandler,
 ) : SnapshotHandler {
-    private val delegate = SnapshotVerifier(maxPercentDifference = maxPercentDifference)
-
-    override fun newFrameHandler(
-        snapshot: Snapshot,
-        frameCount: Int,
-        fps: Int,
-    ): SnapshotHandler.FrameHandler {
-        val newSnapshot = Snapshot(
-            name = snapshot.name,
-            testName = paparazziTestName,
-            timestamp = snapshot.timestamp,
-            tags = snapshot.tags,
-            file = snapshot.file,
-        )
-        return delegate.newFrameHandler(newSnapshot, frameCount, fps)
-    }
-
-    override fun close() {
-        delegate.close()
-    }
-}
-
-private class PreviewHtmlReportWriter(
-    maxPercentDifference: Double,
-) : SnapshotHandler {
-    private val delegate = HtmlReportWriter(maxPercentDifference = maxPercentDifference)
-
     override fun newFrameHandler(
         snapshot: Snapshot,
         frameCount: Int,
@@ -252,10 +225,12 @@ private object PaparazziPreviewRule {
                 previewInfo.widthDp > 0 && previewInfo.heightDp > 0 -> SessionParams.RenderingMode.FULL_EXPAND
                 else -> SessionParams.RenderingMode.SHRINK
             },
-            snapshotHandler = when (System.getProperty("paparazzi.test.verify")?.toBoolean() == true) {
-                true -> PreviewSnapshotVerifier(tolerance)
-                false -> PreviewHtmlReportWriter(tolerance)
-            },
+            snapshotHandler = TestNameOverrideHandler(
+                when (System.getProperty("paparazzi.test.verify")?.toBoolean() == true) {
+                    true -> SnapshotVerifier(maxPercentDifference = tolerance)
+                    false -> HtmlReportWriter(maxPercentDifference = tolerance)
+                }
+            ),
             maxPercentDifference = tolerance,
         )
     }
