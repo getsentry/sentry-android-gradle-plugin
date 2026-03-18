@@ -28,9 +28,11 @@ class SentrySnapshotPlugin : Plugin<Project> {
       // for the Kotlin compiler to pick up the generated sources.
       android.sourceSets.getByName("test").kotlin.srcDir(generateTask.flatMap { it.outputDir })
 
-      project.tasks
-        .matching { it.name.matches(Regex("(compile|ksp).*UnitTestKotlin")) }
-        .configureEach { it.dependsOn(generateTask) }
+      project.tasks.configureEach { task ->
+        if (task.name.matches(Regex("(compile|ksp).*UnitTestKotlin"))) {
+          task.dependsOn(generateTask)
+        }
+      }
     }
 
     project.afterEvaluate {
