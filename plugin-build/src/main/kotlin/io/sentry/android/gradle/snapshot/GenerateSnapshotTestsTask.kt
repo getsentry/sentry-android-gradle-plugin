@@ -62,7 +62,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
         // Fall back to the Android namespace when the user doesn't configure packageTrees
         task.packageTrees.set(
           extension.packageTrees.map { packages ->
-            packages.ifEmpty { listOfNotNull(android.namespace) }
+            packages.ifEmpty { listOf(android.namespace) }
           }
         )
         task.outputDir.set(project.layout.buildDirectory.dir("generated/sentry/snapshotTests"))
@@ -77,13 +77,8 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
       val includePrivateExpr =
         if (includePrivatePreviews) "\n                .includePrivatePreviews()" else ""
 
-      val scanExpr =
-        if (packageTrees.isNotEmpty()) {
-          val packages = packageTrees.joinToString(", ") { "\"$it\"" }
-          ".scanPackageTrees($packages)"
-        } else {
-          ".scanAllPackages()"
-        }
+      val packages = packageTrees.joinToString(", ") { "\"$it\"" }
+      val scanExpr = ".scanPackageTrees($packages)"
 
       return """
 package $PACKAGE_NAME

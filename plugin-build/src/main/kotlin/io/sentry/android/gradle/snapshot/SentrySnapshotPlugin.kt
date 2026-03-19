@@ -37,8 +37,8 @@ class SentrySnapshotPlugin : Plugin<Project> {
 
     project.afterEvaluate {
       if (!project.pluginManager.hasPlugin("app.cash.paparazzi")) {
-        project.logger.warn(
-          "WARNING: 'io.sentry.android.snapshot' requires the 'app.cash.paparazzi' plugin. " +
+        error(
+          "'io.sentry.android.snapshot' requires the 'app.cash.paparazzi' plugin. " +
             "Please apply 'app.cash.paparazzi' to use snapshot testing."
         )
       }
