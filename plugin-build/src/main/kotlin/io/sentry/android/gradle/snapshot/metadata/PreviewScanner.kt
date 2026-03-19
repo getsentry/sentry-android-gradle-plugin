@@ -22,10 +22,7 @@ data class PreviewConfig(
   var heightDp: Int? = null,
 )
 
-data class PreviewMethod(
-  val methodName: String,
-  val config: PreviewConfig,
-)
+data class PreviewMethod(val methodName: String, val config: PreviewConfig)
 
 class PreviewMethodScanner(private val includePrivatePreviews: Boolean) {
 

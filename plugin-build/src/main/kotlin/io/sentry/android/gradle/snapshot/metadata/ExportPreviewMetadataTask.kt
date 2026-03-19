@@ -117,8 +117,7 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
     val methods = scanner.scan(bytes)
     if (methods.isEmpty()) return
 
-    val rawClassName =
-      relativePath.removeSuffix(".class").replace('/', '.').replace('\\', '.')
+    val rawClassName = relativePath.removeSuffix(".class").replace('/', '.').replace('\\', '.')
     // Strip Kt suffix — Kotlin top-level functions compile to FooKt.class
     val className = rawClassName.removeSuffix("Kt")
 
@@ -199,10 +198,7 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
             .artifactView { view ->
               view.componentFilter { id -> id is ProjectComponentIdentifier }
               view.attributes { attrs ->
-                attrs.attribute(
-                  Attribute.of(ARTIFACT_TYPE, String::class.java),
-                  "android-classes",
-                )
+                attrs.attribute(Attribute.of(ARTIFACT_TYPE, String::class.java), "android-classes")
               }
             }
             .files

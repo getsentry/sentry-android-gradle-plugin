@@ -38,8 +38,7 @@ class ExportPreviewMetadataTaskTest {
 
     assertTrue(outputFile.exists())
     val parsed = parseJson(outputFile)
-    @Suppress("UNCHECKED_CAST")
-    val previews = parsed["previews"] as List<Map<String, Any?>>
+    @Suppress("UNCHECKED_CAST") val previews = parsed["previews"] as List<Map<String, Any?>>
     assertEquals(2, previews.size)
 
     val first = previews[0]
@@ -49,8 +48,7 @@ class ExportPreviewMetadataTaskTest {
 
     val second = previews[1]
     assertEquals("DarkGreetingPreview", second["methodName"])
-    @Suppress("UNCHECKED_CAST")
-    val config = second["configuration"] as Map<String, Any?>
+    @Suppress("UNCHECKED_CAST") val config = second["configuration"] as Map<String, Any?>
     assertEquals(0x20, config["uiMode"])
     assertEquals(true, config["showBackground"])
   }
@@ -78,12 +76,10 @@ class ExportPreviewMetadataTaskTest {
     task.export()
 
     val parsed = parseJson(outputFile)
-    @Suppress("UNCHECKED_CAST")
-    val scannedPackages = parsed["scannedPackages"] as List<String>
+    @Suppress("UNCHECKED_CAST") val scannedPackages = parsed["scannedPackages"] as List<String>
     assertEquals(listOf("io.app"), scannedPackages)
 
-    @Suppress("UNCHECKED_CAST")
-    val previews = parsed["previews"] as List<Map<String, Any?>>
+    @Suppress("UNCHECKED_CAST") val previews = parsed["previews"] as List<Map<String, Any?>>
     assertEquals(1, previews.size)
   }
 
@@ -111,8 +107,7 @@ class ExportPreviewMetadataTaskTest {
     task.export()
 
     val parsed = parseJson(outputFile)
-    @Suppress("UNCHECKED_CAST")
-    val previews = parsed["previews"] as List<Map<String, Any?>>
+    @Suppress("UNCHECKED_CAST") val previews = parsed["previews"] as List<Map<String, Any?>>
     assertEquals(1, previews.size)
     assertEquals("InsidePreview", previews[0]["methodName"])
   }
@@ -143,12 +138,10 @@ class ExportPreviewMetadataTaskTest {
     task.export()
 
     val parsed = parseJson(outputFile)
-    @Suppress("UNCHECKED_CAST")
-    val previews = parsed["previews"] as List<Map<String, Any?>>
+    @Suppress("UNCHECKED_CAST") val previews = parsed["previews"] as List<Map<String, Any?>>
     assertEquals(1, previews.size)
 
-    @Suppress("UNCHECKED_CAST")
-    val device = previews[0]["device"] as Map<String, Any?>
+    @Suppress("UNCHECKED_CAST") val device = previews[0]["device"] as Map<String, Any?>
     assertNotNull(device)
     assertEquals("spec:width=800dp,height=1280dp", device["deviceSpec"])
     assertEquals(800, device["widthDp"])
@@ -171,8 +164,7 @@ class ExportPreviewMetadataTaskTest {
     task.export()
 
     val parsed = parseJson(outputFile)
-    @Suppress("UNCHECKED_CAST")
-    val previews = parsed["previews"] as List<Map<String, Any?>>
+    @Suppress("UNCHECKED_CAST") val previews = parsed["previews"] as List<Map<String, Any?>>
     assertTrue(previews.isEmpty())
   }
 
@@ -221,13 +213,7 @@ class ExportPreviewMetadataTaskTest {
 
     for (method in methods) {
       val mv =
-        cw.visitMethod(
-          Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC,
-          method.name,
-          "()V",
-          null,
-          null,
-        )
+        cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, method.name, "()V", null, null)
       val av = mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)
       for ((key, value) in method.annotationFields) {
         av.visit(key, value)

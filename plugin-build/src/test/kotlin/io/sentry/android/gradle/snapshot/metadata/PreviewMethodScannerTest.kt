@@ -3,7 +3,6 @@ package io.sentry.android.gradle.snapshot.metadata
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.junit.Test
-import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 
@@ -11,12 +10,13 @@ class PreviewMethodScannerTest {
 
   @Test
   fun `finds public method annotated with Preview`() {
-    val bytes = buildClass("com/example/TestKt") { cw ->
-      val mv =
-        cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, "MyPreview", "()V", null, null)
-      mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)?.visitEnd()
-      mv.visitEnd()
-    }
+    val bytes =
+      buildClass("com/example/TestKt") { cw ->
+        val mv =
+          cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, "MyPreview", "()V", null, null)
+        mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)?.visitEnd()
+        mv.visitEnd()
+      }
 
     val results = PreviewMethodScanner(includePrivatePreviews = false).scan(bytes)
 
@@ -26,11 +26,13 @@ class PreviewMethodScannerTest {
 
   @Test
   fun `skips private methods when includePrivatePreviews is false`() {
-    val bytes = buildClass("com/example/TestKt") { cw ->
-      val mv = cw.visitMethod(Opcodes.ACC_PRIVATE or Opcodes.ACC_STATIC, "Secret", "()V", null, null)
-      mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)?.visitEnd()
-      mv.visitEnd()
-    }
+    val bytes =
+      buildClass("com/example/TestKt") { cw ->
+        val mv =
+          cw.visitMethod(Opcodes.ACC_PRIVATE or Opcodes.ACC_STATIC, "Secret", "()V", null, null)
+        mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)?.visitEnd()
+        mv.visitEnd()
+      }
 
     val results = PreviewMethodScanner(includePrivatePreviews = false).scan(bytes)
 
@@ -39,11 +41,13 @@ class PreviewMethodScannerTest {
 
   @Test
   fun `includes private methods when includePrivatePreviews is true`() {
-    val bytes = buildClass("com/example/TestKt") { cw ->
-      val mv = cw.visitMethod(Opcodes.ACC_PRIVATE or Opcodes.ACC_STATIC, "Secret", "()V", null, null)
-      mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)?.visitEnd()
-      mv.visitEnd()
-    }
+    val bytes =
+      buildClass("com/example/TestKt") { cw ->
+        val mv =
+          cw.visitMethod(Opcodes.ACC_PRIVATE or Opcodes.ACC_STATIC, "Secret", "()V", null, null)
+        mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)?.visitEnd()
+        mv.visitEnd()
+      }
 
     val results = PreviewMethodScanner(includePrivatePreviews = true).scan(bytes)
 
@@ -53,12 +57,13 @@ class PreviewMethodScannerTest {
 
   @Test
   fun `ignores methods without Preview annotation`() {
-    val bytes = buildClass("com/example/TestKt") { cw ->
-      val mv =
-        cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, "NotAPreview", "()V", null, null)
-      mv.visitAnnotation("Landroidx/compose/runtime/Composable;", true)?.visitEnd()
-      mv.visitEnd()
-    }
+    val bytes =
+      buildClass("com/example/TestKt") { cw ->
+        val mv =
+          cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, "NotAPreview", "()V", null, null)
+        mv.visitAnnotation("Landroidx/compose/runtime/Composable;", true)?.visitEnd()
+        mv.visitEnd()
+      }
 
     val results = PreviewMethodScanner(includePrivatePreviews = false).scan(bytes)
 
@@ -67,24 +72,25 @@ class PreviewMethodScannerTest {
 
   @Test
   fun `extracts all annotation fields`() {
-    val bytes = buildClass("com/example/TestKt") { cw ->
-      val mv =
-        cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, "Configured", "()V", null, null)
-      val av = mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)
-      av.visit("name", "Dark Theme")
-      av.visit("apiLevel", 33)
-      av.visit("locale", "de")
-      av.visit("fontScale", 1.5f)
-      av.visit("uiMode", 0x20)
-      av.visit("showSystemUi", true)
-      av.visit("showBackground", true)
-      av.visit("backgroundColor", 0xFFFF0000L)
-      av.visit("device", "spec:width=411dp,height=891dp")
-      av.visit("widthDp", 411)
-      av.visit("heightDp", 891)
-      av.visitEnd()
-      mv.visitEnd()
-    }
+    val bytes =
+      buildClass("com/example/TestKt") { cw ->
+        val mv =
+          cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, "Configured", "()V", null, null)
+        val av = mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)
+        av.visit("name", "Dark Theme")
+        av.visit("apiLevel", 33)
+        av.visit("locale", "de")
+        av.visit("fontScale", 1.5f)
+        av.visit("uiMode", 0x20)
+        av.visit("showSystemUi", true)
+        av.visit("showBackground", true)
+        av.visit("backgroundColor", 0xFFFF0000L)
+        av.visit("device", "spec:width=411dp,height=891dp")
+        av.visit("widthDp", 411)
+        av.visit("heightDp", 891)
+        av.visitEnd()
+        mv.visitEnd()
+      }
 
     val results = PreviewMethodScanner(includePrivatePreviews = false).scan(bytes)
 
@@ -105,12 +111,12 @@ class PreviewMethodScannerTest {
 
   @Test
   fun `defaults are used when annotation has no explicit fields`() {
-    val bytes = buildClass("com/example/TestKt") { cw ->
-      val mv =
-        cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, "Bare", "()V", null, null)
-      mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)?.visitEnd()
-      mv.visitEnd()
-    }
+    val bytes =
+      buildClass("com/example/TestKt") { cw ->
+        val mv = cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, "Bare", "()V", null, null)
+        mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)?.visitEnd()
+        mv.visitEnd()
+      }
 
     val results = PreviewMethodScanner(includePrivatePreviews = false).scan(bytes)
 
@@ -131,14 +137,14 @@ class PreviewMethodScannerTest {
 
   @Test
   fun `finds multiple preview methods in one class`() {
-    val bytes = buildClass("com/example/ScreenKt") { cw ->
-      for (name in listOf("LightPreview", "DarkPreview", "TabletPreview")) {
-        val mv =
-          cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, name, "()V", null, null)
-        mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)?.visitEnd()
-        mv.visitEnd()
+    val bytes =
+      buildClass("com/example/ScreenKt") { cw ->
+        for (name in listOf("LightPreview", "DarkPreview", "TabletPreview")) {
+          val mv = cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, name, "()V", null, null)
+          mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)?.visitEnd()
+          mv.visitEnd()
+        }
       }
-    }
 
     val results = PreviewMethodScanner(includePrivatePreviews = false).scan(bytes)
 
@@ -162,10 +168,7 @@ class PreviewMethodScannerTest {
    * Builds a minimal .class file with the given internal name and allows the caller to add methods
    * via the [block] callback.
    */
-  private fun buildClass(
-    internalName: String,
-    block: (ClassWriter) -> Unit,
-  ): ByteArray {
+  private fun buildClass(internalName: String, block: (ClassWriter) -> Unit): ByteArray {
     val cw = ClassWriter(0)
     cw.visit(
       Opcodes.V11,

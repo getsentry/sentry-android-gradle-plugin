@@ -202,9 +202,7 @@ distributions {
     contents { from("build${sep}publications${sep}sentrySnapshotPluginPluginMarkerMaven") }
   }
   create("sentrySnapshotMetadataPluginMarker") {
-    contents {
-      from("build${sep}publications${sep}sentrySnapshotMetadataPluginPluginMarkerMaven")
-    }
+    contents { from("build${sep}publications${sep}sentrySnapshotMetadataPluginPluginMarkerMaven") }
   }
 }
 

@@ -48,15 +48,7 @@ data class PreviewConfiguration(
     )
 }
 
-data class DeviceMetadata(
-  val deviceSpec: String?,
-  val widthDp: Int?,
-  val heightDp: Int?,
-) {
+data class DeviceMetadata(val deviceSpec: String?, val widthDp: Int?, val heightDp: Int?) {
   fun toMap(): Map<String, Any?> =
-    mapOf(
-      "deviceSpec" to deviceSpec,
-      "widthDp" to widthDp,
-      "heightDp" to heightDp,
-    )
+    mapOf("deviceSpec" to deviceSpec, "widthDp" to widthDp, "heightDp" to heightDp)
 }
