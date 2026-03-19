@@ -62,7 +62,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
         // Fall back to the Android namespace when the user doesn't configure packageTrees
         task.packageTrees.set(
           extension.packageTrees.map { packages ->
-            packages.ifEmpty { listOf(android.namespace) }
+            packages.ifEmpty { listOf(android.namespace!!) }
           }
         )
         task.outputDir.set(project.layout.buildDirectory.dir("generated/sentry/snapshotTests"))
