@@ -342,6 +342,7 @@ private fun Variant.configureDependenciesTask(
   sentryTelemetryProvider: Provider<SentryTelemetryService>,
 ): TaskProvider<SentryExternalDependenciesReportTaskV2>? {
   if (extension.includeDependenciesReport.get()) {
+    val outputDir = project.layout.buildDirectory.dir("generated${sep}sentry${sep}dependencies${sep}${name}")
     val reportDependenciesTask =
       SentryExternalDependenciesReportTaskV2.register(
         project = project,
@@ -349,6 +350,7 @@ private fun Variant.configureDependenciesTask(
         sentryTelemetryProvider,
         configurationName = "${name}RuntimeClasspath",
         attributeValueJar = "android-classes",
+        output = outputDir,
         includeReport = extension.includeDependenciesReport,
         taskSuffix = name.capitalized,
       )
