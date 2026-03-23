@@ -104,7 +104,7 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
   }
 
   private fun matchesPackage(classPath: String, packagePaths: List<String>): Boolean {
-    return packagePaths.any { classPath.startsWith(it) }
+    return packagePaths.any { classPath.startsWith("$it/") }
   }
 
   private fun scanClassFile(
@@ -113,9 +113,10 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
     scanner: PreviewMethodScanner,
     results: MutableList<PreviewMetadata>,
   ) {
-    val sourceFileName = extractSourceFileName(bytes)
-    val methods = scanner.scan(bytes)
+    val scanResult = scanner.fullScan(bytes)
+    val methods = scanResult.previewMethods
     if (methods.isEmpty()) return
+    val sourceFileName = scanResult.sourceFile
 
     val rawClassName = relativePath.removeSuffix(".class").replace('/', '.').replace('\\', '.')
     // Strip Kt suffix — Kotlin top-level functions compile to FooKt.class
@@ -154,20 +155,6 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
         )
       )
     }
-  }
-
-  private fun extractSourceFileName(bytes: ByteArray): String? {
-    var sourceFile: String? = null
-    val reader = org.objectweb.asm.ClassReader(bytes)
-    reader.accept(
-      object : org.objectweb.asm.ClassVisitor(org.objectweb.asm.Opcodes.ASM9) {
-        override fun visitSource(source: String?, debug: String?) {
-          sourceFile = source
-        }
-      },
-      org.objectweb.asm.ClassReader.SKIP_CODE or org.objectweb.asm.ClassReader.SKIP_FRAMES,
-    )
-    return sourceFile
   }
 
   companion object {

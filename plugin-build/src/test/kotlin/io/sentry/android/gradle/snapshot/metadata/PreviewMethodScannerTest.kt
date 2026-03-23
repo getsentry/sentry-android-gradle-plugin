@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.snapshot.metadata
 
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.Test
 import org.objectweb.asm.ClassWriter
@@ -162,6 +163,47 @@ class PreviewMethodScannerTest {
     val results = PreviewMethodScanner(includePrivatePreviews = false).scan(bytes)
 
     assertTrue(results.isEmpty())
+  }
+
+  @Test
+  fun `fullScan extracts source file name`() {
+    val cw = ClassWriter(0)
+    cw.visit(
+      Opcodes.V11,
+      Opcodes.ACC_PUBLIC or Opcodes.ACC_FINAL,
+      "com/example/ScreenKt",
+      null,
+      "java/lang/Object",
+      null,
+    )
+    cw.visitSource("Screen.kt", null)
+    val mv =
+      cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, "ScreenPreview", "()V", null, null)
+    mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)?.visitEnd()
+    mv.visitEnd()
+    cw.visitEnd()
+
+    val result = PreviewMethodScanner(includePrivatePreviews = false).fullScan(cw.toByteArray())
+
+    assertEquals("Screen.kt", result.sourceFile)
+    assertEquals(1, result.previewMethods.size)
+    assertEquals("ScreenPreview", result.previewMethods[0].methodName)
+  }
+
+  @Test
+  fun `fullScan returns null source file when not present`() {
+    val bytes =
+      buildClass("com/example/NoSourceKt") { cw ->
+        val mv =
+          cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, "Preview", "()V", null, null)
+        mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)?.visitEnd()
+        mv.visitEnd()
+      }
+
+    val result = PreviewMethodScanner(includePrivatePreviews = false).fullScan(bytes)
+
+    assertNull(result.sourceFile)
+    assertEquals(1, result.previewMethods.size)
   }
 
   /**

@@ -24,13 +24,17 @@ data class PreviewConfig(
 
 data class PreviewMethod(val methodName: String, val config: PreviewConfig)
 
+data class ScanResult(val previewMethods: List<PreviewMethod>, val sourceFile: String?)
+
 class PreviewMethodScanner(private val includePrivatePreviews: Boolean) {
 
-  fun scan(classBytes: ByteArray): List<PreviewMethod> {
+  fun scan(classBytes: ByteArray): List<PreviewMethod> = fullScan(classBytes).previewMethods
+
+  fun fullScan(classBytes: ByteArray): ScanResult {
     val reader = ClassReader(classBytes)
     val visitor = PreviewClassVisitor(includePrivatePreviews)
     reader.accept(visitor, ClassReader.SKIP_CODE or ClassReader.SKIP_FRAMES)
-    return visitor.previewMethods
+    return ScanResult(visitor.previewMethods, visitor.sourceFile)
   }
 }
 
@@ -38,6 +42,11 @@ private class PreviewClassVisitor(private val includePrivatePreviews: Boolean) :
   ClassVisitor(Opcodes.ASM9) {
 
   val previewMethods = mutableListOf<PreviewMethod>()
+  var sourceFile: String? = null
+
+  override fun visitSource(source: String?, debug: String?) {
+    sourceFile = source
+  }
 
   override fun visitMethod(
     access: Int,
