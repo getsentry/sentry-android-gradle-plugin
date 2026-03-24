@@ -1,6 +1,10 @@
 package io.sentry.android.gradle.snapshot
 
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.api.variant.HostTestBuilder
 import com.android.build.gradle.BaseExtension
+import io.sentry.android.gradle.util.AgpVersions
+import kotlin.jvm.java
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -17,20 +21,33 @@ class SentrySnapshotPlugin : Plugin<Project> {
     project.pluginManager.withPlugin("app.cash.paparazzi") {
       val android = project.extensions.getByType(BaseExtension::class.java)
 
-      val generateTask = GenerateSnapshotTestsTask.register(project, extension, android)
-
       project.dependencies.add(
         "testImplementation",
         "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
       )
 
-      // Wire source set and task dependencies eagerly — afterEvaluate is too late
-      // for the Kotlin compiler to pick up the generated sources.
-      android.sourceSets.getByName("test").kotlin.srcDir(generateTask.flatMap { it.outputDir })
+      val androidComponents =
+        project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
 
-      project.tasks.configureEach { task ->
-        if (task.name.matches(Regex("(compile|ksp).*UnitTestKotlin"))) {
-          task.dependsOn(generateTask)
+      androidComponents.onVariants { variant ->
+        val generateTask = GenerateSnapshotTestsTask.register(project, extension, android, variant)
+        if (AgpVersions.isAGP90(AgpVersions.CURRENT)) {
+          // Right now it seems we only have HostTestBuilder.UNIT_TEST_TYPE as the key but we are
+          // creating screenshot tests like HostTestBuilder.SCREENSHOT_TEST_TYPE
+          // We should adjust this once the API is stable and documented.
+          variant.hostTests[HostTestBuilder.UNIT_TEST_TYPE]
+            // Using `sources?.kotlin` is broken so we have to use sources?.java:
+            // https://issuetracker.google.com/issues/268248348
+            ?.sources
+            ?.java
+            ?.addGeneratedSourceDirectory(generateTask, GenerateSnapshotTestsTask::outputDir)
+        } else {
+          // `unitTest` is deprecated, the replacement above is complex
+          @Suppress("DEPRECATION_ERROR")
+          variant.unitTest
+            ?.sources
+            ?.java
+            ?.addGeneratedSourceDirectory(generateTask, GenerateSnapshotTestsTask::outputDir)
         }
       }
     }
