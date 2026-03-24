@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.3.0-alpha.2
+
+### Internal Changes 🔧
+
+- Pin GitHub Actions to full-length commit SHAs by @joshuarli in [#1116](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1116)
+
 ## 6.2.0
 
 ### Features
