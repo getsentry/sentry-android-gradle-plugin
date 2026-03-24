@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.snapshot
 
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.api.variant.HostTestBuilder
 import com.android.build.gradle.BaseExtension
 import io.sentry.android.gradle.util.AgpVersions
 import kotlin.jvm.java
@@ -34,14 +35,12 @@ class SentrySnapshotPlugin : Plugin<Project> {
           // Right now it seems we only have HostTestBuilder.UNIT_TEST_TYPE as the key but we are
           // creating screenshot tests like HostTestBuilder.SCREENSHOT_TEST_TYPE
           // We should adjust this once the API is stable and documented.
-          variant.hostTests.values.forEach {
+          variant.hostTests[HostTestBuilder.UNIT_TEST_TYPE]
             // Using `sources?.kotlin` is broken so we have to use sources?.java:
             // https://issuetracker.google.com/issues/268248348
-            it.sources.java?.addGeneratedSourceDirectory(
-              generateTask,
-              GenerateSnapshotTestsTask::outputDir,
-            )
-          }
+            ?.sources
+            ?.java
+            ?.addGeneratedSourceDirectory(generateTask, GenerateSnapshotTestsTask::outputDir)
         } else {
           // `unitTest` is deprecated, the replacement above is complex
           @Suppress("DEPRECATION_ERROR")
