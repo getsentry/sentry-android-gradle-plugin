@@ -69,7 +69,9 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
             packages.ifEmpty { listOf(android.namespace!!) }
           }
         )
-        task.outputDir.set(project.layout.buildDirectory.dir("generated/sentry/snapshotTests/${variant.name}"))
+        task.outputDir.set(
+          project.layout.buildDirectory.dir("generated/sentry/snapshotTests/${variant.name}")
+        )
       }
     }
 
