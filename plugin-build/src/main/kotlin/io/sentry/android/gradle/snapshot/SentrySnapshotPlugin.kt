@@ -1,8 +1,12 @@
 package io.sentry.android.gradle.snapshot
 
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.api.variant.HasUnitTest
+import com.android.build.api.variant.UnitTest
 import com.android.build.gradle.BaseExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import kotlin.jvm.java
 
 class SentrySnapshotPlugin : Plugin<Project> {
 
@@ -24,14 +28,14 @@ class SentrySnapshotPlugin : Plugin<Project> {
         "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
       )
 
-      // Wire source set and task dependencies eagerly — afterEvaluate is too late
-      // for the Kotlin compiler to pick up the generated sources.
-      android.sourceSets.getByName("test").kotlin.srcDir(generateTask.flatMap { it.outputDir })
+      val androidComponents =
+        project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
 
-      project.tasks.configureEach { task ->
-        if (task.name.matches(Regex("(compile|ksp).*UnitTestKotlin"))) {
-          task.dependsOn(generateTask)
-        }
+      androidComponents.onVariants { variant ->
+        (variant as? HasUnitTest)?.unitTest?.sources?.kotlin?.addGeneratedSourceDirectory(
+          generateTask,
+          GenerateSnapshotTestsTask::outputDir
+        )
       }
     }
 
