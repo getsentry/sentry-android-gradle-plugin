@@ -1,12 +1,10 @@
 package io.sentry.android.gradle.snapshot.metadata
 
-import com.android.build.gradle.BaseExtension
 import groovy.json.JsonOutput
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
@@ -24,10 +22,6 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
     description = "Exports Compose @Preview metadata to a JSON file using ASM bytecode scanning"
   }
 
-  @get:Input abstract val scanPackages: ListProperty<String>
-
-  @get:Input abstract val namespace: Property<String>
-
   @get:Input abstract val includePrivatePreviews: Property<Boolean>
 
   @get:InputDirectory
@@ -38,8 +32,6 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
 
   @TaskAction
   fun export() {
-    val packages = scanPackages.get().ifEmpty { listOf(namespace.get()) }
-    val packagePaths = packages.map { it.replace('.', '/') }
     val scanner = PreviewMethodScanner(includePrivatePreviews.get())
     val rootDir = mergedClassesDir.get().asFile
 
@@ -54,19 +46,17 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
         .forEach { file -> scanner.findCustomAnnotations(file.readBytes(), customAnnotations) }
     }
 
-    // Second pass: find preview methods (filtered to scanned packages)
+    // Second pass: find preview methods
     val previews = mutableListOf<PreviewMetadata>()
     rootDir
       .walk()
       .filter { it.isFile && it.name.endsWith(".class") }
       .forEach { file ->
         val relativePath = file.relativeTo(rootDir).path
-        if (matchesPackage(relativePath, packagePaths)) {
-          scanClassFile(file.readBytes(), relativePath, scanner, customAnnotations, previews)
-        }
+        scanClassFile(file.readBytes(), relativePath, scanner, customAnnotations, previews)
       }
 
-    val export = PreviewMetadataExport(scannedPackages = packages, previews = previews)
+    val export = PreviewMetadataExport(previews = previews)
     val json = JsonOutput.prettyPrint(JsonOutput.toJson(export.toMap()))
 
     val outFile = outputFile.get().asFile
@@ -74,10 +64,6 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
     outFile.writeText(json)
 
     logger.lifecycle("Exported ${previews.size} preview(s) to ${outFile.absolutePath}")
-  }
-
-  private fun matchesPackage(classPath: String, packagePaths: List<String>): Boolean {
-    return packagePaths.any { classPath.startsWith("$it/") }
   }
 
   private fun scanClassFile(
@@ -149,15 +135,12 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
     fun register(
       project: Project,
       extension: SentrySnapshotMetadataExtension,
-      android: BaseExtension,
       mergeTask: TaskProvider<MergeClassesTask>,
     ): TaskProvider<ExportPreviewMetadataTask> {
       return project.tasks.register(
         "exportPreviewMetadata",
         ExportPreviewMetadataTask::class.java,
       ) { task ->
-        task.scanPackages.set(extension.packageTrees)
-        task.namespace.set(project.provider { android.namespace ?: "" })
         task.includePrivatePreviews.set(extension.includePrivatePreviews)
         task.mergedClassesDir.set(mergeTask.flatMap { it.outputDir })
 

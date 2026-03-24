@@ -1,7 +1,6 @@
 package io.sentry.android.gradle.snapshot.metadata
 
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.jetbrains.annotations.ApiStatus
 
@@ -14,7 +13,4 @@ abstract class SentrySnapshotMetadataExtension(objects: ObjectFactory) {
 
   val includePrivatePreviews: Property<Boolean> =
     objects.property(Boolean::class.java).convention(false)
-
-  val packageTrees: ListProperty<String> =
-    objects.listProperty(String::class.java).convention(emptyList())
 }

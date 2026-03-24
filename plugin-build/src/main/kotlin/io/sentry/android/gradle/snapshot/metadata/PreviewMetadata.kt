@@ -1,11 +1,7 @@
 package io.sentry.android.gradle.snapshot.metadata
 
-data class PreviewMetadataExport(
-  val scannedPackages: List<String>,
-  val previews: List<PreviewMetadata>,
-) {
-  fun toMap(): Map<String, Any> =
-    mapOf("scannedPackages" to scannedPackages, "previews" to previews.map { it.toMap() })
+data class PreviewMetadataExport(val previews: List<PreviewMetadata>) {
+  fun toMap(): Map<String, Any> = mapOf("previews" to previews.map { it.toMap() })
 }
 
 data class PreviewMetadata(

@@ -33,7 +33,7 @@ class ExportPreviewMetadataTaskTest {
     )
 
     val outputFile = tmpDir.newFile("preview-metadata.json")
-    val task = createTask(classesDir.parentFile.parentFile, outputFile, listOf("com.example"))
+    val task = createTask(classesDir.parentFile.parentFile, outputFile)
 
     task.export()
 
@@ -55,62 +55,37 @@ class ExportPreviewMetadataTaskTest {
   }
 
   @Test
-  fun `falls back to namespace when scanPackages is empty`() {
-    val classesDir = tmpDir.newFolder("classes", "io", "app")
+  fun `scans all classes in merged directory`() {
+    val classesDir = tmpDir.newFolder("classes")
+
+    val pkg1 = File(classesDir, "com/feature1")
+    pkg1.mkdirs()
     writePreviewClass(
-      dir = classesDir,
-      fileName = "ScreenKt.class",
-      internalName = "io/app/ScreenKt",
-      sourceFile = "Screen.kt",
-      methods = listOf(MethodSpec("ScreenPreview")),
+      dir = pkg1,
+      fileName = "F1Kt.class",
+      internalName = "com/feature1/F1Kt",
+      methods = listOf(MethodSpec("Feature1Preview")),
+    )
+
+    val pkg2 = File(classesDir, "com/feature2")
+    pkg2.mkdirs()
+    writePreviewClass(
+      dir = pkg2,
+      fileName = "F2Kt.class",
+      internalName = "com/feature2/F2Kt",
+      methods = listOf(MethodSpec("Feature2Preview")),
     )
 
     val outputFile = tmpDir.newFile("output.json")
-    val task =
-      createTask(
-        classesDir = classesDir.parentFile.parentFile,
-        outputFile = outputFile,
-        scanPackages = emptyList(),
-        namespace = "io.app",
-      )
-
-    task.export()
-
-    val parsed = parseJson(outputFile)
-    @Suppress("UNCHECKED_CAST") val scannedPackages = parsed["scannedPackages"] as List<String>
-    assertEquals(listOf("io.app"), scannedPackages)
-
-    @Suppress("UNCHECKED_CAST") val previews = parsed["previews"] as List<Map<String, Any?>>
-    assertEquals(1, previews.size)
-  }
-
-  @Test
-  fun `skips classes outside scanned packages`() {
-    val inPackage = tmpDir.newFolder("classes", "com", "example")
-    val outsidePackage = tmpDir.newFolder("classes", "com", "other")
-
-    writePreviewClass(
-      dir = inPackage,
-      fileName = "InsideKt.class",
-      internalName = "com/example/InsideKt",
-      methods = listOf(MethodSpec("InsidePreview")),
-    )
-    writePreviewClass(
-      dir = outsidePackage,
-      fileName = "OutsideKt.class",
-      internalName = "com/other/OutsideKt",
-      methods = listOf(MethodSpec("OutsidePreview")),
-    )
-
-    val outputFile = tmpDir.newFile("output.json")
-    val task = createTask(inPackage.parentFile.parentFile, outputFile, listOf("com.example"))
+    val task = createTask(classesDir, outputFile)
 
     task.export()
 
     val parsed = parseJson(outputFile)
     @Suppress("UNCHECKED_CAST") val previews = parsed["previews"] as List<Map<String, Any?>>
-    assertEquals(1, previews.size)
-    assertEquals("InsidePreview", previews[0]["methodName"])
+    assertEquals(2, previews.size)
+    val methodNames = previews.map { it["methodName"] }.toSet()
+    assertEquals(setOf("Feature1Preview", "Feature2Preview"), methodNames)
   }
 
   @Test
@@ -134,7 +109,7 @@ class ExportPreviewMetadataTaskTest {
     )
 
     val outputFile = tmpDir.newFile("output.json")
-    val task = createTask(classesDir.parentFile.parentFile, outputFile, listOf("com.example"))
+    val task = createTask(classesDir.parentFile.parentFile, outputFile)
 
     task.export()
 
@@ -160,42 +135,13 @@ class ExportPreviewMetadataTaskTest {
     )
 
     val outputFile = tmpDir.newFile("output.json")
-    val task = createTask(classesDir.parentFile.parentFile, outputFile, listOf("com.example"))
+    val task = createTask(classesDir.parentFile.parentFile, outputFile)
 
     task.export()
 
     val parsed = parseJson(outputFile)
     @Suppress("UNCHECKED_CAST") val previews = parsed["previews"] as List<Map<String, Any?>>
     assertTrue(previews.isEmpty())
-  }
-
-  @Test
-  fun `does not match packages with a shared prefix`() {
-    val targetPackage = tmpDir.newFolder("classes", "com", "example")
-    val similarPackage = tmpDir.newFolder("classes", "com", "exampleextended")
-
-    writePreviewClass(
-      dir = targetPackage,
-      fileName = "TargetKt.class",
-      internalName = "com/example/TargetKt",
-      methods = listOf(MethodSpec("TargetPreview")),
-    )
-    writePreviewClass(
-      dir = similarPackage,
-      fileName = "SimilarKt.class",
-      internalName = "com/exampleextended/SimilarKt",
-      methods = listOf(MethodSpec("SimilarPreview")),
-    )
-
-    val outputFile = tmpDir.newFile("output.json")
-    val task = createTask(targetPackage.parentFile.parentFile, outputFile, listOf("com.example"))
-
-    task.export()
-
-    val parsed = parseJson(outputFile)
-    @Suppress("UNCHECKED_CAST") val previews = parsed["previews"] as List<Map<String, Any?>>
-    assertEquals(1, previews.size)
-    assertEquals("TargetPreview", previews[0]["methodName"])
   }
 
   @Test
@@ -210,13 +156,7 @@ class ExportPreviewMetadataTaskTest {
     )
 
     val outputFile = tmpDir.newFile("output.json")
-    val task =
-      createTask(
-        classesDir = classesDir.parentFile.parentFile,
-        outputFile = outputFile,
-        scanPackages = listOf("com.example"),
-        includePrivate = true,
-      )
+    val task = createTask(classesDir.parentFile.parentFile, outputFile, includePrivate = true)
 
     task.export()
 
@@ -238,7 +178,7 @@ class ExportPreviewMetadataTaskTest {
     )
 
     val outputFile = tmpDir.newFile("output.json")
-    val task = createTask(classesDir.parentFile.parentFile, outputFile, listOf("com.example"))
+    val task = createTask(classesDir.parentFile.parentFile, outputFile)
 
     task.export()
 
@@ -258,7 +198,7 @@ class ExportPreviewMetadataTaskTest {
     )
 
     val outputFile = tmpDir.newFile("output.json")
-    val task = createTask(classesDir.parentFile.parentFile, outputFile, listOf("com.example"))
+    val task = createTask(classesDir.parentFile.parentFile, outputFile)
 
     task.export()
 
@@ -268,51 +208,12 @@ class ExportPreviewMetadataTaskTest {
     assertNull(previews[0]["device"])
   }
 
-  @Test
-  fun `scans multiple packages`() {
-    val pkg1 = tmpDir.newFolder("classes", "com", "feature1")
-    val pkg2 = tmpDir.newFolder("classes", "com", "feature2")
-    val pkg3 = tmpDir.newFolder("classes", "com", "excluded")
-
-    writePreviewClass(
-      dir = pkg1,
-      fileName = "F1Kt.class",
-      internalName = "com/feature1/F1Kt",
-      methods = listOf(MethodSpec("Feature1Preview")),
-    )
-    writePreviewClass(
-      dir = pkg2,
-      fileName = "F2Kt.class",
-      internalName = "com/feature2/F2Kt",
-      methods = listOf(MethodSpec("Feature2Preview")),
-    )
-    writePreviewClass(
-      dir = pkg3,
-      fileName = "ExKt.class",
-      internalName = "com/excluded/ExKt",
-      methods = listOf(MethodSpec("ExcludedPreview")),
-    )
-
-    val outputFile = tmpDir.newFile("output.json")
-    val task =
-      createTask(pkg1.parentFile.parentFile, outputFile, listOf("com.feature1", "com.feature2"))
-
-    task.export()
-
-    val parsed = parseJson(outputFile)
-    @Suppress("UNCHECKED_CAST") val previews = parsed["previews"] as List<Map<String, Any?>>
-    assertEquals(2, previews.size)
-    val methodNames = previews.map { it["methodName"] }.toSet()
-    assertEquals(setOf("Feature1Preview", "Feature2Preview"), methodNames)
-  }
-
   // region Custom annotation integration tests
 
   @Test
   fun `discovers custom annotations and expands them in export`() {
     val classesDir = tmpDir.newFolder("classes")
 
-    // Custom annotation class in com/annotations
     val annotationsDir = File(classesDir, "com/annotations")
     annotationsDir.mkdirs()
     writeAnnotationClass(
@@ -322,7 +223,6 @@ class ExportPreviewMetadataTaskTest {
       previewFields = mapOf("name" to "Dark", "uiMode" to 32, "showBackground" to true),
     )
 
-    // Method using the custom annotation in com/example
     val exampleDir = File(classesDir, "com/example")
     exampleDir.mkdirs()
     writeClassWithCustomAnnotation(
@@ -334,7 +234,7 @@ class ExportPreviewMetadataTaskTest {
     )
 
     val outputFile = tmpDir.newFile("output.json")
-    val task = createTask(classesDir, outputFile, listOf("com.example"))
+    val task = createTask(classesDir, outputFile)
 
     task.export()
 
@@ -362,7 +262,7 @@ class ExportPreviewMetadataTaskTest {
     )
 
     val outputFile = tmpDir.newFile("output.json")
-    val task = createTask(classesDir.parentFile.parentFile, outputFile, listOf("com.example"))
+    val task = createTask(classesDir.parentFile.parentFile, outputFile)
 
     task.export()
 
@@ -390,7 +290,7 @@ class ExportPreviewMetadataTaskTest {
     )
 
     val outputFile = tmpDir.newFile("output.json")
-    val task = createTask(classesDir.parentFile.parentFile, outputFile, listOf("com.example"))
+    val task = createTask(classesDir.parentFile.parentFile, outputFile)
 
     task.export()
 
@@ -406,15 +306,11 @@ class ExportPreviewMetadataTaskTest {
   private fun createTask(
     classesDir: File,
     outputFile: File,
-    scanPackages: List<String>,
-    namespace: String = "com.example",
     includePrivate: Boolean = false,
   ): ExportPreviewMetadataTask {
     val project = ProjectBuilder.builder().build()
     return project.tasks
       .register("testExportPreviewMetadata", ExportPreviewMetadataTask::class.java) { task ->
-        task.scanPackages.set(scanPackages)
-        task.namespace.set(namespace)
         task.includePrivatePreviews.set(includePrivate)
         task.mergedClassesDir.set(classesDir)
         task.outputFile.set(outputFile)
