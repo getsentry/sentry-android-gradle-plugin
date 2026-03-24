@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Checkout Duckduckgo
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           repository: duckduckgo/Android
           path: scripts/benchmark/Android
@@ -33,7 +33,7 @@ jobs:
           ./benchmark-build-speed.sh
 
       - name: Upload results
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
         with:
           name: ${{ github.sha }}
           path: ${{ github.workspace }}/scripts/benchmark/results/

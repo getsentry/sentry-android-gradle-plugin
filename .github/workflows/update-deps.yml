@@ -19,7 +19,7 @@ jobs:
   cli:
     runs-on: ubuntu-latest
     steps:
-      - uses: getsentry/github-workflows/updater@v3
+      - uses: getsentry/github-workflows/updater@26f565c05d0dd49f703d238706b775883037d76b # v3
         with:
           path: plugin-build/sentry-cli.properties
           name: CLI
@@ -28,7 +28,7 @@ jobs:
   android:
     runs-on: ubuntu-latest
     steps:
-      - uses: getsentry/github-workflows/updater@v3
+      - uses: getsentry/github-workflows/updater@26f565c05d0dd49f703d238706b775883037d76b # v3
         with:
           path: scripts/update-android.sh
           name: Android SDK
