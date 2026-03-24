@@ -1,5 +1,8 @@
 package io.sentry.android.gradle.snapshot
 
+import com.android.build.api.variant.ApplicationVariant
+import com.android.build.gradle.BaseExtension
+import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -52,10 +55,11 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
     fun register(
       project: Project,
       extension: SentrySnapshotExtension,
-      android: com.android.build.gradle.BaseExtension,
+      android: BaseExtension,
+      variant: ApplicationVariant,
     ): TaskProvider<GenerateSnapshotTestsTask> {
       return project.tasks.register(
-        "generateSnapshotTests",
+        "generateSentrySnapshotTests${variant.name.capitalized}",
         GenerateSnapshotTestsTask::class.java,
       ) { task ->
         task.includePrivatePreviews.set(extension.includePrivatePreviews)

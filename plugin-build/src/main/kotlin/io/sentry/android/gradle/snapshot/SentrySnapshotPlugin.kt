@@ -2,7 +2,6 @@ package io.sentry.android.gradle.snapshot
 
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.HasUnitTest
-import com.android.build.api.variant.UnitTest
 import com.android.build.gradle.BaseExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -21,8 +20,6 @@ class SentrySnapshotPlugin : Plugin<Project> {
     project.pluginManager.withPlugin("app.cash.paparazzi") {
       val android = project.extensions.getByType(BaseExtension::class.java)
 
-      val generateTask = GenerateSnapshotTestsTask.register(project, extension, android)
-
       project.dependencies.add(
         "testImplementation",
         "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
@@ -32,7 +29,10 @@ class SentrySnapshotPlugin : Plugin<Project> {
         project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
 
       androidComponents.onVariants { variant ->
-        (variant as? HasUnitTest)?.unitTest?.sources?.kotlin?.addGeneratedSourceDirectory(
+        val generateTask = GenerateSnapshotTestsTask.register(project, extension, android, variant)
+        // `unitTest` is deprecated and it is unclear what the replacement is
+        // Using `source?.kotlin` is broken so we have to use java: https://issuetracker.google.com/issues/268248348
+        variant.unitTest?.sources?.java?.addGeneratedSourceDirectory(
           generateTask,
           GenerateSnapshotTestsTask::outputDir
         )
