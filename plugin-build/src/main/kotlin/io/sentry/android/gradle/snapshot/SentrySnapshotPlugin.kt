@@ -1,11 +1,10 @@
 package io.sentry.android.gradle.snapshot
 
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
-import com.android.build.api.variant.HasUnitTest
 import com.android.build.gradle.BaseExtension
+import kotlin.jvm.java
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import kotlin.jvm.java
 
 class SentrySnapshotPlugin : Plugin<Project> {
 
@@ -31,11 +30,12 @@ class SentrySnapshotPlugin : Plugin<Project> {
       androidComponents.onVariants { variant ->
         val generateTask = GenerateSnapshotTestsTask.register(project, extension, android, variant)
         // `unitTest` is deprecated and it is unclear what the replacement is
-        // Using `source?.kotlin` is broken so we have to use java: https://issuetracker.google.com/issues/268248348
-        variant.unitTest?.sources?.java?.addGeneratedSourceDirectory(
-          generateTask,
-          GenerateSnapshotTestsTask::outputDir
-        )
+        // Using `source?.kotlin` is broken so we have to use java:
+        // https://issuetracker.google.com/issues/268248348
+        variant.unitTest
+          ?.sources
+          ?.java
+          ?.addGeneratedSourceDirectory(generateTask, GenerateSnapshotTestsTask::outputDir)
       }
     }
 
