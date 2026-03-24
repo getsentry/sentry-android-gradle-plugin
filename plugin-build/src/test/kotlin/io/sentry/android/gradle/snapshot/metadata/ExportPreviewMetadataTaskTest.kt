@@ -2,8 +2,6 @@ package io.sentry.android.gradle.snapshot.metadata
 
 import groovy.json.JsonSlurper
 import java.io.File
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -201,35 +199,6 @@ class ExportPreviewMetadataTaskTest {
   }
 
   @Test
-  fun `scans preview metadata from JAR files`() {
-    val jarFile = tmpDir.newFile("classes.jar")
-    val classBytes =
-      buildPreviewClassBytes("com/example/JarPreviewKt", listOf(MethodSpec("FromJar")))
-
-    ZipOutputStream(jarFile.outputStream()).use { zip ->
-      zip.putNextEntry(ZipEntry("com/example/JarPreviewKt.class"))
-      zip.write(classBytes)
-      zip.closeEntry()
-    }
-
-    val outputFile = tmpDir.newFile("output.json")
-    val task =
-      createTask(
-        classesDir = jarFile,
-        outputFile = outputFile,
-        scanPackages = listOf("com.example"),
-      )
-
-    task.export()
-
-    val parsed = parseJson(outputFile)
-    @Suppress("UNCHECKED_CAST") val previews = parsed["previews"] as List<Map<String, Any?>>
-    assertEquals(1, previews.size)
-    assertEquals("FromJar", previews[0]["methodName"])
-    assertEquals("com.example.JarPreview", previews[0]["className"])
-  }
-
-  @Test
   fun `includes private previews when flag is set`() {
     val classesDir = tmpDir.newFolder("classes", "com", "example")
     writePreviewClass(
@@ -337,6 +306,103 @@ class ExportPreviewMetadataTaskTest {
     assertEquals(setOf("Feature1Preview", "Feature2Preview"), methodNames)
   }
 
+  // region Custom annotation integration tests
+
+  @Test
+  fun `discovers custom annotations and expands them in export`() {
+    val classesDir = tmpDir.newFolder("classes")
+
+    // Custom annotation class in com/annotations
+    val annotationsDir = File(classesDir, "com/annotations")
+    annotationsDir.mkdirs()
+    writeAnnotationClass(
+      dir = annotationsDir,
+      fileName = "DarkPreview.class",
+      internalName = "com/annotations/DarkPreview",
+      previewFields = mapOf("name" to "Dark", "uiMode" to 32, "showBackground" to true),
+    )
+
+    // Method using the custom annotation in com/example
+    val exampleDir = File(classesDir, "com/example")
+    exampleDir.mkdirs()
+    writeClassWithCustomAnnotation(
+      dir = exampleDir,
+      fileName = "ScreenKt.class",
+      internalName = "com/example/ScreenKt",
+      methodName = "MyScreen",
+      annotationDescriptor = "Lcom/annotations/DarkPreview;",
+    )
+
+    val outputFile = tmpDir.newFile("output.json")
+    val task = createTask(classesDir, outputFile, listOf("com.example"))
+
+    task.export()
+
+    val parsed = parseJson(outputFile)
+    @Suppress("UNCHECKED_CAST") val previews = parsed["previews"] as List<Map<String, Any?>>
+    assertEquals(1, previews.size)
+    assertEquals("MyScreen", previews[0]["methodName"])
+    @Suppress("UNCHECKED_CAST") val config = previews[0]["configuration"] as Map<String, Any?>
+    assertEquals(32, config["uiMode"])
+    assertEquals(true, config["showBackground"])
+  }
+
+  // endregion
+
+  // region group and wallpaper tests
+
+  @Test
+  fun `exports group and wallpaper fields`() {
+    val classesDir = tmpDir.newFolder("classes", "com", "example")
+    writePreviewClass(
+      dir = classesDir,
+      fileName = "TestKt.class",
+      internalName = "com/example/TestKt",
+      methods = listOf(MethodSpec("GroupedPreview", mapOf("group" to "my-group", "wallpaper" to 2))),
+    )
+
+    val outputFile = tmpDir.newFile("output.json")
+    val task = createTask(classesDir.parentFile.parentFile, outputFile, listOf("com.example"))
+
+    task.export()
+
+    val parsed = parseJson(outputFile)
+    @Suppress("UNCHECKED_CAST") val previews = parsed["previews"] as List<Map<String, Any?>>
+    assertEquals(1, previews.size)
+    @Suppress("UNCHECKED_CAST") val config = previews[0]["configuration"] as Map<String, Any?>
+    assertEquals("my-group", config["group"])
+    assertEquals(2, config["wallpaper"])
+  }
+
+  // endregion
+
+  // region Preview.Container integration test
+
+  @Test
+  fun `exports multiple previews from Container annotation`() {
+    val classesDir = tmpDir.newFolder("classes", "com", "example")
+    writeContainerPreviewClass(
+      dir = classesDir,
+      fileName = "ScreenKt.class",
+      internalName = "com/example/ScreenKt",
+      methodName = "ThemedScreen",
+      previewConfigs = listOf(mapOf("name" to "Light"), mapOf("name" to "Dark", "uiMode" to 32)),
+    )
+
+    val outputFile = tmpDir.newFile("output.json")
+    val task = createTask(classesDir.parentFile.parentFile, outputFile, listOf("com.example"))
+
+    task.export()
+
+    val parsed = parseJson(outputFile)
+    @Suppress("UNCHECKED_CAST") val previews = parsed["previews"] as List<Map<String, Any?>>
+    assertEquals(2, previews.size)
+    assertEquals("Light", previews[0]["previewName"])
+    assertEquals("Dark", previews[1]["previewName"])
+  }
+
+  // endregion
+
   private fun createTask(
     classesDir: File,
     outputFile: File,
@@ -350,7 +416,7 @@ class ExportPreviewMetadataTaskTest {
         task.scanPackages.set(scanPackages)
         task.namespace.set(namespace)
         task.includePrivatePreviews.set(includePrivate)
-        task.compiledClassesDirs.from(classesDir)
+        task.mergedClassesDir.set(classesDir)
         task.outputFile.set(outputFile)
       }
       .get()
@@ -404,6 +470,87 @@ class ExportPreviewMetadataTaskTest {
 
     cw.visitEnd()
     return cw.toByteArray()
+  }
+
+  private fun writeAnnotationClass(
+    dir: File,
+    fileName: String,
+    internalName: String,
+    previewFields: Map<String, Any> = emptyMap(),
+  ) {
+    val cw = ClassWriter(0)
+    cw.visit(
+      Opcodes.V11,
+      Opcodes.ACC_PUBLIC or Opcodes.ACC_INTERFACE or Opcodes.ACC_ABSTRACT or Opcodes.ACC_ANNOTATION,
+      internalName,
+      null,
+      "java/lang/Object",
+      arrayOf("java/lang/annotation/Annotation"),
+    )
+    val av = cw.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview;", true)
+    for ((key, value) in previewFields) {
+      av.visit(key, value)
+    }
+    av.visitEnd()
+    cw.visitEnd()
+    File(dir, fileName).writeBytes(cw.toByteArray())
+  }
+
+  private fun writeClassWithCustomAnnotation(
+    dir: File,
+    fileName: String,
+    internalName: String,
+    methodName: String,
+    annotationDescriptor: String,
+  ) {
+    val cw = ClassWriter(0)
+    cw.visit(
+      Opcodes.V11,
+      Opcodes.ACC_PUBLIC or Opcodes.ACC_FINAL,
+      internalName,
+      null,
+      "java/lang/Object",
+      null,
+    )
+    val mv = cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, methodName, "()V", null, null)
+    mv.visitAnnotation(annotationDescriptor, true)?.visitEnd()
+    mv.visitEnd()
+    cw.visitEnd()
+    File(dir, fileName).writeBytes(cw.toByteArray())
+  }
+
+  private fun writeContainerPreviewClass(
+    dir: File,
+    fileName: String,
+    internalName: String,
+    methodName: String,
+    previewConfigs: List<Map<String, Any>>,
+  ) {
+    val cw = ClassWriter(0)
+    cw.visit(
+      Opcodes.V11,
+      Opcodes.ACC_PUBLIC or Opcodes.ACC_FINAL,
+      internalName,
+      null,
+      "java/lang/Object",
+      null,
+    )
+    val mv = cw.visitMethod(Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC, methodName, "()V", null, null)
+    val container =
+      mv.visitAnnotation("Landroidx/compose/ui/tooling/preview/Preview\$Container;", true)
+    val array = container.visitArray("value")
+    for (config in previewConfigs) {
+      val preview = array.visitAnnotation(null, "Landroidx/compose/ui/tooling/preview/Preview;")
+      for ((key, value) in config) {
+        preview.visit(key, value)
+      }
+      preview.visitEnd()
+    }
+    array.visitEnd()
+    container.visitEnd()
+    mv.visitEnd()
+    cw.visitEnd()
+    File(dir, fileName).writeBytes(cw.toByteArray())
   }
 
   @Suppress("UNCHECKED_CAST")

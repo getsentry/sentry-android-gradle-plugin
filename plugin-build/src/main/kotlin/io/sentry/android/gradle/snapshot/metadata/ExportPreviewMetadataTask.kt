@@ -2,19 +2,15 @@ package io.sentry.android.gradle.snapshot.metadata
 
 import com.android.build.gradle.BaseExtension
 import groovy.json.JsonOutput
-import java.io.File
-import java.util.zip.ZipInputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
-import org.gradle.api.artifacts.component.ProjectComponentIdentifier
-import org.gradle.api.attributes.Attribute
-import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -34,9 +30,9 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
 
   @get:Input abstract val includePrivatePreviews: Property<Boolean>
 
-  @get:InputFiles
+  @get:InputDirectory
   @get:PathSensitive(PathSensitivity.RELATIVE)
-  abstract val compiledClassesDirs: ConfigurableFileCollection
+  abstract val mergedClassesDir: DirectoryProperty
 
   @get:OutputFile abstract val outputFile: RegularFileProperty
 
@@ -45,15 +41,30 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
     val packages = scanPackages.get().ifEmpty { listOf(namespace.get()) }
     val packagePaths = packages.map { it.replace('.', '/') }
     val scanner = PreviewMethodScanner(includePrivatePreviews.get())
-    val previews = mutableListOf<PreviewMetadata>()
+    val rootDir = mergedClassesDir.get().asFile
 
-    compiledClassesDirs.files.forEach { root ->
-      if (root.isDirectory) {
-        scanDirectory(root, root, packagePaths, scanner, previews)
-      } else if (root.isFile && (root.name.endsWith(".jar") || root.name.endsWith(".zip"))) {
-        scanJar(root, packagePaths, scanner, previews)
-      }
+    // First pass: discover custom preview annotations.
+    // Two iterations handle nested custom annotations where A references B but B was
+    // processed after A in the first iteration.
+    val customAnnotations = mutableMapOf<String, CustomPreviewAnnotation>()
+    repeat(2) {
+      rootDir
+        .walk()
+        .filter { it.isFile && it.name.endsWith(".class") }
+        .forEach { file -> scanner.findCustomAnnotations(file.readBytes(), customAnnotations) }
     }
+
+    // Second pass: find preview methods (filtered to scanned packages)
+    val previews = mutableListOf<PreviewMetadata>()
+    rootDir
+      .walk()
+      .filter { it.isFile && it.name.endsWith(".class") }
+      .forEach { file ->
+        val relativePath = file.relativeTo(rootDir).path
+        if (matchesPackage(relativePath, packagePaths)) {
+          scanClassFile(file.readBytes(), relativePath, scanner, customAnnotations, previews)
+        }
+      }
 
     val export = PreviewMetadataExport(scannedPackages = packages, previews = previews)
     val json = JsonOutput.prettyPrint(JsonOutput.toJson(export.toMap()))
@@ -65,44 +76,6 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
     logger.lifecycle("Exported ${previews.size} preview(s) to ${outFile.absolutePath}")
   }
 
-  private fun scanDirectory(
-    root: File,
-    dir: File,
-    packagePaths: List<String>,
-    scanner: PreviewMethodScanner,
-    results: MutableList<PreviewMetadata>,
-  ) {
-    dir.listFiles()?.forEach { file ->
-      if (file.isDirectory) {
-        scanDirectory(root, file, packagePaths, scanner, results)
-      } else if (file.name.endsWith(".class")) {
-        val relativePath = file.relativeTo(root).path
-        if (matchesPackage(relativePath, packagePaths)) {
-          scanClassFile(file.readBytes(), relativePath, scanner, results)
-        }
-      }
-    }
-  }
-
-  private fun scanJar(
-    jarFile: File,
-    packagePaths: List<String>,
-    scanner: PreviewMethodScanner,
-    results: MutableList<PreviewMetadata>,
-  ) {
-    ZipInputStream(jarFile.inputStream().buffered()).use { zip ->
-      var entry = zip.nextEntry
-      while (entry != null) {
-        if (!entry.isDirectory && entry.name.endsWith(".class")) {
-          if (matchesPackage(entry.name, packagePaths)) {
-            scanClassFile(zip.readBytes(), entry.name, scanner, results)
-          }
-        }
-        entry = zip.nextEntry
-      }
-    }
-  }
-
   private fun matchesPackage(classPath: String, packagePaths: List<String>): Boolean {
     return packagePaths.any { classPath.startsWith("$it/") }
   }
@@ -111,9 +84,10 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
     bytes: ByteArray,
     relativePath: String,
     scanner: PreviewMethodScanner,
+    customAnnotations: Map<String, CustomPreviewAnnotation>,
     results: MutableList<PreviewMetadata>,
   ) {
-    val scanResult = scanner.fullScan(bytes)
+    val scanResult = scanner.fullScan(bytes, customAnnotations)
     val methods = scanResult.previewMethods
     if (methods.isEmpty()) return
     val sourceFileName = scanResult.sourceFile
@@ -135,6 +109,16 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
           null
         }
 
+      val previewParam =
+        method.previewParameter?.let {
+          PreviewParameterMetadata(
+            parameterName = it.parameterName,
+            providerClassFqn = it.providerClassFqn,
+            limit = it.limit,
+            index = it.index,
+          )
+        }
+
       results.add(
         PreviewMetadata(
           className = className,
@@ -150,20 +134,23 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
               showSystemUi = config.showSystemUi,
               showBackground = config.showBackground,
               backgroundColor = config.backgroundColor,
+              group = config.group,
+              wallpaper = config.wallpaper,
             ),
           device = device,
+          previewParameter = previewParam,
         )
       )
     }
   }
 
   companion object {
-    private const val ARTIFACT_TYPE = "artifactType"
 
     fun register(
       project: Project,
       extension: SentrySnapshotMetadataExtension,
       android: BaseExtension,
+      mergeTask: TaskProvider<MergeClassesTask>,
     ): TaskProvider<ExportPreviewMetadataTask> {
       return project.tasks.register(
         "exportPreviewMetadata",
@@ -172,32 +159,13 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
         task.scanPackages.set(extension.packageTrees)
         task.namespace.set(project.provider { android.namespace ?: "" })
         task.includePrivatePreviews.set(extension.includePrivatePreviews)
-
-        // Local compiled classes from compileDebugKotlin
-        task.compiledClassesDirs.from(
-          project.tasks.named("compileDebugKotlin").map { it.outputs.files }
-        )
-
-        // Project dependency classes from debugRuntimeClasspath
-        val debugClasspath = project.configurations.getByName("debugRuntimeClasspath")
-        task.compiledClassesDirs.from(
-          debugClasspath.incoming
-            .artifactView { view ->
-              view.componentFilter { id -> id is ProjectComponentIdentifier }
-              view.attributes { attrs ->
-                attrs.attribute(Attribute.of(ARTIFACT_TYPE, String::class.java), "android-classes")
-              }
-            }
-            .files
-        )
+        task.mergedClassesDir.set(mergeTask.flatMap { it.outputDir })
 
         task.outputFile.set(
           project.layout.buildDirectory.file(
             "sentry-snapshots/preview-metadata/preview-metadata.json"
           )
         )
-
-        task.dependsOn("compileDebugKotlin")
       }
     }
   }
