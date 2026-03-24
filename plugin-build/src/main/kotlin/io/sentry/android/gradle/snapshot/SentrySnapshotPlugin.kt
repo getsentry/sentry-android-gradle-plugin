@@ -44,6 +44,7 @@ class SentrySnapshotPlugin : Plugin<Project> {
           }
         } else {
           // `unitTest` is deprecated, the replacement above is complex
+          @Suppress("DEPRECATION_ERROR")
           variant.unitTest
             ?.sources
             ?.java
