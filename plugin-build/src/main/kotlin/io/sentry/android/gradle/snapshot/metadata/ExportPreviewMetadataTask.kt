@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.snapshot.metadata
 
-import com.android.build.gradle.BaseExtension
 import groovy.json.JsonOutput
 import java.util.zip.ZipInputStream
 import org.gradle.api.DefaultTask
@@ -155,7 +154,6 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
     fun register(
       project: Project,
       extension: SentrySnapshotMetadataExtension,
-      android: BaseExtension,
     ): TaskProvider<ExportPreviewMetadataTask> {
       return project.tasks.register(
         "exportPreviewMetadata",
