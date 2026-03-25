@@ -73,6 +73,14 @@ plugins.withId("com.vanniktech.maven.publish.base") {
         name = "mavenTestRepo"
         url = file("${rootProject.projectDir}/../build/mavenTestRepo").toURI()
       }
+      maven {
+        name = "mavenCentralSnapshots"
+        url = uri("https://central.sonatype.com/repository/maven-snapshots/")
+        credentials {
+          username = findProperty("mavenCentralUsername")?.toString()
+          password = findProperty("mavenCentralPassword")?.toString()
+        }
+      }
     }
   }
 }
