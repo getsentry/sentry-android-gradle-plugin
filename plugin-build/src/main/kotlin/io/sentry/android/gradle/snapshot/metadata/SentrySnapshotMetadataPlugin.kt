@@ -16,8 +16,7 @@ class SentrySnapshotMetadataPlugin : Plugin<Project> {
 
     fun wireWithAndroid() {
       val android = project.extensions.getByType(BaseExtension::class.java)
-      val mergeTask = MergeClassesTask.register(project, android)
-      ExportPreviewMetadataTask.register(project, extension, mergeTask)
+      ExportPreviewMetadataTask.register(project, extension, android)
     }
 
     project.pluginManager.withPlugin("com.android.library") { wireWithAndroid() }
