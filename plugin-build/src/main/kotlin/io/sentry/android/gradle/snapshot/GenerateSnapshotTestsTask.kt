@@ -99,6 +99,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
+import app.cash.paparazzi.HtmlReportWriter
 import app.cash.paparazzi.Paparazzi
 import app.cash.paparazzi.Snapshot
 import app.cash.paparazzi.SnapshotHandler
@@ -231,10 +232,13 @@ private object PaparazziPreviewRule {
                 else -> SessionParams.RenderingMode.SHRINK
             },
             snapshotHandler = TestNameOverrideHandler(
-                SnapshotVerifier(
-                    maxPercentDifference = tolerance,
-                    rootDirectory = sentryOutputDir,
-                )
+                when (System.getProperty("paparazzi.test.verify")?.toBoolean() == true) {
+                    true -> SnapshotVerifier(maxPercentDifference = tolerance)
+                    false -> HtmlReportWriter(
+                        maxPercentDifference = tolerance,
+                        snapshotRootDirectory = sentryOutputDir,
+                    )
+                }
             ),
             maxPercentDifference = tolerance,
         )
