@@ -312,7 +312,7 @@ class ExportPreviewMetadataTaskTest {
     return project.tasks
       .register("testExportPreviewMetadata", ExportPreviewMetadataTask::class.java) { task ->
         task.includePrivatePreviews.set(includePrivate)
-        task.mergedClassesDir.set(classesDir)
+        task.inputClasspath.from(classesDir)
         task.outputFile.set(outputFile)
       }
       .get()
