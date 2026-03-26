@@ -37,6 +37,7 @@ class SentrySnapshotPlugin : Plugin<Project> {
           "sentry.snapshot.output",
           sentrySnapshotRootDir.get().asFile.absolutePath,
         )
+        testTask.systemProperty("paparazzi.test.record", "true")
         testTask.doFirst {
           val imagesDir = File(sentrySnapshotRootDir.get().asFile, "images")
           if (imagesDir.exists()) {
