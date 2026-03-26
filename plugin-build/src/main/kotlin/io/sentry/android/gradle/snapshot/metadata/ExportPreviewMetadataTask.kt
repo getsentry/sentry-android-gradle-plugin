@@ -1,7 +1,7 @@
 package io.sentry.android.gradle.snapshot.metadata
 
-import com.android.build.gradle.BaseExtension
 import groovy.json.JsonOutput
+import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import java.util.zip.ZipInputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -155,22 +155,27 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
     fun register(
       project: Project,
       extension: SentrySnapshotMetadataExtension,
-      android: BaseExtension,
+      variantName: String,
     ): TaskProvider<ExportPreviewMetadataTask> {
+      val taskSuffix = variantName.capitalized
+      val compileTaskName = "compile${taskSuffix}Kotlin"
+
       return project.tasks.register(
-        "exportPreviewMetadata",
+        "exportPreviewMetadata$taskSuffix",
         ExportPreviewMetadataTask::class.java,
       ) { task ->
         task.includePrivatePreviews.set(extension.includePrivatePreviews)
 
         // Local compiled classes
-        // TODO Debug is hard coded here. we should allow different variants
-        task.inputClasspath.from(project.tasks.named("compileDebugKotlin").map { it.outputs.files })
+        task.inputClasspath.from(
+          project.tasks.named(compileTaskName).map { it.outputs.files }
+        )
 
         // Dependency project classes
-        val debugClasspath = project.configurations.getByName("debugRuntimeClasspath")
+        val variantClasspath =
+          project.configurations.getByName("${variantName}RuntimeClasspath")
         task.inputClasspath.from(
-          debugClasspath.incoming
+          variantClasspath.incoming
             .artifactView { view ->
               view.componentFilter { id -> id is ProjectComponentIdentifier }
               view.attributes { attrs ->
@@ -182,11 +187,11 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
 
         task.outputFile.set(
           project.layout.buildDirectory.file(
-            "sentry-snapshots/preview-metadata/preview-metadata.json"
+            "sentry-snapshots/preview-metadata/$variantName/preview-metadata.json"
           )
         )
 
-        task.dependsOn("compileDebugKotlin")
+        task.dependsOn(compileTaskName)
       }
     }
   }
