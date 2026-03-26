@@ -4,6 +4,7 @@ import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.HostTestBuilder
 import com.android.build.gradle.BaseExtension
 import io.sentry.android.gradle.util.AgpVersions
+import java.io.File
 import kotlin.jvm.java
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -30,12 +31,18 @@ class SentrySnapshotPlugin : Plugin<Project> {
       val androidComponents =
         project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
 
-      val sentrySnapshotOutputDir = project.layout.buildDirectory.dir("sentry-snapshots/images")
+      val sentrySnapshotRootDir = project.layout.buildDirectory.dir("sentry-snapshots")
       project.tasks.withType(Test::class.java).configureEach { testTask ->
         testTask.systemProperty(
           "sentry.snapshot.output",
-          sentrySnapshotOutputDir.get().asFile.absolutePath,
+          sentrySnapshotRootDir.get().asFile.absolutePath,
         )
+        testTask.doFirst {
+          val imagesDir = File(sentrySnapshotRootDir.get().asFile, "images")
+          if (imagesDir.exists()) {
+            imagesDir.deleteRecursively()
+          }
+        }
       }
 
       androidComponents.onVariants { variant ->
