@@ -473,17 +473,18 @@ private fun ApplicationVariant.configureSnapshotsTasks(
   val variant = AndroidVariant74(this)
   val sentryProps = getPropertiesFilePath(project, variant)
 
-  val uploadTask = SentryUploadSnapshotsTask.register(
-    project = project,
-    extension = extension,
-    sentryTelemetryProvider = sentryTelemetryProvider,
-    cliExecutable = cliExecutable,
-    sentryOrgOverride = sentryOrg,
-    sentryProjectOverride = sentryProject,
-    applicationId = applicationId,
-    sentryProperties = sentryProps,
-    taskSuffix = name.capitalized,
-  )
+  val uploadTask =
+    SentryUploadSnapshotsTask.register(
+      project = project,
+      extension = extension,
+      sentryTelemetryProvider = sentryTelemetryProvider,
+      cliExecutable = cliExecutable,
+      sentryOrgOverride = sentryOrg,
+      sentryProjectOverride = sentryProject,
+      applicationId = applicationId,
+      sentryProperties = sentryProps,
+      taskSuffix = name.capitalized,
+    )
   uploadTask.configure { task ->
     task.snapshotsPath.set(project.layout.buildDirectory.dir("sentry-snapshots/${name}/images"))
   }
