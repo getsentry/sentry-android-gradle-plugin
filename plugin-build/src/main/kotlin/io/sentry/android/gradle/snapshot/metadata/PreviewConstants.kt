@@ -59,8 +59,8 @@ internal fun builtinMultipreviewConfigs(descriptor: String?): List<PreviewConfig
   return when (descriptor) {
     PREVIEW_LIGHT_DARK ->
       listOf(
-        PreviewConfig(name = "light"),
-        PreviewConfig(name = "dark", uiMode = UI_MODE_NIGHT_YES or UI_MODE_TYPE_NORMAL),
+        PreviewConfig(name = "Light"),
+        PreviewConfig(name = "Dark", uiMode = UI_MODE_NIGHT_YES or UI_MODE_TYPE_NORMAL),
       )
 
     PREVIEW_FONT_SCALE ->
@@ -90,8 +90,8 @@ internal fun builtinMultipreviewConfigs(descriptor: String?): List<PreviewConfig
     PREVIEW_DYNAMIC_COLORS ->
       listOf(
         PreviewConfig(name = "Red", wallpaper = 0),
-        PreviewConfig(name = "Blue", wallpaper = 1),
-        PreviewConfig(name = "Green", wallpaper = 2),
+        PreviewConfig(name = "Green", wallpaper = 1),
+        PreviewConfig(name = "Blue", wallpaper = 2),
         PreviewConfig(name = "Yellow", wallpaper = 3),
       )
 

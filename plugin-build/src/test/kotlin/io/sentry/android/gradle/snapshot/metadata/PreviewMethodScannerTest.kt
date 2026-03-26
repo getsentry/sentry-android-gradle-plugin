@@ -272,8 +272,8 @@ class PreviewMethodScannerTest {
     val results = PreviewMethodScanner(includePrivatePreviews = false).scan(bytes)
 
     assertEquals(2, results.size)
-    assertEquals("light", results[0].config.name)
-    assertEquals("dark", results[1].config.name)
+    assertEquals("Light", results[0].config.name)
+    assertEquals("Dark", results[1].config.name)
     assertEquals(33, results[1].config.uiMode) // UI_MODE_NIGHT_YES | UI_MODE_TYPE_NORMAL
   }
 
@@ -503,8 +503,8 @@ class PreviewMethodScannerTest {
     val results = scanner.fullScan(classBytes, customAnnotations).previewMethods
 
     assertEquals(2, results.size)
-    assertEquals("light", results[0].config.name)
-    assertEquals("dark", results[1].config.name)
+    assertEquals("Light", results[0].config.name)
+    assertEquals("Dark", results[1].config.name)
   }
 
   // endregion

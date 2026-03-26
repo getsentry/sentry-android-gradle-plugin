@@ -142,7 +142,9 @@ private class FindCustomPreviewClassVisitor(
   }
 
   override fun visitEnd() {
-    customAnnotations["L$className;"] = current
+    if (current.previewConfigs.isNotEmpty()) {
+      customAnnotations["L$className;"] = current
+    }
     super.visitEnd()
   }
 }
