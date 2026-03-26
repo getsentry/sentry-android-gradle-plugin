@@ -108,6 +108,9 @@ import app.cash.paparazzi.TestName
 import app.cash.paparazzi.detectEnvironment
 import com.android.ide.common.rendering.api.SessionParams
 import com.android.resources.*
+import java.awt.image.BufferedImage
+import java.io.File
+import javax.imageio.ImageIO
 import kotlin.math.ceil
 import org.junit.Rule
 import org.junit.Test
@@ -205,6 +208,29 @@ private class TestNameOverrideHandler(
     }
 }
 
+private class SentrySnapshotHandler(
+    private val outputDir: File,
+    private val delegate: SnapshotHandler,
+) : SnapshotHandler {
+    override fun newFrameHandler(
+        snapshot: Snapshot,
+        frameCount: Int,
+        fps: Int,
+    ): SnapshotHandler.FrameHandler {
+        val delegateHandler = delegate.newFrameHandler(snapshot, frameCount, fps)
+        return object : SnapshotHandler.FrameHandler {
+            override fun handle(image: BufferedImage) {
+                delegateHandler.handle(image)
+                val name = snapshot.name ?: return
+                outputDir.mkdirs()
+                ImageIO.write(image, "png", File(outputDir, "${'$'}{name}.png"))
+            }
+            override fun close() = delegateHandler.close()
+        }
+    }
+    override fun close() = delegate.close()
+}
+
 private object PaparazziPreviewRule {
     const val UNDEFINED_API_LEVEL = -1
     const val MAX_API_LEVEL = 36
@@ -216,6 +242,9 @@ private object PaparazziPreviewRule {
             false -> previewInfo.apiLevel
         }
         val tolerance = 0.0
+        val sentryOutputDir = File(
+            System.getProperty("sentry.snapshot.output", "build/sentry-snapshots/images")
+        )
         return Paparazzi(
             environment = detectEnvironment().copy(compileSdkVersion = previewApiLevel),
             deviceConfig = DeviceConfigBuilder.build(preview.previewInfo),
@@ -226,11 +255,14 @@ private object PaparazziPreviewRule {
                 previewInfo.widthDp > 0 && previewInfo.heightDp > 0 -> SessionParams.RenderingMode.FULL_EXPAND
                 else -> SessionParams.RenderingMode.SHRINK
             },
-            snapshotHandler = TestNameOverrideHandler(
-                when (System.getProperty("paparazzi.test.verify")?.toBoolean() == true) {
-                    true -> SnapshotVerifier(maxPercentDifference = tolerance)
-                    false -> HtmlReportWriter(maxPercentDifference = tolerance)
-                }
+            snapshotHandler = SentrySnapshotHandler(
+                outputDir = sentryOutputDir,
+                delegate = TestNameOverrideHandler(
+                    when (System.getProperty("paparazzi.test.verify")?.toBoolean() == true) {
+                        true -> SnapshotVerifier(maxPercentDifference = tolerance)
+                        false -> HtmlReportWriter(maxPercentDifference = tolerance)
+                    }
+                ),
             ),
             maxPercentDifference = tolerance,
         )
@@ -302,6 +334,8 @@ class $CLASS_NAME(
             .encodeUnsafeCharacters()
             .build()
 
+        writeSidecarMetadata(screenshotId, preview)
+
         paparazzi.snapshot(name = screenshotId) {
             val previewInfo = preview.previewInfo
             when (previewInfo.showSystemUi) {
@@ -329,6 +363,38 @@ class $CLASS_NAME(
             }
         }
     }
+
+    private fun writeSidecarMetadata(
+        screenshotId: String,
+        preview: ComposablePreview<AndroidPreviewInfo>,
+    ) {
+        val outputDir = File(
+            System.getProperty("sentry.snapshot.output", "build/sentry-snapshots/images")
+        )
+        outputDir.mkdirs()
+        val info = preview.previewInfo
+        val q = '"'
+        val parts = mutableListOf<String>()
+        parts.add(q + "display_name" + q + ": " + q + escapeJson(screenshotId) + q)
+        parts.add(q + "image_file_name" + q + ": " + q + escapeJson(screenshotId) + q)
+        val group = info.group
+        if (!group.isNullOrBlank()) {
+            parts.add(q + "group" + q + ": " + q + escapeJson(group) + q)
+        }
+        val declaringClass = preview.declaringClass
+        if (declaringClass != null) {
+            parts.add(q + "className" + q + ": " + q + escapeJson(declaringClass) + q)
+        }
+        val methodName = info.methodName
+        if (methodName != null) {
+            parts.add(q + "methodName" + q + ": " + q + escapeJson(methodName) + q)
+        }
+        val json = parts.joinToString(",\n  ", prefix = "{\n  ", postfix = "\n}")
+        File(outputDir, "${'$'}{screenshotId}.json").writeText(json)
+    }
+
+    private fun escapeJson(s: String): String =
+        s.replace("\\", "\\\\").replace("\"", "\\\"")
 }
 """
         .trimStart()
