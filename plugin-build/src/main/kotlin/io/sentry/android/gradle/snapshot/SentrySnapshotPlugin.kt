@@ -7,6 +7,7 @@ import io.sentry.android.gradle.util.AgpVersions
 import kotlin.jvm.java
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.testing.Test
 
 class SentrySnapshotPlugin : Plugin<Project> {
 
@@ -28,6 +29,14 @@ class SentrySnapshotPlugin : Plugin<Project> {
 
       val androidComponents =
         project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
+
+      val sentrySnapshotOutputDir = project.layout.buildDirectory.dir("sentry-snapshots/images")
+      project.tasks.withType(Test::class.java).configureEach { testTask ->
+        testTask.systemProperty(
+          "sentry.snapshot.output",
+          sentrySnapshotOutputDir.get().asFile.absolutePath,
+        )
+      }
 
       androidComponents.onVariants { variant ->
         val generateTask = GenerateSnapshotTestsTask.register(project, extension, android, variant)
