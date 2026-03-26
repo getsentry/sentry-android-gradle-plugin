@@ -167,13 +167,10 @@ abstract class ExportPreviewMetadataTask : DefaultTask() {
         task.includePrivatePreviews.set(extension.includePrivatePreviews)
 
         // Local compiled classes
-        task.inputClasspath.from(
-          project.tasks.named(compileTaskName).map { it.outputs.files }
-        )
+        task.inputClasspath.from(project.tasks.named(compileTaskName).map { it.outputs.files })
 
         // Dependency project classes
-        val variantClasspath =
-          project.configurations.getByName("${variantName}RuntimeClasspath")
+        val variantClasspath = project.configurations.getByName("${variantName}RuntimeClasspath")
         task.inputClasspath.from(
           variantClasspath.incoming
             .artifactView { view ->

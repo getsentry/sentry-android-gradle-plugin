@@ -15,8 +15,7 @@ class SentrySnapshotMetadataPlugin : Plugin<Project> {
       )
 
     fun wireWithAndroid() {
-      val androidComponents =
-        project.extensions.getByType(AndroidComponentsExtension::class.java)
+      val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
       androidComponents.onVariants { variant ->
         ExportPreviewMetadataTask.register(project, extension, variant.name)
       }
