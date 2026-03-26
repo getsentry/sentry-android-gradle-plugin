@@ -31,22 +31,25 @@ class SentrySnapshotPlugin : Plugin<Project> {
       val androidComponents =
         project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
 
-      val sentrySnapshotRootDir = project.layout.buildDirectory.dir("sentry-snapshots")
-      project.tasks.withType(Test::class.java).configureEach { testTask ->
-        testTask.systemProperty(
-          "sentry.snapshot.output",
-          sentrySnapshotRootDir.get().asFile.absolutePath,
-        )
-        testTask.systemProperty("paparazzi.test.record", "true")
-        testTask.doFirst {
-          val imagesDir = File(sentrySnapshotRootDir.get().asFile, "images")
-          if (imagesDir.exists()) {
-            imagesDir.deleteRecursively()
+      androidComponents.onVariants { variant ->
+        val variantName = variant.name
+        val sentrySnapshotRootDir = project.layout.buildDirectory.dir("sentry-snapshots/$variantName")
+        val testTaskName = "test${variantName.replaceFirstChar { it.uppercase() }}UnitTest"
+        project.tasks.matching { it.name == testTaskName }.configureEach { task ->
+          val testTask = task as Test
+          testTask.systemProperty(
+            "sentry.snapshot.output",
+            sentrySnapshotRootDir.get().asFile.absolutePath,
+          )
+          testTask.systemProperty("paparazzi.test.record", "true")
+          testTask.doFirst {
+            val imagesDir = File(sentrySnapshotRootDir.get().asFile, "images")
+            if (imagesDir.exists()) {
+              imagesDir.deleteRecursively()
+            }
           }
         }
-      }
 
-      androidComponents.onVariants { variant ->
         val generateTask = GenerateSnapshotTestsTask.register(project, extension, android, variant)
         if (AgpVersions.isAGP90(AgpVersions.CURRENT)) {
           // Right now it seems we only have HostTestBuilder.UNIT_TEST_TYPE as the key but we are
