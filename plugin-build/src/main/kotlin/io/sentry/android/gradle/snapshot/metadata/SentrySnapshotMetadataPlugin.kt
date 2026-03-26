@@ -1,6 +1,6 @@
 package io.sentry.android.gradle.snapshot.metadata
 
-import com.android.build.gradle.BaseExtension
+import com.android.build.api.variant.AndroidComponentsExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -15,8 +15,10 @@ class SentrySnapshotMetadataPlugin : Plugin<Project> {
       )
 
     fun wireWithAndroid() {
-      val android = project.extensions.getByType(BaseExtension::class.java)
-      ExportPreviewMetadataTask.register(project, extension, android)
+      val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+      androidComponents.onVariants { variant ->
+        ExportPreviewMetadataTask.register(project, extension, variant.name)
+      }
     }
 
     project.pluginManager.withPlugin("com.android.library") { wireWithAndroid() }
