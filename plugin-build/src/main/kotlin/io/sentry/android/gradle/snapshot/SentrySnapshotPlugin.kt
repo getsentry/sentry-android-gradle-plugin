@@ -7,7 +7,6 @@ import io.sentry.android.gradle.util.AgpVersions
 import kotlin.jvm.java
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.tasks.testing.Test
 
 class SentrySnapshotPlugin : Plugin<Project> {
 
@@ -40,14 +39,17 @@ class SentrySnapshotPlugin : Plugin<Project> {
             configureTestTask { it.systemProperty("paparazzi.test.record", "true") }
             sources.java?.addGeneratedSourceDirectory(
               generateTask,
-              GenerateSnapshotTestsTask::outputDir
+              GenerateSnapshotTestsTask::outputDir,
             )
           }
         } else {
           @Suppress("DEPRECATION_ERROR")
           // `unitTest` is deprecated, the replacement above is complex
           variant.unitTest?.apply {
-            sources.java?.addGeneratedSourceDirectory(generateTask, GenerateSnapshotTestsTask::outputDir)
+            sources.java?.addGeneratedSourceDirectory(
+              generateTask,
+              GenerateSnapshotTestsTask::outputDir,
+            )
             configureTestTask { it.systemProperty("paparazzi.test.record", "true") }
           }
         }
