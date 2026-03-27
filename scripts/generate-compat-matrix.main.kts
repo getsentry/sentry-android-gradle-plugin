@@ -369,11 +369,12 @@ class GenerateMatrix : CliktCommand() {
       for (row in table.select("tr")) {
         val cells = row.select("td").map { it.text() }
         if (cells.size >= 2 && cells[0].contains("Gradle", ignoreCase = true)) {
-          return try {
-            Version.parse(cells[1], strict = false)
+          try {
+            return Version.parse(cells[1], strict = false)
           } catch (e: Throwable) {
-            echo("Warning: Could not parse Gradle version '${cells[1]}' from release notes")
-            null
+            // Non-version cell (e.g. "Android Gradle Plugin" in fixed-issues tables),
+            // keep searching other rows/tables
+            continue
           }
         }
       }
