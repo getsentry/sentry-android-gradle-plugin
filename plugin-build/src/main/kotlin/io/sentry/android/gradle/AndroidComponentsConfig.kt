@@ -485,9 +485,6 @@ private fun ApplicationVariant.configureSnapshotsTasks(
       sentryProperties = sentryProps,
       taskSuffix = name.capitalized,
     )
-  uploadTask.configure { task ->
-    task.snapshotsPath.set(project.layout.buildDirectory.dir("sentry-snapshots/${name}/images"))
-  }
 }
 
 /**
