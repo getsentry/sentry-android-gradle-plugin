@@ -92,7 +92,7 @@ class GenerateMatrix : CliktCommand() {
       mapOf(
         "7.5".toVersion(strict = false) to "1.8.20",
         "9.0.0".toVersion(strict = false) to "2.1.0",
-        "9.5.0-0".toVersion(strict = false) to "2.3.10",
+        "9.5.0-0".toVersion(strict = false) to "2.3.0",
       )
     // TODO: make it dynamic too
     val kotlinVersion = "2.1.0".toVersion()
