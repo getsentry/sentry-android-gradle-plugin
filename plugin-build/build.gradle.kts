@@ -31,7 +31,7 @@ val fixtureClasspath: Configuration by configurations.creating
 
 dependencies {
   compileOnly(libs.gradleApi)
-  compileOnly(Libs.AGP)
+  compileOnly(libs.agp)
   compileOnly(libs.proguard)
 
   implementation(libs.asm)
