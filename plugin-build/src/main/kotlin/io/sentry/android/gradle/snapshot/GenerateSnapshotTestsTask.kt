@@ -218,9 +218,6 @@ private object PaparazziPreviewRule {
             false -> previewInfo.apiLevel
         }
         val tolerance = 0.0
-        val sentryOutputDir = File(
-            System.getProperty("sentry.snapshot.output", "build/sentry-snapshots")
-        )
         return Paparazzi(
             environment = detectEnvironment().copy(compileSdkVersion = previewApiLevel),
             deviceConfig = DeviceConfigBuilder.build(preview.previewInfo),
@@ -234,10 +231,7 @@ private object PaparazziPreviewRule {
             snapshotHandler = TestNameOverrideHandler(
                 when (System.getProperty("paparazzi.test.verify")?.toBoolean() == true) {
                     true -> SnapshotVerifier(maxPercentDifference = tolerance)
-                    false -> HtmlReportWriter(
-                        maxPercentDifference = tolerance,
-                        snapshotRootDirectory = sentryOutputDir,
-                    )
+                    false -> HtmlReportWriter(maxPercentDifference = tolerance)
                 }
             ),
             maxPercentDifference = tolerance,
@@ -310,8 +304,6 @@ class $CLASS_NAME(
             .encodeUnsafeCharacters()
             .build()
 
-        writeSidecarMetadata(screenshotId, preview)
-
         paparazzi.snapshot(name = screenshotId) {
             val previewInfo = preview.previewInfo
             when (previewInfo.showSystemUi) {
@@ -338,57 +330,40 @@ class $CLASS_NAME(
                 }
             }
         }
+        
+        writeSidecarMetadata(screenshotId, preview)
     }
 
     private fun writeSidecarMetadata(
         screenshotId: String,
         preview: ComposablePreview<AndroidPreviewInfo>,
     ) {
-        val sentryRoot = File(
-            System.getProperty("sentry.snapshot.output", "build/sentry-snapshots")
-        )
-        val imagesDir = File(sentryRoot, "images")
+        val snapshotDir = File(System.getProperty("paparazzi.snapshot.dir"))
+        val imagesDir = File(snapshotDir, "images")
         imagesDir.mkdirs()
         val info = preview.previewInfo
-        val q = '"'
-        val parts = mutableListOf<String>()
-        parts.add(q + "display_name" + q + ": " + q + escapeJson(screenshotId) + q)
-        parts.add(q + "image_file_name" + q + ": " + q + escapeJson(screenshotId) + q)
-        parts.add(q + "className" + q + ": " + q + escapeJson(preview.declaringClass) + q)
-        parts.add(q + "methodName" + q + ": " + q + escapeJson(preview.methodName) + q)
-        if (info.group.isNotBlank()) {
-            parts.add(q + "group" + q + ": " + q + escapeJson(info.group) + q)
+        val metadata = linkedMapOf<String, Any>(
+            "display_name" to screenshotId,
+            "image_file_name" to screenshotId,
+            "className" to preview.declaringClass,
+            "methodName" to preview.methodName,
+        )
+        if (info.group.isNotBlank()) metadata["group"] = info.group
+        if (info.name.isNotBlank()) metadata["previewName"] = info.name
+        if (info.locale.isNotBlank()) metadata["locale"] = info.locale
+        if (info.device.isNotBlank()) metadata["device"] = info.device
+        metadata["nightMode"] = (info.uiMode and 0x30 == 0x20)
+        if (info.fontScale != 1f) metadata["fontScale"] = info.fontScale
+        if (info.apiLevel != -1) metadata["apiLevel"] = info.apiLevel
+        if (info.widthDp > 0) metadata["widthDp"] = info.widthDp
+        if (info.heightDp > 0) metadata["heightDp"] = info.heightDp
+        if (info.showSystemUi) metadata["showSystemUi"] = true
+        if (info.showBackground) metadata["showBackground"] = true
+
+        val json = metadata.entries.joinToString(",\n  ", prefix = "{\n  ", postfix = "\n}") { (k, v) ->
+            if (v is String) "\"" + k + "\": \"" + escapeJson(v) + "\""
+            else "\"" + k + "\": " + v
         }
-        if (info.name.isNotBlank()) {
-            parts.add(q + "previewName" + q + ": " + q + escapeJson(info.name) + q)
-        }
-        if (info.locale.isNotBlank()) {
-            parts.add(q + "locale" + q + ": " + q + escapeJson(info.locale) + q)
-        }
-        if (info.device.isNotBlank()) {
-            parts.add(q + "device" + q + ": " + q + escapeJson(info.device) + q)
-        }
-        val nightMode = info.uiMode and 0x30 == 0x20
-        parts.add(q + "nightMode" + q + ": " + if (nightMode) "true" else "false")
-        if (info.fontScale != 1f) {
-            parts.add(q + "fontScale" + q + ": " + info.fontScale)
-        }
-        if (info.apiLevel != -1) {
-            parts.add(q + "apiLevel" + q + ": " + info.apiLevel)
-        }
-        if (info.widthDp > 0) {
-            parts.add(q + "widthDp" + q + ": " + info.widthDp)
-        }
-        if (info.heightDp > 0) {
-            parts.add(q + "heightDp" + q + ": " + info.heightDp)
-        }
-        if (info.showSystemUi) {
-            parts.add(q + "showSystemUi" + q + ": true")
-        }
-        if (info.showBackground) {
-            parts.add(q + "showBackground" + q + ": true")
-        }
-        val json = parts.joinToString(",\n  ", prefix = "{\n  ", postfix = "\n}")
         val sidecarName = "Paparazzi_Preview_Test_" +
             screenshotId.lowercase(Locale.US).replace("\\s".toRegex(), "_")
         File(imagesDir, "${'$'}{sidecarName}.json").writeText(json)

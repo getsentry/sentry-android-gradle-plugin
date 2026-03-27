@@ -1,10 +1,9 @@
 package io.sentry.android.gradle.snapshot
 
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
-import com.android.build.api.variant.HostTestBuilder
+import com.android.build.api.variant.HostTestBuilder.Companion.UNIT_TEST_TYPE
 import com.android.build.gradle.BaseExtension
 import io.sentry.android.gradle.util.AgpVersions
-import java.io.File
 import kotlin.jvm.java
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -32,45 +31,25 @@ class SentrySnapshotPlugin : Plugin<Project> {
         project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
 
       androidComponents.onVariants { variant ->
-        val variantName = variant.name
-        val sentrySnapshotRootDir =
-          project.layout.buildDirectory.dir("sentry-snapshots/$variantName")
-        val testTaskName = "test${variantName.replaceFirstChar { it.uppercase() }}UnitTest"
-        project.tasks
-          .matching { it.name == testTaskName }
-          .configureEach { task ->
-            val testTask = task as Test
-            testTask.systemProperty(
-              "sentry.snapshot.output",
-              sentrySnapshotRootDir.get().asFile.absolutePath,
-            )
-            testTask.systemProperty("paparazzi.test.record", "true")
-            testTask.doFirst {
-              val imagesDir = File(sentrySnapshotRootDir.get().asFile, "images")
-              if (imagesDir.exists()) {
-                imagesDir.deleteRecursively()
-              }
-            }
-          }
-
         val generateTask = GenerateSnapshotTestsTask.register(project, extension, android, variant)
         if (AgpVersions.isAGP90(AgpVersions.CURRENT)) {
           // Right now it seems we only have HostTestBuilder.UNIT_TEST_TYPE as the key but we are
           // creating screenshot tests like HostTestBuilder.SCREENSHOT_TEST_TYPE
           // We should adjust this once the API is stable and documented.
-          variant.hostTests[HostTestBuilder.UNIT_TEST_TYPE]
-            // Using `sources?.kotlin` is broken so we have to use sources?.java:
-            // https://issuetracker.google.com/issues/268248348
-            ?.sources
-            ?.java
-            ?.addGeneratedSourceDirectory(generateTask, GenerateSnapshotTestsTask::outputDir)
+          variant.hostTests[UNIT_TEST_TYPE]?.apply {
+            configureTestTask { it.systemProperty("paparazzi.test.record", "true") }
+            sources.java?.addGeneratedSourceDirectory(
+              generateTask,
+              GenerateSnapshotTestsTask::outputDir
+            )
+          }
         } else {
-          // `unitTest` is deprecated, the replacement above is complex
           @Suppress("DEPRECATION_ERROR")
-          variant.unitTest
-            ?.sources
-            ?.java
-            ?.addGeneratedSourceDirectory(generateTask, GenerateSnapshotTestsTask::outputDir)
+          // `unitTest` is deprecated, the replacement above is complex
+          variant.unitTest?.apply {
+            sources.java?.addGeneratedSourceDirectory(generateTask, GenerateSnapshotTestsTask::outputDir)
+            configureTestTask { it.systemProperty("paparazzi.test.record", "true") }
+          }
         }
       }
     }
