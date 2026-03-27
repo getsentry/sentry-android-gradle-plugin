@@ -1,5 +1,9 @@
 # Changelog
 
+## 6.4.0-alpha.2
+
+- No documented changes.
+
 ## 6.4.0-alpha.1
 
 ### Dependencies
