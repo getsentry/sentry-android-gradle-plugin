@@ -366,15 +366,17 @@ class GenerateMatrix : CliktCommand() {
     val doc = Jsoup.parse(html)
     val tables = doc.select("table")
     for (table in tables) {
+      val headers = table.select("tr").firstOrNull()?.select("th")?.map { it.text() } ?: continue
+      // The compatibility table has "Minimum version" and "Default version" columns
+      if (headers.none { it.contains("version", ignoreCase = true) }) continue
       for (row in table.select("tr")) {
         val cells = row.select("td").map { it.text() }
-        if (cells.size >= 2 && cells[0].contains("Gradle", ignoreCase = true)) {
-          try {
-            return Version.parse(cells[1], strict = false)
+        if (cells.size >= 2 && cells[0].trim().equals("Gradle", ignoreCase = true)) {
+          return try {
+            Version.parse(cells[1], strict = false)
           } catch (e: Throwable) {
-            // Non-version cell (e.g. "Android Gradle Plugin" in fixed-issues tables),
-            // keep searching other rows/tables
-            continue
+            echo("Warning: Could not parse Gradle version '${cells[1]}' from release notes")
+            null
           }
         }
       }
