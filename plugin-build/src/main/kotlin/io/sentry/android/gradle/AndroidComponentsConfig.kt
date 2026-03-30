@@ -469,22 +469,21 @@ private fun ApplicationVariant.configureSnapshotsTasks(
   cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
-) {
+): TaskProvider<SentryUploadSnapshotsTask> {
   val variant = AndroidVariant74(this)
   val sentryProps = getPropertiesFilePath(project, variant)
 
-  val uploadTask =
-    SentryUploadSnapshotsTask.register(
-      project = project,
-      extension = extension,
-      sentryTelemetryProvider = sentryTelemetryProvider,
-      cliExecutable = cliExecutable,
-      sentryOrgOverride = sentryOrg,
-      sentryProjectOverride = sentryProject,
-      applicationId = applicationId,
-      sentryProperties = sentryProps,
-      taskSuffix = name.capitalized,
-    )
+  return SentryUploadSnapshotsTask.register(
+    project = project,
+    extension = extension,
+    sentryTelemetryProvider = sentryTelemetryProvider,
+    cliExecutable = cliExecutable,
+    sentryOrgOverride = sentryOrg,
+    sentryProjectOverride = sentryProject,
+    applicationId = applicationId,
+    sentryProperties = sentryProps,
+    taskSuffix = name.capitalized,
+  )
 }
 
 /**
