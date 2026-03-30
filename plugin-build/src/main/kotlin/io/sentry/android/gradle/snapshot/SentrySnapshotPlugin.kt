@@ -36,7 +36,6 @@ class SentrySnapshotPlugin : Plugin<Project> {
           // creating screenshot tests like HostTestBuilder.SCREENSHOT_TEST_TYPE
           // We should adjust this once the API is stable and documented.
           variant.hostTests[UNIT_TEST_TYPE]?.apply {
-            configureTestTask { it.systemProperty("paparazzi.test.record", "true") }
             sources.java?.addGeneratedSourceDirectory(
               generateTask,
               GenerateSnapshotTestsTask::outputDir,
@@ -50,7 +49,6 @@ class SentrySnapshotPlugin : Plugin<Project> {
               generateTask,
               GenerateSnapshotTestsTask::outputDir,
             )
-            configureTestTask { it.systemProperty("paparazzi.test.record", "true") }
           }
         }
       }
