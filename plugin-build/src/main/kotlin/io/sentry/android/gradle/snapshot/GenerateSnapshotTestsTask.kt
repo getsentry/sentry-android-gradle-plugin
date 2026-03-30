@@ -219,6 +219,7 @@ private object PaparazziPreviewRule {
         return Paparazzi(
             environment = detectEnvironment().copy(compileSdkVersion = previewApiLevel),
             deviceConfig = DeviceConfigBuilder.build(preview.previewInfo),
+            theme = "android:Theme.Material.Light.NoActionBar.Fullscreen",
             supportsRtl = true,
             showSystemUi = previewInfo.showSystemUi,
             renderingMode = when {
