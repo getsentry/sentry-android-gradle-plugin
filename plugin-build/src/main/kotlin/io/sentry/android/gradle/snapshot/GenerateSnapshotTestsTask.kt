@@ -343,7 +343,7 @@ class $CLASS_NAME(
         imagesDir.mkdirs()
         val info = preview.previewInfo
         val metadata = linkedMapOf<String, Any>(
-            "display_name" to screenshotId,
+            "display_name" to screenshotId.removePrefix(preview.declaringClass + "."),
             "image_file_name" to screenshotId,
             "className" to preview.declaringClass,
             "methodName" to preview.methodName,
