@@ -109,7 +109,6 @@ import app.cash.paparazzi.detectEnvironment
 import com.android.ide.common.rendering.api.SessionParams
 import com.android.resources.*
 import java.io.File
-import java.util.Locale
 import kotlin.math.ceil
 import org.junit.Rule
 import org.junit.Test
@@ -221,6 +220,7 @@ private object PaparazziPreviewRule {
         return Paparazzi(
             environment = detectEnvironment().copy(compileSdkVersion = previewApiLevel),
             deviceConfig = DeviceConfigBuilder.build(preview.previewInfo),
+            theme = "android:Theme.Translucent.NoTitleBar",
             supportsRtl = true,
             showSystemUi = previewInfo.showSystemUi,
             renderingMode = when {
@@ -330,7 +330,7 @@ class $CLASS_NAME(
                 }
             }
         }
-        
+
         writeSidecarMetadata(screenshotId, preview)
     }
 
@@ -365,7 +365,7 @@ class $CLASS_NAME(
             else "\"" + k + "\": " + v
         }
         val sidecarName = "Paparazzi_Preview_Test_" +
-            screenshotId.lowercase(Locale.US).replace("\\s".toRegex(), "_")
+            screenshotId.replace("\\s".toRegex(), "_")
         File(imagesDir, "${'$'}{sidecarName}.json").writeText(json)
     }
 
