@@ -11,6 +11,7 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
@@ -26,6 +27,8 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
   @get:Input abstract val includePrivatePreviews: Property<Boolean>
 
   @get:Input abstract val packageTrees: ListProperty<String>
+
+  @get:Input @get:Optional abstract val theme: Property<String>
 
   @get:OutputDirectory abstract val outputDir: DirectoryProperty
 
@@ -43,6 +46,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
       generateTestFileContent(
         includePrivatePreviews = includePrivatePreviews.get(),
         packageTrees = packageTrees.get(),
+        theme = theme.orNull,
       )
     File(packageDir, "$CLASS_NAME.kt").writeText(content)
     logger.lifecycle("Generated snapshot test: ${packageDir.absolutePath}/$CLASS_NAME.kt")
@@ -63,6 +67,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
         GenerateSnapshotTestsTask::class.java,
       ) { task ->
         task.includePrivatePreviews.set(extension.includePrivatePreviews)
+        task.theme.set(extension.theme)
         // Fall back to the Android namespace when the user doesn't configure packageTrees
         task.packageTrees.set(
           extension.packageTrees.map { packages ->
@@ -79,6 +84,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
     private fun generateTestFileContent(
       includePrivatePreviews: Boolean,
       packageTrees: List<String>,
+      theme: String? = null,
     ): String {
       val includePrivateExpr =
         if (includePrivatePreviews) "\n                .includePrivatePreviews()" else ""
@@ -221,7 +227,7 @@ private object PaparazziPreviewRule {
         return Paparazzi(
             environment = detectEnvironment().copy(compileSdkVersion = previewApiLevel),
             deviceConfig = DeviceConfigBuilder.build(preview.previewInfo),
-            theme = "android:Theme.Translucent.NoTitleBar",
+            ${if (theme != null) "theme = \"$theme\"," else ""}
             supportsRtl = true,
             showSystemUi = previewInfo.showSystemUi,
             renderingMode = when {

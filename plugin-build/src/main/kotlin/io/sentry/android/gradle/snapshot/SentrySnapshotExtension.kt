@@ -17,4 +17,6 @@ abstract class SentrySnapshotExtension(objects: ObjectFactory) {
 
   val packageTrees: ListProperty<String> =
     objects.listProperty(String::class.java).convention(emptyList())
+
+  val theme: Property<String> = objects.property(String::class.java)
 }
