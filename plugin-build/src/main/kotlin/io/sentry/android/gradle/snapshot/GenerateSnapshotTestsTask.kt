@@ -108,6 +108,8 @@ import app.cash.paparazzi.TestName
 import app.cash.paparazzi.detectEnvironment
 import com.android.ide.common.rendering.api.SessionParams
 import com.android.resources.*
+import java.io.File
+import java.util.Locale
 import kotlin.math.ceil
 import org.junit.Rule
 import org.junit.Test
@@ -219,6 +221,7 @@ private object PaparazziPreviewRule {
         return Paparazzi(
             environment = detectEnvironment().copy(compileSdkVersion = previewApiLevel),
             deviceConfig = DeviceConfigBuilder.build(preview.previewInfo),
+            theme = "android:Theme.Translucent.NoTitleBar",
             supportsRtl = true,
             showSystemUi = previewInfo.showSystemUi,
             renderingMode = when {
@@ -328,7 +331,47 @@ class $CLASS_NAME(
                 }
             }
         }
+
+        writeSidecarMetadata(screenshotId, preview)
     }
+
+    private fun writeSidecarMetadata(
+        screenshotId: String,
+        preview: ComposablePreview<AndroidPreviewInfo>,
+    ) {
+        val snapshotDir = File(System.getProperty("paparazzi.snapshot.dir"))
+        val imagesDir = File(snapshotDir, "images")
+        imagesDir.mkdirs()
+        val info = preview.previewInfo
+        val metadata = linkedMapOf<String, Any>(
+            "display_name" to screenshotId.removePrefix(preview.declaringClass + "."),
+            "image_file_name" to screenshotId,
+            "className" to preview.declaringClass,
+            "methodName" to preview.methodName,
+        )
+        if (info.group.isNotBlank()) metadata["group"] = info.group
+        if (info.name.isNotBlank()) metadata["previewName"] = info.name
+        if (info.locale.isNotBlank()) metadata["locale"] = info.locale
+        if (info.device.isNotBlank()) metadata["device"] = info.device
+        metadata["nightMode"] = (info.uiMode and UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES)
+        if (info.fontScale != 1f) metadata["fontScale"] = info.fontScale
+        if (info.apiLevel != -1) metadata["apiLevel"] = info.apiLevel
+        if (info.widthDp > 0) metadata["widthDp"] = info.widthDp
+        if (info.heightDp > 0) metadata["heightDp"] = info.heightDp
+        if (info.showSystemUi) metadata["showSystemUi"] = true
+        if (info.showBackground) metadata["showBackground"] = true
+
+        val json = metadata.entries.joinToString(",\n  ", prefix = "{\n  ", postfix = "\n}") { (k, v) ->
+            if (v is String) "\"" + k + "\": \"" + escapeJson(v) + "\""
+            else "\"" + k + "\": " + v
+        }
+        val sidecarName = "Paparazzi_Preview_Test_" +
+            screenshotId.lowercase(Locale.US).replace("\\s".toRegex(), "_")
+        File(imagesDir, "${'$'}{sidecarName}.json").writeText(json)
+    }
+
+    private fun escapeJson(s: String): String =
+        s.replace("\\", "\\\\").replace("\"", "\\\"")
 }
 """
         .trimStart()

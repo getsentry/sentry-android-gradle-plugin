@@ -47,7 +47,8 @@ private const val SQUARE = "id:wearos_square"
 // region UI mode constants
 // https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/content/res/Configuration.java
 
-private const val UI_MODE_NIGHT_YES: Int = 32
+internal const val UI_MODE_NIGHT_MASK: Int = 0x30
+internal const val UI_MODE_NIGHT_YES: Int = 0x20
 private const val UI_MODE_TYPE_NORMAL: Int = 1
 
 // endregion
