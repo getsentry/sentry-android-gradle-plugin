@@ -63,10 +63,12 @@ class GenerateMatrix : CliktCommand() {
         val (currentVersions, latestVersion) = fetchAgpCompatibilityTable(agpVersions)
         buildMap<Version, Version> {
           for (agpVersion in agpVersions) {
-            put(
-              agpVersion,
-              legacyVersions[agpVersion] ?: currentVersions[agpVersion] ?: latestVersion,
-            )
+            val gradleVersion =
+              legacyVersions[agpVersion]
+                ?: currentVersions[agpVersion]
+                ?: fetchGradleVersionFromReleaseNotes(agpVersion)
+                ?: latestVersion
+            put(agpVersion, gradleVersion)
           }
         }
       } catch (e: Exception) {
@@ -86,12 +88,11 @@ class GenerateMatrix : CliktCommand() {
       }
 
     // TODO: for now this is manual, but we could try get it from Gradle's github in the future
-    val gradleToGroovy =
-      mapOf("7.5".toVersion(strict = false) to "1.2", "8.11".toVersion(strict = false) to "1.7.1")
     val gradleToKotlin =
       mapOf(
         "7.5".toVersion(strict = false) to "1.8.20",
         "9.0.0".toVersion(strict = false) to "2.1.0",
+        "9.5.0-0".toVersion(strict = false) to "2.3.0",
       )
     // TODO: make it dynamic too
     val kotlinVersion = "2.1.0".toVersion()
@@ -128,10 +129,6 @@ class GenerateMatrix : CliktCommand() {
             )
             // TODO: if needed we can test against different Java versions
             put("java", "17")
-            val groovy = gradleToGroovy.entries.findLast { finalGradle >= it.key }?.value
-            if (groovy != null) {
-              put("groovy", groovy)
-            }
             val kotlin = gradleToKotlin.entries.findLast { finalGradle >= it.key }?.value
             if (kotlin != null) {
               put("kotlin", kotlin)
@@ -345,6 +342,46 @@ class GenerateMatrix : CliktCommand() {
     }
 
     return gradleVersions to latest.value
+  }
+
+  /**
+   * Fetches the minimum required Gradle version from the AGP release notes page. This is used as a
+   * fallback when the AGP version is not yet listed in the compatibility table.
+   *
+   * @param agpVersion the AGP version to look up
+   * @return the minimum required Gradle version, or null if the release notes page doesn't exist
+   */
+  private fun fetchGradleVersionFromReleaseNotes(agpVersion: Version): Version? {
+    // Release notes URLs are per-minor version and always use patch 0
+    // e.g. agp-9-2-0-release-notes covers all 9.2.x versions
+    val url =
+      "https://developer.android.com/build/releases/agp-${agpVersion.major}-${agpVersion.minor}-0-release-notes"
+    val html =
+      try {
+        URL(url).readText()
+      } catch (e: Throwable) {
+        echo("Warning: Could not fetch release notes from $url")
+        return null
+      }
+    val doc = Jsoup.parse(html)
+    val tables = doc.select("table")
+    for (table in tables) {
+      val headers = table.select("tr").firstOrNull()?.select("th")?.map { it.text() } ?: continue
+      // The compatibility table has "Minimum version" and "Default version" columns
+      if (headers.none { it.contains("version", ignoreCase = true) }) continue
+      for (row in table.select("tr")) {
+        val cells = row.select("td").map { it.text() }
+        if (cells.size >= 2 && cells[0].trim().equals("Gradle", ignoreCase = true)) {
+          return try {
+            Version.parse(cells[1], strict = false)
+          } catch (e: Throwable) {
+            echo("Warning: Could not parse Gradle version '${cells[1]}' from release notes")
+            null
+          }
+        }
+      }
+    }
+    return null
   }
 }
 

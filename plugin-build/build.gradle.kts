@@ -5,7 +5,7 @@ import java.util.Properties
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_8
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -31,7 +31,7 @@ val fixtureClasspath: Configuration by configurations.creating
 
 dependencies {
   compileOnly(libs.gradleApi)
-  compileOnly(Libs.AGP)
+  compileOnly(libs.agp)
   compileOnly(libs.proguard)
 
   implementation(libs.asm)
@@ -91,8 +91,15 @@ tasks.withType<KotlinCompile>().configureEach {
 
   compilerOptions {
     jvmTarget.set(JVM_11)
-    languageVersion.set(KOTLIN_1_8)
-    apiVersion.set(KOTLIN_1_8)
+    // Kotlin supports current + 3 previous language versions.
+    // We want 1.8, but if the compiler no longer supports it, use the oldest it does support.
+    // e.g. Kotlin 2.1 oldest=1.8, Kotlin 2.3 oldest=2.0
+    val compilerParts = KotlinCompilerVersion.VERSION.split(".")
+    val compilerFlat = compilerParts[0].toInt() * 10 + compilerParts[1].toInt()
+    val oldestFlat = maxOf(compilerFlat - 3, 18) // 18 = Kotlin 1.8
+    val kotlinLangVersion = KotlinVersion.valueOf("KOTLIN_${oldestFlat / 10}_${oldestFlat % 10}")
+    languageVersion.set(kotlinLangVersion)
+    apiVersion.set(kotlinLangVersion)
   }
 }
 
