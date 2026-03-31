@@ -116,11 +116,12 @@ class GenerateSnapshotTestsTaskTest {
   }
 
   @Test
-  fun `generated sidecar filename preserves original case`() {
+  fun `generated sidecar filename is lowercased to match Paparazzi image filenames`() {
     val content = generateAndRead(packageTrees = listOf("com.example"))
 
-    assertTrue(content.contains("screenshotId.replace(\"\\\\s\".toRegex(), \"_\")"))
-    assertFalse(content.contains("lowercase"))
+    assertTrue(
+      content.contains("screenshotId.lowercase(Locale.US).replace(\"\\\\s\".toRegex(), \"_\")")
+    )
   }
 
   private fun generateAndRead(

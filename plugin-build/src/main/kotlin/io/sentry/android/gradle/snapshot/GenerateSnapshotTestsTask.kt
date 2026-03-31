@@ -109,6 +109,7 @@ import app.cash.paparazzi.detectEnvironment
 import com.android.ide.common.rendering.api.SessionParams
 import com.android.resources.*
 import java.io.File
+import java.util.Locale
 import kotlin.math.ceil
 import org.junit.Rule
 import org.junit.Test
@@ -365,7 +366,7 @@ class $CLASS_NAME(
             else "\"" + k + "\": " + v
         }
         val sidecarName = "Paparazzi_Preview_Test_" +
-            screenshotId.replace("\\s".toRegex(), "_")
+            screenshotId.lowercase(Locale.US).replace("\\s".toRegex(), "_")
         File(imagesDir, "${'$'}{sidecarName}.json").writeText(json)
     }
 
