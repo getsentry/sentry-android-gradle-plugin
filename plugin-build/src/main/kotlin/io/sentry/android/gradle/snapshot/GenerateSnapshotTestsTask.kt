@@ -3,8 +3,6 @@ package io.sentry.android.gradle.snapshot
 import com.android.build.api.variant.ApplicationVariant
 import com.android.build.gradle.BaseExtension
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
-import io.sentry.android.gradle.snapshot.metadata.UI_MODE_NIGHT_MASK
-import io.sentry.android.gradle.snapshot.metadata.UI_MODE_NIGHT_YES
 import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
