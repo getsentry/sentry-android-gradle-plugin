@@ -3,6 +3,8 @@ package io.sentry.android.gradle.snapshot
 import com.android.build.api.variant.ApplicationVariant
 import com.android.build.gradle.BaseExtension
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
+import io.sentry.android.gradle.snapshot.metadata.UI_MODE_NIGHT_MASK
+import io.sentry.android.gradle.snapshot.metadata.UI_MODE_NIGHT_YES
 import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -353,7 +355,7 @@ class $CLASS_NAME(
         if (info.name.isNotBlank()) metadata["previewName"] = info.name
         if (info.locale.isNotBlank()) metadata["locale"] = info.locale
         if (info.device.isNotBlank()) metadata["device"] = info.device
-        metadata["nightMode"] = (info.uiMode and 0x30 == 0x20)
+        metadata["nightMode"] = (info.uiMode and UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES)
         if (info.fontScale != 1f) metadata["fontScale"] = info.fontScale
         if (info.apiLevel != -1) metadata["apiLevel"] = info.apiLevel
         if (info.widthDp > 0) metadata["widthDp"] = info.widthDp
