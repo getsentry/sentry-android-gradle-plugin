@@ -71,6 +71,12 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
   fun appStart(appStartExtensionAction: Action<AppStartExtension>) {
     appStartExtensionAction.execute(appStart)
   }
+
+  val binderIpc: BinderIpcExtension = objects.newInstance(BinderIpcExtension::class.java)
+
+  fun binderIpc(binderIpcAction: Action<BinderIpcExtension>) {
+    binderIpcAction.execute(binderIpc)
+  }
 }
 
 enum class InstrumentationFeature(val integrationName: String) {

@@ -33,6 +33,7 @@ internal object SentryVersions {
   internal val VERSION_SQLITE = SemVer(6, 21, 0)
   internal val VERSION_ANDROID_OKHTTP_LISTENER = SemVer(6, 20, 0)
   internal val VERSION_OKHTTP = SemVer(7, 0, 0)
+  internal val VERSION_BINDER_IPC = SemVer(8, 36, 0)
 }
 
 internal object SentryModules {

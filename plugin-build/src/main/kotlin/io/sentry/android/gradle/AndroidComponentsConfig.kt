@@ -203,6 +203,7 @@ fun ApplicationAndroidComponentsExtension.configure(
             extension.includeSourceContext,
             extension.dexguardEnabled,
             extension.tracingInstrumentation.appStart.enabled,
+            extension.tracingInstrumentation.binderIpc.enabled,
           )
         /**
          * We have to register SentryModulesService as a build event listener, so it will not be
@@ -234,6 +235,9 @@ fun ApplicationAndroidComponentsExtension.configure(
           params.logcatEnabled.setDisallowChanges(extension.tracingInstrumentation.logcat.enabled)
           params.appStartEnabled.setDisallowChanges(
             extension.tracingInstrumentation.appStart.enabled
+          )
+          params.binderIpcEnabled.setDisallowChanges(
+            extension.tracingInstrumentation.binderIpc.enabled
           )
           params.tmpDir.set(tmpDir)
         }
