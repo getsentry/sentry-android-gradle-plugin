@@ -78,13 +78,7 @@ fun ApplicationAndroidComponentsExtension.configure(
       }
     }
 
-    variant.configureSnapshotsTasks(
-      project,
-      extension,
-      cliExecutable,
-      sentryOrg,
-      sentryProject,
-    )
+    variant.configureSnapshotsTasks(project, extension, cliExecutable, sentryOrg, sentryProject)
 
     if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
       val paths = OutputPaths(project, variant.name)
