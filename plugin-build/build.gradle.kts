@@ -201,9 +201,6 @@ distributions {
   create("sentryJvmPluginMarker") {
     contents { from("build${sep}publications${sep}sentryJvmPluginPluginMarkerMaven") }
   }
-  create("sentrySnapshotPluginMarker") {
-    contents { from("build${sep}publications${sep}sentrySnapshotPluginPluginMarkerMaven") }
-  }
   create("sentrySnapshotMetadataPluginMarker") {
     contents { from("build${sep}publications${sep}sentrySnapshotMetadataPluginPluginMarkerMaven") }
   }
@@ -251,14 +248,6 @@ tasks.named("sentryPluginMarkerDistTar").configure {
 
 tasks.named("sentryPluginMarkerDistZip").configure {
   dependsOn("generatePomFileForSentryPluginPluginMarkerMavenPublication")
-}
-
-tasks.named("sentrySnapshotPluginMarkerDistTar").configure {
-  dependsOn("generatePomFileForSentrySnapshotPluginPluginMarkerMavenPublication")
-}
-
-tasks.named("sentrySnapshotPluginMarkerDistZip").configure {
-  dependsOn("generatePomFileForSentrySnapshotPluginPluginMarkerMavenPublication")
 }
 
 tasks.named("sentrySnapshotMetadataPluginMarkerDistTar").configure {
