@@ -46,6 +46,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 
 fun ApplicationAndroidComponentsExtension.configure(
@@ -480,11 +481,12 @@ private fun ApplicationVariant.configureSnapshotsTasks(
     )
 
   project.pluginManager.withPlugin("app.cash.paparazzi") {
+    val testTask = project.tasks.named("test${taskSuffix}UnitTest", Test::class.java)
     uploadTask.configure { task ->
-      task.snapshotsPath.convention(
-        project.layout.buildDirectory.dir("reports/paparazzi/images")
+      task.dependsOn("recordPaparazzi$taskSuffix")
+      task.snapshotsPath.fileProvider(
+        testTask.map { it.outputs.files.files.first { file -> file.name == "snapshots" } }
       )
-      task.mustRunAfter("recordPaparazzi$taskSuffix")
     }
   }
 
