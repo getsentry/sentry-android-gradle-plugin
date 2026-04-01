@@ -73,13 +73,17 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
       project.pluginManager.withPlugin("app.cash.paparazzi") {
         val android = project.extensions.getByType(BaseExtension::class.java)
 
+        project.afterEvaluate {
+          if (extension.snapshots.enabled.get()) {
+            project.dependencies.add(
+              "testImplementation",
+              "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
+            )
+          }
+        }
+
         androidComponentsExt.onVariants { variant ->
           if (!extension.snapshots.enabled.get()) return@onVariants
-
-          project.dependencies.add(
-            "testImplementation",
-            "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
-          )
 
           val generateTask =
             GenerateSnapshotTestsTask.register(project, extension.snapshots, android, variant)
