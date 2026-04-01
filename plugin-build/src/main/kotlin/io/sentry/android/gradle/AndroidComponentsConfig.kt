@@ -483,12 +483,14 @@ private fun ApplicationVariant.configureSnapshotsTasks(
     )
 
   project.pluginManager.withPlugin("app.cash.paparazzi") {
-    val testTask = project.tasks.named("test${taskSuffix}UnitTest", Test::class.java)
-    uploadTask.configure { task ->
-      task.dependsOn("recordPaparazzi$taskSuffix")
-      task.snapshotsPath.fileProvider(
-        testTask.map { it.outputs.files.files.first { file -> file.name == "snapshots" } }
-      )
+    project.afterEvaluate {
+      val testTask = project.tasks.named("test${taskSuffix}UnitTest", Test::class.java)
+      uploadTask.configure { task ->
+        task.dependsOn("recordPaparazzi$taskSuffix")
+        task.snapshotsPath.fileProvider(
+          testTask.map { it.outputs.files.files.first { file -> file.name == "snapshots" } }
+        )
+      }
     }
   }
 
