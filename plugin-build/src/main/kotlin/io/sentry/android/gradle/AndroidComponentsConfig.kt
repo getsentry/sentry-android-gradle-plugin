@@ -9,7 +9,9 @@ import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.ApplicationVariant
+import com.android.build.api.variant.HostTestBuilder.Companion.UNIT_TEST_TYPE
 import com.android.build.api.variant.Variant
+import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
@@ -19,6 +21,7 @@ import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
+import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
@@ -464,11 +467,12 @@ private fun ApplicationVariant.configureSnapshotsTasks(
   cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
-): TaskProvider<SentryUploadSnapshotsTask> {
+) {
   val variant = AndroidVariant74(this)
   val sentryProps = getPropertiesFilePath(project, variant)
   val taskSuffix = name.capitalized
 
+  // Register the upload task
   val uploadTask =
     SentryUploadSnapshotsTask.register(
       project = project,
@@ -482,8 +486,39 @@ private fun ApplicationVariant.configureSnapshotsTasks(
       taskSuffix = taskSuffix,
     )
 
+  // Wire Paparazzi test generation and upload task when the Paparazzi plugin is applied
   project.pluginManager.withPlugin("app.cash.paparazzi") {
+    val android = project.extensions.getByType(BaseExtension::class.java)
+
     project.afterEvaluate {
+      project.dependencies.add(
+        "testImplementation",
+        "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
+      )
+    }
+
+    val generateTask =
+      GenerateSnapshotTestsTask.register(project, extension.snapshots, android, this@configureSnapshotsTasks)
+
+    if (AgpVersions.isAGP90(AgpVersions.CURRENT)) {
+      hostTests[UNIT_TEST_TYPE]?.apply {
+        sources.java?.addGeneratedSourceDirectory(
+          generateTask,
+          GenerateSnapshotTestsTask::outputDir,
+        )
+      }
+    } else {
+      @Suppress("DEPRECATION_ERROR")
+      unitTest?.apply {
+        sources.java?.addGeneratedSourceDirectory(
+          generateTask,
+          GenerateSnapshotTestsTask::outputDir,
+        )
+      }
+    }
+
+    project.afterEvaluate {
+      // Is there a better way to get the test task name?
       val testTask = project.tasks.named("test${taskSuffix}UnitTest", Test::class.java)
       uploadTask.configure { task ->
         task.dependsOn("recordPaparazzi$taskSuffix")
@@ -493,8 +528,6 @@ private fun ApplicationVariant.configureSnapshotsTasks(
       }
     }
   }
-
-  return uploadTask
 }
 
 /**
