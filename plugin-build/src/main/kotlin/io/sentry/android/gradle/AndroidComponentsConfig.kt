@@ -464,18 +464,31 @@ private fun ApplicationVariant.configureSnapshotsTasks(
 ): TaskProvider<SentryUploadSnapshotsTask> {
   val variant = AndroidVariant74(this)
   val sentryProps = getPropertiesFilePath(project, variant)
+  val taskSuffix = name.capitalized
 
-  return SentryUploadSnapshotsTask.register(
-    project = project,
-    extension = extension,
-    sentryTelemetryProvider = null,
-    cliExecutable = cliExecutable,
-    sentryOrgOverride = sentryOrg,
-    sentryProjectOverride = sentryProject,
-    applicationId = applicationId,
-    sentryProperties = sentryProps,
-    taskSuffix = name.capitalized,
-  )
+  val uploadTask =
+    SentryUploadSnapshotsTask.register(
+      project = project,
+      extension = extension,
+      sentryTelemetryProvider = null,
+      cliExecutable = cliExecutable,
+      sentryOrgOverride = sentryOrg,
+      sentryProjectOverride = sentryProject,
+      applicationId = applicationId,
+      sentryProperties = sentryProps,
+      taskSuffix = taskSuffix,
+    )
+
+  project.pluginManager.withPlugin("app.cash.paparazzi") {
+    uploadTask.configure { task ->
+      task.snapshotsPath.convention(
+        project.layout.buildDirectory.dir("reports/paparazzi/images")
+      )
+      task.mustRunAfter("recordPaparazzi$taskSuffix")
+    }
+  }
+
+  return uploadTask
 }
 
 /**

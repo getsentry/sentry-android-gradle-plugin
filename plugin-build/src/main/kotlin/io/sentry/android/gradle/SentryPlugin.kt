@@ -1,9 +1,12 @@
 package io.sentry.android.gradle
 
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.api.variant.HostTestBuilder.Companion.UNIT_TEST_TYPE
+import com.android.build.gradle.BaseExtension
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
 import io.sentry.android.gradle.util.AgpVersions
 import java.io.File
 import javax.inject.Inject
@@ -66,6 +69,36 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
       )
 
       project.installDependencies(extension, true)
+
+      project.pluginManager.withPlugin("app.cash.paparazzi") {
+        val android = project.extensions.getByType(BaseExtension::class.java)
+
+        project.dependencies.add(
+          "testImplementation",
+          "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
+        )
+
+        androidComponentsExt.onVariants { variant ->
+          val generateTask =
+            GenerateSnapshotTestsTask.register(project, extension.snapshots, android, variant)
+          if (AgpVersions.isAGP90(AgpVersions.CURRENT)) {
+            variant.hostTests[UNIT_TEST_TYPE]?.apply {
+              sources.java?.addGeneratedSourceDirectory(
+                generateTask,
+                GenerateSnapshotTestsTask::outputDir,
+              )
+            }
+          } else {
+            @Suppress("DEPRECATION_ERROR")
+            variant.unitTest?.apply {
+              sources.java?.addGeneratedSourceDirectory(
+                generateTask,
+                GenerateSnapshotTestsTask::outputDir,
+              )
+            }
+          }
+        }
+      }
     }
   }
 

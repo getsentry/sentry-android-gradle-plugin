@@ -164,10 +164,6 @@ gradlePlugin {
       id = "io.sentry.jvm.gradle"
       implementationClass = "io.sentry.jvm.gradle.SentryJvmPlugin"
     }
-    register("sentrySnapshotPlugin") {
-      id = "io.sentry.android.snapshot"
-      implementationClass = "io.sentry.android.gradle.snapshot.SentrySnapshotPlugin"
-    }
     register("sentrySnapshotMetadataPlugin") {
       id = "io.sentry.android.snapshot.metadata"
       implementationClass =
