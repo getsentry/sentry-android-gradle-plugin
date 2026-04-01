@@ -78,6 +78,8 @@ fun ApplicationAndroidComponentsExtension.configure(
       }
     }
 
+    variant.configureSnapshotsTasks(project, extension, cliExecutable, sentryOrg, sentryProject)
+
     if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
       val paths = OutputPaths(project, variant.name)
       val sentryTelemetryProvider =
@@ -134,15 +136,6 @@ fun ApplicationAndroidComponentsExtension.configure(
       generateDistributionPropertiesTask?.let { tasksGeneratingProperties.add(it) }
 
       sentryVariant.configureNativeSymbolsTask(
-        project,
-        extension,
-        sentryTelemetryProvider,
-        cliExecutable,
-        sentryOrg,
-        sentryProject,
-      )
-
-      variant.configureSnapshotsTasks(
         project,
         extension,
         sentryTelemetryProvider,
@@ -465,7 +458,6 @@ private fun ApplicationVariant.configureDistributionPropertiesTask(
 private fun ApplicationVariant.configureSnapshotsTasks(
   project: Project,
   extension: SentryPluginExtension,
-  sentryTelemetryProvider: Provider<SentryTelemetryService>,
   cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
@@ -476,7 +468,7 @@ private fun ApplicationVariant.configureSnapshotsTasks(
   return SentryUploadSnapshotsTask.register(
     project = project,
     extension = extension,
-    sentryTelemetryProvider = sentryTelemetryProvider,
+    sentryTelemetryProvider = null,
     cliExecutable = cliExecutable,
     sentryOrgOverride = sentryOrg,
     sentryProjectOverride = sentryProject,
