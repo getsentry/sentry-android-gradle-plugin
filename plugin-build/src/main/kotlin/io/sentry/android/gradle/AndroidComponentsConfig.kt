@@ -490,12 +490,10 @@ private fun ApplicationVariant.configureSnapshotsTasks(
   project.pluginManager.withPlugin("app.cash.paparazzi") {
     val android = project.extensions.getByType(BaseExtension::class.java)
 
-    project.afterEvaluate {
-      project.dependencies.add(
-        "testImplementation",
-        "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
-      )
-    }
+    project.dependencies.add(
+      "testImplementation",
+      "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
+    )
 
     val generateTask =
       GenerateSnapshotTestsTask.register(
