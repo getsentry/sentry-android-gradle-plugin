@@ -1,5 +1,14 @@
 # Changelog
 
+## 6.4.0-alpha.5
+
+### Internal Changes 🔧
+
+#### Deps
+
+- Update CLI to v3.3.5 by @github-actions in [#1132](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1132)
+- Update CLI to v3.3.4 by @github-actions in [#1122](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1122)
+
 ## 6.4.0-alpha.4
 
 ### Internal Changes 🔧

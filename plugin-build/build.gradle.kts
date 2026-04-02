@@ -164,10 +164,6 @@ gradlePlugin {
       id = "io.sentry.jvm.gradle"
       implementationClass = "io.sentry.jvm.gradle.SentryJvmPlugin"
     }
-    register("sentrySnapshotPlugin") {
-      id = "io.sentry.android.snapshot"
-      implementationClass = "io.sentry.android.gradle.snapshot.SentrySnapshotPlugin"
-    }
     register("sentrySnapshotMetadataPlugin") {
       id = "io.sentry.android.snapshot.metadata"
       implementationClass =
@@ -204,9 +200,6 @@ distributions {
   }
   create("sentryJvmPluginMarker") {
     contents { from("build${sep}publications${sep}sentryJvmPluginPluginMarkerMaven") }
-  }
-  create("sentrySnapshotPluginMarker") {
-    contents { from("build${sep}publications${sep}sentrySnapshotPluginPluginMarkerMaven") }
   }
   create("sentrySnapshotMetadataPluginMarker") {
     contents { from("build${sep}publications${sep}sentrySnapshotMetadataPluginPluginMarkerMaven") }
@@ -255,14 +248,6 @@ tasks.named("sentryPluginMarkerDistTar").configure {
 
 tasks.named("sentryPluginMarkerDistZip").configure {
   dependsOn("generatePomFileForSentryPluginPluginMarkerMavenPublication")
-}
-
-tasks.named("sentrySnapshotPluginMarkerDistTar").configure {
-  dependsOn("generatePomFileForSentrySnapshotPluginPluginMarkerMavenPublication")
-}
-
-tasks.named("sentrySnapshotPluginMarkerDistZip").configure {
-  dependsOn("generatePomFileForSentrySnapshotPluginPluginMarkerMavenPublication")
 }
 
 tasks.named("sentrySnapshotMetadataPluginMarkerDistTar").configure {

@@ -9,7 +9,9 @@ import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.ApplicationVariant
+import com.android.build.api.variant.HostTestBuilder.Companion.UNIT_TEST_TYPE
 import com.android.build.api.variant.Variant
+import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
@@ -20,6 +22,7 @@ import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
+import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask
@@ -46,6 +49,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 
 fun ApplicationAndroidComponentsExtension.configure(
@@ -78,7 +82,9 @@ fun ApplicationAndroidComponentsExtension.configure(
       }
     }
 
-    variant.configureSnapshotsTasks(project, extension, cliExecutable, sentryOrg, sentryProject)
+    if (extension.snapshots.enabled.get()) {
+      variant.configureSnapshotsTasks(project, extension, cliExecutable, sentryOrg, sentryProject)
+    }
 
     if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
       val paths = OutputPaths(project, variant.name)
@@ -461,21 +467,74 @@ private fun ApplicationVariant.configureSnapshotsTasks(
   cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
-): TaskProvider<SentryUploadSnapshotsTask> {
+) {
   val variant = AndroidVariant74(this)
   val sentryProps = getPropertiesFilePath(project, variant)
+  val taskSuffix = name.capitalized
 
-  return SentryUploadSnapshotsTask.register(
-    project = project,
-    extension = extension,
-    sentryTelemetryProvider = null,
-    cliExecutable = cliExecutable,
-    sentryOrgOverride = sentryOrg,
-    sentryProjectOverride = sentryProject,
-    applicationId = applicationId,
-    sentryProperties = sentryProps,
-    taskSuffix = name.capitalized,
-  )
+  // Register the upload task
+  val uploadTask =
+    SentryUploadSnapshotsTask.register(
+      project = project,
+      extension = extension,
+      sentryTelemetryProvider = null,
+      cliExecutable = cliExecutable,
+      sentryOrgOverride = sentryOrg,
+      sentryProjectOverride = sentryProject,
+      applicationId = applicationId,
+      sentryProperties = sentryProps,
+      taskSuffix = taskSuffix,
+    )
+
+  // Wire Paparazzi test generation and upload task when the Paparazzi plugin is applied
+  project.pluginManager.withPlugin("app.cash.paparazzi") {
+    val android = project.extensions.getByType(BaseExtension::class.java)
+
+    project.dependencies.add(
+      "testImplementation",
+      "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
+    )
+
+    val generateTask =
+      GenerateSnapshotTestsTask.register(
+        project,
+        extension.snapshots,
+        android,
+        this@configureSnapshotsTasks,
+      )
+
+    if (AgpVersions.isAGP90(AgpVersions.CURRENT)) {
+      hostTests[UNIT_TEST_TYPE]?.apply {
+        sources.java?.addGeneratedSourceDirectory(
+          generateTask,
+          GenerateSnapshotTestsTask::outputDir,
+        )
+      }
+    } else {
+      @Suppress("DEPRECATION_ERROR")
+      unitTest?.apply {
+        sources.java?.addGeneratedSourceDirectory(
+          generateTask,
+          GenerateSnapshotTestsTask::outputDir,
+        )
+      }
+    }
+
+    project.afterEvaluate {
+      // Not all variants have unit test tasks (e.g. users can disable them),
+      // so skip wiring if the task doesn't exist.
+      val testTaskName = "test${taskSuffix}UnitTest"
+      if (testTaskName !in project.tasks.names) return@afterEvaluate
+
+      val testTask = project.tasks.named(testTaskName, Test::class.java)
+      uploadTask.configure { task ->
+        task.dependsOn("recordPaparazzi$taskSuffix")
+        task.snapshotsPath.fileProvider(
+          testTask.map { it.outputs.files.files.first { file -> file.name == "snapshots" } }
+        )
+      }
+    }
+  }
 }
 
 /**

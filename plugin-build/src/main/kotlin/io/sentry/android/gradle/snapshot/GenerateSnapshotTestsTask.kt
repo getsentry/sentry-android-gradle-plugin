@@ -3,6 +3,7 @@ package io.sentry.android.gradle.snapshot
 import com.android.build.api.variant.ApplicationVariant
 import com.android.build.gradle.BaseExtension
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
+import io.sentry.android.gradle.extensions.SnapshotsExtension
 import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -58,24 +59,25 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
 
     fun register(
       project: Project,
-      extension: SentrySnapshotExtension,
+      extension: SnapshotsExtension,
       android: BaseExtension,
       variant: ApplicationVariant,
     ): TaskProvider<GenerateSnapshotTestsTask> {
       return project.tasks.register(
-        "generateSentrySnapshotTests${variant.name.capitalized}",
+        "sentryGenerateSnapshotsTests${variant.name.capitalized}",
         GenerateSnapshotTestsTask::class.java,
       ) { task ->
         task.includePrivatePreviews.set(extension.includePrivatePreviews)
         task.theme.set(extension.theme)
         // Fall back to the Android namespace when the user doesn't configure packageTrees
+        // TODO do we actually need this?
         task.packageTrees.set(
           extension.packageTrees.map { packages ->
             packages.ifEmpty { listOf(android.namespace!!) }
           }
         )
         task.outputDir.set(
-          project.layout.buildDirectory.dir("generated/sentry/snapshotTests/${variant.name}")
+          project.layout.buildDirectory.dir("generated/sentry/snapshotsTests/${variant.name}")
         )
       }
     }
