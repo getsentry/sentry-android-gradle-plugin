@@ -21,8 +21,8 @@ import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
-import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
 import io.sentry.android.gradle.services.SentryModulesService
+import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask
@@ -498,7 +498,12 @@ private fun ApplicationVariant.configureSnapshotsTasks(
     }
 
     val generateTask =
-      GenerateSnapshotTestsTask.register(project, extension.snapshots, android, this@configureSnapshotsTasks)
+      GenerateSnapshotTestsTask.register(
+        project,
+        extension.snapshots,
+        android,
+        this@configureSnapshotsTasks,
+      )
 
     if (AgpVersions.isAGP90(AgpVersions.CURRENT)) {
       hostTests[UNIT_TEST_TYPE]?.apply {

@@ -70,6 +70,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
         task.includePrivatePreviews.set(extension.includePrivatePreviews)
         task.theme.set(extension.theme)
         // Fall back to the Android namespace when the user doesn't configure packageTrees
+        // TODO do we actually need this?
         task.packageTrees.set(
           extension.packageTrees.map { packages ->
             packages.ifEmpty { listOf(android.namespace!!) }
