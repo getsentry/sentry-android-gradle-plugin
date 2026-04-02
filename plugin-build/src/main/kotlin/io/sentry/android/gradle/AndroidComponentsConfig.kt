@@ -64,6 +64,16 @@ fun ApplicationAndroidComponentsExtension.configure(
   val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
   tmpDir.mkdirs()
 
+  // Add snapshot dependencies once, outside the per-variant loop
+  if (extension.snapshots.enabled.get()) {
+    project.pluginManager.withPlugin("app.cash.paparazzi") {
+      project.dependencies.add(
+        "testImplementation",
+        "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
+      )
+    }
+  }
+
   onVariants { variant ->
     // Validate distribution configuration for this variant
     val updateSdkVariants = extension.distribution.updateSdkVariants.get()
@@ -489,11 +499,6 @@ private fun ApplicationVariant.configureSnapshotsTasks(
   // Wire Paparazzi test generation and upload task when the Paparazzi plugin is applied
   project.pluginManager.withPlugin("app.cash.paparazzi") {
     val android = project.extensions.getByType(BaseExtension::class.java)
-
-    project.dependencies.add(
-      "testImplementation",
-      "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
-    )
 
     val generateTask =
       GenerateSnapshotTestsTask.register(
