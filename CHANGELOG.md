@@ -2,10 +2,6 @@
 
 ## 6.4.0-alpha.5
 
-### New Features ✨
-
-- (snapshot) Merge snapshot extension into main sentry DSL by @runningcode in [#1136](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1136)
-
 ### Internal Changes 🔧
 
 #### Deps
