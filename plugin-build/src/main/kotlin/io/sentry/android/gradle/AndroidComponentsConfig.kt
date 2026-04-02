@@ -523,8 +523,12 @@ private fun ApplicationVariant.configureSnapshotsTasks(
     }
 
     project.afterEvaluate {
-      // Is there a better way to get the test task name?
-      val testTask = project.tasks.named("test${taskSuffix}UnitTest", Test::class.java)
+      // Not all variants have unit test tasks (e.g. users can disable them),
+      // so skip wiring if the task doesn't exist.
+      val testTaskName = "test${taskSuffix}UnitTest"
+      if (testTaskName !in project.tasks.names) return@afterEvaluate
+
+      val testTask = project.tasks.named(testTaskName, Test::class.java)
       uploadTask.configure { task ->
         task.dependsOn("recordPaparazzi$taskSuffix")
         task.snapshotsPath.fileProvider(
