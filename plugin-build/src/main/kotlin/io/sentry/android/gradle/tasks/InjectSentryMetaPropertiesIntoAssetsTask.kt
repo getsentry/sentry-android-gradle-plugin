@@ -20,6 +20,7 @@ package io.sentry.android.gradle.tasks
 
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.sourcecontext.getAndDelete
+import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.PropertiesUtil
@@ -33,6 +34,7 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -72,6 +74,11 @@ abstract class InjectSentryMetaPropertiesIntoAssetsTask : DefaultTask() {
   @get:InputFiles
   abstract val inputPropertyFiles: ConfigurableFileCollection
 
+  @get:PathSensitive(PathSensitivity.NONE)
+  @get:InputFiles
+  @get:Optional
+  abstract val dependenciesReportDir: DirectoryProperty
+
   @TaskAction
   fun taskAction() {
     val input = inputDir.get().asFile
@@ -79,6 +86,14 @@ abstract class InjectSentryMetaPropertiesIntoAssetsTask : DefaultTask() {
     output.mkdirs()
 
     input.copyRecursively(output, overwrite = true)
+
+    // Copy the dependencies report if present
+    val depReportDir = dependenciesReportDir.orNull?.asFile
+    if (depReportDir != null && depReportDir.exists()) {
+      depReportDir.listFiles()?.forEach { file ->
+        file.copyTo(File(output, file.name), overwrite = true)
+      }
+    }
 
     // skip writing the properties file if there are no input property files
     // this avoids generating an empty properties file when all Sentry features are disabled
@@ -108,6 +123,7 @@ abstract class InjectSentryMetaPropertiesIntoAssetsTask : DefaultTask() {
       sentryTelemetryProvider: Provider<SentryTelemetryService>?,
       tasksGeneratingProperties: List<TaskProvider<out PropertiesFileOutputTask>>,
       taskSuffix: String = "",
+      reportDependenciesTask: TaskProvider<SentryExternalDependenciesReportTaskV2>? = null,
     ): TaskProvider<InjectSentryMetaPropertiesIntoAssetsTask> {
       val inputFiles: List<Provider<RegularFile>> =
         tasksGeneratingProperties.mapNotNull { it.flatMap { task -> task.outputFile } }
@@ -116,6 +132,9 @@ abstract class InjectSentryMetaPropertiesIntoAssetsTask : DefaultTask() {
         InjectSentryMetaPropertiesIntoAssetsTask::class.java,
       ) { task ->
         task.inputPropertyFiles.setFrom(inputFiles)
+        reportDependenciesTask?.let { depTask ->
+          task.dependenciesReportDir.set(depTask.flatMap { it.output })
+        }
 
         task.withSentryTelemetry(extension, sentryTelemetryProvider)
       }

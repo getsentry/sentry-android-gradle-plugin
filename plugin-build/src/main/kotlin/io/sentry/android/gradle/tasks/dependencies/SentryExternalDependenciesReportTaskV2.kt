@@ -72,7 +72,15 @@ abstract class SentryExternalDependenciesReportTaskV2 : DirectoryOutputTask() {
           }
         task.artifactIds.set(artifactIds)
         task.includeReport.set(includeReport)
-        output?.let { task.output.set(it) }
+        if (output != null) {
+          task.output.set(output)
+        } else {
+          task.output.set(
+            project.layout.buildDirectory.dir(
+              "generated${File.separator}sentry${File.separator}dependencies$taskSuffix"
+            )
+          )
+        }
         task.withSentryTelemetry(extension, sentryTelemetryProvider)
       }
     }

@@ -91,7 +91,8 @@ fun ApplicationAndroidComponentsExtension.configure(
       val sentryTelemetryProvider =
         variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
 
-      variant.configureDependenciesTask(project, extension, sentryTelemetryProvider)
+      val reportDependenciesTask =
+        variant.configureDependenciesTask(project, extension, sentryTelemetryProvider)
 
       // TODO: do this only once, and all other tasks should be SentryVariant.configureSomething
       val sentryVariant = AndroidVariant74(variant)
@@ -163,6 +164,7 @@ fun ApplicationAndroidComponentsExtension.configure(
             sentryTelemetryProvider,
             tasksGeneratingProperties,
             variant.name.capitalized,
+            reportDependenciesTask,
           )
 
         assetsWiredWithDirectories(
@@ -337,7 +339,7 @@ private fun Variant.configureDependenciesTask(
   project: Project,
   extension: SentryPluginExtension,
   sentryTelemetryProvider: Provider<SentryTelemetryService>,
-) {
+): TaskProvider<SentryExternalDependenciesReportTaskV2>? {
   if (extension.includeDependenciesReport.get()) {
     val reportDependenciesTask =
       SentryExternalDependenciesReportTaskV2.register(
@@ -349,8 +351,9 @@ private fun Variant.configureDependenciesTask(
         includeReport = extension.includeDependenciesReport,
         taskSuffix = name.capitalized,
       )
-    sources.assets?.addGeneratedSourceDirectory(reportDependenciesTask) { task -> task.output }
+    return reportDependenciesTask
   }
+  return null
 }
 
 private fun ApplicationVariant.configureProguardMappingsTasks(
