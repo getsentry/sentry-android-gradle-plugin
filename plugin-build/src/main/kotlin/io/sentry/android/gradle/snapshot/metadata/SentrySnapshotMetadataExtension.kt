@@ -12,5 +12,5 @@ import org.jetbrains.annotations.ApiStatus
 abstract class SentrySnapshotMetadataExtension(objects: ObjectFactory) {
 
   val includePrivatePreviews: Property<Boolean> =
-    objects.property(Boolean::class.java).convention(false)
+    objects.property(Boolean::class.java).convention(true)
 }

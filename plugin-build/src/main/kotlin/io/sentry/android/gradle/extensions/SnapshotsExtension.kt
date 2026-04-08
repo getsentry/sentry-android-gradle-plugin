@@ -12,7 +12,7 @@ open class SnapshotsExtension @Inject constructor(objects: ObjectFactory) {
   val enabled: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
 
   val includePrivatePreviews: Property<Boolean> =
-    objects.property(Boolean::class.java).convention(false)
+    objects.property(Boolean::class.java).convention(true)
 
   val packageTrees: ListProperty<String> =
     objects.listProperty(String::class.java).convention(emptyList())
