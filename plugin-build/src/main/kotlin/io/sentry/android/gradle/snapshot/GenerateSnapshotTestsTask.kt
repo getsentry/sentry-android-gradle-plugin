@@ -224,17 +224,17 @@ private class TestNameOverrideHandler(
 
 private object PaparazziPreviewRule {
     const val UNDEFINED_API_LEVEL = -1
-    const val MAX_API_LEVEL = 36
 
     fun createFor(preview: ComposablePreview<AndroidPreviewInfo>): Paparazzi {
         val previewInfo = preview.previewInfo
-        val previewApiLevel = when (previewInfo.apiLevel == UNDEFINED_API_LEVEL) {
-            true -> MAX_API_LEVEL
-            false -> previewInfo.apiLevel
+        val env = detectEnvironment()
+        val environment = when (previewInfo.apiLevel == UNDEFINED_API_LEVEL) {
+            true -> env
+            false -> env.copy(compileSdkVersion = previewInfo.apiLevel)
         }
         val tolerance = 0.0
         return Paparazzi(
-            environment = detectEnvironment().copy(compileSdkVersion = previewApiLevel),
+            environment = environment,
             deviceConfig = DeviceConfigBuilder.build(preview.previewInfo),
             ${if (theme != null) "theme = \"$theme\"," else ""}
             supportsRtl = true,
