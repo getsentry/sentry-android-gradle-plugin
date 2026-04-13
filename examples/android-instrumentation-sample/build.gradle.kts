@@ -116,7 +116,5 @@ sentry {
 
   tracingInstrumentation { forceInstrumentDependencies.set(true) }
 
-  snapshots {
-    enabled.set(true)
-  }
+  snapshots { enabled.set(true) }
 }
