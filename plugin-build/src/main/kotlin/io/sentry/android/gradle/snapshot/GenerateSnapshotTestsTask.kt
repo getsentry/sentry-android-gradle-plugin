@@ -15,6 +15,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 
 @CacheableTask
@@ -30,6 +31,8 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
   @get:Input abstract val packageTrees: ListProperty<String>
 
   @get:Input @get:Optional abstract val theme: Property<String>
+
+  @get:Input abstract val paparazziMajorVersion: Property<Int>
 
   @get:OutputDirectory abstract val outputDir: DirectoryProperty
 
@@ -48,6 +51,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
         includePrivatePreviews = includePrivatePreviews.get(),
         packageTrees = packageTrees.get(),
         theme = theme.orNull,
+        paparazziMajorVersion = paparazziMajorVersion.get(),
       )
     File(packageDir, "$CLASS_NAME.kt").writeText(content)
     logger.lifecycle("Generated snapshot test: ${packageDir.absolutePath}/$CLASS_NAME.kt")
@@ -62,6 +66,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
       extension: SnapshotsExtension,
       android: BaseExtension,
       variant: ApplicationVariant,
+      paparazziMajorVersion: Provider<Int>,
     ): TaskProvider<GenerateSnapshotTestsTask> {
       return project.tasks.register(
         "sentryGenerateSnapshotsTests${variant.name.capitalized}",
@@ -69,6 +74,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
       ) { task ->
         task.includePrivatePreviews.set(extension.includePrivatePreviews)
         task.theme.set(extension.theme)
+        task.paparazziMajorVersion.value(paparazziMajorVersion)
         // Fall back to the Android namespace when the user doesn't configure packageTrees
         // TODO do we actually need this?
         task.packageTrees.set(
@@ -87,6 +93,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
       includePrivatePreviews: Boolean,
       packageTrees: List<String>,
       theme: String? = null,
+      paparazziMajorVersion: Int = 2,
     ): String {
       val includePrivateExpr =
         if (includePrivatePreviews) "\n                .includePrivatePreviews()" else ""
@@ -240,7 +247,7 @@ private object PaparazziPreviewRule {
             snapshotHandler = TestNameOverrideHandler(
                 when (System.getProperty("paparazzi.test.verify")?.toBoolean() == true) {
                     true -> SnapshotVerifier(maxPercentDifference = tolerance)
-                    false -> HtmlReportWriter(maxPercentDifference = tolerance)
+                    false -> ${if (paparazziMajorVersion >= 2) "HtmlReportWriter(maxPercentDifference = tolerance)" else "HtmlReportWriter()"}
                 }
             ),
             maxPercentDifference = tolerance,

@@ -124,11 +124,34 @@ class GenerateSnapshotTestsTaskTest {
     )
   }
 
+  @Test
+  fun `generated file uses HtmlReportWriter without maxPercentDifference for paparazzi 1`() {
+    val content = generateAndRead(
+      packageTrees = listOf("com.example"),
+      paparazziMajorVersion = 1,
+    )
+
+    assertTrue(content.contains("HtmlReportWriter()"))
+    assertFalse(content.contains("HtmlReportWriter(maxPercentDifference"))
+  }
+
+  @Test
+  fun `generated file uses HtmlReportWriter with maxPercentDifference for paparazzi 2`() {
+    val content = generateAndRead(
+      packageTrees = listOf("com.example"),
+      paparazziMajorVersion = 2,
+    )
+
+    assertTrue(content.contains("HtmlReportWriter(maxPercentDifference = tolerance)"))
+    assertFalse(content.contains("HtmlReportWriter()"))
+  }
+
   private fun generateAndRead(
     packageTrees: List<String>,
     includePrivatePreviews: Boolean = false,
+    paparazziMajorVersion: Int = 2,
   ): String {
-    val task = createTask(packageTrees, includePrivatePreviews)
+    val task = createTask(packageTrees, includePrivatePreviews, paparazziMajorVersion)
     task.generate()
     val file =
       File(task.outputDir.get().asFile, "io/sentry/snapshot/ComposablePreviewSnapshotTest.kt")
@@ -138,12 +161,14 @@ class GenerateSnapshotTestsTaskTest {
   private fun createTask(
     packageTrees: List<String>,
     includePrivatePreviews: Boolean = false,
+    paparazziMajorVersion: Int = 2,
   ): GenerateSnapshotTestsTask {
     val project = ProjectBuilder.builder().build()
     return project.tasks
       .register("testGenerateSnapshotTests", GenerateSnapshotTestsTask::class.java) { task ->
         task.includePrivatePreviews.set(includePrivatePreviews)
         task.packageTrees.set(packageTrees)
+        task.paparazziMajorVersion.set(paparazziMajorVersion)
         task.outputDir.set(tmpDir.newFolder("output"))
       }
       .get()
