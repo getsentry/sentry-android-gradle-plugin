@@ -66,16 +66,16 @@ class ComposeActivity : ComponentActivity() {
 @Preview
 @Composable
 fun HomeTextPreview() {
-  HomeText(pillShape = RoundedCornerShape(50))
+  HomeText(rememberNavController(), RoundedCornerShape(50))
 }
 
 @Composable
-fun HomeText(navController: NavController? = null, pillShape: RoundedCornerShape) {
+fun HomeText(navController: NavController, pillShape: RoundedCornerShape) {
   BasicText(
     modifier =
       Modifier.border(2.dp, Color.Gray, pillShape)
         .clip(pillShape)
-        .clickable { navController?.navigate(Destination.Details.route) }
+        .clickable { navController.navigate(Destination.Details.route) }
         .padding(24.dp),
     text = "Home. Tap to go to Details.",
   )
@@ -84,16 +84,16 @@ fun HomeText(navController: NavController? = null, pillShape: RoundedCornerShape
 @Preview
 @Composable
 fun DetailsTextPreview() {
-  DetailsText(pillShape = RoundedCornerShape(50))
+  DetailsText(rememberNavController(), RoundedCornerShape(50))
 }
 
 @Composable
-fun DetailsText(navController: NavController? = null, pillShape: RoundedCornerShape) {
+fun DetailsText(navController: NavController, pillShape: RoundedCornerShape) {
   BasicText(
     modifier =
       Modifier.border(2.dp, Color.Gray, pillShape)
         .clip(pillShape)
-        .clickable { navController?.popBackStack() }
+        .clickable { navController.popBackStack() }
         .padding(24.dp),
     text = "Details. Tap or press back to return.",
   )
