@@ -1,6 +1,8 @@
 package io.sentry.android.gradle.snapshot
 
+import io.sentry.android.gradle.parseMajorVersion
 import java.io.File
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.gradle.testfixtures.ProjectBuilder
@@ -125,11 +127,27 @@ class GenerateSnapshotTestsTaskTest {
   }
 
   @Test
+  fun `parseMajorVersion extracts major from standard semver`() {
+    assertEquals(1, parseMajorVersion("1.3.5"))
+    assertEquals(2, parseMajorVersion("2.0.0-alpha01"))
+  }
+
+  @Test
+  fun `parseMajorVersion extracts major from dynamic versions`() {
+    assertEquals(1, parseMajorVersion("1.+"))
+    assertEquals(2, parseMajorVersion("2.+"))
+  }
+
+  @Test
+  fun `parseMajorVersion returns default for unparseable versions`() {
+    assertEquals(2, parseMajorVersion("latest.release"))
+    assertEquals(2, parseMajorVersion(null))
+    assertEquals(2, parseMajorVersion("+"))
+  }
+
+  @Test
   fun `generated file uses HtmlReportWriter without maxPercentDifference for paparazzi 1`() {
-    val content = generateAndRead(
-      packageTrees = listOf("com.example"),
-      paparazziMajorVersion = 1,
-    )
+    val content = generateAndRead(packageTrees = listOf("com.example"), paparazziMajorVersion = 1)
 
     assertTrue(content.contains("HtmlReportWriter()"))
     assertFalse(content.contains("HtmlReportWriter(maxPercentDifference"))
@@ -137,10 +155,7 @@ class GenerateSnapshotTestsTaskTest {
 
   @Test
   fun `generated file uses HtmlReportWriter with maxPercentDifference for paparazzi 2`() {
-    val content = generateAndRead(
-      packageTrees = listOf("com.example"),
-      paparazziMajorVersion = 2,
-    )
+    val content = generateAndRead(packageTrees = listOf("com.example"), paparazziMajorVersion = 2)
 
     assertTrue(content.contains("HtmlReportWriter(maxPercentDifference = tolerance)"))
     assertFalse(content.contains("HtmlReportWriter()"))

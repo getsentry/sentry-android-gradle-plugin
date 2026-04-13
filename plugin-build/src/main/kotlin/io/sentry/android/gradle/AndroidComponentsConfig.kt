@@ -37,7 +37,6 @@ import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.AgpVersions
-import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.GroovyCompat
 import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
@@ -496,12 +495,14 @@ private fun ApplicationVariant.configureSnapshotsTasks(
       "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
     )
 
-    val paparazziMajorVersion = project.provider {
-      val dep = project.configurations.findByName("testImplementation")
-        ?.allDependencies
-        ?.find { it.group == "app.cash.paparazzi" && it.name == "paparazzi" }
-      dep?.version?.let { SemVer.parse(it).major } ?: 2
-    }
+    val paparazziMajorVersion =
+      project.provider {
+        val dep =
+          project.configurations.findByName("testImplementation")?.allDependencies?.find {
+            it.group == "app.cash.paparazzi" && it.name == "paparazzi"
+          }
+        parseMajorVersion(dep?.version)
+      }
 
     val generateTask =
       GenerateSnapshotTestsTask.register(
@@ -545,6 +546,9 @@ private fun ApplicationVariant.configureSnapshotsTasks(
     }
   }
 }
+
+internal fun parseMajorVersion(version: String?, defaultVersion: Int = 2): Int =
+  version?.trimStart()?.takeWhile { it.isDigit() }?.toIntOrNull() ?: defaultVersion
 
 /**
  * Configure the upload AAB and APK tasks and set them up as finalizers on the respective producer
