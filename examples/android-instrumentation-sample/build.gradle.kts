@@ -4,6 +4,7 @@ plugins {
   alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP
   alias(libs.plugins.kotlinAndroid) version BuildPluginsVersion.KOTLIN
   alias(libs.plugins.ksp)
+  alias(libs.plugins.paparazzi)
   id("io.sentry.android.gradle")
   id("io.sentry.kotlin.compiler.gradle")
 }
@@ -86,6 +87,7 @@ dependencies {
   implementation(libs.sample.androidx.composeFoundation)
   implementation(libs.sample.androidx.composeFoundationLayout)
   implementation(libs.sample.androidx.composeNavigation)
+  implementation(libs.sample.androidx.composeUiToolingPreview)
 
   implementation(libs.sample.coroutines.core)
   implementation(libs.sample.coroutines.android)
@@ -113,4 +115,8 @@ sentry {
   telemetryDsn.set(CI.SENTRY_SDKS_DSN)
 
   tracingInstrumentation { forceInstrumentDependencies.set(true) }
+
+  snapshots {
+    enabled.set(true)
+  }
 }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,25 +63,37 @@ class ComposeActivity : ComponentActivity() {
   }
 }
 
+@Preview
 @Composable
-fun HomeText(navController: NavController, pillShape: RoundedCornerShape) {
+fun HomeTextPreview() {
+  HomeText(pillShape = RoundedCornerShape(50))
+}
+
+@Composable
+fun HomeText(navController: NavController? = null, pillShape: RoundedCornerShape) {
   BasicText(
     modifier =
       Modifier.border(2.dp, Color.Gray, pillShape)
         .clip(pillShape)
-        .clickable { navController.navigate(Destination.Details.route) }
+        .clickable { navController?.navigate(Destination.Details.route) }
         .padding(24.dp),
     text = "Home. Tap to go to Details.",
   )
 }
 
+@Preview
 @Composable
-fun DetailsText(navController: NavController, pillShape: RoundedCornerShape) {
+fun DetailsTextPreview() {
+  DetailsText(pillShape = RoundedCornerShape(50))
+}
+
+@Composable
+fun DetailsText(navController: NavController? = null, pillShape: RoundedCornerShape) {
   BasicText(
     modifier =
       Modifier.border(2.dp, Color.Gray, pillShape)
         .clip(pillShape)
-        .clickable { navController.popBackStack() }
+        .clickable { navController?.popBackStack() }
         .padding(24.dp),
     text = "Details. Tap or press back to return.",
   )

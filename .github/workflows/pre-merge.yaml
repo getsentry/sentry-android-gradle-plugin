@@ -46,3 +46,7 @@ jobs:
 
       - name: Build the Debug and Release variants
         run: ./gradlew assemble
+
+      - name: Record and upload snapshots
+        if: env.SENTRY_AUTH_TOKEN != ''
+        run: ./gradlew :examples:android-instrumentation-sample:sentryUploadSnapshotsStagingDebug
