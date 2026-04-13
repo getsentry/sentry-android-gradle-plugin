@@ -495,12 +495,22 @@ private fun ApplicationVariant.configureSnapshotsTasks(
       "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
     )
 
+    val paparazziMajorVersion =
+      project.provider {
+        val dep =
+          project.configurations.findByName("testImplementation")?.allDependencies?.find {
+            it.group == "app.cash.paparazzi" && it.name == "paparazzi"
+          }
+        parseMajorVersion(dep?.version)
+      }
+
     val generateTask =
       GenerateSnapshotTestsTask.register(
         project,
         extension.snapshots,
         android,
         this@configureSnapshotsTasks,
+        paparazziMajorVersion,
       )
 
     if (AgpVersions.isAGP90(AgpVersions.CURRENT)) {
@@ -536,6 +546,9 @@ private fun ApplicationVariant.configureSnapshotsTasks(
     }
   }
 }
+
+internal fun parseMajorVersion(version: String?, defaultVersion: Int = 2): Int =
+  version?.trimStart()?.takeWhile { it.isDigit() }?.toIntOrNull() ?: defaultVersion
 
 /**
  * Configure the upload AAB and APK tasks and set them up as finalizers on the respective producer

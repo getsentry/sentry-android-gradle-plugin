@@ -1,6 +1,8 @@
 package io.sentry.android.gradle.snapshot
 
+import io.sentry.android.gradle.parseMajorVersion
 import java.io.File
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.gradle.testfixtures.ProjectBuilder
@@ -124,11 +126,47 @@ class GenerateSnapshotTestsTaskTest {
     )
   }
 
+  @Test
+  fun `parseMajorVersion extracts major from standard semver`() {
+    assertEquals(1, parseMajorVersion("1.3.5"))
+    assertEquals(2, parseMajorVersion("2.0.0-alpha01"))
+  }
+
+  @Test
+  fun `parseMajorVersion extracts major from dynamic versions`() {
+    assertEquals(1, parseMajorVersion("1.+"))
+    assertEquals(2, parseMajorVersion("2.+"))
+  }
+
+  @Test
+  fun `parseMajorVersion returns default for unparseable versions`() {
+    assertEquals(2, parseMajorVersion("latest.release"))
+    assertEquals(2, parseMajorVersion(null))
+    assertEquals(2, parseMajorVersion("+"))
+  }
+
+  @Test
+  fun `generated file uses HtmlReportWriter without maxPercentDifference for paparazzi 1`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"), paparazziMajorVersion = 1)
+
+    assertTrue(content.contains("HtmlReportWriter()"))
+    assertFalse(content.contains("HtmlReportWriter(maxPercentDifference"))
+  }
+
+  @Test
+  fun `generated file uses HtmlReportWriter with maxPercentDifference for paparazzi 2`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"), paparazziMajorVersion = 2)
+
+    assertTrue(content.contains("HtmlReportWriter(maxPercentDifference = tolerance)"))
+    assertFalse(content.contains("HtmlReportWriter()"))
+  }
+
   private fun generateAndRead(
     packageTrees: List<String>,
     includePrivatePreviews: Boolean = false,
+    paparazziMajorVersion: Int = 2,
   ): String {
-    val task = createTask(packageTrees, includePrivatePreviews)
+    val task = createTask(packageTrees, includePrivatePreviews, paparazziMajorVersion)
     task.generate()
     val file =
       File(task.outputDir.get().asFile, "io/sentry/snapshot/ComposablePreviewSnapshotTest.kt")
@@ -138,12 +176,14 @@ class GenerateSnapshotTestsTaskTest {
   private fun createTask(
     packageTrees: List<String>,
     includePrivatePreviews: Boolean = false,
+    paparazziMajorVersion: Int = 2,
   ): GenerateSnapshotTestsTask {
     val project = ProjectBuilder.builder().build()
     return project.tasks
       .register("testGenerateSnapshotTests", GenerateSnapshotTestsTask::class.java) { task ->
         task.includePrivatePreviews.set(includePrivatePreviews)
         task.packageTrees.set(packageTrees)
+        task.paparazziMajorVersion.set(paparazziMajorVersion)
         task.outputDir.set(tmpDir.newFolder("output"))
       }
       .get()
