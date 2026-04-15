@@ -488,45 +488,47 @@ private fun ApplicationVariant.configureSnapshotsTasks(
 
   // Wire Paparazzi test generation and upload task when the Paparazzi plugin is applied
   project.pluginManager.withPlugin("app.cash.paparazzi") {
-    val android = project.extensions.getByType(BaseExtension::class.java)
+    if (extension.snapshots.generateTests.get()) {
+      val android = project.extensions.getByType(BaseExtension::class.java)
 
-    project.dependencies.add(
-      "testImplementation",
-      "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
-    )
-
-    val paparazziMajorVersion =
-      project.provider {
-        val dep =
-          project.configurations.findByName("testImplementation")?.allDependencies?.find {
-            it.group == "app.cash.paparazzi" && it.name == "paparazzi"
-          }
-        parseMajorVersion(dep?.version)
-      }
-
-    val generateTask =
-      GenerateSnapshotTestsTask.register(
-        project,
-        extension.snapshots,
-        android,
-        this@configureSnapshotsTasks,
-        paparazziMajorVersion,
+      project.dependencies.add(
+        "testImplementation",
+        "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
       )
 
-    if (AgpVersions.isAGP90(AgpVersions.CURRENT)) {
-      hostTests[UNIT_TEST_TYPE]?.apply {
-        sources.java?.addGeneratedSourceDirectory(
-          generateTask,
-          GenerateSnapshotTestsTask::outputDir,
+      val paparazziMajorVersion =
+        project.provider {
+          val dep =
+            project.configurations.findByName("testImplementation")?.allDependencies?.find {
+              it.group == "app.cash.paparazzi" && it.name == "paparazzi"
+            }
+          parseMajorVersion(dep?.version)
+        }
+
+      val generateTask =
+        GenerateSnapshotTestsTask.register(
+          project,
+          extension.snapshots,
+          android,
+          this@configureSnapshotsTasks,
+          paparazziMajorVersion,
         )
-      }
-    } else {
-      @Suppress("DEPRECATION_ERROR")
-      unitTest?.apply {
-        sources.java?.addGeneratedSourceDirectory(
-          generateTask,
-          GenerateSnapshotTestsTask::outputDir,
-        )
+
+      if (AgpVersions.isAGP90(AgpVersions.CURRENT)) {
+        hostTests[UNIT_TEST_TYPE]?.apply {
+          sources.java?.addGeneratedSourceDirectory(
+            generateTask,
+            GenerateSnapshotTestsTask::outputDir,
+          )
+        }
+      } else {
+        @Suppress("DEPRECATION_ERROR")
+        unitTest?.apply {
+          sources.java?.addGeneratedSourceDirectory(
+            generateTask,
+            GenerateSnapshotTestsTask::outputDir,
+          )
+        }
       }
     }
 
