@@ -488,7 +488,7 @@ private fun ApplicationVariant.configureSnapshotsTasks(
 
   // Wire Paparazzi test generation and upload task when the Paparazzi plugin is applied
   project.pluginManager.withPlugin("app.cash.paparazzi") {
-    if (extension.snapshots.generateTests.get()) {
+    if (extension.snapshots.generateSnapshotTests.get()) {
       val android = project.extensions.getByType(BaseExtension::class.java)
 
       project.dependencies.add(

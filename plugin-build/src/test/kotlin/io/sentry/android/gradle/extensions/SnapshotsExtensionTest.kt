@@ -16,21 +16,21 @@ class SnapshotsExtensionTest {
   }
 
   @Test
-  fun `generateTests is true by default`() {
+  fun `generateSnapshotTests is true by default`() {
     val project = ProjectBuilder.builder().build()
     val extension = project.objects.newInstance(SnapshotsExtension::class.java)
 
-    assertTrue(extension.generateTests.get())
+    assertTrue(extension.generateSnapshotTests.get())
   }
 
   @Test
-  fun `generateTests can be set to false`() {
+  fun `generateSnapshotTests can be set to false`() {
     val project = ProjectBuilder.builder().build()
     val extension = project.objects.newInstance(SnapshotsExtension::class.java)
 
-    extension.generateTests.set(false)
+    extension.generateSnapshotTests.set(false)
 
-    assertFalse(extension.generateTests.get())
+    assertFalse(extension.generateSnapshotTests.get())
   }
 
   @Test
