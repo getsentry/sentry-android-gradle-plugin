@@ -11,7 +11,8 @@ open class SnapshotsExtension @Inject constructor(objects: ObjectFactory) {
 
   val enabled: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
 
-  val generateTests: Property<Boolean> = objects.property(Boolean::class.java).convention(true)
+  val generateSnapshotTests: Property<Boolean> =
+    objects.property(Boolean::class.java).convention(true)
 
   val includePrivatePreviews: Property<Boolean> =
     objects.property(Boolean::class.java).convention(true)
