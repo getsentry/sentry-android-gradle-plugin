@@ -13,3 +13,4 @@ targets:
     sdks:
       maven:io.sentry:sentry-android-gradle-plugin:
       maven:io.sentry:sentry-kotlin-compiler-plugin:
+      maven:io.sentry:sentry-snapshots-runtime:
