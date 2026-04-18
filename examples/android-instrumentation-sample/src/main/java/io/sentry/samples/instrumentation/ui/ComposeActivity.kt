@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -62,6 +63,12 @@ class ComposeActivity : ComponentActivity() {
   }
 }
 
+@Preview
+@Composable
+fun HomeTextPreview() {
+  HomeText(rememberNavController(), RoundedCornerShape(50))
+}
+
 @Composable
 fun HomeText(navController: NavController, pillShape: RoundedCornerShape) {
   BasicText(
@@ -72,6 +79,12 @@ fun HomeText(navController: NavController, pillShape: RoundedCornerShape) {
         .padding(24.dp),
     text = "Home. Tap to go to Details.",
   )
+}
+
+@Preview
+@Composable
+fun DetailsTextPreview() {
+  DetailsText(rememberNavController(), RoundedCornerShape(50))
 }
 
 @Composable
