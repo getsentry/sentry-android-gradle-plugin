@@ -16,5 +16,5 @@ targets:
       maven:io.sentry:sentry-snapshots-runtime:
         name: 'io.sentry:sentry-snapshots-runtime'
         sdkName: 'sentry.java.android.snapshots-runtime'
-        packageUrl: 'https://search.maven.org/artifact/io.sentry/sentry-snapshots-runtime'
+        packageUrl: 'https://central.sonatype.com/artifact/io.sentry/sentry-snapshots-runtime'
         mainDocsUrl: 'https://docs.sentry.io/platforms/android'
