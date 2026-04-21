@@ -376,6 +376,17 @@ class $CLASS_NAME(
         if (info.showSystemUi) metadata["show_system_ui"] = true
         if (info.showBackground) metadata["show_background"] = true
 
+        val diffThreshold: Float? = runCatching {
+            val declaring = Class.forName(preview.declaringClass)
+            val method = declaring.declaredMethods.firstOrNull { it.name == preview.methodName }
+                ?: return@runCatching null
+            @Suppress("UNCHECKED_CAST")
+            val annClass = Class.forName("io.sentry.snapshots.runtime.SentrySnapshot") as Class<out Annotation>
+            val ann = method.getAnnotation(annClass) ?: return@runCatching null
+            annClass.getDeclaredMethod("diffThreshold").invoke(ann) as? Float
+        }.getOrNull()
+        if (diffThreshold != null && diffThreshold != 0f) metadata["diff_threshold"] = diffThreshold
+
         val json = metadata.entries.joinToString(",\n  ", prefix = "{\n  ", postfix = "\n}") { (k, v) ->
             if (v is String) "\"" + k + "\": \"" + escapeJson(v) + "\""
             else "\"" + k + "\": " + v
