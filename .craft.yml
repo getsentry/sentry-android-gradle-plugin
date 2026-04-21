@@ -14,3 +14,7 @@ targets:
       maven:io.sentry:sentry-android-gradle-plugin:
       maven:io.sentry:sentry-kotlin-compiler-plugin:
       maven:io.sentry:sentry-snapshots-runtime:
+        name: 'io.sentry:sentry-snapshots-runtime'
+        sdkName: 'sentry.java.android.snapshots-runtime'
+        packageUrl: 'https://search.maven.org/artifact/io.sentry/sentry-snapshots-runtime'
+        mainDocsUrl: 'https://docs.sentry.io/platforms/android'
