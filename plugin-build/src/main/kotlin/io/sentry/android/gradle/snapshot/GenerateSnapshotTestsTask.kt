@@ -361,20 +361,20 @@ class $CLASS_NAME(
         val metadata = linkedMapOf<String, Any>(
             "display_name" to screenshotId.removePrefix(preview.declaringClass + "."),
             "image_file_name" to screenshotId,
-            "className" to preview.declaringClass,
-            "methodName" to preview.methodName,
+            "class_name" to preview.declaringClass,
+            "method_name" to preview.methodName,
         )
         if (info.group.isNotBlank()) metadata["group"] = info.group
-        if (info.name.isNotBlank()) metadata["previewName"] = info.name
+        if (info.name.isNotBlank()) metadata["preview_name"] = info.name
         if (info.locale.isNotBlank()) metadata["locale"] = info.locale
         if (info.device.isNotBlank()) metadata["device"] = info.device
-        metadata["nightMode"] = (info.uiMode and UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES)
-        if (info.fontScale != 1f) metadata["fontScale"] = info.fontScale
-        if (info.apiLevel != -1) metadata["apiLevel"] = info.apiLevel
-        if (info.widthDp > 0) metadata["widthDp"] = info.widthDp
-        if (info.heightDp > 0) metadata["heightDp"] = info.heightDp
-        if (info.showSystemUi) metadata["showSystemUi"] = true
-        if (info.showBackground) metadata["showBackground"] = true
+        metadata["night_mode"] = (info.uiMode and UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES)
+        if (info.fontScale != 1f) metadata["font_scale"] = info.fontScale
+        if (info.apiLevel != -1) metadata["api_level"] = info.apiLevel
+        if (info.widthDp > 0) metadata["width_dp"] = info.widthDp
+        if (info.heightDp > 0) metadata["height_dp"] = info.heightDp
+        if (info.showSystemUi) metadata["show_system_ui"] = true
+        if (info.showBackground) metadata["show_background"] = true
 
         val json = metadata.entries.joinToString(",\n  ", prefix = "{\n  ", postfix = "\n}") { (k, v) ->
             if (v is String) "\"" + k + "\": \"" + escapeJson(v) + "\""
