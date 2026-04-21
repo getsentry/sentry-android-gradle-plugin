@@ -127,6 +127,26 @@ class GenerateSnapshotTestsTaskTest {
   }
 
   @Test
+  fun `generated sidecar reads SentrySnapshot annotation via reflection`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"))
+
+    assertTrue(content.contains("Class.forName(preview.declaringClass)"))
+    assertTrue(content.contains("\"io.sentry.snapshots.runtime.SentrySnapshot\""))
+    assertTrue(content.contains("getDeclaredMethod(\"diffThreshold\")"))
+  }
+
+  @Test
+  fun `generated sidecar emits diff_threshold only when non-default`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"))
+
+    assertTrue(
+      content.contains(
+        "if (diffThreshold != null && diffThreshold != 0f) metadata[\"diff_threshold\"] = diffThreshold"
+      )
+    )
+  }
+
+  @Test
   fun `parseMajorVersion extracts major from standard semver`() {
     assertEquals(1, parseMajorVersion("1.3.5"))
     assertEquals(2, parseMajorVersion("2.0.0-alpha01"))
