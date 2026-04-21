@@ -46,3 +46,9 @@ includeBuild("sentry-kotlin-compiler-plugin") {
     substitute(module("io.sentry:sentry-kotlin-compiler-plugin")).using(project(":"))
   }
 }
+
+includeBuild("sentry-snapshots-runtime") {
+  dependencySubstitution {
+    substitute(module("io.sentry:sentry-snapshots-runtime")).using(project(":"))
+  }
+}
