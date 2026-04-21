@@ -8,7 +8,7 @@ import androidx.annotation.FloatRange
  * Apply alongside `@Preview` on a composable to override the global diff threshold on a
  * per-snapshot basis.
  */
-@Retention(AnnotationRetention.BINARY)
+@Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class SentrySnapshot(
   /**
