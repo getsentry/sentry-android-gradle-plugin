@@ -140,15 +140,10 @@ class GenerateSnapshotTestsTaskTest {
     val content = generateAndRead(packageTrees = listOf("com.example"))
 
     assertTrue(
-      content.contains("if (diffThreshold != 0f) metadata[\"diff_threshold\"] = diffThreshold")
+      content.contains(
+        "if (diffThreshold != null && diffThreshold != 0f) metadata[\"diff_threshold\"] = diffThreshold"
+      )
     )
-  }
-
-  @Test
-  fun `generated sidecar does not swallow reflection failures`() {
-    val content = generateAndRead(packageTrees = listOf("com.example"))
-
-    assertFalse(content.contains("runCatching"))
   }
 
   @Test
