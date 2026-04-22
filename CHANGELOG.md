@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add Binder IPC call instrumentation behind `tracingInstrumentation.binderIpc.enabled` (default on). The instrumentation is a no-op unless `sentry-android-core` >= 8.40.0 is on the classpath, which provides the required `SentryIpcTracer` adapter class.
+
 ## 6.4.0-alpha.4
 
 ### Internal Changes 🔧
