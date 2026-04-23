@@ -362,9 +362,10 @@ class GenerateMatrix : CliktCommand() {
   }
 
   /**
-   * Fetches the AGP -> Kotlin compatibility table from developer.android.com/build/kotlin-support.
-   * Each row lists a Kotlin minor and the minimum AGP version required for it; returned as pairs
-   * (minAGP, Kotlin) so callers can pick the highest Kotlin whose minAGP is <= a given AGP.
+   * Fetches the AGP -> Kotlin compatibility table from developer.android.com/build/kotlin-support,
+   * and resolves each Kotlin minor to its latest stable patch on Maven Central. Rows whose Kotlin
+   * minor has no stable release yet (e.g. Kotlin 2.4 while only 2.4.0-Beta* is published) are
+   * dropped so the matrix never references an unreleased version.
    */
   private fun fetchAgpKotlinCompatibility(): List<Pair<Version, Version>> {
     val html = URL("https://developer.android.com/build/kotlin-support").readText()
@@ -375,6 +376,8 @@ class GenerateMatrix : CliktCommand() {
         headers.any { it.contains("Kotlin version", ignoreCase = true) } &&
           headers.any { it.contains("Required AGP", ignoreCase = true) }
       } ?: error("Could not find AGP/Kotlin compatibility table")
+
+    val latestStablePatches = fetchLatestStableKotlinPatches()
 
     // Cells may carry footnote markers like "8.13.19[1]"; extract the leading x.y[.z] token.
     val versionRegex = Regex("""\d+\.\d+(\.\d+)?""")
@@ -396,10 +399,41 @@ class GenerateMatrix : CliktCommand() {
         } catch (e: Throwable) {
           continue
         }
-      result += agp to kotlin
+      val stableKotlin = latestStablePatches[kotlin.major to kotlin.minor]
+      if (stableKotlin == null) {
+        echo("Warning: Kotlin ${kotlin.major}.${kotlin.minor} has no stable release yet, skipping")
+        continue
+      }
+      result += agp to stableKotlin
     }
     if (result.isEmpty()) error("No rows parsed from AGP/Kotlin compatibility table")
     return result
+  }
+
+  /**
+   * Reads kotlin-stdlib's maven-metadata.xml and returns, per Kotlin major.minor, the highest
+   * published stable patch version.
+   */
+  private fun fetchLatestStableKotlinPatches(): Map<Pair<Int, Int>, Version> {
+    val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+    val document =
+      documentBuilder.parse(
+        "https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/maven-metadata.xml"
+      )
+    document.documentElement.normalize()
+    val versionNodes = document.documentElement.getElementsByTagName("version")
+    val stable = mutableListOf<Version>()
+    for (i in 0 until versionNodes.length) {
+      val text = versionNodes.item(i).textContent
+      val v =
+        try {
+          Version.parse(text, strict = false)
+        } catch (e: Throwable) {
+          continue
+        }
+      if (v.isStable) stable += v
+    }
+    return stable.groupBy { it.major to it.minor }.mapValues { (_, vs) -> vs.max() }
   }
 
   /**
