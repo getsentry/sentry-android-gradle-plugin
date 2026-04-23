@@ -2,11 +2,6 @@
 
 ## Unreleased
 
-### Features
-
-- Add `@SentrySnapshot` runtime annotation for configuring the per-snapshot diff threshold, published as `io.sentry:sentry-snapshots-runtime` ([EME-1055](https://linear.app/getsentry/issue/EME-1055))
-- Emit `diff_threshold` in the snapshot sidecar JSON when a `@Preview` is also annotated with `@SentrySnapshot(diffThreshold = ...)` ([EME-1055](https://linear.app/getsentry/issue/EME-1055))
-
 ### Dependencies
 
 - Bump CLI from v3.3.5 to v3.4.0 ([#1156](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1156))
