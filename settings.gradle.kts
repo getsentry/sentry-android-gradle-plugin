@@ -8,17 +8,6 @@ pluginManagement {
       content { includeGroup("com.android.tools") }
     }
   }
-  // The pinned KSP (KSP1, 2.1.0-1.0.29) is bound to the Kotlin 2.1 compiler and rejects the
-  // newer Kotlin versions the test matrix picks (e.g. 2.3.21). When the matrix overrides the
-  // Kotlin version via VERSION_KOTLIN, swap in the latest KSP2 release, which is decoupled
-  // from the Kotlin compiler and supports language version 2.0+.
-  resolutionStrategy {
-    eachPlugin {
-      if (requested.id.id == "com.google.devtools.ksp" && System.getenv("VERSION_KOTLIN") != null) {
-        useVersion("2.3.7")
-      }
-    }
-  }
 }
 
 dependencyResolutionManagement {
