@@ -8,8 +8,7 @@ import org.jetbrains.annotations.ApiStatus
 @ApiStatus.Experimental
 open class SnapshotPreviewsExtension @Inject constructor(objects: ObjectFactory) {
 
-  val generateTests: Property<Boolean> =
-    objects.property(Boolean::class.java).convention(true)
+  val generateTests: Property<Boolean> = objects.property(Boolean::class.java).convention(true)
 
   val includePrivatePreviews: Property<Boolean> =
     objects.property(Boolean::class.java).convention(true)
