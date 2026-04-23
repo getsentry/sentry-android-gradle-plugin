@@ -102,11 +102,14 @@ class GenerateMatrix : CliktCommand() {
             put("agp", agpVersion.toString())
             val gradle = entry.value
 
-            // Pick the latest Kotlin whose required AGP <= this AGP
+            // Pick the latest Kotlin whose required AGP <= this AGP. Strip the pre-release
+            // identifier so 9.3.0-alpha01 isn't treated as < 9.3.0 by semver rules, which would
+            // skip a row that should match.
+            val agpStable = Version(agpVersion.major, agpVersion.minor, agpVersion.patch)
             val kotlinVersion =
               agpToKotlin
-                .filter { (minAgp, _) -> agpVersion >= minAgp }
-                .maxByOrNull { it.first }
+                .filter { (minAgp, _) -> agpStable >= minAgp }
+                .maxByOrNull { it.second }
                 ?.second
 
             // Floor: if the chosen Kotlin requires a newer Gradle than AGP does, bump Gradle up
