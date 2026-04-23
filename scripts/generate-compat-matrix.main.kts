@@ -357,8 +357,8 @@ class GenerateMatrix : CliktCommand() {
   }
 
   /**
-   * Fetches the value of `SdkConstants.GRADLE_LATEST_VERSION` from Android Studio's source,
-   * used to resolve `CompatibleGradleVersion.VERSION_FOR_DEV` for bleeding-edge AGP versions.
+   * Fetches the value of `SdkConstants.GRADLE_LATEST_VERSION` from Android Studio's source, used to
+   * resolve `CompatibleGradleVersion.VERSION_FOR_DEV` for bleeding-edge AGP versions.
    */
   private fun fetchGradleLatestVersion(): Version {
     val source =
