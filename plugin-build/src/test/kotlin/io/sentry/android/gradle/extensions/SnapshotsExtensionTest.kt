@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.extensions
 
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
@@ -16,36 +17,62 @@ class SnapshotsExtensionTest {
   }
 
   @Test
-  fun `generateSnapshotTests is true by default`() {
+  fun `previews generateTests is true by default`() {
     val project = ProjectBuilder.builder().build()
     val extension = project.objects.newInstance(SnapshotsExtension::class.java)
 
-    assertTrue(extension.generateSnapshotTests.get())
+    assertTrue(extension.previews.generateTests.get())
   }
 
   @Test
-  fun `generateSnapshotTests can be set to false`() {
+  fun `previews generateTests can be set to false`() {
     val project = ProjectBuilder.builder().build()
     val extension = project.objects.newInstance(SnapshotsExtension::class.java)
 
-    extension.generateSnapshotTests.set(false)
+    extension.previews.generateTests.set(false)
 
-    assertFalse(extension.generateSnapshotTests.get())
+    assertFalse(extension.previews.generateTests.get())
   }
 
   @Test
-  fun `includePrivatePreviews is true by default`() {
+  fun `previews includePrivatePreviews is true by default`() {
     val project = ProjectBuilder.builder().build()
     val extension = project.objects.newInstance(SnapshotsExtension::class.java)
 
-    assertTrue(extension.includePrivatePreviews.get())
+    assertTrue(extension.previews.includePrivatePreviews.get())
   }
 
   @Test
-  fun `packageTrees is empty by default`() {
+  fun `previews packageTrees is empty by default`() {
     val project = ProjectBuilder.builder().build()
     val extension = project.objects.newInstance(SnapshotsExtension::class.java)
 
-    assertTrue(extension.packageTrees.get().isEmpty())
+    assertTrue(extension.previews.packageTrees.get().isEmpty())
+  }
+
+  @Test
+  fun `previews theme has no default`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = project.objects.newInstance(SnapshotsExtension::class.java)
+
+    assertNull(extension.previews.theme.orNull)
+  }
+
+  @Test
+  fun `previews block configures sub-extension`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = project.objects.newInstance(SnapshotsExtension::class.java)
+
+    extension.previews { previews ->
+      previews.generateTests.set(false)
+      previews.includePrivatePreviews.set(false)
+      previews.packageTrees.set(listOf("com.example"))
+      previews.theme.set("AppTheme")
+    }
+
+    assertFalse(extension.previews.generateTests.get())
+    assertFalse(extension.previews.includePrivatePreviews.get())
+    assertTrue(extension.previews.packageTrees.get() == listOf("com.example"))
+    assertTrue(extension.previews.theme.get() == "AppTheme")
   }
 }
