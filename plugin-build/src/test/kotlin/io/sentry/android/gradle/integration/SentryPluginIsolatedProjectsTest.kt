@@ -36,9 +36,7 @@ class SentryPluginIsolatedProjectsTest :
     // otherwise the test would silently degrade into a plain config-cache test.
     assertTrue(output) { "isolated projects" in output.lowercase() }
     assertFalse(
-      "problems were found reporting" in output ||
-        "Isolated projects violations" in output ||
-        "cannot access '" in output,
+      "problems were found " in output || "cannot access '" in output,
       "Expected no isolated-projects violations, but got:\n$output",
     )
   }
