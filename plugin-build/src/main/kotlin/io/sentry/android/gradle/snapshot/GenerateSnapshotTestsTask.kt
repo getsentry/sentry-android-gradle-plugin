@@ -1,14 +1,12 @@
 package io.sentry.android.gradle.snapshot
 
 import com.android.build.api.variant.ApplicationVariant
-import com.android.build.gradle.BaseExtension
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
-import io.sentry.android.gradle.extensions.SnapshotsExtension
+import io.sentry.android.gradle.extensions.SnapshotPreviewsExtension
 import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
@@ -27,8 +25,6 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
   }
 
   @get:Input abstract val includePrivatePreviews: Property<Boolean>
-
-  @get:Input abstract val packageTrees: ListProperty<String>
 
   @get:Input @get:Optional abstract val theme: Property<String>
 
@@ -49,7 +45,6 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
     val content =
       generateTestFileContent(
         includePrivatePreviews = includePrivatePreviews.get(),
-        packageTrees = packageTrees.get(),
         theme = theme.orNull,
         paparazziMajorVersion = paparazziMajorVersion.get(),
       )
@@ -63,8 +58,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
 
     fun register(
       project: Project,
-      extension: SnapshotsExtension,
-      android: BaseExtension,
+      extension: SnapshotPreviewsExtension,
       variant: ApplicationVariant,
       paparazziMajorVersion: Provider<Int>,
     ): TaskProvider<GenerateSnapshotTestsTask> {
@@ -75,13 +69,6 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
         task.includePrivatePreviews.set(extension.includePrivatePreviews)
         task.theme.set(extension.theme)
         task.paparazziMajorVersion.value(paparazziMajorVersion)
-        // Fall back to the Android namespace when the user doesn't configure packageTrees
-        // TODO do we actually need this?
-        task.packageTrees.set(
-          extension.packageTrees.map { packages ->
-            packages.ifEmpty { listOf(android.namespace!!) }
-          }
-        )
         task.outputDir.set(
           project.layout.buildDirectory.dir("generated/sentry/snapshotsTests/${variant.name}")
         )
@@ -91,15 +78,13 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
     @Suppress("LongMethod")
     private fun generateTestFileContent(
       includePrivatePreviews: Boolean,
-      packageTrees: List<String>,
       theme: String? = null,
       paparazziMajorVersion: Int = 2,
     ): String {
       val includePrivateExpr =
         if (includePrivatePreviews) "\n                .includePrivatePreviews()" else ""
 
-      val packages = packageTrees.joinToString(", ") { "\"$it\"" }
-      val scanExpr = ".scanPackageTrees($packages)"
+      val scanExpr = ".scanAllPackages()"
 
       return """
 package $PACKAGE_NAME
