@@ -104,6 +104,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
 package $PACKAGE_NAME
 
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -357,23 +358,33 @@ class $CLASS_NAME(
         val imagesDir = File(snapshotDir, "images")
         imagesDir.mkdirs()
         val info = preview.previewInfo
-        val metadata = linkedMapOf<String, Any>(
-            "display_name" to screenshotId.removePrefix(preview.declaringClass + "."),
+
+        val tags = linkedMapOf<String, Any>()
+        if (info.name.isNotBlank()) tags["preview_name"] = info.name
+        if (info.locale.isNotBlank()) tags["locale"] = info.locale
+        if (info.device.isNotBlank()) tags["device"] = info.device
+        if (info.fontScale != 1f) tags["font_scale"] = info.fontScale
+        if (info.apiLevel != -1) tags["api_level"] = info.apiLevel
+        if (info.widthDp > 0) tags["width_dp"] = info.widthDp
+        if (info.heightDp > 0) tags["height_dp"] = info.heightDp
+        if (info.showSystemUi) tags["show_system_ui"] = true
+        if (info.showBackground) tags["show_background"] = true
+
+        val context = linkedMapOf<String, Any>(
             "image_file_name" to screenshotId,
             "class_name" to preview.declaringClass,
             "method_name" to preview.methodName,
         )
+
+        val metadata = linkedMapOf<String, Any>(
+            "display_name" to screenshotId.removePrefix(preview.declaringClass + "."),
+        )
         if (info.group.isNotBlank()) metadata["group"] = info.group
-        if (info.name.isNotBlank()) metadata["preview_name"] = info.name
-        if (info.locale.isNotBlank()) metadata["locale"] = info.locale
-        if (info.device.isNotBlank()) metadata["device"] = info.device
-        metadata["night_mode"] = (info.uiMode and UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES)
-        if (info.fontScale != 1f) metadata["font_scale"] = info.fontScale
-        if (info.apiLevel != -1) metadata["api_level"] = info.apiLevel
-        if (info.widthDp > 0) metadata["width_dp"] = info.widthDp
-        if (info.heightDp > 0) metadata["height_dp"] = info.heightDp
-        if (info.showSystemUi) metadata["show_system_ui"] = true
-        if (info.showBackground) metadata["show_background"] = true
+
+        when (info.uiMode and UI_MODE_NIGHT_MASK) {
+            UI_MODE_NIGHT_YES -> metadata["color_mode"] = "dark"
+            UI_MODE_NIGHT_NO -> metadata["color_mode"] = "light"
+        }
 
         val diffThreshold: Float? = runCatching {
             val declaring = Class.forName(preview.declaringClass)
@@ -386,13 +397,31 @@ class $CLASS_NAME(
         }.getOrNull()
         if (diffThreshold != null && diffThreshold != 0f) metadata["diff_threshold"] = diffThreshold
 
-        val json = metadata.entries.joinToString(",\n  ", prefix = "{\n  ", postfix = "\n}") { (k, v) ->
-            if (v is String) "\"" + k + "\": \"" + escapeJson(v) + "\""
-            else "\"" + k + "\": " + v
-        }
+        if (tags.isNotEmpty()) metadata["tags"] = tags
+        metadata["context"] = context
+
+        val json = renderJson(metadata, 0)
         val sidecarName = "Paparazzi_Preview_Test_" +
             screenshotId.lowercase(Locale.US).replace("\\s".toRegex(), "_")
         File(imagesDir, "${'$'}{sidecarName}.json").writeText(json)
+    }
+
+    private fun renderJson(value: Any, indentLevel: Int): String {
+        val indent = "  ".repeat(indentLevel)
+        val childIndent = "  ".repeat(indentLevel + 1)
+        return when (value) {
+            is String -> "\"" + escapeJson(value) + "\""
+            is Boolean, is Number -> value.toString()
+            is Map<*, *> -> when (value.isEmpty()) {
+                true -> "{}"
+                false -> value.entries.joinToString(
+                    separator = ",\n${'$'}childIndent",
+                    prefix = "{\n${'$'}childIndent",
+                    postfix = "\n${'$'}indent}",
+                ) { (k, v) -> "\"${'$'}k\": " + renderJson(v!!, indentLevel + 1) }
+            }
+            else -> "\"" + escapeJson(value.toString()) + "\""
+        }
     }
 
     private fun escapeJson(s: String): String =

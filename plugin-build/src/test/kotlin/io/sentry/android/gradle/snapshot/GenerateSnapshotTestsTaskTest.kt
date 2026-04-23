@@ -147,6 +147,50 @@ class GenerateSnapshotTestsTaskTest {
   }
 
   @Test
+  fun `generated sidecar places preview location fields in context block`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"))
+
+    assertTrue(content.contains("val context = linkedMapOf<String, Any>("))
+    assertTrue(content.contains("\"image_file_name\" to screenshotId"))
+    assertTrue(content.contains("\"class_name\" to preview.declaringClass"))
+    assertTrue(content.contains("\"method_name\" to preview.methodName"))
+    assertTrue(content.contains("metadata[\"context\"] = context"))
+  }
+
+  @Test
+  fun `generated sidecar places appearance inputs in tags block`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"))
+
+    assertTrue(content.contains("val tags = linkedMapOf<String, Any>()"))
+    assertTrue(content.contains("if (info.name.isNotBlank()) tags[\"preview_name\"] = info.name"))
+    assertTrue(content.contains("if (info.locale.isNotBlank()) tags[\"locale\"] = info.locale"))
+    assertTrue(content.contains("if (info.device.isNotBlank()) tags[\"device\"] = info.device"))
+    assertTrue(content.contains("if (info.fontScale != 1f) tags[\"font_scale\"] = info.fontScale"))
+    assertTrue(content.contains("if (info.apiLevel != -1) tags[\"api_level\"] = info.apiLevel"))
+    assertTrue(content.contains("if (info.widthDp > 0) tags[\"width_dp\"] = info.widthDp"))
+    assertTrue(content.contains("if (info.heightDp > 0) tags[\"height_dp\"] = info.heightDp"))
+    assertTrue(content.contains("if (info.showSystemUi) tags[\"show_system_ui\"] = true"))
+    assertTrue(content.contains("if (info.showBackground) tags[\"show_background\"] = true"))
+    assertTrue(content.contains("if (tags.isNotEmpty()) metadata[\"tags\"] = tags"))
+  }
+
+  @Test
+  fun `generated sidecar maps night mode to color_mode enum`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"))
+
+    assertTrue(content.contains("when (info.uiMode and UI_MODE_NIGHT_MASK) {"))
+    assertTrue(content.contains("UI_MODE_NIGHT_YES -> metadata[\"color_mode\"] = \"dark\""))
+    assertTrue(content.contains("UI_MODE_NIGHT_NO -> metadata[\"color_mode\"] = \"light\""))
+  }
+
+  @Test
+  fun `generated sidecar does not emit legacy night_mode field`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"))
+
+    assertFalse(content.contains("metadata[\"night_mode\"]"))
+  }
+
+  @Test
   fun `parseMajorVersion extracts major from standard semver`() {
     assertEquals(1, parseMajorVersion("1.3.5"))
     assertEquals(2, parseMajorVersion("2.0.0-alpha01"))
