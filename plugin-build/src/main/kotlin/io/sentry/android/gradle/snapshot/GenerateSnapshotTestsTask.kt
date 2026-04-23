@@ -369,6 +369,10 @@ class $CLASS_NAME(
         if (info.heightDp > 0) tags["height_dp"] = info.heightDp
         if (info.showSystemUi) tags["show_system_ui"] = true
         if (info.showBackground) tags["show_background"] = true
+        when (info.uiMode and UI_MODE_NIGHT_MASK) {
+            UI_MODE_NIGHT_YES -> tags["ui_mode"] = "dark"
+            UI_MODE_NIGHT_NO -> tags["ui_mode"] = "light"
+        }
 
         val context = linkedMapOf<String, Any>(
             "image_file_name" to screenshotId,
@@ -380,11 +384,6 @@ class $CLASS_NAME(
             "display_name" to screenshotId.removePrefix(preview.declaringClass + "."),
         )
         if (info.group.isNotBlank()) metadata["group"] = info.group
-
-        when (info.uiMode and UI_MODE_NIGHT_MASK) {
-            UI_MODE_NIGHT_YES -> metadata["color_mode"] = "dark"
-            UI_MODE_NIGHT_NO -> metadata["color_mode"] = "light"
-        }
 
         val diffThreshold: Float? = runCatching {
             val declaring = Class.forName(preview.declaringClass)

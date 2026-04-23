@@ -175,12 +175,12 @@ class GenerateSnapshotTestsTaskTest {
   }
 
   @Test
-  fun `generated sidecar maps night mode to color_mode enum`() {
+  fun `generated sidecar places ui_mode in tags block`() {
     val content = generateAndRead(packageTrees = listOf("com.example"))
 
     assertTrue(content.contains("when (info.uiMode and UI_MODE_NIGHT_MASK) {"))
-    assertTrue(content.contains("UI_MODE_NIGHT_YES -> metadata[\"color_mode\"] = \"dark\""))
-    assertTrue(content.contains("UI_MODE_NIGHT_NO -> metadata[\"color_mode\"] = \"light\""))
+    assertTrue(content.contains("UI_MODE_NIGHT_YES -> tags[\"ui_mode\"] = \"dark\""))
+    assertTrue(content.contains("UI_MODE_NIGHT_NO -> tags[\"ui_mode\"] = \"light\""))
   }
 
   @Test
