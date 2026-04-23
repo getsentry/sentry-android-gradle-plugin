@@ -59,13 +59,11 @@ class GenerateMatrix : CliktCommand() {
 
     val agpToGradle =
       try {
-        val (legacyVersions, _) = fetchAgpCompatibilityTable(agpVersions, legacy = true)
-        val (currentVersions, latestVersion) = fetchAgpCompatibilityTable(agpVersions)
+        val (compatVersions, latestVersion) = fetchAgpCompatibilityTable(agpVersions)
         buildMap<Version, Version> {
           for (agpVersion in agpVersions) {
             val gradleVersion =
-              legacyVersions[agpVersion]
-                ?: currentVersions[agpVersion]
+              compatVersions[agpVersion]
                 ?: fetchGradleVersionFromReleaseNotes(agpVersion)
                 ?: latestVersion
             put(agpVersion, gradleVersion)
@@ -289,49 +287,63 @@ class GenerateMatrix : CliktCommand() {
     return listOf(latestPreRelease, secondToLatestPreRelease, latest, previousMajorLatest)
   }
 
+  /**
+   * Fetches the AGP -> Gradle compatibility table from Android Studio's CompatibleGradleVersion.kt,
+   * which is kept more up-to-date than the public developer.android.com page. The file is served
+   * base64-encoded by gitiles when using `?format=TEXT`.
+   */
   private fun fetchAgpCompatibilityTable(
-    agpVersions: List<Version>,
-    legacy: Boolean = false,
+    agpVersions: List<Version>
   ): Pair<Map<Version, Version>, Version> {
-    val gradleVersions = mutableMapOf<Version, Version>()
-    val html = URL("https://developer.android.com/build/releases/about-agp").readText()
-    val doc = Jsoup.parse(html)
-    val tables = doc.select("table") ?: error("No table found")
-    val table = if (legacy) tables[1] else tables[0]
-    val rows = table.select("tr")
-    val headers = rows.first()?.select("th")?.map { it.text() } ?: listOf()
+    val source =
+      URL(
+          "https://android.googlesource.com/platform/tools/adt/idea/+/refs/heads/mirror-goog-studio-main/build-common/src/com/android/tools/idea/gradle/util/CompatibleGradleVersion.kt?format=TEXT"
+        )
+        .readText()
+        .let { String(java.util.Base64.getDecoder().decode(it)) }
 
-    if (headers.none { it.contains("plugin", ignoreCase = true) }) {
-      error("Wrong table selected")
-    }
-
-    // the table is in format
-    // AGP version (without .patch) - Gradle version
-    val agpToGradle = LinkedHashMap<Version, Version>()
-    for (row in rows) {
-      val cells = row.select("td").map { it.text() }
-      if (cells.size > 0) {
-        val agp =
-          try {
-            Version.parse(cells[0], strict = false)
-          } catch (e: Throwable) {
-            // if version cant be parsed, we're probably past the versions we're interested in
-            break
-          }
-        val gradle =
-          try {
-            Version.parse(cells[1], strict = false)
-          } catch (e: Throwable) {
-            // if version cant be parsed, we're probably past the versions we're interested in
-            break
-          }
-        agpToGradle[agp] = gradle
+    // Enum entries: VERSION_X_Y_Z(GradleVersion.version("X.Y.Z")).
+    // VERSION_FOR_DEV references a constant instead of a literal and is handled separately below.
+    val enumRegex = Regex("""(VERSION_[A-Z0-9_]+)\s*\(\s*GradleVersion\.version\("([^"]+)"\)""")
+    val enumToGradle = mutableMapOf<String, Version>()
+    enumRegex.findAll(source).forEach { match ->
+      val (enumName, versionStr) = match.destructured
+      try {
+        enumToGradle[enumName] = Version.parse(versionStr, strict = false)
+      } catch (e: Throwable) {
+        echo("Warning: could not parse Gradle version '$versionStr' for $enumName")
       }
     }
+    // VERSION_FOR_DEV points at SdkConstants.GRADLE_LATEST_VERSION, which is declared in a
+    // different file — fetch it so AGP pre-releases get the correct bleeding-edge Gradle version.
+    enumToGradle["VERSION_FOR_DEV"] = fetchGradleLatestVersion()
+    val latestGradle =
+      enumToGradle.values.maxOrNull()
+        ?: error("No parseable Gradle versions found in CompatibleGradleVersion.kt")
 
-    val latest = agpToGradle.entries.first()
+    // Map entries: AgpVersion.parse("X.Y.Z") to VERSION_A_B_C
+    val mapRegex = Regex("""AgpVersion\.parse\("([^"]+)"\)\s*to\s*(VERSION_[A-Z0-9_]+)""")
+    val agpToGradle = LinkedHashMap<Version, Version>()
+    mapRegex.findAll(source).forEach { match ->
+      val (agpStr, enumName) = match.destructured
+      val agp =
+        try {
+          Version.parse(agpStr, strict = false)
+        } catch (e: Throwable) {
+          echo("Warning: could not parse AGP version '$agpStr'")
+          return@forEach
+        }
+      val gradle = enumToGradle[enumName] ?: return@forEach
+      agpToGradle[agp] = gradle
+    }
+
+    if (agpToGradle.isEmpty()) {
+      error("No AGP->Gradle entries parsed from CompatibleGradleVersion.kt")
+    }
+
+    val gradleVersions = mutableMapOf<Version, Version>()
     for (agpVersion in agpVersions) {
-      // the compat table does not contain the .patch part, so we compare major and minor
+      // the table keys use representative .0 patches, so match by major/minor
       val entry =
         agpToGradle.entries.find {
           it.key.major == agpVersion.major && it.key.minor == agpVersion.minor
@@ -341,7 +353,24 @@ class GenerateMatrix : CliktCommand() {
       }
     }
 
-    return gradleVersions to latest.value
+    return gradleVersions to latestGradle
+  }
+
+  /**
+   * Fetches the value of `SdkConstants.GRADLE_LATEST_VERSION` from Android Studio's source, used to
+   * resolve `CompatibleGradleVersion.VERSION_FOR_DEV` for bleeding-edge AGP versions.
+   */
+  private fun fetchGradleLatestVersion(): Version {
+    val source =
+      URL(
+          "https://android.googlesource.com/platform/tools/base/+/refs/heads/mirror-goog-studio-main/common/src/main/java/com/android/SdkConstants.java?format=TEXT"
+        )
+        .readText()
+        .let { String(java.util.Base64.getDecoder().decode(it)) }
+    val match =
+      Regex("""GRADLE_LATEST_VERSION\s*=\s*"([^"]+)"""").find(source)
+        ?: error("GRADLE_LATEST_VERSION not found in SdkConstants.java")
+    return Version.parse(match.groupValues[1], strict = false)
   }
 
   /**
