@@ -4,7 +4,10 @@ object BuildPluginsVersion {
     // KSP1 (X.Y.Z-A.B.C) is bound to a specific Kotlin compiler version; KSP2 (e.g. 2.3.7) is
     // decoupled and supports Kotlin language version 2.0+. Default to KSP1 for the default
     // Kotlin 1.8.20, and switch to KSP2 when the matrix sets a Kotlin 2.x version.
-    val KSP = System.getenv("VERSION_KOTLIN")?.let { if (it.startsWith("2.")) "2.3.7" else null }
+    val KSP = System.getenv("VERSION_KOTLIN")
+        ?.substringBefore('.')
+        ?.toIntOrNull()
+        ?.let { if (it >= 2) "2.3.7" else null }
         ?: "2.1.0-1.0.29"
 }
 

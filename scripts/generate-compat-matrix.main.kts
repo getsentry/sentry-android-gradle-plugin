@@ -304,11 +304,9 @@ class GenerateMatrix : CliktCommand() {
     agpVersions: List<Version>
   ): Pair<Map<Version, Version>, Version> {
     val source =
-      URL(
-          "https://android.googlesource.com/platform/tools/adt/idea/+/refs/heads/mirror-goog-studio-main/build-common/src/com/android/tools/idea/gradle/util/CompatibleGradleVersion.kt?format=TEXT"
-        )
-        .readText()
-        .let { String(java.util.Base64.getDecoder().decode(it)) }
+      fetchGooglesourceText(
+        "https://android.googlesource.com/platform/tools/adt/idea/+/refs/heads/mirror-goog-studio-main/build-common/src/com/android/tools/idea/gradle/util/CompatibleGradleVersion.kt?format=TEXT"
+      )
 
     // Enum entries: VERSION_X_Y_Z(GradleVersion.version("X.Y.Z")).
     // VERSION_FOR_DEV references a constant instead of a literal and is handled separately below.
@@ -316,11 +314,13 @@ class GenerateMatrix : CliktCommand() {
     val enumToGradle = mutableMapOf<String, Version>()
     enumRegex.findAll(source).forEach { match ->
       val (enumName, versionStr) = match.destructured
-      try {
-        enumToGradle[enumName] = Version.parse(versionStr, strict = false)
-      } catch (e: Throwable) {
-        echo("Warning: could not parse Gradle version '$versionStr' for $enumName")
-      }
+      val v =
+        parseVersionOrNull(versionStr)
+          ?: run {
+            echo("Warning: could not parse Gradle version '$versionStr' for $enumName")
+            return@forEach
+          }
+      enumToGradle[enumName] = v
     }
     // VERSION_FOR_DEV points at SdkConstants.GRADLE_LATEST_VERSION, which is declared in a
     // different file — fetch it so AGP pre-releases get the correct bleeding-edge Gradle version.
@@ -335,12 +335,11 @@ class GenerateMatrix : CliktCommand() {
     mapRegex.findAll(source).forEach { match ->
       val (agpStr, enumName) = match.destructured
       val agp =
-        try {
-          Version.parse(agpStr, strict = false)
-        } catch (e: Throwable) {
-          echo("Warning: could not parse AGP version '$agpStr'")
-          return@forEach
-        }
+        parseVersionOrNull(agpStr)
+          ?: run {
+            echo("Warning: could not parse AGP version '$agpStr'")
+            return@forEach
+          }
       val gradle = enumToGradle[enumName] ?: return@forEach
       agpToGradle[agp] = gradle
     }
@@ -388,20 +387,8 @@ class GenerateMatrix : CliktCommand() {
     for (row in table.select("tr").drop(1)) {
       val cells = row.select("td").map { it.text() }
       if (cells.size < 2) continue
-      val kotlinStr = versionRegex.find(cells[0])?.value ?: continue
-      val agpStr = versionRegex.find(cells[1])?.value ?: continue
-      val kotlin =
-        try {
-          Version.parse(kotlinStr, strict = false)
-        } catch (e: Throwable) {
-          continue
-        }
-      val agp =
-        try {
-          Version.parse(agpStr, strict = false)
-        } catch (e: Throwable) {
-          continue
-        }
+      val kotlin = versionRegex.find(cells[0])?.value?.let(::parseVersionOrNull) ?: continue
+      val agp = versionRegex.find(cells[1])?.value?.let(::parseVersionOrNull) ?: continue
       val stableKotlin = latestStablePatches[kotlin.major to kotlin.minor]
       if (stableKotlin == null) {
         echo("Warning: Kotlin ${kotlin.major}.${kotlin.minor} has no stable release yet, skipping")
@@ -427,13 +414,7 @@ class GenerateMatrix : CliktCommand() {
     val versionNodes = document.documentElement.getElementsByTagName("version")
     val stable = mutableListOf<Version>()
     for (i in 0 until versionNodes.length) {
-      val text = versionNodes.item(i).textContent
-      val v =
-        try {
-          Version.parse(text, strict = false)
-        } catch (e: Throwable) {
-          continue
-        }
+      val v = parseVersionOrNull(versionNodes.item(i).textContent) ?: continue
       if (v.isStable) stable += v
     }
     return stable.groupBy { it.major to it.minor }.mapValues { (_, vs) -> vs.max() }
@@ -445,16 +426,25 @@ class GenerateMatrix : CliktCommand() {
    */
   private fun fetchGradleLatestVersion(): Version {
     val source =
-      URL(
-          "https://android.googlesource.com/platform/tools/base/+/refs/heads/mirror-goog-studio-main/common/src/main/java/com/android/SdkConstants.java?format=TEXT"
-        )
-        .readText()
-        .let { String(java.util.Base64.getDecoder().decode(it)) }
+      fetchGooglesourceText(
+        "https://android.googlesource.com/platform/tools/base/+/refs/heads/mirror-goog-studio-main/common/src/main/java/com/android/SdkConstants.java?format=TEXT"
+      )
     val match =
       Regex("""GRADLE_LATEST_VERSION\s*=\s*"([^"]+)"""").find(source)
         ?: error("GRADLE_LATEST_VERSION not found in SdkConstants.java")
     return Version.parse(match.groupValues[1], strict = false)
   }
+
+  /** Decodes gitiles' `?format=TEXT` response (base64-encoded) to raw source text. */
+  private fun fetchGooglesourceText(url: String): String =
+    URL(url).readText().let { String(java.util.Base64.getDecoder().decode(it)) }
+
+  private fun parseVersionOrNull(s: String): Version? =
+    try {
+      Version.parse(s, strict = false)
+    } catch (_: Throwable) {
+      null
+    }
 
   /**
    * Fetches the minimum required Gradle version from the AGP release notes page. This is used as a
@@ -484,12 +474,11 @@ class GenerateMatrix : CliktCommand() {
       for (row in table.select("tr")) {
         val cells = row.select("td").map { it.text() }
         if (cells.size >= 2 && cells[0].trim().equals("Gradle", ignoreCase = true)) {
-          return try {
-            Version.parse(cells[1], strict = false)
-          } catch (e: Throwable) {
-            echo("Warning: Could not parse Gradle version '${cells[1]}' from release notes")
-            null
-          }
+          return parseVersionOrNull(cells[1])
+            ?: run {
+              echo("Warning: Could not parse Gradle version '${cells[1]}' from release notes")
+              null
+            }
         }
       }
     }
