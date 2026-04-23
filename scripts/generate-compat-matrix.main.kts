@@ -85,29 +85,35 @@ class GenerateMatrix : CliktCommand() {
         throw ProgramResult(1)
       }
 
-    // TODO: for now this is manual, but we could try get it from Gradle's github in the future
-    val gradleToKotlin =
-      mapOf(
-        "7.5".toVersion(strict = false) to "1.8.20",
-        "9.0.0".toVersion(strict = false) to "2.1.0",
-        "9.5.0-0".toVersion(strict = false) to "2.3.0",
-      )
-    // TODO: make it dynamic too
-    val kotlinVersion = "2.1.0".toVersion()
+    val agpToKotlin =
+      try {
+        fetchAgpKotlinCompatibility()
+      } catch (e: Exception) {
+        print(e.printStackTrace())
+        echo("Error parsing AGP Kotlin compatibility")
+        throw ProgramResult(1)
+      }
+
     val baseIncludes = buildList {
       for (entry in agpToGradle.entries) {
         add(
           buildMap {
-            put("agp", entry.key.toString())
+            val agpVersion = entry.key
+            put("agp", agpVersion.toString())
             val gradle = entry.value
 
-            // Check if the Gradle version meets Kotlin's minimum requirement
-            // Use the current Kotlin version's minimum requirement
+            // Pick the latest Kotlin whose required AGP <= this AGP
+            val kotlinVersion =
+              agpToKotlin
+                .filter { (minAgp, _) -> agpVersion >= minAgp }
+                .maxByOrNull { it.first }
+                ?.second
+
+            // Floor: if the chosen Kotlin requires a newer Gradle than AGP does, bump Gradle up
             val kotlinMinGradle =
-              kotlinToGradleMap.entries
-                .find { (kotlin, _) -> kotlin.inRange(kotlinVersion) }
-                ?.value
-                ?.min
+              kotlinVersion?.let { kv ->
+                kotlinToGradleMap.entries.find { (kotlin, _) -> kotlin.inRange(kv) }?.value?.min
+              }
             val finalGradle =
               if (kotlinMinGradle != null && gradle < kotlinMinGradle) {
                 echo(
@@ -127,9 +133,8 @@ class GenerateMatrix : CliktCommand() {
             )
             // TODO: if needed we can test against different Java versions
             put("java", "17")
-            val kotlin = gradleToKotlin.entries.findLast { finalGradle >= it.key }?.value
-            if (kotlin != null) {
-              put("kotlin", kotlin)
+            if (kotlinVersion != null) {
+              put("kotlin", kotlinVersion.toString())
             }
           }
         )
@@ -354,6 +359,47 @@ class GenerateMatrix : CliktCommand() {
     }
 
     return gradleVersions to latestGradle
+  }
+
+  /**
+   * Fetches the AGP -> Kotlin compatibility table from developer.android.com/build/kotlin-support.
+   * Each row lists a Kotlin minor and the minimum AGP version required for it; returned as pairs
+   * (minAGP, Kotlin) so callers can pick the highest Kotlin whose minAGP is <= a given AGP.
+   */
+  private fun fetchAgpKotlinCompatibility(): List<Pair<Version, Version>> {
+    val html = URL("https://developer.android.com/build/kotlin-support").readText()
+    val doc = Jsoup.parse(html)
+    val table =
+      doc.select("table").find { t ->
+        val headers = t.select("th").map { it.text() }
+        headers.any { it.contains("Kotlin version", ignoreCase = true) } &&
+          headers.any { it.contains("Required AGP", ignoreCase = true) }
+      } ?: error("Could not find AGP/Kotlin compatibility table")
+
+    // Cells may carry footnote markers like "8.13.19[1]"; extract the leading x.y[.z] token.
+    val versionRegex = Regex("""\d+\.\d+(\.\d+)?""")
+    val result = mutableListOf<Pair<Version, Version>>()
+    for (row in table.select("tr").drop(1)) {
+      val cells = row.select("td").map { it.text() }
+      if (cells.size < 2) continue
+      val kotlinStr = versionRegex.find(cells[0])?.value ?: continue
+      val agpStr = versionRegex.find(cells[1])?.value ?: continue
+      val kotlin =
+        try {
+          Version.parse(kotlinStr, strict = false)
+        } catch (e: Throwable) {
+          continue
+        }
+      val agp =
+        try {
+          Version.parse(agpStr, strict = false)
+        } catch (e: Throwable) {
+          continue
+        }
+      result += agp to kotlin
+    }
+    if (result.isEmpty()) error("No rows parsed from AGP/Kotlin compatibility table")
+    return result
   }
 
   /**
