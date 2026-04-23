@@ -16,7 +16,7 @@ class GenerateSnapshotTestsTaskTest {
 
   @Test
   fun `generates test file in correct package directory`() {
-    val task = createTask()
+    val task = createTask(packageTrees = listOf("com.example"))
 
     task.generate()
 
@@ -27,7 +27,7 @@ class GenerateSnapshotTestsTaskTest {
 
   @Test
   fun `cleans output directory on re-run`() {
-    val task = createTask()
+    val task = createTask(packageTrees = listOf("com.example"))
     val outputDir = task.outputDir.get().asFile
 
     // Create a stale file in the output directory
@@ -46,36 +46,46 @@ class GenerateSnapshotTestsTaskTest {
 
   @Test
   fun `generated file contains correct package declaration`() {
-    val content = generateAndRead()
+    val content = generateAndRead(packageTrees = listOf("com.example"))
 
     assertTrue(content.contains("package io.sentry.snapshot"))
   }
 
   @Test
-  fun `generated file scans all packages`() {
-    val content = generateAndRead()
+  fun `generated file scans configured package tree`() {
+    val content = generateAndRead(packageTrees = listOf("com.example.app"))
 
-    assertTrue(content.contains(".scanAllPackages()"))
-    assertFalse(content.contains(".scanPackageTrees("))
+    assertTrue(content.contains(".scanPackageTrees(\"com.example.app\")"))
+  }
+
+  @Test
+  fun `generated file scans multiple package trees`() {
+    val content =
+      generateAndRead(packageTrees = listOf("com.example.feature1", "com.example.feature2"))
+
+    assertTrue(
+      content.contains(".scanPackageTrees(\"com.example.feature1\", \"com.example.feature2\")")
+    )
   }
 
   @Test
   fun `generated file includes private previews when enabled`() {
-    val content = generateAndRead(includePrivatePreviews = true)
+    val content =
+      generateAndRead(packageTrees = listOf("com.example"), includePrivatePreviews = true)
 
     assertTrue(content.contains(".includePrivatePreviews()"))
   }
 
   @Test
   fun `generated file excludes private previews by default`() {
-    val content = generateAndRead()
+    val content = generateAndRead(packageTrees = listOf("com.example"))
 
     assertFalse(content.contains(".includePrivatePreviews()"))
   }
 
   @Test
   fun `generated file contains parameterized test runner`() {
-    val content = generateAndRead()
+    val content = generateAndRead(packageTrees = listOf("com.example"))
 
     assertTrue(content.contains("@RunWith(Parameterized::class)"))
     assertTrue(content.contains("class ComposablePreviewSnapshotTest"))
@@ -83,7 +93,7 @@ class GenerateSnapshotTestsTaskTest {
 
   @Test
   fun `generated sidecar metadata uses short display name`() {
-    val content = generateAndRead()
+    val content = generateAndRead(packageTrees = listOf("com.example"))
 
     assertTrue(
       content.contains(
@@ -94,14 +104,14 @@ class GenerateSnapshotTestsTaskTest {
 
   @Test
   fun `generated sidecar metadata uses full screenshotId for image file name`() {
-    val content = generateAndRead()
+    val content = generateAndRead(packageTrees = listOf("com.example"))
 
     assertTrue(content.contains("\"image_file_name\" to screenshotId"))
   }
 
   @Test
   fun `generated file writes sidecar json to images directory`() {
-    val content = generateAndRead()
+    val content = generateAndRead(packageTrees = listOf("com.example"))
 
     assertTrue(content.contains("val imagesDir = File(snapshotDir, \"images\")"))
     assertTrue(content.contains("File(imagesDir, \"\${sidecarName}.json\").writeText(json)"))
@@ -109,7 +119,7 @@ class GenerateSnapshotTestsTaskTest {
 
   @Test
   fun `generated sidecar filename is lowercased to match Paparazzi image filenames`() {
-    val content = generateAndRead()
+    val content = generateAndRead(packageTrees = listOf("com.example"))
 
     assertTrue(
       content.contains("screenshotId.lowercase(Locale.US).replace(\"\\\\s\".toRegex(), \"_\")")
@@ -118,7 +128,7 @@ class GenerateSnapshotTestsTaskTest {
 
   @Test
   fun `generated sidecar reads SentrySnapshot annotation via reflection`() {
-    val content = generateAndRead()
+    val content = generateAndRead(packageTrees = listOf("com.example"))
 
     assertTrue(content.contains("Class.forName(preview.declaringClass)"))
     assertTrue(content.contains("\"io.sentry.snapshots.runtime.SentrySnapshot\""))
@@ -127,7 +137,7 @@ class GenerateSnapshotTestsTaskTest {
 
   @Test
   fun `generated sidecar emits diff_threshold only when non-default`() {
-    val content = generateAndRead()
+    val content = generateAndRead(packageTrees = listOf("com.example"))
 
     assertTrue(
       content.contains(
@@ -157,7 +167,7 @@ class GenerateSnapshotTestsTaskTest {
 
   @Test
   fun `generated file uses HtmlReportWriter without maxPercentDifference for paparazzi 1`() {
-    val content = generateAndRead(paparazziMajorVersion = 1)
+    val content = generateAndRead(packageTrees = listOf("com.example"), paparazziMajorVersion = 1)
 
     assertTrue(content.contains("HtmlReportWriter()"))
     assertFalse(content.contains("HtmlReportWriter(maxPercentDifference"))
@@ -165,17 +175,18 @@ class GenerateSnapshotTestsTaskTest {
 
   @Test
   fun `generated file uses HtmlReportWriter with maxPercentDifference for paparazzi 2`() {
-    val content = generateAndRead(paparazziMajorVersion = 2)
+    val content = generateAndRead(packageTrees = listOf("com.example"), paparazziMajorVersion = 2)
 
     assertTrue(content.contains("HtmlReportWriter(maxPercentDifference = tolerance)"))
     assertFalse(content.contains("HtmlReportWriter()"))
   }
 
   private fun generateAndRead(
+    packageTrees: List<String>,
     includePrivatePreviews: Boolean = false,
     paparazziMajorVersion: Int = 2,
   ): String {
-    val task = createTask(includePrivatePreviews, paparazziMajorVersion)
+    val task = createTask(packageTrees, includePrivatePreviews, paparazziMajorVersion)
     task.generate()
     val file =
       File(task.outputDir.get().asFile, "io/sentry/snapshot/ComposablePreviewSnapshotTest.kt")
@@ -183,6 +194,7 @@ class GenerateSnapshotTestsTaskTest {
   }
 
   private fun createTask(
+    packageTrees: List<String>,
     includePrivatePreviews: Boolean = false,
     paparazziMajorVersion: Int = 2,
   ): GenerateSnapshotTestsTask {
@@ -190,6 +202,7 @@ class GenerateSnapshotTestsTaskTest {
     return project.tasks
       .register("testGenerateSnapshotTests", GenerateSnapshotTestsTask::class.java) { task ->
         task.includePrivatePreviews.set(includePrivatePreviews)
+        task.packageTrees.set(packageTrees)
         task.paparazziMajorVersion.set(paparazziMajorVersion)
         task.outputDir.set(tmpDir.newFolder("output"))
       }

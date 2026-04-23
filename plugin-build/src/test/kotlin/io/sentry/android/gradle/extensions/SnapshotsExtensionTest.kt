@@ -43,6 +43,14 @@ class SnapshotsExtensionTest {
   }
 
   @Test
+  fun `previews packageTrees is empty by default`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = project.objects.newInstance(SnapshotsExtension::class.java)
+
+    assertTrue(extension.previews.packageTrees.get().isEmpty())
+  }
+
+  @Test
   fun `previews theme has no default`() {
     val project = ProjectBuilder.builder().build()
     val extension = project.objects.newInstance(SnapshotsExtension::class.java)
@@ -58,11 +66,13 @@ class SnapshotsExtensionTest {
     extension.previews { previews ->
       previews.generateTests.set(false)
       previews.includePrivatePreviews.set(false)
+      previews.packageTrees.set(listOf("com.example"))
       previews.theme.set("AppTheme")
     }
 
     assertFalse(extension.previews.generateTests.get())
     assertFalse(extension.previews.includePrivatePreviews.get())
+    assertTrue(extension.previews.packageTrees.get() == listOf("com.example"))
     assertTrue(extension.previews.theme.get() == "AppTheme")
   }
 }
