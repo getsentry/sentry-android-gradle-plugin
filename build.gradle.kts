@@ -39,10 +39,7 @@ allprojects {
 
 tasks.withType<Delete>().configureEach {
   delete(rootProject.buildDir)
-  gradle.includedBuilds.forEach {
-    println(it.name)
-    dependsOn(it.task(":clean"))
-  }
+  gradle.includedBuilds.forEach { dependsOn(it.task(":clean")) }
 }
 
 tasks.register("integrationTest") {
@@ -84,6 +81,4 @@ tasks.named("spotlessApply") {
   gradle.includedBuilds.forEach { dependsOn(it.task(":spotlessApply")) }
 }
 
-tasks.named("assemble") {
-  gradle.includedBuilds.forEach { dependsOn(it.task(":assemble")) }
-}
+tasks.named("assemble") { gradle.includedBuilds.forEach { dependsOn(it.task(":assemble")) } }
