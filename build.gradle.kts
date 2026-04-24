@@ -11,7 +11,7 @@ plugins {
   alias(libs.plugins.kotlin) version BuildPluginsVersion.KOTLIN apply false
   alias(libs.plugins.kotlinAndroid) version BuildPluginsVersion.KOTLIN apply false
   alias(libs.plugins.kapt) version BuildPluginsVersion.KOTLIN apply false
-  alias(libs.plugins.ksp) apply false
+  alias(libs.plugins.ksp) version BuildPluginsVersion.KSP apply false
   alias(libs.plugins.composeCompiler) apply false
   alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP apply false
   alias(libs.plugins.androidLibrary) version BuildPluginsVersion.AGP apply false

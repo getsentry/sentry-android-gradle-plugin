@@ -85,29 +85,38 @@ class GenerateMatrix : CliktCommand() {
         throw ProgramResult(1)
       }
 
-    // TODO: for now this is manual, but we could try get it from Gradle's github in the future
-    val gradleToKotlin =
-      mapOf(
-        "7.5".toVersion(strict = false) to "1.8.20",
-        "9.0.0".toVersion(strict = false) to "2.1.0",
-        "9.5.0-0".toVersion(strict = false) to "2.3.0",
-      )
-    // TODO: make it dynamic too
-    val kotlinVersion = "2.1.0".toVersion()
+    val agpToKotlin =
+      try {
+        fetchAgpKotlinCompatibility()
+      } catch (e: Exception) {
+        print(e.printStackTrace())
+        echo("Error parsing AGP Kotlin compatibility")
+        throw ProgramResult(1)
+      }
+
     val baseIncludes = buildList {
       for (entry in agpToGradle.entries) {
         add(
           buildMap {
-            put("agp", entry.key.toString())
+            val agpVersion = entry.key
+            put("agp", agpVersion.toString())
             val gradle = entry.value
 
-            // Check if the Gradle version meets Kotlin's minimum requirement
-            // Use the current Kotlin version's minimum requirement
+            // Pick the latest Kotlin whose required AGP <= this AGP. Strip the pre-release
+            // identifier so 9.3.0-alpha01 isn't treated as < 9.3.0 by semver rules, which would
+            // skip a row that should match.
+            val agpStable = Version(agpVersion.major, agpVersion.minor, agpVersion.patch)
+            val kotlinVersion =
+              agpToKotlin
+                .filter { (minAgp, _) -> agpStable >= minAgp }
+                .maxByOrNull { it.second }
+                ?.second
+
+            // Floor: if the chosen Kotlin requires a newer Gradle than AGP does, bump Gradle up
             val kotlinMinGradle =
-              kotlinToGradleMap.entries
-                .find { (kotlin, _) -> kotlin.inRange(kotlinVersion) }
-                ?.value
-                ?.min
+              kotlinVersion?.let { kv ->
+                kotlinToGradleMap.entries.find { (kotlin, _) -> kotlin.inRange(kv) }?.value?.min
+              }
             val finalGradle =
               if (kotlinMinGradle != null && gradle < kotlinMinGradle) {
                 echo(
@@ -127,9 +136,8 @@ class GenerateMatrix : CliktCommand() {
             )
             // TODO: if needed we can test against different Java versions
             put("java", "17")
-            val kotlin = gradleToKotlin.entries.findLast { finalGradle >= it.key }?.value
-            if (kotlin != null) {
-              put("kotlin", kotlin)
+            if (kotlinVersion != null) {
+              put("kotlin", kotlinVersion.toString())
             }
           }
         )
@@ -296,11 +304,9 @@ class GenerateMatrix : CliktCommand() {
     agpVersions: List<Version>
   ): Pair<Map<Version, Version>, Version> {
     val source =
-      URL(
-          "https://android.googlesource.com/platform/tools/adt/idea/+/refs/heads/mirror-goog-studio-main/build-common/src/com/android/tools/idea/gradle/util/CompatibleGradleVersion.kt?format=TEXT"
-        )
-        .readText()
-        .let { String(java.util.Base64.getDecoder().decode(it)) }
+      fetchGooglesourceText(
+        "https://android.googlesource.com/platform/tools/adt/idea/+/refs/heads/mirror-goog-studio-main/build-common/src/com/android/tools/idea/gradle/util/CompatibleGradleVersion.kt?format=TEXT"
+      )
 
     // Enum entries: VERSION_X_Y_Z(GradleVersion.version("X.Y.Z")).
     // VERSION_FOR_DEV references a constant instead of a literal and is handled separately below.
@@ -308,11 +314,13 @@ class GenerateMatrix : CliktCommand() {
     val enumToGradle = mutableMapOf<String, Version>()
     enumRegex.findAll(source).forEach { match ->
       val (enumName, versionStr) = match.destructured
-      try {
-        enumToGradle[enumName] = Version.parse(versionStr, strict = false)
-      } catch (e: Throwable) {
-        echo("Warning: could not parse Gradle version '$versionStr' for $enumName")
-      }
+      val v =
+        parseVersionOrNull(versionStr)
+          ?: run {
+            echo("Warning: could not parse Gradle version '$versionStr' for $enumName")
+            return@forEach
+          }
+      enumToGradle[enumName] = v
     }
     // VERSION_FOR_DEV points at SdkConstants.GRADLE_LATEST_VERSION, which is declared in a
     // different file — fetch it so AGP pre-releases get the correct bleeding-edge Gradle version.
@@ -327,12 +335,11 @@ class GenerateMatrix : CliktCommand() {
     mapRegex.findAll(source).forEach { match ->
       val (agpStr, enumName) = match.destructured
       val agp =
-        try {
-          Version.parse(agpStr, strict = false)
-        } catch (e: Throwable) {
-          echo("Warning: could not parse AGP version '$agpStr'")
-          return@forEach
-        }
+        parseVersionOrNull(agpStr)
+          ?: run {
+            echo("Warning: could not parse AGP version '$agpStr'")
+            return@forEach
+          }
       val gradle = enumToGradle[enumName] ?: return@forEach
       agpToGradle[agp] = gradle
     }
@@ -357,21 +364,87 @@ class GenerateMatrix : CliktCommand() {
   }
 
   /**
+   * Fetches the AGP -> Kotlin compatibility table from developer.android.com/build/kotlin-support,
+   * and resolves each Kotlin minor to its latest stable patch on Maven Central. Rows whose Kotlin
+   * minor has no stable release yet (e.g. Kotlin 2.4 while only 2.4.0-Beta* is published) are
+   * dropped so the matrix never references an unreleased version.
+   */
+  private fun fetchAgpKotlinCompatibility(): List<Pair<Version, Version>> {
+    val html = URL("https://developer.android.com/build/kotlin-support").readText()
+    val doc = Jsoup.parse(html)
+    val table =
+      doc.select("table").find { t ->
+        val headers = t.select("th").map { it.text() }
+        headers.any { it.contains("Kotlin version", ignoreCase = true) } &&
+          headers.any { it.contains("Required AGP", ignoreCase = true) }
+      } ?: error("Could not find AGP/Kotlin compatibility table")
+
+    val latestStablePatches = fetchLatestStableKotlinPatches()
+
+    // Cells may carry footnote markers like "8.13.19[1]"; extract the leading x.y[.z] token.
+    val versionRegex = Regex("""\d+\.\d+(\.\d+)?""")
+    val result = mutableListOf<Pair<Version, Version>>()
+    for (row in table.select("tr").drop(1)) {
+      val cells = row.select("td").map { it.text() }
+      if (cells.size < 2) continue
+      val kotlin = versionRegex.find(cells[0])?.value?.let(::parseVersionOrNull) ?: continue
+      val agp = versionRegex.find(cells[1])?.value?.let(::parseVersionOrNull) ?: continue
+      val stableKotlin = latestStablePatches[kotlin.major to kotlin.minor]
+      if (stableKotlin == null) {
+        echo("Warning: Kotlin ${kotlin.major}.${kotlin.minor} has no stable release yet, skipping")
+        continue
+      }
+      result += agp to stableKotlin
+    }
+    if (result.isEmpty()) error("No rows parsed from AGP/Kotlin compatibility table")
+    return result
+  }
+
+  /**
+   * Reads kotlin-stdlib's maven-metadata.xml and returns, per Kotlin major.minor, the highest
+   * published stable patch version.
+   */
+  private fun fetchLatestStableKotlinPatches(): Map<Pair<Int, Int>, Version> {
+    val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+    val document =
+      documentBuilder.parse(
+        "https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/maven-metadata.xml"
+      )
+    document.documentElement.normalize()
+    val versionNodes = document.documentElement.getElementsByTagName("version")
+    val stable = mutableListOf<Version>()
+    for (i in 0 until versionNodes.length) {
+      val v = parseVersionOrNull(versionNodes.item(i).textContent) ?: continue
+      if (v.isStable) stable += v
+    }
+    return stable.groupBy { it.major to it.minor }.mapValues { (_, vs) -> vs.max() }
+  }
+
+  /**
    * Fetches the value of `SdkConstants.GRADLE_LATEST_VERSION` from Android Studio's source, used to
    * resolve `CompatibleGradleVersion.VERSION_FOR_DEV` for bleeding-edge AGP versions.
    */
   private fun fetchGradleLatestVersion(): Version {
     val source =
-      URL(
-          "https://android.googlesource.com/platform/tools/base/+/refs/heads/mirror-goog-studio-main/common/src/main/java/com/android/SdkConstants.java?format=TEXT"
-        )
-        .readText()
-        .let { String(java.util.Base64.getDecoder().decode(it)) }
+      fetchGooglesourceText(
+        "https://android.googlesource.com/platform/tools/base/+/refs/heads/mirror-goog-studio-main/common/src/main/java/com/android/SdkConstants.java?format=TEXT"
+      )
     val match =
       Regex("""GRADLE_LATEST_VERSION\s*=\s*"([^"]+)"""").find(source)
         ?: error("GRADLE_LATEST_VERSION not found in SdkConstants.java")
     return Version.parse(match.groupValues[1], strict = false)
   }
+
+  /** Decodes gitiles' `?format=TEXT` response (base64-encoded) to raw source text. */
+  private fun fetchGooglesourceText(url: String): String =
+    URL(url).readText().let { String(java.util.Base64.getDecoder().decode(it)) }
+
+  private fun parseVersionOrNull(s: String): Version? =
+    try {
+      Version.parse(s, strict = false)
+    } catch (_: Throwable) {
+      null
+    }
 
   /**
    * Fetches the minimum required Gradle version from the AGP release notes page. This is used as a
@@ -401,12 +474,11 @@ class GenerateMatrix : CliktCommand() {
       for (row in table.select("tr")) {
         val cells = row.select("td").map { it.text() }
         if (cells.size >= 2 && cells[0].trim().equals("Gradle", ignoreCase = true)) {
-          return try {
-            Version.parse(cells[1], strict = false)
-          } catch (e: Throwable) {
-            echo("Warning: Could not parse Gradle version '${cells[1]}' from release notes")
-            null
-          }
+          return parseVersionOrNull(cells[1])
+            ?: run {
+              echo("Warning: Could not parse Gradle version '${cells[1]}' from release notes")
+              null
+            }
         }
       }
     }
