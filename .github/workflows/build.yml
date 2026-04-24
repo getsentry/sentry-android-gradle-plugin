@@ -29,16 +29,14 @@ jobs:
           java-version: '17'
 
       - name: Build Gradle Plugin, Kotlin Compiler Plugin, and Snapshots Runtime distribution artifacts
-        run: ./gradlew :plugin-build:assemble :sentry-kotlin-compiler-plugin:assemble :sentry-snapshots-runtime:assemble
+        run: ./gradlew assemble
 
       - name: Archive artifacts
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
         with:
           name: ${{ github.sha }}
           path: |
-            ${{ github.workspace }}/plugin-build/build/distributions/*.zip
-            ${{ github.workspace }}/sentry-kotlin-compiler-plugin/build/distributions/*.zip
-            ${{ github.workspace }}/sentry-snapshots-runtime/build/distributions/*.zip
+            ./*/build/distributions/*.zip
 
       - name: Verify artifact contents
         shell: bash
