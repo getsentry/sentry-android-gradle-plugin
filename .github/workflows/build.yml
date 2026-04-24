@@ -28,8 +28,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build Gradle Plugin and Kotlin Compiler Plugin distribution artifacts
-        run: ./gradlew :plugin-build:assemble :sentry-kotlin-compiler-plugin:assemble
+      - name: Build Gradle Plugin, Kotlin Compiler Plugin, and Snapshots Runtime distribution artifacts
+        run: ./gradlew :plugin-build:assemble :sentry-kotlin-compiler-plugin:assemble :sentry-snapshots-runtime:assemble
 
       - name: Archive artifacts
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
@@ -38,6 +38,7 @@ jobs:
           path: |
             ${{ github.workspace }}/plugin-build/build/distributions/*.zip
             ${{ github.workspace }}/sentry-kotlin-compiler-plugin/build/distributions/*.zip
+            ${{ github.workspace }}/sentry-snapshots-runtime/build/distributions/*.zip
 
       - name: Verify artifact contents
         shell: bash
