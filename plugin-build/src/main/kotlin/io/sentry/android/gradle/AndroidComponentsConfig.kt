@@ -13,6 +13,7 @@ import com.android.build.api.variant.HostTestBuilder.Companion.UNIT_TEST_TYPE
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
+import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
@@ -493,7 +494,7 @@ private fun ApplicationVariant.configureSnapshotsTasks(
 
       project.dependencies.add(
         "testImplementation",
-        "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
+        "io.github.sergio-sastre.ComposablePreviewScanner:android:${BuildConfig.ComposablePreviewScannerVersion}",
       )
 
       val paparazziMajorVersion =

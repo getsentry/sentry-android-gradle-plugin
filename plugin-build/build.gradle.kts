@@ -1,6 +1,5 @@
 import io.sentry.android.gradle.internal.ASMifyTask
 import io.sentry.android.gradle.internal.BootstrapAndroidSdk
-import java.io.FileInputStream
 import java.util.Properties
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
@@ -312,16 +311,18 @@ buildConfig {
   buildConfigField("String", "Version", provider { "\"${project.version}\"" })
   buildConfigField("String", "SdkVersion", provider { "\"${project.property("sdk_version")}\"" })
   buildConfigField("String", "AgpVersion", provider { "\"${BuildPluginsVersion.AGP}\"" })
+  buildConfigField("String", "CliVersion", propertyVersionProvider("sentry-cli.properties"))
   buildConfigField(
     "String",
-    "CliVersion",
-    provider {
-      "\"${Properties().apply {
-          load(FileInputStream(File("$projectDir/sentry-cli.properties")))
-      }.getProperty("version")}\""
-    },
+    "ComposablePreviewScannerVersion",
+    propertyVersionProvider("composable-preview-scanner.properties"),
   )
 }
+
+fun propertyVersionProvider(fileName: String): Provider<String> =
+  providers.fileContents(layout.projectDirectory.file(fileName)).asText.map { content ->
+    "\"${Properties().apply { load(content.reader()) }.getProperty("version")}\""
+  }
 
 tasks.register<ASMifyTask>("asmify")
 
