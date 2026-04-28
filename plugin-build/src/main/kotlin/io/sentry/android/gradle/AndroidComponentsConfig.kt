@@ -493,7 +493,7 @@ private fun ApplicationVariant.configureSnapshotsTasks(
 
       project.dependencies.add(
         "testImplementation",
-        "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
+        "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.2",
       )
 
       val paparazziMajorVersion =
