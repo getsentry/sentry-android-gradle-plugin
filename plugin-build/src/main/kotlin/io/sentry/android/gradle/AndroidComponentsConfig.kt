@@ -13,6 +13,7 @@ import com.android.build.api.variant.HostTestBuilder.Companion.UNIT_TEST_TYPE
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
+import io.github.takahirom.roborazzi.RoborazziExtension
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
@@ -44,6 +45,7 @@ import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.collectModules
 import io.sentry.android.gradle.util.hookWithAssembleTasks
 import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
@@ -486,8 +488,13 @@ private fun ApplicationVariant.configureSnapshotsTasks(
       taskSuffix = taskSuffix,
     )
 
+  val paparazziSeen = AtomicBoolean(false)
+  val roborazziSeen = AtomicBoolean(false)
+
   // Wire Paparazzi test generation and upload task when the Paparazzi plugin is applied
   project.pluginManager.withPlugin("app.cash.paparazzi") {
+    check(!roborazziSeen.get()) { BOTH_SNAPSHOT_ENGINES_ERROR }
+    paparazziSeen.set(true)
     if (extension.snapshots.previews.generateTests.get()) {
       val android = project.extensions.getByType(BaseExtension::class.java)
 
@@ -547,7 +554,70 @@ private fun ApplicationVariant.configureSnapshotsTasks(
       }
     }
   }
+
+  // Wire snapshot upload when the Roborazzi plugin is applied. Roborazzi already provides
+  // its own @Preview test generation; we just configure it and point its output at our
+  // upload staging directory.
+  project.pluginManager.withPlugin("io.github.takahirom.roborazzi") {
+    check(!paparazziSeen.get()) { BOTH_SNAPSHOT_ENGINES_ERROR }
+    roborazziSeen.set(true)
+    configureRoborazziSnapshots(project, extension, taskSuffix, uploadTask)
+  }
 }
+
+@Suppress("OPT_IN_USAGE")
+private fun ApplicationVariant.configureRoborazziSnapshots(
+  project: Project,
+  extension: SentryPluginExtension,
+  taskSuffix: String,
+  uploadTask: TaskProvider<SentryUploadSnapshotsTask>,
+) {
+  val previews = extension.snapshots.previews
+  val android = project.extensions.getByType(BaseExtension::class.java)
+  val roborazziExt = project.extensions.getByType(RoborazziExtension::class.java)
+
+  val snapshotsDir = project.layout.buildDirectory.dir("sentry/snapshots/$name")
+
+  // Pass DSL fields through to Roborazzi's preview-test generator. We use convention()
+  // rather than set() so a user-supplied value in their build script wins.
+  if (previews.generateTests.get()) {
+    project.dependencies.add(
+      "testImplementation",
+      "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
+    )
+    project.dependencies.add(
+      "testImplementation",
+      "io.github.takahirom.roborazzi:roborazzi-compose-preview-scanner-support:" + ROBORAZZI_VERSION,
+    )
+
+    val previewExt = roborazziExt.generateComposePreviewRobolectricTests
+    previewExt.enable.convention(true)
+    previewExt.packages.convention(
+      previews.packageTrees.map { pkgs -> pkgs.ifEmpty { listOf(android.namespace!!) } }
+    )
+    previewExt.includePrivatePreviews.convention(previews.includePrivatePreviews)
+  }
+
+  // Direct Roborazzi PNGs into our staging dir unless the user pinned their own outputDir.
+  roborazziExt.outputDir.convention(snapshotsDir)
+
+  project.afterEvaluate {
+    val testTaskName = "test${taskSuffix}UnitTest"
+    if (testTaskName !in project.tasks.names) return@afterEvaluate
+
+    uploadTask.configure { task ->
+      task.dependsOn("recordRoborazzi$taskSuffix")
+      task.snapshotsPath.set(roborazziExt.outputDir)
+    }
+  }
+}
+
+private const val BOTH_SNAPSHOT_ENGINES_ERROR =
+  "Sentry snapshots: both app.cash.paparazzi and io.github.takahirom.roborazzi are " +
+    "applied to the same module. Apply only one."
+
+// Pinned to match the compileOnly version in plugin-build/build.gradle.kts.
+private const val ROBORAZZI_VERSION = "1.60.0"
 
 internal fun parseMajorVersion(version: String?, defaultVersion: Int = 2): Int =
   version?.trimStart()?.takeWhile { it.isDigit() }?.toIntOrNull() ?: defaultVersion

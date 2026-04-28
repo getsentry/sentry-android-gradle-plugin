@@ -33,6 +33,7 @@ dependencies {
   compileOnly(libs.gradleApi)
   compileOnly(libs.agp)
   compileOnly(libs.proguard)
+  compileOnly(libs.roborazziGradlePlugin)
 
   implementation(libs.asm)
   implementation(libs.asmCommons)
