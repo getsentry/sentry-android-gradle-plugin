@@ -41,6 +41,8 @@ tasks.named("distZip") {
   onlyIf { inputs.sourceFiles.isEmpty.not().also { require(it) { "No distribution to zip." } } }
 }
 
+tasks.named("distTar") { enabled = false }
+
 dependencies {
   compileOnly(libs.kotlinCompilerEmbeddable)
 

@@ -13,6 +13,7 @@ import com.android.build.api.variant.HostTestBuilder.Companion.UNIT_TEST_TYPE
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
+import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
@@ -488,12 +489,12 @@ private fun ApplicationVariant.configureSnapshotsTasks(
 
   // Wire Paparazzi test generation and upload task when the Paparazzi plugin is applied
   project.pluginManager.withPlugin("app.cash.paparazzi") {
-    if (extension.snapshots.generateSnapshotTests.get()) {
+    if (extension.snapshots.previews.generateTests.get()) {
       val android = project.extensions.getByType(BaseExtension::class.java)
 
       project.dependencies.add(
         "testImplementation",
-        "io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1",
+        "io.github.sergio-sastre.ComposablePreviewScanner:android:${BuildConfig.ComposablePreviewScannerVersion}",
       )
 
       val paparazziMajorVersion =
@@ -508,7 +509,7 @@ private fun ApplicationVariant.configureSnapshotsTasks(
       val generateTask =
         GenerateSnapshotTestsTask.register(
           project,
-          extension.snapshots,
+          extension.snapshots.previews,
           android,
           this@configureSnapshotsTasks,
           paparazziMajorVersion,

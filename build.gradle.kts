@@ -11,7 +11,7 @@ plugins {
   alias(libs.plugins.kotlin) version BuildPluginsVersion.KOTLIN apply false
   alias(libs.plugins.kotlinAndroid) version BuildPluginsVersion.KOTLIN apply false
   alias(libs.plugins.kapt) version BuildPluginsVersion.KOTLIN apply false
-  alias(libs.plugins.ksp) apply false
+  alias(libs.plugins.ksp) version BuildPluginsVersion.KSP apply false
   alias(libs.plugins.composeCompiler) apply false
   alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP apply false
   alias(libs.plugins.androidLibrary) version BuildPluginsVersion.AGP apply false
@@ -39,8 +39,7 @@ allprojects {
 
 tasks.withType<Delete>().configureEach {
   delete(rootProject.buildDir)
-  dependsOn(gradle.includedBuild("plugin-build").task(":clean"))
-  dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":clean"))
+  gradle.includedBuilds.forEach { dependsOn(it.task(":clean")) }
 }
 
 tasks.register("integrationTest") {
@@ -75,11 +74,11 @@ tasks.register("preMerge") {
 }
 
 tasks.named("spotlessCheck") {
-  dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":spotlessCheck"))
-  dependsOn(gradle.includedBuild("plugin-build").task(":spotlessCheck"))
+  gradle.includedBuilds.forEach { dependsOn(it.task(":spotlessCheck")) }
 }
 
 tasks.named("spotlessApply") {
-  dependsOn(gradle.includedBuild("sentry-kotlin-compiler-plugin").task(":spotlessApply"))
-  dependsOn(gradle.includedBuild("plugin-build").task(":spotlessApply"))
+  gradle.includedBuilds.forEach { dependsOn(it.task(":spotlessApply")) }
 }
+
+tasks.named("assemble") { gradle.includedBuilds.forEach { dependsOn(it.task(":assemble")) } }

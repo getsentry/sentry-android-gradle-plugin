@@ -3,7 +3,7 @@ package io.sentry.android.gradle.snapshot
 import com.android.build.api.variant.ApplicationVariant
 import com.android.build.gradle.BaseExtension
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
-import io.sentry.android.gradle.extensions.SnapshotsExtension
+import io.sentry.android.gradle.extensions.SnapshotPreviewsExtension
 import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -63,7 +63,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
 
     fun register(
       project: Project,
-      extension: SnapshotsExtension,
+      extension: SnapshotPreviewsExtension,
       android: BaseExtension,
       variant: ApplicationVariant,
       paparazziMajorVersion: Provider<Int>,
@@ -76,7 +76,6 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
         task.theme.set(extension.theme)
         task.paparazziMajorVersion.value(paparazziMajorVersion)
         // Fall back to the Android namespace when the user doesn't configure packageTrees
-        // TODO do we actually need this?
         task.packageTrees.set(
           extension.packageTrees.map { packages ->
             packages.ifEmpty { listOf(android.namespace!!) }
@@ -105,6 +104,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
 package $PACKAGE_NAME
 
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -358,31 +358,69 @@ class $CLASS_NAME(
         val imagesDir = File(snapshotDir, "images")
         imagesDir.mkdirs()
         val info = preview.previewInfo
+
+        val tags = linkedMapOf<String, Any>()
+        if (info.name.isNotBlank()) tags["preview_name"] = info.name
+        if (info.locale.isNotBlank()) tags["locale"] = info.locale
+        if (info.device.isNotBlank()) tags["device"] = info.device
+        if (info.fontScale != 1f) tags["font_scale"] = info.fontScale
+        if (info.apiLevel != -1) tags["api_level"] = info.apiLevel
+        if (info.widthDp > 0) tags["width_dp"] = info.widthDp
+        if (info.heightDp > 0) tags["height_dp"] = info.heightDp
+        if (info.showSystemUi) tags["show_system_ui"] = true
+        if (info.showBackground) tags["show_background"] = true
+        when (info.uiMode and UI_MODE_NIGHT_MASK) {
+            UI_MODE_NIGHT_YES -> tags["ui_mode"] = "dark"
+            UI_MODE_NIGHT_NO -> tags["ui_mode"] = "light"
+        }
+
+        val context = linkedMapOf<String, Any>(
+            "image_file_name" to screenshotId,
+            "class_name" to preview.declaringClass,
+            "method_name" to preview.methodName,
+        )
+
         val metadata = linkedMapOf<String, Any>(
             "display_name" to screenshotId.removePrefix(preview.declaringClass + "."),
-            "image_file_name" to screenshotId,
-            "className" to preview.declaringClass,
-            "methodName" to preview.methodName,
         )
         if (info.group.isNotBlank()) metadata["group"] = info.group
-        if (info.name.isNotBlank()) metadata["previewName"] = info.name
-        if (info.locale.isNotBlank()) metadata["locale"] = info.locale
-        if (info.device.isNotBlank()) metadata["device"] = info.device
-        metadata["nightMode"] = (info.uiMode and UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES)
-        if (info.fontScale != 1f) metadata["fontScale"] = info.fontScale
-        if (info.apiLevel != -1) metadata["apiLevel"] = info.apiLevel
-        if (info.widthDp > 0) metadata["widthDp"] = info.widthDp
-        if (info.heightDp > 0) metadata["heightDp"] = info.heightDp
-        if (info.showSystemUi) metadata["showSystemUi"] = true
-        if (info.showBackground) metadata["showBackground"] = true
 
-        val json = metadata.entries.joinToString(",\n  ", prefix = "{\n  ", postfix = "\n}") { (k, v) ->
-            if (v is String) "\"" + k + "\": \"" + escapeJson(v) + "\""
-            else "\"" + k + "\": " + v
-        }
+        val diffThreshold: Float? = runCatching {
+            val declaring = Class.forName(preview.declaringClass)
+            val method = declaring.declaredMethods.firstOrNull { it.name == preview.methodName }
+                ?: return@runCatching null
+            @Suppress("UNCHECKED_CAST")
+            val annClass = Class.forName("io.sentry.snapshots.runtime.SentrySnapshot") as Class<out Annotation>
+            val ann = method.getAnnotation(annClass) ?: return@runCatching null
+            annClass.getDeclaredMethod("diffThreshold").invoke(ann) as? Float
+        }.getOrNull()
+        if (diffThreshold != null && diffThreshold != 0f) metadata["diff_threshold"] = diffThreshold
+
+        if (tags.isNotEmpty()) metadata["tags"] = tags
+        metadata["context"] = context
+
+        val json = renderJson(metadata, 0)
         val sidecarName = "Paparazzi_Preview_Test_" +
             screenshotId.lowercase(Locale.US).replace("\\s".toRegex(), "_")
         File(imagesDir, "${'$'}{sidecarName}.json").writeText(json)
+    }
+
+    private fun renderJson(value: Any, indentLevel: Int): String {
+        val indent = "  ".repeat(indentLevel)
+        val childIndent = "  ".repeat(indentLevel + 1)
+        return when (value) {
+            is String -> "\"" + escapeJson(value) + "\""
+            is Boolean, is Number -> value.toString()
+            is Map<*, *> -> when (value.isEmpty()) {
+                true -> "{}"
+                false -> value.entries.joinToString(
+                    separator = ",\n${'$'}childIndent",
+                    prefix = "{\n${'$'}childIndent",
+                    postfix = "\n${'$'}indent}",
+                ) { (k, v) -> "\"${'$'}k\": " + renderJson(v!!, indentLevel + 1) }
+            }
+            else -> "\"" + escapeJson(value.toString()) + "\""
+        }
     }
 
     private fun escapeJson(s: String): String =

@@ -1,5 +1,27 @@
 # Changelog
 
+## 6.6.0
+
+### Dependencies
+
+- Bump ComposablePreviewScanner from v0.8.1 to v0.9.0 ([#1174](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1174), [#1176](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1176))
+  - [changelog](https://github.com/sergio-sastre/ComposablePreviewScanner/blob/master/CHANGELOG.md#090)
+  - [diff](https://github.com/sergio-sastre/ComposablePreviewScanner/compare/0.8.1...0.9.0)
+- Bump CLI from v3.4.0 to v3.4.1 ([#1175](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1175))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#341)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.4.0...3.4.1)
+
+## 6.5.0
+
+### Dependencies
+
+- Bump CLI from v3.3.5 to v3.4.0 ([#1156](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1156))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#340)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.3.5...3.4.0)
+- Bump Android SDK from v8.38.0 to v8.40.0 ([#1153](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1153), [#1161](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1161))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8400)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.38.0...8.40.0)
+
 ## 6.4.0
 
 ### Dependencies
