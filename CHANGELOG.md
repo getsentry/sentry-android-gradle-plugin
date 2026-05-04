@@ -4,9 +4,9 @@
 
 ### Dependencies
 
-- Bump ComposablePreviewScanner from v0.8.1 to v0.8.2 ([#1174](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1174))
-  - [changelog](https://github.com/sergio-sastre/ComposablePreviewScanner/blob/master/CHANGELOG.md#082)
-  - [diff](https://github.com/sergio-sastre/ComposablePreviewScanner/compare/0.8.1...0.8.2)
+- Bump ComposablePreviewScanner from v0.8.1 to v0.9.0 ([#1174](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1174), [#1176](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1176))
+  - [changelog](https://github.com/sergio-sastre/ComposablePreviewScanner/blob/master/CHANGELOG.md#090)
+  - [diff](https://github.com/sergio-sastre/ComposablePreviewScanner/compare/0.8.1...0.9.0)
 - Bump CLI from v3.4.0 to v3.4.1 ([#1175](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1175))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#341)
   - [diff](https://github.com/getsentry/sentry-cli/compare/3.4.0...3.4.1)
