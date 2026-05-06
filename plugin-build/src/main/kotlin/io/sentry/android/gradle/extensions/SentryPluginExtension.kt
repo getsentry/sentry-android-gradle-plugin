@@ -222,7 +222,7 @@ abstract class SentryPluginExtension @Inject constructor(objects: ObjectFactory)
   val telemetryDsn: Property<String> =
     objects.property(String::class.java).convention(SENTRY_SAAS_DSN)
 
-  internal fun applySettingsDefaults(settings: SentrySettingsExtension) {
+  internal fun applySettingsDefaults(settings: SentryPluginExtension) {
     org.convention(settings.org)
     projectName.convention(settings.projectName)
     authToken.convention(settings.authToken)
