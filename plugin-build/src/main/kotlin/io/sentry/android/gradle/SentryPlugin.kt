@@ -4,6 +4,7 @@ import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.extensions.SentrySettingsExtension
 import io.sentry.android.gradle.util.AgpVersions
 import java.io.File
 import javax.inject.Inject
@@ -42,6 +43,15 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
     }
 
     val extension = project.extensions.create("sentry", SentryPluginExtension::class.java)
+
+    runCatching {
+        val gradleExt = project.gradle.extensions.getByType(ExtraPropertiesExtension::class.java)
+        val settingsExtension =
+          gradleExt.get(SentrySettingsPlugin.SENTRY_SETTINGS_EXTENSION_KEY)
+            as SentrySettingsExtension
+        extension.applySettingsDefaults(settingsExtension)
+      }
+      .getOrNull()
 
     project.pluginManager.withPlugin("com.android.application") {
       val androidComponentsExt =
