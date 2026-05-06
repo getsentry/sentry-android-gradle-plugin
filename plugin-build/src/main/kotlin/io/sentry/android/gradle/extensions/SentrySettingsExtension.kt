@@ -6,6 +6,15 @@ import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 
+/**
+ * Settings-level extension for shared Sentry configuration across all modules.
+ *
+ * Properties here are intentionally duplicated from [SentryPluginExtension] because Gradle
+ * settings extensions and project extensions live in different scopes — a project extension
+ * cannot inherit from or reference a settings extension type at configuration time. The
+ * project-level plugin bridges the two via [SentryPluginExtension.applySettingsDefaults],
+ * which wires these values as conventions (overridable defaults) on each module's extension.
+ */
 abstract class SentrySettingsExtension @Inject constructor(objects: ObjectFactory) {
 
   /** The slug of the Sentry organization. Applied as the default for all modules. */

@@ -10,6 +10,8 @@ class SentrySettingsPlugin : Plugin<Settings> {
   override fun apply(settings: Settings) {
     val extension = settings.extensions.create("sentry", SentrySettingsExtension::class.java)
 
+    // Stash the extension in Gradle's ExtraPropertiesExtension so the project-level
+    // plugin can read it — settings and project scopes are otherwise isolated.
     settings.gradle.extensions
       .getByType(ExtraPropertiesExtension::class.java)
       .set(SENTRY_SETTINGS_EXTENSION_KEY, extension)
