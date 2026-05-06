@@ -21,7 +21,7 @@ class SentrySettingsPlugin : Plugin<Settings> {
         project.pluginManager.apply("io.sentry.android.gradle")
       }
       project.pluginManager.withPlugin("java-library") {
-        project.pluginManager.apply("io.sentry.android.gradle")
+        project.pluginManager.apply("io.sentry.jvm.gradle")
       }
     }
   }
