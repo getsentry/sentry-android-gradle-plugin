@@ -16,11 +16,6 @@ class SentrySettingsPlugin : Plugin<Settings> {
       .getByType(ExtraPropertiesExtension::class.java)
       .set(SENTRY_SETTINGS_EXTENSION_KEY, extension)
 
-    settings.gradle.beforeProject { project ->
-      project.pluginManager.withPlugin("java-library") {
-        project.pluginManager.apply("io.sentry.jvm.gradle")
-      }
-    }
   }
 
   companion object {
