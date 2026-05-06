@@ -30,16 +30,7 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
           .trimIndent()
       )
     }
-    val appliedViaSettings =
-      project.gradle.extensions
-        .getByType(ExtraPropertiesExtension::class.java)
-        .has(SentrySettingsPlugin.SENTRY_SETTINGS_EXTENSION_KEY)
-
-    if (
-      !appliedViaSettings &&
-        !project.plugins.hasPlugin("com.android.application") &&
-        !project.plugins.hasPlugin("com.android.library")
-    ) {
+    if (!project.plugins.hasPlugin("com.android.application")) {
       project.logger.warn(
         """
                 WARNING: Using 'io.sentry.android.gradle' is only supported for the app module.
@@ -84,9 +75,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
       project.installDependencies(extension, true)
     }
 
-    project.pluginManager.withPlugin("com.android.library") {
-      project.installDependencies(extension, true)
-    }
   }
 
   companion object {
