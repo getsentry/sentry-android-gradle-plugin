@@ -3,14 +3,12 @@ package io.sentry.android.gradle.extensions
 import io.sentry.android.gradle.telemetry.SentryTelemetryService.Companion.SENTRY_SAAS_DSN
 import javax.inject.Inject
 import org.gradle.api.Action
-import org.gradle.api.Project
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.jetbrains.annotations.ApiStatus.Experimental
 
-abstract class SentryPluginExtension @Inject constructor(project: Project) {
-
-  private val objects = project.objects
+abstract class SentryPluginExtension @Inject constructor(objects: ObjectFactory) {
 
   /**
    * Disables or enables the handling of Proguard mapping for Sentry. If enabled the plugin will

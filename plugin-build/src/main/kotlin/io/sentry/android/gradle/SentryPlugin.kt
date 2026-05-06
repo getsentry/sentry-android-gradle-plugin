@@ -41,7 +41,7 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
       )
     }
 
-    val extension = project.extensions.create("sentry", SentryPluginExtension::class.java, project)
+    val extension = project.extensions.create("sentry", SentryPluginExtension::class.java)
 
     project.pluginManager.withPlugin("com.android.application") {
       val androidComponentsExt =
