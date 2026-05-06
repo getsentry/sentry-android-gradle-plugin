@@ -44,14 +44,12 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
 
     val extension = project.extensions.create("sentry", SentryPluginExtension::class.java)
 
-    runCatching {
-        val gradleExt = project.gradle.extensions.getByType(ExtraPropertiesExtension::class.java)
-        val settingsExtension =
-          gradleExt.get(SentrySettingsPlugin.SENTRY_SETTINGS_EXTENSION_KEY)
-            as SentrySettingsExtension
-        extension.applySettingsDefaults(settingsExtension)
-      }
-      .getOrNull()
+    val gradleExt = project.gradle.extensions.getByType(ExtraPropertiesExtension::class.java)
+    if (gradleExt.has(SentrySettingsPlugin.SENTRY_SETTINGS_EXTENSION_KEY)) {
+      val settingsExtension =
+        gradleExt.get(SentrySettingsPlugin.SENTRY_SETTINGS_EXTENSION_KEY) as SentrySettingsExtension
+      extension.applySettingsDefaults(settingsExtension)
+    }
 
     project.pluginManager.withPlugin("com.android.application") {
       val androidComponentsExt =
