@@ -35,7 +35,7 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
   private val configuredForJavaProject = AtomicBoolean(false)
 
   override fun apply(project: Project) {
-    val extension = project.extensions.create("sentry", SentryPluginExtension::class.java, project)
+    val extension = project.extensions.create("sentry", SentryPluginExtension::class.java)
 
     project.pluginManager.withPlugin("org.gradle.java") {
       if (configuredForJavaProject.getAndSet(true)) {
