@@ -6,6 +6,12 @@
 
 - Change auto-install trigger for log4j2 from -api to -core dependency ([#1155](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1155))
 
+### Dependencies
+
+- Bump Android SDK from v8.40.0 to v8.41.0 ([#1182](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1182))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8410)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.40.0...8.41.0)
+
 ## 6.6.0
 
 ### Dependencies
