@@ -37,6 +37,8 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
     snapshotsPath.set(project.file(path))
   }
 
+  @get:Input @get:Optional abstract val diffThreshold: Property<Double>
+
   @get:Input @get:Optional abstract val vcsHeadSha: Property<String>
   @get:Input @get:Optional abstract val vcsBaseSha: Property<String>
   @get:Input @get:Optional abstract val vcsProvider: Property<String>
@@ -51,6 +53,10 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
     args.add("snapshots")
     args.add("--app-id")
     args.add(appId.get())
+
+    diffThreshold.orNull?.let {
+      if (it != 0.0) args.addAll(listOf("--diff-threshold", it.toString()))
+    }
 
     vcsHeadSha.orNull?.let { args.addAll(listOf("--head-sha", it)) }
     vcsBaseSha.orNull?.let { args.addAll(listOf("--base-sha", it)) }
@@ -93,6 +99,7 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
         task.sentryAuthToken.set(extension.authToken)
         task.sentryUrl.set(extension.url)
         task.appId.set(applicationId)
+        task.diffThreshold.set(extension.snapshots.diffThreshold)
         task.vcsHeadSha.set(extension.vcsInfo.headSha)
         task.vcsBaseSha.set(extension.vcsInfo.baseSha)
         task.vcsProvider.set(extension.vcsInfo.vcsProvider)

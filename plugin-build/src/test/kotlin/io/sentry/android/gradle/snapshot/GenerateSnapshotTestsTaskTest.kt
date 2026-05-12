@@ -141,7 +141,7 @@ class GenerateSnapshotTestsTaskTest {
 
     assertTrue(
       content.contains(
-        "if (effectiveThreshold != 0f) metadata[\"diff_threshold\"] = effectiveThreshold"
+        "if (diffThreshold != null && diffThreshold != 0f) metadata[\"diff_threshold\"] = diffThreshold"
       )
     )
   }
@@ -238,13 +238,6 @@ class GenerateSnapshotTestsTaskTest {
 
     assertTrue(content.contains("val tolerance = 0.05"))
     assertFalse(content.contains("val tolerance = 0.0\n"))
-  }
-
-  @Test
-  fun `generated sidecar uses global threshold as fallback`() {
-    val content = generateAndRead(packageTrees = listOf("com.example"), diffThreshold = 0.02)
-
-    assertTrue(content.contains("val effectiveThreshold = annotationThreshold ?: tolerance.toFloat()"))
   }
 
   private fun generateAndRead(

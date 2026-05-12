@@ -390,7 +390,7 @@ class $CLASS_NAME(
         )
         if (info.group.isNotBlank()) metadata["group"] = info.group
 
-        val annotationThreshold: Float? = runCatching {
+        val diffThreshold: Float? = runCatching {
             val declaring = Class.forName(preview.declaringClass)
             val method = declaring.declaredMethods.firstOrNull { it.name == preview.methodName }
                 ?: return@runCatching null
@@ -399,8 +399,7 @@ class $CLASS_NAME(
             val ann = method.getAnnotation(annClass) ?: return@runCatching null
             annClass.getDeclaredMethod("diffThreshold").invoke(ann) as? Float
         }.getOrNull()
-        val effectiveThreshold = annotationThreshold ?: tolerance.toFloat()
-        if (effectiveThreshold != 0f) metadata["diff_threshold"] = effectiveThreshold
+        if (diffThreshold != null && diffThreshold != 0f) metadata["diff_threshold"] = diffThreshold
 
         if (tags.isNotEmpty()) metadata["tags"] = tags
         metadata["context"] = context
