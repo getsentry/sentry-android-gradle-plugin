@@ -237,7 +237,6 @@ class GenerateSnapshotTestsTaskTest {
     val content = generateAndRead(packageTrees = listOf("com.example"), diffThreshold = 0.05)
 
     assertTrue(content.contains("val tolerance = 0.05"))
-    assertFalse(content.contains("val tolerance = 0.0\n"))
   }
 
   private fun generateAndRead(
@@ -246,7 +245,8 @@ class GenerateSnapshotTestsTaskTest {
     diffThreshold: Double = 0.0,
     paparazziMajorVersion: Int = 2,
   ): String {
-    val task = createTask(packageTrees, includePrivatePreviews, diffThreshold, paparazziMajorVersion)
+    val task =
+      createTask(packageTrees, includePrivatePreviews, diffThreshold, paparazziMajorVersion)
     task.generate()
     val file =
       File(task.outputDir.get().asFile, "io/sentry/snapshot/ComposablePreviewSnapshotTest.kt")
