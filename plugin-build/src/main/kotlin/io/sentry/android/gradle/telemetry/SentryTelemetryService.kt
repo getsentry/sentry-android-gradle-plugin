@@ -17,32 +17,22 @@ import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.SentryPlugin.Companion.logger
 import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
-import io.sentry.android.gradle.telemetry.SentryCliInfoValueSource.InfoParams
-import io.sentry.android.gradle.telemetry.SentryCliVersionValueSource.VersionParams
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SentryCliException
 import io.sentry.android.gradle.util.error
 import io.sentry.android.gradle.util.getBuildServiceName
 import io.sentry.android.gradle.util.info
-import io.sentry.android.gradle.util.setSentryPipelineEnv
 import io.sentry.exception.ExceptionMechanismException
 import io.sentry.gradle.common.SentryVariant
 import io.sentry.protocol.Mechanism
 import io.sentry.protocol.User
-import java.io.ByteArrayOutputStream
 import java.io.File
-import java.nio.charset.Charset
-import javax.inject.Inject
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.internal.tasks.execution.ExecuteTaskBuildOperationDetails
-import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.provider.ValueSource
-import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters.None
-import org.gradle.api.tasks.Input
 import org.gradle.execution.RunRootBuildWorkBuildOperationType
 import org.gradle.internal.operations.BuildOperationDescriptor
 import org.gradle.internal.operations.BuildOperationListener
@@ -50,7 +40,6 @@ import org.gradle.internal.operations.OperationFinishEvent
 import org.gradle.internal.operations.OperationIdentifier
 import org.gradle.internal.operations.OperationProgressEvent
 import org.gradle.internal.operations.OperationStartEvent
-import org.gradle.process.ExecOperations
 import org.gradle.util.GradleVersion
 
 abstract class SentryTelemetryService : BuildService<None>, BuildOperationListener, AutoCloseable {
@@ -59,6 +48,12 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
   private var transaction: ITransaction? = null
   private var didAddChildSpans: Boolean = false
   private var started: Boolean = false
+  private var enriched: Boolean = false
+  private var cliExecutable: String? = null
+  private var buildDirectory: File? = null
+  private var authToken: String? = null
+  private var cliUrl: String? = null
+  private var propertiesFilePath: String? = null
 
   @Synchronized
   fun start(paramsCallback: () -> SentryTelemetryServiceParams) {
@@ -66,6 +61,12 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
       return
     }
     val startParameters = paramsCallback()
+
+    cliExecutable = startParameters.cliExecutable
+    buildDirectory = startParameters.buildDirectory
+    authToken = startParameters.authToken
+    cliUrl = startParameters.cliUrl
+    propertiesFilePath = startParameters.propertiesFilePath
 
     try {
       if (startParameters.saas == false) {
@@ -210,6 +211,7 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
   }
 
   fun startTask(operation: String): ISpan? {
+    enrichWithCliData()
     didAddChildSpans = true
     hub.setTag("step", operation)
     return hub.span?.startChild(operation)
@@ -226,6 +228,74 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
     }
   }
 
+  @Synchronized
+  private fun enrichWithCliData() {
+    if (enriched || !started) return
+    enriched = true
+
+    val cli = cliExecutable ?: return
+    val buildDir = buildDirectory ?: return
+
+    try {
+      SentryCliProvider.maybeExtractFromResources(buildDir, cli)
+
+      val infoArgs = mutableListOf<String>()
+      cliUrl?.let { url -> infoArgs.addAll(listOf("--url", url)) }
+      infoArgs.addAll(listOf("--log-level=error", "info"))
+      val infoEnv = mutableMapOf<String, String>()
+      propertiesFilePath?.let { infoEnv["SENTRY_PROPERTIES"] = it }
+      authToken?.let { infoEnv["SENTRY_AUTH_TOKEN"] = it }
+
+      val infoOutput = executeCliCommand(cli, infoArgs, infoEnv)
+      if (infoOutput != null) {
+        val isSaas = infoOutput.contains(saasRegex)
+        if (!isSaas) {
+          SentryPlugin.logger.info {
+            "Sentry is running against a self hosted instance. " +
+              "Telemetry has been disabled."
+          }
+          hub = NoOpHub.getInstance()
+          return
+        }
+        orgRegex.find(infoOutput)?.groupValues?.getOrNull(1)?.let { org ->
+          if (org != "-") {
+            hub.configureScope { scope ->
+              scope.user = User().also { it.id = org }
+            }
+          }
+        }
+      }
+
+      val versionOutput = executeCliCommand(cli, listOf("--log-level=error", "--version"))
+      if (versionOutput != null) {
+        versionRegex.find(versionOutput)?.groupValues?.getOrNull(1)?.let { version ->
+          Sentry.configureScope { it.setTag("SENTRY_CLI_VERSION", version) }
+        }
+      }
+    } catch (t: Throwable) {
+      SentryPlugin.logger.info { "Failed to enrich telemetry with CLI data: ${t.message}" }
+    }
+  }
+
+  private fun executeCliCommand(
+    cli: String,
+    args: List<String>,
+    envVars: Map<String, String> = emptyMap(),
+  ): String? {
+    val command = mutableListOf(cli).apply { addAll(args) }
+    val process =
+      ProcessBuilder(command)
+        .apply {
+          environment()["SENTRY_PIPELINE"] = "sentry-gradle-plugin/${BuildConfig.Version}"
+          environment().putAll(envVars)
+        }
+        .start()
+
+    val output = process.inputStream.bufferedReader().readText()
+    val exitCode = process.waitFor()
+    return if (exitCode == 0) output else null
+  }
+
   override fun close() {
     if (transaction?.isFinished == false) {
       endRun()
@@ -239,6 +309,7 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
     val MECHANISM_TYPE: String = "GradleTelemetry"
     private val orgRegex = Regex("""(?m)Default Organization: (.*)$""")
     private val versionRegex = Regex("""(?m)sentry-cli (.*)$""")
+    private val saasRegex = Regex("""(?m)Sentry Server: .*sentry\.io$""")
 
     fun createParameters(
       project: Project,
@@ -252,15 +323,17 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
       val org = sentryOrg ?: extension.org.orNull
       val isTelemetryEnabled = extension.telemetry.get()
 
-      // if telemetry is disabled we don't even need to exec sentry-cli as telemetry service
-      // will be no-op
-      if (isTelemetryEnabled) {
-        paramsWithExecAvailable(project, cliExecutable, extension, variant, org, buildType, tags)
-          ?.let {
-            return it
+      val cliPath =
+        if (isTelemetryEnabled) {
+          try {
+            cliExecutable.get()
+          } catch (_: Throwable) {
+            null
           }
-      }
-      // fallback: sentry-cli is not available or e.g. auth token is not configured
+        } else {
+          null
+        }
+
       return SentryTelemetryServiceParams(
         isTelemetryEnabled,
         extension.telemetryDsn.get(),
@@ -268,75 +341,14 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
         buildType,
         tags,
         extension.debug.get(),
-        saas = extension.url.orNull == null,
+        saas = extension.url.orNull.let { it == null || it.contains("sentry.io") },
         cliVersion = BuildConfig.CliVersion,
-      )
-    }
-
-    private fun paramsWithExecAvailable(
-      project: Project,
-      cliExecutable: Provider<String>,
-      extension: SentryPluginExtension,
-      variant: SentryVariant?,
-      sentryOrg: String?,
-      buildType: String,
-      tags: Map<String, String>,
-    ): SentryTelemetryServiceParams? {
-      var cliVersion: String? = BuildConfig.CliVersion
-      var defaultSentryOrganization: String? = null
-      val infoOutput =
-        project.providers
-          .of(SentryCliInfoValueSource::class.java) { cliVS ->
-            cliVS.parameters.buildDirectory.set(project.buildDir)
-            cliVS.parameters.cliExecutable.set(cliExecutable)
-            cliVS.parameters.authToken.set(extension.authToken)
-            cliVS.parameters.url.set(extension.url)
-            variant?.let { v ->
-              cliVS.parameters.propertiesFilePath.set(
-                SentryPropertiesFileProvider.getPropertiesFilePath(project, v)
-              )
-            }
-          }
-          .get()
-
-      if (infoOutput.isEmpty()) {
-        return null
-      }
-      val isSaas = infoOutput.contains("(?m)Sentry Server: .*sentry.io$".toRegex())
-
-      orgRegex.find(infoOutput)?.let { matchResult ->
-        val groupValues = matchResult.groupValues
-        if (groupValues.size > 1) {
-          defaultSentryOrganization = groupValues[1]
-        }
-      }
-
-      val versionOutput =
-        project.providers
-          .of(SentryCliVersionValueSource::class.java) { cliVS ->
-            cliVS.parameters.buildDirectory.set(project.buildDir)
-            cliVS.parameters.cliExecutable.set(cliExecutable)
-            cliVS.parameters.url.set(extension.url)
-          }
-          .get()
-
-      versionRegex.find(versionOutput)?.let { matchResult ->
-        val groupValues = matchResult.groupValues
-        if (groupValues.size > 1) {
-          cliVersion = groupValues[1]
-        }
-      }
-
-      return SentryTelemetryServiceParams(
-        extension.telemetry.get(),
-        extension.telemetryDsn.get(),
-        sentryOrg,
-        buildType,
-        tags,
-        extension.debug.get(),
-        defaultSentryOrganization,
-        isSaas,
-        cliVersion = cliVersion,
+        cliExecutable = cliPath,
+        buildDirectory = project.layout.buildDirectory.asFile.orNull,
+        authToken = extension.authToken.orNull,
+        cliUrl = extension.url.orNull,
+        propertiesFilePath =
+          variant?.let { SentryPropertiesFileProvider.getPropertiesFilePath(project, it) },
       )
     }
 
@@ -405,104 +417,6 @@ class SentryMinimalException(message: String) : RuntimeException(message) {
   }
 }
 
-abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
-  interface InfoParams : ValueSourceParameters {
-    @get:Input val buildDirectory: Property<File>
-
-    @get:Input val cliExecutable: Property<String>
-
-    @get:Input val propertiesFilePath: Property<String>
-
-    @get:Input val url: Property<String>
-
-    @get:Input val authToken: Property<String>
-  }
-
-  @get:Inject abstract val execOperations: ExecOperations
-
-  override fun obtain(): String? {
-    val stdOutput = ByteArrayOutputStream()
-    val errOutput = ByteArrayOutputStream()
-
-    val execResult =
-      execOperations.exec {
-        it.isIgnoreExitValue = true
-        SentryCliProvider.maybeExtractFromResources(
-          parameters.buildDirectory.get(),
-          parameters.cliExecutable.get(),
-        )
-
-        val args = mutableListOf(parameters.cliExecutable.get())
-
-        parameters.url.orNull?.let { url ->
-          args.add("--url")
-          args.add(url)
-        }
-
-        args.add("--log-level=error")
-        args.add("info")
-
-        parameters.propertiesFilePath.orNull?.let { path ->
-          it.environment("SENTRY_PROPERTIES", path)
-        }
-
-        parameters.authToken.orNull?.let { authToken ->
-          it.environment("SENTRY_AUTH_TOKEN", authToken)
-        }
-
-        it.setSentryPipelineEnv()
-
-        it.commandLine(args)
-        it.standardOutput = stdOutput
-        it.errorOutput = errOutput
-      }
-
-    if (execResult.exitValue == 0) {
-      return String(stdOutput.toByteArray(), Charset.defaultCharset())
-    } else {
-      logger.info {
-        "Failed to execute sentry-cli info. Error Output: " +
-          String(errOutput.toByteArray(), Charset.defaultCharset())
-      }
-      return ""
-    }
-  }
-}
-
-abstract class SentryCliVersionValueSource : ValueSource<String, VersionParams> {
-  interface VersionParams : ValueSourceParameters {
-    @get:Input val buildDirectory: Property<File>
-
-    @get:Input val cliExecutable: Property<String>
-
-    @get:Input val url: Property<String>
-  }
-
-  @get:Inject abstract val execOperations: ExecOperations
-
-  override fun obtain(): String {
-    val output = ByteArrayOutputStream()
-    execOperations.exec {
-      it.isIgnoreExitValue = true
-      SentryCliProvider.maybeExtractFromResources(
-        parameters.buildDirectory.get(),
-        parameters.cliExecutable.get(),
-      )
-
-      val args = mutableListOf(parameters.cliExecutable.get())
-
-      args.add("--log-level=error")
-      args.add("--version")
-
-      it.setSentryPipelineEnv()
-
-      it.commandLine(args)
-      it.standardOutput = output
-    }
-    return String(output.toByteArray(), Charset.defaultCharset())
-  }
-}
-
 data class SentryTelemetryServiceParams(
   val sendTelemetry: Boolean,
   val dsn: String,
@@ -513,4 +427,9 @@ data class SentryTelemetryServiceParams(
   val defaultSentryOrganization: String? = null,
   val saas: Boolean? = null,
   val cliVersion: String? = null,
+  val cliExecutable: String? = null,
+  val buildDirectory: File? = null,
+  val authToken: String? = null,
+  val cliUrl: String? = null,
+  val propertiesFilePath: String? = null,
 )
