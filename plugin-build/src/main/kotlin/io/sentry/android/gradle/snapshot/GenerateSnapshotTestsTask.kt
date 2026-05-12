@@ -3,7 +3,7 @@ package io.sentry.android.gradle.snapshot
 import com.android.build.api.variant.ApplicationVariant
 import com.android.build.gradle.BaseExtension
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
-import io.sentry.android.gradle.extensions.SnapshotPreviewsExtension
+import io.sentry.android.gradle.extensions.SnapshotsExtension
 import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -32,6 +32,8 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
 
   @get:Input @get:Optional abstract val theme: Property<String>
 
+  @get:Input abstract val diffThreshold: Property<Double>
+
   @get:Input abstract val paparazziMajorVersion: Property<Int>
 
   @get:OutputDirectory abstract val outputDir: DirectoryProperty
@@ -51,6 +53,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
         includePrivatePreviews = includePrivatePreviews.get(),
         packageTrees = packageTrees.get(),
         theme = theme.orNull,
+        diffThreshold = diffThreshold.get(),
         paparazziMajorVersion = paparazziMajorVersion.get(),
       )
     File(packageDir, "$CLASS_NAME.kt").writeText(content)
@@ -63,7 +66,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
 
     fun register(
       project: Project,
-      extension: SnapshotPreviewsExtension,
+      extension: SnapshotsExtension,
       android: BaseExtension,
       variant: ApplicationVariant,
       paparazziMajorVersion: Provider<Int>,
@@ -72,12 +75,13 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
         "sentryGenerateSnapshotsTests${variant.name.capitalized}",
         GenerateSnapshotTestsTask::class.java,
       ) { task ->
-        task.includePrivatePreviews.set(extension.includePrivatePreviews)
-        task.theme.set(extension.theme)
+        task.includePrivatePreviews.set(extension.previews.includePrivatePreviews)
+        task.theme.set(extension.previews.theme)
+        task.diffThreshold.set(extension.diffThreshold)
         task.paparazziMajorVersion.value(paparazziMajorVersion)
         // Fall back to the Android namespace when the user doesn't configure packageTrees
         task.packageTrees.set(
-          extension.packageTrees.map { packages ->
+          extension.previews.packageTrees.map { packages ->
             packages.ifEmpty { listOf(android.namespace!!) }
           }
         )
@@ -92,6 +96,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
       includePrivatePreviews: Boolean,
       packageTrees: List<String>,
       theme: String? = null,
+      diffThreshold: Double = 0.0,
       paparazziMajorVersion: Int = 2,
     ): String {
       val includePrivateExpr =
@@ -232,7 +237,7 @@ private object PaparazziPreviewRule {
             true -> env
             false -> env.copy(compileSdkVersion = previewInfo.apiLevel)
         }
-        val tolerance = 0.0
+        val tolerance = $diffThreshold
         return Paparazzi(
             environment = environment,
             deviceConfig = DeviceConfigBuilder.build(preview.previewInfo),
@@ -385,7 +390,7 @@ class $CLASS_NAME(
         )
         if (info.group.isNotBlank()) metadata["group"] = info.group
 
-        val diffThreshold: Float? = runCatching {
+        val annotationThreshold: Float? = runCatching {
             val declaring = Class.forName(preview.declaringClass)
             val method = declaring.declaredMethods.firstOrNull { it.name == preview.methodName }
                 ?: return@runCatching null
@@ -394,7 +399,8 @@ class $CLASS_NAME(
             val ann = method.getAnnotation(annClass) ?: return@runCatching null
             annClass.getDeclaredMethod("diffThreshold").invoke(ann) as? Float
         }.getOrNull()
-        if (diffThreshold != null && diffThreshold != 0f) metadata["diff_threshold"] = diffThreshold
+        val effectiveThreshold = annotationThreshold ?: tolerance.toFloat()
+        if (effectiveThreshold != 0f) metadata["diff_threshold"] = effectiveThreshold
 
         if (tags.isNotEmpty()) metadata["tags"] = tags
         metadata["context"] = context

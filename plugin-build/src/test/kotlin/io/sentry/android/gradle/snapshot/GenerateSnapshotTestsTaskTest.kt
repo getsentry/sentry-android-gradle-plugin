@@ -141,7 +141,7 @@ class GenerateSnapshotTestsTaskTest {
 
     assertTrue(
       content.contains(
-        "if (diffThreshold != null && diffThreshold != 0f) metadata[\"diff_threshold\"] = diffThreshold"
+        "if (effectiveThreshold != 0f) metadata[\"diff_threshold\"] = effectiveThreshold"
       )
     )
   }
@@ -225,12 +225,35 @@ class GenerateSnapshotTestsTaskTest {
     assertFalse(content.contains("HtmlReportWriter()"))
   }
 
+  @Test
+  fun `generated file uses default tolerance of zero`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"))
+
+    assertTrue(content.contains("val tolerance = 0.0"))
+  }
+
+  @Test
+  fun `generated file uses configured diffThreshold as tolerance`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"), diffThreshold = 0.05)
+
+    assertTrue(content.contains("val tolerance = 0.05"))
+    assertFalse(content.contains("val tolerance = 0.0\n"))
+  }
+
+  @Test
+  fun `generated sidecar uses global threshold as fallback`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"), diffThreshold = 0.02)
+
+    assertTrue(content.contains("val effectiveThreshold = annotationThreshold ?: tolerance.toFloat()"))
+  }
+
   private fun generateAndRead(
     packageTrees: List<String>,
     includePrivatePreviews: Boolean = false,
+    diffThreshold: Double = 0.0,
     paparazziMajorVersion: Int = 2,
   ): String {
-    val task = createTask(packageTrees, includePrivatePreviews, paparazziMajorVersion)
+    val task = createTask(packageTrees, includePrivatePreviews, diffThreshold, paparazziMajorVersion)
     task.generate()
     val file =
       File(task.outputDir.get().asFile, "io/sentry/snapshot/ComposablePreviewSnapshotTest.kt")
@@ -240,6 +263,7 @@ class GenerateSnapshotTestsTaskTest {
   private fun createTask(
     packageTrees: List<String>,
     includePrivatePreviews: Boolean = false,
+    diffThreshold: Double = 0.0,
     paparazziMajorVersion: Int = 2,
   ): GenerateSnapshotTestsTask {
     val project = ProjectBuilder.builder().build()
@@ -247,6 +271,7 @@ class GenerateSnapshotTestsTaskTest {
       .register("testGenerateSnapshotTests", GenerateSnapshotTestsTask::class.java) { task ->
         task.includePrivatePreviews.set(includePrivatePreviews)
         task.packageTrees.set(packageTrees)
+        task.diffThreshold.set(diffThreshold)
         task.paparazziMajorVersion.set(paparazziMajorVersion)
         task.outputDir.set(tmpDir.newFolder("output"))
       }
