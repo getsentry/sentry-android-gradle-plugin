@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.extensions
 
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -14,6 +15,24 @@ class SnapshotsExtensionTest {
     val extension = project.objects.newInstance(SnapshotsExtension::class.java)
 
     assertFalse(extension.enabled.get())
+  }
+
+  @Test
+  fun `diffThreshold is zero by default`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = project.objects.newInstance(SnapshotsExtension::class.java)
+
+    assertEquals(0.0, extension.diffThreshold.get())
+  }
+
+  @Test
+  fun `diffThreshold can be configured`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = project.objects.newInstance(SnapshotsExtension::class.java)
+
+    extension.diffThreshold.set(0.05)
+
+    assertEquals(0.05, extension.diffThreshold.get())
   }
 
   @Test

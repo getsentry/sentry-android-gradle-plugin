@@ -509,7 +509,7 @@ private fun ApplicationVariant.configureSnapshotsTasks(
       val generateTask =
         GenerateSnapshotTestsTask.register(
           project,
-          extension.snapshots.previews,
+          extension.snapshots,
           android,
           this@configureSnapshotsTasks,
           paparazziMajorVersion,

@@ -11,6 +11,8 @@ open class SnapshotsExtension @Inject constructor(objects: ObjectFactory) {
 
   val enabled: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
 
+  val diffThreshold: Property<Double> = objects.property(Double::class.java).convention(0.0)
+
   val previews: SnapshotPreviewsExtension =
     objects.newInstance(SnapshotPreviewsExtension::class.java)
 

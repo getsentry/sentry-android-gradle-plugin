@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add global `diffThreshold` option for snapshots ([#1186](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1186))
+
 ### Fixes
 
 - Change auto-install trigger for log4j2 from -api to -core dependency ([#1155](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1155))
