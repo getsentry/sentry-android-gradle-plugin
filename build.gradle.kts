@@ -1,5 +1,5 @@
 buildscript {
-  dependencies { classpath("org.apache.commons:commons-compress:1.26.0") }
+  dependencies { classpath("org.apache.commons:commons-compress:1.28.0") }
   if (BuildPluginsVersion.AGP.substringBefore(".").toInt() < 8) {
     // AGP 7.x has troubles with compileSdk 34 due to some R8 shenanigans, so we have to use a newer
     // version of R* here
