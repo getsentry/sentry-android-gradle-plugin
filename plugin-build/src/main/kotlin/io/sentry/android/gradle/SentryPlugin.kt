@@ -43,6 +43,13 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
 
     val extension = project.extensions.create("sentry", SentryPluginExtension::class.java)
 
+    val gradleExt = project.gradle.extensions.getByType(ExtraPropertiesExtension::class.java)
+    if (gradleExt.has(SentrySettingsPlugin.SENTRY_SETTINGS_EXTENSION_KEY)) {
+      val settingsExtension =
+        gradleExt.get(SentrySettingsPlugin.SENTRY_SETTINGS_EXTENSION_KEY) as SentryPluginExtension
+      extension.applySettingsDefaults(settingsExtension)
+    }
+
     project.pluginManager.withPlugin("com.android.application") {
       val androidComponentsExt =
         project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
@@ -67,6 +74,7 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
 
       project.installDependencies(extension, true)
     }
+
   }
 
   companion object {
