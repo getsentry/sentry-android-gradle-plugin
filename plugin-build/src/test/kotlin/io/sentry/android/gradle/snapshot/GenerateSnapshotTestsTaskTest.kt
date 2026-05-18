@@ -165,10 +165,18 @@ class GenerateSnapshotTestsTaskTest {
     assertTrue(content.contains("if (info.name.isNotBlank()) tags[\"preview_name\"] = info.name"))
     assertTrue(content.contains("if (info.locale.isNotBlank()) tags[\"locale\"] = info.locale"))
     assertTrue(content.contains("if (info.device.isNotBlank()) tags[\"device\"] = info.device"))
-    assertTrue(content.contains("if (info.fontScale != 1f) tags[\"font_scale\"] = info.fontScale.toString()"))
-    assertTrue(content.contains("if (info.apiLevel != -1) tags[\"api_level\"] = info.apiLevel.toString()"))
-    assertTrue(content.contains("if (info.widthDp > 0) tags[\"width_dp\"] = info.widthDp.toString()"))
-    assertTrue(content.contains("if (info.heightDp > 0) tags[\"height_dp\"] = info.heightDp.toString()"))
+    assertTrue(
+      content.contains("if (info.fontScale != 1f) tags[\"font_scale\"] = info.fontScale.toString()")
+    )
+    assertTrue(
+      content.contains("if (info.apiLevel != -1) tags[\"api_level\"] = info.apiLevel.toString()")
+    )
+    assertTrue(
+      content.contains("if (info.widthDp > 0) tags[\"width_dp\"] = info.widthDp.toString()")
+    )
+    assertTrue(
+      content.contains("if (info.heightDp > 0) tags[\"height_dp\"] = info.heightDp.toString()")
+    )
     assertTrue(content.contains("if (info.showSystemUi) tags[\"show_system_ui\"] = \"true\""))
     assertTrue(content.contains("if (info.showBackground) tags[\"show_background\"] = \"true\""))
     assertTrue(content.contains("if (tags.isNotEmpty()) metadata[\"tags\"] = tags"))
