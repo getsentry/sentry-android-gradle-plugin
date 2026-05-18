@@ -364,16 +364,16 @@ class $CLASS_NAME(
         imagesDir.mkdirs()
         val info = preview.previewInfo
 
-        val tags = linkedMapOf<String, Any>()
+        val tags = linkedMapOf<String, String>()
         if (info.name.isNotBlank()) tags["preview_name"] = info.name
         if (info.locale.isNotBlank()) tags["locale"] = info.locale
         if (info.device.isNotBlank()) tags["device"] = info.device
-        if (info.fontScale != 1f) tags["font_scale"] = info.fontScale
-        if (info.apiLevel != -1) tags["api_level"] = info.apiLevel
-        if (info.widthDp > 0) tags["width_dp"] = info.widthDp
-        if (info.heightDp > 0) tags["height_dp"] = info.heightDp
-        if (info.showSystemUi) tags["show_system_ui"] = true
-        if (info.showBackground) tags["show_background"] = true
+        if (info.fontScale != 1f) tags["font_scale"] = info.fontScale.toString()
+        if (info.apiLevel != -1) tags["api_level"] = info.apiLevel.toString()
+        if (info.widthDp > 0) tags["width_dp"] = info.widthDp.toString()
+        if (info.heightDp > 0) tags["height_dp"] = info.heightDp.toString()
+        if (info.showSystemUi) tags["show_system_ui"] = "true"
+        if (info.showBackground) tags["show_background"] = "true"
         when (info.uiMode and UI_MODE_NIGHT_MASK) {
             UI_MODE_NIGHT_YES -> tags["ui_mode"] = "dark"
             UI_MODE_NIGHT_NO -> tags["ui_mode"] = "light"
