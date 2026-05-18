@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix snapshot upload error by using string values for all sidecar tags ([#1199](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1199))
+
 ## 6.7.0
 
 ### Features
