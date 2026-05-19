@@ -135,11 +135,14 @@ internal object SentryCliProvider {
     return when {
       "mac" in osName -> "Darwin-universal"
       "linux" in osName -> {
-        val normalizedArch = when (osArch) {
-          "amd64", "x86_64" -> "x86_64"
-          "arm64", "aarch64" -> "aarch64"
-          else -> osArch
-        }
+        val normalizedArch =
+          when (osArch) {
+            "amd64",
+            "x86_64" -> "x86_64"
+            "arm64",
+            "aarch64" -> "aarch64"
+            else -> osArch
+          }
         "Linux-$normalizedArch"
       }
       "win" in osName -> "Windows-i686.exe"
