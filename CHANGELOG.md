@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Normalize Linux ARM64 architecture name for bundled sentry-cli binary lookup ([#1201](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1201))
+
 ## 6.7.1
 
 ### Fixes
