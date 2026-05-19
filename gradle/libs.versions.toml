@@ -38,8 +38,8 @@ proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.5
 gradleApi = { group = "org.gradle.experimental", name = "gradle-public-api", version = "8.9" }
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable" }
-autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.0.1" }
-autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.0.1" }
+autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.1.1" }
+autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.1.1" }
 kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
 kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.7.1" }
 truth = { module = "com.google.truth:truth", version = "1.4.4" }
