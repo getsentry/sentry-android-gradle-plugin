@@ -2,6 +2,7 @@
 
 package io.sentry.android.gradle.telemetry
 
+import com.android.build.gradle.BaseExtension
 import io.sentry.BuildConfig
 import io.sentry.IHub
 import io.sentry.ISpan
@@ -12,7 +13,6 @@ import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SpanStatus
 import io.sentry.TransactionOptions
-import com.android.build.gradle.BaseExtension
 import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.SentryPlugin.Companion.logger
@@ -401,9 +401,7 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
             "coreLibraryDesugaring_enabled",
             android.compileOptions.isCoreLibraryDesugaringEnabled.toString(),
           )
-          android.defaultConfig.minSdkVersion?.apiLevel?.let {
-            tags.put("minSdk", it.toString())
-          }
+          android.defaultConfig.minSdkVersion?.apiLevel?.let { tags.put("minSdk", it.toString()) }
         }
       } catch (_: Throwable) {
         // Android extensions may not be available (e.g. JVM plugin)
