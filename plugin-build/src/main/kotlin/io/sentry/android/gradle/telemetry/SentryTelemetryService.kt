@@ -2,6 +2,7 @@
 
 package io.sentry.android.gradle.telemetry
 
+import com.android.build.gradle.BaseExtension
 import io.sentry.BuildConfig
 import io.sentry.IHub
 import io.sentry.ISpan
@@ -392,6 +393,19 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
       )
       // TODO PII?
       //            extension.projectName.orNull?.let { tags.put("projectName", it) }
+
+      try {
+        val android = project.extensions.findByType(BaseExtension::class.java)
+        if (android != null) {
+          tags.put(
+            "coreLibraryDesugaring_enabled",
+            android.compileOptions.isCoreLibraryDesugaringEnabled.toString(),
+          )
+          android.defaultConfig.minSdkVersion?.apiLevel?.let { tags.put("minSdk", it.toString()) }
+        }
+      } catch (_: Throwable) {
+        // Android extensions may not be available (e.g. JVM plugin)
+      }
 
       return tags
     }
