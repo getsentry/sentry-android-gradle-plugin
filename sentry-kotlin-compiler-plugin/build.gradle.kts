@@ -57,9 +57,9 @@ dependencies {
   testImplementation(kotlin2120.output)
   testImplementation(kotlin2200.output)
 
-  kotlin1920.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.9.24")
-  kotlin2120.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.1.20")
-  kotlin2200.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.2.0")
+  kotlin1920.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.21")
+  kotlin2120.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.21")
+  kotlin2200.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.21")
 
   compileOnly(kotlin1920.output)
   compileOnly(kotlin2120.output)
