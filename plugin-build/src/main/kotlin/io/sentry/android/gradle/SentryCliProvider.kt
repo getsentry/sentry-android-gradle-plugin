@@ -141,11 +141,24 @@ internal object SentryCliProvider {
             "x86_64" -> "x86_64"
             "arm64",
             "aarch64" -> "aarch64"
+            "x86",
+            "i386",
+            "i686" -> "i686"
             else -> osArch
           }
         "Linux-$normalizedArch"
       }
-      "win" in osName -> "Windows-i686.exe"
+      "win" in osName -> {
+        val normalizedArch =
+          when (osArch) {
+            "amd64",
+            "x86_64" -> "x86_64"
+            "arm64",
+            "aarch64" -> "aarch64"
+            else -> "i686"
+          }
+        "Windows-$normalizedArch.exe"
+      }
       else -> null
     }
   }
