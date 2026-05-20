@@ -12,6 +12,7 @@ import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SpanStatus
 import io.sentry.TransactionOptions
+import com.android.build.gradle.BaseExtension
 import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.SentryPlugin.Companion.logger
@@ -392,6 +393,21 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
       )
       // TODO PII?
       //            extension.projectName.orNull?.let { tags.put("projectName", it) }
+
+      try {
+        val android = project.extensions.findByType(BaseExtension::class.java)
+        if (android != null) {
+          tags.put(
+            "coreLibraryDesugaring_enabled",
+            android.compileOptions.isCoreLibraryDesugaringEnabled.toString(),
+          )
+          android.defaultConfig.minSdkVersion?.apiLevel?.let {
+            tags.put("minSdk", it.toString())
+          }
+        }
+      } catch (_: Throwable) {
+        // Android extensions may not be available (e.g. JVM plugin)
+      }
 
       return tags
     }
