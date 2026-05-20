@@ -93,7 +93,7 @@ sample-springBoot-starterWebflux = { group = "org.springframework.boot", name = 
 sample-springBoot-starterAop = { group = "org.springframework.boot", name = "spring-boot-starter-aop", version.ref = "sampleSpringBoot" }
 sample-springBoot-starterSecurity = { group = "org.springframework.boot", name = "spring-boot-starter-security", version.ref = "sampleSpringBoot" }
 sample-springBoot-starterJdbc = { group = "org.springframework.boot", name = "spring-boot-starter-jdbc", version.ref = "sampleSpringBoot" }
-sample-springBoot-hsqldb = "org.hsqldb:hsqldb:2.6.1"
+sample-springBoot-hsqldb = "org.hsqldb:hsqldb:2.7.4"
 sample-springBoot-aspectj = { group = "org.aspectj", name = "aspectjweaver" }
 sample-springBoot-kotlinReflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect" }
 sample-springBoot-kotlinStdLib = { group = "org.jetbrains.kotlin", name = "stdlib-jdk8" }
