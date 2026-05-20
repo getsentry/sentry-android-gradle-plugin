@@ -190,9 +190,15 @@ class SentryCliProviderTest {
   }
 
   @Test
-  @WithSystemProperty(["os.name", "os.arch"], ["linux", "armV7"])
-  fun `getCliSuffix on linux armV7 returns Linux-armV7`() {
-    assertEquals("Linux-armV7", getCliSuffix())
+  @WithSystemProperty(["os.name", "os.arch"], ["linux", "arm"])
+  fun `getCliSuffix on linux arm returns Linux-armv7`() {
+    assertEquals("Linux-armv7", getCliSuffix())
+  }
+
+  @Test
+  @WithSystemProperty(["os.name", "os.arch"], ["linux", "armv7l"])
+  fun `getCliSuffix on linux armv7l returns Linux-armv7`() {
+    assertEquals("Linux-armv7", getCliSuffix())
   }
 
   @Test

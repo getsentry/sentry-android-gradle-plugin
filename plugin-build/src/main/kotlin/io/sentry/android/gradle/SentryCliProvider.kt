@@ -144,6 +144,8 @@ internal object SentryCliProvider {
             "x86",
             "i386",
             "i686" -> "i686"
+            "arm",
+            "armv7l" -> "armv7"
             else -> osArch
           }
         "Linux-$normalizedArch"
