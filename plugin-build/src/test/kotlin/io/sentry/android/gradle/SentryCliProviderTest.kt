@@ -148,9 +148,15 @@ class SentryCliProviderTest {
   }
 
   @Test
-  @WithSystemProperty(["os.name"], ["mac"])
-  fun `getCliSuffix on mac returns Darwin-universal`() {
-    assertEquals("Darwin-universal", getCliSuffix())
+  @WithSystemProperty(["os.name", "os.arch"], ["mac", "aarch64"])
+  fun `getCliSuffix on mac aarch64 returns Darwin-arm64`() {
+    assertEquals("Darwin-arm64", getCliSuffix())
+  }
+
+  @Test
+  @WithSystemProperty(["os.name", "os.arch"], ["mac", "x86_64"])
+  fun `getCliSuffix on mac x86_64 returns Darwin-x86_64`() {
+    assertEquals("Darwin-x86_64", getCliSuffix())
   }
 
   @Test
