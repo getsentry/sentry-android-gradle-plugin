@@ -7,6 +7,7 @@ import org.gradle.util.GradleVersion
 internal object AgpVersions {
   val CURRENT: SemVer = SemVer.parse(Version.ANDROID_GRADLE_PLUGIN_VERSION)
   val VERSION_7_4_0: SemVer = SemVer.parse("7.4.0-rc01")
+  val VERSION_8_0_0: SemVer = SemVer.parse("8.0.0")
   val VERSION_8_3_0: SemVer = SemVer.parse("8.3.0")
   val VERSION_9_0_0: SemVer = SemVer.parse("9.0.0")
 

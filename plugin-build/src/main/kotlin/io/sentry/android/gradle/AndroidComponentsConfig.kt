@@ -468,6 +468,10 @@ private fun ApplicationVariant.configureSnapshotsTasks(
   sentryOrg: String?,
   sentryProject: String?,
 ) {
+  check(AgpVersions.CURRENT >= AgpVersions.VERSION_8_0_0) {
+    "Sentry Snapshots require Android Gradle Plugin 8.0 or higher. " +
+      "Current version: ${AgpVersions.CURRENT}"
+  }
   val variant = AndroidVariant74(this)
   val sentryProps = getPropertiesFilePath(project, variant)
   val taskSuffix = name.capitalized
