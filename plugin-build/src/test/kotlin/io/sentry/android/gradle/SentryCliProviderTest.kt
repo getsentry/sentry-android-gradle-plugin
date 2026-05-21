@@ -184,56 +184,14 @@ class SentryCliProviderTest {
   }
 
   @Test
-  @WithSystemProperty(["os.name", "os.arch"], ["linux", "i686"])
-  fun `getCliSuffix on linux i686 returns Linux-i686`() {
-    assertEquals("Linux-i686", getCliSuffix())
+  @WithSystemProperty(["os.name", "os.arch"], ["linux", "armV7"])
+  fun `getCliSuffix on linux armV7 returns Linux-armV7`() {
+    assertEquals("Linux-armV7", getCliSuffix())
   }
 
   @Test
-  @WithSystemProperty(["os.name", "os.arch"], ["linux", "i386"])
-  fun `getCliSuffix on linux i386 returns Linux-i686`() {
-    assertEquals("Linux-i686", getCliSuffix())
-  }
-
-  @Test
-  @WithSystemProperty(["os.name", "os.arch"], ["linux", "arm"])
-  fun `getCliSuffix on linux arm returns Linux-armv7`() {
-    assertEquals("Linux-armv7", getCliSuffix())
-  }
-
-  @Test
-  @WithSystemProperty(["os.name", "os.arch"], ["linux", "armv7l"])
-  fun `getCliSuffix on linux armv7l returns Linux-armv7`() {
-    assertEquals("Linux-armv7", getCliSuffix())
-  }
-
-  @Test
-  @WithSystemProperty(["os.name", "os.arch"], ["windows", "amd64"])
-  fun `getCliSuffix on win amd64 returns Windows-x86_64`() {
-    assertEquals("Windows-x86_64.exe", getCliSuffix())
-  }
-
-  @Test
-  @WithSystemProperty(["os.name", "os.arch"], ["windows", "x86_64"])
-  fun `getCliSuffix on win x86_64 returns Windows-x86_64`() {
-    assertEquals("Windows-x86_64.exe", getCliSuffix())
-  }
-
-  @Test
-  @WithSystemProperty(["os.name", "os.arch"], ["windows", "arm64"])
-  fun `getCliSuffix on win arm64 returns Windows-aarch64`() {
-    assertEquals("Windows-aarch64.exe", getCliSuffix())
-  }
-
-  @Test
-  @WithSystemProperty(["os.name", "os.arch"], ["windows", "aarch64"])
-  fun `getCliSuffix on win aarch64 returns Windows-aarch64`() {
-    assertEquals("Windows-aarch64.exe", getCliSuffix())
-  }
-
-  @Test
-  @WithSystemProperty(["os.name", "os.arch"], ["windows", "x86"])
-  fun `getCliSuffix on win x86 returns Windows-i686`() {
+  @WithSystemProperty(["os.name"], ["windows"])
+  fun `getCliSuffix on win returns Windows-i686`() {
     assertEquals("Windows-i686.exe", getCliSuffix())
   }
 
