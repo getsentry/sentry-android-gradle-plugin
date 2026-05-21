@@ -63,7 +63,7 @@ zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.5" }
 
 # samples
 sample-androidx-recyclerView = "androidx.recyclerview:recyclerview:1.2.0"
-sample-androidx-lifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
+sample-androidx-lifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:2.9.4"
 sample-androidx-appcompat = "androidx.appcompat:appcompat:1.2.0"
 
 sample-androidx-composeRuntime = "androidx.compose.runtime:runtime:1.5.4"
