@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fail fast with a clear error when Snapshots feature is used with AGP 7.x ([#1212](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1212))
+
 ## 6.8.0
 
 ### Dependencies

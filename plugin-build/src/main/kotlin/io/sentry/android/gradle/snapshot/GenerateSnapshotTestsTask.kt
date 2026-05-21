@@ -1,7 +1,6 @@
 package io.sentry.android.gradle.snapshot
 
 import com.android.build.api.variant.ApplicationVariant
-import com.android.build.gradle.BaseExtension
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.extensions.SnapshotsExtension
 import java.io.File
@@ -67,7 +66,6 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
     fun register(
       project: Project,
       extension: SnapshotsExtension,
-      android: BaseExtension,
       variant: ApplicationVariant,
       paparazziMajorVersion: Provider<Int>,
     ): TaskProvider<GenerateSnapshotTestsTask> {
@@ -79,10 +77,9 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
         task.theme.set(extension.previews.theme)
         task.diffThreshold.set(extension.diffThreshold)
         task.paparazziMajorVersion.value(paparazziMajorVersion)
-        // Fall back to the Android namespace when the user doesn't configure packageTrees
         task.packageTrees.set(
-          extension.previews.packageTrees.map { packages ->
-            packages.ifEmpty { listOf(android.namespace!!) }
+          extension.previews.packageTrees.zip(variant.namespace) { packages, ns ->
+            packages.ifEmpty { listOf(ns) }
           }
         )
         task.outputDir.set(

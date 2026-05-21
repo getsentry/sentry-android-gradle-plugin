@@ -11,7 +11,6 @@ import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.ApplicationVariant
 import com.android.build.api.variant.HostTestBuilder.Companion.UNIT_TEST_TYPE
 import com.android.build.api.variant.Variant
-import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryPlugin.Companion.sep
@@ -469,6 +468,10 @@ private fun ApplicationVariant.configureSnapshotsTasks(
   sentryOrg: String?,
   sentryProject: String?,
 ) {
+  check(AgpVersions.CURRENT >= AgpVersions.VERSION_8_0_0) {
+    "Sentry Snapshots require Android Gradle Plugin 8.0 or higher. " +
+      "Current version: ${AgpVersions.CURRENT}"
+  }
   val variant = AndroidVariant74(this)
   val sentryProps = getPropertiesFilePath(project, variant)
   val taskSuffix = name.capitalized
@@ -490,8 +493,6 @@ private fun ApplicationVariant.configureSnapshotsTasks(
   // Wire Paparazzi test generation and upload task when the Paparazzi plugin is applied
   project.pluginManager.withPlugin("app.cash.paparazzi") {
     if (extension.snapshots.previews.generateTests.get()) {
-      val android = project.extensions.getByType(BaseExtension::class.java)
-
       project.dependencies.add(
         "testImplementation",
         "io.github.sergio-sastre.ComposablePreviewScanner:android:${BuildConfig.ComposablePreviewScannerVersion}",
@@ -510,7 +511,6 @@ private fun ApplicationVariant.configureSnapshotsTasks(
         GenerateSnapshotTestsTask.register(
           project,
           extension.snapshots,
-          android,
           this@configureSnapshotsTasks,
           paparazziMajorVersion,
         )
