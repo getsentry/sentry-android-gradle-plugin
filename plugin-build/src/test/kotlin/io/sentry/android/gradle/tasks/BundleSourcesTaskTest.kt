@@ -29,6 +29,7 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
+        it.configureCliPaths(project)
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -56,6 +57,7 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
+        it.configureCliPaths(project)
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -137,6 +139,7 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
+        it.configureCliPaths(project)
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -158,6 +161,7 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
+        it.configureCliPaths(project)
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -217,6 +221,7 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
+        it.configureCliPaths(project)
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -234,6 +239,12 @@ class BundleSourcesTaskTest {
       plugins.apply("io.sentry.android.gradle")
       return this
     }
+  }
+
+  private fun SentryCliExecTask.configureCliPaths(project: Project) {
+    sentryProjectDir.set(project.layout.projectDirectory)
+    sentryRootDir.fileValue(project.rootDir)
+    buildDirectory.set(project.layout.buildDirectory)
   }
 
   private fun createDebugMetaProperties(

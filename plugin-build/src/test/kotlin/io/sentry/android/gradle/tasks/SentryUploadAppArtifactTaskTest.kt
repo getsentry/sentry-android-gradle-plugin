@@ -30,6 +30,7 @@ class SentryUploadAppArtifactTaskTest {
     val apkFile = project.apkDirProvider(dummyApkName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.configureCliPaths(project)
         it.apk.set(apkFile)
       }
 
@@ -48,6 +49,7 @@ class SentryUploadAppArtifactTaskTest {
     val aabFile = project.aabFileProvider(dummyAabName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.configureCliPaths(project)
         it.bundle.set(aabFile)
       }
 
@@ -66,6 +68,7 @@ class SentryUploadAppArtifactTaskTest {
     val apkDir = project.apkDirProvider(dummyApkName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
+        it.configureCliPaths(project)
         it.apk.set(apkDir)
         it.debug.set(true)
       }
@@ -123,6 +126,7 @@ class SentryUploadAppArtifactTaskTest {
     val apkDir = project.apkDirProvider(dummyApkName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
+        it.configureCliPaths(project)
         it.sentryUrl.set("https://some-host.sentry.io")
         it.apk.set(apkDir)
       }
@@ -141,6 +145,7 @@ class SentryUploadAppArtifactTaskTest {
     val apkDir = project.apkDirProvider(dummyApkName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
+        it.configureCliPaths(project)
         it.apk.set(apkDir)
         it.sentryOrganization.set("dummy-org")
       }
@@ -158,6 +163,7 @@ class SentryUploadAppArtifactTaskTest {
     val apkDir = project.apkDirProvider(dummyApkName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadProguardMapping", SentryUploadAppArtifactTask::class.java) {
+        it.configureCliPaths(project)
         it.apk.set(apkDir)
         it.sentryProject.set("dummy-proj")
       }
@@ -174,6 +180,7 @@ class SentryUploadAppArtifactTaskTest {
     val nonExistentBundle = project.layout.buildDirectory.file("nonexistent/bundle.aab")
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.configureCliPaths(project)
         it.bundle.set(nonExistentBundle)
       }
 
@@ -188,6 +195,7 @@ class SentryUploadAppArtifactTaskTest {
     val nonExistentApkDir = project.layout.buildDirectory.dir("nonexistent/apk")
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.configureCliPaths(project)
         it.apk.set(nonExistentApkDir)
       }
 
@@ -204,6 +212,7 @@ class SentryUploadAppArtifactTaskTest {
     emptyApkDir.get().asFile.mkdirs()
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.configureCliPaths(project)
         it.apk.set(emptyApkDir)
       }
 
@@ -217,6 +226,7 @@ class SentryUploadAppArtifactTaskTest {
     val project = createProject()
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.configureCliPaths(project)
       }
 
     val exception = assertFailsWith<IllegalStateException> { task.get().computeCommandLineArgs() }
@@ -230,6 +240,7 @@ class SentryUploadAppArtifactTaskTest {
     val apkDir = project.apkDirProvider(dummyApkName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.configureCliPaths(project)
         it.apk.set(apkDir)
         it.vcsHeadSha.set("abc123def456")
         it.vcsBaseSha.set("def456abc123")
@@ -265,6 +276,7 @@ class SentryUploadAppArtifactTaskTest {
     val apkDir = project.apkDirProvider(dummyApkName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.configureCliPaths(project)
         it.apk.set(apkDir)
         it.installGroups.set(setOf("internal", "beta", "alpha"))
       }
@@ -283,6 +295,7 @@ class SentryUploadAppArtifactTaskTest {
     val apkDir = project.apkDirProvider(dummyApkName)
     val task: TaskProvider<SentryUploadAppArtifactTask> =
       project.tasks.register("testUploadAppArtifact", SentryUploadAppArtifactTask::class.java) {
+        it.configureCliPaths(project)
         it.apk.set(apkDir)
         it.installGroups.set(emptySet())
       }
@@ -298,6 +311,12 @@ class SentryUploadAppArtifactTaskTest {
       plugins.apply("io.sentry.android.gradle")
       return this
     }
+  }
+
+  private fun SentryCliExecTask.configureCliPaths(project: Project) {
+    sentryProjectDir.set(project.layout.projectDirectory)
+    sentryRootDir.fileValue(project.rootDir)
+    buildDirectory.set(project.layout.buildDirectory)
   }
 
   private fun Project.apkDirProvider(path: String): Provider<Directory> {

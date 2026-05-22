@@ -25,7 +25,9 @@ class SentryCliExecTaskTest {
     assertTrue(!cliPath.exists())
 
     val task: TaskProvider<TestTask> =
-      project.tasks.register("testTask", TestTask::class.java)
+      project.tasks.register("testTask", TestTask::class.java) {
+        it.configureCliPaths(project)
+      }
 
     val args = task.get().computeCommandLineArgs()
 
@@ -39,6 +41,7 @@ class SentryCliExecTaskTest {
 
     val task: TaskProvider<TestTask> =
       project.tasks.register("testTask", TestTask::class.java) {
+        it.configureCliPaths(project)
         it.debug.set(true)
       }
 
@@ -93,6 +96,7 @@ class SentryCliExecTaskTest {
     val project = createProject()
     val task: TaskProvider<TestTask> =
       project.tasks.register("testTask", TestTask::class.java) {
+        it.configureCliPaths(project)
         it.sentryOrganization.set("dummy-org")
       }
 
@@ -107,6 +111,7 @@ class SentryCliExecTaskTest {
     val project = createProject()
     val task: TaskProvider<TestTask> =
       project.tasks.register("testTask", TestTask::class.java) {
+        it.configureCliPaths(project)
         it.sentryProject.set("dummy-proj")
       }
 
@@ -121,6 +126,7 @@ class SentryCliExecTaskTest {
     val project = createProject()
     val task: TaskProvider<TestTask> =
       project.tasks.register("testTask", TestTask::class.java) {
+        it.configureCliPaths(project)
         it.sentryUrl.set("https://some-host.sentry.io")
       }
 
@@ -135,6 +141,12 @@ class SentryCliExecTaskTest {
       plugins.apply("io.sentry.android.gradle")
       return this
     }
+  }
+
+  private fun SentryCliExecTask.configureCliPaths(project: Project) {
+    sentryProjectDir.set(project.layout.projectDirectory)
+    sentryRootDir.fileValue(project.rootDir)
+    buildDirectory.set(project.layout.buildDirectory)
   }
 
   abstract class TestTask : SentryCliExecTask() {

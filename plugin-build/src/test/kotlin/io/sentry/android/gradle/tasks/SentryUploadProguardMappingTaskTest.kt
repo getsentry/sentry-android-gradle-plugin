@@ -33,6 +33,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
+        it.configureCliPaths(project)
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(true)
@@ -60,6 +61,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
+        it.configureCliPaths(project)
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(true)
@@ -99,6 +101,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
+        it.configureCliPaths(project)
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFiles
         it.autoUploadProguardMapping.set(true)
@@ -120,6 +123,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
+        it.configureCliPaths(project)
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(false)
@@ -141,6 +145,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
+        it.configureCliPaths(project)
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(false)
@@ -212,6 +217,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
+        it.configureCliPaths(project)
         it.sentryUrl.set("https://some-host.sentry.io")
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
@@ -235,6 +241,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
+        it.configureCliPaths(project)
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(false)
@@ -258,6 +265,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
+        it.configureCliPaths(project)
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(false)
@@ -313,6 +321,12 @@ class SentryUploadProguardMappingTaskTest {
       plugins.apply("io.sentry.android.gradle")
       return this
     }
+  }
+
+  private fun SentryCliExecTask.configureCliPaths(project: Project) {
+    sentryProjectDir.set(project.layout.projectDirectory)
+    sentryRootDir.fileValue(project.rootDir)
+    buildDirectory.set(project.layout.buildDirectory)
   }
 
   private fun createFakeUuid(

@@ -218,6 +218,11 @@ class SentryUploadSnapshotsTaskTest {
     block: (SentryUploadSnapshotsTask) -> Unit = {},
   ): SentryUploadSnapshotsTask =
     project.tasks
-      .register("testUploadSnapshots", SentryUploadSnapshotsTask::class.java) { block(it) }
+      .register("testUploadSnapshots", SentryUploadSnapshotsTask::class.java) {
+        it.sentryProjectDir.set(project.layout.projectDirectory)
+        it.sentryRootDir.fileValue(project.rootDir)
+        it.buildDirectory.set(project.layout.buildDirectory)
+        block(it)
+      }
       .get()
 }

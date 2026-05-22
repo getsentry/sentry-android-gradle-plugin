@@ -24,6 +24,7 @@ class UploadSourceBundleTaskTest {
     val sourceBundleDir = File(project.buildDir, "dummy/folder")
     val task: TaskProvider<UploadSourceBundleTask> =
       project.tasks.register("testUploadSourceBundle", UploadSourceBundleTask::class.java) {
+        it.configureCliPaths(project)
         it.sourceBundleDir.set(sourceBundleDir)
         it.autoUploadSourceContext.set(true)
       }
@@ -49,6 +50,7 @@ class UploadSourceBundleTaskTest {
     val sourceBundleDir = File(project.buildDir, "dummy/folder")
     val task: TaskProvider<UploadSourceBundleTask> =
       project.tasks.register("testUploadSourceBundle", UploadSourceBundleTask::class.java) {
+        it.configureCliPaths(project)
         it.sourceBundleDir.set(sourceBundleDir)
         it.autoUploadSourceContext.set(false)
       }
@@ -65,6 +67,7 @@ class UploadSourceBundleTaskTest {
     val sourceBundleDir = File(project.buildDir, "dummy/folder")
     val task: TaskProvider<UploadSourceBundleTask> =
       project.tasks.register("testUploadSourceBundle", UploadSourceBundleTask::class.java) {
+        it.configureCliPaths(project)
         it.sourceBundleDir.set(sourceBundleDir)
         it.autoUploadSourceContext.set(true)
         it.debug.set(true)
@@ -120,6 +123,7 @@ class UploadSourceBundleTaskTest {
 
     val task: TaskProvider<UploadSourceBundleTask> =
       project.tasks.register("testUploadSourceBundle", UploadSourceBundleTask::class.java) {
+        it.configureCliPaths(project)
         it.sourceBundleDir.set(sourceBundleDir)
         it.autoUploadSourceContext.set(true)
         it.sentryUrl.set("https://some-host.sentry.io")
@@ -154,6 +158,7 @@ class UploadSourceBundleTaskTest {
 
     val task: TaskProvider<UploadSourceBundleTask> =
       project.tasks.register("testUploadSourceBundle", UploadSourceBundleTask::class.java) {
+        it.configureCliPaths(project)
         it.sourceBundleDir.set(sourceBundleDir)
         it.autoUploadSourceContext.set(true)
         it.sentryOrganization.set("dummy-org")
@@ -172,6 +177,7 @@ class UploadSourceBundleTaskTest {
 
     val task: TaskProvider<UploadSourceBundleTask> =
       project.tasks.register("testUploadSourceBundle", UploadSourceBundleTask::class.java) {
+        it.configureCliPaths(project)
         it.sourceBundleDir.set(sourceBundleDir)
         it.autoUploadSourceContext.set(true)
         it.sentryProject.set("dummy-proj")
@@ -188,5 +194,11 @@ class UploadSourceBundleTaskTest {
       plugins.apply("io.sentry.android.gradle")
       return this
     }
+  }
+
+  private fun SentryCliExecTask.configureCliPaths(project: Project) {
+    sentryProjectDir.set(project.layout.projectDirectory)
+    sentryRootDir.fileValue(project.rootDir)
+    buildDirectory.set(project.layout.buildDirectory)
   }
 }

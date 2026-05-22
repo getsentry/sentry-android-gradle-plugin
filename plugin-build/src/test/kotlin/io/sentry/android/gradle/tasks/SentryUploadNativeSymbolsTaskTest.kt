@@ -178,6 +178,11 @@ class SentryUploadNativeSymbolsTaskTest {
     block: (SentryUploadNativeSymbolsTask) -> Unit = {},
   ): SentryUploadNativeSymbolsTask =
     project.tasks
-      .register("testUploadNativeSymbols", SentryUploadNativeSymbolsTask::class.java) { block(it) }
+      .register("testUploadNativeSymbols", SentryUploadNativeSymbolsTask::class.java) {
+        it.sentryProjectDir.set(project.layout.projectDirectory)
+        it.sentryRootDir.fileValue(project.rootDir)
+        it.buildDirectory.set(project.layout.buildDirectory)
+        block(it)
+      }
       .get()
 }

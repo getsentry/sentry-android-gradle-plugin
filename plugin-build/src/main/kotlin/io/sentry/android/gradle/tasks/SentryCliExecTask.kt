@@ -4,11 +4,10 @@ import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.info
 import io.sentry.android.gradle.util.setSentryPipelineEnv
-import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -38,9 +37,11 @@ abstract class SentryCliExecTask : Exec() {
 
   @get:Internal abstract val sentryTelemetryService: Property<SentryTelemetryService>
 
-  private val sentryProjectDir: File = project.projectDir
-  private val sentryRootDir: File = project.rootDir
-  private val buildDirectory: Provider<File> = project.layout.buildDirectory.asFile
+  @get:Internal abstract val sentryProjectDir: DirectoryProperty
+
+  @get:Internal abstract val sentryRootDir: DirectoryProperty
+
+  @get:Internal abstract val buildDirectory: DirectoryProperty
 
   override fun exec() {
     computeCommandLineArgs().let {
@@ -93,9 +94,14 @@ abstract class SentryCliExecTask : Exec() {
       args.add(1, "/c")
     }
 
+    val buildDir = buildDirectory.get().asFile
     val cliPath =
-      SentryCliProvider.getSentryCliPath(sentryProjectDir, buildDirectory.get(), sentryRootDir)
-    args.add(SentryCliProvider.maybeExtractFromResources(buildDirectory.get(), cliPath))
+      SentryCliProvider.getSentryCliPath(
+        sentryProjectDir.get().asFile,
+        buildDir,
+        sentryRootDir.get().asFile,
+      )
+    args.add(SentryCliProvider.maybeExtractFromResources(buildDir, cliPath))
     args.addAll(preArgs())
 
     getArguments(args)

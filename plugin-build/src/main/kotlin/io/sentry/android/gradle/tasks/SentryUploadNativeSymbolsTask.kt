@@ -31,8 +31,6 @@ abstract class SentryUploadNativeSymbolsTask : SentryCliExecTask() {
 
   @get:Internal abstract val variantName: Property<String>
 
-  private val buildDir: Provider<File> = project.layout.buildDirectory.asFile
-
   override fun getArguments(args: MutableList<String>) {
     args.add("debug-files")
     args.add("upload")
@@ -44,7 +42,8 @@ abstract class SentryUploadNativeSymbolsTask : SentryCliExecTask() {
     // eg absoluteProjectFolderPath/build/intermediates/merged_native_libs/{variantName}
     // where {variantName} could be debug/release...
     args.add(
-      File(buildDir.get(), "intermediates/merged_native_libs/${variantName.get()}").absolutePath
+      File(buildDirectory.get().asFile, "intermediates/merged_native_libs/${variantName.get()}")
+        .absolutePath
     )
 
     // Only include sources if includeNativeSources is enabled, as this is opt-in feature
