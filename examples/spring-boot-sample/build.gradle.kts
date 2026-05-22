@@ -2,9 +2,7 @@ import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-buildscript {
-  dependencies { classpath("org.apache.commons:commons-compress:1.28.0") }
-}
+buildscript { dependencies { classpath("org.apache.commons:commons-compress:1.28.0") } }
 
 plugins {
   alias(libs.plugins.springBoot)
