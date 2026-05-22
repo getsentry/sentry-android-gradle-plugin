@@ -13,8 +13,10 @@ import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SpanStatus
 import io.sentry.TransactionOptions
+import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.SentryPlugin.Companion.logger
+import io.sentry.android.gradle.SentryPropertiesFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SentryCliException
@@ -25,6 +27,8 @@ import io.sentry.exception.ExceptionMechanismException
 import io.sentry.gradle.common.SentryVariant
 import io.sentry.protocol.Mechanism
 import io.sentry.protocol.User
+import java.io.File
+import java.util.concurrent.TimeUnit
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.internal.tasks.execution.ExecuteTaskBuildOperationDetails
@@ -94,15 +98,10 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
 
         hub.configureScope { scope ->
           scope.user =
-            User().also { user ->
-              startParameters.defaultSentryOrganization?.let { org ->
-                if (org != "-") {
-                  user.id = org
-                }
-              }
-              startParameters.sentryOrganization?.let { user.id = it }
-            }
+            User().also { user -> startParameters.sentryOrganization?.let { user.id = it } }
         }
+
+        fetchDefaultOrgInBackground(startParameters)
 
         started = true
       }
@@ -213,6 +212,61 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
     }
   }
 
+  private fun fetchDefaultOrgInBackground(params: SentryTelemetryServiceParams) {
+    val buildDir = params.cliBuildDir ?: return
+    val projectDir = params.cliProjectDir ?: return
+    val rootDir = params.cliRootDir ?: return
+
+    Thread {
+        try {
+          val cliPath = SentryCliProvider.getSentryCliPath(projectDir, buildDir, rootDir)
+          val resolvedCli = SentryCliProvider.maybeExtractFromResources(buildDir, cliPath)
+
+          val args = mutableListOf(resolvedCli)
+          params.cliUrl?.let { url ->
+            args.add("--url")
+            args.add(url)
+          }
+          args.add("--log-level=error")
+          args.add("info")
+
+          val processBuilder = ProcessBuilder(args).redirectErrorStream(true)
+          params.cliPropertiesFilePath?.let {
+            processBuilder.environment()["SENTRY_PROPERTIES"] = it
+          }
+          params.cliAuthToken?.let { processBuilder.environment()["SENTRY_AUTH_TOKEN"] = it }
+          processBuilder.environment()["SENTRY_PIPELINE"] =
+            "sentry-gradle-plugin/${BuildConfig.Version}"
+
+          val process = processBuilder.start()
+          val output = process.inputStream.bufferedReader().readText()
+          if (!process.waitFor(CLI_INFO_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+            process.destroyForcibly()
+            return@Thread
+          }
+
+          if (process.exitValue() == 0) {
+            ORG_REGEX.find(output)?.groupValues?.getOrNull(1)?.let { org ->
+              if (org != "-") {
+                hub.configureScope { scope ->
+                  if (scope.user?.id == null) {
+                    scope.user = User().also { it.id = org }
+                  }
+                }
+              }
+            }
+          }
+        } catch (t: Throwable) {
+          SentryPlugin.logger.info { "Failed to fetch default org from sentry-cli: ${t.message}" }
+        }
+      }
+      .apply {
+        isDaemon = true
+        name = "sentry-cli-info"
+        start()
+      }
+  }
+
   override fun close() {
     if (transaction?.isFinished == false) {
       endRun()
@@ -224,6 +278,8 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
     val SENTRY_SAAS_DSN: String =
       "https://000e5dea9770b4537055f8a6d28c021e@o1.ingest.sentry.io/4506241308295168"
     val MECHANISM_TYPE: String = "GradleTelemetry"
+    private val ORG_REGEX = Regex("""(?m)Default Organization: (.*)$""")
+    private const val CLI_INFO_TIMEOUT_SECONDS = 5L
 
     fun createParameters(
       project: Project,
@@ -244,6 +300,13 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
         extension.debug.get(),
         saas = extension.url.orNull == null,
         cliVersion = BuildConfig.CliVersion,
+        cliProjectDir = project.projectDir,
+        cliBuildDir = project.buildDir,
+        cliRootDir = project.rootDir,
+        cliAuthToken = extension.authToken.orNull,
+        cliUrl = extension.url.orNull,
+        cliPropertiesFilePath =
+          variant?.let { SentryPropertiesFileProvider.getPropertiesFilePath(project, it) },
       )
     }
 
@@ -332,7 +395,12 @@ data class SentryTelemetryServiceParams(
   val buildType: String,
   val extraTags: Map<String, String>,
   val isDebug: Boolean,
-  val defaultSentryOrganization: String? = null,
   val saas: Boolean? = null,
   val cliVersion: String? = null,
+  val cliProjectDir: File? = null,
+  val cliBuildDir: File? = null,
+  val cliRootDir: File? = null,
+  val cliAuthToken: String? = null,
+  val cliUrl: String? = null,
+  val cliPropertiesFilePath: String? = null,
 )
