@@ -1,6 +1,4 @@
-buildscript {
-  dependencies { classpath("org.apache.commons:commons-compress:1.28.0") }
-}
+buildscript { dependencies { classpath("org.apache.commons:commons-compress:1.28.0") } }
 
 plugins {
   alias(libs.plugins.kotlin) version BuildPluginsVersion.KOTLIN apply false
