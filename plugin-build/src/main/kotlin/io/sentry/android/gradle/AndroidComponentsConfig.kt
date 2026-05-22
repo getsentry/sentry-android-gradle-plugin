@@ -271,13 +271,7 @@ private fun Variant.configureTelemetry(
   val sentryTelemetryProvider = SentryTelemetryService.register(project)
   project.gradle.taskGraph.whenReady {
     sentryTelemetryProvider.get().start {
-      SentryTelemetryService.createParameters(
-        project,
-        variant,
-        extension,
-        sentryOrg,
-        "Android",
-      )
+      SentryTelemetryService.createParameters(project, variant, extension, sentryOrg, "Android")
     }
     buildEvents.onOperationCompletion(sentryTelemetryProvider)
   }

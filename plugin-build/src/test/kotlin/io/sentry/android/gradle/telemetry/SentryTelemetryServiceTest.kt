@@ -18,14 +18,7 @@ class SentryTelemetryServiceTest {
     val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
     val extension = project.extensions.create("sentry", SentryPluginExtension::class.java)
 
-    val params =
-      SentryTelemetryService.createParameters(
-        project,
-        null,
-        extension,
-        null,
-        "test",
-      )
+    val params = SentryTelemetryService.createParameters(project, null, extension, null, "test")
 
     assertEquals(BuildConfig.CliVersion, params.cliVersion)
   }
@@ -35,14 +28,7 @@ class SentryTelemetryServiceTest {
     val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
     val extension = project.extensions.create("sentry", SentryPluginExtension::class.java)
 
-    val params =
-      SentryTelemetryService.createParameters(
-        project,
-        null,
-        extension,
-        null,
-        "test",
-      )
+    val params = SentryTelemetryService.createParameters(project, null, extension, null, "test")
 
     assertTrue(params.saas == true)
   }
@@ -53,14 +39,7 @@ class SentryTelemetryServiceTest {
     val extension = project.extensions.create("sentry", SentryPluginExtension::class.java)
     extension.url.set("https://sentry.example.com")
 
-    val params =
-      SentryTelemetryService.createParameters(
-        project,
-        null,
-        extension,
-        null,
-        "test",
-      )
+    val params = SentryTelemetryService.createParameters(project, null, extension, null, "test")
 
     assertTrue(params.saas == false)
   }

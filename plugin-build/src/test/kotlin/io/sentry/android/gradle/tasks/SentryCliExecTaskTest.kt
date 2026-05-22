@@ -3,7 +3,6 @@ package io.sentry.android.gradle.tasks
 import io.sentry.android.gradle.SentryCliProvider
 import java.io.File
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.gradle.api.Project
@@ -25,9 +24,7 @@ class SentryCliExecTaskTest {
     assertTrue(!cliPath.exists())
 
     val task: TaskProvider<TestTask> =
-      project.tasks.register("testTask", TestTask::class.java) {
-        it.configureCliPaths(project)
-      }
+      project.tasks.register("testTask", TestTask::class.java) { it.configureCliPaths(project) }
 
     val args = task.get().computeCommandLineArgs()
 
@@ -71,9 +68,7 @@ class SentryCliExecTaskTest {
   fun `with sentryAuthToken env variable is set correctly`() {
     val project = createProject()
     val task: TaskProvider<TestTask> =
-      project.tasks.register("testTask", TestTask::class.java) {
-        it.sentryAuthToken.set("<token>")
-      }
+      project.tasks.register("testTask", TestTask::class.java) { it.sentryAuthToken.set("<token>") }
 
     task.get().setSentryAuthTokenEnv()
 
@@ -83,8 +78,7 @@ class SentryCliExecTaskTest {
   @Test
   fun `without sentryProperties file SENTRY_PROPERTIES is not set`() {
     val project = createProject()
-    val task: TaskProvider<TestTask> =
-      project.tasks.register("testTask", TestTask::class.java)
+    val task: TaskProvider<TestTask> = project.tasks.register("testTask", TestTask::class.java)
 
     task.get().setSentryPropertiesEnv()
 
