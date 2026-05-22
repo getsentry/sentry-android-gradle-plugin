@@ -325,7 +325,7 @@ class SentryUploadProguardMappingTaskTest {
 
   private fun SentryCliExecTask.configureCliPaths(project: Project) {
     sentryProjectDir.set(project.layout.projectDirectory)
-    sentryRootDir.fileValue(project.rootDir)
+    sentryRootDir.set(project.rootProject.layout.projectDirectory)
     buildDirectory.set(project.layout.buildDirectory)
   }
 

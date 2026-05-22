@@ -17,7 +17,7 @@ fun ExecSpec.setSentryPipelineEnv() {
  */
 fun SentryCliExecTask.asSentryCliExec() {
   sentryProjectDir.set(project.layout.projectDirectory)
-  sentryRootDir.fileValue(project.rootDir)
+  sentryRootDir.set(project.rootProject.layout.projectDirectory)
   buildDirectory.set(project.layout.buildDirectory)
 
   isIgnoreExitValue = true

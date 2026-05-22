@@ -180,7 +180,7 @@ class SentryUploadNativeSymbolsTaskTest {
     project.tasks
       .register("testUploadNativeSymbols", SentryUploadNativeSymbolsTask::class.java) {
         it.sentryProjectDir.set(project.layout.projectDirectory)
-        it.sentryRootDir.fileValue(project.rootDir)
+        it.sentryRootDir.set(project.rootProject.layout.projectDirectory)
         it.buildDirectory.set(project.layout.buildDirectory)
         block(it)
       }
