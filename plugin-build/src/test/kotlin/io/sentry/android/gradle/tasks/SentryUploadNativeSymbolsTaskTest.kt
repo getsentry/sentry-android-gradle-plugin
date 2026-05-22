@@ -16,7 +16,6 @@ class SentryUploadNativeSymbolsTaskTest {
     val project = createProject()
     val task =
       createTestTask(project) {
-        it.cliExecutable.set("sentry-cli")
         it.includeNativeSources.set(false)
         it.variantName.set("debug")
         it.autoUploadNativeSymbol.set(true)
@@ -24,7 +23,7 @@ class SentryUploadNativeSymbolsTaskTest {
 
     val args = task.computeCommandLineArgs()
 
-    assertTrue("sentry-cli" in args)
+    assertTrue(args.any { it.contains("sentry-cli") })
     assertTrue("debug-files" in args)
     assertTrue("upload" in args)
     val path = File(project.buildDir, "intermediates/merged_native_libs/debug").absolutePath
@@ -38,7 +37,6 @@ class SentryUploadNativeSymbolsTaskTest {
     val project = createProject()
     val task =
       createTestTask(project) {
-        it.cliExecutable.set("sentry-cli")
         it.includeNativeSources.set(false)
         it.variantName.set("debug")
         it.autoUploadNativeSymbol.set(false)
@@ -54,7 +52,6 @@ class SentryUploadNativeSymbolsTaskTest {
     val project = createProject()
     val task =
       createTestTask(project) {
-        it.cliExecutable.set("sentry-cli")
         it.includeNativeSources.set(false)
         it.variantName.set("debug")
         it.autoUploadNativeSymbol.set(false)
@@ -71,7 +68,6 @@ class SentryUploadNativeSymbolsTaskTest {
     val project = createProject()
     val task =
       createTestTask(project) {
-        it.cliExecutable.set("sentry-cli")
         it.includeNativeSources.set(true)
         it.variantName.set("debug")
         it.autoUploadNativeSymbol.set(true)
@@ -108,7 +104,6 @@ class SentryUploadNativeSymbolsTaskTest {
     val project = createProject()
     val task =
       createTestTask(project) {
-        it.cliExecutable.set("sentry-cli")
         it.sentryOrganization.set("dummy-org")
         it.includeNativeSources.set(true)
         it.variantName.set("debug")
@@ -126,7 +121,6 @@ class SentryUploadNativeSymbolsTaskTest {
     val project = createProject()
     val task =
       createTestTask(project) {
-        it.cliExecutable.set("sentry-cli")
         it.sentryProject.set("dummy-proj")
         it.includeNativeSources.set(true)
         it.variantName.set("debug")
@@ -144,7 +138,6 @@ class SentryUploadNativeSymbolsTaskTest {
     val project = createProject()
     val task =
       createTestTask(project) {
-        it.cliExecutable.set("sentry-cli")
         it.sentryUrl.set("https://some-host.sentry.io")
         it.includeNativeSources.set(true)
         it.variantName.set("debug")
@@ -162,7 +155,6 @@ class SentryUploadNativeSymbolsTaskTest {
     val project = createProject()
     val task =
       createTestTask(project) {
-        it.cliExecutable.set("sentry-cli")
         it.sentryUrl.set("https://some-host.sentry.io")
         it.includeNativeSources.set(true)
         it.variantName.set("debug")

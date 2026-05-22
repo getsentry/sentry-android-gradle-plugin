@@ -60,7 +60,6 @@ abstract class SentryUploadNativeSymbolsTask : SentryCliExecTask() {
       sentryTelemetryProvider: Provider<SentryTelemetryService>,
       variantName: String,
       debug: Property<Boolean>,
-      cliExecutable: Provider<String>,
       sentryProperties: String?,
       sentryOrg: Provider<String>,
       sentryProject: Provider<String>,
@@ -78,7 +77,6 @@ abstract class SentryUploadNativeSymbolsTask : SentryCliExecTask() {
           task.workingDir(project.rootDir)
           task.debug.set(debug)
           task.autoUploadNativeSymbol.set(autoUploadNativeSymbols)
-          task.cliExecutable.set(cliExecutable)
           task.sentryProperties.set(sentryProperties?.let { file -> project.file(file) })
           task.includeNativeSources.set(includeNativeSources)
           task.variantName.set(variantName)
@@ -99,7 +97,6 @@ fun SentryVariant.configureNativeSymbolsTask(
   project: Project,
   extension: SentryPluginExtension,
   sentryTelemetryProvider: Provider<SentryTelemetryService>,
-  cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
 ) {
@@ -113,7 +110,6 @@ fun SentryVariant.configureNativeSymbolsTask(
         sentryTelemetryProvider = sentryTelemetryProvider,
         variantName = name,
         debug = extension.debug,
-        cliExecutable = cliExecutable,
         sentryProperties = sentryProps,
         autoUploadNativeSymbols = extension.autoUploadNativeSymbols,
         includeNativeSources = extension.includeNativeSources,

@@ -29,7 +29,6 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -37,7 +36,7 @@ class BundleSourcesTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertThat(args).contains("sentry-cli")
+    assertThat(args.first()).contains("sentry-cli")
     assertThat(args).contains("debug-files")
     assertThat(args).contains("bundle-jvm")
     assertThat(args).contains(sourceDir.absolutePath)
@@ -57,7 +56,6 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -79,7 +77,6 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -101,7 +98,6 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -122,7 +118,6 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -142,7 +137,6 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -164,7 +158,6 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -224,7 +217,6 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)

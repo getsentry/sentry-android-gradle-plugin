@@ -1,11 +1,7 @@
-@file:Suppress("UnstableApiUsage")
-
 package io.sentry.android.gradle
 
 import io.sentry.BuildConfig
-import io.sentry.android.gradle.SentryCliValueSource.Params
 import io.sentry.android.gradle.SentryPlugin.Companion.logger
-import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.error
 import io.sentry.android.gradle.util.info
 import java.io.File
@@ -13,18 +9,8 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.Locale
 import java.util.Properties
-import org.gradle.api.Project
-import org.gradle.api.file.Directory
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFile
-import org.gradle.api.provider.Provider
-import org.gradle.api.provider.ValueSource
-import org.gradle.api.provider.ValueSourceParameters
-import org.gradle.api.tasks.Input
 
 internal object SentryCliProvider {
-
-  @field:Volatile private var memoizedCliPath: String? = null
 
   /**
    * Return the correct sentry-cli executable path to use for the given project. This will look for
@@ -34,23 +20,12 @@ internal object SentryCliProvider {
    * without actually extracting it.
    */
   @JvmStatic
-  @Synchronized
-  fun getSentryCliPath(
-    projectDir: DirectoryProperty,
-    projectBuildDir: DirectoryProperty,
-    rootDir: DirectoryProperty,
-  ): String {
-    val cliPath = memoizedCliPath
-    if (!cliPath.isNullOrEmpty() && File(cliPath).exists()) {
-      logger.info { "Using memoized cli path: $cliPath" }
-      return cliPath
-    }
+  fun getSentryCliPath(projectDir: File, projectBuildDir: File, rootDir: File): String {
     // If a path is provided explicitly use that first.
     logger.info { "Searching cli from sentry.properties file..." }
 
     searchCliInPropertiesFile(projectDir, rootDir)?.let {
       logger.info { "cli Found: $it" }
-      memoizedCliPath = it
       return@getSentryCliPath it
     } ?: logger.info { "sentry-cli not found in sentry.properties file" }
 
@@ -58,16 +33,11 @@ internal object SentryCliProvider {
     val cliResLocation = getCliLocationInResources()
     if (!cliResLocation.isNullOrBlank()) {
       logger.info { "cli present in resources: $cliResLocation" }
-      // just provide the target extraction path
-      // actual extraction will be done prior to task execution
-      val extractedResourcePath =
-        getCliResourcesExtractionPath(projectBuildDir).get().asFile.absolutePath
-      memoizedCliPath = extractedResourcePath
-      return extractedResourcePath
+      return getCliResourcesExtractionPath(projectBuildDir).absolutePath
     }
 
     logger.error { "Falling back to invoking `sentry-cli` from shell" }
-    return "sentry-cli".also { memoizedCliPath = it }
+    return "sentry-cli"
   }
 
   private fun getCliLocationInResources(): String? {
@@ -91,19 +61,12 @@ internal object SentryCliProvider {
     return null
   }
 
-  internal fun getSentryPropertiesPath(
-    projectDir: DirectoryProperty,
-    rootDir: DirectoryProperty,
-  ): String? =
-    listOf(projectDir.file("sentry.properties"), rootDir.file("sentry.properties"))
-      .map { it.get().asFile }
+  internal fun getSentryPropertiesPath(projectDir: File, rootDir: File): String? =
+    listOf(File(projectDir, "sentry.properties"), File(rootDir, "sentry.properties"))
       .firstOrNull(File::exists)
       ?.path
 
-  internal fun searchCliInPropertiesFile(
-    projectDir: DirectoryProperty,
-    rootDir: DirectoryProperty,
-  ): String? {
+  internal fun searchCliInPropertiesFile(projectDir: File, rootDir: File): String? {
     return getSentryPropertiesPath(projectDir, rootDir)?.let { propertiesFile ->
       runCatching {
           Properties().apply { load(FileInputStream(propertiesFile)) }.getProperty("cli.executable")
@@ -115,11 +78,9 @@ internal object SentryCliProvider {
   internal fun getResourceUrl(resourcePath: String): String? =
     javaClass.getResource(resourcePath)?.toString()
 
-  internal fun getCliResourcesExtractionPath(
-    projectBuildDir: DirectoryProperty
-  ): Provider<RegularFile> {
+  internal fun getCliResourcesExtractionPath(projectBuildDir: File): File {
     // usually <project>/build/tmp/
-    return projectBuildDir.dir("tmp").map { it.file("sentry-cli-${BuildConfig.CliVersion}.exe") }
+    return File(projectBuildDir, "tmp/sentry-cli-${BuildConfig.CliVersion}.exe")
   }
 
   internal fun extractCliFromResources(resourcePath: String, outputPath: File): String? {
@@ -159,57 +120,27 @@ internal object SentryCliProvider {
 
   /** Tries to extract the sentry-cli from resources if the computedCliPath does not exist. */
   @Synchronized
-  internal fun maybeExtractFromResources(buildDir: DirectoryProperty, cliPath: String): String {
+  internal fun maybeExtractFromResources(buildDir: File, cliPath: String): String {
     val cli = File(cliPath)
-    if (!cli.exists()) {
-      // we only want to auto-extract if the path matches the pre-computed one
-      if (
-        File(cliPath)
-          .absolutePath
-          .equals(getCliResourcesExtractionPath(buildDir).get().asFile.absolutePath)
-      ) {
-        val cliResPath = getCliLocationInResources()
-        if (!cliResPath.isNullOrBlank()) {
-          return extractCliFromResources(cliResPath, cli) ?: cliPath
-        }
+    if (cli.exists()) {
+      return cliPath
+    }
+
+    val currentExtractionPath = getCliResourcesExtractionPath(buildDir)
+    if (currentExtractionPath.exists()) {
+      return currentExtractionPath.absolutePath
+    }
+
+    // Only auto-extract for paths that look like previous resource extractions
+    val buildTmpDir = File(buildDir, "tmp")
+    if (cli.absolutePath.startsWith(buildTmpDir.absolutePath)) {
+      val cliResPath = getCliLocationInResources()
+      if (!cliResPath.isNullOrBlank()) {
+        return extractCliFromResources(cliResPath, currentExtractionPath)
+          ?: currentExtractionPath.absolutePath
       }
     }
+
     return cliPath
-  }
-}
-
-abstract class SentryCliValueSource : ValueSource<String, Params> {
-  interface Params : ValueSourceParameters {
-    @get:Input val projectDir: DirectoryProperty
-
-    @get:Input val projectBuildDir: DirectoryProperty
-
-    @get:Input val rootProjDir: DirectoryProperty
-  }
-
-  override fun obtain(): String? {
-    return SentryCliProvider.getSentryCliPath(
-      parameters.projectDir,
-      parameters.projectBuildDir,
-      parameters.rootProjDir,
-    )
-  }
-}
-
-fun Project.cliExecutableProvider(): Provider<String> {
-  // config-cache compatible way to retrieve the cli path, it properly gets invalidated when
-  // e.g. switching branches
-  return providers.of(SentryCliValueSource::class.java) {
-    it.parameters.projectDir.set(layout.projectDirectory)
-    it.parameters.projectBuildDir.set(layout.buildDirectory)
-    it.parameters.rootProjDir.set(getIsolatedRootProjectDir())
-  }
-}
-
-private fun Project.getIsolatedRootProjectDir(): Directory {
-  return if (GradleVersions.CURRENT >= GradleVersions.VERSION_8_8) {
-    isolated.rootProject.projectDirectory
-  } else {
-    rootProject.layout.projectDirectory
   }
 }

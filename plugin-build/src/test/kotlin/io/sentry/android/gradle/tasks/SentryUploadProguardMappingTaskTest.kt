@@ -33,7 +33,6 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
-        it.cliExecutable.set("sentry-cli")
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(true)
@@ -41,7 +40,7 @@ class SentryUploadProguardMappingTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("sentry-cli" in args)
+    assertTrue(args.any { it.contains("sentry-cli") })
     assertTrue("upload-proguard" in args)
     assertTrue("--uuid" in args)
     assertTrue(randomUuid.toString() in args)
@@ -61,7 +60,6 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
-        it.cliExecutable.set("sentry-cli")
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(true)
@@ -69,7 +67,7 @@ class SentryUploadProguardMappingTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("sentry-cli" in args)
+    assertTrue(args.any { it.contains("sentry-cli") })
     assertTrue("upload-proguard" in args)
     assertTrue("--uuid" in args)
     assertTrue(randomUuid.toString() in args)
@@ -101,7 +99,6 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
-        it.cliExecutable.set("sentry-cli")
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFiles
         it.autoUploadProguardMapping.set(true)
@@ -123,7 +120,6 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
-        it.cliExecutable.set("sentry-cli")
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(false)
@@ -145,7 +141,6 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
-        it.cliExecutable.set("sentry-cli")
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(false)
@@ -218,7 +213,6 @@ class SentryUploadProguardMappingTaskTest {
         SentryUploadProguardMappingsTask::class.java,
       ) {
         it.sentryUrl.set("https://some-host.sentry.io")
-        it.cliExecutable.set("sentry-cli")
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(false)
@@ -241,7 +235,6 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
-        it.cliExecutable.set("sentry-cli")
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(false)
@@ -265,7 +258,6 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
-        it.cliExecutable.set("sentry-cli")
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(false)

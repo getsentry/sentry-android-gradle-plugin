@@ -54,7 +54,6 @@ fun ApplicationAndroidComponentsExtension.configure(
   project: Project,
   extension: SentryPluginExtension,
   buildEvents: BuildEventListenerRegistryInternal,
-  cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
 ) {
@@ -77,13 +76,13 @@ fun ApplicationAndroidComponentsExtension.configure(
     }
 
     if (extension.snapshots.enabled.get()) {
-      variant.configureSnapshotsTasks(project, extension, cliExecutable, sentryOrg, sentryProject)
+      variant.configureSnapshotsTasks(project, extension, sentryOrg, sentryProject)
     }
 
     if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
       val paths = OutputPaths(project, variant.name)
       val sentryTelemetryProvider =
-        variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
+        variant.configureTelemetry(project, extension, sentryOrg, buildEvents)
 
       variant.configureDependenciesTask(project, extension, sentryTelemetryProvider)
 
@@ -106,7 +105,6 @@ fun ApplicationAndroidComponentsExtension.configure(
           sentryTelemetryProvider,
           paths,
           sourceFiles,
-          cliExecutable,
           sentryOrg,
           sentryProject,
         )
@@ -118,7 +116,6 @@ fun ApplicationAndroidComponentsExtension.configure(
           extension,
           sentryTelemetryProvider,
           paths,
-          cliExecutable,
           sentryOrg,
           sentryProject,
         )
@@ -139,7 +136,6 @@ fun ApplicationAndroidComponentsExtension.configure(
         project,
         extension,
         sentryTelemetryProvider,
-        cliExecutable,
         sentryOrg,
         sentryProject,
       )
@@ -257,7 +253,6 @@ fun ApplicationAndroidComponentsExtension.configure(
           project,
           extension,
           sentryTelemetryProvider,
-          cliExecutable,
           sentryOrg,
           sentryProject,
         )
@@ -269,7 +264,6 @@ fun ApplicationAndroidComponentsExtension.configure(
 private fun Variant.configureTelemetry(
   project: Project,
   extension: SentryPluginExtension,
-  cliExecutable: Provider<String>,
   sentryOrg: String?,
   buildEvents: BuildEventListenerRegistryInternal,
 ): Provider<SentryTelemetryService> {
@@ -281,7 +275,6 @@ private fun Variant.configureTelemetry(
         project,
         variant,
         extension,
-        cliExecutable,
         sentryOrg,
         "Android",
       )
@@ -297,7 +290,6 @@ private fun Variant.configureSourceBundleTasks(
   sentryTelemetryProvider: Provider<SentryTelemetryService>,
   paths: OutputPaths,
   sourceFiles: Provider<out Collection<Directory>>?,
-  cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
 ): SourceContext.SourceContextTasks? {
@@ -313,7 +305,6 @@ private fun Variant.configureSourceBundleTasks(
         variant,
         paths,
         sourceFiles,
-        cliExecutable,
         sentryOrg,
         sentryProject,
         taskSuffix,
@@ -354,7 +345,6 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
   extension: SentryPluginExtension,
   sentryTelemetryProvider: Provider<SentryTelemetryService>,
   paths: OutputPaths,
-  cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
 ): TaskProvider<SentryGenerateProguardUuidTask>? {
@@ -386,7 +376,6 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
         extension,
         sentryTelemetryProvider,
         debug = extension.debug,
-        cliExecutable = cliExecutable,
         generateUuidTask = generateUuidTask,
         sentryProperties = sentryProps,
         mappingFiles = mappings,
@@ -460,7 +449,6 @@ private fun ApplicationVariant.configureDistributionPropertiesTask(
 private fun ApplicationVariant.configureSnapshotsTasks(
   project: Project,
   extension: SentryPluginExtension,
-  cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
 ) {
@@ -478,7 +466,6 @@ private fun ApplicationVariant.configureSnapshotsTasks(
       project = project,
       extension = extension,
       sentryTelemetryProvider = null,
-      cliExecutable = cliExecutable,
       sentryOrgOverride = sentryOrg,
       sentryProjectOverride = sentryProject,
       applicationId = applicationId,
@@ -557,7 +544,6 @@ fun Variant.configureUploadAppTasks(
   project: Project,
   extension: SentryPluginExtension,
   sentryTelemetryProvider: Provider<SentryTelemetryService>,
-  cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
 ): Pair<TaskProvider<SentryUploadAppArtifactTask>, TaskProvider<SentryUploadAppArtifactTask>> {
@@ -570,7 +556,6 @@ fun Variant.configureUploadAppTasks(
       extension,
       sentryTelemetryProvider,
       debug = extension.debug,
-      cliExecutable = cliExecutable,
       appBundle = variant.bundle,
       apk = variant.apk,
       sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,

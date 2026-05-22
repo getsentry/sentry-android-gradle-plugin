@@ -45,8 +45,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
     project.pluginManager.withPlugin("com.android.application") {
       val androidComponentsExt =
         project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
-      val cliExecutable = project.cliExecutableProvider()
-
       val extraProperties = project.extensions.getByName("ext") as ExtraPropertiesExtension
 
       val sentryOrgParameter =
@@ -59,7 +57,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
         project,
         extension,
         buildEvents,
-        cliExecutable,
         sentryOrgParameter,
         sentryProjectParameter,
       )
