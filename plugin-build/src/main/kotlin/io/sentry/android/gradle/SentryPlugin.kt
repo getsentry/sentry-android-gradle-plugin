@@ -4,6 +4,7 @@ import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.sourcecontext.registerSentrySourceElements
 import io.sentry.android.gradle.util.AgpVersions
 import java.io.File
 import javax.inject.Inject
@@ -30,11 +31,14 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
           .trimIndent()
       )
     }
-    if (!project.plugins.hasPlugin("com.android.application")) {
+    if (
+      !project.plugins.hasPlugin("com.android.application") &&
+        !project.plugins.hasPlugin("com.android.library")
+    ) {
       project.logger.warn(
         """
-                WARNING: Using 'io.sentry.android.gradle' is only supported for the app module.
-                Please make sure that you apply the Sentry gradle plugin alongside 'com.android.application' on the _module_ level, and not on the root project level.
+                WARNING: Using 'io.sentry.android.gradle' is only supported for app and library modules.
+                Please make sure that you apply the Sentry gradle plugin alongside 'com.android.application' or 'com.android.library' on the _module_ level, and not on the root project level.
                 https://docs.sentry.io/platforms/android/configuration/gradle/
                 """
           .trimIndent()
@@ -66,6 +70,10 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
       )
 
       project.installDependencies(extension, true)
+    }
+
+    project.pluginManager.withPlugin("com.android.library") {
+      registerSentrySourceElements(project)
     }
   }
 

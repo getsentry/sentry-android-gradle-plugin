@@ -25,6 +25,7 @@ import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
+import io.sentry.android.gradle.sourcecontext.resolveDependencySources
 import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask
 import io.sentry.android.gradle.tasks.InjectSentryMetaPropertiesIntoAssetsTask
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
@@ -43,6 +44,7 @@ import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.collectModules
 import io.sentry.android.gradle.util.hookWithAssembleTasks
+import io.sentry.gradle.common.filterBuildConfig
 import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
@@ -102,7 +104,19 @@ fun ApplicationAndroidComponentsExtension.configure(
             project.layout.projectDirectory.dir(it)
           }
         }
-      val sourceFiles = sentryVariant.sources(project, additionalSourcesProvider)
+      val moduleSourceFiles = sentryVariant.sources(project, additionalSourcesProvider)
+
+      val sourceFiles =
+        if (extension.includeSourceContext.get()) {
+          val dependencySources = resolveDependencySources(project, variant.name)
+          moduleSourceFiles?.map { currentSources ->
+            val depDirs =
+              dependencySources.files.map { project.layout.projectDirectory.dir(it.absolutePath) }
+            (currentSources + depDirs).filterBuildConfig().toSet()
+          }
+        } else {
+          moduleSourceFiles
+        }
 
       val tasksGeneratingProperties = mutableListOf<TaskProvider<out PropertiesFileOutputTask>>()
       val sourceContextTasks =

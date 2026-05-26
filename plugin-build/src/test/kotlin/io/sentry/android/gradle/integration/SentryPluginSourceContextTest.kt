@@ -349,6 +349,116 @@ class SentryPluginSourceContextTest :
   }
 
   @Test
+  fun `bundles source context from library module dependencies`() {
+    // Set up settings.gradle to include the :library module
+    File(testProjectDir.root, "settings.gradle")
+      .writeText(
+        // language=Groovy
+        """
+            include ':app', ':module', ':library'
+            """
+          .trimIndent()
+      )
+
+    // Create the library module with the sentry plugin to publish source elements
+    val libraryDir = File(testProjectDir.root, "library").apply { mkdirs() }
+    File(libraryDir, "build.gradle")
+      .writeText(
+        // language=Groovy
+        """
+            plugins {
+              id 'com.android.library'
+              id 'io.sentry.android.gradle'
+            }
+
+            android {
+              namespace 'com.example.library'
+              compileSdkVersion 35
+              defaultConfig {
+                minSdkVersion 21
+              }
+            }
+
+            sentry {
+              autoInstallation.enabled = false
+              telemetry = false
+            }
+            """
+          .trimIndent()
+      )
+
+    val libSrcDir = File(libraryDir, "src/main/java/com/example/library")
+    libSrcDir.mkdirs()
+    val libContents =
+      // language=java
+      """
+            package com.example.library;
+
+            public class LibHelper {
+              public static int add(int a, int b) { return a + b; }
+            }
+          """
+        .trimIndent()
+    File(libSrcDir, "LibHelper.java").writeText(libContents)
+
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+
+              buildFeatures {
+                buildConfig false
+              }
+
+              buildTypes {
+                release {
+                  minifyEnabled true
+                  proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
+              }
+            }
+
+            dependencies {
+              implementation project(':library')
+            }
+
+            sentry {
+              debug = true
+              includeSourceContext = true
+              autoUploadSourceContext = false
+              autoUploadProguardMapping = false
+              org = "sentry-sdks"
+              projectName = "sentry-android"
+            }
+            """
+        .trimIndent()
+    )
+
+    sentryPropertiesFile.writeText("")
+    val ktContents = testProjectDir.withDummyKtFile()
+
+    val result = runner.appendArguments("app:assembleRelease").build()
+
+    assertTrue(result.output) { "BUILD SUCCESSFUL" in result.output }
+
+    // App module sources should be bundled
+    verifySourceBundleContents(testProjectDir.root, "files/_/_/com/example/Example.jvm", ktContents)
+
+    // Library module sources should also be bundled
+    verifySourceBundleContents(
+      testProjectDir.root,
+      "files/_/_/com/example/library/LibHelper.jvm",
+      libContents,
+    )
+  }
+
+  @Test
   fun `uploadSourceBundle task is not up-to-date on subsequent builds if cli path changes`() {
     val sentryCli = SentryCliProvider.getSentryCliPath(File(""), File("build"), File(""))
     SentryCliProvider.maybeExtractFromResources(File("build"), sentryCli)
