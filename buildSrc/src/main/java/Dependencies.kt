@@ -1,6 +1,6 @@
 object BuildPluginsVersion {
-    val AGP = System.getenv("VERSION_AGP") ?: "8.10.1"
-    val KOTLIN = System.getenv("VERSION_KOTLIN") ?: "1.8.20"
+    val AGP = System.getenv("VERSION_AGP") ?: "9.3.0-alpha07"
+    val KOTLIN = System.getenv("VERSION_KOTLIN") ?: "2.3.21"
     // KSP1 (X.Y.Z-A.B.C) is bound to a specific Kotlin compiler version; KSP2 (e.g. 2.3.7) is
     // decoupled and supports Kotlin language version 2.0+. Default to KSP1 for the default
     // Kotlin 1.8.20, and switch to KSP2 when the matrix sets a Kotlin 2.x version.
