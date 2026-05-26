@@ -1,5 +1,5 @@
 [versions]
-kotlin = "1.8.20"
+kotlin = "2.3.21"
 agp = "8.10.1"
 
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
