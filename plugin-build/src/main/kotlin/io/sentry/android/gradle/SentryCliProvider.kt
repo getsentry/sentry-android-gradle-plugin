@@ -87,7 +87,7 @@ internal object SentryCliProvider {
 
   internal fun getSentryPropertiesPath(projectDir: DirectoryProperty, rootDir: DirectoryProperty): String? =
     listOf(projectDir.file("sentry.properties"), rootDir.file("sentry.properties"))
-      .map({directory -> directory.get().asFile})
+      .map { it.get().asFile }
       .firstOrNull(File::exists)
       ?.path
 
