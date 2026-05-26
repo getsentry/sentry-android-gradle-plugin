@@ -50,6 +50,7 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
   private var transaction: ITransaction? = null
   private var didAddChildSpans: Boolean = false
   private var started: Boolean = false
+  private var pendingOrgLookupParams: SentryTelemetryServiceParams? = null
 
   @Synchronized
   fun start(paramsCallback: () -> SentryTelemetryServiceParams) {
@@ -101,7 +102,7 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
             User().also { user -> startParameters.sentryOrganization?.let { user.id = it } }
         }
 
-        fetchDefaultOrgInBackground(startParameters)
+        pendingOrgLookupParams = startParameters
 
         started = true
       }
@@ -110,7 +111,12 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
     }
   }
 
-  override fun started(descriptor: BuildOperationDescriptor, event: OperationStartEvent) {}
+  override fun started(descriptor: BuildOperationDescriptor, event: OperationStartEvent) {
+    pendingOrgLookupParams?.let { params ->
+      pendingOrgLookupParams = null
+      fetchDefaultOrgInBackground(params)
+    }
+  }
 
   override fun progress(identifier: OperationIdentifier, event: OperationProgressEvent) {}
 
