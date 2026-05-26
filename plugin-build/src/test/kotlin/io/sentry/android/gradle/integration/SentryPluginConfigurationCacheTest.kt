@@ -11,6 +11,8 @@ import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.TaskOutcome
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
@@ -185,7 +187,10 @@ class SentryPluginConfigurationCacheTest :
       run0.output,
     )
 
-    val cliPath = SentryCliProvider.getCliResourcesExtractionPath(File(runner.projectDir, "build"))
+    val buildDirProp = ProjectBuilder.builder().build().objects.directoryProperty().apply {
+      set(File(runner.projectDir, "build"))
+    }
+    val cliPath = SentryCliProvider.getCliResourcesExtractionPath(buildDirProp).get().asFile
 
     // On Gradle >= 8, the whole build folder is wiped anyway
     if (cliPath.exists()) {

@@ -17,7 +17,7 @@ class SentryTelemetryServiceTest {
     val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
 
     val cliPath =
-      SentryCliProvider.getCliResourcesExtractionPath(project.layout.buildDirectory.asFile.get())
+      SentryCliProvider.getCliResourcesExtractionPath(project.layout.buildDirectory).get().asFile
 
     val infoOutput =
       project.providers

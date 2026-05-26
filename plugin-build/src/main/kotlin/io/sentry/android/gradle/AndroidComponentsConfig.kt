@@ -61,7 +61,7 @@ fun ApplicationAndroidComponentsExtension.configure(
   sentryProject: String?,
 ) {
   // temp folder for sentry-related stuff
-  val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
+  val tmpDir = project.layout.buildDirectory.dir("sentry-tmp").map { it.file("sentry") }.get().asFile
   tmpDir.mkdirs()
 
   onVariants { variant ->

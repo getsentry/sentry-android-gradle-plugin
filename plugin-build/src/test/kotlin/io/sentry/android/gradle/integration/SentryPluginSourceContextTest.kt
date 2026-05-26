@@ -13,6 +13,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.TaskOutcome.SKIPPED
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
@@ -296,8 +298,10 @@ class SentryPluginSourceContextTest :
 
   @Test
   fun `uploadSourceBundle task is up-to-date on subsequent builds`() {
-    val sentryCli = SentryCliProvider.getSentryCliPath(File(""), File("build"), File(""))
-    SentryCliProvider.maybeExtractFromResources(File("build"), sentryCli)
+    val helperProject = ProjectBuilder.builder().build()
+    fun dirProp(f: File): DirectoryProperty = helperProject.objects.directoryProperty().apply { set(f) }
+    val sentryCli = SentryCliProvider.getSentryCliPath(dirProp(File("")), dirProp(File("build")), dirProp(File("")))
+    SentryCliProvider.maybeExtractFromResources(dirProp(File("build")), sentryCli)
 
     sentryPropertiesFile.writeText("cli.executable=$sentryCli")
 
@@ -350,8 +354,10 @@ class SentryPluginSourceContextTest :
 
   @Test
   fun `uploadSourceBundle task is not up-to-date on subsequent builds if cli path changes`() {
-    val sentryCli = SentryCliProvider.getSentryCliPath(File(""), File("build"), File(""))
-    SentryCliProvider.maybeExtractFromResources(File("build"), sentryCli)
+    val helperProject = ProjectBuilder.builder().build()
+    fun dirProp(f: File): DirectoryProperty = helperProject.objects.directoryProperty().apply { set(f) }
+    val sentryCli = SentryCliProvider.getSentryCliPath(dirProp(File("")), dirProp(File("build")), dirProp(File("")))
+    SentryCliProvider.maybeExtractFromResources(dirProp(File("build")), sentryCli)
 
     sentryPropertiesFile.writeText("cli.executable=$sentryCli")
 
