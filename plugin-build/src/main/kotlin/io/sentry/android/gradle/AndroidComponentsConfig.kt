@@ -229,9 +229,7 @@ fun ApplicationAndroidComponentsExtension.configure(
             extension.tracingInstrumentation.appStart.enabled
           )
           params.tmpDir.set(
-            project.layout.buildDirectory.dir(
-              "sentry-logs/instrumentation/${variant.name}"
-            )
+            project.layout.buildDirectory.dir("sentry-logs/instrumentation/${variant.name}")
           )
         }
 
