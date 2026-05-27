@@ -27,7 +27,7 @@ import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.util.info
-import java.io.File
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
@@ -54,7 +54,7 @@ abstract class SpanAddingClassVisitorFactory :
 
     @get:Internal val sentryModulesService: Property<SentryModulesService>
 
-    @get:Internal val tmpDir: Property<File>
+    @get:Internal val tmpDir: DirectoryProperty
 
     @get:Internal var _instrumentable: ClassInstrumentable?
 

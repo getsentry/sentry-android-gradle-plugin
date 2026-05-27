@@ -58,10 +58,6 @@ fun ApplicationAndroidComponentsExtension.configure(
   sentryOrg: String?,
   sentryProject: String?,
 ) {
-  // temp folder for sentry-related stuff
-  val tmpDir = project.layout.buildDirectory.dir("tmp").map { it.file("sentry") }.get().asFile
-  tmpDir.mkdirs()
-
   onVariants { variant ->
     // Validate distribution configuration for this variant
     val updateSdkVariants = extension.distribution.updateSdkVariants.get()
@@ -232,7 +228,11 @@ fun ApplicationAndroidComponentsExtension.configure(
           params.appStartEnabled.setDisallowChanges(
             extension.tracingInstrumentation.appStart.enabled
           )
-          params.tmpDir.set(tmpDir)
+          params.tmpDir.set(
+            project.layout.buildDirectory.dir(
+              "sentry-logs/instrumentation/${variant.name}"
+            )
+          )
         }
 
         val manifestUpdater =
