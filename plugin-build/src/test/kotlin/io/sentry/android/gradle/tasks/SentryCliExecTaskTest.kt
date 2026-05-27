@@ -38,7 +38,8 @@ class SentryCliExecTaskTest {
   fun `cli-executable is extracted from resources if required`() {
     val project = createProject()
 
-    val cliPath = SentryCliProvider.getCliResourcesExtractionPath(project.layout.buildDirectory).get().asFile
+    val cliPath =
+      SentryCliProvider.getCliResourcesExtractionPath(project.layout.buildDirectory).get().asFile
 
     assertTrue(!cliPath.exists())
 

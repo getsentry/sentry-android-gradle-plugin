@@ -13,7 +13,6 @@ import com.android.build.api.variant.HostTestBuilder.Companion.UNIT_TEST_TYPE
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.BuildConfig
-import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
@@ -43,7 +42,6 @@ import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.collectModules
 import io.sentry.android.gradle.util.hookWithAssembleTasks
-import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
@@ -61,7 +59,8 @@ fun ApplicationAndroidComponentsExtension.configure(
   sentryProject: String?,
 ) {
   // temp folder for sentry-related stuff
-  val tmpDir = project.layout.buildDirectory.dir("sentry-tmp").map { it.file("sentry") }.get().asFile
+  val tmpDir =
+    project.layout.buildDirectory.dir("sentry-tmp").map { it.file("sentry") }.get().asFile
   tmpDir.mkdirs()
 
   onVariants { variant ->

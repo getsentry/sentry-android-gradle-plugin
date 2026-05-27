@@ -68,7 +68,10 @@ class SentryCliProviderTest {
 
     testProjectDir.newFile("sentry.properties").apply { writeText("cli.executable=vim") }
 
-    assertEquals("vim", searchCliInPropertiesFile(dirProp(project.projectDir), dirProp(project.rootDir)))
+    assertEquals(
+      "vim",
+      searchCliInPropertiesFile(dirProp(project.projectDir), dirProp(project.rootDir)),
+    )
   }
 
   @Test

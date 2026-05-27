@@ -4,12 +4,10 @@ import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.info
 import io.sentry.android.gradle.util.setSentryPipelineEnv
-import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -94,8 +92,7 @@ abstract class SentryCliExecTask : Exec() {
       args.add(1, "/c")
     }
 
-    val cliPath =
-      SentryCliProvider.maybeExtractFromResources(buildDirectory, cliExecutable.get())
+    val cliPath = SentryCliProvider.maybeExtractFromResources(buildDirectory, cliExecutable.get())
     args.add(cliPath)
     args.addAll(preArgs())
 

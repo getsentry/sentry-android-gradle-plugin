@@ -299,8 +299,14 @@ class SentryPluginSourceContextTest :
   @Test
   fun `uploadSourceBundle task is up-to-date on subsequent builds`() {
     val helperProject = ProjectBuilder.builder().build()
-    fun dirProp(f: File): DirectoryProperty = helperProject.objects.directoryProperty().apply { set(f) }
-    val sentryCli = SentryCliProvider.getSentryCliPath(dirProp(File("")), dirProp(File("build")), dirProp(File("")))
+    fun dirProp(f: File): DirectoryProperty =
+      helperProject.objects.directoryProperty().apply { set(f) }
+    val sentryCli =
+      SentryCliProvider.getSentryCliPath(
+        dirProp(File("")),
+        dirProp(File("build")),
+        dirProp(File("")),
+      )
     SentryCliProvider.maybeExtractFromResources(dirProp(File("build")), sentryCli)
 
     sentryPropertiesFile.writeText("cli.executable=$sentryCli")
@@ -355,8 +361,14 @@ class SentryPluginSourceContextTest :
   @Test
   fun `uploadSourceBundle task is not up-to-date on subsequent builds if cli path changes`() {
     val helperProject = ProjectBuilder.builder().build()
-    fun dirProp(f: File): DirectoryProperty = helperProject.objects.directoryProperty().apply { set(f) }
-    val sentryCli = SentryCliProvider.getSentryCliPath(dirProp(File("")), dirProp(File("build")), dirProp(File("")))
+    fun dirProp(f: File): DirectoryProperty =
+      helperProject.objects.directoryProperty().apply { set(f) }
+    val sentryCli =
+      SentryCliProvider.getSentryCliPath(
+        dirProp(File("")),
+        dirProp(File("build")),
+        dirProp(File("")),
+      )
     SentryCliProvider.maybeExtractFromResources(dirProp(File("build")), sentryCli)
 
     sentryPropertiesFile.writeText("cli.executable=$sentryCli")
