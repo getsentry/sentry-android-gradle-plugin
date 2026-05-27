@@ -22,7 +22,7 @@ class SentryTelemetryServiceTest {
     val infoOutput =
       project.providers
         .of(SentryCliInfoValueSource::class.java) { cliVS ->
-          cliVS.parameters.buildDirectory.set(project.buildDir)
+          cliVS.parameters.buildDirectory.set(project.layout.buildDirectory)
           cliVS.parameters.cliExecutable.set(cliPath.absolutePath)
           // sets an empty/invalid auth token
           cliVS.parameters.authToken.set("")
