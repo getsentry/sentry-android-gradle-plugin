@@ -4,6 +4,7 @@ import java.util.Properties
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -69,6 +70,16 @@ java {
   targetCompatibility = JavaVersion.VERSION_11
 }
 
+// Tests need JVM 17 because the CI matrix tests against AGP 9.3+ (compiled with JVM 17 bytecode),
+// but production stays on JVM 11 to support hybrid/gaming SDKs that lag behind native tooling.
+val jvm17TestCompileTasks = setOf("compileTestJava", "compileTestKotlin")
+
+tasks.withType<JavaCompile>().configureEach {
+  if (name in jvm17TestCompileTasks) {
+    targetCompatibility = JavaVersion.VERSION_17.toString()
+  }
+}
+
 // We need to compile Groovy first and let Kotlin depend on it.
 // See https://docs.gradle.org/6.1-rc-1/release-notes.html#compilation-order
 tasks.withType<GroovyCompile>().configureEach {
@@ -89,7 +100,7 @@ tasks.withType<KotlinCompile>().configureEach {
   }
 
   compilerOptions {
-    jvmTarget.set(JVM_11)
+    jvmTarget.set(if (name in jvm17TestCompileTasks) JVM_17 else JVM_11)
     // Kotlin supports current + 3 previous language versions.
     // We want 1.8, but if the compiler no longer supports it, use the oldest it does support.
     // e.g. Kotlin 2.1 oldest=1.8, Kotlin 2.3 oldest=2.0
