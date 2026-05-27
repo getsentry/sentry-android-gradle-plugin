@@ -206,7 +206,7 @@ fun Project.cliExecutableProvider(): Provider<String> {
   }
 }
 
-fun Project.getIsolatedRootProjectDir(): Directory {
+private fun Project.getIsolatedRootProjectDir(): Directory {
   return if (GradleVersions.CURRENT >= GradleVersions.VERSION_8_8) {
     isolated.rootProject.projectDirectory
   } else {
