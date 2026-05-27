@@ -70,8 +70,12 @@ java {
   targetCompatibility = JavaVersion.VERSION_11
 }
 
+// Tests need JVM 17 because the CI matrix tests against AGP 9.3+ (compiled with JVM 17 bytecode),
+// but production stays on JVM 11 to support hybrid/gaming SDKs that lag behind native tooling.
+val jvm17TestCompileTasks = setOf("compileTestJava", "compileTestKotlin")
+
 tasks.withType<JavaCompile>().configureEach {
-  if (name.contains("Test")) {
+  if (name in jvm17TestCompileTasks) {
     targetCompatibility = JavaVersion.VERSION_17.toString()
   }
 }
@@ -96,7 +100,7 @@ tasks.withType<KotlinCompile>().configureEach {
   }
 
   compilerOptions {
-    jvmTarget.set(if (name.contains("Test")) JVM_17 else JVM_11)
+    jvmTarget.set(if (name in jvm17TestCompileTasks) JVM_17 else JVM_11)
     // Kotlin supports current + 3 previous language versions.
     // We want 1.8, but if the compiler no longer supports it, use the oldest it does support.
     // e.g. Kotlin 2.1 oldest=1.8, Kotlin 2.3 oldest=2.0
