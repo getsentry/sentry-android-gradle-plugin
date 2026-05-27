@@ -5,6 +5,7 @@ package io.sentry.android.gradle
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryCliValueSource.Params
 import io.sentry.android.gradle.SentryPlugin.Companion.logger
+import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.error
 import io.sentry.android.gradle.util.info
 import java.io.File
@@ -13,6 +14,7 @@ import java.io.FileOutputStream
 import java.util.Locale
 import java.util.Properties
 import org.gradle.api.Project
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
@@ -198,8 +200,16 @@ fun Project.cliExecutableProvider(): Provider<String> {
   // config-cache compatible way to retrieve the cli path, it properly gets invalidated when
   // e.g. switching branches
   return providers.of(SentryCliValueSource::class.java) {
-    it.parameters.projectDir.set(project.layout.projectDirectory)
-    it.parameters.projectBuildDir.set(project.layout.buildDirectory)
-    it.parameters.rootProjDir.set(project.rootProject.layout.projectDirectory)
+    it.parameters.projectDir.set(layout.projectDirectory)
+    it.parameters.projectBuildDir.set(layout.buildDirectory)
+    it.parameters.rootProjDir.set(getIsolatedRootProjectDir())
+  }
+}
+
+fun Project.getIsolatedRootProjectDir(): Directory {
+  return if (GradleVersions.CURRENT >= GradleVersions.VERSION_8_8) {
+    isolated.rootProject.projectDirectory
+  } else {
+    rootProject.layout.projectDirectory
   }
 }
