@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Defer instrumentation log directory creation to execution time and use variant-specific paths to prevent log file corruption during parallel variant transforms ([#1236](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1236))
+
 ### Dependencies
 
 - Bump CLI from v3.4.2 to v3.4.3 ([#1215](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1215))
