@@ -165,23 +165,19 @@ internal object SentryCliProvider {
   /** Tries to extract the sentry-cli from resources if the computedCliPath does not exist. */
   @Synchronized
   internal fun maybeExtractFromResources(buildDir: DirectoryProperty, cliPath: String): String {
-    return maybeExtractFromResources(buildDir.get().asFile, cliPath)
-  }
-
-  @Synchronized
-  internal fun maybeExtractFromResources(buildDir: File, cliPath: String): String {
+    val buildDirFile = buildDir.get().asFile
     val cli = File(cliPath)
     if (cli.exists()) {
       return cliPath
     }
 
-    val currentExtractionPath = getCliResourcesExtractionPath(buildDir)
+    val currentExtractionPath = getCliResourcesExtractionPath(buildDirFile)
     if (currentExtractionPath.exists()) {
       return currentExtractionPath.absolutePath
     }
 
     // Only auto-extract for paths that look like previous resource extractions
-    val buildTmpDir = File(buildDir, "tmp")
+    val buildTmpDir = File(buildDirFile, "tmp")
     if (cli.absolutePath.startsWith(buildTmpDir.absolutePath)) {
       val cliResPath = getCliLocationInResources()
       if (!cliResPath.isNullOrBlank()) {
