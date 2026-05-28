@@ -24,12 +24,6 @@ import org.gradle.api.tasks.Input
 
 internal object SentryCliProvider {
 
-  @field:Volatile private var memoizedCliPath: String? = null
-
-  internal fun clearMemoizedCliPath() {
-    memoizedCliPath = null
-  }
-
   /**
    * Return the correct sentry-cli executable path to use for the given project. This will look for
    * a sentry-cli executable in a local node_modules in case it was put there by sentry-react-native
@@ -38,40 +32,26 @@ internal object SentryCliProvider {
    * without actually extracting it.
    */
   @JvmStatic
-  @Synchronized
   fun getSentryCliPath(
     projectDir: DirectoryProperty,
     projectBuildDir: DirectoryProperty,
     rootDir: DirectoryProperty,
   ): String {
-    val cliPath = memoizedCliPath
-    if (!cliPath.isNullOrEmpty() && File(cliPath).exists()) {
-      logger.info { "Using memoized cli path: $cliPath" }
-      return cliPath
-    }
-    // If a path is provided explicitly use that first.
     logger.info { "Searching cli from sentry.properties file..." }
 
     searchCliInPropertiesFile(projectDir, rootDir)?.let {
       logger.info { "cli Found: $it" }
-      memoizedCliPath = it
       return@getSentryCliPath it
     } ?: logger.info { "sentry-cli not found in sentry.properties file" }
 
-    // next up try a packaged version of sentry-cli
     val cliResLocation = getCliLocationInResources()
     if (!cliResLocation.isNullOrBlank()) {
       logger.info { "cli present in resources: $cliResLocation" }
-      // just provide the target extraction path
-      // actual extraction will be done prior to task execution
-      val extractedResourcePath =
-        getCliResourcesExtractionPath(projectBuildDir).get().asFile.absolutePath
-      memoizedCliPath = extractedResourcePath
-      return extractedResourcePath
+      return getCliResourcesExtractionPath(projectBuildDir).get().asFile.absolutePath
     }
 
     logger.error { "Falling back to invoking `sentry-cli` from shell" }
-    return "sentry-cli".also { memoizedCliPath = it }
+    return "sentry-cli"
   }
 
   private fun getCliLocationInResources(): String? {
