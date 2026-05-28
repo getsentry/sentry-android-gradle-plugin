@@ -94,14 +94,9 @@ abstract class SentryCliExecTask : Exec() {
       args.add(1, "/c")
     }
 
-    val buildDir = buildDirectory.get().asFile
     val cliPath =
-      SentryCliProvider.getSentryCliPath(
-        sentryProjectDir.get().asFile,
-        buildDir,
-        sentryRootDir.get().asFile,
-      )
-    args.add(SentryCliProvider.maybeExtractFromResources(buildDir, cliPath))
+      SentryCliProvider.getSentryCliPath(sentryProjectDir, buildDirectory, sentryRootDir)
+    args.add(SentryCliProvider.maybeExtractFromResources(buildDirectory, cliPath))
     args.addAll(preArgs())
 
     getArguments(args)

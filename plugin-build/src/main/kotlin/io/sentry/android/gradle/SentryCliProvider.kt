@@ -9,6 +9,9 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.Locale
 import java.util.Properties
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFile
+import org.gradle.api.provider.Provider
 
 internal object SentryCliProvider {
 
@@ -19,6 +22,19 @@ internal object SentryCliProvider {
    * installation, and a matching cli is packaged in the resources it will provide a temporary path,
    * without actually extracting it.
    */
+  @JvmStatic
+  fun getSentryCliPath(
+    projectDir: DirectoryProperty,
+    projectBuildDir: DirectoryProperty,
+    rootDir: DirectoryProperty,
+  ): String {
+    return getSentryCliPath(
+      projectDir.get().asFile,
+      projectBuildDir.get().asFile,
+      rootDir.get().asFile,
+    )
+  }
+
   @JvmStatic
   fun getSentryCliPath(projectDir: File, projectBuildDir: File, rootDir: File): String {
     // If a path is provided explicitly use that first.
@@ -61,10 +77,26 @@ internal object SentryCliProvider {
     return null
   }
 
-  internal fun getSentryPropertiesPath(projectDir: File, rootDir: File): String? =
-    listOf(File(projectDir, "sentry.properties"), File(rootDir, "sentry.properties"))
+  internal fun getSentryPropertiesPath(
+    projectDir: DirectoryProperty,
+    rootDir: DirectoryProperty,
+  ): String? =
+    listOf(projectDir.file("sentry.properties"), rootDir.file("sentry.properties"))
+      .map { it.get().asFile }
       .firstOrNull(File::exists)
       ?.path
+
+  internal fun searchCliInPropertiesFile(
+    projectDir: DirectoryProperty,
+    rootDir: DirectoryProperty,
+  ): String? {
+    return getSentryPropertiesPath(projectDir, rootDir)?.let { propertiesFile ->
+      runCatching {
+          Properties().apply { load(FileInputStream(propertiesFile)) }.getProperty("cli.executable")
+        }
+        .getOrNull()
+    }
+  }
 
   internal fun searchCliInPropertiesFile(projectDir: File, rootDir: File): String? {
     return getSentryPropertiesPath(projectDir, rootDir)?.let { propertiesFile ->
@@ -75,8 +107,20 @@ internal object SentryCliProvider {
     }
   }
 
+  internal fun getSentryPropertiesPath(projectDir: File, rootDir: File): String? =
+    listOf(File(projectDir, "sentry.properties"), File(rootDir, "sentry.properties"))
+      .firstOrNull(File::exists)
+      ?.path
+
   internal fun getResourceUrl(resourcePath: String): String? =
     javaClass.getResource(resourcePath)?.toString()
+
+  internal fun getCliResourcesExtractionPath(
+    projectBuildDir: DirectoryProperty
+  ): Provider<RegularFile> {
+    // usually <project>/build/tmp/
+    return projectBuildDir.dir("tmp").map { it.file("sentry-cli-${BuildConfig.CliVersion}.exe") }
+  }
 
   internal fun getCliResourcesExtractionPath(projectBuildDir: File): File {
     // usually <project>/build/tmp/
@@ -119,6 +163,11 @@ internal object SentryCliProvider {
   }
 
   /** Tries to extract the sentry-cli from resources if the computedCliPath does not exist. */
+  @Synchronized
+  internal fun maybeExtractFromResources(buildDir: DirectoryProperty, cliPath: String): String {
+    return maybeExtractFromResources(buildDir.get().asFile, cliPath)
+  }
+
   @Synchronized
   internal fun maybeExtractFromResources(buildDir: File, cliPath: String): String {
     val cli = File(cliPath)
