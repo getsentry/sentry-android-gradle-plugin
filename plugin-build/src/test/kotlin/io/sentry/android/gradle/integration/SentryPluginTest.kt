@@ -660,7 +660,7 @@ class SentryPluginTest :
     // since it's an integration test, we just test that the log file was created for the class
     // meaning our CommonClassVisitor has visited and instrumented it
     val debugOutput =
-      testProjectDir.root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
+      testProjectDir.root.resolve("app/build/sentry-logs/instrumentation/debug/RealCall-instrumentation.log")
     assertTrue { debugOutput.exists() && debugOutput.length() > 0 }
   }
 
@@ -960,7 +960,7 @@ class SentryPluginTest :
     // since it's an integration test, we just test that the log file wasn't created
     // for the class meaning our CommonClassVisitor has NOT instrumented it
     val debugOutput =
-      testProjectDir.root.resolve("app/build/tmp/sentry/RealCall-instrumentation.log")
+      testProjectDir.root.resolve("app/build/sentry-logs/instrumentation/debug/RealCall-instrumentation.log")
     assertTrue { !debugOutput.exists() }
   }
 
