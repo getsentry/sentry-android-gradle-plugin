@@ -27,7 +27,6 @@ import io.sentry.exception.ExceptionMechanismException
 import io.sentry.gradle.common.SentryVariant
 import io.sentry.protocol.Mechanism
 import io.sentry.protocol.User
-import java.io.File
 import java.util.concurrent.TimeUnit
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -226,8 +225,7 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
 
     Thread {
         try {
-          val cliPath =
-            SentryCliProvider.getSentryCliPath(projectDir, buildDir.get().asFile, rootDir)
+          val cliPath = SentryCliProvider.getSentryCliPath(projectDir, buildDir, rootDir)
           val resolvedCli = SentryCliProvider.maybeExtractFromResources(buildDir, cliPath)
 
           val args = mutableListOf(resolvedCli)
@@ -308,9 +306,9 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
         extension.debug.get(),
         saas = extension.url.orNull == null,
         cliVersion = BuildConfig.CliVersion,
-        cliProjectDir = project.projectDir,
+        cliProjectDir = project.objects.directoryProperty().apply { set(project.projectDir) },
         cliBuildDir = project.layout.buildDirectory,
-        cliRootDir = project.rootDir,
+        cliRootDir = project.objects.directoryProperty().apply { set(project.rootDir) },
         cliAuthToken = extension.authToken.orNull,
         cliUrl = extension.url.orNull,
         cliPropertiesFilePath =
@@ -405,9 +403,9 @@ data class SentryTelemetryServiceParams(
   val isDebug: Boolean,
   val saas: Boolean? = null,
   val cliVersion: String? = null,
-  val cliProjectDir: File? = null,
+  val cliProjectDir: DirectoryProperty? = null,
   val cliBuildDir: DirectoryProperty? = null,
-  val cliRootDir: File? = null,
+  val cliRootDir: DirectoryProperty? = null,
   val cliAuthToken: String? = null,
   val cliUrl: String? = null,
   val cliPropertiesFilePath: String? = null,

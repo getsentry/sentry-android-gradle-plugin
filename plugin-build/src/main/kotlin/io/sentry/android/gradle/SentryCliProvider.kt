@@ -70,33 +70,6 @@ internal object SentryCliProvider {
     return "sentry-cli".also { memoizedCliPath = it }
   }
 
-  @JvmStatic
-  fun getSentryCliPath(projectDir: File, projectBuildDir: File, rootDir: File): String {
-    val cliPath = memoizedCliPath
-    if (!cliPath.isNullOrEmpty() && File(cliPath).exists()) {
-      logger.info { "Using memoized cli path: $cliPath" }
-      return cliPath
-    }
-    logger.info { "Searching cli from sentry.properties file..." }
-
-    searchCliInPropertiesFile(projectDir, rootDir)?.let {
-      logger.info { "cli Found: $it" }
-      memoizedCliPath = it
-      return@getSentryCliPath it
-    } ?: logger.info { "sentry-cli not found in sentry.properties file" }
-
-    val cliResLocation = getCliLocationInResources()
-    if (!cliResLocation.isNullOrBlank()) {
-      logger.info { "cli present in resources: $cliResLocation" }
-      val extractedResourcePath = getCliResourcesExtractionPath(projectBuildDir).absolutePath
-      memoizedCliPath = extractedResourcePath
-      return extractedResourcePath
-    }
-
-    logger.error { "Falling back to invoking `sentry-cli` from shell" }
-    return "sentry-cli".also { memoizedCliPath = it }
-  }
-
   private fun getCliLocationInResources(): String? {
     val cliSuffix = getCliSuffix()
     logger.info { "cliSuffix is $cliSuffix" }
@@ -127,24 +100,10 @@ internal object SentryCliProvider {
       .firstOrNull(File::exists)
       ?.path
 
-  internal fun getSentryPropertiesPath(projectDir: File, rootDir: File): String? =
-    listOf(File(projectDir, "sentry.properties"), File(rootDir, "sentry.properties"))
-      .firstOrNull(File::exists)
-      ?.path
-
   internal fun searchCliInPropertiesFile(
     projectDir: DirectoryProperty,
     rootDir: DirectoryProperty,
   ): String? {
-    return getSentryPropertiesPath(projectDir, rootDir)?.let { propertiesFile ->
-      runCatching {
-          Properties().apply { load(FileInputStream(propertiesFile)) }.getProperty("cli.executable")
-        }
-        .getOrNull()
-    }
-  }
-
-  internal fun searchCliInPropertiesFile(projectDir: File, rootDir: File): String? {
     return getSentryPropertiesPath(projectDir, rootDir)?.let { propertiesFile ->
       runCatching {
           Properties().apply { load(FileInputStream(propertiesFile)) }.getProperty("cli.executable")
@@ -161,10 +120,6 @@ internal object SentryCliProvider {
   ): Provider<RegularFile> {
     // usually <project>/build/tmp/
     return projectBuildDir.dir("tmp").map { it.file("sentry-cli-${BuildConfig.CliVersion}.exe") }
-  }
-
-  internal fun getCliResourcesExtractionPath(projectBuildDir: File): File {
-    return File(projectBuildDir, "tmp/sentry-cli-${BuildConfig.CliVersion}.exe")
   }
 
   internal fun extractCliFromResources(resourcePath: String, outputPath: File): String? {
