@@ -26,6 +26,10 @@ internal object SentryCliProvider {
 
   @field:Volatile private var memoizedCliPath: String? = null
 
+  internal fun clearMemoizedCliPath() {
+    memoizedCliPath = null
+  }
+
   /**
    * Return the correct sentry-cli executable path to use for the given project. This will look for
    * a sentry-cli executable in a local node_modules in case it was put there by sentry-react-native

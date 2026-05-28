@@ -8,6 +8,7 @@ import kotlin.test.assertTrue
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -15,6 +16,11 @@ import org.junit.rules.TemporaryFolder
 class SentryCliExecTaskTest {
 
   @get:Rule val tempDir = TemporaryFolder()
+
+  @Before
+  fun setup() {
+    SentryCliProvider.clearMemoizedCliPath()
+  }
 
   @Test
   fun `cli path is resolved and extracted from resources`() {
