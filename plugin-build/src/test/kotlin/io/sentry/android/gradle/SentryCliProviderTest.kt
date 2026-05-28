@@ -12,6 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
@@ -23,6 +24,11 @@ class SentryCliProviderTest {
 
   @get:Rule val systemPropertyRule = SystemPropertyRule()
 
+  private fun dirProp(dir: File): DirectoryProperty {
+    val project = ProjectBuilder.builder().build()
+    return project.objects.directoryProperty().apply { set(dir) }
+  }
+
   @Test
   fun `getSentryPropertiesPath returns local properties file`() {
     val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
@@ -31,7 +37,7 @@ class SentryCliProviderTest {
 
     assertEquals(
       project.file("sentry.properties").path,
-      getSentryPropertiesPath(project.projectDir, project.rootDir),
+      getSentryPropertiesPath(dirProp(project.projectDir), dirProp(project.rootDir)),
     )
   }
 
@@ -45,7 +51,7 @@ class SentryCliProviderTest {
 
     assertEquals(
       topLevelProject.file("sentry.properties").path,
-      getSentryPropertiesPath(project.projectDir, project.rootDir),
+      getSentryPropertiesPath(dirProp(project.projectDir), dirProp(project.rootDir)),
     )
   }
 
@@ -53,7 +59,7 @@ class SentryCliProviderTest {
   fun `getSentryPropertiesPath returns null if no properties file is found`() {
     val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
 
-    assertNull(getSentryPropertiesPath(project.projectDir, project.rootDir))
+    assertNull(getSentryPropertiesPath(dirProp(project.projectDir), dirProp(project.rootDir)))
   }
 
   @Test
@@ -62,7 +68,10 @@ class SentryCliProviderTest {
 
     testProjectDir.newFile("sentry.properties").apply { writeText("cli.executable=vim") }
 
-    assertEquals("vim", searchCliInPropertiesFile(project.projectDir, project.rootDir))
+    assertEquals(
+      "vim",
+      searchCliInPropertiesFile(dirProp(project.projectDir), dirProp(project.rootDir)),
+    )
   }
 
   @Test
@@ -71,7 +80,7 @@ class SentryCliProviderTest {
 
     testProjectDir.newFile("sentry.properties").apply { writeText("another=field") }
 
-    assertNull(searchCliInPropertiesFile(project.projectDir, project.rootDir))
+    assertNull(searchCliInPropertiesFile(dirProp(project.projectDir), dirProp(project.rootDir)))
   }
 
   @Test
@@ -80,14 +89,14 @@ class SentryCliProviderTest {
 
     testProjectDir.newFile("sentry.properties")
 
-    assertNull(searchCliInPropertiesFile(project.projectDir, project.rootDir))
+    assertNull(searchCliInPropertiesFile(dirProp(project.projectDir), dirProp(project.rootDir)))
   }
 
   @Test
   fun `searchCliInPropertiesFile returns null for missing file`() {
     val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
 
-    assertNull(searchCliInPropertiesFile(project.projectDir, project.rootDir))
+    assertNull(searchCliInPropertiesFile(dirProp(project.projectDir), dirProp(project.rootDir)))
   }
 
   @Test

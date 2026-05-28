@@ -442,7 +442,7 @@ abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
       execOperations.exec {
         it.isIgnoreExitValue = true
         SentryCliProvider.maybeExtractFromResources(
-          parameters.buildDirectory.get().asFile,
+          parameters.buildDirectory,
           parameters.cliExecutable.get(),
         )
 
@@ -499,7 +499,7 @@ abstract class SentryCliVersionValueSource : ValueSource<String, VersionParams> 
     execOperations.exec {
       it.isIgnoreExitValue = true
       SentryCliProvider.maybeExtractFromResources(
-        parameters.buildDirectory.get().asFile,
+        parameters.buildDirectory,
         parameters.cliExecutable.get(),
       )
 

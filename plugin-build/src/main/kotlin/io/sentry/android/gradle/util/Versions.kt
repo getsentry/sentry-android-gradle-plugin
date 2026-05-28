@@ -21,6 +21,7 @@ internal object AgpVersions {
 internal object GradleVersions {
   val CURRENT: SemVer = SemVer.parse(GradleVersion.current().version)
   val VERSION_8_0: SemVer = SemVer.parse("8.0")
+  val VERSION_8_8: SemVer = SemVer.parse("8.8")
 }
 
 internal object SentryVersions {
