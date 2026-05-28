@@ -25,48 +25,37 @@ internal object SentryPropertiesFileProvider {
     val projDir = project.projectDir
     val rootDir = project.rootDir
 
-    val sep = File.separator
-
     // Local Project dirs
     val possibleFiles = mutableListOf<String>()
     if (buildTypeName.isNotBlank()) {
-      possibleFiles.add("${projDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME")
+      possibleFiles.add("${projDir}/src/${buildTypeName}/$FILENAME")
     }
     if (flavorName.isNotBlank()) {
       if (buildTypeName.isNotBlank()) {
-        possibleFiles.add(
-          "${projDir}${sep}src${sep}${buildTypeName}${sep}$flavorName${sep}$FILENAME"
-        )
-        possibleFiles.add(
-          "${projDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME"
-        )
+        possibleFiles.add("${projDir}/src/${buildTypeName}/$flavorName/$FILENAME")
+        possibleFiles.add("${projDir}/src/${flavorName}/${buildTypeName}/$FILENAME")
       }
-      possibleFiles.add("${projDir}${sep}src${sep}${flavorName}${sep}$FILENAME")
+      possibleFiles.add("${projDir}/src/${flavorName}/$FILENAME")
     }
-    possibleFiles.add("${projDir}${sep}$FILENAME")
+    possibleFiles.add("${projDir}/$FILENAME")
 
     // Other flavors dirs
     possibleFiles.addAll(
-      variant?.productFlavors?.map { "${projDir}${sep}src${sep}${it}${sep}$FILENAME" }
-        ?: emptyList()
+      variant?.productFlavors?.map { "${projDir}/src/${it}/$FILENAME" } ?: emptyList()
     )
 
     // Root project dirs
     if (buildTypeName.isNotBlank()) {
-      possibleFiles.add("${rootDir}${sep}src${sep}${buildTypeName}${sep}$FILENAME")
+      possibleFiles.add("${rootDir}/src/${buildTypeName}/$FILENAME")
     }
     if (flavorName.isNotBlank()) {
-      possibleFiles.add("${rootDir}${sep}src${sep}${flavorName}${sep}$FILENAME")
+      possibleFiles.add("${rootDir}/src/${flavorName}/$FILENAME")
       if (buildTypeName.isNotBlank()) {
-        possibleFiles.add(
-          "${rootDir}${sep}src${sep}${buildTypeName}${sep}${flavorName}${sep}$FILENAME"
-        )
-        possibleFiles.add(
-          "${rootDir}${sep}src${sep}${flavorName}${sep}${buildTypeName}${sep}$FILENAME"
-        )
+        possibleFiles.add("${rootDir}/src/${buildTypeName}/${flavorName}/$FILENAME")
+        possibleFiles.add("${rootDir}/src/${flavorName}/${buildTypeName}/$FILENAME")
       }
     }
-    possibleFiles.add("${rootDir}${sep}$FILENAME")
+    possibleFiles.add("${rootDir}/$FILENAME")
 
     return possibleFiles
       .distinct()

@@ -23,12 +23,11 @@ class SentryUploadNativeSymbolsTaskTest {
       }
 
     val args = task.computeCommandLineArgs()
-    val sep = File.separator
 
     assertTrue("sentry-cli" in args)
     assertTrue("debug-files" in args)
     assertTrue("upload" in args)
-    val path = "${project.buildDir}${sep}intermediates" + "${sep}merged_native_libs${sep}debug"
+    val path = File(project.buildDir, "intermediates/merged_native_libs/debug").absolutePath
     assertTrue(path in args)
     assertFalse("--include-sources" in args)
     assertFalse("--log-level=debug" in args)

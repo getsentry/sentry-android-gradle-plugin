@@ -72,7 +72,7 @@ abstract class ASMifyTask : Exec() {
       dir.mkdirs()
 
       val filename =
-        clazz.substringAfterLast(File.separator).substringBefore(".") + "_asmified.java"
+        File(clazz).nameWithoutExtension + "_asmified.java"
 
       val file = File(dir, filename)
       if (file.exists()) {
