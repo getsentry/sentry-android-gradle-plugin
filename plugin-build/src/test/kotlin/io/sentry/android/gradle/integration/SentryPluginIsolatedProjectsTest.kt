@@ -54,7 +54,7 @@ class SentryPluginIsolatedProjectsTest :
     val pluginClasspath =
       PluginUnderTestMetadataReading.readImplementationClasspath()
         .joinToString(separator = ", ") { "\"$it\"" }
-        .replace(File.separator, "/")
+        .replace("\\", "/")
 
     File(testProjectDir.root, "settings.gradle")
       .writeText(
