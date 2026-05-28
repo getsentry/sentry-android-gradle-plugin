@@ -71,8 +71,7 @@ abstract class ASMifyTask : Exec() {
       val dir = File(tmpDir)
       dir.mkdirs()
 
-      val filename =
-        File(clazz).nameWithoutExtension + "_asmified.java"
+      val filename = File(clazz).nameWithoutExtension + "_asmified.java"
 
       val file = File(dir, filename)
       if (file.exists()) {

@@ -44,8 +44,7 @@ abstract class SentryUploadNativeSymbolsTask : SentryCliExecTask() {
     // eg absoluteProjectFolderPath/build/intermediates/merged_native_libs/{variantName}
     // where {variantName} could be debug/release...
     args.add(
-      File(buildDir.get(), "intermediates/merged_native_libs/${variantName.get()}")
-        .absolutePath
+      File(buildDir.get(), "intermediates/merged_native_libs/${variantName.get()}").absolutePath
     )
 
     // Only include sources if includeNativeSources is enabled, as this is opt-in feature

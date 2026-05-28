@@ -115,10 +115,7 @@ internal object SentryTasksProvider {
       if (project.plugins.hasPlugin("com.guardsquare.proguard")) {
         val fileCollection =
           project.files(
-            File(
-              project.buildDir,
-              "outputs/proguard/${variant.name}/mapping/mapping.txt",
-            )
+            File(project.buildDir, "outputs/proguard/${variant.name}/mapping/mapping.txt")
           )
         return project.provider { fileCollection }
       }

@@ -134,5 +134,4 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
       project.installDependencies(extension, false)
     }
   }
-
 }
