@@ -1,0 +1,35 @@
+# Benchmarks the configuration-phase performance of this project's `help` task
+# with the configuration cache disabled, comparing the PR base commit against
+# the PR head commit in a single gradle-profiler run via the git-checkout
+# mutator.
+#
+# BASE_REF and HEAD_REF are supplied as environment variables by the CI
+# workflow; HOCON falls back to environment variables for ${...} lookups.
+#
+# `help` configures the whole build while executing essentially nothing, so it
+# is a clean configuration-time signal. --no-configuration-cache forces a full
+# configuration on every build.
+
+help_base {
+    title = "help base"
+    tasks = ["help"]
+    gradle-args = ["--no-configuration-cache"]
+    warm-ups = 2
+    iterations = 5
+    git-checkout {
+        build = ${BASE_REF}
+        cleanup = ${HEAD_REF}
+    }
+}
+
+help_pr {
+    title = "help PR"
+    tasks = ["help"]
+    gradle-args = ["--no-configuration-cache"]
+    warm-ups = 2
+    iterations = 5
+    git-checkout {
+        build = ${HEAD_REF}
+        cleanup = ${HEAD_REF}
+    }
+}
