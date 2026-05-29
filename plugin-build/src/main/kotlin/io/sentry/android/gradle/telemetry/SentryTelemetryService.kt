@@ -28,6 +28,7 @@ import io.sentry.gradle.common.SentryVariant
 import io.sentry.protocol.Mechanism
 import io.sentry.protocol.User
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.DirectoryProperty
@@ -223,54 +224,47 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
     val projectDir = params.cliProjectDir ?: return
     val rootDir = params.cliRootDir ?: return
 
-    Thread {
-        try {
-          val cliPath = SentryCliProvider.getSentryCliPath(projectDir, buildDir, rootDir)
-          val resolvedCli = SentryCliProvider.maybeExtractFromResources(buildDir, cliPath)
+    thread(isDaemon = true, name = "sentry-cli-info") {
+      try {
+        val cliPath = SentryCliProvider.getSentryCliPath(projectDir, buildDir, rootDir)
+        val resolvedCli = SentryCliProvider.maybeExtractFromResources(buildDir, cliPath)
 
-          val args = mutableListOf(resolvedCli)
-          params.cliUrl?.let { url ->
-            args.add("--url")
-            args.add(url)
-          }
-          args.add("--log-level=error")
-          args.add("info")
+        val args = mutableListOf(resolvedCli)
+        params.cliUrl?.let { url ->
+          args.add("--url")
+          args.add(url)
+        }
+        args.add("--log-level=error")
+        args.add("info")
 
-          val processBuilder = ProcessBuilder(args).redirectErrorStream(true)
-          params.cliPropertiesFilePath?.let {
-            processBuilder.environment()["SENTRY_PROPERTIES"] = it
-          }
-          params.cliAuthToken?.let { processBuilder.environment()["SENTRY_AUTH_TOKEN"] = it }
-          processBuilder.environment()["SENTRY_PIPELINE"] =
-            "sentry-gradle-plugin/${BuildConfig.Version}"
+        val processBuilder = ProcessBuilder(args).redirectErrorStream(true)
+        params.cliPropertiesFilePath?.let { processBuilder.environment()["SENTRY_PROPERTIES"] = it }
+        params.cliAuthToken?.let { processBuilder.environment()["SENTRY_AUTH_TOKEN"] = it }
+        processBuilder.environment()["SENTRY_PIPELINE"] =
+          "sentry-gradle-plugin/${BuildConfig.Version}"
 
-          val process = processBuilder.start()
-          val output = process.inputStream.bufferedReader().readText()
-          if (!process.waitFor(CLI_INFO_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-            process.destroyForcibly()
-            return@Thread
-          }
+        val process = processBuilder.start()
+        val output = process.inputStream.bufferedReader().readText()
+        if (!process.waitFor(CLI_INFO_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+          process.destroyForcibly()
+          return@thread
+        }
 
-          if (process.exitValue() == 0) {
-            ORG_REGEX.find(output)?.groupValues?.getOrNull(1)?.let { org ->
-              if (org != "-") {
-                hub.configureScope { scope ->
-                  if (scope.user?.id == null) {
-                    scope.user = User().also { it.id = org }
-                  }
+        if (process.exitValue() == 0) {
+          ORG_REGEX.find(output)?.groupValues?.getOrNull(1)?.let { org ->
+            if (org != "-") {
+              hub.configureScope { scope ->
+                if (scope.user?.id == null) {
+                  scope.user = User().also { it.id = org }
                 }
               }
             }
           }
-        } catch (t: Throwable) {
-          SentryPlugin.logger.info { "Failed to fetch default org from sentry-cli: ${t.message}" }
         }
+      } catch (t: Throwable) {
+        SentryPlugin.logger.info { "Failed to fetch default org from sentry-cli: ${t.message}" }
       }
-      .apply {
-        isDaemon = true
-        name = "sentry-cli-info"
-        start()
-      }
+    }
   }
 
   override fun close() {
