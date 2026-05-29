@@ -3,8 +3,10 @@
 
 Usage: help-config-comment.py <benchmark.csv> <output.md>
 
-The CSV has one column per scenario; we read the `scenario` header row for the
-titles and the `mean` row for the mean total build time (milliseconds).
+The CSV has one column per scenario. gradle-profiler does not write summary
+rows to the CSV (those live in the HTML report), so we read the `scenario`
+header row for the titles and average the `measured build #N` rows ourselves to
+get the mean total build time in milliseconds.
 """
 import csv
 import sys
@@ -14,24 +16,27 @@ MARKER = "<!-- help-config-benchmark -->"
 
 def main(csv_path: str, out_path: str) -> None:
     header = None
-    mean = None
+    measured = []
     with open(csv_path, newline="") as f:
         for row in csv.reader(f):
             if not row:
                 continue
             if row[0] == "scenario":
                 header = row
-            elif row[0] == "mean":
-                mean = row
+            elif row[0].startswith("measured build"):
+                measured.append(row)
 
-    if header is None or mean is None:
+    if header is None or not measured:
         body = f"{MARKER}\n### `help` configuration benchmark\n\nCould not parse benchmark results."
         with open(out_path, "w") as f:
             f.write(body)
         return
 
     titles = header[1:]
-    means = [float(v) for v in mean[1 : 1 + len(titles)]]
+    means = []
+    for col in range(1, 1 + len(titles)):
+        values = [float(r[col]) for r in measured]
+        means.append(sum(values) / len(values))
     by_title = dict(zip(titles, means))
 
     base = by_title.get("help base")
