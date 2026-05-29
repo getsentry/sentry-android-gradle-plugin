@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.cliExecutableProvider
 import java.io.File
 import java.util.UUID
 import kotlin.test.assertEquals
@@ -324,8 +325,7 @@ class SentryUploadProguardMappingTaskTest {
   }
 
   private fun SentryCliExecTask.configureCliPaths(project: Project) {
-    sentryProjectDir.set(project.layout.projectDirectory)
-    sentryRootDir.set(project.rootProject.layout.projectDirectory)
+    cliExecutable.set(project.cliExecutableProvider())
     buildDirectory.set(project.layout.buildDirectory)
   }
 

@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.cliExecutableProvider
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -179,8 +180,7 @@ class SentryUploadNativeSymbolsTaskTest {
   ): SentryUploadNativeSymbolsTask =
     project.tasks
       .register("testUploadNativeSymbols", SentryUploadNativeSymbolsTask::class.java) {
-        it.sentryProjectDir.set(project.layout.projectDirectory)
-        it.sentryRootDir.set(project.rootProject.layout.projectDirectory)
+        it.cliExecutable.set(project.cliExecutableProvider())
         it.buildDirectory.set(project.layout.buildDirectory)
         block(it)
       }

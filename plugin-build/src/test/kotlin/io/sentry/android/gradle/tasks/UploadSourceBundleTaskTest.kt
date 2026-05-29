@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.cliExecutableProvider
 import io.sentry.android.gradle.sourcecontext.UploadSourceBundleTask
 import java.io.File
 import kotlin.test.assertEquals
@@ -197,8 +198,7 @@ class UploadSourceBundleTaskTest {
   }
 
   private fun SentryCliExecTask.configureCliPaths(project: Project) {
-    sentryProjectDir.set(project.layout.projectDirectory)
-    sentryRootDir.set(project.rootProject.layout.projectDirectory)
+    cliExecutable.set(project.cliExecutableProvider())
     buildDirectory.set(project.layout.buildDirectory)
   }
 }

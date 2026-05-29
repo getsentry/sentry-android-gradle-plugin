@@ -4,6 +4,7 @@ import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
 import com.google.common.truth.Truth.assertAbout
 import com.google.common.truth.Truth.assertThat
+import io.sentry.android.gradle.cliExecutableProvider
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import org.gradle.api.Project
@@ -314,8 +315,7 @@ class SentryUploadAppArtifactTaskTest {
   }
 
   private fun SentryCliExecTask.configureCliPaths(project: Project) {
-    sentryProjectDir.set(project.layout.projectDirectory)
-    sentryRootDir.set(project.rootProject.layout.projectDirectory)
+    cliExecutable.set(project.cliExecutableProvider())
     buildDirectory.set(project.layout.buildDirectory)
   }
 

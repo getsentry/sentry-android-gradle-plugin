@@ -37,9 +37,7 @@ abstract class SentryCliExecTask : Exec() {
 
   @get:Internal abstract val sentryTelemetryService: Property<SentryTelemetryService>
 
-  @get:Internal abstract val sentryProjectDir: DirectoryProperty
-
-  @get:Internal abstract val sentryRootDir: DirectoryProperty
+  @get:Input abstract val cliExecutable: Property<String>
 
   @get:Internal abstract val buildDirectory: DirectoryProperty
 
@@ -94,9 +92,7 @@ abstract class SentryCliExecTask : Exec() {
       args.add(1, "/c")
     }
 
-    val cliPath =
-      SentryCliProvider.getSentryCliPath(sentryProjectDir, buildDirectory, sentryRootDir)
-    args.add(SentryCliProvider.maybeExtractFromResources(buildDirectory, cliPath))
+    args.add(SentryCliProvider.maybeExtractFromResources(buildDirectory, cliExecutable.get()))
     args.addAll(preArgs())
 
     getArguments(args)

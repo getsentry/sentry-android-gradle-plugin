@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.tasks
 
 import io.sentry.android.gradle.SentryCliProvider
+import io.sentry.android.gradle.cliExecutableProvider
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -139,8 +140,7 @@ class SentryCliExecTaskTest {
   }
 
   private fun SentryCliExecTask.configureCliPaths(project: Project) {
-    sentryProjectDir.set(project.layout.projectDirectory)
-    sentryRootDir.set(project.rootProject.layout.projectDirectory)
+    cliExecutable.set(project.cliExecutableProvider())
     buildDirectory.set(project.layout.buildDirectory)
   }
 

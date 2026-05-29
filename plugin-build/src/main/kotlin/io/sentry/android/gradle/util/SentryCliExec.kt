@@ -1,24 +1,15 @@
 package io.sentry.android.gradle.util
 
 import io.sentry.BuildConfig
+import io.sentry.android.gradle.cliExecutableProvider
 import io.sentry.android.gradle.tasks.SentryCliExecTask
 import io.sentry.android.gradle.util.CliFailureReason.OUTDATED
 import java.io.ByteArrayOutputStream
 import org.gradle.api.GradleException
-import org.gradle.api.Project
-import org.gradle.api.file.Directory
 import org.gradle.process.ExecSpec
 
 fun ExecSpec.setSentryPipelineEnv() {
   environment("SENTRY_PIPELINE", "sentry-gradle-plugin/${BuildConfig.Version}")
-}
-
-private fun Project.getIsolatedRootProjectDir(): Directory {
-  return if (GradleVersions.CURRENT >= GradleVersions.VERSION_8_8) {
-    isolated.rootProject.projectDirectory
-  } else {
-    rootProject.layout.projectDirectory
-  }
 }
 
 /**
@@ -26,8 +17,7 @@ private fun Project.getIsolatedRootProjectDir(): Directory {
  * called at configuration phase (=when registering a task).
  */
 fun SentryCliExecTask.asSentryCliExec() {
-  sentryProjectDir.set(project.layout.projectDirectory)
-  sentryRootDir.set(project.getIsolatedRootProjectDir())
+  cliExecutable.set(project.cliExecutableProvider())
   buildDirectory.set(project.layout.buildDirectory)
 
   isIgnoreExitValue = true
