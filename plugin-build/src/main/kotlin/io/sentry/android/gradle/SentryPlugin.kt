@@ -5,7 +5,6 @@ import io.sentry.BuildConfig
 import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.util.AgpVersions
-import java.io.File
 import javax.inject.Inject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -41,7 +40,7 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
       )
     }
 
-    val extension = project.extensions.create("sentry", SentryPluginExtension::class.java, project)
+    val extension = project.extensions.create("sentry", SentryPluginExtension::class.java)
 
     project.pluginManager.withPlugin("com.android.application") {
       val androidComponentsExt =
@@ -73,8 +72,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
     const val SENTRY_ORG_PARAMETER = "sentryOrg"
     const val SENTRY_PROJECT_PARAMETER = "sentryProject"
     internal const val SENTRY_SDK_VERSION = BuildConfig.SdkVersion
-
-    internal val sep = File.separator
 
     // a single unified logger used by instrumentation
     internal val logger by lazy { LoggerFactory.getLogger(SentryPlugin::class.java) }

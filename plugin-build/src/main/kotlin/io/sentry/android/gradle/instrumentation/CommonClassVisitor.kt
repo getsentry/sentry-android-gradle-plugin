@@ -22,12 +22,10 @@ class CommonClassVisitor(
     // to avoid file creation in case the debug mode is not set
     if (parameters.debug.get()) {
 
-      // create log dir.
-      val logDir = parameters.tmpDir.get()
+      val logDir = parameters.tmpDir.get().asFile
       logDir.mkdirs()
 
-      // delete and recreate file
-      log = File(parameters.tmpDir.get(), "$className-instrumentation.log")
+      log = File(logDir, "$className-instrumentation.log")
       if (log.exists()) {
         log.delete()
       }

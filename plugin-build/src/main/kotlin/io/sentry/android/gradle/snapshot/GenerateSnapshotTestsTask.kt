@@ -1,14 +1,15 @@
 package io.sentry.android.gradle.snapshot
 
 import com.android.build.api.variant.ApplicationVariant
-import com.android.build.gradle.BaseExtension
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
+import io.sentry.android.gradle.extensions.SnapshotsExtension
 import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
@@ -30,6 +31,10 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
 
   @get:Input @get:Optional abstract val theme: Property<String>
 
+  @get:Input abstract val diffThreshold: Property<Double>
+
+  @get:Input abstract val paparazziMajorVersion: Property<Int>
+
   @get:OutputDirectory abstract val outputDir: DirectoryProperty
 
   @TaskAction
@@ -47,6 +52,8 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
         includePrivatePreviews = includePrivatePreviews.get(),
         packageTrees = packageTrees.get(),
         theme = theme.orNull,
+        diffThreshold = diffThreshold.get(),
+        paparazziMajorVersion = paparazziMajorVersion.get(),
       )
     File(packageDir, "$CLASS_NAME.kt").writeText(content)
     logger.lifecycle("Generated snapshot test: ${packageDir.absolutePath}/$CLASS_NAME.kt")
@@ -58,24 +65,25 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
 
     fun register(
       project: Project,
-      extension: SentrySnapshotExtension,
-      android: BaseExtension,
+      extension: SnapshotsExtension,
       variant: ApplicationVariant,
+      paparazziMajorVersion: Provider<Int>,
     ): TaskProvider<GenerateSnapshotTestsTask> {
       return project.tasks.register(
-        "generateSentrySnapshotTests${variant.name.capitalized}",
+        "sentryGenerateSnapshotsTests${variant.name.capitalized}",
         GenerateSnapshotTestsTask::class.java,
       ) { task ->
-        task.includePrivatePreviews.set(extension.includePrivatePreviews)
-        task.theme.set(extension.theme)
-        // Fall back to the Android namespace when the user doesn't configure packageTrees
+        task.includePrivatePreviews.set(extension.previews.includePrivatePreviews)
+        task.theme.set(extension.previews.theme)
+        task.diffThreshold.set(extension.diffThreshold)
+        task.paparazziMajorVersion.value(paparazziMajorVersion)
         task.packageTrees.set(
-          extension.packageTrees.map { packages ->
-            packages.ifEmpty { listOf(android.namespace!!) }
+          extension.previews.packageTrees.zip(variant.namespace) { packages, ns ->
+            packages.ifEmpty { listOf(ns) }
           }
         )
         task.outputDir.set(
-          project.layout.buildDirectory.dir("generated/sentry/snapshotTests/${variant.name}")
+          project.layout.buildDirectory.dir("generated/sentry/snapshotsTests/${variant.name}")
         )
       }
     }
@@ -85,6 +93,8 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
       includePrivatePreviews: Boolean,
       packageTrees: List<String>,
       theme: String? = null,
+      diffThreshold: Double = 0.0,
+      paparazziMajorVersion: Int = 2,
     ): String {
       val includePrivateExpr =
         if (includePrivatePreviews) "\n                .includePrivatePreviews()" else ""
@@ -96,6 +106,7 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
 package $PACKAGE_NAME
 
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -215,17 +226,17 @@ private class TestNameOverrideHandler(
 
 private object PaparazziPreviewRule {
     const val UNDEFINED_API_LEVEL = -1
-    const val MAX_API_LEVEL = 36
 
     fun createFor(preview: ComposablePreview<AndroidPreviewInfo>): Paparazzi {
         val previewInfo = preview.previewInfo
-        val previewApiLevel = when (previewInfo.apiLevel == UNDEFINED_API_LEVEL) {
-            true -> MAX_API_LEVEL
-            false -> previewInfo.apiLevel
+        val env = detectEnvironment()
+        val environment = when (previewInfo.apiLevel == UNDEFINED_API_LEVEL) {
+            true -> env
+            false -> env.copy(compileSdkVersion = previewInfo.apiLevel)
         }
-        val tolerance = 0.0
+        val tolerance = $diffThreshold
         return Paparazzi(
-            environment = detectEnvironment().copy(compileSdkVersion = previewApiLevel),
+            environment = environment,
             deviceConfig = DeviceConfigBuilder.build(preview.previewInfo),
             ${if (theme != null) "theme = \"$theme\"," else ""}
             supportsRtl = true,
@@ -238,7 +249,7 @@ private object PaparazziPreviewRule {
             snapshotHandler = TestNameOverrideHandler(
                 when (System.getProperty("paparazzi.test.verify")?.toBoolean() == true) {
                     true -> SnapshotVerifier(maxPercentDifference = tolerance)
-                    false -> HtmlReportWriter(maxPercentDifference = tolerance)
+                    false -> ${if (paparazziMajorVersion >= 2) "HtmlReportWriter(maxPercentDifference = tolerance)" else "HtmlReportWriter()"}
                 }
             ),
             maxPercentDifference = tolerance,
@@ -349,31 +360,69 @@ class $CLASS_NAME(
         val imagesDir = File(snapshotDir, "images")
         imagesDir.mkdirs()
         val info = preview.previewInfo
+
+        val tags = linkedMapOf<String, String>()
+        if (info.name.isNotBlank()) tags["preview_name"] = info.name
+        if (info.locale.isNotBlank()) tags["locale"] = info.locale
+        if (info.device.isNotBlank()) tags["device"] = info.device
+        if (info.fontScale != 1f) tags["font_scale"] = info.fontScale.toString()
+        if (info.apiLevel != -1) tags["api_level"] = info.apiLevel.toString()
+        if (info.widthDp > 0) tags["width_dp"] = info.widthDp.toString()
+        if (info.heightDp > 0) tags["height_dp"] = info.heightDp.toString()
+        if (info.showSystemUi) tags["show_system_ui"] = "true"
+        if (info.showBackground) tags["show_background"] = "true"
+        when (info.uiMode and UI_MODE_NIGHT_MASK) {
+            UI_MODE_NIGHT_YES -> tags["ui_mode"] = "dark"
+            UI_MODE_NIGHT_NO -> tags["ui_mode"] = "light"
+        }
+
+        val context = linkedMapOf<String, Any>(
+            "image_file_name" to screenshotId,
+            "class_name" to preview.declaringClass,
+            "method_name" to preview.methodName,
+        )
+
         val metadata = linkedMapOf<String, Any>(
             "display_name" to screenshotId.removePrefix(preview.declaringClass + "."),
-            "image_file_name" to screenshotId,
-            "className" to preview.declaringClass,
-            "methodName" to preview.methodName,
         )
         if (info.group.isNotBlank()) metadata["group"] = info.group
-        if (info.name.isNotBlank()) metadata["previewName"] = info.name
-        if (info.locale.isNotBlank()) metadata["locale"] = info.locale
-        if (info.device.isNotBlank()) metadata["device"] = info.device
-        metadata["nightMode"] = (info.uiMode and UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES)
-        if (info.fontScale != 1f) metadata["fontScale"] = info.fontScale
-        if (info.apiLevel != -1) metadata["apiLevel"] = info.apiLevel
-        if (info.widthDp > 0) metadata["widthDp"] = info.widthDp
-        if (info.heightDp > 0) metadata["heightDp"] = info.heightDp
-        if (info.showSystemUi) metadata["showSystemUi"] = true
-        if (info.showBackground) metadata["showBackground"] = true
 
-        val json = metadata.entries.joinToString(",\n  ", prefix = "{\n  ", postfix = "\n}") { (k, v) ->
-            if (v is String) "\"" + k + "\": \"" + escapeJson(v) + "\""
-            else "\"" + k + "\": " + v
-        }
+        val diffThreshold: Float? = runCatching {
+            val declaring = Class.forName(preview.declaringClass)
+            val method = declaring.declaredMethods.firstOrNull { it.name == preview.methodName }
+                ?: return@runCatching null
+            @Suppress("UNCHECKED_CAST")
+            val annClass = Class.forName("io.sentry.snapshots.runtime.SentrySnapshot") as Class<out Annotation>
+            val ann = method.getAnnotation(annClass) ?: return@runCatching null
+            annClass.getDeclaredMethod("diffThreshold").invoke(ann) as? Float
+        }.getOrNull()
+        if (diffThreshold != null && diffThreshold != 0f) metadata["diff_threshold"] = diffThreshold
+
+        if (tags.isNotEmpty()) metadata["tags"] = tags
+        metadata["context"] = context
+
+        val json = renderJson(metadata, 0)
         val sidecarName = "Paparazzi_Preview_Test_" +
             screenshotId.lowercase(Locale.US).replace("\\s".toRegex(), "_")
         File(imagesDir, "${'$'}{sidecarName}.json").writeText(json)
+    }
+
+    private fun renderJson(value: Any, indentLevel: Int): String {
+        val indent = "  ".repeat(indentLevel)
+        val childIndent = "  ".repeat(indentLevel + 1)
+        return when (value) {
+            is String -> "\"" + escapeJson(value) + "\""
+            is Boolean, is Number -> value.toString()
+            is Map<*, *> -> when (value.isEmpty()) {
+                true -> "{}"
+                false -> value.entries.joinToString(
+                    separator = ",\n${'$'}childIndent",
+                    prefix = "{\n${'$'}childIndent",
+                    postfix = "\n${'$'}indent}",
+                ) { (k, v) -> "\"${'$'}k\": " + renderJson(v!!, indentLevel + 1) }
+            }
+            else -> "\"" + escapeJson(value.toString()) + "\""
+        }
     }
 
     private fun escapeJson(s: String): String =

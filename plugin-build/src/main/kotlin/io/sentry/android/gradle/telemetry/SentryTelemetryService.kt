@@ -2,6 +2,7 @@
 
 package io.sentry.android.gradle.telemetry
 
+import com.android.build.api.dsl.CommonExtension
 import io.sentry.BuildConfig
 import io.sentry.IHub
 import io.sentry.ISpan
@@ -30,11 +31,11 @@ import io.sentry.gradle.common.SentryVariant
 import io.sentry.protocol.Mechanism
 import io.sentry.protocol.User
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.nio.charset.Charset
 import javax.inject.Inject
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.internal.tasks.execution.ExecuteTaskBuildOperationDetails
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -287,7 +288,7 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
       val infoOutput =
         project.providers
           .of(SentryCliInfoValueSource::class.java) { cliVS ->
-            cliVS.parameters.buildDirectory.set(project.buildDir)
+            cliVS.parameters.buildDirectory.set(project.layout.buildDirectory)
             cliVS.parameters.cliExecutable.set(cliExecutable)
             cliVS.parameters.authToken.set(extension.authToken)
             cliVS.parameters.url.set(extension.url)
@@ -314,7 +315,7 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
       val versionOutput =
         project.providers
           .of(SentryCliVersionValueSource::class.java) { cliVS ->
-            cliVS.parameters.buildDirectory.set(project.buildDir)
+            cliVS.parameters.buildDirectory.set(project.layout.buildDirectory)
             cliVS.parameters.cliExecutable.set(cliExecutable)
             cliVS.parameters.url.set(extension.url)
           }
@@ -393,6 +394,19 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
       // TODO PII?
       //            extension.projectName.orNull?.let { tags.put("projectName", it) }
 
+      try {
+        val android = project.extensions.findByType(CommonExtension::class.java)
+        if (android != null) {
+          tags.put(
+            "coreLibraryDesugaring_enabled",
+            android.compileOptions.isCoreLibraryDesugaringEnabled.toString(),
+          )
+          android.defaultConfig.minSdk?.let { tags.put("minSdk", it.toString()) }
+        }
+      } catch (_: Throwable) {
+        // Android extensions may not be available (e.g. JVM plugin)
+      }
+
       return tags
     }
   }
@@ -407,7 +421,7 @@ class SentryMinimalException(message: String) : RuntimeException(message) {
 
 abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
   interface InfoParams : ValueSourceParameters {
-    @get:Input val buildDirectory: Property<File>
+    @get:Input val buildDirectory: DirectoryProperty
 
     @get:Input val cliExecutable: Property<String>
 
@@ -428,7 +442,7 @@ abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
       execOperations.exec {
         it.isIgnoreExitValue = true
         SentryCliProvider.maybeExtractFromResources(
-          parameters.buildDirectory.get(),
+          parameters.buildDirectory,
           parameters.cliExecutable.get(),
         )
 
@@ -471,7 +485,7 @@ abstract class SentryCliInfoValueSource : ValueSource<String, InfoParams> {
 
 abstract class SentryCliVersionValueSource : ValueSource<String, VersionParams> {
   interface VersionParams : ValueSourceParameters {
-    @get:Input val buildDirectory: Property<File>
+    @get:Input val buildDirectory: DirectoryProperty
 
     @get:Input val cliExecutable: Property<String>
 
@@ -485,7 +499,7 @@ abstract class SentryCliVersionValueSource : ValueSource<String, VersionParams> 
     execOperations.exec {
       it.isIgnoreExitValue = true
       SentryCliProvider.maybeExtractFromResources(
-        parameters.buildDirectory.get(),
+        parameters.buildDirectory,
         parameters.cliExecutable.get(),
       )
 

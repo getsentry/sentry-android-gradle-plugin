@@ -9,9 +9,10 @@ import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.ApplicationVariant
+import com.android.build.api.variant.HostTestBuilder.Companion.UNIT_TEST_TYPE
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.internal.utils.setDisallowChanges
-import io.sentry.android.gradle.SentryPlugin.Companion.sep
+import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
@@ -20,6 +21,7 @@ import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
+import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask
@@ -40,12 +42,12 @@ import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.collectModules
 import io.sentry.android.gradle.util.hookWithAssembleTasks
-import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
 
 fun ApplicationAndroidComponentsExtension.configure(
@@ -56,10 +58,6 @@ fun ApplicationAndroidComponentsExtension.configure(
   sentryOrg: String?,
   sentryProject: String?,
 ) {
-  // temp folder for sentry-related stuff
-  val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
-  tmpDir.mkdirs()
-
   onVariants { variant ->
     // Validate distribution configuration for this variant
     val updateSdkVariants = extension.distribution.updateSdkVariants.get()
@@ -76,6 +74,10 @@ fun ApplicationAndroidComponentsExtension.configure(
             "You cannot use the auto-update SDK in variants where the Sentry SDK is disabled."
         )
       }
+    }
+
+    if (extension.snapshots.enabled.get()) {
+      variant.configureSnapshotsTasks(project, extension, cliExecutable, sentryOrg, sentryProject)
     }
 
     if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
@@ -134,15 +136,6 @@ fun ApplicationAndroidComponentsExtension.configure(
       generateDistributionPropertiesTask?.let { tasksGeneratingProperties.add(it) }
 
       sentryVariant.configureNativeSymbolsTask(
-        project,
-        extension,
-        sentryTelemetryProvider,
-        cliExecutable,
-        sentryOrg,
-        sentryProject,
-      )
-
-      variant.configureSnapshotsTasks(
         project,
         extension,
         sentryTelemetryProvider,
@@ -239,7 +232,9 @@ fun ApplicationAndroidComponentsExtension.configure(
           params.binderIpcEnabled.setDisallowChanges(
             extension.tracingInstrumentation.binderIpc.enabled
           )
-          params.tmpDir.set(tmpDir)
+          params.tmpDir.set(
+            project.layout.buildDirectory.dir("sentry-logs/instrumentation/${variant.name}")
+          )
         }
 
         val manifestUpdater =
@@ -469,26 +464,94 @@ private fun ApplicationVariant.configureDistributionPropertiesTask(
 private fun ApplicationVariant.configureSnapshotsTasks(
   project: Project,
   extension: SentryPluginExtension,
-  sentryTelemetryProvider: Provider<SentryTelemetryService>,
   cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
-): TaskProvider<SentryUploadSnapshotsTask> {
+) {
+  check(AgpVersions.CURRENT >= AgpVersions.VERSION_8_0_0) {
+    "Sentry Snapshots require Android Gradle Plugin 8.0 or higher. " +
+      "Current version: ${AgpVersions.CURRENT}"
+  }
   val variant = AndroidVariant74(this)
   val sentryProps = getPropertiesFilePath(project, variant)
+  val taskSuffix = name.capitalized
 
-  return SentryUploadSnapshotsTask.register(
-    project = project,
-    extension = extension,
-    sentryTelemetryProvider = sentryTelemetryProvider,
-    cliExecutable = cliExecutable,
-    sentryOrgOverride = sentryOrg,
-    sentryProjectOverride = sentryProject,
-    applicationId = applicationId,
-    sentryProperties = sentryProps,
-    taskSuffix = name.capitalized,
-  )
+  // Register the upload task
+  val uploadTask =
+    SentryUploadSnapshotsTask.register(
+      project = project,
+      extension = extension,
+      sentryTelemetryProvider = null,
+      cliExecutable = cliExecutable,
+      sentryOrgOverride = sentryOrg,
+      sentryProjectOverride = sentryProject,
+      applicationId = applicationId,
+      sentryProperties = sentryProps,
+      taskSuffix = taskSuffix,
+    )
+
+  // Wire Paparazzi test generation and upload task when the Paparazzi plugin is applied
+  project.pluginManager.withPlugin("app.cash.paparazzi") {
+    if (extension.snapshots.previews.generateTests.get()) {
+      project.dependencies.add(
+        "testImplementation",
+        "io.github.sergio-sastre.ComposablePreviewScanner:android:${BuildConfig.ComposablePreviewScannerVersion}",
+      )
+
+      val paparazziMajorVersion =
+        project.provider {
+          val dep =
+            project.configurations.findByName("testImplementation")?.allDependencies?.find {
+              it.group == "app.cash.paparazzi" && it.name == "paparazzi"
+            }
+          parseMajorVersion(dep?.version)
+        }
+
+      val generateTask =
+        GenerateSnapshotTestsTask.register(
+          project,
+          extension.snapshots,
+          this@configureSnapshotsTasks,
+          paparazziMajorVersion,
+        )
+
+      if (AgpVersions.isAGP90(AgpVersions.CURRENT)) {
+        hostTests[UNIT_TEST_TYPE]?.apply {
+          sources.java?.addGeneratedSourceDirectory(
+            generateTask,
+            GenerateSnapshotTestsTask::outputDir,
+          )
+        }
+      } else {
+        @Suppress("DEPRECATION_ERROR")
+        unitTest?.apply {
+          sources.java?.addGeneratedSourceDirectory(
+            generateTask,
+            GenerateSnapshotTestsTask::outputDir,
+          )
+        }
+      }
+    }
+
+    project.afterEvaluate {
+      // Not all variants have unit test tasks (e.g. users can disable them),
+      // so skip wiring if the task doesn't exist.
+      val testTaskName = "test${taskSuffix}UnitTest"
+      if (testTaskName !in project.tasks.names) return@afterEvaluate
+
+      val testTask = project.tasks.named(testTaskName, Test::class.java)
+      uploadTask.configure { task ->
+        task.dependsOn("recordPaparazzi$taskSuffix")
+        task.snapshotsPath.fileProvider(
+          testTask.map { it.outputs.files.files.first { file -> file.name == "snapshots" } }
+        )
+      }
+    }
+  }
 }
+
+internal fun parseMajorVersion(version: String?, defaultVersion: Int = 2): Int =
+  version?.trimStart()?.takeWhile { it.isDigit() }?.toIntOrNull() ?: defaultVersion
 
 /**
  * Configure the upload AAB and APK tasks and set them up as finalizers on the respective producer

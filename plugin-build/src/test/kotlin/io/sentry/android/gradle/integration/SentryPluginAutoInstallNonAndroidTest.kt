@@ -46,7 +46,7 @@ class SentryPluginAutoInstallNonAndroidTest :
             dependencies {
               implementation 'org.springframework.boot:spring-boot-starter:3.0.0'
               implementation 'ch.qos.logback:logback-classic:1.0.0'
-              implementation 'org.apache.logging.log4j:log4j-api:2.0'
+              implementation 'org.apache.logging.log4j:log4j-core:2.0'
             }
 
             sentry.autoInstallation.enabled = false
@@ -80,7 +80,7 @@ class SentryPluginAutoInstallNonAndroidTest :
             dependencies {
               implementation 'org.springframework.boot:spring-boot-starter:3.0.0'
               implementation 'ch.qos.logback:logback-classic:1.0.0'
-              implementation 'org.apache.logging.log4j:log4j-api:2.0'
+              implementation 'org.apache.logging.log4j:log4j-core:2.0'
               implementation 'org.springframework:spring-jdbc:6.0.0'
               // keeps versions
               implementation 'io.sentry:sentry-jdbc:6.10.0'
@@ -132,7 +132,33 @@ class SentryPluginAutoInstallNonAndroidTest :
   }
 
   @Test
-  fun `log4j2 is added`() {
+  fun `log4j2 is added for core dependency`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+                id "java"
+                id "io.sentry.jvm.gradle"
+            }
+            dependencies {
+              implementation 'org.apache.logging.log4j:log4j-core:2.0'
+            }
+
+            sentry.autoInstallation.enabled = true
+            sentry.autoInstallation.sentryVersion = "6.28.0"
+            """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+
+    assertTrue { "io.sentry:sentry-log4j2:6.28.0" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `log4j2 is not added for api dependency`() {
     appBuildFile.writeText(
       // language=Groovy
       """
@@ -152,7 +178,7 @@ class SentryPluginAutoInstallNonAndroidTest :
 
     val result = runListDependenciesTask()
 
-    assertTrue { "io.sentry:sentry-log4j2:6.28.0" in result.output }
+    assertFalse { "io.sentry:sentry-log4j2:6.28.0" in result.output }
     // ensure all dependencies could be resolved
     assertFalse { "FAILED" in result.output }
   }

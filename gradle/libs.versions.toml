@@ -17,31 +17,31 @@ kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version = "2.1.0-1.0.29" }
+ksp = { id = "com.google.devtools.ksp" }
 dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
-spotless = { id = "com.diffplug.spotless", version = "7.0.4" }
-groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.7.1" }
+spotless = { id = "com.diffplug.spotless", version = "8.5.0" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
-buildConfig = { id = "com.github.gmazzo.buildconfig", version = "4.2.0" }
+buildConfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.9" }
 springBoot = { id = "org.springframework.boot", version = "3.4.1" }
 springDependencyManagement = { id = "io.spring.dependency-management", version = "1.1.7" }
 composeCompiler =  { id = "org.jetbrains.kotlin.plugin.compose", version = "2.1.0" }
 
 [libraries]
 junit = { group = "junit", name = "junit", version = "4.13.2" }
+androidxAnnotation = { group = "androidx.annotation", name = "annotation", version = "1.9.1" }
 proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.5.0" }
 # this allows us to develop against a fixed version of Gradle, as opposed to depending on the
 # locally available version. kotlin-gradle-plugin follows the same approach.
 gradleApi = { group = "org.gradle.experimental", name = "gradle-public-api", version = "8.9" }
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable" }
-autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.0.1" }
-autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.0.1" }
+autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.1.1" }
+autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.1.1" }
 kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
 kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.7.1" }
-truth = { module = "com.google.truth:truth", version = "1.4.4" }
+truth = { module = "com.google.truth:truth", version = "1.4.5" }
 composeDesktop = { group = "org.jetbrains.compose.desktop", name = "desktop", version = "1.6.10" }
 
 # bytecode instrumentation
@@ -62,7 +62,7 @@ zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.5" }
 
 # samples
 sample-androidx-recyclerView = "androidx.recyclerview:recyclerview:1.2.0"
-sample-androidx-lifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
+sample-androidx-lifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:2.9.4"
 sample-androidx-appcompat = "androidx.appcompat:appcompat:1.2.0"
 
 sample-androidx-composeRuntime = "androidx.compose.runtime:runtime:1.5.4"
@@ -92,7 +92,7 @@ sample-springBoot-starterWebflux = { group = "org.springframework.boot", name = 
 sample-springBoot-starterAop = { group = "org.springframework.boot", name = "spring-boot-starter-aop", version.ref = "sampleSpringBoot" }
 sample-springBoot-starterSecurity = { group = "org.springframework.boot", name = "spring-boot-starter-security", version.ref = "sampleSpringBoot" }
 sample-springBoot-starterJdbc = { group = "org.springframework.boot", name = "spring-boot-starter-jdbc", version.ref = "sampleSpringBoot" }
-sample-springBoot-hsqldb = "org.hsqldb:hsqldb:2.6.1"
+sample-springBoot-hsqldb = "org.hsqldb:hsqldb:2.7.4"
 sample-springBoot-aspectj = { group = "org.aspectj", name = "aspectjweaver" }
 sample-springBoot-kotlinReflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect" }
 sample-springBoot-kotlinStdLib = { group = "org.jetbrains.kotlin", name = "stdlib-jdk8" }

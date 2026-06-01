@@ -14,12 +14,10 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
 
-  private val sep = File.separator
-
   @Test
   fun `getPropertiesFilePath finds file inside debug folder`() {
     val (project, _) = createTestAndroidProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
-    createTestFile(project.projectDir, "src${sep}debug${sep}sentry.properties")
+    createTestFile(project.projectDir, "src/debug/sentry.properties")
 
     val variant = project.retrieveAndroidVariant("debug")
 
@@ -44,7 +42,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
         productFlavors.create("lite")
         productFlavors.create("full")
       }
-    createTestFile(project.projectDir, "src${sep}lite${sep}sentry.properties")
+    createTestFile(project.projectDir, "src/lite/sentry.properties")
 
     val variant = project.retrieveAndroidVariant("liteDebug")
 
@@ -59,7 +57,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
         productFlavors.create("lite")
         productFlavors.create("full")
       }
-    createTestFile(project.projectDir, "src${sep}lite${sep}debug${sep}sentry.properties")
+    createTestFile(project.projectDir, "src/lite/debug/sentry.properties")
 
     val variant = project.retrieveAndroidVariant("liteDebug")
 
@@ -74,7 +72,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
         productFlavors.create("lite")
         productFlavors.create("full")
       }
-    createTestFile(project.projectDir, "src${sep}debug${sep}lite${sep}sentry.properties")
+    createTestFile(project.projectDir, "src/debug/lite/sentry.properties")
 
     val variant = project.retrieveAndroidVariant("liteDebug")
 
@@ -89,7 +87,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
         productFlavors.create("lite") { it.dimension("version") }
         productFlavors.create("api30") { it.dimension("api") }
       }
-    createTestFile(project.projectDir, "src${sep}liteApi30${sep}sentry.properties")
+    createTestFile(project.projectDir, "src/liteApi30/sentry.properties")
 
     val variant = project.retrieveAndroidVariant("liteApi30Debug")
 
@@ -104,7 +102,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
         productFlavors.create("lite") { it.dimension("version") }
         productFlavors.create("api30") { it.dimension("api") }
       }
-    createTestFile(project.projectDir, "src${sep}api30${sep}sentry.properties")
+    createTestFile(project.projectDir, "src/api30/sentry.properties")
 
     val variant = project.retrieveAndroidVariant("liteApi30Debug")
 
@@ -134,7 +132,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
         parent = rootProject,
         forceEvaluate = !AgpVersions.isAGP74(agpVersion),
       )
-    createTestFile(rootProject.projectDir, "src${sep}debug${sep}sentry.properties")
+    createTestFile(rootProject.projectDir, "src/debug/sentry.properties")
 
     val variant = project.retrieveAndroidVariant("debug")
 
@@ -152,7 +150,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
         flavorDimensions("version")
         productFlavors.create("lite")
       }
-    createTestFile(rootProject.projectDir, "src${sep}lite${sep}sentry.properties")
+    createTestFile(rootProject.projectDir, "src/lite/sentry.properties")
 
     val variant = project.retrieveAndroidVariant("liteDebug")
 
@@ -170,7 +168,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
         flavorDimensions("version")
         productFlavors.create("lite")
       }
-    createTestFile(rootProject.projectDir, "src${sep}lite${sep}debug${sep}sentry.properties")
+    createTestFile(rootProject.projectDir, "src/lite/debug/sentry.properties")
 
     val variant = project.retrieveAndroidVariant("liteDebug")
 
@@ -194,7 +192,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
         forceEvaluate = !AgpVersions.isAGP74(agpVersion),
       )
     // Only place the file under src/debug/ — with null variant this should not be found
-    createTestFile(project.projectDir, "src${sep}debug${sep}sentry.properties")
+    createTestFile(project.projectDir, "src/debug/sentry.properties")
 
     assertEquals(null, getPropertiesFilePath(project))
   }
@@ -210,7 +208,7 @@ class SentryPropertiesFileProviderTest(private val agpVersion: SemVer) {
         flavorDimensions("version")
         productFlavors.create("lite")
       }
-    createTestFile(rootProject.projectDir, "src${sep}debug${sep}lite${sep}sentry.properties")
+    createTestFile(rootProject.projectDir, "src/debug/lite/sentry.properties")
 
     val variant = project.retrieveAndroidVariant("liteDebug")
 

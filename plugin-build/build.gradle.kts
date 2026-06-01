@@ -1,10 +1,12 @@
+import com.vanniktech.maven.publish.tasks.JavadocJar
 import io.sentry.android.gradle.internal.ASMifyTask
 import io.sentry.android.gradle.internal.BootstrapAndroidSdk
-import java.io.FileInputStream
 import java.util.Properties
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -70,6 +72,16 @@ java {
   targetCompatibility = JavaVersion.VERSION_11
 }
 
+// Tests need JVM 17 because the CI matrix tests against AGP 9.3+ (compiled with JVM 17 bytecode),
+// but production stays on JVM 11 to support hybrid/gaming SDKs that lag behind native tooling.
+val jvm17TestCompileTasks = setOf("compileTestJava", "compileTestKotlin")
+
+tasks.withType<JavaCompile>().configureEach {
+  if (name in jvm17TestCompileTasks) {
+    targetCompatibility = JavaVersion.VERSION_17.toString()
+  }
+}
+
 // We need to compile Groovy first and let Kotlin depend on it.
 // See https://docs.gradle.org/6.1-rc-1/release-notes.html#compilation-order
 tasks.withType<GroovyCompile>().configureEach {
@@ -90,7 +102,7 @@ tasks.withType<KotlinCompile>().configureEach {
   }
 
   compilerOptions {
-    jvmTarget.set(JVM_11)
+    jvmTarget.set(if (name in jvm17TestCompileTasks) JVM_17 else JVM_11)
     // Kotlin supports current + 3 previous language versions.
     // We want 1.8, but if the compiler no longer supports it, use the oldest it does support.
     // e.g. Kotlin 2.1 oldest=1.8, Kotlin 2.3 oldest=2.0
@@ -164,10 +176,6 @@ gradlePlugin {
       id = "io.sentry.jvm.gradle"
       implementationClass = "io.sentry.jvm.gradle.SentryJvmPlugin"
     }
-    register("sentrySnapshotPlugin") {
-      id = "io.sentry.android.snapshot"
-      implementationClass = "io.sentry.android.gradle.snapshot.SentrySnapshotPlugin"
-    }
     register("sentrySnapshotMetadataPlugin") {
       id = "io.sentry.android.snapshot.metadata"
       implementationClass =
@@ -204,9 +212,6 @@ distributions {
   }
   create("sentryJvmPluginMarker") {
     contents { from("build${sep}publications${sep}sentryJvmPluginPluginMarkerMaven") }
-  }
-  create("sentrySnapshotPluginMarker") {
-    contents { from("build${sep}publications${sep}sentrySnapshotPluginPluginMarkerMaven") }
   }
   create("sentrySnapshotMetadataPluginMarker") {
     contents { from("build${sep}publications${sep}sentrySnapshotMetadataPluginPluginMarkerMaven") }
@@ -255,14 +260,6 @@ tasks.named("sentryPluginMarkerDistTar").configure {
 
 tasks.named("sentryPluginMarkerDistZip").configure {
   dependsOn("generatePomFileForSentryPluginPluginMarkerMavenPublication")
-}
-
-tasks.named("sentrySnapshotPluginMarkerDistTar").configure {
-  dependsOn("generatePomFileForSentrySnapshotPluginPluginMarkerMavenPublication")
-}
-
-tasks.named("sentrySnapshotPluginMarkerDistZip").configure {
-  dependsOn("generatePomFileForSentrySnapshotPluginPluginMarkerMavenPublication")
 }
 
 tasks.named("sentrySnapshotMetadataPluginMarkerDistTar").configure {
@@ -327,16 +324,18 @@ buildConfig {
   buildConfigField("String", "Version", provider { "\"${project.version}\"" })
   buildConfigField("String", "SdkVersion", provider { "\"${project.property("sdk_version")}\"" })
   buildConfigField("String", "AgpVersion", provider { "\"${BuildPluginsVersion.AGP}\"" })
+  buildConfigField("String", "CliVersion", propertyVersionProvider("sentry-cli.properties"))
   buildConfigField(
     "String",
-    "CliVersion",
-    provider {
-      "\"${Properties().apply {
-          load(FileInputStream(File("$projectDir/sentry-cli.properties")))
-      }.getProperty("version")}\""
-    },
+    "ComposablePreviewScannerVersion",
+    propertyVersionProvider("composable-preview-scanner.properties"),
   )
 }
+
+fun propertyVersionProvider(fileName: String): Provider<String> =
+  providers.fileContents(layout.projectDirectory.file(fileName)).asText.map { content ->
+    "\"${Properties().apply { load(content.reader()) }.getProperty("version")}\""
+  }
 
 tasks.register<ASMifyTask>("asmify")
 
@@ -360,4 +359,12 @@ plugins.withId("com.vanniktech.maven.publish.base") {
       }
     }
   }
+}
+
+tasks.withType<DokkaTask>().configureEach {
+  notCompatibleWithConfigurationCache("Cannot serialize configuration")
+}
+
+tasks.withType<JavadocJar>().configureEach {
+  notCompatibleWithConfigurationCache("Cannot serialize configuration")
 }

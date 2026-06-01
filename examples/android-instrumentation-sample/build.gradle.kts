@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
 plugins {
   alias(libs.plugins.androidApplication) version BuildPluginsVersion.AGP
   alias(libs.plugins.kotlinAndroid) version BuildPluginsVersion.KOTLIN
-  alias(libs.plugins.ksp)
+  alias(libs.plugins.ksp) version BuildPluginsVersion.KSP
   id("io.sentry.android.gradle")
   id("io.sentry.kotlin.compiler.gradle")
 }

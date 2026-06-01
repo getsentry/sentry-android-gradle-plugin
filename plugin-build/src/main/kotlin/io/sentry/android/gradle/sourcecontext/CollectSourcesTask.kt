@@ -75,10 +75,7 @@ internal class SourceCollector {
       if (sourceDir.exists()) {
         SentryPlugin.logger.debug { "Collecting sources in ${sourceDir.absolutePath}" }
         sourceDir.walk().forEach { sourceFile ->
-          val relativePath =
-            sourceFile.absolutePath
-              .removePrefix(sourceDir.absolutePath)
-              .removePrefix(File.separator)
+          val relativePath = sourceFile.toRelativeString(sourceDir)
           val targetFile = outDir.resolve(File(relativePath))
           if (sourceFile.isFile) {
             if (relativePath.isBlank()) {

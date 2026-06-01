@@ -30,7 +30,7 @@ abstract class Log4j2InstallStrategy : AbstractInstallStrategy {
 
   companion object Registrar : InstallStrategyRegistrar {
     private const val LOG4J2_GROUP = "org.apache.logging.log4j"
-    private const val LOG4J2_ID = "log4j-api"
+    private const val LOG4J2_ID = "log4j-core"
     internal const val SENTRY_LOG4J2_ID = "sentry-log4j2"
 
     private val MIN_SUPPORTED_VERSION = SemVer(2, 0, 0)

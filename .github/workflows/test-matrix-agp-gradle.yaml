@@ -65,9 +65,10 @@ jobs:
           java-version: ${{ matrix.java }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # pin@v4
+        uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # pin@v6
         with:
           gradle-version: ${{ matrix.gradle }}
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Build the Release variants and integrationTest
         run: gradle assembleRelease bundleRelease integrationTest
@@ -91,7 +92,7 @@ jobs:
           rm -r output
 
       - name: Upload Test Results
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: test-results-AGP${{ matrix.agp }}-Gradle${{ matrix.gradle }}
           path: plugin-build/build/reports/tests/

@@ -6,6 +6,108 @@
 
 - Add Binder IPC call instrumentation ([#1159](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1159))
 
+## 6.9.0
+
+### Fixes
+
+- Defer instrumentation log directory creation to execution time and use variant-specific paths to prevent log file corruption during parallel variant transforms ([#1236](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1236))
+
+### Dependencies
+
+- Bump CLI from v3.4.2 to v3.4.3 ([#1215](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1215))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#343)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.4.2...3.4.3)
+- Bump Android SDK from v8.42.0 to v8.43.0 ([#1241](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1241))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8430)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.42.0...8.43.0)
+
+## 6.8.1
+
+### Fixes
+
+- Fail fast with a clear error when Snapshots feature is used with AGP 7.x ([#1212](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1212))
+
+## 6.8.0
+
+### Dependencies
+
+- Bump Android SDK from v8.41.0 to v8.42.0 ([#1207](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1207))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8420)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.41.0...8.42.0)
+
+## 6.7.1
+
+### Fixes
+
+- Fix snapshot upload error by using string values for all sidecar tags ([#1199](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1199))
+
+## 6.7.0
+
+### Features
+
+- Add global `diffThreshold` option for snapshots ([#1186](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1186))
+
+### Fixes
+
+- Change auto-install trigger for log4j2 from -api to -core dependency ([#1155](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1155))
+
+### Dependencies
+
+- Bump Android SDK from v8.40.0 to v8.41.0 ([#1182](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1182))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8410)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.40.0...8.41.0)
+- Bump CLI from v3.4.1 to v3.4.2 ([#1185](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1185))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#342)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.4.1...3.4.2)
+
+## 6.6.0
+
+### Dependencies
+
+- Bump ComposablePreviewScanner from v0.8.1 to v0.9.0 ([#1174](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1174), [#1176](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1176))
+  - [changelog](https://github.com/sergio-sastre/ComposablePreviewScanner/blob/master/CHANGELOG.md#090)
+  - [diff](https://github.com/sergio-sastre/ComposablePreviewScanner/compare/0.8.1...0.9.0)
+- Bump CLI from v3.4.0 to v3.4.1 ([#1175](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1175))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#341)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.4.0...3.4.1)
+
+## 6.5.0
+
+### Dependencies
+
+- Bump CLI from v3.3.5 to v3.4.0 ([#1156](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1156))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#340)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.3.5...3.4.0)
+- Bump Android SDK from v8.38.0 to v8.40.0 ([#1153](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1153), [#1161](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1161))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8400)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.38.0...8.40.0)
+
+## 6.4.0
+
+### Dependencies
+
+- Bump Android SDK from v8.37.1 to v8.38.0 ([#1140](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1140))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8380)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.37.1...8.38.0)
+
+## 6.4.0-alpha.6
+
+### Internal Changes 🔧
+
+#### Deps
+
+- Update CLI to v3.3.5 by @github-actions in [#1132](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1132)
+- Update CLI to v3.3.4 by @github-actions in [#1122](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1122)
+
+## 6.4.0-alpha.5
+
+### Internal Changes 🔧
+
+#### Deps
+
+- Update CLI to v3.3.5 by @github-actions in [#1132](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1132)
+- Update CLI to v3.3.4 by @github-actions in [#1122](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1122)
+
 ## 6.4.0-alpha.4
 
 ### Internal Changes 🔧

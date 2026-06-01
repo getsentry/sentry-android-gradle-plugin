@@ -157,6 +157,47 @@ class SentryUploadSnapshotsTaskTest {
   }
 
   @Test
+  fun `diffThreshold is passed to CLI when non-zero`() {
+    val task = createTestTask {
+      it.cliExecutable.set("sentry-cli")
+      it.appId.set("com.example")
+      it.snapshotsPath.set(File("/path/to/snapshots"))
+      it.diffThreshold.set(0.05)
+    }
+
+    val args = task.computeCommandLineArgs()
+
+    assertThat(args).containsAtLeast("--diff-threshold", "0.05").inOrder()
+  }
+
+  @Test
+  fun `diffThreshold is omitted when zero`() {
+    val task = createTestTask {
+      it.cliExecutable.set("sentry-cli")
+      it.appId.set("com.example")
+      it.snapshotsPath.set(File("/path/to/snapshots"))
+      it.diffThreshold.set(0.0)
+    }
+
+    val args = task.computeCommandLineArgs()
+
+    assertThat(args).doesNotContain("--diff-threshold")
+  }
+
+  @Test
+  fun `diffThreshold is omitted when not set`() {
+    val task = createTestTask {
+      it.cliExecutable.set("sentry-cli")
+      it.appId.set("com.example")
+      it.snapshotsPath.set(File("/path/to/snapshots"))
+    }
+
+    val args = task.computeCommandLineArgs()
+
+    assertThat(args).doesNotContain("--diff-threshold")
+  }
+
+  @Test
   fun `vcs parameters are omitted when not set`() {
     val task = createTestTask {
       it.cliExecutable.set("sentry-cli")
