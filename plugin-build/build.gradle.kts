@@ -59,7 +59,7 @@ dependencies {
   testImplementationAar(libs.sqliteFramework)
   testRuntimeOnly(files(androidSdkPath))
   testImplementationAar(libs.sentryAndroid)
-  testImplementationAar(libs.sentryAndroidOkhttp)
+  testImplementation(libs.sentryOkhttp)
   testImplementationAar(libs.sentryOkhttp)
 
   // Needed to read contents from APK/Source Bundles

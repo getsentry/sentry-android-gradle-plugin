@@ -51,7 +51,6 @@ sqlite = { group = "androidx.sqlite", name = "sqlite", version.ref = "sqlite" }
 sqliteFramework = { group = "androidx.sqlite", name = "sqlite-framework", version.ref = "sqlite" }
 sentry = { group = "io.sentry", name = "sentry", version.ref = "sentry" }
 sentryAndroid = { group = "io.sentry", name = "sentry-android", version.ref = "sentry" }
-sentryAndroidOkhttp = { group = "io.sentry", name = "sentry-android-okhttp", version.ref = "sentry" }
 sentryOkhttp = { group = "io.sentry", name = "sentry-okhttp", version.ref = "sentry" }
 sentrySpringBootJakarta = { group = "io.sentry", name = "sentry-spring-boot-starter-jakarta", version.ref = "sentry" }
 
