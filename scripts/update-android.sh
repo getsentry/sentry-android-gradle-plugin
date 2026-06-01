@@ -5,7 +5,7 @@ cd $(dirname "$0")/../
 file='gradle/libs.versions.toml'
 content=$(cat $file)
 
-regex='(sentry = ")([0-9\.]+)'
+regex='(sentry = ")([^"]+)'
 if ! [[ $content =~ $regex ]]; then
     echo "Failed to find the Android SDK version in $file"
     exit 1
