@@ -5,7 +5,7 @@ agp = "8.10.1"
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
 ktfmt = "0.51"
 sqlite = "2.1.0"
-sentry = "7.0.0"
+sentry = "7.22.6"
 
 sampleCoroutines = "1.5.2"
 sampleRoom = "2.7.2"
