@@ -60,6 +60,7 @@ dependencies {
   testRuntimeOnly(files(androidSdkPath))
   testImplementationAar(libs.sentryAndroid)
   testImplementation(libs.sentryOkhttp)
+  testImplementationAar(libs.sentryAndroidOkhttp)
 
   // Needed to read contents from APK/Source Bundles
   testImplementation(libs.arscLib)

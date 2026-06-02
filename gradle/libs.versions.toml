@@ -6,6 +6,10 @@ asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference
 ktfmt = "0.51"
 sqlite = "2.1.0"
 sentry = "8.43.0"
+# Pinned to the last release that shipped sentry-android-okhttp; the module was removed
+# in 8.0.0, so there is no newer version to update to. Used only to verify the legacy
+# okhttp instrumentation path in tests.
+sentryAndroidOkhttp = "7.22.6"
 
 sampleCoroutines = "1.5.2"
 sampleRoom = "2.7.2"
@@ -52,6 +56,7 @@ sqliteFramework = { group = "androidx.sqlite", name = "sqlite-framework", versio
 sentry = { group = "io.sentry", name = "sentry", version.ref = "sentry" }
 sentryAndroid = { group = "io.sentry", name = "sentry-android", version.ref = "sentry" }
 sentryOkhttp = { group = "io.sentry", name = "sentry-okhttp", version.ref = "sentry" }
+sentryAndroidOkhttp = { group = "io.sentry", name = "sentry-android-okhttp", version.ref = "sentryAndroidOkhttp" }
 sentrySpringBootJakarta = { group = "io.sentry", name = "sentry-spring-boot-starter-jakarta", version.ref = "sentry" }
 
 # test

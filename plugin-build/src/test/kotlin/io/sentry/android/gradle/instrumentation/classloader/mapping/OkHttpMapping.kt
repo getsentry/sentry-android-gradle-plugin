@@ -12,10 +12,4 @@ val okHttpMissingClasses =
       { name ->
         standardClassSource(name, superclass = "okhttp3.internal.Internal")
       },
-    // Removed from the Sentry SDK in 8.0.0; generate a stub so the verifier can still
-    // resolve it for the legacy useSentryAndroidOkHttp instrumentation path.
-    "io.sentry.android.okhttp.SentryOkHttpEventListener" to
-      { name ->
-        standardClassSource(name, superclass = "io.sentry.okhttp.SentryOkHttpEventListener")
-      },
   )
