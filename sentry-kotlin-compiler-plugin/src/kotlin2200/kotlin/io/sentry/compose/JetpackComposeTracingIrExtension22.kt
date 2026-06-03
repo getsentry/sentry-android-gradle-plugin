@@ -178,9 +178,9 @@ class JetpackComposeTracingIrExtension22(private val messageCollector: MessageCo
 
           for (idx in 0 until expression.symbol.owner.parameters.size) {
             val valueParameter = expression.symbol.owner.parameters[idx]
-            // The unified parameter API also lists dispatch/extension/context receivers, so wrap
-            // only actual value arguments. Otherwise the Modifier receivers of chained calls
-            // (e.g. Modifier.fillMaxSize().padding()) get tagged too.
+            // In Kotlin 2.2 dispatch/extension receivers are part of parameters; only enrich
+            // regular value parameters, otherwise modifier-receiver chains (e.g.
+            // Modifier.fillMaxSize().padding()) would each get their receiver wrapped as well.
             if (
               valueParameter.kind == IrParameterKind.Regular &&
                 valueParameter.type.classFqName == modifierClassFqName
