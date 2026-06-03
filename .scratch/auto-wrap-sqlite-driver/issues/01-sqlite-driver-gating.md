@@ -1,6 +1,6 @@
 # Add gating for SQLiteDriver instrumentation
 
-Status: ready-for-agent
+Status: done
 Type: AFK
 
 ## Description

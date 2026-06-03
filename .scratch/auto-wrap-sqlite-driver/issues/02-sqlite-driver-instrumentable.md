@@ -1,6 +1,6 @@
 # Implement SQLiteDriver call-site wrapping instrumentable + visitor
 
-Status: ready-for-agent
+Status: done
 Type: AFK
 
 ## Description

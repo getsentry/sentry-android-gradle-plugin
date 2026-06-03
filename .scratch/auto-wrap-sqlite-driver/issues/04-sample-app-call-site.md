@@ -1,6 +1,6 @@
 # Add a SQLiteDriver call site to the instrumentation sample app
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: AFK
 Blocked by: 03
 
@@ -32,3 +32,21 @@ Caveats (be conservative):
 - [ ] `./gradlew spotlessApply` passes for any changed files; the relevant sample build task succeeds.
 
 ## Comments
+
+**Deferred during Phase 6 (make-it auto), 2026-06.** Implementing this now would knowingly produce a
+broken sample:
+
+- The sample (`examples/android-instrumentation-sample`) resolves the latest published
+  `sentry-android` (8.43.0), which is `>=` the placeholder `VERSION_SENTRY_SQLITE_DRIVER` (8.43.0).
+  With the gate satisfied, the plugin would inject `io.sentry.sqlite.SentrySQLiteDriver.create(...)`
+  at a `setDriver(...)` call site — but `SentrySQLiteDriver` does NOT exist in 8.43.0 (sentry-java
+  PR #5466 is still open/unmerged). The sample would build but crash at launch (the DB is created in
+  `SampleApp`).
+- The sample's Room may also predate 2.7 (no `setDriver`), which would be a compile error.
+
+**Unblock condition:** once sentry-java PR #5466 ships and `VERSION_SENTRY_SQLITE_DRIVER` is pinned to
+that real release, bump the sample to that SDK version and add a concrete-driver
+`Room.databaseBuilder(...).setDriver(BundledSQLiteDriver())` call site (adding
+`androidx.sqlite:sqlite-bundled`). Then the injection resolves and the sample becomes a live smoke
+test. Until then this is intentionally not implemented. This slice was always marked non-blocking in
+the PRD.
