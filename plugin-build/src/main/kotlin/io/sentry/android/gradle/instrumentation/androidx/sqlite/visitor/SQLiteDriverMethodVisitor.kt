@@ -56,8 +56,7 @@ class SQLiteDriverMethodVisitor(
     if (isSetDriver) {
       // `stack` is maintained by AnalyzerAdapter and reflects the state *before* this instruction,
       // so the top of stack is the driver argument we are about to pass to setDriver.
-      val top = stack?.lastOrNull()
-      val topType = top as? String
+      val topType = stack?.lastOrNull() as? String
       if (isWrappable(topType)) {
         super.visitMethodInsn(
           Opcodes.INVOKESTATIC,
