@@ -6,6 +6,10 @@ import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
+import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.config.messageCollector
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGetObjectValue
@@ -265,4 +269,12 @@ fun FqName.classId(name: String): ClassId {
 
 fun ClassId.callableId(name: String): CallableId {
   return CallableId(this, Name.identifier(name))
+}
+
+@OptIn(ExperimentalCompilerApi::class)
+fun CompilerPluginRegistrar.ExtensionStorage.registerComposeTracing22(
+  configuration: CompilerConfiguration
+) {
+  val messageCollector = configuration.messageCollector
+  IrGenerationExtension.registerExtension(JetpackComposeTracingIrExtension22(messageCollector))
 }

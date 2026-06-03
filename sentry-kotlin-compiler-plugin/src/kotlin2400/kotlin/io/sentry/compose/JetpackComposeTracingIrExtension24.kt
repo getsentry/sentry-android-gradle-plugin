@@ -4,12 +4,12 @@ import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
-import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.config.messageCollector
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGetObjectValue
@@ -31,9 +31,8 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
 
-// required only for Kotlin 2.0.0
-// @UnsafeDuringIrConstructionAPI
-class JetpackComposeTracingIrExtension19(private val messageCollector: MessageCollector) :
+// Modified duplicate of JetpackComposeTracingIrExtension22, compiled against 2.4.0
+class JetpackComposeTracingIrExtension24(private val messageCollector: MessageCollector) :
   IrGenerationExtension {
 
   override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
@@ -90,12 +89,15 @@ class JetpackComposeTracingIrExtension19(private val messageCollector: MessageCo
     }
     val modifierThen = modifierThenRefs.single()
 
-    val sentryModifierTagFunction =
-      FqName("io.sentry.compose").classId("SentryModifier").callableId("sentryTag")
+    val sentryModifierClassId = FqName("io.sentry.compose").classId("SentryModifier")
+
+    val sentryModifierCompanionClass = pluginContext.referenceClass(sentryModifierClassId)?.owner
+
+    val sentryModifierTagFunction = sentryModifierClassId.callableId("sentryTag")
 
     val sentryModifierTagFunctionRefs = pluginContext.referenceFunctions(sentryModifierTagFunction)
 
-    if (sentryModifierTagFunctionRefs.isEmpty()) {
+    if (sentryModifierCompanionClass == null || sentryModifierTagFunctionRefs.isEmpty()) {
       messageCollector.report(
         CompilerMessageSeverity.WARNING,
         "io.sentry.compose.Modifier.sentryTag() not found, " +
@@ -115,6 +117,7 @@ class JetpackComposeTracingIrExtension19(private val messageCollector: MessageCo
       return
     }
     val sentryModifierTagFunctionRef = sentryModifierTagFunctionRefs.single()
+    val sentryModifierCompanionClassRef = sentryModifierCompanionClass.symbol
 
     val transformer =
       object : IrElementTransformerVoidWithContext() {
@@ -165,16 +168,18 @@ class JetpackComposeTracingIrExtension19(private val messageCollector: MessageCo
           // avoid infinite recursion by instrumenting ourselves
           val dispatchReceiver = expression.dispatchReceiver
           if (
-            dispatchReceiver is IrCall && dispatchReceiver.symbol == sentryModifierTagFunctionRef
+            (dispatchReceiver is IrCall &&
+              dispatchReceiver.symbol == sentryModifierTagFunctionRef) ||
+              expression.symbol == sentryModifierTagFunctionRef
           ) {
             return super.visitCall(expression)
           }
 
-          for (idx in 0 until expression.symbol.owner.valueParameters.size) {
-            val valueParameter = expression.symbol.owner.valueParameters[idx]
+          for (idx in 0 until expression.symbol.owner.parameters.size) {
+            val valueParameter = expression.symbol.owner.parameters[idx]
             if (valueParameter.type.classFqName == modifierClassFqName) {
-              val argument = expression.getValueArgument(idx)
-              expression.putValueArgument(idx, wrapExpression(argument, composableName, builder))
+              val argument = expression.arguments[idx]
+              expression.arguments[idx] = wrapExpression(argument, composableName, builder)
             }
           }
           return super.visitCall(expression)
@@ -193,7 +198,7 @@ class JetpackComposeTracingIrExtension19(private val messageCollector: MessageCo
             // Case A: modifier is not supplied
             // -> simply set our modifier as param
             // e.g. BasicText(text = "abc")
-            // into BasicText(text = "abc", modifier = Modifier.sentryTag("<composable>")
+            // into BasicText(text = "abc", modifier = Modifier.sentryTag("<composable>"))
 
             // we can safely set the sentryModifier if there's no value parameter provided
             // but in case the Jetpack Compose Compiler plugin runs before us,
@@ -217,11 +222,12 @@ class JetpackComposeTracingIrExtension19(private val messageCollector: MessageCo
             // Modifier.sentryTag()
             val sentryTagCall = generateSentryTagCall(builder, composableName)
 
-            // Modifier.then()
+            // sentryTag.then(<original expression>)
             val thenCall = builder.irCall(modifierThen, type = modifierType)
-            thenCall.putValueArgument(0, expression)
-            thenCall.dispatchReceiver = sentryTagCall
-
+            // argument 0: dispatch receiver
+            thenCall.arguments[0] = sentryTagCall
+            // argument 1: modifier expression
+            thenCall.arguments[1] = expression
             return thenCall
           }
         }
@@ -232,12 +238,22 @@ class JetpackComposeTracingIrExtension19(private val messageCollector: MessageCo
         ): IrCall {
           val sentryTagCall =
             builder.irCall(sentryModifierTagFunctionRef, type = modifierType).also {
-              it.extensionReceiver =
+              // dispatch receiver: SentryModifier
+              // it.arguments[0]
+              it.arguments[0] =
+                builder.irGetObjectValue(
+                  type = sentryModifierCompanionClassRef.createType(false, emptyList()),
+                  classSymbol = sentryModifierCompanionClassRef,
+                )
+
+              // extension receiver, Modifier
+              it.arguments[1] =
                 builder.irGetObjectValue(
                   type = modifierCompanionClassRef.createType(false, emptyList()),
                   classSymbol = modifierCompanionClassRef,
                 )
-              it.putValueArgument(0, builder.irString(composableName))
+
+              it.arguments[2] = builder.irString(composableName)
             }
           return sentryTagCall
         }
@@ -256,10 +272,9 @@ fun ClassId.callableId(name: String): CallableId {
 }
 
 @OptIn(ExperimentalCompilerApi::class)
-fun CompilerPluginRegistrar.ExtensionStorage.registerComposeTracing19(
+fun CompilerPluginRegistrar.ExtensionStorage.registerComposeTracing24(
   configuration: CompilerConfiguration
 ) {
-  val messageCollector =
-    configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
-  IrGenerationExtension.registerExtension(JetpackComposeTracingIrExtension19(messageCollector))
+  val messageCollector = configuration.messageCollector
+  IrGenerationExtension.registerExtension(JetpackComposeTracingIrExtension24(messageCollector))
 }
