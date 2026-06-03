@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
-  alias(libs.plugins.kotlin) version "2.4.0"
-  alias(libs.plugins.kapt) version "2.4.0"
+  alias(libs.plugins.kotlin) version "2.3.21"
+  alias(libs.plugins.kapt) version "2.3.21"
   id("distribution")
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.spotless)
@@ -104,7 +104,7 @@ kotlin {
   jvmToolchain(11)
   compilerOptions {
     jvmTarget.set(JvmTarget.JVM_11)
-    languageVersion.set(KotlinVersion.KOTLIN_2_0)
-    apiVersion.set(KotlinVersion.KOTLIN_2_0)
+    languageVersion.set(KotlinVersion.KOTLIN_1_9)
+    apiVersion.set(KotlinVersion.KOTLIN_1_9)
   }
 }

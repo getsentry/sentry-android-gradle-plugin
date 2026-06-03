@@ -6,6 +6,10 @@
 
 - Add support for the Kotlin 2.4 compiler in the Compose tracing compiler plugin ([#1253](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1253))
 
+### Fixes
+
+- Compose tracing no longer adds the Sentry modifier multiple times for chained modifiers (e.g. `Modifier.fillMaxSize().padding()`) on Kotlin 2.2 and newer ([#1253](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1253))
+
 ### Dependencies
 
 - Bump Android SDK from v8.43.0 to v8.43.1 ([#1261](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1261))
