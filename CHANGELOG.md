@@ -8,6 +8,10 @@
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8431)
   - [diff](https://github.com/getsentry/sentry-java/compare/8.43.0...8.43.1)
 
+### API Changes
+
+- The `debug` extension property is now typed as `Property<Boolean>` instead of `Property<Boolean?>` ([#1253](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1253))
+
 ## 6.9.0
 
 ### Fixes
