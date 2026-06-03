@@ -173,7 +173,7 @@ abstract class SentryPluginExtension @Inject constructor(objects: ObjectFactory)
    *
    * Default is disabled.
    */
-  val debug: Property<Boolean> = objects.property<Boolean?>(Boolean::class.java).convention(false)
+  val debug: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
 
   /**
    * The slug of the Sentry organization to use for uploading proguard mappings/source contexts.
