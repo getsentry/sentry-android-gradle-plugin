@@ -1,9 +1,13 @@
 package io.sentry.android.gradle.instrumentation.androidx.sqlite.visitor
 
+import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.instrumentation.MethodContext
+import io.sentry.android.gradle.util.debug
+import io.sentry.android.gradle.util.info
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.commons.AnalyzerAdapter
+import org.slf4j.Logger
 
 /**
  * Wraps the argument of `RoomDatabase.Builder.setDriver(SQLiteDriver)` call sites with
@@ -31,6 +35,7 @@ class SQLiteDriverMethodVisitor(
   originalVisitor: MethodVisitor,
   instrumentableContext: MethodContext,
   owner: String,
+  private val logger: Logger = SentryPlugin.logger,
 ) :
   AnalyzerAdapter(
     apiVersion,
@@ -40,6 +45,8 @@ class SQLiteDriverMethodVisitor(
     instrumentableContext.descriptor,
     originalVisitor,
   ) {
+
+  private val callSite = "${owner.replace('/', '.')}.${instrumentableContext.name}"
 
   override fun visitMethodInsn(
     opcode: Int,
@@ -58,6 +65,10 @@ class SQLiteDriverMethodVisitor(
       // so the top of stack is the driver argument we are about to pass to setDriver.
       val topType = stack?.lastOrNull() as? String
       if (isWrappable(topType)) {
+        logger.info {
+          "Wrapping setDriver argument ($topType) with " +
+            "${SENTRY_DRIVER.replace('/', '.')}.create in $callSite"
+        }
         super.visitMethodInsn(
           Opcodes.INVOKESTATIC,
           SENTRY_DRIVER,
@@ -65,6 +76,13 @@ class SQLiteDriverMethodVisitor(
           "(L$DRIVER_IFACE;)L$DRIVER_IFACE;",
           false,
         )
+      } else {
+        // A setDriver call we deliberately did not wrap (bridge / already-Sentry / erased to the
+        // bare SQLiteDriver interface). Surface it so a missed span can be diagnosed.
+        logger.debug {
+          "Skipped setDriver argument (${topType ?: "unknown type"}) from instrumentation " +
+            "in $callSite"
+        }
       }
     }
     super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
