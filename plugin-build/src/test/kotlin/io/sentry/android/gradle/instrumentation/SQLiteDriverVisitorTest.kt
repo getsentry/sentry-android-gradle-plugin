@@ -4,7 +4,7 @@ import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteDr
 import io.sentry.android.gradle.instrumentation.fakes.TestClassContext
 import io.sentry.android.gradle.instrumentation.fakes.TestSpanAddingParameters
 import java.io.FileInputStream
-import junit.framework.TestCase.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -59,9 +59,9 @@ class SQLiteDriverVisitorTest(
     val instrumentedCreates = countSentryCreateCalls(ClassReader(classWriter.toByteArray()))
 
     assertEquals(
-      "Unexpected injected SentrySQLiteDriver.create count for $className",
       expectedInjectedCreates,
       instrumentedCreates - originalCreates,
+      "Unexpected injected SentrySQLiteDriver.create count for $className",
     )
   }
 
