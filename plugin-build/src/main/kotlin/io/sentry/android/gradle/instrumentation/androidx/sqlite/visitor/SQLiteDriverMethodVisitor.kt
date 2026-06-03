@@ -70,19 +70,21 @@ class SQLiteDriverMethodVisitor(
     super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
   }
 
-  private fun isWrappable(type: String?): Boolean {
-    if (type == null) return false
-    // Never wrap the bridge -> the no-double-wrap guarantee. The bridge adapts a (possibly already
-    // Sentry-wrapped) SupportSQLiteOpenHelper, so wrapping it would produce duplicate spans.
-    if (type == BRIDGE) return false
-    // Already a Sentry driver (SDK create() is also idempotent for this, but skip eagerly).
-    if (type == SENTRY_DRIVER) return false
-    // Erased to the bare interface: we cannot prove it isn't a bridge, so bias to a false-negative
-    // (a missed span) over a false-positive (a double span).
-    if (type == DRIVER_IFACE) return false
-    // Any other concrete type assignable to SQLiteDriver.
-    return true
-  }
+  private fun isWrappable(type: String?): Boolean =
+    when (type) {
+      null -> false
+      // Never wrap the bridge -> the no-double-wrap guarantee. The bridge adapts a (possibly
+      // already Sentry-wrapped) SupportSQLiteOpenHelper, so wrapping it would produce duplicate
+      // spans.
+      BRIDGE -> false
+      // Already a Sentry driver (SDK create() is also idempotent for this, but skip eagerly).
+      SENTRY_DRIVER -> false
+      // Erased to the bare interface: we cannot prove it isn't a bridge, so bias to a
+      // false-negative (a missed span) over a false-positive (a double span).
+      DRIVER_IFACE -> false
+      // Any other concrete type assignable to SQLiteDriver.
+      else -> true
+    }
 
   companion object {
     private const val DRIVER_IFACE = "androidx/sqlite/SQLiteDriver"
