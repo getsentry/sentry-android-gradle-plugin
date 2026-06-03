@@ -3,6 +3,7 @@ package io.sentry.android.gradle.instrumentation
 import com.android.build.api.instrumentation.ClassContext
 import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteDriver
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
@@ -116,6 +117,11 @@ class VisitorTest(
           null,
         ),
         arrayOf("androidxSqlite", "FrameworkSQLiteDatabase", AndroidXSQLiteDatabase(), null),
+        sqliteDriverTestParameters("SetDriverConcrete"),
+        sqliteDriverTestParameters("SetDriverConcreteLocal"),
+        sqliteDriverTestParameters("SetDriverBridge"),
+        sqliteDriverTestParameters("SetDriverAlreadySentry"),
+        sqliteDriverTestParameters("SetDriverBareInterface"),
         arrayOf(
           "androidxSqlite",
           "FrameworkSQLiteStatement",
@@ -185,6 +191,9 @@ class VisitorTest(
         arrayOf("appstart", "MlKitInitProvider", ContentProvider(), null),
         arrayOf("appstart", "FacebookInitProvider", ContentProvider(), null),
       )
+
+    private fun sqliteDriverTestParameters(className: String) =
+      arrayOf("androidxSqlite", className, AndroidXSQLiteDriver(), TestClassContext(className))
 
     private fun roomDaoTestParameters(suffix: String = "") =
       arrayOf(
