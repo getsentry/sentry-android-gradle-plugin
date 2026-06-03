@@ -44,7 +44,7 @@ kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-comp
 autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.1.1" }
 autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.1.1" }
 kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
-kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.7.1" }
+kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.11.1" }
 truth = { module = "com.google.truth:truth", version = "1.4.5" }
 composeDesktop = { group = "org.jetbrains.compose.desktop", name = "desktop", version = "1.6.10" }
 

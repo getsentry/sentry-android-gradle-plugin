@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix duplicate Sentry modifier injection on chained modifiers when compiling with Kotlin 2.2+ ([#1254](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1254))
+
 ## 6.9.0
 
 ### Fixes
