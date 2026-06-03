@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add Binder IPC call instrumentation ([#1159](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1159))
+
 ## 6.9.0
 
 ### Fixes

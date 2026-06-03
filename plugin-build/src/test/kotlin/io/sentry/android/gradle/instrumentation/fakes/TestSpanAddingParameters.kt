@@ -47,4 +47,7 @@ class TestSpanAddingParameters(
 
   override val appStartEnabled: Property<Boolean>
     get() = TODO()
+
+  override val binderIpcEnabled: Property<Boolean>
+    get() = TODO()
 }
