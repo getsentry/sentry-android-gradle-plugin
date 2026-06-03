@@ -8,14 +8,8 @@ import io.sentry.SentryKotlinCompilerPlugin
 import io.sentry.SentryKotlinCompilerPluginCommandLineProcessor
 import kotlin.test.assertEquals
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
-import org.junit.Ignore
 import org.junit.Test
 
-// The module now compiles against the Kotlin 2.4 compiler, but no stable kotlin-compile-testing
-// (kctfork) release supports 2.4 yet — it passes a null optIn to CommonCompilerArguments, which
-// 2.4 rejects. Re-enable once a stable kctfork supports Kotlin 2.4. The 2.4 instrumentation path
-// is still exercised end-to-end by the sample-app builds in the AGP/Gradle/Kotlin test matrix.
-@Ignore("kctfork has no stable release compatible with the Kotlin 2.4 compiler yet")
 @OptIn(ExperimentalCompilerApi::class)
 class JetpackComposeInstrumentationTest {
 
