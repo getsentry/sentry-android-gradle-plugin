@@ -10,7 +10,8 @@ covering the WRAP/SKIP decision boundary:
 | `SetDriverConcrete`       | `androidx/sqlite/driver/bundled/BundledSQLiteDriver` | 1 (WRAP)                |
 | `SetDriverConcreteLocal`  | `androidx/sqlite/driver/AndroidSQLiteDriver` (local) | 1 (WRAP)                |
 | `SetDriverBridge`         | `androidx/sqlite/driver/SupportSQLiteDriver`         | 0 (SKIP — no double-wrap) |
-| `SetDriverAlreadySentry`  | `androidx/sqlite/SQLiteDriver` (create() return)     | 0 (SKIP — already wrapped) |
+| `SetDriverSentryTyped`    | `io/sentry/sqlite/SentrySQLiteDriver` (concrete)     | 0 (SKIP — already wrapped, typed) |
+| `SetDriverAlreadySentry`  | `androidx/sqlite/SQLiteDriver` (create() return)     | 0 (SKIP — already wrapped, erased) |
 | `SetDriverBareInterface`  | `androidx/sqlite/SQLiteDriver` (method return)       | 0 (SKIP — erased)        |
 
 The `stubs/` tree contains the minimal androidx/room/sentry types needed only to COMPILE the

@@ -120,6 +120,7 @@ class VisitorTest(
         sqliteDriverTestParameters("SetDriverConcrete"),
         sqliteDriverTestParameters("SetDriverConcreteLocal"),
         sqliteDriverTestParameters("SetDriverBridge"),
+        sqliteDriverTestParameters("SetDriverSentryTyped"),
         sqliteDriverTestParameters("SetDriverAlreadySentry"),
         sqliteDriverTestParameters("SetDriverBareInterface"),
         arrayOf(

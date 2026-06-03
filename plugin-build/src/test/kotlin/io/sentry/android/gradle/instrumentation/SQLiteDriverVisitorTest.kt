@@ -110,7 +110,8 @@ class SQLiteDriverVisitorTest(
         arrayOf("SetDriverConcreteLocal", 1),
         // SKIP cases
         arrayOf("SetDriverBridge", 0), // the hard no-double-wrap guarantee
-        arrayOf("SetDriverAlreadySentry", 0),
+        arrayOf("SetDriverSentryTyped", 0), // arg statically typed as SentrySQLiteDriver
+        arrayOf("SetDriverAlreadySentry", 0), // create() return -> erased to SQLiteDriver iface
         arrayOf("SetDriverBareInterface", 0),
       )
   }
