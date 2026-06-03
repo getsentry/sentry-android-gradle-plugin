@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Automatically wrap `androidx.sqlite.SQLiteDriver` with `SentrySQLiteDriver` via byte code instrumentation, adding a span per SQL statement for Room 2.7+ projects that supply a driver through `RoomDatabase.Builder.setDriver(...)`. The `androidx.sqlite.driver.SupportSQLiteDriver` bridge is never wrapped, so it cannot produce duplicate spans alongside the existing `SupportSQLiteOpenHelper` instrumentation. Gated by `InstrumentationFeature.DATABASE` and a sentry-android-sqlite version that ships `SentrySQLiteDriver` ([#1244](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1244))
+
 ## 6.9.0
 
 ### Fixes

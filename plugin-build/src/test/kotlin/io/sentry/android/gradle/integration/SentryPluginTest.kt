@@ -483,6 +483,27 @@ class SentryPluginTest :
   }
 
   @Test
+  fun `applies SQLiteDriver instrumentable when sentry-android-sqlite supports SentrySQLiteDriver`() {
+    // The dependency version must stay >= SentryVersions.VERSION_SENTRY_SQLITE_DRIVER so the driver
+    // gate fires. This asserts wiring/gating through real AGP; it only inspects the instrumentable
+    // chain log, so it does not require the SentrySQLiteDriver class to be present at runtime.
+    applyTracingInstrumentation(
+      features = setOf(InstrumentationFeature.DATABASE),
+      dependencies =
+        setOf("androidx.sqlite:sqlite:2.0.0", "io.sentry:sentry-android-sqlite:8.43.0"),
+      appStart = false,
+      logcat = false,
+    )
+
+    val build = runner.appendArguments(":app:assembleDebug", "--info").build()
+
+    assertTrue(build.output) {
+      "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+        "AndroidXSQLiteOpenHelper, AndroidXSQLiteDriver, AndroidXRoomDao)" in build.output
+    }
+  }
+
+  @Test
   fun `applies only FILE_IO instrumentables when only FILE_IO feature enabled`() {
     applyTracingInstrumentation(
       features = setOf(InstrumentationFeature.FILE_IO),

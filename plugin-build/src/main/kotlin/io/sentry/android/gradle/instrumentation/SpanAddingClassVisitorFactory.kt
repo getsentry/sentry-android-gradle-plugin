@@ -8,6 +8,7 @@ import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteDriver
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
@@ -90,6 +91,7 @@ abstract class SpanAddingClassVisitorFactory :
         ChainedInstrumentable(
           listOfNotNull(
             AndroidXSQLiteOpenHelper().takeIf { sentryModulesService.isNewDatabaseInstrEnabled() },
+            AndroidXSQLiteDriver().takeIf { sentryModulesService.isSQLiteDriverInstrEnabled() },
             AndroidXSQLiteDatabase().takeIf { sentryModulesService.isOldDatabaseInstrEnabled() },
             AndroidXSQLiteStatement(androidXSqliteFrameWorkVersion).takeIf {
               sentryModulesService.isOldDatabaseInstrEnabled()
