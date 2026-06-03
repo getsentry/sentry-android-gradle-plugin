@@ -59,8 +59,8 @@ dependencies {
   testImplementationAar(libs.sqliteFramework)
   testRuntimeOnly(files(androidSdkPath))
   testImplementationAar(libs.sentryAndroid)
+  testImplementation(libs.sentryOkhttp)
   testImplementationAar(libs.sentryAndroidOkhttp)
-  testImplementationAar(libs.sentryOkhttp)
 
   // Needed to read contents from APK/Source Bundles
   testImplementation(libs.arscLib)
@@ -322,7 +322,7 @@ buildConfig {
   className("BuildConfig")
 
   buildConfigField("String", "Version", provider { "\"${project.version}\"" })
-  buildConfigField("String", "SdkVersion", provider { "\"${project.property("sdk_version")}\"" })
+  buildConfigField("String", "SdkVersion", libs.versions.sentry.map { "\"$it\"" })
   buildConfigField("String", "AgpVersion", provider { "\"${BuildPluginsVersion.AGP}\"" })
   buildConfigField("String", "CliVersion", propertyVersionProvider("sentry-cli.properties"))
   buildConfigField(
