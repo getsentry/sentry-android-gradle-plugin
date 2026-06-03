@@ -2,10 +2,10 @@
 set -euo pipefail
 
 cd $(dirname "$0")/../
-file='gradle/libs.versions.toml'
+file='plugin-build/gradle.properties'
 content=$(cat $file)
 
-regex='(sentry = ")([^"]+)'
+regex='(sdk_version = *)([0-9\.]+)'
 if ! [[ $content =~ $regex ]]; then
     echo "Failed to find the Android SDK version in $file"
     exit 1
