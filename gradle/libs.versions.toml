@@ -14,7 +14,7 @@ sentryAndroidOkhttp = "7.22.6"
 sampleCoroutines = "1.5.2"
 sampleRoom = "2.7.2"
 sampleRetrofit = "2.9.0"
-sampleSpringBoot = "3.4.1"
+sampleSpringBoot = "3.5.14"
 
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
