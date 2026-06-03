@@ -40,9 +40,11 @@ class SQLiteDriverVisitorTest(
   fun `injects expected number of SentrySQLiteDriver_create calls`() {
     val path = "src/test/resources/testFixtures/instrumentation/androidxSqlite/$className.class"
 
-    val originalCreates = countSentryCreateCalls(FileInputStream(path).use { ClassReader(it) })
-
+    // A ClassReader is immutable and re-acceptable, so one read of the file serves both the
+    // baseline count and the instrumentation pass.
     val classReader = FileInputStream(path).use { ClassReader(it) }
+    val originalCreates = countSentryCreateCalls(classReader)
+
     val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
     val instrumentable = AndroidXSQLiteDriver()
     val classVisitor: ClassVisitor =
