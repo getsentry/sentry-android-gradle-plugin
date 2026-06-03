@@ -484,7 +484,7 @@ class SentryPluginTest :
 
   @Test
   fun `applies SQLiteDriver instrumentable when sentry-android-sqlite supports SentrySQLiteDriver`() {
-    // The dependency version must stay >= SentryVersions.VERSION_SENTRY_SQLITE_DRIVER so the driver
+    // The dependency version must stay >= SentryVersions.VERSION_SQLITE_DRIVER so the driver
     // gate fires. This asserts wiring/gating through real AGP; it only inspects the instrumentable
     // chain log, so it does not require the SentrySQLiteDriver class to be present at runtime.
     applyTracingInstrumentation(

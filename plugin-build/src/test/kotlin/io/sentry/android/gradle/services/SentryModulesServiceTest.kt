@@ -105,7 +105,7 @@ class SentryModulesServiceTest {
       fixture.getSut(
         testProjectDir.root,
         sentryModules =
-          mapOf(SentryModules.SENTRY_ANDROID_SQLITE to SentryVersions.VERSION_SENTRY_SQLITE_DRIVER),
+          mapOf(SentryModules.SENTRY_ANDROID_SQLITE to SentryVersions.VERSION_SQLITE_DRIVER),
         features = setOf(InstrumentationFeature.DATABASE),
       )
 

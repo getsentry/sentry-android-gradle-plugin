@@ -39,7 +39,7 @@ internal object SentryVersions {
   // TODO: pin to the actual sentry-java release that ships SentrySQLiteDriver
   // (PR getsentry/sentry-java#5466 — still open; latest released is 8.42.0, so 8.43.0 is a
   // placeholder). Reuses the existing SentryModules.SENTRY_ANDROID_SQLITE module id.
-  internal val VERSION_SENTRY_SQLITE_DRIVER = SemVer(8, 43, 0)
+  internal val VERSION_SQLITE_DRIVER = SemVer(8, 43, 0)
 }
 
 internal object SentryModules {

@@ -76,7 +76,7 @@ abstract class SentryModulesService :
   fun isSQLiteDriverInstrEnabled(): Boolean =
     sentryModules.isAtLeast(
       SentryModules.SENTRY_ANDROID_SQLITE,
-      SentryVersions.VERSION_SENTRY_SQLITE_DRIVER,
+      SentryVersions.VERSION_SQLITE_DRIVER,
     ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
 
   fun isOldDatabaseInstrEnabled(): Boolean =
