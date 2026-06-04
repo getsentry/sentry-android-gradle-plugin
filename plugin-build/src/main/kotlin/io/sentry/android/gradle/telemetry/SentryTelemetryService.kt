@@ -27,6 +27,7 @@ import io.sentry.exception.ExceptionMechanismException
 import io.sentry.gradle.common.SentryVariant
 import io.sentry.protocol.Mechanism
 import io.sentry.protocol.User
+import java.util.concurrent.atomic.AtomicBoolean
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.internal.tasks.execution.ExecuteTaskBuildOperationDetails
@@ -49,7 +50,7 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
   private var didAddChildSpans: Boolean = false
   private var started: Boolean = false
   private var orgProvider: Provider<String>? = null
-  private var orgAttached: Boolean = false
+  private val orgAttached = AtomicBoolean(false)
 
   @Synchronized
   fun start(paramsCallback: () -> SentryTelemetryServiceParams) {
@@ -207,10 +208,9 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
   // the underlying sentry-cli process out of the configuration phase so the configuration cache
   // stays valid. An explicitly configured org already set on the scope is left untouched.
   private fun attachDefaultOrg() {
-    if (orgAttached) {
+    if (!orgAttached.compareAndSet(false, true)) {
       return
     }
-    orgAttached = true
     orgProvider?.orNull?.let { org ->
       scopes.configureScope { scope ->
         if (scope.user?.id == null) {
