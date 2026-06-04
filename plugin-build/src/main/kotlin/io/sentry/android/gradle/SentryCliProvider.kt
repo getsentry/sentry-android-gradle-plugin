@@ -13,14 +13,17 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.Locale
 import java.util.Properties
+import java.util.concurrent.TimeUnit
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 
 internal object SentryCliProvider {
 
@@ -194,5 +197,92 @@ private fun Project.getIsolatedRootProjectDir(): Directory {
     isolated.rootProject.projectDirectory
   } else {
     rootProject.layout.projectDirectory
+  }
+}
+
+/**
+ * Resolves the default Sentry organization by running `sentry-cli info`. Implemented as a
+ * ValueSource so the external process is started in a configuration-cache compatible way; querying
+ * the returned provider during task execution keeps the process off the configuration phase.
+ */
+abstract class SentryOrgValueSource : ValueSource<String, SentryOrgValueSource.Params> {
+  interface Params : ValueSourceParameters {
+    @get:Input val projectDir: DirectoryProperty
+
+    @get:Input val projectBuildDir: DirectoryProperty
+
+    @get:Input val rootProjDir: DirectoryProperty
+
+    @get:Input @get:Optional val url: Property<String>
+
+    @get:Input @get:Optional val authToken: Property<String>
+
+    @get:Input @get:Optional val propertiesFilePath: Property<String>
+  }
+
+  override fun obtain(): String? {
+    return try {
+      val cliPath =
+        SentryCliProvider.getSentryCliPath(
+          parameters.projectDir,
+          parameters.projectBuildDir,
+          parameters.rootProjDir,
+        )
+      val resolvedCli =
+        SentryCliProvider.maybeExtractFromResources(parameters.projectBuildDir, cliPath)
+
+      val args = mutableListOf(resolvedCli)
+      parameters.url.orNull?.let {
+        args.add("--url")
+        args.add(it)
+      }
+      args.add("--log-level=error")
+      args.add("info")
+
+      val processBuilder = ProcessBuilder(args).redirectErrorStream(true)
+      parameters.propertiesFilePath.orNull?.let {
+        processBuilder.environment()["SENTRY_PROPERTIES"] = it
+      }
+      parameters.authToken.orNull?.let { processBuilder.environment()["SENTRY_AUTH_TOKEN"] = it }
+      processBuilder.environment()["SENTRY_PIPELINE"] =
+        "sentry-gradle-plugin/${BuildConfig.Version}"
+
+      val process = processBuilder.start()
+      // Wait with the timeout before reading the output: reading first would block indefinitely if
+      // the process hangs (e.g. a network stall), bypassing the timeout. `info` output is small and
+      // bounded, so it cannot fill the pipe buffer and stall the process before we read it here.
+      if (!process.waitFor(CLI_INFO_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+        process.destroyForcibly()
+        return null
+      }
+      if (process.exitValue() != 0) {
+        return null
+      }
+      val output = process.inputStream.bufferedReader().readText()
+      ORG_REGEX.find(output)?.groupValues?.getOrNull(1)?.takeUnless { it == "-" }
+    } catch (t: Throwable) {
+      logger.info { "Failed to fetch default org from sentry-cli: ${t.message}" }
+      null
+    }
+  }
+
+  companion object {
+    private val ORG_REGEX = Regex("""(?m)Default Organization: (.*)$""")
+    private const val CLI_INFO_TIMEOUT_SECONDS = 5L
+  }
+}
+
+fun Project.defaultOrgProvider(
+  url: String?,
+  authToken: String?,
+  propertiesFilePath: String?,
+): Provider<String> {
+  return providers.of(SentryOrgValueSource::class.java) {
+    it.parameters.projectDir.set(layout.projectDirectory)
+    it.parameters.projectBuildDir.set(layout.buildDirectory)
+    it.parameters.rootProjDir.set(getIsolatedRootProjectDir())
+    url?.let { value -> it.parameters.url.set(value) }
+    authToken?.let { value -> it.parameters.authToken.set(value) }
+    propertiesFilePath?.let { value -> it.parameters.propertiesFilePath.set(value) }
   }
 }

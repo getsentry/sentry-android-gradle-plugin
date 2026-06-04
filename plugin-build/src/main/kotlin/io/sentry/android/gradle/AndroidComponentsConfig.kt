@@ -83,7 +83,7 @@ fun ApplicationAndroidComponentsExtension.configure(
     if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
       val paths = OutputPaths(project, variant.name)
       val sentryTelemetryProvider =
-        variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
+        variant.configureTelemetry(project, extension, sentryOrg, buildEvents)
 
       variant.configureDependenciesTask(project, extension, sentryTelemetryProvider)
 
@@ -265,7 +265,6 @@ fun ApplicationAndroidComponentsExtension.configure(
 private fun Variant.configureTelemetry(
   project: Project,
   extension: SentryPluginExtension,
-  cliExecutable: Provider<String>,
   sentryOrg: String?,
   buildEvents: BuildEventListenerRegistryInternal,
 ): Provider<SentryTelemetryService> {
@@ -273,14 +272,7 @@ private fun Variant.configureTelemetry(
   val sentryTelemetryProvider = SentryTelemetryService.register(project)
   project.gradle.taskGraph.whenReady {
     sentryTelemetryProvider.get().start {
-      SentryTelemetryService.createParameters(
-        project,
-        variant,
-        extension,
-        cliExecutable,
-        sentryOrg,
-        "Android",
-      )
+      SentryTelemetryService.createParameters(project, variant, extension, sentryOrg, "Android")
     }
     buildEvents.onOperationCompletion(sentryTelemetryProvider)
   }

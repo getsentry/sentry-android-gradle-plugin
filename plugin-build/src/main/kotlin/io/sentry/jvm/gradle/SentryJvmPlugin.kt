@@ -66,7 +66,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
             project,
             javaVariant,
             extension,
-            cliExecutable,
             sentryOrgParameter,
             "JVM",
           )
