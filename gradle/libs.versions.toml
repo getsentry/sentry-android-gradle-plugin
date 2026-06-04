@@ -11,7 +11,7 @@ sentry = "8.43.1"
 # okhttp instrumentation path in tests.
 sentryAndroidOkhttp = "7.22.6"
 
-sampleCoroutines = "1.5.2"
+sampleCoroutines = "1.11.0"
 sampleRoom = "2.7.2"
 sampleRetrofit = "2.9.0"
 sampleSpringBoot = "3.4.1"
