@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.cliExecutableProvider
 import java.io.File
 import java.util.UUID
 import kotlin.test.assertEquals
@@ -33,7 +34,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(true)
@@ -41,7 +42,7 @@ class SentryUploadProguardMappingTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("sentry-cli" in args)
+    assertTrue(args.any { it.contains("sentry-cli") })
     assertTrue("upload-proguard" in args)
     assertTrue("--uuid" in args)
     assertTrue(randomUuid.toString() in args)
@@ -61,7 +62,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(true)
@@ -69,7 +70,7 @@ class SentryUploadProguardMappingTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertTrue("sentry-cli" in args)
+    assertTrue(args.any { it.contains("sentry-cli") })
     assertTrue("upload-proguard" in args)
     assertTrue("--uuid" in args)
     assertTrue(randomUuid.toString() in args)
@@ -101,7 +102,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFiles
         it.autoUploadProguardMapping.set(true)
@@ -123,7 +124,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(false)
@@ -145,7 +146,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(false)
@@ -217,8 +218,8 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
+        it.configureCliPaths(project)
         it.sentryUrl.set("https://some-host.sentry.io")
-        it.cliExecutable.set("sentry-cli")
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(false)
@@ -241,7 +242,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(false)
@@ -265,7 +266,7 @@ class SentryUploadProguardMappingTaskTest {
         "testUploadProguardMapping",
         SentryUploadProguardMappingsTask::class.java,
       ) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.uuidFile.set(uuidFileProvider)
         it.mappingsFiles = mappingFile
         it.autoUploadProguardMapping.set(false)
@@ -321,6 +322,11 @@ class SentryUploadProguardMappingTaskTest {
       plugins.apply("io.sentry.android.gradle")
       return this
     }
+  }
+
+  private fun SentryCliExecTask.configureCliPaths(project: Project) {
+    cliExecutable.set(project.cliExecutableProvider())
+    buildDirectory.set(project.layout.buildDirectory)
   }
 
   private fun createFakeUuid(

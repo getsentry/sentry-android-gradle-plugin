@@ -3,7 +3,6 @@ package io.sentry.jvm.gradle
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.SentryTasksProvider
 import io.sentry.android.gradle.autoinstall.installDependencies
-import io.sentry.android.gradle.cliExecutableProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
@@ -48,7 +47,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
 
       val javaVariant = JavaVariant(project, javaExtension)
       val outputPaths = OutputPaths(project, "java")
-      val cliExecutable = project.cliExecutableProvider()
 
       val extraProperties = project.extensions.getByName("ext") as ExtraPropertiesExtension
 
@@ -66,7 +64,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
             project,
             javaVariant,
             extension,
-            cliExecutable,
             sentryOrgParameter,
             "JVM",
           )
@@ -90,7 +87,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
           javaVariant,
           outputPaths,
           sourceFiles,
-          cliExecutable,
           sentryOrgParameter,
           sentryProjectParameter,
           "Java",
