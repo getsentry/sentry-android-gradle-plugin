@@ -249,7 +249,9 @@ abstract class SentryOrgValueSource : ValueSource<String, SentryOrgValueSource.P
         "sentry-gradle-plugin/${BuildConfig.Version}"
 
       val process = processBuilder.start()
-      val output = process.inputStream.bufferedReader().readText()
+      // Wait with the timeout before reading the output: reading first would block indefinitely if
+      // the process hangs (e.g. a network stall), bypassing the timeout. `info` output is small and
+      // bounded, so it cannot fill the pipe buffer and stall the process before we read it here.
       if (!process.waitFor(CLI_INFO_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
         process.destroyForcibly()
         return null
@@ -257,6 +259,7 @@ abstract class SentryOrgValueSource : ValueSource<String, SentryOrgValueSource.P
       if (process.exitValue() != 0) {
         return null
       }
+      val output = process.inputStream.bufferedReader().readText()
       ORG_REGEX.find(output)?.groupValues?.getOrNull(1)?.takeUnless { it == "-" }
     } catch (t: Throwable) {
       logger.info { "Failed to fetch default org from sentry-cli: ${t.message}" }
