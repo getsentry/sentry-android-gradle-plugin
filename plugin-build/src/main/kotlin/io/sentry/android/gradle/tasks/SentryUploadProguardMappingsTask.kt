@@ -89,7 +89,6 @@ abstract class SentryUploadProguardMappingsTask : SentryCliExecTask() {
       extension: SentryPluginExtension,
       sentryTelemetryProvider: Provider<SentryTelemetryService>?,
       debug: Property<Boolean>,
-      cliExecutable: Provider<String>,
       sentryProperties: String?,
       generateUuidTask: Provider<SentryGenerateProguardUuidTask>,
       mappingFiles: Provider<FileCollection>,
@@ -108,7 +107,6 @@ abstract class SentryUploadProguardMappingsTask : SentryCliExecTask() {
           task.dependsOn(generateUuidTask)
           task.workingDir(project.rootDir)
           task.debug.set(debug)
-          task.cliExecutable.set(cliExecutable)
           task.sentryProperties.set(sentryProperties?.let { file -> project.file(file) })
           task.uuidFile.set(generateUuidTask.flatMap { it.outputFile })
           task.mappingsFiles = mappingFiles

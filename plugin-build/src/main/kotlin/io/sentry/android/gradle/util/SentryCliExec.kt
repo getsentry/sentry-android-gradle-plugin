@@ -1,10 +1,11 @@
 package io.sentry.android.gradle.util
 
 import io.sentry.BuildConfig
+import io.sentry.android.gradle.cliExecutableProvider
+import io.sentry.android.gradle.tasks.SentryCliExecTask
 import io.sentry.android.gradle.util.CliFailureReason.OUTDATED
 import java.io.ByteArrayOutputStream
 import org.gradle.api.GradleException
-import org.gradle.api.tasks.Exec
 import org.gradle.process.ExecSpec
 
 fun ExecSpec.setSentryPipelineEnv() {
@@ -15,7 +16,10 @@ fun ExecSpec.setSentryPipelineEnv() {
  * An ext function for tasks that wrap sentry-cli, which provides common error handling. Must be
  * called at configuration phase (=when registering a task).
  */
-fun Exec.asSentryCliExec() {
+fun SentryCliExecTask.asSentryCliExec() {
+  cliExecutable.set(project.cliExecutableProvider())
+  buildDirectory.set(project.layout.buildDirectory)
+
   isIgnoreExitValue = true
   // this is a workaround, otherwise doFirst is not needed
   // https://github.com/gradle/gradle/issues/16535

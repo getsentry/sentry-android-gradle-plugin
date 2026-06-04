@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.tasks
 
 import com.google.common.truth.Truth.assertThat
+import io.sentry.android.gradle.cliExecutableProvider
 import io.sentry.android.gradle.sourcecontext.BundleSourcesTask
 import io.sentry.android.gradle.sourcecontext.GenerateBundleIdTask.Companion.SENTRY_BUNDLE_ID_PROPERTY
 import java.io.File
@@ -29,7 +30,7 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -37,7 +38,7 @@ class BundleSourcesTaskTest {
 
     val args = task.get().computeCommandLineArgs()
 
-    assertThat(args).contains("sentry-cli")
+    assertThat(args.first()).contains("sentry-cli")
     assertThat(args).contains("debug-files")
     assertThat(args).contains("bundle-jvm")
     assertThat(args).contains(sourceDir.absolutePath)
@@ -57,7 +58,7 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -79,7 +80,6 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -101,7 +101,6 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -122,7 +121,6 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -142,7 +140,7 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -164,7 +162,7 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -224,7 +222,7 @@ class BundleSourcesTaskTest {
     val outDir = File(project.buildDir, "dummy/out")
     val task: TaskProvider<BundleSourcesTask> =
       project.tasks.register("testBundleSources", BundleSourcesTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.sourceDir.set(sourceDir)
         it.bundleIdFile.set(debugMetaPropertiesFile)
         it.output.set(outDir)
@@ -242,6 +240,11 @@ class BundleSourcesTaskTest {
       plugins.apply("io.sentry.android.gradle")
       return this
     }
+  }
+
+  private fun SentryCliExecTask.configureCliPaths(project: Project) {
+    cliExecutable.set(project.cliExecutableProvider())
+    buildDirectory.set(project.layout.buildDirectory)
   }
 
   private fun createDebugMetaProperties(

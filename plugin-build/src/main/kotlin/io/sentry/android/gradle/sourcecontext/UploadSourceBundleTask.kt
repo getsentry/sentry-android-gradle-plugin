@@ -68,7 +68,6 @@ abstract class UploadSourceBundleTask : SentryCliExecTask() {
       variant: SentryVariant,
       bundleSourcesTask: TaskProvider<BundleSourcesTask>,
       debug: Property<Boolean>,
-      cliExecutable: Provider<String>,
       autoUploadSourceContext: Property<Boolean>,
       sentryOrg: Provider<String>,
       sentryProject: Provider<String>,
@@ -87,7 +86,6 @@ abstract class UploadSourceBundleTask : SentryCliExecTask() {
         task.sentryAuthToken.set(sentryAuthToken)
         task.sentryUrl.set(sentryUrl)
         task.sourceBundleDir.set(bundleSourcesTask.flatMap { it.output })
-        task.cliExecutable.set(cliExecutable)
         task.autoUploadSourceContext.set(autoUploadSourceContext)
         SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)?.let {
           task.sentryProperties.set(File(it))

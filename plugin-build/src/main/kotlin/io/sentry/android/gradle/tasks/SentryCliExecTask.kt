@@ -22,8 +22,6 @@ abstract class SentryCliExecTask : Exec() {
 
   @get:Input @get:Optional abstract val debug: Property<Boolean>
 
-  @get:Input abstract val cliExecutable: Property<String>
-
   @get:InputFile
   @get:Optional
   @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -39,7 +37,9 @@ abstract class SentryCliExecTask : Exec() {
 
   @get:Internal abstract val sentryTelemetryService: Property<SentryTelemetryService>
 
-  private val buildDirectory: DirectoryProperty = project.layout.buildDirectory
+  @get:Input abstract val cliExecutable: Property<String>
+
+  @get:Internal abstract val buildDirectory: DirectoryProperty
 
   override fun exec() {
     computeCommandLineArgs().let {
@@ -92,8 +92,7 @@ abstract class SentryCliExecTask : Exec() {
       args.add(1, "/c")
     }
 
-    val cliPath = SentryCliProvider.maybeExtractFromResources(buildDirectory, cliExecutable.get())
-    args.add(cliPath)
+    args.add(SentryCliProvider.maybeExtractFromResources(buildDirectory, cliExecutable.get()))
     args.addAll(preArgs())
 
     getArguments(args)
