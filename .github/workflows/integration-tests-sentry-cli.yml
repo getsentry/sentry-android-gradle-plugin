@@ -35,4 +35,6 @@ jobs:
       - name: Start server and run integration test for sentry-cli commands
         run: |
           test/integration-test-server-start.sh &
-          ./gradlew -p plugin-build integrationTest --tests "*IntegrationTest"
+          # Verification is disabled here because the standalone `-p plugin-build` build
+          # resolves buildscript-classpath artifacts not captured in the metadata.
+          ./gradlew -p plugin-build integrationTest --tests "*IntegrationTest" --dependency-verification=off
