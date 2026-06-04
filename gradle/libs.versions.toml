@@ -1,5 +1,4 @@
 [versions]
-kotlin = "1.8.20"
 agp = "8.10.1"
 
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
@@ -17,10 +16,11 @@ sampleRetrofit = "2.9.0"
 sampleSpringBoot = "3.4.1"
 
 [plugins]
-kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+# Version is supplied at the apply site, normally from BuildPluginsVersion.KOTLIN.
+kotlin = { id = "org.jetbrains.kotlin.jvm" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android" }
+kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring" }
+kapt = { id = "org.jetbrains.kotlin.kapt" }
 ksp = { id = "com.google.devtools.ksp" }
 dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
 spotless = { id = "com.diffplug.spotless", version = "8.5.0" }
@@ -43,7 +43,7 @@ agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" 
 kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable" }
 autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.1.1" }
 autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.1.1" }
-kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
+kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version = "2.1.21" }
 kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.13.0" }
 truth = { module = "com.google.truth:truth", version = "1.4.5" }
 composeDesktop = { group = "org.jetbrains.compose.desktop", name = "desktop", version = "1.6.10" }
