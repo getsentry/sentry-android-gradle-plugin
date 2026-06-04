@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Features
+
+- Add support for the Kotlin 2.4 compiler in the Compose tracing compiler plugin ([#1253](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1253))
+
+### Fixes
+
+- Compose tracing no longer adds the Sentry modifier multiple times for chained modifiers (e.g. `Modifier.fillMaxSize().padding()`) on Kotlin 2.2 and newer ([#1253](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1253))
+
 ### Dependencies
 
 - Bump Android SDK from v8.43.0 to v8.43.1 ([#1261](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1261))
@@ -10,6 +18,10 @@
 - Bump CLI from v3.4.3 to v3.5.0 ([#1251](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1251))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#350)
   - [diff](https://github.com/getsentry/sentry-cli/compare/3.4.3...3.5.0)
+
+### API Changes
+
+- The `debug` extension property is now typed as `Property<Boolean>` instead of `Property<Boolean?>` ([#1253](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1253))
 
 ## 6.9.0
 

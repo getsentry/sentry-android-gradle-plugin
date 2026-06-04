@@ -6,12 +6,17 @@ import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
+import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.config.messageCollector
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGetObjectValue
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrComposite
 import org.jetbrains.kotlin.ir.expressions.IrExpression
@@ -173,7 +178,13 @@ class JetpackComposeTracingIrExtension22(private val messageCollector: MessageCo
 
           for (idx in 0 until expression.symbol.owner.parameters.size) {
             val valueParameter = expression.symbol.owner.parameters[idx]
-            if (valueParameter.type.classFqName == modifierClassFqName) {
+            // In Kotlin 2.2 dispatch/extension receivers are part of parameters; only enrich
+            // regular value parameters, otherwise modifier-receiver chains (e.g.
+            // Modifier.fillMaxSize().padding()) would each get their receiver wrapped as well.
+            if (
+              valueParameter.kind == IrParameterKind.Regular &&
+                valueParameter.type.classFqName == modifierClassFqName
+            ) {
               val argument = expression.arguments[idx]
               expression.arguments[idx] = wrapExpression(argument, composableName, builder)
             }
@@ -265,4 +276,12 @@ fun FqName.classId(name: String): ClassId {
 
 fun ClassId.callableId(name: String): CallableId {
   return CallableId(this, Name.identifier(name))
+}
+
+@OptIn(ExperimentalCompilerApi::class)
+fun CompilerPluginRegistrar.ExtensionStorage.registerComposeTracing22(
+  configuration: CompilerConfiguration
+) {
+  val messageCollector = configuration.messageCollector
+  IrGenerationExtension.registerExtension(JetpackComposeTracingIrExtension22(messageCollector))
 }

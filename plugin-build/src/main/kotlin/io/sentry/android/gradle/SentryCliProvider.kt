@@ -146,8 +146,7 @@ internal object SentryCliProvider {
   }
 
   internal fun getCliSuffix(): String? {
-    // TODO: change to .lowercase(Locale.ROOT) when using Kotlin 1.6
-    val osName = System.getProperty("os.name").toLowerCase(Locale.ROOT)
+    val osName = System.getProperty("os.name").lowercase(Locale.ROOT)
     val osArch = System.getProperty("os.arch")
     return when {
       "mac" in osName -> "Darwin-universal"
