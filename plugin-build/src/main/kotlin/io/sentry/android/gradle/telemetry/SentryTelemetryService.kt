@@ -4,10 +4,10 @@ package io.sentry.android.gradle.telemetry
 
 import com.android.build.api.dsl.CommonExtension
 import io.sentry.BuildConfig
-import io.sentry.IHub
+import io.sentry.IScopes
 import io.sentry.ISpan
 import io.sentry.ITransaction
-import io.sentry.NoOpHub
+import io.sentry.NoOpScopes
 import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
@@ -56,7 +56,7 @@ import org.gradle.util.GradleVersion
 
 abstract class SentryTelemetryService : BuildService<None>, BuildOperationListener, AutoCloseable {
 
-  private var hub: IHub = NoOpHub.getInstance()
+  private var scopes: IScopes = NoOpScopes.getInstance()
   private var transaction: ITransaction? = null
   private var didAddChildSpans: Boolean = false
   private var started: Boolean = false
@@ -73,10 +73,10 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
         SentryPlugin.logger.info {
           "Sentry is running against a self hosted instance. " + "Telemetry has been disabled."
         }
-        hub = NoOpHub.getInstance()
+        scopes = NoOpScopes.getInstance()
       } else if (!startParameters.sendTelemetry) {
         SentryPlugin.logger.info { "Sentry telemetry has been disabled." }
-        hub = NoOpHub.getInstance()
+        scopes = NoOpScopes.getInstance()
       } else {
         if (!Sentry.isEnabled()) {
           SentryPlugin.logger.info {
@@ -103,10 +103,10 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
             } catch (t: Throwable) {}
           }
         }
-        hub = Sentry.getCurrentHub()
+        scopes = Sentry.getCurrentScopes()
         startRun("gradle build ${startParameters.buildType}")
 
-        hub.configureScope { scope ->
+        scopes.configureScope { scope ->
           scope.user =
             User().also { user ->
               startParameters.defaultSentryOrganization?.let { org ->
@@ -180,30 +180,30 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
         Thread.currentThread(),
       )
     val event = SentryEvent(mechanismException).also { it.level = SentryLevel.FATAL }
-    hub.captureEvent(event)
+    scopes.captureEvent(event)
   }
 
   fun startRun(transactionName: String) {
-    hub.startSession()
+    scopes.startSession()
     val options = TransactionOptions()
     options.isBindToScope = true
-    transaction = hub.startTransaction(transactionName, "build", options)
+    transaction = scopes.startTransaction(transactionName, "build", options)
   }
 
   fun endRun() {
     if (didAddChildSpans) {
       transaction?.finish()
-      hub.endSession()
+      scopes.endSession()
     }
   }
 
   fun traceCli(): List<String> {
     val args = mutableListOf<String>()
-    hub.traceparent?.let { header ->
+    scopes.traceparent?.let { header ->
       args.add("--header")
       args.add("${header.name}:${header.value}")
     }
-    hub.baggage?.let { header ->
+    scopes.baggage?.let { header ->
       args.add("--header")
       args.add("${header.name}:${header.value}")
     }
@@ -212,8 +212,8 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
 
   fun startTask(operation: String): ISpan? {
     didAddChildSpans = true
-    hub.setTag("step", operation)
-    return hub.span?.startChild(operation)
+    scopes.setTag("step", operation)
+    return scopes.span?.startChild(operation)
   }
 
   fun endTask(span: ISpan?, task: Task) {
