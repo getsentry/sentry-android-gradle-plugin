@@ -1,6 +1,7 @@
 package io.sentry.jvm.gradle
 
 import io.sentry.android.gradle.SentryPlugin
+import io.sentry.android.gradle.SentrySettingsPlugin
 import io.sentry.android.gradle.SentryTasksProvider
 import io.sentry.android.gradle.autoinstall.installDependencies
 import io.sentry.android.gradle.cliExecutableProvider
@@ -35,6 +36,13 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
 
   override fun apply(project: Project) {
     val extension = project.extensions.create("sentry", SentryPluginExtension::class.java)
+
+    val gradleExt = project.gradle.extensions.getByType(ExtraPropertiesExtension::class.java)
+    if (gradleExt.has(SentrySettingsPlugin.SENTRY_SETTINGS_EXTENSION_KEY)) {
+      val settingsExtension =
+        gradleExt.get(SentrySettingsPlugin.SENTRY_SETTINGS_EXTENSION_KEY) as SentryPluginExtension
+      extension.applySettingsDefaults(settingsExtension)
+    }
 
     project.pluginManager.withPlugin("org.gradle.java") {
       if (configuredForJavaProject.getAndSet(true)) {
