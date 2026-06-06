@@ -2,15 +2,21 @@
 
 ## Unreleased
 
-### Dependencies
+### Features
 
-- Bump mockito-kotlin from `com.nhaarman.mockitokotlin2:2.2.0` to `org.mockito.kotlin:5.4.0` ([#1286](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1286))
+- Auto-instrument SQLiteDriver for Room users ([#1285](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1285))
+  - Gated on `sentry-android-sqlite` >= 8.44.0 and the existing `tracingInstrumentation` `DATABASE` feature
+  - For users of the `androidx.sqlite.driver.SupportSQLiteDriver` bridge, auto-instrumentation wraps only the `SupportSQLiteOpenHelper` consumed by the bridge and not the bridge itself (avoids duplicate spans)
 
 ### Fixes
 
 - Resolve the sentry-cli path as a task input instead of memoizing it in a static field, fixing stale-path build failures when switching branches with the configuration cache enabled ([#1264](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1264))
   - This fixed the issue where sentry-cli could not be found (`A problem occurred starting process 'command  ../sentry-cliXXX.exe'`)
 - Defer the telemetry default-org lookup to execution time so the configuration cache no longer re-runs `sentry-cli` on every build ([#1263](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1263))
+
+### Dependencies
+
+- Bump mockito-kotlin from `com.nhaarman.mockitokotlin2:2.2.0` to `org.mockito.kotlin:5.4.0` ([#1286](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1286))
 
 ## 6.10.0
 

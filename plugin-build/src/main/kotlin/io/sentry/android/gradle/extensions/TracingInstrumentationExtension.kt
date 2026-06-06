@@ -75,9 +75,16 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
 
 enum class InstrumentationFeature(val integrationName: String) {
   /**
-   * When enabled the SDK will create spans for any CRUD operation performed by
-   * 'androidx.sqlite.db.SupportSQLiteOpenHelper' and 'androidx.room'. This feature uses bytecode
-   * manipulation.
+   * When enabled the SDK will create spans for database operations at two levels:
+   *
+   * **SQL statement execution** (`db.sql.query` spans): Wraps the low-level db open helper or
+   * driver so each SQL statement produces one or more spans.
+   *
+   * **DAO method execution** (`db.sql.room` spans): Wraps each public method on Room's generated
+   * `@Dao` `_Impl` classes, measuring the full DAO call end-to-end (transaction management, query
+   * execution, and cursor processing). Only for Room users and only on versions prior to Room 2.7.
+   *
+   * This feature uses bytecode manipulation.
    */
   DATABASE("DatabaseInstrumentation"),
 

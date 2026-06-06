@@ -72,6 +72,19 @@ abstract class SentryModulesService :
     sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_SQLITE, SentryVersions.VERSION_SQLITE) &&
       parameters.features.get().contains(InstrumentationFeature.DATABASE)
 
+  /**
+   * Returns true when the owning app uses a version of sentry-android-sqlite that contains
+   * `SentrySQLiteDriver` and the DATABASE feature is enabled.
+   *
+   * Room version is not gated here: Room < 2.7 has no matching `setDriver` method, so
+   * instrumentation is a no-op. Method descriptor matching is the safety boundary.
+   */
+  fun isSQLiteDriverInstrEnabled(): Boolean =
+    sentryModules.isAtLeast(
+      SentryModules.SENTRY_ANDROID_SQLITE,
+      SentryVersions.VERSION_SQLITE_DRIVER,
+    ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
+
   fun isOldDatabaseInstrEnabled(): Boolean =
     !isNewDatabaseInstrEnabled() &&
       sentryModules.isAtLeast(
