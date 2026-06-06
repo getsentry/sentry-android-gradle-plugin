@@ -33,6 +33,11 @@ internal object SentryVersions {
   internal val VERSION_LOGCAT = SemVer(6, 17, 0)
   internal val VERSION_APP_START = SemVer(7, 1, 0)
   internal val VERSION_SQLITE = SemVer(6, 21, 0)
+  // TODO ADAM: pin to the sentry-android-sqlite release that ships SentrySQLiteDriver bridge-skip
+  //  (sentry-java PR #5466). 8.44.0 is a placeholder for the next anticipated release; update
+  //  once that release ships. Until pinned, the SQLiteDriver instrumentable stays gated off
+  //  for any consumer whose sentry-android-sqlite version is below this threshold.
+  internal val VERSION_SQLITE_DRIVER = SemVer(8, 44, 0)
   internal val VERSION_ANDROID_OKHTTP_LISTENER = SemVer(6, 20, 0)
   internal val VERSION_OKHTTP = SemVer(7, 0, 0)
 }

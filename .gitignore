@@ -185,6 +185,11 @@ fabric.properties
 .idea/**/markdown-navigator.xml
 .idea/**/markdown-navigator/
 
+# Additional IDE settings
+.idea/AndroidProjectSystem.xml
+.idea/deploymentTargetSelector.xml
+.idea/markdown.xml
+
 ### Gradle ###
 .gradle
 
@@ -303,6 +308,9 @@ hs_err_pid*
 ### AndroidStudio Patch ###
 
 !/gradle/wrapper/gradle-wrapper.jar
+
+# Kotlin compiler sessions
+.kotlin/
 
 # Custom
 /sqlite-framework

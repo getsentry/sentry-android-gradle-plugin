@@ -21,6 +21,7 @@ import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThrows
 import org.junit.Assume.assumeThat
+import org.junit.Ignore
 import org.junit.Test
 
 class SentryPluginTest :
@@ -526,6 +527,73 @@ class SentryPluginTest :
     val build = runner.appendArguments(":app:assembleDebug", "--info").build()
     assertTrue {
       "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=)" in build.output
+    }
+  }
+
+  // TODO ADAM: enable once sentry-android-sqlite 8.44.0 ships with the SentrySQLiteDriver
+  // bridge-skip
+  //  from sentry-java PR #5466. Until then, the placeholder version pinned in
+  //  SentryVersions.VERSION_SQLITE_DRIVER can't be resolved by the test runner's
+  //  dependency graph (no such artifact on Maven yet).
+  @Ignore("Placeholder version VERSION_SQLITE_DRIVER not yet on Maven")
+  @Test
+  fun `applies SQLiteDriver instrumentable when sentry-android-sqlite ships SentrySQLiteDriver`() {
+    applyTracingInstrumentation(
+      features = setOf(InstrumentationFeature.DATABASE),
+      dependencies =
+        setOf("androidx.sqlite:sqlite:2.6.2", "io.sentry:sentry-android-sqlite:8.44.0"),
+      appStart = false,
+      logcat = false,
+    )
+
+    val build = runner.appendArguments(":app:assembleDebug", "--info").build()
+    assertTrue {
+      "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+        "AndroidXSQLiteOpenHelper, AndroidXSQLiteDriver, AndroidXRoomDao)" in build.output
+    }
+  }
+
+  // TODO ADAM: enable once sentry-android-sqlite 8.44.0 ships with the SentrySQLiteDriver
+  // Helper-wrap (>= 6.21.0) and driver-wrap (>= VERSION_SQLITE_DRIVER) are independent gates; both
+  // instrumentables must appear when the newer SDK is on the classpath.
+  @Ignore("Placeholder version VERSION_SQLITE_DRIVER not yet on Maven")
+  @Test
+  fun `applies helper-wrap and driver-wrap together when both SDK gates pass`() {
+    applyTracingInstrumentation(
+      features = setOf(InstrumentationFeature.DATABASE),
+      dependencies =
+        setOf("androidx.sqlite:sqlite:2.6.2", "io.sentry:sentry-android-sqlite:8.44.0"),
+      appStart = false,
+      logcat = false,
+    )
+
+    val build = runner.appendArguments(":app:assembleDebug", "--info").build()
+    val chainLine =
+      build.output.lines().firstOrNull {
+        it.contains("[sentry] Instrumentable: ChainedInstrumentable(instrumentables=")
+      }
+    assertTrue(chainLine != null)
+    assertTrue("AndroidXSQLiteOpenHelper" in chainLine!!)
+    assertTrue("AndroidXSQLiteDriver" in chainLine)
+    assertTrue("AndroidXRoomDao" in chainLine)
+    assertFalse("AndroidXSQLiteDatabase" in chainLine)
+    assertFalse("AndroidXSQLiteStatement" in chainLine)
+  }
+
+  @Test
+  fun `does not apply SQLiteDriver instrumentable on sentry-android-sqlite below threshold`() {
+    applyTracingInstrumentation(
+      features = setOf(InstrumentationFeature.DATABASE),
+      dependencies =
+        setOf("androidx.sqlite:sqlite:2.0.0", "io.sentry:sentry-android-sqlite:6.21.0"),
+      appStart = false,
+      logcat = false,
+    )
+
+    val build = runner.appendArguments(":app:assembleDebug", "--info").build()
+    assertTrue {
+      "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=" +
+        "AndroidXSQLiteOpenHelper, AndroidXRoomDao)" in build.output
     }
   }
 

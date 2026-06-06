@@ -5,6 +5,7 @@ import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigati
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.AndroidXSQLiteDriver
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import io.sentry.android.gradle.instrumentation.appstart.Application
 import io.sentry.android.gradle.instrumentation.appstart.ContentProvider
@@ -122,6 +123,17 @@ class VisitorTest(
           AndroidXSQLiteStatement(SemVer(2, 3, 0)),
           null,
         ),
+        arrayOf("androidxSqliteDriver", "InlineConstruction", AndroidXSQLiteDriver(), null),
+        arrayOf("androidxSqliteDriver", "LocalTypedAsImpl", AndroidXSQLiteDriver(), null),
+        arrayOf("androidxSqliteDriver", "LocalTypedAsBridge", AndroidXSQLiteDriver(), null),
+        arrayOf("androidxSqliteDriver", "FactoryReturn", AndroidXSQLiteDriver(), null),
+        arrayOf("androidxSqliteDriver", "TwoSetDriver", AndroidXSQLiteDriver(), null),
+        arrayOf("androidxSqliteDriver", "InvokeInterface", AndroidXSQLiteDriver(), null),
+        arrayOf("androidxSqliteDriver", "InlineBridge", AndroidXSQLiteDriver(), null),
+        arrayOf("androidxSqliteDriver", "FieldLoad", AndroidXSQLiteDriver(), null),
+        arrayOf("androidxSqliteDriver", "ManualWrap", AndroidXSQLiteDriver(), null),
+        arrayOf("androidxSqliteDriver", "InferredLocal", AndroidXSQLiteDriver(), null),
+        arrayOf("androidxSqliteDriver", "NoSetDriver", AndroidXSQLiteDriver(), null),
         roomDaoTestParameters("DeleteAndReturnUnit"),
         roomDaoTestParameters("InsertAndReturnLong"),
         roomDaoTestParameters("InsertAndReturnUnit"),

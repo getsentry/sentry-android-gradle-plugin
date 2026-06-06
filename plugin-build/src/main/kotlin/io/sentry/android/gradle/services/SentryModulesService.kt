@@ -52,12 +52,17 @@ abstract class SentryModulesService :
       features.add("DexGuard")
     }
 
+    if (isSQLiteDriverInstrEnabled()) {
+      features.add("SQLiteDriver")
+    }
+
     return project.provider { features }
   }
 
   private fun isInstrumentationEnabled(feature: InstrumentationFeature): Boolean {
     return when (feature) {
-      InstrumentationFeature.DATABASE -> isOldDatabaseInstrEnabled() || isNewDatabaseInstrEnabled()
+      InstrumentationFeature.DATABASE ->
+        isOldDatabaseInstrEnabled() || isNewDatabaseInstrEnabled() || isSQLiteDriverInstrEnabled()
       InstrumentationFeature.FILE_IO -> isFileIOInstrEnabled()
       InstrumentationFeature.OKHTTP -> isOkHttpInstrEnabled()
       InstrumentationFeature.COMPOSE -> isComposeInstrEnabled()
@@ -71,6 +76,15 @@ abstract class SentryModulesService :
   fun isNewDatabaseInstrEnabled(): Boolean =
     sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_SQLITE, SentryVersions.VERSION_SQLITE) &&
       parameters.features.get().contains(InstrumentationFeature.DATABASE)
+
+  // Coexists with isNewDatabaseInstrEnabled() — helper-wrap and driver-wrap target disjoint call
+  // sites and both run when both SDK gates pass. Bridge-case double-wrap is defended in the SDK
+  // (SentrySQLiteDriver.create() skips androidx.sqlite.driver.SupportSQLiteDriver instances).
+  fun isSQLiteDriverInstrEnabled(): Boolean =
+    sentryModules.isAtLeast(
+      SentryModules.SENTRY_ANDROID_SQLITE,
+      SentryVersions.VERSION_SQLITE_DRIVER,
+    ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
 
   fun isOldDatabaseInstrEnabled(): Boolean =
     !isNewDatabaseInstrEnabled() &&

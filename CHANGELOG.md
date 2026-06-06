@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Features
+
+// TODO ADAM: Update SDK version number.
+- Auto-wrap SQLiteDriver with SentrySQLiteDriver for Room users ([#1281](https://github.com/getsentry/sentry-android-gradle-plugin/issues/1281))
+  - Gated on `sentry-android-sqlite` >= 8.44.0 and the existing `tracingInstrumentation` `DATABASE` feature
+  - Users of the `androidx.sqlite.driver.SupportSQLiteDriver` bridge are protected from duplicate span creation (the `SupportSQLiteOpenHelper` passed to the bridge constructor is auto-wrapped but the bridge itself isn't)
+
 ### Fixes
 
 - Resolve the sentry-cli path as a task input instead of memoizing it in a static field, fixing stale-path build failures when switching branches with the configuration cache enabled ([#1264](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1264))
