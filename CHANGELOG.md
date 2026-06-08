@@ -9,6 +9,7 @@
 ### Fixes
 
 - Compose tracing no longer adds the Sentry modifier multiple times for chained modifiers (e.g. `Modifier.fillMaxSize().padding()`) on Kotlin 2.2 and newer ([#1253](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1253))
+- The published Gradle plugin and `sentry-snapshots-runtime` POMs no longer declare a transitive `kotlin-stdlib` dependency ([#1276](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1276))
 
 ### Dependencies
 
