@@ -10,21 +10,22 @@ import org.objectweb.asm.Type
 import org.objectweb.asm.commons.GeneratorAdapter
 import org.objectweb.asm.commons.Method
 
-class BinderIpcMethodInstrumentable : MethodInstrumentable {
+class BinderMethodInstrumentable : MethodInstrumentable {
 
   override fun getVisitor(
     instrumentableContext: MethodContext,
     apiVersion: Int,
     originalVisitor: MethodVisitor,
     parameters: SpanAddingClassVisitorFactory.SpanAddingParameters,
-  ): MethodVisitor = BinderIpcMethodVisitor(apiVersion, originalVisitor, instrumentableContext)
+  ): MethodVisitor = BinderMethodVisitor(apiVersion, originalVisitor, instrumentableContext)
 
   override fun isInstrumentable(data: MethodContext): Boolean = true
 }
 
-private const val SENTRY_IPC_TRACER = "io/sentry/android/core/SentryIpcTracer"
+private const val SENTRY_BINDER_ADAPTER =
+  "io/sentry/android/core/internal/binder/SentryBinderAdapter"
 
-class BinderIpcMethodVisitor(
+class BinderMethodVisitor(
   apiVersion: Int,
   originalVisitor: MethodVisitor,
   instrumentableContext: MethodContext,
@@ -79,7 +80,7 @@ class BinderIpcMethodVisitor(
     mv.visitLdcInsn(name)
     mv.visitMethodInsn(
       Opcodes.INVOKESTATIC,
-      SENTRY_IPC_TRACER,
+      SENTRY_BINDER_ADAPTER,
       "onCallStart",
       "(Ljava/lang/String;Ljava/lang/String;)I",
       false,
@@ -105,13 +106,13 @@ class BinderIpcMethodVisitor(
 
     mv.visitLabel(tryEnd)
     loadLocal(cookieLocal)
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, SENTRY_IPC_TRACER, "onCallEnd", "(I)V", false)
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, SENTRY_BINDER_ADAPTER, "onCallEnd", "(I)V", false)
     mv.visitJumpInsn(Opcodes.GOTO, afterFinally)
 
     // catch-all handler: call onCallEnd then re-throw
     mv.visitLabel(catchHandler)
     loadLocal(cookieLocal)
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, SENTRY_IPC_TRACER, "onCallEnd", "(I)V", false)
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, SENTRY_BINDER_ADAPTER, "onCallEnd", "(I)V", false)
     mv.visitInsn(Opcodes.ATHROW)
 
     mv.visitLabel(afterFinally)

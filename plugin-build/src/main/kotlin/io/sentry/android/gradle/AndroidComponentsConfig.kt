@@ -196,7 +196,7 @@ fun ApplicationAndroidComponentsExtension.configure(
             extension.includeSourceContext,
             extension.dexguardEnabled,
             extension.tracingInstrumentation.appStart.enabled,
-            extension.tracingInstrumentation.binderIpc.enabled,
+            extension.tracingInstrumentation.binder.enabled,
           )
         /**
          * We have to register SentryModulesService as a build event listener, so it will not be
@@ -230,7 +230,7 @@ fun ApplicationAndroidComponentsExtension.configure(
             extension.tracingInstrumentation.appStart.enabled
           )
           params.binderIpcEnabled.setDisallowChanges(
-            extension.tracingInstrumentation.binderIpc.enabled
+            extension.tracingInstrumentation.binder.enabled
           )
           params.tmpDir.set(
             project.layout.buildDirectory.dir("sentry-logs/instrumentation/${variant.name}")

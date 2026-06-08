@@ -23,7 +23,7 @@ class BinderIpc : ClassInstrumentable {
       apiVersion,
       originalVisitor,
       CLASSNAME,
-      listOf(BinderIpcMethodInstrumentable()),
+      listOf(BinderMethodInstrumentable()),
       parameters,
     )
   }

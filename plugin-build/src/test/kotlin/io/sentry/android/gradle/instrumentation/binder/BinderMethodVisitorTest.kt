@@ -15,7 +15,7 @@ import org.objectweb.asm.Opcodes
 import org.objectweb.asm.util.Textifier
 import org.objectweb.asm.util.TraceClassVisitor
 
-class BinderIpcMethodVisitorTest {
+class BinderMethodVisitorTest {
 
   @get:Rule val tmpDir = TemporaryFolder()
 
@@ -27,7 +27,7 @@ class BinderIpcMethodVisitorTest {
         Opcodes.ASM9,
         writer,
         "TestClass",
-        listOf(BinderIpcMethodInstrumentable()),
+        listOf(BinderMethodInstrumentable()),
         TestSpanAddingParameters(debugOutput = false, inMemoryDir = tmpDir.root),
       )
     reader.accept(visitor, ClassReader.SKIP_FRAMES)
@@ -66,11 +66,11 @@ class BinderIpcMethodVisitorTest {
     val text = disassemble(instrumented)
 
     assertTrue(
-      text.contains("io/sentry/android/core/SentryIpcTracer.onCallStart"),
+      text.contains("io/sentry/android/core/internal/binder/SentryBinderAdapter.onCallStart"),
       "onCallStart should be emitted:\n$text",
     )
     assertTrue(
-      text.contains("io/sentry/android/core/SentryIpcTracer.onCallEnd"),
+      text.contains("io/sentry/android/core/internal/binder/SentryBinderAdapter.onCallEnd"),
       "onCallEnd should be emitted:\n$text",
     )
     assertTrue(
@@ -101,7 +101,9 @@ class BinderIpcMethodVisitorTest {
     val instrumented = instrument(bytes)
     val text = disassemble(instrumented)
 
-    assertTrue(text.contains("io/sentry/android/core/SentryIpcTracer.onCallStart"))
+    assertTrue(
+      text.contains("io/sentry/android/core/internal/binder/SentryBinderAdapter.onCallStart")
+    )
     assertTrue(text.contains("LDC \"Settings.Secure\""))
   }
 
@@ -117,7 +119,7 @@ class BinderIpcMethodVisitorTest {
     val instrumented = instrument(bytes)
     val text = disassemble(instrumented)
 
-    assertFalse(text.contains("SentryIpcTracer"), "unknown calls must not be wrapped:\n$text")
+    assertFalse(text.contains("SentryBinderAdapter"), "unknown calls must not be wrapped:\n$text")
   }
 
   @Test
@@ -139,6 +141,6 @@ class BinderIpcMethodVisitorTest {
     val instrumented = instrument(bytes)
     val text = disassemble(instrumented)
 
-    assertFalse(text.contains("SentryIpcTracer"))
+    assertFalse(text.contains("SentryBinderAdapter"))
   }
 }

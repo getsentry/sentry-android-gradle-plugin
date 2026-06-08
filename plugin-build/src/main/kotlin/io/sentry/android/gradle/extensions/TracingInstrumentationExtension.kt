@@ -72,10 +72,10 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
     appStartExtensionAction.execute(appStart)
   }
 
-  val binderIpc: BinderIpcExtension = objects.newInstance(BinderIpcExtension::class.java)
+  val binder: BinderExtension = objects.newInstance(BinderExtension::class.java)
 
-  fun binderIpc(binderIpcAction: Action<BinderIpcExtension>) {
-    binderIpcAction.execute(binderIpc)
+  fun binderIpc(binderAction: Action<BinderExtension>) {
+    binderAction.execute(binder)
   }
 }
 
