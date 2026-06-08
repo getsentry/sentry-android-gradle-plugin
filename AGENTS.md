@@ -16,7 +16,7 @@ separate builds via `includeBuild`:
 
 - `plugin-build/` — the actual plugin source lives here, under `plugin-build/src`. It has
   its own `settings.gradle.kts` and `gradle.properties`. Look here first for plugin code.
-- `sentry-kotlin-compiler-plugin/` — Kotlin compiler plugin, substituted into samples
+- `sentry-kotlin-compiler-plugin/` — Kotlin compiler plugin which performs Jetpack Compose instrumentation, substituted into samples
   without publishing.
 - `sentry-snapshots-runtime/` — snapshots runtime, also substituted into samples.
 
