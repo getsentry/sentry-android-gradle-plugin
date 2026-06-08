@@ -49,8 +49,8 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
   @get:Input @get:Optional abstract val vcsPrNumber: Property<Int>
 
   override fun getArguments(args: MutableList<String>) {
-    args.add("build")
     args.add("snapshots")
+    args.add("upload")
     args.add("--app-id")
     args.add(appId.get())
 

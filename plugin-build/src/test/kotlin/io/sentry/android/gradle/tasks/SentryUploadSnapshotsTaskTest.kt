@@ -23,8 +23,8 @@ class SentryUploadSnapshotsTaskTest {
     val args = task.computeCommandLineArgs()
 
     assertTrue("sentry-cli" in args)
-    assertTrue("build" in args)
     assertTrue("snapshots" in args)
+    assertTrue("upload" in args)
     assertTrue("--app-id" in args)
     assertTrue("com.example" in args)
     assertTrue("/path/to/snapshots" in args)
