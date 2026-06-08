@@ -72,7 +72,8 @@ build cache — `./gradlew clean` and add `--no-build-cache`.
 - **Changelog is enforced** by [dangerfile.js](dangerfile.js): every PR must add an entry
   to the "Unreleased" section of [CHANGELOG.md](CHANGELOG.md) that references the PR
   number (e.g. `- Fix X ([#1234](...))`). To opt out, add `#skip-changelog` to the PR
-  description.
+  description. The entry needs the PR number, which you can get with
+  `gh pr view --json number -q '.number'` (or `gh pr view <branch> ...`).
 - `feat:` PRs get a reminder to update [sentry-docs](https://github.com/getsentry/sentry-docs).
 - Commit subjects use conventional-commit style with a scope, e.g. `fix(snapshots): ...`,
   `build(deps): ...`.
