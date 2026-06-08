@@ -74,6 +74,9 @@ build cache — `./gradlew clean` and add `--no-build-cache`.
   number (e.g. `- Fix X ([#1234](...))`). To opt out, add `#skip-changelog` to the PR
   description. The entry needs the PR number, which you can get with
   `gh pr view --json number -q '.number'` (or `gh pr view <branch> ...`).
+  - When rebasing, a release cut on `main` may have renamed the old "Unreleased" heading
+    to a version number, leaving your entry under a released section. Move it back into an
+    `## Unreleased` section at the top of the file (add the heading if it's missing).
 - `feat:` PRs get a reminder to update [sentry-docs](https://github.com/getsentry/sentry-docs).
 - Commit subjects use conventional-commit style with a scope, e.g. `fix(snapshots): ...`,
   `build(deps): ...`.
