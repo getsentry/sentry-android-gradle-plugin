@@ -90,7 +90,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
           javaVariant,
           outputPaths,
           sourceFiles,
-          cliExecutable,
           sentryOrgParameter,
           sentryProjectParameter,
           "Java",

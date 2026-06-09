@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Resolve the sentry-cli path as a task input instead of memoizing it in a static field, fixing stale-path build failures when switching branches with the configuration cache enabled ([#1264](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1264))
+  - This fixed the issue where sentry-cli could not be found (`A problem occurred starting process 'command  ../sentry-cliXXX.exe'`)
+
 ## 6.10.0
 
 ### Features
