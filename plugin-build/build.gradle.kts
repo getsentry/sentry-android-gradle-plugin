@@ -73,6 +73,8 @@ dependencies {
 val isVersionOverrideBuild =
   System.getenv("VERSION_AGP") != null || System.getenv("VERSION_KOTLIN") != null
 
+// Regenerate the lockfile and verification metadata after changing dependencies; see
+// CONTRIBUTING.md.
 if (!isVersionOverrideBuild) {
   dependencyLocking { lockAllConfigurations() }
 }
