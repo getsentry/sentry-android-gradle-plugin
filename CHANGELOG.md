@@ -6,6 +6,7 @@
 
 - Resolve the sentry-cli path as a task input instead of memoizing it in a static field, fixing stale-path build failures when switching branches with the configuration cache enabled ([#1264](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1264))
   - This fixed the issue where sentry-cli could not be found (`A problem occurred starting process 'command  ../sentry-cliXXX.exe'`)
+- Defer the telemetry default-org lookup to execution time so the configuration cache no longer re-runs `sentry-cli` on every build ([#1263](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1263))
 
 ## 6.10.0
 
