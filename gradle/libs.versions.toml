@@ -60,7 +60,7 @@ sentryAndroidOkhttp = { group = "io.sentry", name = "sentry-android-okhttp", ver
 sentrySpringBootJakarta = { group = "io.sentry", name = "sentry-spring-boot-starter-jakarta", version.ref = "sentry" }
 
 # test
-mockitoKotlin = { group = "com.nhaarman.mockitokotlin2", name = "mockito-kotlin", version = "2.2.0" }
+mockitoKotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.0" }
 arscLib = { group = "io.github.reandroid", name = "ARSCLib", version = "1.1.4" }
 zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.5" }
 

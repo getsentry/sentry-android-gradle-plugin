@@ -1,12 +1,5 @@
 package io.sentry.android.gradle.autoinstall.logback
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
@@ -18,6 +11,13 @@ import org.gradle.api.artifacts.DirectDependenciesMetadata
 import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.VariantMetadata
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.slf4j.Logger
 
 class LogbackInstallStrategyTest {
@@ -78,11 +78,7 @@ class LogbackInstallStrategyTest {
         "[sentry] sentry-logback was successfully installed with version: 6.25.2"
     }
     verify(fixture.dependencies)
-      .add(
-        com.nhaarman.mockitokotlin2.check<String> {
-          assertEquals("io.sentry:sentry-logback:6.25.2", it)
-        }
-      )
+      .add(org.mockito.kotlin.check<String> { assertEquals("io.sentry:sentry-logback:6.25.2", it) })
   }
 
   private class LogbackInstallStrategyImpl(logger: Logger) : LogbackInstallStrategy(logger)
