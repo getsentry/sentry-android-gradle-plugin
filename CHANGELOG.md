@@ -4,7 +4,7 @@
 
 ### Dependencies
 
-- Bump mockito-kotlin from `com.nhaarman.mockitokotlin2:2.2.0` to `org.mockito.kotlin:5.4.0` ([#XXXX](https://github.com/getsentry/sentry-android-gradle-plugin/pull/XXXX))
+- Bump mockito-kotlin from `com.nhaarman.mockitokotlin2:2.2.0` to `org.mockito.kotlin:5.4.0` ([#1286](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1286))
 
 ### Fixes
 
