@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Dependencies
+
+- Bump mockito-kotlin from `com.nhaarman.mockitokotlin2:2.2.0` to `org.mockito.kotlin:5.4.0` ([#1286](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1286))
+
 ### Fixes
 
 - Resolve the sentry-cli path as a task input instead of memoizing it in a static field, fixing stale-path build failures when switching branches with the configuration cache enabled ([#1264](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1264))

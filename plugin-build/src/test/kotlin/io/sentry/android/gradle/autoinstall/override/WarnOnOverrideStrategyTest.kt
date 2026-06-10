@@ -1,10 +1,5 @@
 package io.sentry.android.gradle.autoinstall.override
 
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import io.sentry.android.gradle.util.SentryModules
@@ -15,6 +10,11 @@ import org.gradle.api.artifacts.ComponentMetadataDetails
 import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.slf4j.Logger
 
 class WarnOnOverrideStrategyTest {

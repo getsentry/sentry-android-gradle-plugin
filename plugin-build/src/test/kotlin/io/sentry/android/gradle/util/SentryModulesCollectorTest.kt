@@ -1,10 +1,5 @@
 package io.sentry.android.gradle.util
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.whenever
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import io.sentry.android.gradle.services.SentryModulesService
@@ -23,6 +18,11 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
 
 class SentryModulesCollectorTest {
 
