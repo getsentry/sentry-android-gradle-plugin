@@ -22,7 +22,7 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android" }
 kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring" }
 kapt = { id = "org.jetbrains.kotlin.kapt" }
 ksp = { id = "com.google.devtools.ksp" }
-dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
+dokka = { id = "org.jetbrains.dokka", version = "2.2.0" }
 spotless = { id = "com.diffplug.spotless", version = "8.6.0" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
