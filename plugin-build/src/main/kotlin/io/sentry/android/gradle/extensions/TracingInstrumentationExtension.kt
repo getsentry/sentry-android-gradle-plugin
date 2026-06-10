@@ -82,7 +82,7 @@ enum class InstrumentationFeature(val integrationName: String) {
    *
    * **DAO method execution** (`db.sql.room` spans): Wraps each public method on Room's generated
    * `@Dao` `_Impl` classes, measuring the full DAO call end-to-end (transaction management, query
-   * execution, and cursor processing). Only for Room users and only on versions prior to Room 2.7.
+   * execution, and cursor processing). Only for Room users on < Room 2.7.
    *
    * This feature uses bytecode manipulation.
    */

@@ -15,13 +15,11 @@ class SentryModulesServiceTest {
 
   class Fixture {
 
-    data class Sut(val service: SentryModulesService, val project: org.gradle.api.Project)
-
     fun getSut(
       tmpDir: File,
       features: Set<InstrumentationFeature> = emptySet(),
       sentryModules: Map<ModuleIdentifier, SemVer> = emptyMap(),
-    ): Sut {
+    ): SentryModulesService {
       val fakeProject = ProjectBuilder.builder().withProjectDir(tmpDir).build()
 
       val featureProvider = fakeProject.provider { features }
@@ -41,7 +39,7 @@ class SentryModulesServiceTest {
         )
       val service = serviceProvider.get()
       service.sentryModules = sentryModules
-      return Sut(service, fakeProject)
+      return service
     }
   }
 
@@ -54,7 +52,7 @@ class SentryModulesServiceTest {
 
   @Test
   fun `isSQLiteDriverInstrEnabled is true when sentry-android-sqlite meets threshold and DATABASE is enabled`() {
-    val (service, _) =
+    val service =
       fixture.getSut(
         tmpDir = testProjectDir.root,
         features = setOf(InstrumentationFeature.DATABASE),
@@ -66,23 +64,11 @@ class SentryModulesServiceTest {
 
   @Test
   fun `isSQLiteDriverInstrEnabled is false when sentry-android-sqlite is absent from classpath`() {
-    val (service, _) =
+    val service =
       fixture.getSut(
         tmpDir = testProjectDir.root,
         features = setOf(InstrumentationFeature.DATABASE),
         sentryModules = emptyMap(),
-      )
-
-    assertFalse(service.isSQLiteDriverInstrEnabled())
-  }
-
-  @Test
-  fun `isSQLiteDriverInstrEnabled is false when sentry-android-sqlite is below VERSION_SQLITE`() {
-    val (service, _) =
-      fixture.getSut(
-        tmpDir = testProjectDir.root,
-        features = setOf(InstrumentationFeature.DATABASE),
-        sentryModules = mapOf(SentryModules.SENTRY_ANDROID_SQLITE to SentryVersions.VERSION_SQLITE),
       )
 
     assertFalse(service.isSQLiteDriverInstrEnabled())
@@ -96,7 +82,7 @@ class SentryModulesServiceTest {
         SentryVersions.VERSION_SQLITE_DRIVER.minor - 1,
         SentryVersions.VERSION_SQLITE_DRIVER.patch,
       )
-    val (service, _) =
+    val service =
       fixture.getSut(
         tmpDir = testProjectDir.root,
         features = setOf(InstrumentationFeature.DATABASE),
@@ -108,7 +94,7 @@ class SentryModulesServiceTest {
 
   @Test
   fun `isSQLiteDriverInstrEnabled is false when DATABASE is disabled`() {
-    val (service, _) =
+    val service =
       fixture.getSut(
         tmpDir = testProjectDir.root,
         features = emptySet(),
@@ -128,7 +114,7 @@ class SentryModulesServiceTest {
 
   @Test
   fun `between VERSION_SQLITE and VERSION_SQLITE_DRIVER only the open-helper path is on`() {
-    val (service, _) =
+    val service =
       fixture.getSut(
         tmpDir = testProjectDir.root,
         features = setOf(InstrumentationFeature.DATABASE),
@@ -146,7 +132,7 @@ class SentryModulesServiceTest {
 
   @Test
   fun `at VERSION_SQLITE_DRIVER the open-helper path is also on and the old path is off`() {
-    val (service, _) =
+    val service =
       fixture.getSut(
         tmpDir = testProjectDir.root,
         features = setOf(InstrumentationFeature.DATABASE),

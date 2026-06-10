@@ -10,6 +10,9 @@ import io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.visitor.S
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 
+/** JVM type descriptor for `androidx.sqlite.SQLiteDriver`. */
+internal const val SQLITE_DRIVER_TYPE_DESCRIPTOR = "Landroidx/sqlite/SQLiteDriver;"
+
 /**
  * Auto-instruments `SQLiteDriver` for all Room users by wrapping any driver passed to
  * `RoomDatabase.Builder.setDriver(SQLiteDriver)`.
@@ -70,9 +73,6 @@ class AndroidXSQLiteDriver : ClassInstrumentable {
 
 class SetDriverMethodInstrumentable : MethodInstrumentable {
 
-  override val fqName: String
-    get() = SET_DRIVER
-
   override fun getVisitor(
     instrumentableContext: MethodContext,
     apiVersion: Int,
@@ -85,6 +85,6 @@ class SetDriverMethodInstrumentable : MethodInstrumentable {
 
   companion object {
     internal const val SET_DRIVER = "setDriver"
-    internal const val SET_DRIVER_DESCRIPTOR_PREFIX = "(Landroidx/sqlite/SQLiteDriver;)"
+    internal const val SET_DRIVER_DESCRIPTOR_PREFIX = "($SQLITE_DRIVER_TYPE_DESCRIPTOR)"
   }
 }

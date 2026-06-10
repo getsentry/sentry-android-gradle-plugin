@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.visitor
 
 import io.sentry.android.gradle.instrumentation.MethodContext
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.SQLITE_DRIVER_TYPE_DESCRIPTOR
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Type
 import org.objectweb.asm.commons.AdviceAdapter
@@ -28,7 +29,7 @@ class SetDriverMethodVisitor(
   companion object {
     internal const val CREATE = "create"
     internal const val SENTRY_CREATE_DESCRIPTOR =
-      "(Landroidx/sqlite/SQLiteDriver;)Landroidx/sqlite/SQLiteDriver;"
+      "($SQLITE_DRIVER_TYPE_DESCRIPTOR)$SQLITE_DRIVER_TYPE_DESCRIPTOR"
     internal const val SENTRY_SQLITE_DRIVER_TYPE = "Lio/sentry/sqlite/SentrySQLiteDriver;"
   }
 }

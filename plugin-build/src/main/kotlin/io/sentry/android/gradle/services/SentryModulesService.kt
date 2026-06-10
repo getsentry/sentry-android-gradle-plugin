@@ -77,7 +77,7 @@ abstract class SentryModulesService :
    * `SentrySQLiteDriver` and the DATABASE feature is enabled.
    *
    * Room version is not gated here: Room < 2.7 has no matching `setDriver` method, so
-   * instrumentation is a no-op. Method descriptor matching is the safety boundary.
+   * instrumentation is a no-op.
    */
   fun isSQLiteDriverInstrEnabled(): Boolean =
     sentryModules.isAtLeast(

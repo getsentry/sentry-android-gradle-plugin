@@ -16,6 +16,7 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.tree.FieldInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
 
@@ -77,8 +78,12 @@ class SetDriverMethodVisitorTest {
     val wrapIndex =
       realInsns.indexOfFirst { it is MethodInsnNode && SQLiteDriverBytecodeTestUtil.isWrapCall(it) }
     assertTrue(wrapIndex >= 0, "setDriver has no SentrySQLiteDriver.create call")
-    val returnIndex =
-      realInsns.indexOfFirst { it.opcode == Opcodes.ARETURN || it.opcode == Opcodes.RETURN }
-    return wrapIndex < returnIndex
+    val firstOriginalBodyIndex =
+      realInsns.indexOfFirst {
+        (it is MethodInsnNode && !SQLiteDriverBytecodeTestUtil.isWrapCall(it)) ||
+          it is FieldInsnNode
+      }
+    assertTrue(firstOriginalBodyIndex >= 0, "setDriver fixture has no recognizable original body")
+    return wrapIndex < firstOriginalBodyIndex
   }
 }

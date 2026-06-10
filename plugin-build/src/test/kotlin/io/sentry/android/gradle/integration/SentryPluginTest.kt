@@ -4,6 +4,7 @@ import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SemVer
+import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.verifyDebugMetaPropertiesNotInApk
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
 import io.sentry.android.gradle.verifyIntegrationList
@@ -561,8 +562,7 @@ class SentryPluginTest :
 
   @Test
   fun `does not apply sqliteDriver instrumentable when sentry gate fails without room on classpath`() {
-    val build =
-      buildDatabaseInstrumentation(SQLITE_OLD, SENTRY_ANDROID_SQLITE_OPEN_HELPER, minSdk = null)
+    val build = buildDatabaseInstrumentation(SQLITE, SENTRY_ANDROID_SQLITE_OPEN_HELPER)
 
     assertInstrumentableChain(build, "AndroidXSQLiteOpenHelper", "AndroidXRoomDao")
   }
@@ -1231,16 +1231,13 @@ class SentryPluginTest :
     )
   }
 
-  private fun buildDatabaseInstrumentation(
-    vararg dependencies: String,
-    minSdk: Int? = DRIVER_PATH_MIN_SDK,
-  ): BuildResult {
+  private fun buildDatabaseInstrumentation(vararg dependencies: String): BuildResult {
     applyTracingInstrumentation(
       features = setOf(InstrumentationFeature.DATABASE),
       dependencies = dependencies.toSet(),
       appStart = false,
       logcat = false,
-      minSdk = minSdk,
+      minSdk = DRIVER_PATH_MIN_SDK,
     )
     return runner.appendArguments(":app:assembleDebug", "--info").build()
   }
@@ -1265,9 +1262,9 @@ class SentryPluginTest :
       "Placeholder version VERSION_SQLITE_DRIVER not yet on Maven"
 
     private const val SQLITE = "androidx.sqlite:sqlite:2.6.2"
-    private const val SQLITE_OLD = "androidx.sqlite:sqlite:2.0.0"
     private const val SENTRY_ANDROID_SQLITE_OPEN_HELPER = "io.sentry:sentry-android-sqlite:6.21.0"
-    private const val SENTRY_ANDROID_SQLITE_DRIVER = "io.sentry:sentry-android-sqlite:8.44.0"
+    private val SENTRY_ANDROID_SQLITE_DRIVER =
+      "io.sentry:sentry-android-sqlite:${SentryVersions.VERSION_SQLITE_DRIVER}"
     private const val ROOM2_AT_DRIVER_FLOOR = "androidx.room:room-runtime:2.7.0"
     private const val ROOM2_BELOW_DRIVER_FLOOR = "androidx.room:room-runtime:2.6.1"
     private const val ROOM3_AT_DRIVER_FLOOR = "androidx.room3:room3-runtime:3.0.0-alpha06"
