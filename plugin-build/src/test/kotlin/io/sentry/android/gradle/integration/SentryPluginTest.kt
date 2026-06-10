@@ -4,6 +4,7 @@ import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SemVer
+import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.verifyDebugMetaPropertiesNotInApk
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
 import io.sentry.android.gradle.verifyIntegrationList
@@ -16,11 +17,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThrows
 import org.junit.Assume.assumeThat
+import org.junit.Ignore
 import org.junit.Test
 
 class SentryPluginTest :
@@ -529,6 +532,86 @@ class SentryPluginTest :
     }
   }
 
+  @Ignore(SQLITE_DRIVER_IGNORE_REASON)
+  @Test
+  fun `applies sqliteDriver instrumentable when sentry gate passes with room2`() {
+    val build =
+      buildDatabaseInstrumentation(SQLITE, ROOM2_AT_DRIVER_FLOOR, SENTRY_ANDROID_SQLITE_DRIVER)
+
+    assertInstrumentableChain(
+      build,
+      "AndroidXSQLiteOpenHelper",
+      "AndroidXSQLiteDriver",
+      "AndroidXRoomDao",
+    )
+  }
+
+  @Ignore(SQLITE_DRIVER_IGNORE_REASON)
+  @Test
+  fun `applies sqliteDriver instrumentable when sentry gate passes with room3`() {
+    val build =
+      buildDatabaseInstrumentation(SQLITE, ROOM3_AT_DRIVER_FLOOR, SENTRY_ANDROID_SQLITE_DRIVER)
+
+    assertInstrumentableChain(
+      build,
+      "AndroidXSQLiteOpenHelper",
+      "AndroidXSQLiteDriver",
+      "AndroidXRoomDao",
+    )
+  }
+
+  @Test
+  fun `does not apply sqliteDriver instrumentable when sentry gate fails without room on classpath`() {
+    val build = buildDatabaseInstrumentation(SQLITE, SENTRY_ANDROID_SQLITE_OPEN_HELPER)
+
+    assertInstrumentableChain(build, "AndroidXSQLiteOpenHelper", "AndroidXRoomDao")
+  }
+
+  @Test
+  fun `does not apply sqliteDriver instrumentable when sentry gate fails with room2`() {
+    val build =
+      buildDatabaseInstrumentation(SQLITE, ROOM2_AT_DRIVER_FLOOR, SENTRY_ANDROID_SQLITE_OPEN_HELPER)
+
+    assertInstrumentableChain(build, "AndroidXSQLiteOpenHelper", "AndroidXRoomDao")
+  }
+
+  @Test
+  fun `does not apply sqliteDriver instrumentable when sentry gate fails with room3`() {
+    val build =
+      buildDatabaseInstrumentation(SQLITE, ROOM3_AT_DRIVER_FLOOR, SENTRY_ANDROID_SQLITE_OPEN_HELPER)
+
+    assertInstrumentableChain(build, "AndroidXSQLiteOpenHelper", "AndroidXRoomDao")
+  }
+
+  @Ignore(SQLITE_DRIVER_IGNORE_REASON)
+  @Test
+  fun `applies sqliteDriver instrumentable when sentry gate passes without room on classpath`() {
+    val build = buildDatabaseInstrumentation(SQLITE, SENTRY_ANDROID_SQLITE_DRIVER)
+
+    assertInstrumentableChain(
+      build,
+      "AndroidXSQLiteOpenHelper",
+      "AndroidXSQLiteDriver",
+      "AndroidXRoomDao",
+    )
+  }
+
+  @Ignore(SQLITE_DRIVER_IGNORE_REASON)
+  @Test
+  fun `applies sqliteDriver instrumentable when sentry gate passes with room below 2_7`() {
+    val build =
+      buildDatabaseInstrumentation(SQLITE, ROOM2_BELOW_DRIVER_FLOOR, SENTRY_ANDROID_SQLITE_DRIVER)
+
+    assertInstrumentableChain(
+      build,
+      "AndroidXSQLiteOpenHelper",
+      "AndroidXSQLiteDriver",
+      "AndroidXRoomDao",
+    )
+  }
+
+  // Database path when sentry-android-sqlite is absent (old AndroidXSQLiteDatabase/Statement).
+  // Orthogonal to the SQLiteDriver gate matrix above.
   @Test
   fun `apply old Database instrumentable when app does not depend on sentry-android-sqlite`() {
     applyTracingInstrumentation(
@@ -1106,6 +1189,7 @@ class SentryPluginTest :
     excludes: Set<String> = emptySet(),
     sdkVersion: String = "7.1.0",
     forceInstrumentDependencies: Boolean = true,
+    minSdk: Int? = null,
   ) {
     appBuildFile.appendText(
       // language=Groovy
@@ -1131,8 +1215,60 @@ class SentryPluginTest :
                     excludes = ["${excludes.joinToString()}"]
                   }
                 }
+                ${
+                  minSdk?.let {
+                    """
+                android {
+                  defaultConfig {
+                    minSdkVersion $it
+                  }
+                }
+                """
+                  } ?: ""
+                }
             """
         .trimIndent()
     )
+  }
+
+  private fun buildDatabaseInstrumentation(vararg dependencies: String): BuildResult {
+    applyTracingInstrumentation(
+      features = setOf(InstrumentationFeature.DATABASE),
+      dependencies = dependencies.toSet(),
+      appStart = false,
+      logcat = false,
+      minSdk = DRIVER_PATH_MIN_SDK,
+    )
+    return runner.appendArguments(":app:assembleDebug", "--info").build()
+  }
+
+  private fun assertInstrumentableChain(build: BuildResult, vararg expected: String) {
+    assertEquals(expected.toList(), instrumentables(build))
+  }
+
+  private fun instrumentables(build: BuildResult): List<String> {
+    val line =
+      build.output.lines().first {
+        it.contains("[sentry] Instrumentable: ChainedInstrumentable(instrumentables=")
+      }
+    val prefix = "ChainedInstrumentable(instrumentables="
+    val start = line.indexOf(prefix) + prefix.length
+    val end = line.lastIndexOf(')')
+    return line.substring(start, end).split(", ").filter { it.isNotEmpty() }
+  }
+
+  companion object {
+    private const val SQLITE_DRIVER_IGNORE_REASON =
+      "Placeholder version VERSION_SQLITE_DRIVER not yet on Maven"
+
+    private const val SQLITE = "androidx.sqlite:sqlite:2.6.2"
+    private const val SENTRY_ANDROID_SQLITE_OPEN_HELPER = "io.sentry:sentry-android-sqlite:6.21.0"
+    private val SENTRY_ANDROID_SQLITE_DRIVER =
+      "io.sentry:sentry-android-sqlite:${SentryVersions.VERSION_SQLITE_DRIVER}"
+    private const val ROOM2_AT_DRIVER_FLOOR = "androidx.room:room-runtime:2.7.0"
+    private const val ROOM2_BELOW_DRIVER_FLOOR = "androidx.room:room-runtime:2.6.1"
+    private const val ROOM3_AT_DRIVER_FLOOR = "androidx.room3:room3-runtime:3.0.0-alpha06"
+    /** androidx.sqlite 2.6.x and room3-runtime both require minSdk 23 in the test fixture. */
+    private const val DRIVER_PATH_MIN_SDK = 23
   }
 }

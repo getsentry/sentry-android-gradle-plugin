@@ -5,6 +5,7 @@ import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigati
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.AndroidXSQLiteDriver
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import io.sentry.android.gradle.instrumentation.appstart.Application
 import io.sentry.android.gradle.instrumentation.appstart.ContentProvider
@@ -121,6 +122,20 @@ class VisitorTest(
           "FrameworkSQLiteStatement",
           AndroidXSQLiteStatement(SemVer(2, 3, 0)),
           null,
+        ),
+        // RoomDatabase$Builder fixtures: see SQLiteDriverBytecodeTestUtil (extracted from published
+        // AARs).
+        arrayOf(
+          "androidxRoom",
+          "RoomDatabase\$Builder",
+          AndroidXSQLiteDriver(),
+          TestClassContext("androidx.room.RoomDatabase\$Builder"),
+        ),
+        arrayOf(
+          "androidxRoom",
+          "RoomDatabase3\$Builder",
+          AndroidXSQLiteDriver(),
+          TestClassContext("androidx.room3.RoomDatabase\$Builder"),
         ),
         roomDaoTestParameters("DeleteAndReturnUnit"),
         roomDaoTestParameters("InsertAndReturnLong"),
