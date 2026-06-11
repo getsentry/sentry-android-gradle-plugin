@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -28,7 +27,7 @@ dependencies {
   implementation(libs.sample.springBoot.kotlinReflect)
   implementation(libs.sample.springBoot.starterJdbc)
   implementation(libs.sentrySpringBootJakarta)
-  implementation(kotlin(Samples.SpringBoot.kotlinStdLib, KotlinCompilerVersion.VERSION))
+  implementation(kotlin(Samples.SpringBoot.kotlinStdLib))
 
   runtimeOnly(libs.sample.springBoot.hsqldb)
   testImplementation(libs.sample.springBoot.starterTest) {

@@ -4,7 +4,6 @@ dependencyResolutionManagement {
   repositories {
     mavenCentral()
     google()
-    mavenLocal()
     exclusiveContent {
       forRepository { maven(url = "https://repo.gradle.org/gradle/libs-releases") }
       filter { includeGroup("org.gradle.experimental") }

@@ -49,8 +49,8 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
   @get:Input @get:Optional abstract val vcsPrNumber: Property<Int>
 
   override fun getArguments(args: MutableList<String>) {
-    args.add("build")
     args.add("snapshots")
+    args.add("upload")
     args.add("--app-id")
     args.add(appId.get())
 
@@ -75,7 +75,6 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
       project: Project,
       extension: SentryPluginExtension,
       sentryTelemetryProvider: Provider<SentryTelemetryService>?,
-      cliExecutable: Provider<String>,
       sentryOrgOverride: String?,
       sentryProjectOverride: String?,
       applicationId: Provider<String>,
@@ -88,7 +87,6 @@ abstract class SentryUploadSnapshotsTask : SentryCliExecTask() {
       ) { task ->
         task.workingDir(project.rootDir)
         task.debug.set(extension.debug)
-        task.cliExecutable.set(cliExecutable)
         task.sentryProperties.set(sentryProperties?.let { project.file(it) })
         task.sentryOrganization.set(
           sentryOrgOverride?.let { project.provider { it } } ?: extension.org

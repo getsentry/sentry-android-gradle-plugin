@@ -1,5 +1,6 @@
 plugins {
-  alias(libs.plugins.kotlin)
+  // No buildSrc here, so this standalone included build can't read BuildPluginsVersion.KOTLIN.
+  alias(libs.plugins.kotlin) version "2.1.21"
   id("distribution")
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.spotless)

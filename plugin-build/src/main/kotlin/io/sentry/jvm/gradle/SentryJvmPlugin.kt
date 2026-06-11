@@ -14,7 +14,6 @@ import io.sentry.android.gradle.util.SentryPluginUtils
 import io.sentry.android.gradle.util.hookWithAssembleTasks
 import io.sentry.android.gradle.util.info
 import io.sentry.gradle.common.JavaVariant
-import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import org.gradle.api.Plugin
@@ -45,7 +44,7 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
 
       val javaExtension = project.extensions.getByType(JavaPluginExtension::class.java)
 
-      val sentryResDir = project.layout.buildDirectory.dir("generated${sep}sentry")
+      val sentryResDir = project.layout.buildDirectory.dir("generated/sentry")
 
       val javaVariant = JavaVariant(project, javaExtension)
       val outputPaths = OutputPaths(project, "java")
@@ -67,7 +66,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
             project,
             javaVariant,
             extension,
-            cliExecutable,
             sentryOrgParameter,
             "JVM",
           )
@@ -91,7 +89,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
           javaVariant,
           outputPaths,
           sourceFiles,
-          cliExecutable,
           sentryOrgParameter,
           sentryProjectParameter,
           "Java",
@@ -134,9 +131,5 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
 
       project.installDependencies(extension, false)
     }
-  }
-
-  companion object {
-    internal val sep = File.separator
   }
 }

@@ -1,30 +1,33 @@
 [versions]
-kotlin = "1.8.20"
 agp = "8.10.1"
 
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
 ktfmt = "0.51"
 sqlite = "2.1.0"
-sentry = "7.0.0"
+sentry = "8.43.2"
+# Pinned to the last release that shipped sentry-android-okhttp; the module was removed
+# in 8.0.0, so there is no newer version to update to. Used only to verify the legacy
+# okhttp instrumentation path in tests.
+sentryAndroidOkhttp = "7.22.6"
 
-sampleCoroutines = "1.5.2"
+sampleCoroutines = "1.11.0"
 sampleRoom = "2.7.2"
 sampleRetrofit = "2.9.0"
 sampleSpringBoot = "3.4.1"
 
 [plugins]
-kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+# Version is supplied at the apply site, normally from BuildPluginsVersion.KOTLIN.
+kotlin = { id = "org.jetbrains.kotlin.jvm" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android" }
+kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring" }
+kapt = { id = "org.jetbrains.kotlin.kapt" }
 ksp = { id = "com.google.devtools.ksp" }
 dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
-spotless = { id = "com.diffplug.spotless", version = "7.0.4" }
-groovyGradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version = "1.7.1" }
+spotless = { id = "com.diffplug.spotless", version = "8.6.0" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
-buildConfig = { id = "com.github.gmazzo.buildconfig", version = "4.2.0" }
+buildConfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.9" }
 springBoot = { id = "org.springframework.boot", version = "3.4.1" }
 springDependencyManagement = { id = "io.spring.dependency-management", version = "1.1.7" }
 composeCompiler =  { id = "org.jetbrains.kotlin.plugin.compose", version = "2.1.0" }
@@ -38,11 +41,11 @@ proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.5
 gradleApi = { group = "org.gradle.experimental", name = "gradle-public-api", version = "8.9" }
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable" }
-autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.0.1" }
-autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.0.1" }
-kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
-kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.7.1" }
-truth = { module = "com.google.truth:truth", version = "1.4.4" }
+autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.1.1" }
+autoServiceAnnotatons = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.1.1" }
+kotlinJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version = "2.1.21" }
+kotlinCompileTesting = { group = "dev.zacsweers.kctfork", name = "core", version = "0.13.0" }
+truth = { module = "com.google.truth:truth", version = "1.4.5" }
 composeDesktop = { group = "org.jetbrains.compose.desktop", name = "desktop", version = "1.6.10" }
 
 # bytecode instrumentation
@@ -52,19 +55,19 @@ sqlite = { group = "androidx.sqlite", name = "sqlite", version.ref = "sqlite" }
 sqliteFramework = { group = "androidx.sqlite", name = "sqlite-framework", version.ref = "sqlite" }
 sentry = { group = "io.sentry", name = "sentry", version.ref = "sentry" }
 sentryAndroid = { group = "io.sentry", name = "sentry-android", version.ref = "sentry" }
-sentryAndroidOkhttp = { group = "io.sentry", name = "sentry-android-okhttp", version.ref = "sentry" }
 sentryOkhttp = { group = "io.sentry", name = "sentry-okhttp", version.ref = "sentry" }
+sentryAndroidOkhttp = { group = "io.sentry", name = "sentry-android-okhttp", version.ref = "sentryAndroidOkhttp" }
 sentrySpringBootJakarta = { group = "io.sentry", name = "sentry-spring-boot-starter-jakarta", version.ref = "sentry" }
 
 # test
-mockitoKotlin = { group = "com.nhaarman.mockitokotlin2", name = "mockito-kotlin", version = "2.2.0" }
+mockitoKotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.0" }
 arscLib = { group = "io.github.reandroid", name = "ARSCLib", version = "1.1.4" }
 zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.5" }
 
 # samples
 sample-androidx-recyclerView = "androidx.recyclerview:recyclerview:1.2.0"
-sample-androidx-lifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
-sample-androidx-appcompat = "androidx.appcompat:appcompat:1.2.0"
+sample-androidx-lifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:2.9.4"
+sample-androidx-appcompat = "androidx.appcompat:appcompat:1.7.1"
 
 sample-androidx-composeRuntime = "androidx.compose.runtime:runtime:1.5.4"
 sample-androidx-composeNavigation = "androidx.navigation:navigation-compose:2.5.2"
@@ -93,7 +96,7 @@ sample-springBoot-starterWebflux = { group = "org.springframework.boot", name = 
 sample-springBoot-starterAop = { group = "org.springframework.boot", name = "spring-boot-starter-aop", version.ref = "sampleSpringBoot" }
 sample-springBoot-starterSecurity = { group = "org.springframework.boot", name = "spring-boot-starter-security", version.ref = "sampleSpringBoot" }
 sample-springBoot-starterJdbc = { group = "org.springframework.boot", name = "spring-boot-starter-jdbc", version.ref = "sampleSpringBoot" }
-sample-springBoot-hsqldb = "org.hsqldb:hsqldb:2.6.1"
+sample-springBoot-hsqldb = "org.hsqldb:hsqldb:2.7.4"
 sample-springBoot-aspectj = { group = "org.aspectj", name = "aspectjweaver" }
 sample-springBoot-kotlinReflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect" }
 sample-springBoot-kotlinStdLib = { group = "org.jetbrains.kotlin", name = "stdlib-jdk8" }

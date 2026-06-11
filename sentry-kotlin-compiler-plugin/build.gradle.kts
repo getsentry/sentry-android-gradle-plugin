@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
-  alias(libs.plugins.kotlin) version "2.1.0"
-  alias(libs.plugins.kapt) version "2.1.0"
+  alias(libs.plugins.kotlin) version "2.3.21"
+  alias(libs.plugins.kapt) version "2.3.21"
   id("distribution")
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.spotless)
@@ -13,6 +13,7 @@ plugins {
 val kotlin1920: SourceSet by sourceSets.creating
 val kotlin2120: SourceSet by sourceSets.creating
 val kotlin2200: SourceSet by sourceSets.creating
+val kotlin2400: SourceSet by sourceSets.creating
 
 spotless {
   kotlin {
@@ -56,14 +57,17 @@ dependencies {
   testImplementation(kotlin1920.output)
   testImplementation(kotlin2120.output)
   testImplementation(kotlin2200.output)
+  testImplementation(kotlin2400.output)
 
   kotlin1920.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.9.24")
   kotlin2120.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.1.20")
   kotlin2200.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.2.0")
+  kotlin2400.compileOnlyConfigurationName("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.4.0")
 
   compileOnly(kotlin1920.output)
   compileOnly(kotlin2120.output)
   compileOnly(kotlin2200.output)
+  compileOnly(kotlin2400.output)
 }
 
 kapt { correctErrorTypes = true }
@@ -91,6 +95,7 @@ tasks.withType<Jar>().configureEach {
   from(kotlin1920.output)
   from(kotlin2120.output)
   from(kotlin2200.output)
+  from(kotlin2400.output)
 }
 
 // see

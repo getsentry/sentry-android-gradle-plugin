@@ -37,7 +37,7 @@ class LyricsActivity : ComponentActivity() {
     filesystem = intent.getSerializableExtra(FILESYSTEM_EXTRA_KEY) as Filesystem
     toolbar.title = "Lyrics for ${track.name}"
 
-    val dir = File("$filesDir${File.separatorChar}lyrics")
+    val dir = File("$filesDir/lyrics")
     dir.mkdirs()
 
     lyricsInput.setText(filesystem.read(this, "${track.id}.txt"))

@@ -11,10 +11,8 @@ import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.ApplicationVariant
 import com.android.build.api.variant.HostTestBuilder.Companion.UNIT_TEST_TYPE
 import com.android.build.api.variant.Variant
-import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.BuildConfig
-import io.sentry.android.gradle.SentryPlugin.Companion.sep
 import io.sentry.android.gradle.SentryPropertiesFileProvider.getPropertiesFilePath
 import io.sentry.android.gradle.SentryTasksProvider.capitalized
 import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
@@ -44,7 +42,6 @@ import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.collectModules
 import io.sentry.android.gradle.util.hookWithAssembleTasks
-import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
@@ -61,10 +58,6 @@ fun ApplicationAndroidComponentsExtension.configure(
   sentryOrg: String?,
   sentryProject: String?,
 ) {
-  // temp folder for sentry-related stuff
-  val tmpDir = File("${project.buildDir}${sep}tmp${sep}sentry")
-  tmpDir.mkdirs()
-
   onVariants { variant ->
     // Validate distribution configuration for this variant
     val updateSdkVariants = extension.distribution.updateSdkVariants.get()
@@ -84,13 +77,13 @@ fun ApplicationAndroidComponentsExtension.configure(
     }
 
     if (extension.snapshots.enabled.get()) {
-      variant.configureSnapshotsTasks(project, extension, cliExecutable, sentryOrg, sentryProject)
+      variant.configureSnapshotsTasks(project, extension, sentryOrg, sentryProject)
     }
 
     if (isVariantAllowed(extension, variant.name, variant.flavorName, variant.buildType)) {
       val paths = OutputPaths(project, variant.name)
       val sentryTelemetryProvider =
-        variant.configureTelemetry(project, extension, cliExecutable, sentryOrg, buildEvents)
+        variant.configureTelemetry(project, extension, sentryOrg, buildEvents)
 
       variant.configureDependenciesTask(project, extension, sentryTelemetryProvider)
 
@@ -113,7 +106,6 @@ fun ApplicationAndroidComponentsExtension.configure(
           sentryTelemetryProvider,
           paths,
           sourceFiles,
-          cliExecutable,
           sentryOrg,
           sentryProject,
         )
@@ -125,7 +117,6 @@ fun ApplicationAndroidComponentsExtension.configure(
           extension,
           sentryTelemetryProvider,
           paths,
-          cliExecutable,
           sentryOrg,
           sentryProject,
         )
@@ -146,7 +137,6 @@ fun ApplicationAndroidComponentsExtension.configure(
         project,
         extension,
         sentryTelemetryProvider,
-        cliExecutable,
         sentryOrg,
         sentryProject,
       )
@@ -235,7 +225,9 @@ fun ApplicationAndroidComponentsExtension.configure(
           params.appStartEnabled.setDisallowChanges(
             extension.tracingInstrumentation.appStart.enabled
           )
-          params.tmpDir.set(tmpDir)
+          params.tmpDir.set(
+            project.layout.buildDirectory.dir("sentry-logs/instrumentation/${variant.name}")
+          )
         }
 
         val manifestUpdater =
@@ -262,7 +254,6 @@ fun ApplicationAndroidComponentsExtension.configure(
           project,
           extension,
           sentryTelemetryProvider,
-          cliExecutable,
           sentryOrg,
           sentryProject,
         )
@@ -274,7 +265,6 @@ fun ApplicationAndroidComponentsExtension.configure(
 private fun Variant.configureTelemetry(
   project: Project,
   extension: SentryPluginExtension,
-  cliExecutable: Provider<String>,
   sentryOrg: String?,
   buildEvents: BuildEventListenerRegistryInternal,
 ): Provider<SentryTelemetryService> {
@@ -282,14 +272,7 @@ private fun Variant.configureTelemetry(
   val sentryTelemetryProvider = SentryTelemetryService.register(project)
   project.gradle.taskGraph.whenReady {
     sentryTelemetryProvider.get().start {
-      SentryTelemetryService.createParameters(
-        project,
-        variant,
-        extension,
-        cliExecutable,
-        sentryOrg,
-        "Android",
-      )
+      SentryTelemetryService.createParameters(project, variant, extension, sentryOrg, "Android")
     }
     buildEvents.onOperationCompletion(sentryTelemetryProvider)
   }
@@ -302,7 +285,6 @@ private fun Variant.configureSourceBundleTasks(
   sentryTelemetryProvider: Provider<SentryTelemetryService>,
   paths: OutputPaths,
   sourceFiles: Provider<out Collection<Directory>>?,
-  cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
 ): SourceContext.SourceContextTasks? {
@@ -318,7 +300,6 @@ private fun Variant.configureSourceBundleTasks(
         variant,
         paths,
         sourceFiles,
-        cliExecutable,
         sentryOrg,
         sentryProject,
         taskSuffix,
@@ -359,7 +340,6 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
   extension: SentryPluginExtension,
   sentryTelemetryProvider: Provider<SentryTelemetryService>,
   paths: OutputPaths,
-  cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
 ): TaskProvider<SentryGenerateProguardUuidTask>? {
@@ -391,7 +371,6 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
         extension,
         sentryTelemetryProvider,
         debug = extension.debug,
-        cliExecutable = cliExecutable,
         generateUuidTask = generateUuidTask,
         sentryProperties = sentryProps,
         mappingFiles = mappings,
@@ -465,10 +444,13 @@ private fun ApplicationVariant.configureDistributionPropertiesTask(
 private fun ApplicationVariant.configureSnapshotsTasks(
   project: Project,
   extension: SentryPluginExtension,
-  cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
 ) {
+  check(AgpVersions.CURRENT >= AgpVersions.VERSION_8_0_0) {
+    "Sentry Snapshots require Android Gradle Plugin 8.0 or higher. " +
+      "Current version: ${AgpVersions.CURRENT}"
+  }
   val variant = AndroidVariant74(this)
   val sentryProps = getPropertiesFilePath(project, variant)
   val taskSuffix = name.capitalized
@@ -479,7 +461,6 @@ private fun ApplicationVariant.configureSnapshotsTasks(
       project = project,
       extension = extension,
       sentryTelemetryProvider = null,
-      cliExecutable = cliExecutable,
       sentryOrgOverride = sentryOrg,
       sentryProjectOverride = sentryProject,
       applicationId = applicationId,
@@ -490,8 +471,6 @@ private fun ApplicationVariant.configureSnapshotsTasks(
   // Wire Paparazzi test generation and upload task when the Paparazzi plugin is applied
   project.pluginManager.withPlugin("app.cash.paparazzi") {
     if (extension.snapshots.previews.generateTests.get()) {
-      val android = project.extensions.getByType(BaseExtension::class.java)
-
       project.dependencies.add(
         "testImplementation",
         "io.github.sergio-sastre.ComposablePreviewScanner:android:${BuildConfig.ComposablePreviewScannerVersion}",
@@ -510,7 +489,6 @@ private fun ApplicationVariant.configureSnapshotsTasks(
         GenerateSnapshotTestsTask.register(
           project,
           extension.snapshots,
-          android,
           this@configureSnapshotsTasks,
           paparazziMajorVersion,
         )
@@ -561,7 +539,6 @@ fun Variant.configureUploadAppTasks(
   project: Project,
   extension: SentryPluginExtension,
   sentryTelemetryProvider: Provider<SentryTelemetryService>,
-  cliExecutable: Provider<String>,
   sentryOrg: String?,
   sentryProject: String?,
 ): Pair<TaskProvider<SentryUploadAppArtifactTask>, TaskProvider<SentryUploadAppArtifactTask>> {
@@ -574,7 +551,6 @@ fun Variant.configureUploadAppTasks(
       extension,
       sentryTelemetryProvider,
       debug = extension.debug,
-      cliExecutable = cliExecutable,
       appBundle = variant.bundle,
       apk = variant.apk,
       sentryOrg = sentryOrg?.let { project.provider { it } } ?: extension.org,

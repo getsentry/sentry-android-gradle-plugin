@@ -22,7 +22,7 @@ internal object SentryPluginUtils {
     if (isEmpty()) {
       ""
     } else {
-      substring(0, 1).toUpperCase(Locale.US) + substring(1)
+      substring(0, 1).uppercase(Locale.US) + substring(1)
     }
 
   fun isMinificationEnabled(

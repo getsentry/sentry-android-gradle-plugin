@@ -6,6 +6,71 @@
 
 - Normalize Linux ARM64 architecture name for bundled sentry-cli binary lookup ([#1201](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1201))
 
+### Dependencies
+
+- Bump Android SDK from v8.43.1 to v8.43.2 ([#1291](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1291))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8432)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.43.1...8.43.2)
+
+### Fixes
+
+- Resolve the sentry-cli path as a task input instead of memoizing it in a static field, fixing stale-path build failures when switching branches with the configuration cache enabled ([#1264](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1264))
+  - This fixed the issue where sentry-cli could not be found (`A problem occurred starting process 'command  ../sentry-cliXXX.exe'`)
+- Defer the telemetry default-org lookup to execution time so the configuration cache no longer re-runs `sentry-cli` on every build ([#1263](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1263))
+
+## 6.10.0
+
+### Features
+
+- Add support for the Kotlin 2.4 compiler in the Compose tracing compiler plugin ([#1253](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1253))
+
+### Fixes
+
+- Compose tracing no longer adds the Sentry modifier multiple times for chained modifiers (e.g. `Modifier.fillMaxSize().padding()`) on Kotlin 2.2 and newer ([#1253](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1253))
+- The published Gradle plugin and `sentry-snapshots-runtime` POMs no longer declare a transitive `kotlin-stdlib` dependency ([#1276](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1276))
+
+### Dependencies
+
+- Bump Android SDK from v8.43.0 to v8.43.1 ([#1261](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1261))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8431)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.43.0...8.43.1)
+- Bump CLI from v3.4.3 to v3.5.0 ([#1251](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1251))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#350)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.4.3...3.5.0)
+
+### API Changes
+
+- The `debug` extension property is now typed as `Property<Boolean>` instead of `Property<Boolean?>` ([#1253](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1253))
+
+## 6.9.0
+
+### Fixes
+
+- Defer instrumentation log directory creation to execution time and use variant-specific paths to prevent log file corruption during parallel variant transforms ([#1236](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1236))
+
+### Dependencies
+
+- Bump CLI from v3.4.2 to v3.4.3 ([#1215](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1215))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#343)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.4.2...3.4.3)
+- Bump Android SDK from v8.42.0 to v8.43.0 ([#1241](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1241))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8430)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.42.0...8.43.0)
+
+## 6.8.1
+
+### Fixes
+
+- Fail fast with a clear error when Snapshots feature is used with AGP 7.x ([#1212](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1212))
+
+## 6.8.0
+
+### Dependencies
+
+- Bump Android SDK from v8.41.0 to v8.42.0 ([#1207](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1207))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8420)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.41.0...8.42.0)
+
 ## 6.7.1
 
 ### Fixes

@@ -112,14 +112,10 @@ internal object SentryTasksProvider {
     dexguardEnabled: Boolean = false,
   ): Provider<FileCollection> {
     if (dexguardEnabled) {
-      val sep = File.separator
       if (project.plugins.hasPlugin("com.guardsquare.proguard")) {
         val fileCollection =
           project.files(
-            File(
-              project.buildDir,
-              "outputs${sep}proguard${sep}${variant.name}${sep}mapping${sep}mapping.txt",
-            )
+            File(project.buildDir, "outputs/proguard/${variant.name}/mapping/mapping.txt")
           )
         return project.provider { fileCollection }
       }
@@ -135,25 +131,25 @@ internal object SentryTasksProvider {
           project.files(
             File(
               project.buildDir,
-              basePath.plus(listOf("apk", variant.name, "mapping.txt")).joinToString(sep),
+              basePath.plus(listOf("apk", variant.name, "mapping.txt")).joinToString("/"),
             ),
             File(
               project.buildDir,
-              basePath.plus(listOf("bundle", variant.name, "mapping.txt")).joinToString(sep),
+              basePath.plus(listOf("bundle", variant.name, "mapping.txt")).joinToString("/"),
             ),
             File(
               project.buildDir,
               basePath
                 .plus(listOf("apk", variant.flavorName, variant.buildTypeName, "mapping.txt"))
                 .filterNotNull()
-                .joinToString(sep),
+                .joinToString("/"),
             ),
             File(
               project.buildDir,
               basePath
                 .plus(listOf("bundle", variant.flavorName, variant.buildTypeName, "mapping.txt"))
                 .filterNotNull()
-                .joinToString(sep),
+                .joinToString("/"),
             ),
           )
         return project.provider { fileCollection }

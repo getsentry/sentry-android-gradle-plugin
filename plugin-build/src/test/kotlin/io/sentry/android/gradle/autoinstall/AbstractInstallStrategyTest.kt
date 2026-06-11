@@ -1,14 +1,14 @@
 package io.sentry.android.gradle.autoinstall
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertTrue
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataDetails
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.slf4j.Logger
 
 class AbstractInstallStrategyTest {

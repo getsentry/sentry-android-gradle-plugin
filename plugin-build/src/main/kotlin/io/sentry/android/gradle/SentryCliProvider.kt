@@ -5,6 +5,7 @@ package io.sentry.android.gradle
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryCliValueSource.Params
 import io.sentry.android.gradle.SentryPlugin.Companion.logger
+import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.error
 import io.sentry.android.gradle.util.info
 import java.io.File
@@ -12,16 +13,19 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.Locale
 import java.util.Properties
+import java.util.concurrent.TimeUnit
 import org.gradle.api.Project
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 
 internal object SentryCliProvider {
-
-  @field:Volatile private var memoizedCliPath: String? = null
 
   /**
    * Return the correct sentry-cli executable path to use for the given project. This will look for
@@ -31,35 +35,26 @@ internal object SentryCliProvider {
    * without actually extracting it.
    */
   @JvmStatic
-  @Synchronized
-  fun getSentryCliPath(projectDir: File, projectBuildDir: File, rootDir: File): String {
-    val cliPath = memoizedCliPath
-    if (!cliPath.isNullOrEmpty() && File(cliPath).exists()) {
-      logger.info { "Using memoized cli path: $cliPath" }
-      return cliPath
-    }
-    // If a path is provided explicitly use that first.
+  fun getSentryCliPath(
+    projectDir: DirectoryProperty,
+    projectBuildDir: DirectoryProperty,
+    rootDir: DirectoryProperty,
+  ): String {
     logger.info { "Searching cli from sentry.properties file..." }
 
     searchCliInPropertiesFile(projectDir, rootDir)?.let {
       logger.info { "cli Found: $it" }
-      memoizedCliPath = it
       return@getSentryCliPath it
     } ?: logger.info { "sentry-cli not found in sentry.properties file" }
 
-    // next up try a packaged version of sentry-cli
     val cliResLocation = getCliLocationInResources()
     if (!cliResLocation.isNullOrBlank()) {
       logger.info { "cli present in resources: $cliResLocation" }
-      // just provide the target extraction path
-      // actual extraction will be done prior to task execution
-      val extractedResourcePath = getCliResourcesExtractionPath(projectBuildDir).absolutePath
-      memoizedCliPath = extractedResourcePath
-      return extractedResourcePath
+      return getCliResourcesExtractionPath(projectBuildDir).get().asFile.absolutePath
     }
 
     logger.error { "Falling back to invoking `sentry-cli` from shell" }
-    return "sentry-cli".also { memoizedCliPath = it }
+    return "sentry-cli"
   }
 
   private fun getCliLocationInResources(): String? {
@@ -83,12 +78,19 @@ internal object SentryCliProvider {
     return null
   }
 
-  internal fun getSentryPropertiesPath(projectDir: File, rootDir: File): String? =
-    listOf(File(projectDir, "sentry.properties"), File(rootDir, "sentry.properties"))
+  internal fun getSentryPropertiesPath(
+    projectDir: DirectoryProperty,
+    rootDir: DirectoryProperty,
+  ): String? =
+    listOf(projectDir.file("sentry.properties"), rootDir.file("sentry.properties"))
+      .map { it.get().asFile }
       .firstOrNull(File::exists)
       ?.path
 
-  internal fun searchCliInPropertiesFile(projectDir: File, rootDir: File): String? {
+  internal fun searchCliInPropertiesFile(
+    projectDir: DirectoryProperty,
+    rootDir: DirectoryProperty,
+  ): String? {
     return getSentryPropertiesPath(projectDir, rootDir)?.let { propertiesFile ->
       runCatching {
           Properties().apply { load(FileInputStream(propertiesFile)) }.getProperty("cli.executable")
@@ -100,9 +102,11 @@ internal object SentryCliProvider {
   internal fun getResourceUrl(resourcePath: String): String? =
     javaClass.getResource(resourcePath)?.toString()
 
-  internal fun getCliResourcesExtractionPath(projectBuildDir: File): File {
+  internal fun getCliResourcesExtractionPath(
+    projectBuildDir: DirectoryProperty
+  ): Provider<RegularFile> {
     // usually <project>/build/tmp/
-    return File(File(projectBuildDir, "tmp"), "sentry-cli-${BuildConfig.CliVersion}.exe")
+    return projectBuildDir.dir("tmp").map { it.file("sentry-cli-${BuildConfig.CliVersion}.exe") }
   }
 
   internal fun extractCliFromResources(resourcePath: String, outputPath: File): String? {
@@ -129,8 +133,7 @@ internal object SentryCliProvider {
   }
 
   internal fun getCliSuffix(): String? {
-    // TODO: change to .lowercase(Locale.ROOT) when using Kotlin 1.6
-    val osName = System.getProperty("os.name").toLowerCase(Locale.ROOT)
+    val osName = System.getProperty("os.name").lowercase(Locale.ROOT)
     val osArch = System.getProperty("os.arch")
     return when {
       "mac" in osName ->
@@ -153,11 +156,15 @@ internal object SentryCliProvider {
 
   /** Tries to extract the sentry-cli from resources if the computedCliPath does not exist. */
   @Synchronized
-  internal fun maybeExtractFromResources(buildDir: File, cliPath: String): String {
+  internal fun maybeExtractFromResources(buildDir: DirectoryProperty, cliPath: String): String {
     val cli = File(cliPath)
     if (!cli.exists()) {
       // we only want to auto-extract if the path matches the pre-computed one
-      if (File(cliPath).absolutePath.equals(getCliResourcesExtractionPath(buildDir).absolutePath)) {
+      if (
+        File(cliPath)
+          .absolutePath
+          .equals(getCliResourcesExtractionPath(buildDir).get().asFile.absolutePath)
+      ) {
         val cliResPath = getCliLocationInResources()
         if (!cliResPath.isNullOrBlank()) {
           return extractCliFromResources(cliResPath, cli) ?: cliPath
@@ -170,18 +177,18 @@ internal object SentryCliProvider {
 
 abstract class SentryCliValueSource : ValueSource<String, Params> {
   interface Params : ValueSourceParameters {
-    @get:Input val projectDir: Property<File>
+    @get:Input val projectDir: DirectoryProperty
 
-    @get:Input val projectBuildDir: Property<File>
+    @get:Input val projectBuildDir: DirectoryProperty
 
-    @get:Input val rootProjDir: Property<File>
+    @get:Input val rootProjDir: DirectoryProperty
   }
 
   override fun obtain(): String? {
     return SentryCliProvider.getSentryCliPath(
-      parameters.projectDir.get(),
-      parameters.projectBuildDir.get(),
-      parameters.rootProjDir.get(),
+      parameters.projectDir,
+      parameters.projectBuildDir,
+      parameters.rootProjDir,
     )
   }
 }
@@ -190,8 +197,103 @@ fun Project.cliExecutableProvider(): Provider<String> {
   // config-cache compatible way to retrieve the cli path, it properly gets invalidated when
   // e.g. switching branches
   return providers.of(SentryCliValueSource::class.java) {
-    it.parameters.projectDir.set(project.projectDir)
-    it.parameters.projectBuildDir.set(project.layout.buildDirectory.asFile.get())
-    it.parameters.rootProjDir.set(project.rootDir)
+    it.parameters.projectDir.set(layout.projectDirectory)
+    it.parameters.projectBuildDir.set(layout.buildDirectory)
+    it.parameters.rootProjDir.set(getIsolatedRootProjectDir())
+  }
+}
+
+private fun Project.getIsolatedRootProjectDir(): Directory {
+  return if (GradleVersions.CURRENT >= GradleVersions.VERSION_8_8) {
+    isolated.rootProject.projectDirectory
+  } else {
+    rootProject.layout.projectDirectory
+  }
+}
+
+/**
+ * Resolves the default Sentry organization by running `sentry-cli info`. Implemented as a
+ * ValueSource so the external process is started in a configuration-cache compatible way; querying
+ * the returned provider during task execution keeps the process off the configuration phase.
+ */
+abstract class SentryOrgValueSource : ValueSource<String, SentryOrgValueSource.Params> {
+  interface Params : ValueSourceParameters {
+    @get:Input val projectDir: DirectoryProperty
+
+    @get:Input val projectBuildDir: DirectoryProperty
+
+    @get:Input val rootProjDir: DirectoryProperty
+
+    @get:Input @get:Optional val url: Property<String>
+
+    @get:Input @get:Optional val authToken: Property<String>
+
+    @get:Input @get:Optional val propertiesFilePath: Property<String>
+  }
+
+  override fun obtain(): String? {
+    return try {
+      val cliPath =
+        SentryCliProvider.getSentryCliPath(
+          parameters.projectDir,
+          parameters.projectBuildDir,
+          parameters.rootProjDir,
+        )
+      val resolvedCli =
+        SentryCliProvider.maybeExtractFromResources(parameters.projectBuildDir, cliPath)
+
+      val args = mutableListOf(resolvedCli)
+      parameters.url.orNull?.let {
+        args.add("--url")
+        args.add(it)
+      }
+      args.add("--log-level=error")
+      args.add("info")
+
+      val processBuilder = ProcessBuilder(args).redirectErrorStream(true)
+      parameters.propertiesFilePath.orNull?.let {
+        processBuilder.environment()["SENTRY_PROPERTIES"] = it
+      }
+      parameters.authToken.orNull?.let { processBuilder.environment()["SENTRY_AUTH_TOKEN"] = it }
+      processBuilder.environment()["SENTRY_PIPELINE"] =
+        "sentry-gradle-plugin/${BuildConfig.Version}"
+
+      val process = processBuilder.start()
+      // Wait with the timeout before reading the output: reading first would block indefinitely if
+      // the process hangs (e.g. a network stall), bypassing the timeout. `info` output is small and
+      // bounded, so it cannot fill the pipe buffer and stall the process before we read it here.
+      if (!process.waitFor(CLI_INFO_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+        process.destroyForcibly()
+        return null
+      }
+      if (process.exitValue() != 0) {
+        return null
+      }
+      val output = process.inputStream.bufferedReader().readText()
+      ORG_REGEX.find(output)?.groupValues?.getOrNull(1)?.takeUnless { it == "-" }
+    } catch (t: Throwable) {
+      logger.info { "Failed to fetch default org from sentry-cli: ${t.message}" }
+      null
+    }
+  }
+
+  companion object {
+    private val ORG_REGEX = Regex("""(?m)Default Organization: (.*)$""")
+    private const val CLI_INFO_TIMEOUT_SECONDS = 5L
+  }
+}
+
+fun Project.defaultOrgProvider(
+  url: String?,
+  authToken: String?,
+  propertiesFilePath: String?,
+): Provider<String> {
+  return providers.of(SentryOrgValueSource::class.java) {
+    it.parameters.projectDir.set(layout.projectDirectory)
+    it.parameters.projectBuildDir.set(layout.buildDirectory)
+    it.parameters.rootProjDir.set(getIsolatedRootProjectDir())
+    url?.let { value -> it.parameters.url.set(value) }
+    authToken?.let { value -> it.parameters.authToken.set(value) }
+    propertiesFilePath?.let { value -> it.parameters.propertiesFilePath.set(value) }
   }
 }

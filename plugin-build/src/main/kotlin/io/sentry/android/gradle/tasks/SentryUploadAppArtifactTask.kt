@@ -101,7 +101,6 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
       debug: Property<Boolean>,
       appBundle: Provider<RegularFile>,
       apk: Provider<Directory>,
-      cliExecutable: Provider<String>,
       sentryProperties: String?,
       sentryOrg: Provider<String>,
       sentryProject: Provider<String>,
@@ -118,7 +117,7 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
         ) { task ->
           task.workingDir(project.rootDir)
           task.debug.set(debug)
-          task.cliExecutable.set(cliExecutable)
+
           task.sentryProperties.set(sentryProperties?.let { file -> project.file(file) })
           task.bundle.set(appBundle)
           task.sentryOrganization.set(sentryOrg)
@@ -148,7 +147,7 @@ abstract class SentryUploadAppArtifactTask @Inject constructor(objectFactory: Ob
         ) { task ->
           task.workingDir(project.rootDir)
           task.debug.set(debug)
-          task.cliExecutable.set(cliExecutable)
+
           task.sentryProperties.set(sentryProperties?.let { file -> project.file(file) })
           task.apk.set(apk)
           task.sentryOrganization.set(sentryOrg)

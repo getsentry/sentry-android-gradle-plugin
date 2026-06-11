@@ -43,7 +43,7 @@ abstract class BaseSentryPluginTest(
     val pluginClasspath =
       PluginUnderTestMetadataReading.readImplementationClasspath()
         .joinToString(separator = ", ") { "\"$it\"" }
-        .replace(File.separator, "/")
+        .replace("\\", "/")
 
     appBuildFile = File(testProjectDir.root, "app/build.gradle")
     moduleBuildFile = File(testProjectDir.root, "module/build.gradle")

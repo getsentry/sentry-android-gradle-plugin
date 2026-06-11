@@ -6,8 +6,8 @@ plugins {
 android {
   compileSdk = LibsVersion.SDK_VERSION
   defaultConfig {
-    minSdk LibsVersion.MIN_SDK_VERSION
-    targetSdk LibsVersion.SDK_VERSION
+    minSdk = LibsVersion.MIN_SDK_VERSION
+    targetSdk = LibsVersion.SDK_VERSION
     versionCode = 1
     versionName = "1.0"
   }
@@ -18,7 +18,7 @@ android {
         'proguard-android-optimize.txt')
     }
   }
-  namespace 'com.example.sampleapp'
+  namespace = 'com.example.sampleapp'
 }
 
 sentry {

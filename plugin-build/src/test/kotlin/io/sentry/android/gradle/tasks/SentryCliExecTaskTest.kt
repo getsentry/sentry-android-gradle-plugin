@@ -1,9 +1,9 @@
 package io.sentry.android.gradle.tasks
 
 import io.sentry.android.gradle.SentryCliProvider
+import io.sentry.android.gradle.cliExecutableProvider
 import java.io.File
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.gradle.api.Project
@@ -18,39 +18,18 @@ class SentryCliExecTaskTest {
   @get:Rule val tempDir = TemporaryFolder()
 
   @Test
-  fun `cli-executable is set correctly`() {
+  fun `cli path is resolved and extracted from resources`() {
     val project = createProject()
-
-    val task: TaskProvider<TestTask> =
-      project.tasks.register("testTask", TestTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
-      }
-
-    val args = task.get().computeCommandLineArgs()
-
-    assertTrue("sentry-cli" in args)
-    assertFalse("--org" in args)
-    assertFalse("--project" in args)
-    assertFalse("--log-level=debug" in args)
-  }
-
-  @Test
-  fun `cli-executable is extracted from resources if required`() {
-    val project = createProject()
-
-    val cliPath = SentryCliProvider.getCliResourcesExtractionPath(project.buildDir)
+    val cliPath =
+      SentryCliProvider.getCliResourcesExtractionPath(project.layout.buildDirectory).get().asFile
 
     assertTrue(!cliPath.exists())
 
     val task: TaskProvider<TestTask> =
-      project.tasks.register("testTask", TestTask::class.java) {
-        it.cliExecutable.set(cliPath.absolutePath)
-      }
+      project.tasks.register("testTask", TestTask::class.java) { it.configureCliPaths(project) }
 
-    // when the args are computed (usually during task execution)
     val args = task.get().computeCommandLineArgs()
 
-    // then the CLI should be extracted and set
     assertTrue(cliPath.exists())
     assertEquals(cliPath.absolutePath, File(args[0]).absolutePath)
   }
@@ -61,7 +40,7 @@ class SentryCliExecTaskTest {
 
     val task: TaskProvider<TestTask> =
       project.tasks.register("testTask", TestTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.debug.set(true)
       }
 
@@ -76,7 +55,6 @@ class SentryCliExecTaskTest {
     val propertiesFile = project.file("dummy/folder/sentry.properties")
     val task: TaskProvider<TestTask> =
       project.tasks.register("testTask", TestTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
         it.sentryProperties.set(propertiesFile)
       }
 
@@ -92,10 +70,7 @@ class SentryCliExecTaskTest {
   fun `with sentryAuthToken env variable is set correctly`() {
     val project = createProject()
     val task: TaskProvider<TestTask> =
-      project.tasks.register("testTask", TestTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
-        it.sentryAuthToken.set("<token>")
-      }
+      project.tasks.register("testTask", TestTask::class.java) { it.sentryAuthToken.set("<token>") }
 
     task.get().setSentryAuthTokenEnv()
 
@@ -105,10 +80,7 @@ class SentryCliExecTaskTest {
   @Test
   fun `without sentryProperties file SENTRY_PROPERTIES is not set`() {
     val project = createProject()
-    val task: TaskProvider<TestTask> =
-      project.tasks.register("testTask", TestTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
-      }
+    val task: TaskProvider<TestTask> = project.tasks.register("testTask", TestTask::class.java)
 
     task.get().setSentryPropertiesEnv()
 
@@ -120,7 +92,7 @@ class SentryCliExecTaskTest {
     val project = createProject()
     val task: TaskProvider<TestTask> =
       project.tasks.register("testTask", TestTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.sentryOrganization.set("dummy-org")
       }
 
@@ -135,7 +107,7 @@ class SentryCliExecTaskTest {
     val project = createProject()
     val task: TaskProvider<TestTask> =
       project.tasks.register("testTask", TestTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.sentryProject.set("dummy-proj")
       }
 
@@ -150,7 +122,7 @@ class SentryCliExecTaskTest {
     val project = createProject()
     val task: TaskProvider<TestTask> =
       project.tasks.register("testTask", TestTask::class.java) {
-        it.cliExecutable.set("sentry-cli")
+        it.configureCliPaths(project)
         it.sentryUrl.set("https://some-host.sentry.io")
       }
 
@@ -165,6 +137,11 @@ class SentryCliExecTaskTest {
       plugins.apply("io.sentry.android.gradle")
       return this
     }
+  }
+
+  private fun SentryCliExecTask.configureCliPaths(project: Project) {
+    cliExecutable.set(project.cliExecutableProvider())
+    buildDirectory.set(project.layout.buildDirectory)
   }
 
   abstract class TestTask : SentryCliExecTask() {

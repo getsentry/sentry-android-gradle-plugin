@@ -77,7 +77,6 @@ abstract class BundleSourcesTask : SentryCliExecTask() {
       collectSourcesTask: TaskProvider<CollectSourcesTask>,
       output: Provider<Directory>,
       debug: Property<Boolean>,
-      cliExecutable: Provider<String>,
       sentryOrg: Provider<String>,
       sentryProject: Provider<String>,
       sentryAuthToken: Property<String>,
@@ -95,7 +94,6 @@ abstract class BundleSourcesTask : SentryCliExecTask() {
         task.sentryAuthToken.set(sentryAuthToken)
         task.sentryUrl.set(sentryUrl)
         task.sourceDir.set(collectSourcesTask.flatMap { it.output })
-        task.cliExecutable.set(cliExecutable)
         SentryPropertiesFileProvider.getPropertiesFilePath(project, variant)?.let {
           task.sentryProperties.set(File(it))
         }

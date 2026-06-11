@@ -4,11 +4,10 @@ import io.sentry.android.gradle.SentryCliProvider
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.info
 import io.sentry.android.gradle.util.setSentryPipelineEnv
-import java.io.File
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -22,8 +21,6 @@ import org.gradle.work.DisableCachingByDefault
 abstract class SentryCliExecTask : Exec() {
 
   @get:Input @get:Optional abstract val debug: Property<Boolean>
-
-  @get:Input abstract val cliExecutable: Property<String>
 
   @get:InputFile
   @get:Optional
@@ -40,7 +37,9 @@ abstract class SentryCliExecTask : Exec() {
 
   @get:Internal abstract val sentryTelemetryService: Property<SentryTelemetryService>
 
-  private val buildDirectory: Provider<File> = project.layout.buildDirectory.asFile
+  @get:Input abstract val cliExecutable: Property<String>
+
+  @get:Internal abstract val buildDirectory: DirectoryProperty
 
   override fun exec() {
     computeCommandLineArgs().let {
@@ -93,9 +92,7 @@ abstract class SentryCliExecTask : Exec() {
       args.add(1, "/c")
     }
 
-    val cliPath =
-      SentryCliProvider.maybeExtractFromResources(buildDirectory.get(), cliExecutable.get())
-    args.add(cliPath)
+    args.add(SentryCliProvider.maybeExtractFromResources(buildDirectory, cliExecutable.get()))
     args.addAll(preArgs())
 
     getArguments(args)
