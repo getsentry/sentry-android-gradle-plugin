@@ -7,6 +7,7 @@
 - Resolve the sentry-cli path as a task input instead of memoizing it in a static field, fixing stale-path build failures when switching branches with the configuration cache enabled ([#1264](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1264))
   - This fixed the issue where sentry-cli could not be found (`A problem occurred starting process 'command  ../sentry-cliXXX.exe'`)
 - Defer the telemetry default-org lookup to execution time so the configuration cache no longer re-runs `sentry-cli` on every build ([#1263](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1263))
+- The published Gradle plugin and `sentry-snapshots-runtime` POMs no longer declare a transitive `kotlin-stdlib` dependency ([#1276](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1276))
 - Normalize Linux ARM64 architecture name for bundled sentry-cli binary lookup ([#1201](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1201))
 
 ### Dependencies
@@ -24,7 +25,6 @@
 ### Fixes
 
 - Compose tracing no longer adds the Sentry modifier multiple times for chained modifiers (e.g. `Modifier.fillMaxSize().padding()`) on Kotlin 2.2 and newer ([#1253](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1253))
-- The published Gradle plugin and `sentry-snapshots-runtime` POMs no longer declare a transitive `kotlin-stdlib` dependency ([#1276](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1276))
 
 ### Dependencies
 
