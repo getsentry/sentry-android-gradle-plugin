@@ -2,10 +2,6 @@
 
 ## Unreleased
 
-### Fixes
-
-- Normalize Linux ARM64 architecture name for bundled sentry-cli binary lookup ([#1201](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1201))
-
 ### Dependencies
 
 - Bump Android SDK from v8.43.1 to v8.43.2 ([#1291](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1291))
@@ -17,6 +13,7 @@
 - Resolve the sentry-cli path as a task input instead of memoizing it in a static field, fixing stale-path build failures when switching branches with the configuration cache enabled ([#1264](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1264))
   - This fixed the issue where sentry-cli could not be found (`A problem occurred starting process 'command  ../sentry-cliXXX.exe'`)
 - Defer the telemetry default-org lookup to execution time so the configuration cache no longer re-runs `sentry-cli` on every build ([#1263](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1263))
+- Normalize Linux ARM64 architecture name for bundled sentry-cli binary lookup ([#1201](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1201))
 
 ## 6.10.0
 
