@@ -5,6 +5,9 @@
 ### Dependencies
 
 - Bump mockito-kotlin from `com.nhaarman.mockitokotlin2:2.2.0` to `org.mockito.kotlin:5.4.0` ([#1286](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1286))
+- Bump Android SDK from v8.43.1 to v8.43.2 ([#1291](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1291))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8432)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.43.1...8.43.2)
 
 ### Fixes
 
