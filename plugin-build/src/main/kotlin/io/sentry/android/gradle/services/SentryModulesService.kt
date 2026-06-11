@@ -44,8 +44,8 @@ abstract class SentryModulesService :
       features.add("AppStartInstrumentation")
     }
 
-    if (isBinderIpcInstrEnabled()) {
-      features.add("BinderIpcInstrumentation")
+    if (isBinderInstrEnabled()) {
+      features.add("BinderInstrumentation")
     }
 
     if (parameters.sourceContextEnabled.getOrElse(false)) {
@@ -120,9 +120,7 @@ abstract class SentryModulesService :
     sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_CORE, SentryVersions.VERSION_APP_START) &&
       parameters.appStartEnabled.get()
 
-  fun isBinderIpcInstrEnabled(): Boolean =
-    sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_CORE, SentryVersions.VERSION_BINDER_IPC) &&
-      parameters.binderIpcEnabled.get()
+  fun isBinderInstrEnabled(): Boolean = parameters.binderEnabled.get()
 
   private fun Map<ModuleIdentifier, SemVer>.isAtLeast(
     module: ModuleIdentifier,
@@ -137,7 +135,7 @@ abstract class SentryModulesService :
       sourceContextEnabled: Provider<Boolean>,
       dexguardEnabled: Provider<Boolean>,
       appStartEnabled: Provider<Boolean>,
-      binderIpcEnabled: Provider<Boolean>,
+      binderEnabled: Provider<Boolean>,
     ): Provider<SentryModulesService> {
       return project.gradle.sharedServices.registerIfAbsent(
         getBuildServiceName(SentryModulesService::class.java),
@@ -148,7 +146,7 @@ abstract class SentryModulesService :
         it.parameters.sourceContextEnabled.setDisallowChanges(sourceContextEnabled)
         it.parameters.dexguardEnabled.setDisallowChanges(dexguardEnabled)
         it.parameters.appStartEnabled.setDisallowChanges(appStartEnabled)
-        it.parameters.binderIpcEnabled.setDisallowChanges(binderIpcEnabled)
+        it.parameters.binderEnabled.setDisallowChanges(binderEnabled)
       }
     }
   }
@@ -167,6 +165,6 @@ abstract class SentryModulesService :
 
     @get:Input val appStartEnabled: Property<Boolean>
 
-    @get:Input val binderIpcEnabled: Property<Boolean>
+    @get:Input val binderEnabled: Property<Boolean>
   }
 }

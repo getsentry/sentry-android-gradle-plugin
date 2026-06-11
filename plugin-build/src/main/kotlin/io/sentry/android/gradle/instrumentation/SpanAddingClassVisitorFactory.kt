@@ -13,7 +13,7 @@ import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.Android
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import io.sentry.android.gradle.instrumentation.appstart.Application
 import io.sentry.android.gradle.instrumentation.appstart.ContentProvider
-import io.sentry.android.gradle.instrumentation.binder.BinderIpc
+import io.sentry.android.gradle.instrumentation.binder.Binder
 import io.sentry.android.gradle.instrumentation.logcat.Logcat
 import io.sentry.android.gradle.instrumentation.logcat.LogcatLevel
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
@@ -109,7 +109,7 @@ abstract class SpanAddingClassVisitorFactory :
             RemappingInstrumentable().takeIf { sentryModulesService.isFileIOInstrEnabled() },
             ComposeNavigation().takeIf { sentryModulesService.isComposeInstrEnabled() },
             Logcat().takeIf { sentryModulesService.isLogcatInstrEnabled() },
-            BinderIpc().takeIf { sentryModulesService.isBinderIpcInstrEnabled() },
+            Binder().takeIf { sentryModulesService.isBinderInstrEnabled() },
             Application().takeIf { sentryModulesService.isAppStartInstrEnabled() },
             ContentProvider().takeIf { sentryModulesService.isAppStartInstrEnabled() },
           )
