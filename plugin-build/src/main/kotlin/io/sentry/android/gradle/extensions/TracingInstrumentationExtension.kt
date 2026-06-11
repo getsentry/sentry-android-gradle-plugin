@@ -77,8 +77,8 @@ enum class InstrumentationFeature(val integrationName: String) {
   /**
    * When enabled the SDK will create spans for database operations at two levels:
    *
-   * **SQL statement execution** (`db.sql.query` spans): Wraps the low-level db open helper or
-   * driver so each SQL statement produces one or more spans.
+   * **SQL statement execution** (`db.sql.query` spans): Wraps the low-level `SQLiteDriver` or
+   * `SupportSQLiteOpenHelper` so each SQL statement produces one or more spans.
    *
    * **DAO method execution** (`db.sql.room` spans): Wraps each public method on Room's generated
    * `@Dao` `_Impl` classes, measuring the full DAO call end-to-end (transaction management, query

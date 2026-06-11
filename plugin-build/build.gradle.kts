@@ -57,12 +57,11 @@ dependencies {
   // we need these dependencies for tests, because the bytecode verifier also analyzes superclasses
   testImplementationAar(libs.roomRuntimeAndroid)
   testImplementationAar(libs.room3RuntimeAndroid)
+  testImplementation(libs.sample.coroutines.core)
   testImplementationAar(libs.sentryAndroid)
-  testImplementationAar(libs.sentryAndroidOkhttp)
   testImplementationAar(libs.sqlite)
   testImplementationAar(libs.sqliteFramework)
-
-  testImplementation(libs.sample.coroutines.core)
+  testImplementationAar(libs.sentryAndroidOkhttp)
   testImplementation(libs.sentryOkhttp)
 
   testRuntimeOnly(files(androidSdkPath))
