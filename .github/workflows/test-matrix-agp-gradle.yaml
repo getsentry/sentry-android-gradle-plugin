@@ -71,7 +71,9 @@ jobs:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Build the Release variants and integrationTest
-        run: gradle assembleRelease bundleRelease integrationTest
+        # Verification is disabled here because the matrix deliberately overrides
+        # AGP/Kotlin/Gradle versions, resolving artifacts not in the metadata.
+        run: gradle assembleRelease bundleRelease integrationTest --dependency-verification=off
 
       - name: Check sentry-debug-meta.properties inside APKs
         run: |

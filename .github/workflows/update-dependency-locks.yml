@@ -1,0 +1,68 @@
+name: Update Dependency Locks
+
+# Dependabot bumps versions in gradle/libs.versions.toml but cannot regenerate
+# the plugin-build lockfile or verification metadata (it has no support for the
+# latter, and its lockfile support breaks with version catalogs). Without this,
+# every Dependabot Gradle PR fails STRICT-mode locking and checksum verification.
+# This job regenerates both and pushes them back onto the Dependabot branch.
+
+on:
+  pull_request:
+
+# The job pushes via CI_DEPLOY_KEY (SSH), so the GITHUB_TOKEN needs no write
+# scopes. dependabot/fetch-metadata reads PR metadata via the API, which
+# requires pull-requests: read.
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  regenerate:
+    name: Regenerate lockfile and verification metadata
+    # Dependabot-triggered runs read secrets from the Dependabot secret store, so
+    # CI_DEPLOY_KEY must be added there (Settings -> Secrets -> Dependabot), not
+    # only to Actions secrets.
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+
+      - name: Check out PR branch
+        if: steps.metadata.outputs.package-ecosystem == 'gradle'
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          ref: ${{ github.head_ref }}
+          # Pushing with the deploy key (rather than GITHUB_TOKEN) re-triggers CI
+          # so the regenerated files are validated.
+          ssh-key: ${{ secrets.CI_DEPLOY_KEY }}
+
+      - name: Setup Gradle
+        if: steps.metadata.outputs.package-ecosystem == 'gradle'
+        uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # pin@v6
+
+      - name: Set up Java
+        if: steps.metadata.outputs.package-ecosystem == 'gradle'
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Regenerate lockfile and verification metadata
+        if: steps.metadata.outputs.package-ecosystem == 'gradle'
+        run: ./gradlew -p plugin-build resolveAndLockAll --write-locks --write-verification-metadata sha256
+
+      - name: Commit and push if changed
+        if: steps.metadata.outputs.package-ecosystem == 'gradle'
+        run: |
+          files="plugin-build/gradle.lockfile plugin-build/settings-gradle.lockfile plugin-build/gradle/verification-metadata.xml"
+          if git diff --quiet -- $files; then
+            echo "No lockfile or verification metadata changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add $files
+          git commit -m "build(plugin): Regenerate dependency locks and verification metadata"
+          git push
