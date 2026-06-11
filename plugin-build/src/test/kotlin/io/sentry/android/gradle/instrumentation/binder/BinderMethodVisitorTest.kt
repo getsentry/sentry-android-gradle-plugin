@@ -66,11 +66,17 @@ class BinderMethodVisitorTest {
     val text = disassemble(instrumented)
 
     assertTrue(
-      text.contains("io/sentry/android/core/internal/binder/SentryBinderAdapter.onCallStart"),
+      text.contains(
+        "io/sentry/android/core/internal/binder/SentryBinderAdapter.onCallStart " +
+          "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;"
+      ),
       "onCallStart should be emitted:\n$text",
     )
     assertTrue(
-      text.contains("io/sentry/android/core/internal/binder/SentryBinderAdapter.onCallEnd"),
+      text.contains(
+        "io/sentry/android/core/internal/binder/SentryBinderAdapter.onCallEnd " +
+          "(Ljava/lang/Object;)V"
+      ),
       "onCallEnd should be emitted:\n$text",
     )
     assertTrue(

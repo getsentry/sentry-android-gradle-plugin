@@ -82,11 +82,11 @@ class BinderMethodVisitor(
       Opcodes.INVOKESTATIC,
       SENTRY_BINDER_ADAPTER,
       "onCallStart",
-      "(Ljava/lang/String;Ljava/lang/String;)I",
+      "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;",
       false,
     )
-    val cookieLocal = newLocal(Type.INT_TYPE)
-    storeLocal(cookieLocal)
+    val tokenLocal = newLocal(Type.getObjectType("java/lang/Object"))
+    storeLocal(tokenLocal)
 
     val tryStart = Label()
     val tryEnd = Label()
@@ -105,14 +105,26 @@ class BinderMethodVisitor(
     super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
 
     mv.visitLabel(tryEnd)
-    loadLocal(cookieLocal)
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, SENTRY_BINDER_ADAPTER, "onCallEnd", "(I)V", false)
+    loadLocal(tokenLocal)
+    mv.visitMethodInsn(
+      Opcodes.INVOKESTATIC,
+      SENTRY_BINDER_ADAPTER,
+      "onCallEnd",
+      "(Ljava/lang/Object;)V",
+      false,
+    )
     mv.visitJumpInsn(Opcodes.GOTO, afterFinally)
 
     // catch-all handler: call onCallEnd then re-throw
     mv.visitLabel(catchHandler)
-    loadLocal(cookieLocal)
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, SENTRY_BINDER_ADAPTER, "onCallEnd", "(I)V", false)
+    loadLocal(tokenLocal)
+    mv.visitMethodInsn(
+      Opcodes.INVOKESTATIC,
+      SENTRY_BINDER_ADAPTER,
+      "onCallEnd",
+      "(Ljava/lang/Object;)V",
+      false,
+    )
     mv.visitInsn(Opcodes.ATHROW)
 
     mv.visitLabel(afterFinally)
