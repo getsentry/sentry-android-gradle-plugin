@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Normalize Linux ARM64 architecture name for bundled sentry-cli binary lookup ([#1201](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1201))
+
 ### Dependencies
 
 - Bump Android SDK from v8.43.1 to v8.43.2 ([#1291](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1291))
