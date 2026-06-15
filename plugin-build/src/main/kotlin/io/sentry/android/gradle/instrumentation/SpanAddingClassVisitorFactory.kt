@@ -65,7 +65,7 @@ abstract class SpanAddingClassVisitorFactory :
 
     @get:Input val appStartEnabled: Property<Boolean>
 
-    @get:Input val binderIpcEnabled: Property<Boolean>
+    @get:Input val binderEnabled: Property<Boolean>
   }
 
   private val instrumentable: ClassInstrumentable

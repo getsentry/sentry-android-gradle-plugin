@@ -4,6 +4,7 @@ import com.android.build.api.instrumentation.ClassContext
 import io.sentry.android.gradle.instrumentation.ClassInstrumentable
 import io.sentry.android.gradle.instrumentation.CommonClassVisitor
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
+import io.sentry.android.gradle.instrumentation.util.isSentryClass
 import org.objectweb.asm.ClassVisitor
 
 class Binder : ClassInstrumentable {
@@ -27,5 +28,5 @@ class Binder : ClassInstrumentable {
     )
   }
 
-  override fun isInstrumentable(data: ClassContext) = true // !data.isSentryClass()
+  override fun isInstrumentable(data: ClassContext) = !data.isSentryClass()
 }

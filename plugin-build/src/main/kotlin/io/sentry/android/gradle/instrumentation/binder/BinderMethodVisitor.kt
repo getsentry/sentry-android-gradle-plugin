@@ -46,21 +46,50 @@ class BinderMethodVisitor(
     isInterface: Boolean,
   ) {
     val spec = BinderMethodRegistry.lookup(owner, name)
+
+    // Not a tracked binder call - emit the original instruction untouched.
     if (spec == null) {
       super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
       return
     }
 
-    val isInstanceCall = opcode == Opcodes.INVOKEVIRTUAL || opcode == Opcodes.INVOKEINTERFACE
-    val isStaticCall = opcode == Opcodes.INVOKESTATIC
-    if (spec.isStatic && !isStaticCall || !spec.isStatic && !isInstanceCall) {
+    // The registry is keyed by owner + name only, so a lookup can match a call whose invocation
+    // kind (static vs. instance) differs from the spec - e.g. an unrelated static method that
+    // happens to share a name with a tracked instance method (many tracked names are generic,
+    // like commit/cancel/acquire/release). That distinction decides whether a receiver sits on
+    // the stack below the arguments, so instrumenting a mismatched call would spill the wrong
+    // number of values and emit invalid bytecode. Skip it and emit the original instruction.
+    val opcodeMatchesSpec =
+      if (spec.isStatic) {
+        opcode == Opcodes.INVOKESTATIC
+      } else {
+        opcode == Opcodes.INVOKEVIRTUAL || opcode == Opcodes.INVOKEINTERFACE
+      }
+    if (!opcodeMatchesSpec) {
       super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
       return
     }
 
-    val argTypes = Method(name, descriptor).argumentTypes
+    // We rewrite `target(args...)` into the equivalent of:
+    //
+    //   Object token = SentryBinderAdapter.onCallStart(component, name);
+    //   try {
+    //     target(args...);
+    //     SentryBinderAdapter.onCallEnd(token);
+    //   } catch (Throwable t) {
+    //     SentryBinderAdapter.onCallEnd(token);
+    //     throw t;
+    //   }
+    //
+    // Adapter calls are emitted via `mv` (the delegate) rather than the GeneratorAdapter helpers
+    // (push/invokeStatic) on purpose: those helpers route through visitMethodInsn - this very
+    // override - and would recurse. `super.visitMethodInsn` is reserved for the original target
+    // call so it still passes through any downstream visitors.
 
-    // Save arguments from the stack into temp locals (reverse order for LIFO)
+    // The arguments (and the receiver, for instance calls) are already on the stack. Spill them
+    // into locals so we can run onCallStart first and reload them inside the try block. The stack
+    // is LIFO, so arguments are popped in reverse order.
+    val argTypes = Method(name, descriptor).argumentTypes
     val argLocals = IntArray(argTypes.size)
     for (i in argLocals.size - 1 downTo 0) {
       argLocals[i] = newLocal(argTypes[i])
@@ -69,13 +98,12 @@ class BinderMethodVisitor(
 
     val receiverLocal =
       if (!spec.isStatic) {
-        val local = newLocal(Type.getObjectType(owner))
-        storeLocal(local)
-        local
+        newLocal(Type.getObjectType(owner)).also { storeLocal(it) }
       } else {
         -1
       }
 
+    // Object token = SentryBinderAdapter.onCallStart(component, name);
     mv.visitLdcInsn(spec.component)
     mv.visitLdcInsn(name)
     mv.visitMethodInsn(
@@ -88,14 +116,26 @@ class BinderMethodVisitor(
     val tokenLocal = newLocal(Type.getObjectType("java/lang/Object"))
     storeLocal(tokenLocal)
 
+    // SentryBinderAdapter.onCallEnd(token); - emitted on both the normal and the exceptional path.
+    fun emitOnCallEnd() {
+      loadLocal(tokenLocal)
+      mv.visitMethodInsn(
+        Opcodes.INVOKESTATIC,
+        SENTRY_BINDER_ADAPTER,
+        "onCallEnd",
+        "(Ljava/lang/Object;)V",
+        false,
+      )
+    }
+
     val tryStart = Label()
     val tryEnd = Label()
     val catchHandler = Label()
     val afterFinally = Label()
-
     mv.visitTryCatchBlock(tryStart, tryEnd, catchHandler, null)
-    mv.visitLabel(tryStart)
 
+    // try { target(args...); onCallEnd(token); }
+    mv.visitLabel(tryStart)
     if (!spec.isStatic) {
       loadLocal(receiverLocal)
     }
@@ -103,28 +143,13 @@ class BinderMethodVisitor(
       loadLocal(local)
     }
     super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
-
     mv.visitLabel(tryEnd)
-    loadLocal(tokenLocal)
-    mv.visitMethodInsn(
-      Opcodes.INVOKESTATIC,
-      SENTRY_BINDER_ADAPTER,
-      "onCallEnd",
-      "(Ljava/lang/Object;)V",
-      false,
-    )
+    emitOnCallEnd()
     mv.visitJumpInsn(Opcodes.GOTO, afterFinally)
 
-    // catch-all handler: call onCallEnd then re-throw
+    // catch (Throwable t) { onCallEnd(token); throw t; }
     mv.visitLabel(catchHandler)
-    loadLocal(tokenLocal)
-    mv.visitMethodInsn(
-      Opcodes.INVOKESTATIC,
-      SENTRY_BINDER_ADAPTER,
-      "onCallEnd",
-      "(Ljava/lang/Object;)V",
-      false,
-    )
+    emitOnCallEnd()
     mv.visitInsn(Opcodes.ATHROW)
 
     mv.visitLabel(afterFinally)

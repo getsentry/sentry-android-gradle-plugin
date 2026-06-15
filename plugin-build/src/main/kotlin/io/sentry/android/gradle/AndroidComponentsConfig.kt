@@ -229,9 +229,7 @@ fun ApplicationAndroidComponentsExtension.configure(
           params.appStartEnabled.setDisallowChanges(
             extension.tracingInstrumentation.appStart.enabled
           )
-          params.binderIpcEnabled.setDisallowChanges(
-            extension.tracingInstrumentation.binder.enabled
-          )
+          params.binderEnabled.setDisallowChanges(extension.tracingInstrumentation.binder.enabled)
           params.tmpDir.set(
             project.layout.buildDirectory.dir("sentry-logs/instrumentation/${variant.name}")
           )
