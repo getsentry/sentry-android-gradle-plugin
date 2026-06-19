@@ -5,8 +5,18 @@
 ### Features
 
 - Auto-instrument SQLiteDriver for Room users ([#1285](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1285))
-  - Gated on `sentry-android-sqlite` >= 8.44.0 and the existing `tracingInstrumentation` `DATABASE` feature
+  - Gated on `sentry-android-sqlite` >= 8.45.0 and the existing `tracingInstrumentation` `DATABASE` feature
   - For users of the `androidx.sqlite.driver.SupportSQLiteDriver` bridge, auto-instrumentation wraps only the `SupportSQLiteOpenHelper` consumed by the bridge and not the bridge itself (avoids duplicate spans)
+
+### Dependencies
+
+- Bump Android SDK from v8.43.2 to v8.45.0 ([#TODO](https://github.com/getsentry/sentry-android-gradle-plugin/pull/TODO))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#TODO)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.43.2...8.45.0)
+
+## 6.12.0
+
+### Dependencies
 
 - Bump CLI from v3.5.0 to v3.5.1 ([#1300](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1300))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#351)
@@ -27,10 +37,6 @@
 - Bump Android SDK from v8.43.1 to v8.43.2 ([#1291](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1291))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8432)
   - [diff](https://github.com/getsentry/sentry-java/compare/8.43.1...8.43.2)
-
-### Dependencies
-
-- Bump mockito-kotlin from `com.nhaarman.mockitokotlin2:2.2.0` to `org.mockito.kotlin:5.4.0` ([#1286](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1286))
 
 ## 6.10.0
 

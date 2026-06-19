@@ -75,6 +75,24 @@ class SentryModulesServiceTest {
   }
 
   @Test
+  fun `isSQLiteDriverInstrEnabled is false when sentry-android-sqlite is one patch below VERSION_SQLITE_DRIVER`() {
+    val belowThreshold =
+      SemVer(
+        SentryVersions.VERSION_SQLITE_DRIVER.major,
+        SentryVersions.VERSION_SQLITE_DRIVER.minor,
+        SentryVersions.VERSION_SQLITE_DRIVER.patch - 1,
+      )
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        features = setOf(InstrumentationFeature.DATABASE),
+        sentryModules = mapOf(SentryModules.SENTRY_ANDROID_SQLITE to belowThreshold),
+      )
+
+    assertFalse(service.isSQLiteDriverInstrEnabled())
+  }
+
+  @Test
   fun `isSQLiteDriverInstrEnabled is false when sentry-android-sqlite is one minor below VERSION_SQLITE_DRIVER`() {
     val belowThreshold =
       SemVer(

@@ -76,8 +76,8 @@ abstract class SentryModulesService :
    * Returns true when the owning app uses a version of sentry-android-sqlite that contains
    * `SentrySQLiteDriver` and the DATABASE feature is enabled.
    *
-   * For simplicity we avoid gating on the Room version and rely on visitor behavior instead
-   * (no-ops for versions of Room without a `SQLiteDriver`).
+   * For simplicity we avoid gating on the Room version and rely on visitor behavior instead (no-ops
+   * for versions of Room without a `SQLiteDriver`).
    */
   fun isSQLiteDriverInstrEnabled(): Boolean =
     sentryModules.isAtLeast(

@@ -23,7 +23,6 @@ import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThrows
 import org.junit.Assume.assumeThat
-import org.junit.Ignore
 import org.junit.Test
 
 class SentryPluginTest :
@@ -532,7 +531,6 @@ class SentryPluginTest :
     }
   }
 
-  @Ignore(SQLITE_DRIVER_IGNORE_REASON)
   @Test
   fun `applies sqliteDriver instrumentable when sentry gate passes with room2`() {
     val build =
@@ -546,7 +544,6 @@ class SentryPluginTest :
     )
   }
 
-  @Ignore(SQLITE_DRIVER_IGNORE_REASON)
   @Test
   fun `applies sqliteDriver instrumentable when sentry gate passes with room3`() {
     val build =
@@ -583,7 +580,6 @@ class SentryPluginTest :
     assertInstrumentableChain(build, "AndroidXSQLiteOpenHelper", "AndroidXRoomDao")
   }
 
-  @Ignore(SQLITE_DRIVER_IGNORE_REASON)
   @Test
   fun `applies sqliteDriver instrumentable when sentry gate passes without room on classpath`() {
     val build = buildDatabaseInstrumentation(SQLITE, SENTRY_ANDROID_SQLITE_DRIVER)
@@ -596,7 +592,6 @@ class SentryPluginTest :
     )
   }
 
-  @Ignore(SQLITE_DRIVER_IGNORE_REASON)
   @Test
   fun `applies sqliteDriver instrumentable when sentry gate passes with room below 2_7`() {
     val build =
@@ -1258,9 +1253,6 @@ class SentryPluginTest :
   }
 
   companion object {
-    private const val SQLITE_DRIVER_IGNORE_REASON =
-      "Placeholder version VERSION_SQLITE_DRIVER not yet on Maven"
-
     private const val SQLITE = "androidx.sqlite:sqlite:2.6.2"
     private const val SENTRY_ANDROID_SQLITE_OPEN_HELPER = "io.sentry:sentry-android-sqlite:6.21.0"
     private val SENTRY_ANDROID_SQLITE_DRIVER =
