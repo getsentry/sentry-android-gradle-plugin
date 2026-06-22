@@ -28,6 +28,8 @@ class SetDriverMethodVisitor(
 
   companion object {
     internal const val CREATE = "create"
+    // Must match SentrySQLiteDriver.create(SQLiteDriver): SQLiteDriver in sentry-android-sqlite:
+    // https://github.com/getsentry/sentry-java/blob/main/sentry-android-sqlite/src/main/java/io/sentry/sqlite/SentrySQLiteDriver.kt
     internal const val SENTRY_CREATE_DESCRIPTOR =
       "($SQLITE_DRIVER_TYPE_DESCRIPTOR)$SQLITE_DRIVER_TYPE_DESCRIPTOR"
     internal const val SENTRY_SQLITE_DRIVER_TYPE = "Lio/sentry/sqlite/SentrySQLiteDriver;"
