@@ -1,12 +1,14 @@
 # Changelog
 
-## 6.12.0
+## Unreleased
 
 ### Features
 
 - Auto-instrument SQLiteDriver for Room users ([#1285](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1285))
-  - Gated on `sentry-android-sqlite` >= 8.45.0 and the existing `tracingInstrumentation` `DATABASE` feature
+  - Gated on `sentry-android-sqlite` >= 8.45.0 and the existing `tracingInstrumentation` `DATABASE` feature (enabled by default)
   - For users of the `androidx.sqlite.driver.SupportSQLiteDriver` bridge, auto-instrumentation wraps only the `SupportSQLiteOpenHelper` consumed by the bridge and not the bridge itself (avoids duplicate spans)
+
+## 6.12.0
 
 ### Dependencies
 
