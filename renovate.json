@@ -8,9 +8,9 @@
   "semanticCommitScope": "deps",
   "packageRules": [
     {
-      "description": "The Sentry SDK is bumped by the update-deps workflow's updater action, which writes its own CHANGELOG entry. Letting Renovate update it too would create duplicate PRs.",
+      "description": "The Sentry SDK is bumped by the update-deps workflow's updater action, which writes its own CHANGELOG entry. Most io.sentry artifacts share the same version ref, so any of them would rewrite it and collide with the updater. Leave the whole group to the updater.",
       "matchPackageNames": [
-        "io.sentry:sentry"
+        "io.sentry:**"
       ],
       "enabled": false
     },
