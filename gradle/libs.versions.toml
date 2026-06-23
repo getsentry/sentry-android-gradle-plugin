@@ -71,7 +71,7 @@ sample-androidx-appcompat = "androidx.appcompat:appcompat:1.7.1"
 
 sample-androidx-composeRuntime = "androidx.compose.runtime:runtime:1.5.4"
 sample-androidx-composeNavigation = "androidx.navigation:navigation-compose:2.5.2"
-sample-androidx-composeActivity = "androidx.activity:activity-compose:1.4.0"
+sample-androidx-composeActivity = "androidx.activity:activity-compose:1.13.0"
 sample-androidx-composeFoundation = "androidx.compose.foundation:foundation:1.5.4"
 sample-androidx-composeFoundationLayout = "androidx.compose.foundation:foundation-layout:1.5.4"
 
