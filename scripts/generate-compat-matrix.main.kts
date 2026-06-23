@@ -17,6 +17,7 @@ import io.github.z4kn4fein.semver.Version
 import io.github.z4kn4fein.semver.toVersion
 import java.io.File
 import java.net.URL
+import kotlin.io.path.createTempDirectory
 import javax.xml.parsers.DocumentBuilderFactory
 import org.jsoup.Jsoup
 import org.w3c.dom.Element
@@ -454,7 +455,7 @@ class GenerateMatrix : CliktCommand() {
     branch: String,
     filePath: String,
   ): String {
-    val tmpDir = createTempDir("googlesource-${repoUrl.substringAfterLast('/')}")
+    val tmpDir = createTempDirectory("googlesource-${repoUrl.substringAfterLast('/')}").toFile()
     try {
       exec(
         "git",
