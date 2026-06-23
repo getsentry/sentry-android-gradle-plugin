@@ -15,6 +15,7 @@ import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.github.z4kn4fein.semver.Version
 import io.github.z4kn4fein.semver.toVersion
+import java.io.File
 import java.net.URL
 import javax.xml.parsers.DocumentBuilderFactory
 import org.jsoup.Jsoup
@@ -304,8 +305,11 @@ class GenerateMatrix : CliktCommand() {
     agpVersions: List<Version>
   ): Pair<Map<Version, Version>, Version> {
     val source =
-      fetchGooglesourceText(
-        "https://android.googlesource.com/platform/tools/adt/idea/+/refs/heads/mirror-goog-studio-main/build-common/src/com/android/tools/idea/gradle/util/CompatibleGradleVersion.kt?format=TEXT"
+      fetchGooglesourceViaGit(
+        repoUrl = "https://android.googlesource.com/platform/tools/adt/idea",
+        branch = "mirror-goog-studio-main",
+        filePath =
+          "build-common/src/com/android/tools/idea/gradle/util/CompatibleGradleVersion.kt",
       )
 
     // Enum entries: VERSION_X_Y_Z(GradleVersion.version("X.Y.Z")).
@@ -426,8 +430,10 @@ class GenerateMatrix : CliktCommand() {
    */
   private fun fetchGradleLatestVersion(): Version {
     val source =
-      fetchGooglesourceText(
-        "https://android.googlesource.com/platform/tools/base/+/refs/heads/mirror-goog-studio-main/common/src/main/java/com/android/SdkConstants.java?format=TEXT"
+      fetchGooglesourceViaGit(
+        repoUrl = "https://android.googlesource.com/platform/tools/base",
+        branch = "mirror-goog-studio-main",
+        filePath = "common/src/main/java/com/android/SdkConstants.java",
       )
     val match =
       Regex("""GRADLE_LATEST_VERSION\s*=\s*"([^"]+)"""").find(source)
@@ -435,9 +441,47 @@ class GenerateMatrix : CliktCommand() {
     return Version.parse(match.groupValues[1], strict = false)
   }
 
-  /** Decodes gitiles' `?format=TEXT` response (base64-encoded) to raw source text. */
-  private fun fetchGooglesourceText(url: String): String =
-    URL(url).readText().let { String(java.util.Base64.getDecoder().decode(it)) }
+  /**
+   * Fetches a single file from a googlesource repo via a shallow sparse clone. More reliable than
+   * the gitiles `?format=TEXT` HTTP endpoint, which returns 503 under load.
+   *
+   * @param repoUrl base repo URL, e.g. "https://android.googlesource.com/platform/tools/adt/idea"
+   * @param branch branch name, e.g. "mirror-goog-studio-main"
+   * @param filePath repo-relative file path
+   */
+  private fun fetchGooglesourceViaGit(
+    repoUrl: String,
+    branch: String,
+    filePath: String,
+  ): String {
+    val tmpDir = createTempDir("googlesource-${repoUrl.substringAfterLast('/')}")
+    try {
+      exec(
+        "git",
+        "clone",
+        "--depth=1",
+        "--no-checkout",
+        "--filter=blob:none",
+        "--branch",
+        branch,
+        repoUrl,
+        tmpDir.absolutePath,
+      )
+      exec("git", "-C", tmpDir.absolutePath, "sparse-checkout", "set", filePath)
+      exec("git", "-C", tmpDir.absolutePath, "checkout")
+      return File(tmpDir, filePath).readText()
+    } finally {
+      tmpDir.deleteRecursively()
+    }
+  }
+
+  /** Runs a command, throwing if it exits non-zero. */
+  private fun exec(vararg cmd: String) {
+    val proc = ProcessBuilder(*cmd).redirectErrorStream(true).start()
+    val out = proc.inputStream.bufferedReader().readText()
+    val code = proc.waitFor()
+    if (code != 0) error("Command failed (exit $code): ${cmd.joinToString(" ")}\n$out")
+  }
 
   private fun parseVersionOrNull(s: String): Version? =
     try {
