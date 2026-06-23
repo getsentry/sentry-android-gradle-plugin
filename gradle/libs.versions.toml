@@ -38,7 +38,7 @@ androidxAnnotation = { group = "androidx.annotation", name = "annotation", versi
 proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.5.0" }
 # this allows us to develop against a fixed version of Gradle, as opposed to depending on the
 # locally available version. kotlin-gradle-plugin follows the same approach.
-gradleApi = { group = "org.gradle.experimental", name = "gradle-public-api", version = "8.9" }
+gradleApi = { group = "org.gradle.experimental", name = "gradle-public-api", version = "8.14.5" }
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlinCompilerEmbeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable" }
 autoService = { group = "com.google.auto.service", name = "auto-service", version = "1.1.1" }
