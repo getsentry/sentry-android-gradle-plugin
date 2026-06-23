@@ -6,6 +6,12 @@
 
 - Pin the plugin's build dependencies with Gradle dependency locking and SHA-256 dependency verification ([#1256](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1256))
 
+### Dependencies
+
+- Bump Android SDK from v8.44.0 to v8.44.1 ([#1305](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1305))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8441)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.44.0...8.44.1)
+
 ## 6.12.0
 
 ### Dependencies
