@@ -39,6 +39,11 @@ Run from the repo root (the root build delegates into the included builds):
   compiler plugin to a local test repo first).
 - Plugin unit tests live in `plugin-build`: `./gradlew :plugin-build:test` (or via the
   `plugin-build` included build).
+- `plugin-build` pins its full dependency graph (lockfile + SHA-256 verification metadata)
+  in STRICT mode. Adding, removing, or bumping a dependency there fails the build until you
+  regenerate both:
+  `./gradlew -p plugin-build resolveAndLockAll --write-locks --write-verification-metadata sha256`.
+  See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 Some tests upload mappings/source context and fail without an auth token:
 

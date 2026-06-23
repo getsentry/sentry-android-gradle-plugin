@@ -7,6 +7,26 @@ We suggest opening an issue to discuss bigger changes before investing on a big 
 
 The project currently requires you run JDK version `17` and the Android SDK.
 
+# Updating dependencies in `plugin-build`
+
+The published plugin build (`plugin-build`) pins its full transitive
+dependency graph for supply-chain hardening: resolved versions are recorded
+in `plugin-build/gradle.lockfile` and a SHA-256 checksum for every artifact
+in `plugin-build/gradle/verification-metadata.xml`. Locking runs in STRICT
+mode, so any drift fails the build.
+
+Whenever you add, remove, or bump a dependency in
+`plugin-build/build.gradle.kts`, regenerate both files and commit them:
+
+```bash
+./gradlew -p plugin-build resolveAndLockAll --write-locks --write-verification-metadata sha256
+```
+
+Review the diff before committing — new transitive artifacts should look like
+they belong. The compatibility test matrix overrides AGP/Kotlin/Gradle
+versions via env vars and deliberately skips locking, so you only need to
+regenerate against the canonical build.
+
 # Overriding `sentry-cli` for local development
 
 If you want to use a local version of the sentry-cli for testing integration with the plugin, you can do so by setting the `cli.executable` property in the `sentry.properties` file of the target project.
