@@ -8,8 +8,6 @@
   - Gated on `sentry-android-sqlite` >= 8.45.0 and the existing `tracingInstrumentation` `DATABASE` feature (enabled by default)
   - For users of the `androidx.sqlite.driver.SupportSQLiteDriver` bridge, auto-instrumentation wraps only the `SupportSQLiteOpenHelper` consumed by the bridge and not the bridge itself (avoids duplicate spans)
 
-## 6.12.0
-
 ### Dependencies
 
 - Bump Android SDK from v8.43.2 to v8.45.0 ([#TODO](https://github.com/getsentry/sentry-android-gradle-plugin/pull/TODO))

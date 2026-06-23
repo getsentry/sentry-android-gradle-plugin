@@ -19,15 +19,17 @@ internal const val SQLITE_DRIVER_TYPE_DESCRIPTOR = "Landroidx/sqlite/SQLiteDrive
  *
  * In other words, this:
  * ```kotlin
+ * val someDriver = AndroidSQLiteDriver()
  * val database = Room.databaseBuilder(context, MyDatabase::class.java, "dbName")
- *      .setDriver(AndroidSQLiteDriver())
+ *      .setDriver(someDriver)
  *      .build()
  * ```
  *
  * becomes:
  * ```kotlin
+ * val someDriver = AndroidSQLiteDriver()
  * val database = Room.databaseBuilder(context, MyDatabase::class.java, "dbName")
- *      .setDriver(SentrySQLiteDriver.create(AndroidSQLiteDriver()))
+ *      .setDriver(SentrySQLiteDriver.create(someDriver))
  *      .build()
  * ```
  *
