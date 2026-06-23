@@ -5,7 +5,7 @@
 @file:DependsOn("com.squareup.okhttp3:okhttp:4.12.0")
 @file:DependsOn("com.google.guava:guava:33.4.0-jre")
 @file:DependsOn("io.github.z4kn4fein:semver-jvm:3.0.0")
-@file:DependsOn("org.jsoup:jsoup:1.17.2")
+@file:DependsOn("org.jsoup:jsoup:1.22.2")
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.ProgramResult
