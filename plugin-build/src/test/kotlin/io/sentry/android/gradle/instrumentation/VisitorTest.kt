@@ -52,17 +52,22 @@ class VisitorTest(
     // first we read the original bytecode and pass it through the ClassWriter, so it computes
     // MAXS for us automatically (that's what AGP will do as well)
     val inputBytes =
-      if (
+      when {
         classContext != null &&
-          SQLiteDriverBytecodeTestUtil.isRoomBuilderClass(classContext.currentClassData.className)
-      ) {
-        SQLiteDriverBytecodeTestUtil.loadRoomBuilderFixture(classContext.currentClassData.className)
-      } else {
-        FileInputStream(
-            "src/test/resources/testFixtures/instrumentation/" +
-              "$instrumentedProject/$className.class"
+          SQLiteDriverBytecodeTestUtil.isRoomBuilderClass(
+            classContext.currentClassData.className
+          ) ->
+          SQLiteDriverBytecodeTestUtil.loadRoomBuilderFixture(
+            classContext.currentClassData.className
           )
-          .use { it.readBytes() }
+        InstrumentationBytecodeTestUtil.hasClasspathFixture(instrumentedProject, className) ->
+          InstrumentationBytecodeTestUtil.loadClasspathFixture(instrumentedProject, className)
+        else ->
+          FileInputStream(
+              "src/test/resources/testFixtures/instrumentation/" +
+                "$instrumentedProject/$className.class"
+            )
+            .use { it.readBytes() }
       }
     val classReader = ClassReader(inputBytes)
     val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
