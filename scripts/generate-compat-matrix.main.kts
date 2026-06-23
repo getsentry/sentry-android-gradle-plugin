@@ -463,7 +463,7 @@ class GenerateMatrix : CliktCommand() {
         repoUrl,
         tmpDir.absolutePath,
       )
-      exec("git", "-C", tmpDir.absolutePath, "sparse-checkout", "set", filePath)
+      exec("git", "-C", tmpDir.absolutePath, "sparse-checkout", "set", "--no-cone", filePath)
       exec("git", "-C", tmpDir.absolutePath, "checkout")
       return File(tmpDir, filePath).readText()
     } finally {
