@@ -17,8 +17,8 @@ import io.github.z4kn4fein.semver.Version
 import io.github.z4kn4fein.semver.toVersion
 import java.io.File
 import java.net.URL
-import kotlin.io.path.createTempDirectory
 import javax.xml.parsers.DocumentBuilderFactory
+import kotlin.io.path.createTempDirectory
 import org.jsoup.Jsoup
 import org.w3c.dom.Element
 
@@ -309,8 +309,7 @@ class GenerateMatrix : CliktCommand() {
       fetchGooglesourceViaGit(
         repoUrl = "https://android.googlesource.com/platform/tools/adt/idea",
         branch = "mirror-goog-studio-main",
-        filePath =
-          "build-common/src/com/android/tools/idea/gradle/util/CompatibleGradleVersion.kt",
+        filePath = "build-common/src/com/android/tools/idea/gradle/util/CompatibleGradleVersion.kt",
       )
 
     // Enum entries: VERSION_X_Y_Z(GradleVersion.version("X.Y.Z")).
@@ -450,11 +449,7 @@ class GenerateMatrix : CliktCommand() {
    * @param branch branch name, e.g. "mirror-goog-studio-main"
    * @param filePath repo-relative file path
    */
-  private fun fetchGooglesourceViaGit(
-    repoUrl: String,
-    branch: String,
-    filePath: String,
-  ): String {
+  private fun fetchGooglesourceViaGit(repoUrl: String, branch: String, filePath: String): String {
     val tmpDir = createTempDirectory("googlesource-${repoUrl.substringAfterLast('/')}").toFile()
     try {
       exec(
