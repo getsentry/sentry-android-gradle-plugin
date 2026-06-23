@@ -2,5 +2,25 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "semanticCommits": "enabled",
+  "semanticCommitType": "build",
+  "semanticCommitScope": "deps",
+  "packageRules": [
+    {
+      "description": "The Sentry SDK is bumped by the update-deps workflow's updater action, which writes its own CHANGELOG entry. Letting Renovate update it too would create duplicate PRs.",
+      "matchPackageNames": [
+        "io.sentry:sentry"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Deps bundled into the published plugin are user-facing, so use a fix: title to make Danger require a CHANGELOG entry. Everything else stays build(deps): and is skipped.",
+      "matchPackageNames": [
+        "org.ow2.asm:asm-util",
+        "org.ow2.asm:asm-commons"
+      ],
+      "semanticCommitType": "fix"
+    }
   ]
 }
