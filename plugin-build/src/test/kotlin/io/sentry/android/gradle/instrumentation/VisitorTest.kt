@@ -6,6 +6,7 @@ import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.AndroidXSQLiteDriver
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.SQLiteDriverBytecodeTestUtil
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import io.sentry.android.gradle.instrumentation.appstart.Application
 import io.sentry.android.gradle.instrumentation.appstart.ContentProvider
@@ -50,11 +51,20 @@ class VisitorTest(
   fun `instrumented class passes Java verifier`() {
     // first we read the original bytecode and pass it through the ClassWriter, so it computes
     // MAXS for us automatically (that's what AGP will do as well)
-    val inputStream =
-      FileInputStream(
-        "src/test/resources/testFixtures/instrumentation/" + "$instrumentedProject/$className.class"
-      )
-    val classReader = ClassReader(inputStream)
+    val inputBytes =
+      if (
+        classContext != null &&
+          SQLiteDriverBytecodeTestUtil.isRoomBuilderClass(classContext.currentClassData.className)
+      ) {
+        SQLiteDriverBytecodeTestUtil.loadRoomBuilderFixture(classContext.currentClassData.className)
+      } else {
+        FileInputStream(
+            "src/test/resources/testFixtures/instrumentation/" +
+              "$instrumentedProject/$className.class"
+          )
+          .use { it.readBytes() }
+      }
+    val classReader = ClassReader(inputBytes)
     val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
     val classContext = this.classContext ?: TestClassContext(instrumentable.fqName)
     val classVisitor =
@@ -123,8 +133,8 @@ class VisitorTest(
           AndroidXSQLiteStatement(SemVer(2, 3, 0)),
           null,
         ),
-        // RoomDatabase$Builder fixtures: see SQLiteDriverBytecodeTestUtil (extracted from published
-        // AARs).
+        // RoomDatabase$Builder bytecode: loaded from Room runtime AARs on the test classpath (see
+        // SQLiteDriverBytecodeTestUtil).
         arrayOf(
           "androidxRoom",
           "RoomDatabase\$Builder",

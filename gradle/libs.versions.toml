@@ -62,7 +62,7 @@ sentrySpringBootJakarta = { group = "io.sentry", name = "sentry-spring-boot-star
 # test
 arscLib = { group = "io.github.reandroid", name = "ARSCLib", version = "1.1.4" }
 mockitoKotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.0" }
-# Room & Room 3 runtime versions must match RoomDatabase$Builder bytecode fixtures (see SQLiteDriverBytecodeTestUtil)
+# Room runtime versions used by SQLiteDriverBytecodeTestUtil to load RoomDatabase$Builder bytecode from the test classpath
 roomRuntimeAndroid = { group = "androidx.room", name = "room-runtime-android", version = "2.7.0" }
 room3RuntimeAndroid = { group = "androidx.room3", name = "room3-runtime-android", version = "3.0.0-alpha06" }
 zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.5" }
