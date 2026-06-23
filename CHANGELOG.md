@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Security
+
+- Pin the plugin's build dependencies with Gradle dependency locking and SHA-256 dependency verification ([#1256](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1256))
+
 ## 6.12.0
 
 ### Dependencies
@@ -49,10 +55,6 @@
 ### API Changes
 
 - The `debug` extension property is now typed as `Property<Boolean>` instead of `Property<Boolean?>` ([#1253](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1253))
-
-### Internal Changes 🔧
-
-- Pin the plugin's build dependencies with Gradle dependency locking and SHA-256 dependency verification ([#1256](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1256))
 
 ## 6.9.0
 
