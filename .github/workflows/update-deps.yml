@@ -28,11 +28,26 @@ jobs:
   android:
     runs-on: ubuntu-latest
     steps:
+      # The SDK lives in plugin-build's STRICT dependency lock + verification metadata,
+      # so the post-update-script regenerates both. Gradle and Java are set up here
+      # because the updater runs that script before opening the PR.
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # pin@v6
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+
+      - name: Set up Java
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - uses: getsentry/github-workflows/updater@607fed74f812e69201531a5185b6c3c57caa4e89 # v3
         with:
           path: scripts/update-android.sh
           name: Android SDK
           ssh-key: ${{ secrets.CI_DEPLOY_KEY }}
+          post-update-script: scripts/relock-plugin-build.sh
 
   composable-preview-scanner:
     runs-on: ubuntu-latest
