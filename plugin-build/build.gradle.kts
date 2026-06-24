@@ -71,6 +71,28 @@ dependencies {
   testImplementation(libs.zip4j)
 }
 
+// The compatibility test matrix (test-matrix-agp-gradle.yaml) overrides AGP/Kotlin/Gradle
+// versions via env vars, which deliberately diverges from the lockfile. Only lock the
+// canonical build; matrix builds resolve their own versions.
+val isVersionOverrideBuild =
+  System.getenv("VERSION_AGP") != null || System.getenv("VERSION_KOTLIN") != null
+
+// Regenerate the lockfile and verification metadata after changing dependencies; see
+// CONTRIBUTING.md.
+if (!isVersionOverrideBuild) {
+  dependencyLocking { lockAllConfigurations() }
+}
+
+tasks.register("resolveAndLockAll") {
+  notCompatibleWithConfigurationCache("Filters configurations at execution time")
+  doFirst {
+    require(gradle.startParameter.isWriteDependencyLocks) {
+      "$path must be run from the command line with the `--write-locks` flag"
+    }
+  }
+  doLast { configurations.filter { it.isCanBeResolved }.forEach { it.resolve() } }
+}
+
 java {
   sourceCompatibility = JavaVersion.VERSION_11
   targetCompatibility = JavaVersion.VERSION_11

@@ -8,11 +8,19 @@
   - Gated on `sentry-android-sqlite` >= 8.45.0 and the existing `tracingInstrumentation` `DATABASE` feature (enabled by default)
   - For users of the `androidx.sqlite.driver.SupportSQLiteDriver` bridge, auto-instrumentation wraps only the `SupportSQLiteOpenHelper` consumed by the bridge and not the bridge itself (avoids duplicate spans)
 
+### Security
+
+- Pin the plugin's build dependencies with Gradle dependency locking and SHA-256 dependency verification ([#1256](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1256))
+
 ### Dependencies
 
-- Bump Android SDK from v8.44.0 to v8.45.0 ([#1285](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1285))
+- Bump Android SDK from v8.44.1 to v8.45.0 ([#1285](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1285))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8450)
-  - [diff](https://github.com/getsentry/sentry-java/compare/8.44.0...8.45.0)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.44.1...8.45.0)
+- Bump Android SDK from v8.44.0 to v8.44.1 ([#1305](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1305))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8441)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.44.0...8.44.1)
+- Bump Vanniktech Maven Publish plugin from v0.27.0 to v0.35.0 ([#1335](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1335))
 
 ## 6.12.0
 
