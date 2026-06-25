@@ -65,7 +65,7 @@ mockitoKotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version
 # Room & Room 3 runtime versions must match RoomDatabase$Builder bytecode fixtures (see SQLiteDriverBytecodeTestUtil)
 roomRuntimeAndroid = { group = "androidx.room", name = "room-runtime-android", version = "2.7.0" }
 room3RuntimeAndroid = { group = "androidx.room3", name = "room3-runtime-android", version = "3.0.0-alpha06" }
-zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.5" }
+zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.6" }
 
 # samples
 sample-androidx-recyclerView = "androidx.recyclerview:recyclerview:1.2.0"
