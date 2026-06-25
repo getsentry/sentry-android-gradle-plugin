@@ -8,9 +8,9 @@
 
 ### Dependencies
 
-- Bump Android SDK from v8.44.0 to v8.44.1 ([#1305](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1305))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8441)
-  - [diff](https://github.com/getsentry/sentry-java/compare/8.44.0...8.44.1)
+- Bump Android SDK from v8.44.0 to v8.45.0 ([#1305](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1305), [#1342](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1342))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8450)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.44.0...8.45.0)
 - Bump Vanniktech Maven Publish plugin from v0.27.0 to v0.35.0 ([#1335](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1335))
 
 ## 6.12.0
