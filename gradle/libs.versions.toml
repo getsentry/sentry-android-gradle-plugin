@@ -4,7 +4,7 @@ agp = "8.10.1"
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
 ktfmt = "0.51"
 sqlite = "2.1.0"
-sentry = "8.44.1"
+sentry = "8.45.0"
 # Pinned to the last release that shipped sentry-android-okhttp; the module was removed
 # in 8.0.0, so there is no newer version to update to. Used only to verify the legacy
 # okhttp instrumentation path in tests.
@@ -60,8 +60,11 @@ sentryAndroidOkhttp = { group = "io.sentry", name = "sentry-android-okhttp", ver
 sentrySpringBootJakarta = { group = "io.sentry", name = "sentry-spring-boot-starter-jakarta", version.ref = "sentry" }
 
 # test
-mockitoKotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.0" }
 arscLib = { group = "io.github.reandroid", name = "ARSCLib", version = "1.1.4" }
+mockitoKotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.0" }
+# Room & Room 3 runtime versions must match RoomDatabase$Builder bytecode fixtures (see SQLiteDriverBytecodeTestUtil)
+roomRuntimeAndroid = { group = "androidx.room", name = "room-runtime-android", version = "2.7.0" }
+room3RuntimeAndroid = { group = "androidx.room3", name = "room3-runtime-android", version = "3.0.0-alpha06" }
 zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.5" }
 
 # samples
