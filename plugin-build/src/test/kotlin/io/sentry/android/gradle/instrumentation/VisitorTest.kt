@@ -6,7 +6,6 @@ import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.AndroidXSQLiteDriver
-import io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.SQLiteDriverBytecodeTestUtil
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import io.sentry.android.gradle.instrumentation.appstart.Application
 import io.sentry.android.gradle.instrumentation.appstart.ContentProvider
@@ -53,21 +52,11 @@ class VisitorTest(
     // MAXS for us automatically (that's what AGP will do as well)
     val inputBytes =
       when {
-        classContext != null &&
-          SQLiteDriverBytecodeTestUtil.isRoomBuilderClass(
+        classContext != null ->
+          InstrumentationBytecodeTestUtil.loadClasspathFixture(
             classContext.currentClassData.className
-          ) ->
-          SQLiteDriverBytecodeTestUtil.loadRoomBuilderFixture(
-            classContext.currentClassData.className
-          )
-        InstrumentationBytecodeTestUtil.hasClasspathFixture(instrumentedProject, className) ->
-          InstrumentationBytecodeTestUtil.loadClasspathFixture(instrumentedProject, className)
-        else ->
-          FileInputStream(
-              "src/test/resources/testFixtures/instrumentation/" +
-                "$instrumentedProject/$className.class"
-            )
-            .use { it.readBytes() }
+          ) ?: loadFilesystemFixture()
+        else -> loadFilesystemFixture()
       }
     val classReader = ClassReader(inputBytes)
     val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
@@ -108,6 +97,12 @@ class VisitorTest(
     )
   }
 
+  private fun loadFilesystemFixture(): ByteArray =
+    FileInputStream(
+        "src/test/resources/testFixtures/instrumentation/" + "$instrumentedProject/$className.class"
+      )
+      .use { it.readBytes() }
+
   @After
   fun printLogs() {
     // only print bytecode when running locally
@@ -126,29 +121,39 @@ class VisitorTest(
     fun parameters() =
       listOf(
         arrayOf(
-          "androidxSqlite",
+          "androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory",
           "FrameworkSQLiteOpenHelperFactory",
           AndroidXSQLiteOpenHelper(),
-          null,
+          TestClassContext(
+            TestClassData(
+              className = "androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory",
+              interfaces = listOf("androidx.sqlite.db.SupportSQLiteOpenHelper\$Factory"),
+            )
+          ),
         ),
-        arrayOf("androidxSqlite", "FrameworkSQLiteDatabase", AndroidXSQLiteDatabase(), null),
         arrayOf(
-          "androidxSqlite",
+          "androidx.sqlite.db.framework.FrameworkSQLiteDatabase",
+          "FrameworkSQLiteDatabase",
+          AndroidXSQLiteDatabase(),
+          TestClassContext("androidx.sqlite.db.framework.FrameworkSQLiteDatabase"),
+        ),
+        arrayOf(
+          "androidx.sqlite.db.framework.FrameworkSQLiteStatement",
           "FrameworkSQLiteStatement",
           AndroidXSQLiteStatement(SemVer(2, 3, 0)),
-          null,
+          TestClassContext("androidx.sqlite.db.framework.FrameworkSQLiteStatement"),
         ),
-        // RoomDatabase$Builder bytecode: loaded from Room runtime AARs on the test classpath (see
-        // SQLiteDriverBytecodeTestUtil).
+        // RoomDatabase$Builder bytecode: loaded by FQN from Room runtime AARs on the test
+        // classpath.
         arrayOf(
-          "androidxRoom",
+          "androidx.room.RoomDatabase\$Builder",
           "RoomDatabase\$Builder",
           AndroidXSQLiteDriver(),
           TestClassContext("androidx.room.RoomDatabase\$Builder"),
         ),
         arrayOf(
-          "androidxRoom",
-          "RoomDatabase3\$Builder",
+          "androidx.room3.RoomDatabase\$Builder",
+          "RoomDatabase\$Builder",
           AndroidXSQLiteDriver(),
           TestClassContext("androidx.room3.RoomDatabase\$Builder"),
         ),
@@ -187,7 +192,12 @@ class VisitorTest(
         kspTracksDaoTestParameters("insertAll"),
         kspTracksDaoTestParameters("update"),
         arrayOf("fileIO", "SQLiteCopyOpenHelper", WrappingInstrumentable(), null),
-        arrayOf("fileIO", "TypefaceCompatUtil", WrappingInstrumentable(), null),
+        arrayOf(
+          "androidx.core.graphics.TypefaceCompatUtil",
+          "TypefaceCompatUtil",
+          WrappingInstrumentable(),
+          TestClassContext("androidx.core.graphics.TypefaceCompatUtil"),
+        ),
         arrayOf(
           "fileIO",
           "Test",
