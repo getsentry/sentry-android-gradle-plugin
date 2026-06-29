@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.instrumentation.androidx.sqlite.driver
 
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.visitor.SetDriverMethodVisitor
+import java.io.FileInputStream
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
@@ -9,6 +10,8 @@ import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
 
 internal object SQLiteDriverBytecodeTestUtil {
+
+  private const val FIXTURES_ROOT = "src/test/resources/testFixtures/instrumentation/androidxRoom"
 
   /**
    * Room `Builder` bytecode loaded from published AARs on the test classpath:

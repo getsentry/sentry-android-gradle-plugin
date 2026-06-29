@@ -16,10 +16,10 @@ jobs:
     env:
       SENTRY_URL: http://127.0.0.1:8000
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
-          python-version: '3.10.5'
+          python-version: '3.14.6'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # pin@v6
@@ -35,4 +35,6 @@ jobs:
       - name: Start server and run integration test for sentry-cli commands
         run: |
           test/integration-test-server-start.sh &
-          ./gradlew -p plugin-build integrationTest --tests "*IntegrationTest"
+          # Verification is disabled here because the standalone `-p plugin-build` build
+          # resolves buildscript-classpath artifacts not captured in the metadata.
+          ./gradlew -p plugin-build integrationTest --tests "*IntegrationTest" --dependency-verification=off

@@ -33,7 +33,7 @@ internal object SentryVersions {
   internal val VERSION_LOGCAT = SemVer(6, 17, 0)
   internal val VERSION_APP_START = SemVer(7, 1, 0)
   internal val VERSION_SQLITE = SemVer(6, 21, 0)
-  internal val VERSION_SQLITE_DRIVER = SemVer(8, 44, 1)
+  internal val VERSION_SQLITE_DRIVER = SemVer(8, 45, 0)
   internal val VERSION_ANDROID_OKHTTP_LISTENER = SemVer(6, 20, 0)
   internal val VERSION_OKHTTP = SemVer(7, 0, 0)
 }

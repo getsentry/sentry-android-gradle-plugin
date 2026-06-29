@@ -4,7 +4,7 @@ agp = "8.10.1"
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
 ktfmt = "0.51"
 sqlite = "2.3.0"
-sentry = "8.44.1"
+sentry = "8.46.0"
 # Pinned to the last release that shipped sentry-android-okhttp; the module was removed
 # in 8.0.0, so there is no newer version to update to. Used only to verify the legacy
 # okhttp instrumentation path in tests.
@@ -23,11 +23,11 @@ kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring" }
 kapt = { id = "org.jetbrains.kotlin.kapt" }
 ksp = { id = "com.google.devtools.ksp" }
 dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
-spotless = { id = "com.diffplug.spotless", version = "8.6.0" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }
+spotless = { id = "com.diffplug.spotless", version = "8.7.0" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.35.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
-buildConfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.9" }
+buildConfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.10" }
 springBoot = { id = "org.springframework.boot", version = "3.4.1" }
 springDependencyManagement = { id = "io.spring.dependency-management", version = "1.1.7" }
 composeCompiler =  { id = "org.jetbrains.kotlin.plugin.compose", version = "2.1.0" }

@@ -75,12 +75,12 @@ class SentryModulesServiceTest {
   }
 
   @Test
-  fun `isSQLiteDriverInstrEnabled is false when sentry-android-sqlite is one patch below VERSION_SQLITE_DRIVER`() {
+  fun `isSQLiteDriverInstrEnabled is false when sentry-android-sqlite is just below VERSION_SQLITE_DRIVER`() {
     val belowThreshold =
       SemVer(
         SentryVersions.VERSION_SQLITE_DRIVER.major,
-        SentryVersions.VERSION_SQLITE_DRIVER.minor,
-        SentryVersions.VERSION_SQLITE_DRIVER.patch - 1,
+        SentryVersions.VERSION_SQLITE_DRIVER.minor - 1,
+        99,
       )
     val service =
       fixture.getSut(

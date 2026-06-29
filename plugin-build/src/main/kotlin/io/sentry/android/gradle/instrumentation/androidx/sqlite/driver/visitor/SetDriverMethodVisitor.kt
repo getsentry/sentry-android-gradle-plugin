@@ -21,8 +21,8 @@ class SetDriverMethodVisitor(
   ) {
 
   override fun onMethodEnter() {
-    // We inject our wrapper at the start of RoomDatabase.Builder.setDriver(driver) so that the
-    // method receives SentrySQLiteDriver.create(driver) instead of the raw driver (arg0).
+    // Inject at the start of RoomDatabase.Builder.setDriver(driver) so the method
+    // receives SentrySQLiteDriver.create(driver) instead of the raw driver (arg0).
     loadArg(0)
     invokeStatic(Type.getType(SENTRY_SQLITE_DRIVER_TYPE), Method(CREATE, SENTRY_CREATE_DESCRIPTOR))
     storeArg(0)
