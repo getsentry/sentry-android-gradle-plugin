@@ -55,6 +55,7 @@ dependencies {
   testImplementation(libs.asmCommons)
 
   // we need these dependencies for tests, because the bytecode verifier also analyzes superclasses
+  testImplementationAar(libs.androidxCore)
   testImplementationAar(libs.roomRuntimeAndroid)
   testImplementationAar(libs.room3RuntimeAndroid)
   testImplementation(libs.sample.coroutines.core)

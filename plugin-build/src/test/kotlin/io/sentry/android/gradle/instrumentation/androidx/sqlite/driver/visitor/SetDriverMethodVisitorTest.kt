@@ -2,6 +2,7 @@
 
 package io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.visitor
 
+import io.sentry.android.gradle.instrumentation.InstrumentationBytecodeTestUtil
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.AndroidXSQLiteDriver
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.SQLiteDriverBytecodeTestUtil
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.SetDriverMethodInstrumentable
@@ -50,7 +51,10 @@ class SetDriverMethodVisitorTest {
   }
 
   private fun instrument(className: String): ByteArray {
-    val bytes = SQLiteDriverBytecodeTestUtil.loadRoomBuilderFixture(className)
+    val bytes =
+      requireNotNull(InstrumentationBytecodeTestUtil.loadClasspathFixture(className)) {
+        "Could not load $className from test classpath"
+      }
     val classReader = ClassReader(bytes)
     val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
     val classVisitor =

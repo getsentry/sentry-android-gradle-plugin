@@ -1,12 +1,13 @@
 # This is a Gradle generated file for dependency locking.
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
+androidx.core:core:1.15.0=testImplementationAar
 androidx.databinding:databinding-common:8.10.1=testRuntimeClasspath
 androidx.databinding:databinding-compiler-common:8.10.1=testRuntimeClasspath
 androidx.room3:room3-runtime-android:3.0.0-alpha06=testImplementationAar
 androidx.room:room-runtime-android:2.7.0=testImplementationAar
-androidx.sqlite:sqlite-framework:2.1.0=testImplementationAar
-androidx.sqlite:sqlite:2.1.0=testImplementationAar
+androidx.sqlite:sqlite-framework:2.3.0=testImplementationAar
+androidx.sqlite:sqlite:2.3.0=testImplementationAar
 com.android.databinding:baseLibrary:8.10.1=testRuntimeClasspath
 com.android.tools.analytics-library:crash:31.10.1=testRuntimeClasspath
 com.android.tools.analytics-library:protos:31.10.1=testRuntimeClasspath
