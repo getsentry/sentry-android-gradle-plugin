@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Use Sentry BOM versions for auto-installed SDK dependencies ([#1349](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1349))
+
 ### Dependencies
 
 - Bump Android SDK from v8.45.0 to v8.46.0 ([#1343](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1343))
