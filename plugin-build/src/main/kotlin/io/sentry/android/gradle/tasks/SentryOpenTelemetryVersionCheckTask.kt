@@ -34,16 +34,8 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
 
   @get:Input abstract val docsUrl: Property<String>
 
-  /**
-   * Whether io.spring.dependency-management is applied. It governs version resolution differently
-   * from Gradle's native BOM support, so the suggested fix differs (see [buildMessage]).
-   */
   @get:Input abstract val springDependencyManagementApplied: Property<Boolean>
 
-  /**
-   * Whether the project declares a Sentry OpenTelemetry dependency at all. When it doesn't, there
-   * is nothing to verify, so the check is skipped without resolving the runtime classpath.
-   */
   @get:Input abstract val hasSentryOpenTelemetryDependency: Property<Boolean>
 
   @get:Input abstract val verifyEnabled: Property<Boolean>
