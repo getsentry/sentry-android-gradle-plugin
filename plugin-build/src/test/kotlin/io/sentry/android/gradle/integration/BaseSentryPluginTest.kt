@@ -7,7 +7,6 @@ import java.io.OutputStreamWriter
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.gradle.testkit.runner.internal.io.SynchronizedOutputStream
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -52,7 +51,6 @@ abstract class BaseSentryPluginTest(
       testProjectDir.writeFile("build.gradle") {
         // language=Groovy
         """
-            import io.sentry.android.gradle.autoinstall.AutoInstallState
             import io.sentry.android.gradle.util.GradleVersions
             import org.gradle.util.internal.VersionNumber
 
@@ -111,14 +109,6 @@ abstract class BaseSentryPluginTest(
                   $additionalRootProjectConfig
                 }
               }
-
-              pluginManager.withPlugin('io.sentry.android.gradle') {
-                tasks.register('cleanupAutoInstallState') {
-                  doLast {
-                    AutoInstallState.clearReference()
-                  }
-                }
-              }
             }
             """
           .trimIndent()
@@ -155,15 +145,6 @@ abstract class BaseSentryPluginTest(
       }
     } catch (e: Exception) {
       e.printStackTrace()
-    }
-  }
-
-  @After
-  fun teardown() {
-    try {
-      runner.withArguments("app:cleanupAutoInstallState").build()
-    } catch (ignored: Throwable) {
-      // may fail if we are relying on BuildFinishesListener, but we don't care here
     }
   }
 
