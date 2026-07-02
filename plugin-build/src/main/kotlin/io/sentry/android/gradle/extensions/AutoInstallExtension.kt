@@ -18,4 +18,12 @@ open class AutoInstallExtension @Inject constructor(objects: ObjectFactory) {
    */
   val sentryVersion: Property<String> =
     objects.property(String::class.java).convention(SENTRY_SDK_VERSION)
+
+  /**
+   * Fails the build when the OpenTelemetry versions resolved on the runtime classpath were
+   * downgraded below what the Sentry OpenTelemetry integration requires (which leads to
+   * ClassNotFoundException / NoSuchMethodError at runtime). Defaults to true.
+   */
+  val verifyOpenTelemetryVersions: Property<Boolean> =
+    objects.property(Boolean::class.java).convention(true)
 }

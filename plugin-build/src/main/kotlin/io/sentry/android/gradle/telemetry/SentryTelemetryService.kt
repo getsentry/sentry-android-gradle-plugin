@@ -315,6 +315,10 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
         "autoInstallation_sentryVersion",
         extension.autoInstallation.sentryVersion.get().toString(),
       )
+      tags.put(
+        "autoInstallation_verifyOpenTelemetryVersions",
+        extension.autoInstallation.verifyOpenTelemetryVersions.get().toString(),
+      )
       tags.put("includeDependenciesReport", extension.includeDependenciesReport.get().toString())
       tags.put("includeSourceContext", extension.includeSourceContext.get().toString())
       tags.put(
