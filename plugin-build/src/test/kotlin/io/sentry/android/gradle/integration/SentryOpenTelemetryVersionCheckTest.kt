@@ -56,7 +56,6 @@ class SentryOpenTelemetryVersionCheckTest :
     assertTrue { "io.opentelemetry:opentelemetry-sdk" in result.output }
     assertTrue { "Sentry requires 1.63.0 but 1.62.0 was resolved" in result.output }
     assertTrue { "verifyOpenTelemetryVersions = false" in result.output }
-    // io.spring.dependency-management is applied -> suggest importing the BOM through it.
     assertTrue {
       "import the Sentry OpenTelemetry BOM through io.spring.dependency-management" in result.output
     }
@@ -102,7 +101,6 @@ class SentryOpenTelemetryVersionCheckTest :
 
     assertEquals(TaskOutcome.FAILED, result.task(verifyTask)?.outcome)
     assertTrue { "Sentry requires 1.63.0 but 1.62.0 was resolved" in result.output }
-    // No dependency-management plugin -> suggest a platform dependency.
     assertTrue {
       "implementation platform(\"io.sentry:sentry-opentelemetry-bom:<sentryVersion>\")" in
         result.output

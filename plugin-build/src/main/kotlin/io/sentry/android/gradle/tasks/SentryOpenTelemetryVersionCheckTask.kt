@@ -46,7 +46,6 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
    */
   @get:Input abstract val hasSentryOpenTelemetryDependency: Property<Boolean>
 
-  /** Whether the check is enabled (sentry.autoInstallation.verifyOpenTelemetryVersions). */
   @get:Input abstract val verifyEnabled: Property<Boolean>
 
   init {
