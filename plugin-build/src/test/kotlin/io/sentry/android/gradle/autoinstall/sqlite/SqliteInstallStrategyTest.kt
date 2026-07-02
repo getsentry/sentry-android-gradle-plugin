@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.autoinstall.sqlite
 
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -45,11 +44,7 @@ class SqliteInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(sqliteVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      with(AutoInstallState.getInstance()) {
-        this.enabled = true
-        this.sentryVersion = "6.21.0"
-      }
-      return SQLiteInstallStrategyImpl(logger)
+      return SQLiteInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "6.21.0", logger)
     }
   }
 
@@ -85,5 +80,9 @@ class SqliteInstallStrategyTest {
       )
   }
 
-  private class SQLiteInstallStrategyImpl(logger: Logger) : SQLiteInstallStrategy(logger)
+  private class SQLiteInstallStrategyImpl(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : SQLiteInstallStrategy(autoInstallEnabled, sentryVersion, logger)
 }
