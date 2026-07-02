@@ -19,8 +19,7 @@ class AbstractInstallStrategyTest {
       mock<ComponentMetadataContext> { whenever(it.details).thenReturn(metadataDetails) }
 
     fun getSut(): AbstractInstallStrategy {
-      with(AutoInstallState.getInstance()) { this.enabled = false }
-      return RandomInstallStrategy(logger)
+      return RandomInstallStrategy(autoInstallEnabled = false, logger = logger)
     }
   }
 
@@ -39,9 +38,10 @@ class AbstractInstallStrategyTest {
   }
 
   private class RandomInstallStrategy(
+    autoInstallEnabled: Boolean,
     logger: Logger,
     override val sentryModuleId: String = "random-module",
-  ) : AbstractInstallStrategy() {
+  ) : AbstractInstallStrategy(autoInstallEnabled, "0.0.0") {
     init {
       this.logger = logger
     }

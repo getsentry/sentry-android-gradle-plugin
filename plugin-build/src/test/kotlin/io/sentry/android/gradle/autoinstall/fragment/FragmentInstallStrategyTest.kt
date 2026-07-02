@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.autoinstall.fragment
 
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -45,11 +44,7 @@ class FragmentInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn("1.3.5") }
       whenever(metadataDetails.id).thenReturn(id)
 
-      with(AutoInstallState.getInstance()) {
-        this.enabled = true
-        this.sentryVersion = "5.6.1"
-      }
-      return FragmentInstallStrategyImpl(logger)
+      return FragmentInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "5.6.1", logger)
     }
   }
 
@@ -68,5 +63,9 @@ class FragmentInstallStrategyTest {
       .add(check<String> { assertEquals("io.sentry:sentry-android-fragment:5.6.1", it) })
   }
 
-  private class FragmentInstallStrategyImpl(logger: Logger) : FragmentInstallStrategy(logger)
+  private class FragmentInstallStrategyImpl(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : FragmentInstallStrategy(autoInstallEnabled, sentryVersion, logger)
 }

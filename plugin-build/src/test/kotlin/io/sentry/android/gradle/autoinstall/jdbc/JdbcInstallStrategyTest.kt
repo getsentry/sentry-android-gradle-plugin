@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.autoinstall.jdbc
 
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -44,11 +43,7 @@ class JdbcInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(jdbcVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      with(AutoInstallState.getInstance()) {
-        this.enabled = true
-        this.sentryVersion = "6.21.0"
-      }
-      return JdbcInstallStrategyImpl(logger)
+      return JdbcInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "6.21.0", logger)
     }
   }
 
@@ -67,5 +62,9 @@ class JdbcInstallStrategyTest {
       .add(org.mockito.kotlin.check<String> { assertEquals("io.sentry:sentry-jdbc:6.21.0", it) })
   }
 
-  private class JdbcInstallStrategyImpl(logger: Logger) : JdbcInstallStrategy(logger)
+  private class JdbcInstallStrategyImpl(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : JdbcInstallStrategy(autoInstallEnabled, sentryVersion, logger)
 }

@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.autoinstall.kotlin
 
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -46,11 +45,11 @@ class KotlinExtensionsInstallStrategyTest {
         mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(kotlinExtensionsVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      with(AutoInstallState.getInstance()) {
-        this.enabled = true
-        this.sentryVersion = "6.25.2"
-      }
-      return KotlinExtensionsInstallStrategyImpl(logger)
+      return KotlinExtensionsInstallStrategyImpl(
+        autoInstallEnabled = true,
+        sentryVersion = "6.25.2",
+        logger,
+      )
     }
   }
 
@@ -86,6 +85,9 @@ class KotlinExtensionsInstallStrategyTest {
       )
   }
 
-  private class KotlinExtensionsInstallStrategyImpl(logger: Logger) :
-    KotlinExtensionsInstallStrategy(logger)
+  private class KotlinExtensionsInstallStrategyImpl(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : KotlinExtensionsInstallStrategy(autoInstallEnabled, sentryVersion, logger)
 }

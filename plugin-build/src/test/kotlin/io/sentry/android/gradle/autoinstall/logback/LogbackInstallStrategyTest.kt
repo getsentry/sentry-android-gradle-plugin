@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.autoinstall.logback
 
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -45,11 +44,7 @@ class LogbackInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(logbackVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      with(AutoInstallState.getInstance()) {
-        this.enabled = true
-        this.sentryVersion = "6.25.2"
-      }
-      return LogbackInstallStrategyImpl(logger)
+      return LogbackInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "6.25.2", logger)
     }
   }
 
@@ -81,5 +76,9 @@ class LogbackInstallStrategyTest {
       .add(org.mockito.kotlin.check<String> { assertEquals("io.sentry:sentry-logback:6.25.2", it) })
   }
 
-  private class LogbackInstallStrategyImpl(logger: Logger) : LogbackInstallStrategy(logger)
+  private class LogbackInstallStrategyImpl(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : LogbackInstallStrategy(autoInstallEnabled, sentryVersion, logger)
 }

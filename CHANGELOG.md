@@ -6,6 +6,7 @@
 
 - Instrument classes when Gradle reuses the configuration cache ([#1513](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1513))
   - The resolved Sentry versions now reach the bytecode transform as a declared input instead of a build service mutated from `afterResolve`, which never ran on a build that reused the configuration cache. The versions also key the build cache, so an uninstrumented entry can no longer be served to later builds.
+- Pass auto-install state to component metadata rules instead of a global singleton, fixing project isolation ([#1352](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1352))
 
 ### Dependencies
 

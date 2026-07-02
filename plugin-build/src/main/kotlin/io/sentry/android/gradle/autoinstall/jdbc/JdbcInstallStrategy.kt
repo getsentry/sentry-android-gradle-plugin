@@ -11,13 +11,20 @@ import org.slf4j.Logger
 // @CacheableRule
 abstract class JdbcInstallStrategy : AbstractInstallStrategy {
 
-  constructor(logger: Logger) : super() {
+  constructor(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : super(autoInstallEnabled, sentryVersion) {
     this.logger = logger
   }
 
   @Suppress("unused") // used by Gradle
   @Inject // inject is needed to avoid Gradle error
-  constructor() : this(SentryPlugin.logger)
+  constructor(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+  ) : this(autoInstallEnabled, sentryVersion, SentryPlugin.logger)
 
   override val sentryModuleId: String
     get() = SENTRY_JDBC_ID
@@ -47,23 +54,41 @@ abstract class JdbcInstallStrategy : AbstractInstallStrategy {
 
     internal const val SENTRY_JDBC_ID = "sentry-jdbc"
 
-    override fun register(component: ComponentMetadataHandler) {
-      component.withModule("$SPRING_JDBC_GROUP:$SPRING_JDBC_ID", JdbcInstallStrategy::class.java) {}
-      component.withModule("$HSQL_GROUP:$HSQL_ID", JdbcInstallStrategy::class.java) {}
-      component.withModule("$MYSQL_GROUP:$MYSQL_ID", JdbcInstallStrategy::class.java) {}
-      component.withModule("$MARIADB_GROUP:$MARIADB_ID", JdbcInstallStrategy::class.java) {}
-      component.withModule("$POSTGRES_GROUP:$POSTGRES_ID", JdbcInstallStrategy::class.java) {}
+    override fun register(
+      component: ComponentMetadataHandler,
+      autoInstallEnabled: Boolean,
+      sentryVersion: String,
+    ) {
+      component.withModule("$SPRING_JDBC_GROUP:$SPRING_JDBC_ID", JdbcInstallStrategy::class.java) {
+        it.params(autoInstallEnabled, sentryVersion)
+      }
+      component.withModule("$HSQL_GROUP:$HSQL_ID", JdbcInstallStrategy::class.java) {
+        it.params(autoInstallEnabled, sentryVersion)
+      }
+      component.withModule("$MYSQL_GROUP:$MYSQL_ID", JdbcInstallStrategy::class.java) {
+        it.params(autoInstallEnabled, sentryVersion)
+      }
+      component.withModule("$MARIADB_GROUP:$MARIADB_ID", JdbcInstallStrategy::class.java) {
+        it.params(autoInstallEnabled, sentryVersion)
+      }
+      component.withModule("$POSTGRES_GROUP:$POSTGRES_ID", JdbcInstallStrategy::class.java) {
+        it.params(autoInstallEnabled, sentryVersion)
+      }
 
       (5..14).forEach {
         component.withModule(
           "$ORACLE_GROUP:$ORACLE_OJDBC_ID_PREFIX$it",
           JdbcInstallStrategy::class.java,
-        ) {}
+        ) {
+          it.params(autoInstallEnabled, sentryVersion)
+        }
 
         component.withModule(
           "$ORACLE_DATABASE_GROUP:$ORACLE_OJDBC_ID_PREFIX$it",
           JdbcInstallStrategy::class.java,
-        ) {}
+        ) {
+          it.params(autoInstallEnabled, sentryVersion)
+        }
       }
     }
   }

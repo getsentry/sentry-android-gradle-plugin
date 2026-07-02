@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.autoinstall.quartz
 
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -44,11 +43,7 @@ class QuartzInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(quartzVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      with(AutoInstallState.getInstance()) {
-        this.enabled = true
-        this.sentryVersion = "6.30.0"
-      }
-      return QuartzInstallStrategyImpl(logger)
+      return QuartzInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "6.30.0", logger)
     }
   }
 
@@ -67,5 +62,9 @@ class QuartzInstallStrategyTest {
       .add(org.mockito.kotlin.check<String> { assertEquals("io.sentry:sentry-quartz:6.30.0", it) })
   }
 
-  private class QuartzInstallStrategyImpl(logger: Logger) : QuartzInstallStrategy(logger)
+  private class QuartzInstallStrategyImpl(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : QuartzInstallStrategy(autoInstallEnabled, sentryVersion, logger)
 }

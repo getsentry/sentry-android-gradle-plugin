@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.autoinstall.override
 
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import io.sentry.android.gradle.util.SentryModules
 import kotlin.test.assertNull
@@ -35,11 +34,11 @@ class WarnOnOverrideStrategyTest {
         }
       whenever(metadataDetails.id).thenReturn(id)
 
-      with(AutoInstallState.getInstance()) {
-        this.enabled = enabled
-        this.sentryVersion = "6.34.0"
-      }
-      return WarnOnOverrideStrategyImpl(logger)
+      return WarnOnOverrideStrategyImpl(
+        autoInstallEnabled = enabled,
+        sentryVersion = "6.34.0",
+        logger,
+      )
     }
   }
 
@@ -83,5 +82,9 @@ class WarnOnOverrideStrategyTest {
     }
   }
 
-  private class WarnOnOverrideStrategyImpl(logger: Logger) : WarnOnOverrideStrategy(logger)
+  private class WarnOnOverrideStrategyImpl(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : WarnOnOverrideStrategy(autoInstallEnabled, sentryVersion, logger)
 }

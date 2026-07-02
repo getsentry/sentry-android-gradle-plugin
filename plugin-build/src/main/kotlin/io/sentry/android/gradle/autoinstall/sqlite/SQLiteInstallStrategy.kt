@@ -10,13 +10,20 @@ import org.slf4j.Logger
 
 abstract class SQLiteInstallStrategy : AbstractInstallStrategy {
 
-  constructor(logger: Logger) : super() {
+  constructor(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : super(autoInstallEnabled, sentryVersion) {
     this.logger = logger
   }
 
   @Suppress("unused") // used by Gradle
   @Inject // inject is needed to avoid Gradle error
-  constructor() : this(SentryPlugin.logger)
+  constructor(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+  ) : this(autoInstallEnabled, sentryVersion, SentryPlugin.logger)
 
   override val sentryModuleId: String
     get() = SENTRY_SQLITE_ID
@@ -34,8 +41,14 @@ abstract class SQLiteInstallStrategy : AbstractInstallStrategy {
 
     private val MIN_SUPPORTED_VERSION = SemVer(2, 0, 0)
 
-    override fun register(component: ComponentMetadataHandler) {
-      component.withModule("$SQLITE_GROUP:$SQLITE_ID", SQLiteInstallStrategy::class.java) {}
+    override fun register(
+      component: ComponentMetadataHandler,
+      autoInstallEnabled: Boolean,
+      sentryVersion: String,
+    ) {
+      component.withModule("$SQLITE_GROUP:$SQLITE_ID", SQLiteInstallStrategy::class.java) {
+        it.params(autoInstallEnabled, sentryVersion)
+      }
     }
   }
 }

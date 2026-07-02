@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.autoinstall
 
+import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
 import io.sentry.android.gradle.autoinstall.compose.ComposeInstallStrategy
 import io.sentry.android.gradle.autoinstall.fragment.FragmentInstallStrategy
 import io.sentry.android.gradle.autoinstall.graphql.Graphql22InstallStrategy
@@ -64,29 +65,31 @@ private val delayedStrategies =
 fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boolean) {
   configurations.named("implementation").configure { configuration ->
     configuration.withDependencies { dependencies ->
-      project.dependencies.components { component ->
-        delayedStrategies.forEach { it.register(component) }
-      }
+      val autoInstallEnabled = extension.autoInstallation.enabled.get()
 
-      // if autoInstallation is disabled, the autoInstallState will contain initial values
-      // which all default to false, hence, the integrations won't be installed as well
-      if (extension.autoInstallation.enabled.get()) {
-        val sentryDependency = dependencies.findSentryDependency(isAndroid)
-        with(AutoInstallState.getInstance(gradle)) {
+      // The version and enabled flag are resolved here and passed to the component metadata rules
+      // as parameters, so the rules don't rely on shared mutable state across projects.
+      val sentryVersion =
+        if (autoInstallEnabled) {
+          val sentryDependency = dependencies.findSentryDependency(isAndroid)
           val sentryArtifactId =
             if (isAndroid) {
               SentryModules.SENTRY_ANDROID.name
             } else {
               SentryModules.SENTRY.name
             }
-          this.sentryVersion =
-            installSentrySdk(sentryDependency, dependencies, sentryArtifactId, extension)
-          this.enabled = true
+          installSentrySdk(sentryDependency, dependencies, sentryArtifactId, extension)
+        } else {
+          SENTRY_SDK_VERSION
+        }
+
+      project.dependencies.components { component ->
+        (strategies + delayedStrategies).forEach {
+          it.register(component, autoInstallEnabled, sentryVersion)
         }
       }
     }
   }
-  project.dependencies.components { component -> strategies.forEach { it.register(component) } }
 }
 
 private fun Project.installSentrySdk(

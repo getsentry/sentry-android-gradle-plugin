@@ -10,13 +10,20 @@ import org.slf4j.Logger
 
 abstract class AndroidOkHttpInstallStrategy : AbstractInstallStrategy {
 
-  constructor(logger: Logger) : super() {
+  constructor(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : super(autoInstallEnabled, sentryVersion) {
     this.logger = logger
   }
 
   @Suppress("unused") // used by Gradle
   @Inject // inject is needed to avoid Gradle error
-  constructor() : this(SentryPlugin.logger)
+  constructor(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+  ) : this(autoInstallEnabled, sentryVersion, SentryPlugin.logger)
 
   override val sentryModuleId: String
     get() = SENTRY_ANDROID_OKHTTP_ID
@@ -37,8 +44,14 @@ abstract class AndroidOkHttpInstallStrategy : AbstractInstallStrategy {
 
     private val MIN_SUPPORTED_VERSION = SemVer(3, 13, 0)
 
-    override fun register(component: ComponentMetadataHandler) {
-      component.withModule("$OKHTTP_GROUP:$OKHTTP_ID", AndroidOkHttpInstallStrategy::class.java) {}
+    override fun register(
+      component: ComponentMetadataHandler,
+      autoInstallEnabled: Boolean,
+      sentryVersion: String,
+    ) {
+      component.withModule("$OKHTTP_GROUP:$OKHTTP_ID", AndroidOkHttpInstallStrategy::class.java) {
+        it.params(autoInstallEnabled, sentryVersion)
+      }
     }
   }
 }

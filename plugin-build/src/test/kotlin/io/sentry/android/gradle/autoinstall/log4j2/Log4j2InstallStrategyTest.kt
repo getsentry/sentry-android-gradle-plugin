@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.autoinstall.log4j2
 
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -45,11 +44,7 @@ class Log4j2InstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(log4j2Version) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      with(AutoInstallState.getInstance()) {
-        this.enabled = true
-        this.sentryVersion = "6.25.2"
-      }
-      return Log4j2InstallStrategyImpl(logger)
+      return Log4j2InstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "6.25.2", logger)
     }
   }
 
@@ -81,5 +76,9 @@ class Log4j2InstallStrategyTest {
       .add(org.mockito.kotlin.check<String> { assertEquals("io.sentry:sentry-log4j2:6.25.2", it) })
   }
 
-  private class Log4j2InstallStrategyImpl(logger: Logger) : Log4j2InstallStrategy(logger)
+  private class Log4j2InstallStrategyImpl(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : Log4j2InstallStrategy(autoInstallEnabled, sentryVersion, logger)
 }
