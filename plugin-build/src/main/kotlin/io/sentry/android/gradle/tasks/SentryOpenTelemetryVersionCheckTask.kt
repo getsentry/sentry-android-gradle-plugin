@@ -3,15 +3,10 @@ package io.sentry.android.gradle.tasks
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
-import io.sentry.android.gradle.util.SemVer
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.artifacts.ModuleVersionIdentifier
-import org.gradle.api.artifacts.component.ModuleComponentSelector
-import org.gradle.api.artifacts.result.ComponentSelectionCause
 import org.gradle.api.artifacts.result.ResolvedComponentResult
-import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
@@ -57,182 +52,20 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
 
   @TaskAction
   fun action() {
-    val mismatches = collectDowngrades(rootComponent.get())
-    if (mismatches.isNotEmpty()) {
+    val downgrades = SentryOpenTelemetryVersionChecker.collectDowngrades(rootComponent.get())
+    if (downgrades.isNotEmpty()) {
       throw GradleException(
-        buildMessage(mismatches, docsUrl.get(), springDependencyManagementApplied.get())
+        SentryOpenTelemetryVersionChecker.buildMessage(
+          downgrades,
+          docsUrl.get(),
+          springDependencyManagementApplied.get(),
+        )
       )
     }
   }
 
   companion object {
-    private const val SENTRY_GROUP = "io.sentry"
-    private const val SENTRY_OPENTELEMETRY_ARTIFACT_PREFIX = "sentry-opentelemetry-"
-    private const val OTEL_GROUP = "io.opentelemetry"
     private const val SPRING_DEPENDENCY_MANAGEMENT_PLUGIN_ID = "io.spring.dependency-management"
-
-    internal data class VersionDowngrade(
-      val module: String,
-      val requested: String,
-      val resolved: String,
-      val requestedBy: String,
-      val sentryBomVersion: String,
-      val reason: String?,
-    )
-
-    /**
-     * Walks the resolved dependency graph and returns, for every OpenTelemetry module that a
-     * `sentry-opentelemetry-*` artifact depends on, the ones whose resolved version is lower than
-     * the version Sentry requested.
-     */
-    internal fun collectDowngrades(root: ResolvedComponentResult): List<VersionDowngrade> {
-      val mismatches = linkedMapOf<String, VersionDowngrade>()
-      val visited = mutableSetOf<Any>()
-      val stack = ArrayDeque<ResolvedComponentResult>()
-      stack.addLast(root)
-      while (stack.isNotEmpty()) {
-        val component = stack.removeLast()
-        if (!visited.add(component.id)) {
-          continue
-        }
-        val sentryOpenTelemetryArtifact = component.sentryOpenTelemetryArtifact()
-        for (dependency in component.dependencies) {
-          if (dependency !is ResolvedDependencyResult) {
-            continue
-          }
-          if (sentryOpenTelemetryArtifact != null) {
-            val requested = dependency.requested
-            if (requested is ModuleComponentSelector && requested.isOpenTelemetry()) {
-              val resolvedVersion = dependency.selected.moduleVersion?.version
-              if (resolvedVersion != null && isDowngrade(requested.version, resolvedVersion)) {
-                val module = "${requested.group}:${requested.module}"
-                mismatches.putIfAbsent(
-                  module,
-                  VersionDowngrade(
-                    module = module,
-                    requested = requested.version,
-                    resolved = resolvedVersion,
-                    requestedBy = sentryOpenTelemetryArtifact.toString(),
-                    sentryBomVersion = sentryOpenTelemetryArtifact.version,
-                    reason = dependency.selected.downgradeReason(),
-                  ),
-                )
-              }
-            }
-          }
-          stack.addLast(dependency.selected)
-        }
-      }
-      return mismatches.values.toList()
-    }
-
-    private fun ResolvedComponentResult.sentryOpenTelemetryArtifact(): ModuleVersionIdentifier? {
-      val moduleVersion = moduleVersion ?: return null
-      if (
-        moduleVersion.group == SENTRY_GROUP &&
-          moduleVersion.name.startsWith(SENTRY_OPENTELEMETRY_ARTIFACT_PREFIX)
-      ) {
-        return moduleVersion
-      }
-      return null
-    }
-
-    private fun ResolvedComponentResult.downgradeReason(): String? =
-      selectionReason.descriptions
-        .lastOrNull {
-          it.cause == ComponentSelectionCause.CONSTRAINT ||
-            it.cause == ComponentSelectionCause.FORCED ||
-            it.cause == ComponentSelectionCause.CONFLICT_RESOLUTION ||
-            it.cause == ComponentSelectionCause.SELECTED_BY_RULE
-        }
-        ?.description
-
-    // Matches every OpenTelemetry group (io.opentelemetry, io.opentelemetry.instrumentation,
-    // io.opentelemetry.semconv, ...) so any OTel module a sentry-opentelemetry-* artifact declares
-    // is covered as that set grows. We only ever inspect edges declared by Sentry's own artifacts,
-    // so this never flags unrelated OpenTelemetry usage.
-    private fun ModuleComponentSelector.isOpenTelemetry(): Boolean =
-      group == OTEL_GROUP || group.startsWith("$OTEL_GROUP.")
-
-    private fun isDowngrade(requested: String, resolved: String): Boolean {
-      // A blank requested version means it was declared without a concrete version (e.g. managed
-      // elsewhere); there is nothing to compare against, so don't flag it.
-      if (requested.isBlank() || requested == resolved) {
-        return false
-      }
-      return try {
-        SemVer.parse(resolved) < SemVer.parse(requested)
-      } catch (e: IllegalArgumentException) {
-        // Non-semver version strings can't be compared reliably; err on the side of not failing.
-        false
-      }
-    }
-
-    internal fun buildMessage(
-      mismatches: List<VersionDowngrade>,
-      docsUrl: String,
-      springDependencyManagementApplied: Boolean,
-    ): String {
-      val sentryBomVersion = mismatches.first().sentryBomVersion
-      val details =
-        mismatches.joinToString(separator = "\n") { mismatch ->
-          buildString {
-            append("  - ${mismatch.module}: Sentry requires ${mismatch.requested} ")
-            append("but ${mismatch.resolved} was resolved")
-            append("\n    Requested by: ${mismatch.requestedBy}")
-            mismatch.reason?.let { append("\n    Gradle selection reason: $it") }
-          }
-        }
-      val fix =
-        if (springDependencyManagementApplied) {
-          // io.spring.dependency-management enforces its managed versions via a resolution strategy
-          // that overrides Gradle platform() constraints, so the BOM has to be imported through the
-          // plugin's own API to win.
-          """
-          |To fix this, import the Sentry OpenTelemetry BOM through io.spring.dependency-management so
-          |its versions win dependency resolution:
-          |
-          |  dependencyManagement {
-          |    imports {
-          |      mavenBom("io.sentry:sentry-opentelemetry-bom:$sentryBomVersion")
-          |    }
-          |  }
-          """
-            .trimMargin()
-        } else {
-          """
-          |To fix this, add the Sentry OpenTelemetry BOM as a platform dependency so its versions win
-          |dependency resolution:
-          |
-          |  dependencies {
-          |    implementation(platform("io.sentry:sentry-opentelemetry-bom:$sentryBomVersion"))
-          |  }
-          """
-            .trimMargin()
-        }
-      return """
-        |Sentry detected that OpenTelemetry was downgraded below the version its integration requires.
-        |
-        |The Sentry OpenTelemetry integration was built against specific OpenTelemetry versions,
-        |but the following were downgraded by another dependency management mechanism:
-        |
-        |$details
-        |
-        |Running with these downgraded OpenTelemetry versions can cause
-        |ClassNotFoundException / NoSuchMethodError at runtime.
-        |
-        |$fix
-        |
-        |See $docsUrl for details.
-        |
-        |You can disable this check with:
-        |
-        |  sentry {
-        |    autoInstallation.verifyOpenTelemetryVersions = false
-        |  }
-        """
-        .trimMargin()
-    }
 
     fun register(
       project: Project,
@@ -260,7 +93,7 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
         task.hasSentryOpenTelemetryDependency.set(
           project.provider {
             configuration.allDependencies.any {
-              it.group == SENTRY_GROUP && it.name.startsWith(SENTRY_OPENTELEMETRY_ARTIFACT_PREFIX)
+              SentryOpenTelemetryVersionChecker.isSentryOpenTelemetryArtifact(it.group, it.name)
             }
           }
         )
