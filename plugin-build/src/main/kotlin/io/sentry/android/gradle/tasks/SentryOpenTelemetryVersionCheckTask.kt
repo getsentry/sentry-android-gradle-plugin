@@ -16,6 +16,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.work.DisableCachingByDefault
 
 /**
  * Fails the build when the OpenTelemetry versions resolved on the runtime classpath were downgraded
@@ -28,6 +29,7 @@ import org.gradle.api.tasks.TaskProvider
  * `NoSuchMethodError` at runtime. We detect that downgrade here and fail fast with actionable
  * guidance instead of letting it blow up at runtime.
  */
+@DisableCachingByDefault(because = "Only validates resolved dependency versions and has no outputs")
 abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
 
   @get:Internal abstract val rootComponent: Property<ResolvedComponentResult>

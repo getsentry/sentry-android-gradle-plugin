@@ -140,6 +140,44 @@ class SentryOpenTelemetryVersionCheckTest :
   }
 
   @Test
+  fun `respects configuration cache`() {
+    writeSentryOpenTelemetryArtifact("2.0.0", "io.opentelemetry:opentelemetry-sdk:1.63.0")
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+                id "java"
+                id "io.sentry.jvm.gradle"
+            }
+
+            repositories {
+              maven { url file('../repo') }
+              mavenCentral()
+            }
+
+            dependencies {
+              implementation 'io.sentry:sentry-opentelemetry-agentless:2.0.0'
+            }
+
+            sentry.autoInstallation.enabled = true
+            """
+        .trimIndent()
+    )
+
+    runner.appendArguments("app:verifySentryOpenTelemetryVersions", "--configuration-cache")
+
+    val result = runner.build()
+    assertEquals(TaskOutcome.SUCCESS, result.task(verifyTask)?.outcome)
+    assertTrue(result.output) { "Configuration cache entry stored." in result.output }
+
+    val resultWithConfigurationCache = runner.build()
+    assertEquals(TaskOutcome.SUCCESS, resultWithConfigurationCache.task(verifyTask)?.outcome)
+    assertTrue(resultWithConfigurationCache.output) {
+      "Configuration cache entry reused." in resultWithConfigurationCache.output
+    }
+  }
+
+  @Test
   fun `is skipped when the project has no Sentry OpenTelemetry dependency`() {
     // A plain JVM project with the Sentry SDK but no sentry-opentelemetry-* dependency should not
     // run the check at all (no runtime classpath resolution, no failure).
