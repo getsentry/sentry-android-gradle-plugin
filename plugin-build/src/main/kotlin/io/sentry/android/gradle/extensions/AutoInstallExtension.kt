@@ -20,7 +20,8 @@ open class AutoInstallExtension @Inject constructor(objects: ObjectFactory) {
     objects.property(String::class.java).convention(SENTRY_SDK_VERSION)
 
   /**
-   * Fails the build when the OpenTelemetry versions resolved on the runtime classpath were
+   Whether to verify that the OpenTelemetry versions resolved on the runtime classpath satisfy what the Sentry OpenTelemetry integration requires, failing the build if any were downgraded.
+   Defaults to `true`.
    * downgraded below what the Sentry OpenTelemetry integration requires (which leads to
    * ClassNotFoundException / NoSuchMethodError at runtime). Defaults to true.
    */

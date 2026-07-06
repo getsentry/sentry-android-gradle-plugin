@@ -171,7 +171,7 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
           |dependency resolution:
           |
           |  dependencies {
-          |    implementation platform("io.sentry:sentry-opentelemetry-bom:<sentryVersion>")
+          |    implementation(platform("io.sentry:sentry-opentelemetry-bom:<sentryVersion>"))
           |  }
           """
             .trimMargin()
