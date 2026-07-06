@@ -61,9 +61,8 @@ class SentryOpenTelemetryVersionCheckTest :
     assertTrue {
       "import the Sentry OpenTelemetry BOM through io.spring.dependency-management" in result.output
     }
-    assertTrue {
-      "mavenBom(\"io.sentry:sentry-opentelemetry-bom:<sentryVersion>\")" in result.output
-    }
+    assertTrue { "mavenBom(\"io.sentry:sentry-opentelemetry-bom:2.0.0\")" in result.output }
+    assertFalse { "<sentryVersion>" in result.output }
     assertFalse { "implementation platform" in result.output }
   }
 
@@ -106,8 +105,7 @@ class SentryOpenTelemetryVersionCheckTest :
     assertTrue { "Requested by: io.sentry:sentry-opentelemetry-agentless:2.0.0" in result.output }
     assertTrue { "Gradle selection reason: forced" in result.output }
     assertTrue {
-      "implementation(platform(\"io.sentry:sentry-opentelemetry-bom:<sentryVersion>\"))" in
-        result.output
+      "implementation(platform(\"io.sentry:sentry-opentelemetry-bom:2.0.0\"))" in result.output
     }
     assertFalse { "io.spring.dependency-management" in result.output }
   }

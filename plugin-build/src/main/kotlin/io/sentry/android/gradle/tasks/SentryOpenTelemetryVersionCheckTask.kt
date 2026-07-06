@@ -7,6 +7,7 @@ import io.sentry.android.gradle.util.SemVer
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.component.ModuleComponentSelector
 import org.gradle.api.artifacts.result.ComponentSelectionCause
 import org.gradle.api.artifacts.result.ResolvedComponentResult
@@ -75,6 +76,7 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
       val requested: String,
       val resolved: String,
       val requestedBy: String,
+      val sentryBomVersion: String,
       val reason: String?,
     )
 
@@ -93,12 +95,12 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
         if (!visited.add(component.id)) {
           continue
         }
-        val fromSentryOpenTelemetry = component.isSentryOpenTelemetryArtifact()
+        val sentryOpenTelemetryArtifact = component.sentryOpenTelemetryArtifact()
         for (dependency in component.dependencies) {
           if (dependency !is ResolvedDependencyResult) {
             continue
           }
-          if (fromSentryOpenTelemetry) {
+          if (sentryOpenTelemetryArtifact != null) {
             val requested = dependency.requested
             if (requested is ModuleComponentSelector && requested.isOpenTelemetry()) {
               val resolvedVersion = dependency.selected.moduleVersion?.version
@@ -110,7 +112,8 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
                     module = module,
                     requested = requested.version,
                     resolved = resolvedVersion,
-                    requestedBy = component.moduleVersion.toString(),
+                    requestedBy = sentryOpenTelemetryArtifact.toString(),
+                    sentryBomVersion = sentryOpenTelemetryArtifact.version,
                     reason = dependency.selected.downgradeReason(),
                   ),
                 )
@@ -123,10 +126,15 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
       return mismatches.values.toList()
     }
 
-    private fun ResolvedComponentResult.isSentryOpenTelemetryArtifact(): Boolean {
-      val moduleVersion = moduleVersion ?: return false
-      return moduleVersion.group == SENTRY_GROUP &&
-        moduleVersion.name.startsWith(SENTRY_OPENTELEMETRY_ARTIFACT_PREFIX)
+    private fun ResolvedComponentResult.sentryOpenTelemetryArtifact(): ModuleVersionIdentifier? {
+      val moduleVersion = moduleVersion ?: return null
+      if (
+        moduleVersion.group == SENTRY_GROUP &&
+          moduleVersion.name.startsWith(SENTRY_OPENTELEMETRY_ARTIFACT_PREFIX)
+      ) {
+        return moduleVersion
+      }
+      return null
     }
 
     private fun ResolvedComponentResult.downgradeReason(): String? =
@@ -165,6 +173,7 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
       docsUrl: String,
       springDependencyManagementApplied: Boolean,
     ): String {
+      val sentryBomVersion = mismatches.first().sentryBomVersion
       val details =
         mismatches.joinToString(separator = "\n") { mismatch ->
           buildString {
@@ -185,7 +194,7 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
           |
           |  dependencyManagement {
           |    imports {
-          |      mavenBom("io.sentry:sentry-opentelemetry-bom:<sentryVersion>")
+          |      mavenBom("io.sentry:sentry-opentelemetry-bom:$sentryBomVersion")
           |    }
           |  }
           """
@@ -196,7 +205,7 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
           |dependency resolution:
           |
           |  dependencies {
-          |    implementation(platform("io.sentry:sentry-opentelemetry-bom:<sentryVersion>"))
+          |    implementation(platform("io.sentry:sentry-opentelemetry-bom:$sentryBomVersion"))
           |  }
           """
             .trimMargin()
