@@ -55,6 +55,8 @@ class SentryOpenTelemetryVersionCheckTest :
     }
     assertTrue { "io.opentelemetry:opentelemetry-sdk" in result.output }
     assertTrue { "Sentry requires 1.63.0 but 1.62.0 was resolved" in result.output }
+    assertTrue { "Requested by: io.sentry:sentry-opentelemetry-agentless:2.0.0" in result.output }
+    assertTrue { "Gradle selection reason:" in result.output }
     assertTrue { "verifyOpenTelemetryVersions = false" in result.output }
     assertTrue {
       "import the Sentry OpenTelemetry BOM through io.spring.dependency-management" in result.output
@@ -101,8 +103,10 @@ class SentryOpenTelemetryVersionCheckTest :
 
     assertEquals(TaskOutcome.FAILED, result.task(verifyTask)?.outcome)
     assertTrue { "Sentry requires 1.63.0 but 1.62.0 was resolved" in result.output }
+    assertTrue { "Requested by: io.sentry:sentry-opentelemetry-agentless:2.0.0" in result.output }
+    assertTrue { "Gradle selection reason: forced" in result.output }
     assertTrue {
-      "implementation platform(\"io.sentry:sentry-opentelemetry-bom:<sentryVersion>\")" in
+      "implementation(platform(\"io.sentry:sentry-opentelemetry-bom:<sentryVersion>\"))" in
         result.output
     }
     assertFalse { "io.spring.dependency-management" in result.output }

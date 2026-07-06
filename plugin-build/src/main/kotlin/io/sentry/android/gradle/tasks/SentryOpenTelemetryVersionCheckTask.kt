@@ -8,6 +8,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.component.ModuleComponentSelector
+import org.gradle.api.artifacts.result.ComponentSelectionCause
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.provider.Property
@@ -73,6 +74,8 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
       val module: String,
       val requested: String,
       val resolved: String,
+      val requestedBy: String,
+      val reason: String?,
     )
 
     /**
@@ -103,7 +106,13 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
                 val module = "${requested.group}:${requested.module}"
                 mismatches.putIfAbsent(
                   module,
-                  VersionDowngrade(module, requested.version, resolvedVersion),
+                  VersionDowngrade(
+                    module = module,
+                    requested = requested.version,
+                    resolved = resolvedVersion,
+                    requestedBy = component.moduleVersion.toString(),
+                    reason = dependency.selected.downgradeReason(),
+                  ),
                 )
               }
             }
@@ -119,6 +128,16 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
       return moduleVersion.group == SENTRY_GROUP &&
         moduleVersion.name.startsWith(SENTRY_OPENTELEMETRY_ARTIFACT_PREFIX)
     }
+
+    private fun ResolvedComponentResult.downgradeReason(): String? =
+      selectionReason.descriptions
+        .lastOrNull {
+          it.cause == ComponentSelectionCause.CONSTRAINT ||
+            it.cause == ComponentSelectionCause.FORCED ||
+            it.cause == ComponentSelectionCause.CONFLICT_RESOLUTION ||
+            it.cause == ComponentSelectionCause.SELECTED_BY_RULE
+        }
+        ?.description
 
     // Matches every OpenTelemetry group (io.opentelemetry, io.opentelemetry.instrumentation,
     // io.opentelemetry.semconv, ...) so any OTel module a sentry-opentelemetry-* artifact declares
@@ -148,8 +167,12 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
     ): String {
       val details =
         mismatches.joinToString(separator = "\n") { mismatch ->
-          "  - ${mismatch.module}: Sentry requires ${mismatch.requested} " +
-            "but ${mismatch.resolved} was resolved"
+          buildString {
+            append("  - ${mismatch.module}: Sentry requires ${mismatch.requested} ")
+            append("but ${mismatch.resolved} was resolved")
+            append("\n    Requested by: ${mismatch.requestedBy}")
+            mismatch.reason?.let { append("\n    Gradle selection reason: $it") }
+          }
         }
       val fix =
         if (springDependencyManagementApplied) {
