@@ -69,7 +69,7 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
     private const val OTEL_GROUP = "io.opentelemetry"
     private const val SPRING_DEPENDENCY_MANAGEMENT_PLUGIN_ID = "io.spring.dependency-management"
 
-    internal data class VersionMismatch(
+    internal data class VersionDowngrade(
       val module: String,
       val requested: String,
       val resolved: String,
@@ -80,8 +80,8 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
      * `sentry-opentelemetry-*` artifact depends on, the ones whose resolved version is lower than
      * the version Sentry requested.
      */
-    internal fun collectDowngrades(root: ResolvedComponentResult): List<VersionMismatch> {
-      val mismatches = linkedMapOf<String, VersionMismatch>()
+    internal fun collectDowngrades(root: ResolvedComponentResult): List<VersionDowngrade> {
+      val mismatches = linkedMapOf<String, VersionDowngrade>()
       val visited = mutableSetOf<Any>()
       val stack = ArrayDeque<ResolvedComponentResult>()
       stack.addLast(root)
@@ -103,7 +103,7 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
                 val module = "${requested.group}:${requested.module}"
                 mismatches.putIfAbsent(
                   module,
-                  VersionMismatch(module, requested.version, resolvedVersion),
+                  VersionDowngrade(module, requested.version, resolvedVersion),
                 )
               }
             }
@@ -142,7 +142,7 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
     }
 
     internal fun buildMessage(
-      mismatches: List<VersionMismatch>,
+      mismatches: List<VersionDowngrade>,
       docsUrl: String,
       springDependencyManagementApplied: Boolean,
     ): String {
