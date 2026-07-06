@@ -147,7 +147,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
   }
 
   companion object {
-    // TODO: finalize the troubleshooting docs URL before release.
     internal const val OPENTELEMETRY_VERSION_MISMATCH_DOCS_URL =
       "https://docs.sentry.io/platforms/java/opentelemetry/troubleshooting/"
   }
