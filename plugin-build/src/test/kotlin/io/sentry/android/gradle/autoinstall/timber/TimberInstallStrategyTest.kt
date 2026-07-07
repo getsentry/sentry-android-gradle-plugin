@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.autoinstall.timber
 
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -46,11 +45,7 @@ class TimberInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(timberVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      with(AutoInstallState.getInstance()) {
-        this.enabled = true
-        this.sentryVersion = "5.6.1"
-      }
-      return TimberInstallStrategyImpl(logger)
+      return TimberInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "5.6.1", logger)
     }
   }
 
@@ -82,5 +77,9 @@ class TimberInstallStrategyTest {
       .add(check<String> { assertEquals("io.sentry:sentry-android-timber:5.6.1", it) })
   }
 
-  private class TimberInstallStrategyImpl(logger: Logger) : TimberInstallStrategy(logger)
+  private class TimberInstallStrategyImpl(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : TimberInstallStrategy(autoInstallEnabled, sentryVersion, logger)
 }

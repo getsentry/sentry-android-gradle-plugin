@@ -2,6 +2,10 @@
 
 ## 6.14.0
 
+### Fixes
+
+- Pass auto-install state to component metadata rules instead of a global singleton, fixing project isolation ([#1352](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1352))
+
 ### Dependencies
 
 - Bump Android SDK from v8.45.0 to v8.47.0 ([#1343](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1343), [#1353](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1353))

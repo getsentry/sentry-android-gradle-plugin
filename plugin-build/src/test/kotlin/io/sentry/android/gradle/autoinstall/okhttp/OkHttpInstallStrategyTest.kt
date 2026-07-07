@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.autoinstall.okhttp
 
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -49,11 +48,11 @@ class OkHttpInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(okHttpVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      with(AutoInstallState.getInstance()) {
-        this.enabled = true
-        this.sentryVersion = sentryVersion
-      }
-      return OkHttpInstallStrategyImpl(logger)
+      return OkHttpInstallStrategyImpl(
+        autoInstallEnabled = true,
+        sentryVersion = sentryVersion,
+        logger,
+      )
     }
   }
 
@@ -98,5 +97,9 @@ class OkHttpInstallStrategyTest {
       .add(check<String> { assertEquals("io.sentry:sentry-okhttp:7.0.0", it) })
   }
 
-  private class OkHttpInstallStrategyImpl(logger: Logger) : OkHttpInstallStrategy(logger)
+  private class OkHttpInstallStrategyImpl(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : OkHttpInstallStrategy(autoInstallEnabled, sentryVersion, logger)
 }

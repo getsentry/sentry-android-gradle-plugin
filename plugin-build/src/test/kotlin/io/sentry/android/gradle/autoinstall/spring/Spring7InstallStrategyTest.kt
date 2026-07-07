@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.autoinstall.spring
 
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -45,11 +44,7 @@ class Spring7InstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(springVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      with(AutoInstallState.getInstance()) {
-        this.enabled = true
-        this.sentryVersion = "8.21.0"
-      }
-      return Spring7InstallStrategyImpl(logger)
+      return Spring7InstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "8.21.0", logger)
     }
   }
 
@@ -96,5 +91,9 @@ class Spring7InstallStrategyTest {
       )
   }
 
-  private class Spring7InstallStrategyImpl(logger: Logger) : Spring7InstallStrategy(logger)
+  private class Spring7InstallStrategyImpl(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : Spring7InstallStrategy(autoInstallEnabled, sentryVersion, logger)
 }

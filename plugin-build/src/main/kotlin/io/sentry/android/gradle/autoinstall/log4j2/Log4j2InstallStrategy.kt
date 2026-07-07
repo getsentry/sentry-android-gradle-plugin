@@ -11,13 +11,20 @@ import org.slf4j.Logger
 // @CacheableRule
 abstract class Log4j2InstallStrategy : AbstractInstallStrategy {
 
-  constructor(logger: Logger) : super() {
+  constructor(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : super(autoInstallEnabled, sentryVersion) {
     this.logger = logger
   }
 
   @Suppress("unused") // used by Gradle
   @Inject // inject is needed to avoid Gradle error
-  constructor() : this(SentryPlugin.logger)
+  constructor(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+  ) : this(autoInstallEnabled, sentryVersion, SentryPlugin.logger)
 
   override val sentryModuleId: String
     get() = SENTRY_LOG4J2_ID
@@ -35,8 +42,14 @@ abstract class Log4j2InstallStrategy : AbstractInstallStrategy {
 
     private val MIN_SUPPORTED_VERSION = SemVer(2, 0, 0)
 
-    override fun register(component: ComponentMetadataHandler) {
-      component.withModule("$LOG4J2_GROUP:$LOG4J2_ID", Log4j2InstallStrategy::class.java) {}
+    override fun register(
+      component: ComponentMetadataHandler,
+      autoInstallEnabled: Boolean,
+      sentryVersion: String,
+    ) {
+      component.withModule("$LOG4J2_GROUP:$LOG4J2_ID", Log4j2InstallStrategy::class.java) {
+        it.params(autoInstallEnabled, sentryVersion)
+      }
     }
   }
 }

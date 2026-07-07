@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.autoinstall.compose
 
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -46,11 +45,7 @@ class ComposeInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(composeVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      with(AutoInstallState.getInstance()) {
-        this.enabled = true
-        this.sentryVersion = "6.7.0"
-      }
-      return ComposeInstallStrategyImpl(logger)
+      return ComposeInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "6.7.0", logger)
     }
   }
 
@@ -82,5 +77,9 @@ class ComposeInstallStrategyTest {
       .add(check<String> { assertEquals("io.sentry:sentry-compose-android:6.7.0", it) })
   }
 
-  private class ComposeInstallStrategyImpl(logger: Logger) : ComposeInstallStrategy(logger)
+  private class ComposeInstallStrategyImpl(
+    autoInstallEnabled: Boolean,
+    sentryVersion: String,
+    logger: Logger,
+  ) : ComposeInstallStrategy(autoInstallEnabled, sentryVersion, logger)
 }

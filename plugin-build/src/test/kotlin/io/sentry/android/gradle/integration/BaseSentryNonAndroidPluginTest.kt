@@ -7,7 +7,6 @@ import java.io.OutputStreamWriter
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.gradle.testkit.runner.internal.io.SynchronizedOutputStream
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -53,7 +52,6 @@ abstract class BaseSentryNonAndroidPluginTest(private val gradleVersion: String)
       testProjectDir.writeFile("build.gradle") {
         // language=Groovy
         """
-            import io.sentry.android.gradle.autoinstall.AutoInstallState
             import io.sentry.android.gradle.util.GradleVersions
 
             buildscript {
@@ -79,16 +77,6 @@ abstract class BaseSentryNonAndroidPluginTest(private val gradleVersion: String)
               }
             }
 
-            subprojects {
-              pluginManager.withPlugin('io.sentry.jvm.gradle') {
-                tasks.register('cleanupAutoInstallState') {
-                  doLast {
-                    AutoInstallState.clearReference()
-                  }
-                }
-              }
-            }
-
                 // unlock transforms because we're running tests in parallel therefore they may conflict
                 print(providers.exec {
                   commandLine 'find', project.gradle.gradleUserHomeDir, '-type', 'f', '-name', 'transforms-3.lock', '-delete'
@@ -106,15 +94,6 @@ abstract class BaseSentryNonAndroidPluginTest(private val gradleVersion: String)
         .withGradleVersion(gradleVersion)
         .forwardStdOutput(writer)
         .forwardStdError(writer)
-  }
-
-  @After
-  fun teardown() {
-    try {
-      runner.appendArguments("app:cleanupAutoInstallState").build()
-    } catch (ignored: Throwable) {
-      // may fail if we are relying on BuildFinishesListener, but we don't care here
-    }
   }
 
   companion object {
