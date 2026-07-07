@@ -51,6 +51,20 @@ Some tests upload mappings/source context and fail without an auth token:
 export SENTRY_AUTH_TOKEN=<your_token>
 ```
 
+## Testing conventions
+
+- Prefer [Google Truth](https://truth.dev/) for assertions in new unit tests
+  (`import com.google.common.truth.Truth.assertThat`). Much of the existing suite still
+  uses `kotlin.test`/JUnit assertions; don't rewrite those wholesale, but reach for Truth
+  when adding new tests or touching assertions in a test you're already editing.
+
+```kotlin
+import com.google.common.truth.Truth.assertThat
+
+assertThat(actual).isEqualTo(expected)
+assertThat(list).containsExactly("a", "b").inOrder()
+```
+
 ## Local sentry-cli
 
 To test against a local `sentry-cli`, set `cli.executable` in the target project's
