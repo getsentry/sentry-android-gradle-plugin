@@ -1,9 +1,7 @@
 package io.sentry.android.gradle.integration
 
+import com.google.common.truth.Truth.assertThat
 import java.io.File
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import org.gradle.testkit.runner.TaskOutcome
 import org.gradle.util.GradleVersion
 import org.junit.Test
@@ -49,21 +47,20 @@ class SentryOpenTelemetryVersionCheckTest :
 
     val result = runner.appendArguments("app:verifySentryOpenTelemetryVersions").buildAndFail()
 
-    assertEquals(TaskOutcome.FAILED, result.task(verifyTask)?.outcome)
-    assertTrue {
-      "OpenTelemetry was downgraded below the version its integration requires" in result.output
-    }
-    assertTrue { "io.opentelemetry:opentelemetry-sdk" in result.output }
-    assertTrue { "Sentry requires 1.63.0 but 1.62.0 was resolved" in result.output }
-    assertTrue { "Requested by: io.sentry:sentry-opentelemetry-agentless:2.0.0" in result.output }
-    assertTrue { "Gradle selection reason:" in result.output }
-    assertTrue { "verifyOpenTelemetryVersions = false" in result.output }
-    assertTrue {
-      "import the Sentry OpenTelemetry BOM through io.spring.dependency-management" in result.output
-    }
-    assertTrue { "mavenBom(\"io.sentry:sentry-opentelemetry-bom:2.0.0\")" in result.output }
-    assertFalse { "<sentryVersion>" in result.output }
-    assertFalse { "implementation platform" in result.output }
+    assertThat(result.task(verifyTask)?.outcome).isEqualTo(TaskOutcome.FAILED)
+    assertThat(result.output)
+      .contains("OpenTelemetry was downgraded below the version its integration requires")
+    assertThat(result.output).contains("io.opentelemetry:opentelemetry-sdk")
+    assertThat(result.output).contains("Sentry requires 1.63.0 but 1.62.0 was resolved")
+    assertThat(result.output)
+      .contains("Requested by: io.sentry:sentry-opentelemetry-agentless:2.0.0")
+    assertThat(result.output).contains("Gradle selection reason:")
+    assertThat(result.output).contains("verifyOpenTelemetryVersions = false")
+    assertThat(result.output)
+      .contains("import the Sentry OpenTelemetry BOM through io.spring.dependency-management")
+    assertThat(result.output).contains("mavenBom(\"io.sentry:sentry-opentelemetry-bom:2.0.0\")")
+    assertThat(result.output).doesNotContain("<sentryVersion>")
+    assertThat(result.output).doesNotContain("implementation platform")
   }
 
   @Test
@@ -100,14 +97,14 @@ class SentryOpenTelemetryVersionCheckTest :
 
     val result = runner.appendArguments("app:verifySentryOpenTelemetryVersions").buildAndFail()
 
-    assertEquals(TaskOutcome.FAILED, result.task(verifyTask)?.outcome)
-    assertTrue { "Sentry requires 1.63.0 but 1.62.0 was resolved" in result.output }
-    assertTrue { "Requested by: io.sentry:sentry-opentelemetry-agentless:2.0.0" in result.output }
-    assertTrue { "Gradle selection reason: forced" in result.output }
-    assertTrue {
-      "implementation(platform(\"io.sentry:sentry-opentelemetry-bom:2.0.0\"))" in result.output
-    }
-    assertFalse { "io.spring.dependency-management" in result.output }
+    assertThat(result.task(verifyTask)?.outcome).isEqualTo(TaskOutcome.FAILED)
+    assertThat(result.output).contains("Sentry requires 1.63.0 but 1.62.0 was resolved")
+    assertThat(result.output)
+      .contains("Requested by: io.sentry:sentry-opentelemetry-agentless:2.0.0")
+    assertThat(result.output).contains("Gradle selection reason: forced")
+    assertThat(result.output)
+      .contains("implementation(platform(\"io.sentry:sentry-opentelemetry-bom:2.0.0\"))")
+    assertThat(result.output).doesNotContain("io.spring.dependency-management")
   }
 
   @Test
@@ -138,7 +135,7 @@ class SentryOpenTelemetryVersionCheckTest :
 
     val result = runner.appendArguments("app:verifySentryOpenTelemetryVersions").build()
 
-    assertEquals(TaskOutcome.SUCCESS, result.task(verifyTask)?.outcome)
+    assertThat(result.task(verifyTask)?.outcome).isEqualTo(TaskOutcome.SUCCESS)
   }
 
   @Test
@@ -169,14 +166,13 @@ class SentryOpenTelemetryVersionCheckTest :
     runner.appendArguments("app:verifySentryOpenTelemetryVersions", "--configuration-cache")
 
     val result = runner.build()
-    assertEquals(TaskOutcome.SUCCESS, result.task(verifyTask)?.outcome)
-    assertTrue(result.output) { "Configuration cache entry stored." in result.output }
+    assertThat(result.task(verifyTask)?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    assertThat(result.output).contains("Configuration cache entry stored.")
 
     val resultWithConfigurationCache = runner.build()
-    assertEquals(TaskOutcome.SUCCESS, resultWithConfigurationCache.task(verifyTask)?.outcome)
-    assertTrue(resultWithConfigurationCache.output) {
-      "Configuration cache entry reused." in resultWithConfigurationCache.output
-    }
+    assertThat(resultWithConfigurationCache.task(verifyTask)?.outcome)
+      .isEqualTo(TaskOutcome.SUCCESS)
+    assertThat(resultWithConfigurationCache.output).contains("Configuration cache entry reused.")
   }
 
   @Test
@@ -206,7 +202,7 @@ class SentryOpenTelemetryVersionCheckTest :
 
     val result = runner.appendArguments("app:verifySentryOpenTelemetryVersions").build()
 
-    assertEquals(TaskOutcome.SKIPPED, result.task(verifyTask)?.outcome)
+    assertThat(result.task(verifyTask)?.outcome).isEqualTo(TaskOutcome.SKIPPED)
   }
 
   @Test
@@ -244,7 +240,7 @@ class SentryOpenTelemetryVersionCheckTest :
 
     val result = runner.appendArguments("app:verifySentryOpenTelemetryVersions").build()
 
-    assertEquals(TaskOutcome.SKIPPED, result.task(verifyTask)?.outcome)
+    assertThat(result.task(verifyTask)?.outcome).isEqualTo(TaskOutcome.SKIPPED)
   }
 
   @Test
@@ -281,10 +277,9 @@ class SentryOpenTelemetryVersionCheckTest :
 
     val result = runner.appendArguments("app:classes").buildAndFail()
 
-    assertEquals(TaskOutcome.FAILED, result.task(verifyTask)?.outcome)
-    assertTrue {
-      "OpenTelemetry was downgraded below the version its integration requires" in result.output
-    }
+    assertThat(result.task(verifyTask)?.outcome).isEqualTo(TaskOutcome.FAILED)
+    assertThat(result.output)
+      .contains("OpenTelemetry was downgraded below the version its integration requires")
   }
 
   @Test
@@ -326,11 +321,11 @@ class SentryOpenTelemetryVersionCheckTest :
 
     val result = runner.appendArguments("app:verifySentryOpenTelemetryVersions").buildAndFail()
 
-    assertEquals(TaskOutcome.FAILED, result.task(verifyTask)?.outcome)
-    assertTrue {
-      "io.opentelemetry.semconv:opentelemetry-semconv: Sentry requires 1.42.0 but 1.41.0 was resolved" in
-        result.output
-    }
+    assertThat(result.task(verifyTask)?.outcome).isEqualTo(TaskOutcome.FAILED)
+    assertThat(result.output)
+      .contains(
+        "io.opentelemetry.semconv:opentelemetry-semconv: Sentry requires 1.42.0 but 1.41.0 was resolved"
+      )
   }
 
   /**
