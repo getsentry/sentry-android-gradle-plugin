@@ -97,7 +97,7 @@ abstract class SentryOpenTelemetryVersionCheckTask : DefaultTask() {
             }
           }
         )
-        task.verifyEnabled.set(extension.autoInstallation.verifyOpenTelemetryVersions)
+        task.verifyEnabled.set(extension.verifyOpenTelemetryVersions)
         task.withSentryTelemetry(extension, sentryTelemetryProvider)
       }
     }

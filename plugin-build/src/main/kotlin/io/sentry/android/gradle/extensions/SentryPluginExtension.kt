@@ -104,6 +104,14 @@ abstract class SentryPluginExtension @Inject constructor(objects: ObjectFactory)
     autoInstallationAction.execute(autoInstallation)
   }
 
+  /**
+   * Whether to verify that the OpenTelemetry versions resolved on the runtime classpath satisfy
+   * what the Sentry OpenTelemetry integration requires, failing the build if any were downgraded.
+   * Defaults to `true`.
+   */
+  val verifyOpenTelemetryVersions: Property<Boolean> =
+    objects.property(Boolean::class.java).convention(true)
+
   val sizeAnalysis: SizeAnalysisExtension = objects.newInstance(SizeAnalysisExtension::class.java)
 
   @Experimental

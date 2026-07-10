@@ -122,7 +122,7 @@ internal object SentryOpenTelemetryVersionChecker {
       |You can disable this check with:
       |
       |  sentry {
-      |    autoInstallation.verifyOpenTelemetryVersions = false
+      |    verifyOpenTelemetryVersions = false
       |  }
       """
       .trimMargin()

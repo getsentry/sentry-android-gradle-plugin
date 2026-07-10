@@ -233,7 +233,7 @@ class SentryOpenTelemetryVersionCheckTest :
             }
 
             sentry.autoInstallation.enabled = true
-            sentry.autoInstallation.verifyOpenTelemetryVersions = false
+            sentry.verifyOpenTelemetryVersions = false
             """
         .trimIndent()
     )
