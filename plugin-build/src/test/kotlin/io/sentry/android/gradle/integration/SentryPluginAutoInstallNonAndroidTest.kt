@@ -631,6 +631,71 @@ class SentryPluginAutoInstallNonAndroidTest :
     assertFalse { "FAILED" in result.output }
   }
 
+  @Test
+  fun `installs sentry-async-profiler when installProfiler is enabled`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+                id "java"
+                id "io.sentry.jvm.gradle"
+            }
+
+            sentry.autoInstallation.enabled = true
+            sentry.autoInstallation.installProfiler = true
+            """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+    assertTrue { "io.sentry:sentry-async-profiler:$SENTRY_SDK_VERSION" in result.output }
+    // ensure all dependencies could be resolved
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
+  fun `does not install sentry-async-profiler by default`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+                id "java"
+                id "io.sentry.jvm.gradle"
+            }
+
+            sentry.autoInstallation.enabled = true
+            """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+    assertFalse { "io.sentry:sentry-async-profiler" in result.output }
+  }
+
+  @Test
+  fun `does not install sentry-async-profiler when sentry version is too low`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+                id "java"
+                id "io.sentry.jvm.gradle"
+            }
+
+            sentry.autoInstallation.enabled = true
+            sentry.autoInstallation.sentryVersion = "8.22.0"
+            sentry.autoInstallation.installProfiler = true
+            """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+    assertFalse { "io.sentry:sentry-async-profiler" in result.output }
+    assertTrue {
+      "sentry-async-profiler won't be installed because the current sentry version" in result.output
+    }
+  }
+
   private fun runListDependenciesTask() = runner.appendArguments("app:dependencies").build()
 
   private fun writeSentryOpenTelemetryBom(version: String) {

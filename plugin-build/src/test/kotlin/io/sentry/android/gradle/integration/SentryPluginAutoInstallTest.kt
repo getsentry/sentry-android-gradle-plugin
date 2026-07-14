@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.integration
 
+import com.google.common.truth.Truth.assertThat
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
 import kotlin.test.assertFalse
@@ -34,6 +35,36 @@ class SentryPluginAutoInstallTest :
 
     val result = runListDependenciesTask()
     assertTrue { "io.sentry:sentry-android:$SENTRY_SDK_VERSION" in result.output }
+  }
+
+  @Test
+  fun `does not install sentry-async-profiler in Android projects`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+            }
+
+            sentry {
+              includeProguardMapping = false
+              autoInstallation.installProfiler = true
+            }
+            """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+    assertThat(result.output).doesNotContain("io.sentry:sentry-async-profiler")
+    assertThat(result.output)
+      .contains(
+        "sentry-async-profiler won't be installed because it is only supported for JVM projects"
+      )
   }
 
   @Test

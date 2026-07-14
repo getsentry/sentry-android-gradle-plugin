@@ -48,4 +48,5 @@ sentry {
   debug.set(true)
   includeSourceContext.set(CI.canAutoUpload())
   additionalSourceDirsForSourceContext.set(setOf("testsrc"))
+  autoInstallation { installProfiler = true }
 }

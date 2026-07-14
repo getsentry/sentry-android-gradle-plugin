@@ -21,12 +21,17 @@ import io.sentry.android.gradle.autoinstall.spring.SpringBoot4InstallStrategy
 import io.sentry.android.gradle.autoinstall.sqlite.SQLiteInstallStrategy
 import io.sentry.android.gradle.autoinstall.timber.TimberInstallStrategy
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.info
+import io.sentry.android.gradle.util.warn
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
 
 internal const val SENTRY_GROUP = "io.sentry"
+internal const val SENTRY_ASYNC_PROFILER_ID = "sentry-async-profiler"
+
+private val MIN_PROFILER_SENTRY_VERSION = SemVer(8, 23, 0)
 
 // Note: sentry-android-distribution is not included here because it requires variant-specific
 // installation logic. Unlike other integrations that are installed globally when their
@@ -82,6 +87,15 @@ fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boo
           this.sentryVersion =
             installSentrySdk(sentryDependency, dependencies, sentryArtifactId, extension)
           this.enabled = true
+          if (extension.autoInstallation.installProfiler.get()) {
+            if (isAndroid) {
+              logger.warn {
+                "$SENTRY_ASYNC_PROFILER_ID won't be installed because it is only supported for JVM projects"
+              }
+            } else {
+              installProfiler(dependencies, this.sentryVersion)
+            }
+          }
         }
       }
     }
@@ -105,6 +119,42 @@ private fun Project.installSentrySdk(
   } else {
     logger.info { "$sentryArtifactId won't be installed because it was already installed directly" }
     sentryVersion
+  }
+}
+
+private fun Project.installProfiler(dependencies: DependencySet, sentryVersion: String) {
+  val alreadyInstalled =
+    dependencies.any { it.group == SENTRY_GROUP && it.name == SENTRY_ASYNC_PROFILER_ID }
+  if (alreadyInstalled) {
+    logger.info {
+      "$SENTRY_ASYNC_PROFILER_ID won't be installed because it was already installed directly"
+    }
+    return
+  }
+
+  try {
+    val sentrySemVersion = SemVer.parse(sentryVersion)
+    if (sentrySemVersion < MIN_PROFILER_SENTRY_VERSION) {
+      logger.warn {
+        "$SENTRY_ASYNC_PROFILER_ID won't be installed because the current sentry version " +
+          "($sentrySemVersion) is lower than the minimum supported sentry version " +
+          "($MIN_PROFILER_SENTRY_VERSION)"
+      }
+      return
+    }
+  } catch (ex: IllegalArgumentException) {
+    logger.warn {
+      "$SENTRY_ASYNC_PROFILER_ID won't be installed because the provided " +
+        "sentry version($sentryVersion) could not be processed as a semantic version."
+    }
+    return
+  }
+
+  val profilerDep =
+    this.dependencies.create("$SENTRY_GROUP:$SENTRY_ASYNC_PROFILER_ID:$sentryVersion")
+  dependencies.add(profilerDep)
+  logger.info {
+    "$SENTRY_ASYNC_PROFILER_ID was successfully installed with version: $sentryVersion"
   }
 }
 

@@ -7,6 +7,7 @@
 - Fail the build when OpenTelemetry is downgraded below the version the Sentry OpenTelemetry integration requires ([#1350](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1350))
   - The `sentry-opentelemetry-*` artifacts are built against specific OpenTelemetry versions. When another dependency management mechanism (most commonly Spring Boot `io.spring.dependency-management`) forces OpenTelemetry below the version a Sentry integration requires, running against those downgraded versions can cause `ClassNotFoundException` / `NoSuchMethodError` at runtime. The new `verifySentryOpenTelemetryVersions` task detects this downgrade and fails the build early with guidance on how to fix it.
   - You may disable this check by setting `sentry.verifyOpenTelemetryVersions = false`
+- Add `autoInstallation.installProfiler` flag to auto-install `sentry-async-profiler` in JVM projects (requires Sentry SDK 8.23.0 or higher) ([#XXXX](https://github.com/getsentry/sentry-android-gradle-plugin/pull/XXXX))
 
 ### Fixes
 

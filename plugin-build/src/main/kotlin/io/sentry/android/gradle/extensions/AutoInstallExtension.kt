@@ -18,4 +18,14 @@ open class AutoInstallExtension @Inject constructor(objects: ObjectFactory) {
    */
   val sentryVersion: Property<String> =
     objects.property(String::class.java).convention(SENTRY_SDK_VERSION)
+
+  /**
+   * Enable auto-installation of the sentry-async-profiler integration for JVM projects. Defaults to
+   * false.
+   *
+   * When enabled, sentry-async-profiler is added to the project dependencies with the same version
+   * as the Sentry SDK. Requires Sentry SDK version 8.23.0 or higher. Android projects do not
+   * install this JVM-only dependency and emit a warning instead.
+   */
+  val installProfiler: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
 }
