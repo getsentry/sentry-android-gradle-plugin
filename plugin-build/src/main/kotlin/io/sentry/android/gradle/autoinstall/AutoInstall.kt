@@ -71,7 +71,7 @@ fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boo
       // if autoInstallation is disabled, the autoInstallState will contain initial values
       // which all default to false, hence, the integrations won't be installed as well
       if (extension.autoInstallation.enabled.get()) {
-        val sentryVersion = dependencies.findSentryVersion(isAndroid)
+        val sentryDependency = dependencies.findSentryDependency(isAndroid)
         with(AutoInstallState.getInstance(gradle)) {
           val sentryArtifactId =
             if (isAndroid) {
@@ -80,7 +80,7 @@ fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boo
               SentryModules.SENTRY.name
             }
           this.sentryVersion =
-            installSentrySdk(sentryVersion, dependencies, sentryArtifactId, extension)
+            installSentrySdk(sentryDependency, dependencies, sentryArtifactId, extension)
           this.enabled = true
         }
       }
@@ -90,45 +90,57 @@ fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boo
 }
 
 private fun Project.installSentrySdk(
-  sentryVersion: String?,
+  sentryDependency: SentryDependency,
   dependencies: DependencySet,
   sentryArtifactId: String,
   extension: SentryPluginExtension,
 ): String {
-  return if (sentryVersion == null) {
-    val userDefinedVersion = extension.autoInstallation.sentryVersion.get()
+  val sentryVersion = sentryDependency.version ?: extension.autoInstallation.sentryVersion.get()
+  return if (!sentryDependency.isInstalled) {
     val sentryAndroidDep =
-      this.dependencies.create("$SENTRY_GROUP:$sentryArtifactId:$userDefinedVersion")
+      this.dependencies.create("$SENTRY_GROUP:$sentryArtifactId:$sentryVersion")
     dependencies.add(sentryAndroidDep)
-    logger.info { "$sentryArtifactId was successfully installed with version: $userDefinedVersion" }
-    userDefinedVersion
+    logger.info { "$sentryArtifactId was successfully installed with version: $sentryVersion" }
+    sentryVersion
   } else {
     logger.info { "$sentryArtifactId won't be installed because it was already installed directly" }
     sentryVersion
   }
 }
 
-private fun DependencySet.findSentryVersion(isAndroid: Boolean): String? =
+private data class SentryDependency(val version: String?, val isInstalled: Boolean)
+
+private fun DependencySet.findSentryDependency(isAndroid: Boolean): SentryDependency {
+  val installedDependency = find {
+    it.group == SENTRY_GROUP && it.name in installedSentryModuleNames(isAndroid)
+  }
+  val bomVersion = find {
+    it.group == SENTRY_GROUP && it.name in sentryBomModuleNames(isAndroid) && it.version != null
+  }
+
+  return SentryDependency(
+    installedDependency?.version ?: bomVersion?.version,
+    installedDependency != null,
+  )
+}
+
+private fun installedSentryModuleNames(isAndroid: Boolean): Set<String> =
   if (isAndroid) {
-    find {
-        it.group == SENTRY_GROUP &&
-          (it.name == SentryModules.SENTRY_ANDROID_CORE.name ||
-            it.name == SentryModules.SENTRY_ANDROID.name ||
-            it.name == SentryModules.SENTRY_BOM.name) &&
-          it.version != null
-      }
-      ?.version
+    setOf(SentryModules.SENTRY_ANDROID_CORE.name, SentryModules.SENTRY_ANDROID.name)
   } else {
-    find {
-        it.group == SENTRY_GROUP &&
-          (it.name == SentryModules.SENTRY.name ||
-            it.name == SentryModules.SENTRY_SPRING_BOOT2.name ||
-            it.name == SentryModules.SENTRY_SPRING_BOOT3.name ||
-            it.name == SentryModules.SENTRY_SPRING_BOOT4.name ||
-            it.name == SentryModules.SENTRY_BOM.name ||
-            it.name == SentryModules.SENTRY_OPENTELEMETRY_AGENTLESS.name ||
-            it.name == SentryModules.SENTRY_OPENTELEMETRY_AGENTLESS_SPRING.name) &&
-          it.version != null
-      }
-      ?.version
+    setOf(
+      SentryModules.SENTRY.name,
+      SentryModules.SENTRY_SPRING_BOOT2.name,
+      SentryModules.SENTRY_SPRING_BOOT3.name,
+      SentryModules.SENTRY_SPRING_BOOT4.name,
+      SentryModules.SENTRY_OPENTELEMETRY_AGENTLESS.name,
+      SentryModules.SENTRY_OPENTELEMETRY_AGENTLESS_SPRING.name,
+    )
+  }
+
+private fun sentryBomModuleNames(isAndroid: Boolean): Set<String> =
+  if (isAndroid) {
+    setOf(SentryModules.SENTRY_BOM.name)
+  } else {
+    setOf(SentryModules.SENTRY_BOM.name, SentryModules.SENTRY_OPENTELEMETRY_BOM.name)
   }

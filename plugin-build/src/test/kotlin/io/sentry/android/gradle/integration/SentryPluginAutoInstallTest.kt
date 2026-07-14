@@ -359,6 +359,40 @@ class SentryPluginAutoInstallTest :
   }
 
   @Test
+  fun `uses sentry-bom version for auto installed dependencies`() {
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+            }
+
+            dependencies {
+              implementation platform('io.sentry:sentry-bom:7.0.0')
+              implementation 'com.jakewharton.timber:timber:4.7.1'
+            }
+
+            sentry.autoInstallation.enabled = true
+            sentry.autoInstallation.sentryVersion = "6.32.0"
+            sentry.includeProguardMapping = false
+            """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+    assertTrue { "io.sentry:sentry-android:7.0.0" in result.output }
+    assertTrue { "io.sentry:sentry-android-timber:7.0.0" in result.output }
+    assertFalse { "io.sentry:sentry-android:6.32.0" in result.output }
+    assertFalse { "io.sentry:sentry-android-timber:6.32.0" in result.output }
+    assertFalse { "FAILED" in result.output }
+  }
+
+  @Test
   fun `considers sentry-opentelemetry-agentless as a core version`() {
     appBuildFile.writeText(
       // language=Groovy

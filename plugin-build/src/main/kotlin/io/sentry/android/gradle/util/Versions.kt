@@ -76,6 +76,8 @@ internal object SentryModules {
   internal val SENTRY_SPRING_BOOT4 =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-spring-boot-4")
   internal val SENTRY_BOM = DefaultModuleIdentifier.newId("io.sentry", "sentry-bom")
+  internal val SENTRY_OPENTELEMETRY_BOM =
+    DefaultModuleIdentifier.newId("io.sentry", "sentry-opentelemetry-bom")
   internal val SENTRY_OPENTELEMETRY_AGENTLESS =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-opentelemetry-agentless")
   internal val SENTRY_OPENTELEMETRY_AGENTLESS_SPRING =
