@@ -5,7 +5,7 @@
 ### Features
 
 - Fail the build when OpenTelemetry is downgraded below the version the Sentry OpenTelemetry integration requires ([#1350](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1350))
-  - The `sentry-opentelemetry-*` artifacts are built against specific OpenTelemetry versions. When another dependency management mechanism (most commonly Spring Boot's `io.spring.dependency-management`) forces OpenTelemetry below the version Sentry's integration requires, running against those downgraded versions can cause `ClassNotFoundException` / `NoSuchMethodError` at runtime. The new `verifySentryOpenTelemetryVersions` task detects this downgrade and fails the build early with guidance on how to fix it.
+  - The `sentry-opentelemetry-*` artifacts are built against specific OpenTelemetry versions. When another dependency management mechanism (most commonly Spring Boot `io.spring.dependency-management`) forces OpenTelemetry below the version a Sentry integration requires, running against those downgraded versions can cause `ClassNotFoundException` / `NoSuchMethodError` at runtime. The new `verifySentryOpenTelemetryVersions` task detects this downgrade and fails the build early with guidance on how to fix it.
   - You may disable this check by setting `sentry.verifyOpenTelemetryVersions = false`
 
 ### Fixes
@@ -14,9 +14,23 @@
 
 ### Dependencies
 
-- Bump Android SDK from v8.45.0 to v8.46.0 ([#1343](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1343))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8460)
-  - [diff](https://github.com/getsentry/sentry-java/compare/8.45.0...8.46.0)
+- Bump Android SDK from v8.47.0 to v8.48.0 ([#1359](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1359))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8480)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.47.0...8.48.0)
+- Bump ComposablePreviewScanner from v0.9.0 to v0.9.1 ([#1357](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1357))
+  - [changelog](https://github.com/sergio-sastre/ComposablePreviewScanner/blob/master/CHANGELOG.md#091)
+  - [diff](https://github.com/sergio-sastre/ComposablePreviewScanner/compare/0.9.0...0.9.1)
+
+## 6.14.0
+
+### Dependencies
+
+- Bump Android SDK from v8.45.0 to v8.47.0 ([#1343](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1343), [#1353](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1353))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8470)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.45.0...8.47.0)
+- Bump CLI from v3.5.1 to v3.6.0 ([#1344](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1344))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#360)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.5.1...3.6.0)
 
 ## 6.13.0
 
