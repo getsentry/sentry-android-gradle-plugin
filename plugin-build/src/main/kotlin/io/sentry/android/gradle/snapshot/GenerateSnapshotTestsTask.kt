@@ -386,6 +386,10 @@ class $CLASS_NAME(
             "display_name" to screenshotId.removePrefix(preview.declaringClass + "."),
         )
         if (info.group.isNotBlank()) metadata["group"] = info.group
+        when (info.uiMode and UI_MODE_NIGHT_MASK) {
+            UI_MODE_NIGHT_YES -> metadata["canvas_theme"] = "dark"
+            UI_MODE_NIGHT_NO -> metadata["canvas_theme"] = "light"
+        }
 
         val diffThreshold: Float? = runCatching {
             val declaring = Class.forName(preview.declaringClass)

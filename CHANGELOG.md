@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Emit `canvas_theme` (`light`/`dark`) in the generated snapshot sidecar metadata, derived from the Compose `@Preview` `uiMode` ([#XXXX](https://github.com/getsentry/sentry-android-gradle-plugin/pull/XXXX))
+
 ### Dependencies
 
 - Bump CLI from v3.6.0 to v3.6.1 ([#1367](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1367))
