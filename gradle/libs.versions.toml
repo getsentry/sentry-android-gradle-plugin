@@ -64,7 +64,7 @@ androidxCore = { group = "androidx.core", name = "core", version = "1.15.0" }
 arscLib = { group = "io.github.reandroid", name = "ARSCLib", version = "1.1.4" }
 mockitoKotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.0" }
 roomRuntimeAndroid = { group = "androidx.room", name = "room-runtime-android", version = "2.7.0" }
-room3RuntimeAndroid = { group = "androidx.room3", name = "room3-runtime-android", version = "3.0.0-alpha06" }
+room3RuntimeAndroid = { group = "androidx.room3", name = "room3-runtime-android", version = "3.0.0" }
 zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.5" }
 
 # samples
