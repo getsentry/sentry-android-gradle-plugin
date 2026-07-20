@@ -90,7 +90,7 @@ sample-retrofit-retrofitGson = { group = "com.squareup.retrofit2", name = "conve
 
 sample-timber-timber = { group = "com.jakewharton.timber", name = "timber", version = "5.0.1" }
 
-sample-fragment-fragmentKtx = { group = "androidx.fragment", name = "fragment-ktx", version = "1.3.5" }
+sample-fragment-fragmentKtx = { group = "androidx.fragment", name = "fragment-ktx", version = "1.8.9" }
 
 sample-springBoot-starter = { group = "org.springframework.boot", name = "spring-boot-starter", version.ref = "sampleSpringBoot" }
 sample-springBoot-starterTest = { group = "org.springframework.boot", name = "spring-boot-starter-test", version.ref = "sampleSpringBoot" }
