@@ -4,7 +4,7 @@
 
 ### Features
 
-- Emit `canvas_theme` (`light`/`dark`) in the generated snapshot sidecar metadata, derived from the Compose `@Preview` `uiMode` ([#XXXX](https://github.com/getsentry/sentry-android-gradle-plugin/pull/XXXX))
+- Emit `canvas_theme` (`light`/`dark`) in the generated snapshot sidecar metadata, derived from the Compose `@Preview` `uiMode` ([#1364](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1364))
 
 ### Dependencies
 
