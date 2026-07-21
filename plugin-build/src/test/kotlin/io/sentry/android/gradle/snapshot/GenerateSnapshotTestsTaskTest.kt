@@ -192,6 +192,14 @@ class GenerateSnapshotTestsTaskTest {
   }
 
   @Test
+  fun `generated sidecar places canvas_theme in top-level metadata`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"))
+
+    assertTrue(content.contains("UI_MODE_NIGHT_YES -> metadata[\"canvas_theme\"] = \"dark\""))
+    assertTrue(content.contains("UI_MODE_NIGHT_NO -> metadata[\"canvas_theme\"] = \"light\""))
+  }
+
+  @Test
   fun `generated sidecar does not emit legacy night_mode field`() {
     val content = generateAndRead(packageTrees = listOf("com.example"))
 
