@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Breaking Changes
+
+- This breaking change is only for customers using self-hosted Sentry together with a user auth token (not an org auth token) and the url and auth token are configured separately:
+  - If so, this breaking change applies to you in order to patch a security flaw. [Please read this](https://github.com/getsentry/sentry-cli/issues/3380#issuecomment-5059013026) for further details.
+
+### Dependencies
+
+- Bump CLI from v3.6.1 to v3.6.2 ([#1373](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1373))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#362)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.6.1...3.6.2)
+
 ## 6.16.0
 
 ### Features

@@ -14,7 +14,11 @@ jobs:
   integration-test:
     runs-on: ubuntu-latest
     env:
+      # sentry-cli 3.6.2+ ignores an auth token when the URL comes from a different
+      # configuration source, so the URL and token must share one source. CLI arguments
+      # and environment variables count as a single runtime source, so both live here.
       SENTRY_URL: http://127.0.0.1:8000
+      SENTRY_AUTH_TOKEN: <token>
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
