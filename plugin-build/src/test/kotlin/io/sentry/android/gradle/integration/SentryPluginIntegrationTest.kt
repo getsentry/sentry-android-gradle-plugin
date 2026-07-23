@@ -37,7 +37,6 @@ class SentryPluginIntegrationTest :
       "Integration test server endpoint is not set",
       System.getenv("SENTRY_URL").isNullOrBlank(),
     )
-    sentryPropertiesFile.appendText("auth.token=<token>")
     applyAutoUploadProguardMapping()
 
     val build = runner.appendArguments(":app:assembleRelease").build()
@@ -54,7 +53,6 @@ class SentryPluginIntegrationTest :
       "Integration test server endpoint is not set",
       System.getenv("SENTRY_URL").isNullOrBlank(),
     )
-    sentryPropertiesFile.appendText("auth.token=<token>")
     applyUploadNativeSymbols()
 
     val build = runner.appendArguments(":app:assembleRelease").build()
@@ -71,7 +69,6 @@ class SentryPluginIntegrationTest :
       "Integration test server endpoint is not set",
       System.getenv("SENTRY_URL").isNullOrBlank(),
     )
-    sentryPropertiesFile.appendText("auth.token=<token>")
     applyUploadSourceContexts()
 
     testProjectDir.withDummyComposeFile()
@@ -93,7 +90,6 @@ class SentryPluginIntegrationTest :
       "Integration test server endpoint is not set",
       System.getenv("SENTRY_URL").isNullOrBlank(),
     )
-    sentryPropertiesFile.appendText("auth.token=<token>")
     applySizeAnalysis()
 
     val build = runner.appendArguments(":app:assembleRelease").build()
