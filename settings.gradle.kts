@@ -36,7 +36,19 @@ include(":examples:android-gradle")
 
 include(":examples:android-gradle-kts")
 
-include(":examples:android-ndk")
+// Configuring this sample makes AGP download and set up the NDK, which isn't available when
+// Renovate regenerates the dependency lockfile/verification metadata and would fail the run.
+// The sample is never needed to resolve dependencies, so skip it on those runs. Renovate
+// always invokes Gradle with --write-locks/--update-locks and --dependency-verification
+// lenient; normal dev and CI builds don't, so they still build the sample.
+val isDependencyResolutionRun =
+  startParameter.isWriteDependencyLocks ||
+    startParameter.lockedDependenciesToUpdate.isNotEmpty() ||
+    startParameter.dependencyVerificationMode ==
+      org.gradle.api.artifacts.verification.DependencyVerificationMode.LENIENT
+if (!isDependencyResolutionRun) {
+  include(":examples:android-ndk")
+}
 
 include(":examples:android-instrumentation-sample")
 
