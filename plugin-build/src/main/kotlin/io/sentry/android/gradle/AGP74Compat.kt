@@ -14,6 +14,7 @@ import com.android.build.api.variant.impl.VariantImpl
 import io.sentry.android.gradle.SentryTasksProvider.getComposeMappingMergeTask
 import io.sentry.android.gradle.SentryTasksProvider.getMinifyTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
+import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.gradle.common.SentryVariant
 import io.sentry.gradle.common.filterBuildConfig
 import org.gradle.api.Project
@@ -31,7 +32,9 @@ data class AndroidVariant74(private val variant: Variant) : SentryVariant {
   override val flavorName: String? = variant.flavorName
   override val buildTypeName: String? = variant.buildType
   override val productFlavors: List<String> = variant.productFlavors.map { it.second }
-  override val isMinifyEnabled: Boolean = (variant as? CanMinifyCode)?.isMinifyEnabled == true
+  override val isMinifyEnabled: Boolean =
+    (variant as? CanMinifyCode)?.isMinifyEnabled == true ||
+      variant.isApplicationOptimizationEnabled()
 
   // TODO: replace this eventually (when targeting AGP 8.3.0) with
   // https://cs.android.com/android-studio/platform/tools/base/+/mirror-goog-studio-main:build-system/gradle-api/src/main/java/com/android/build/api/variant/Component.kt;l=103-104;bpv=1
@@ -112,6 +115,25 @@ data class AndroidVariant74(private val variant: Variant) : SentryVariant {
       .wiredWithDirectories(inputDir, outputDir)
       .toTransform(SingleArtifact.ASSETS)
   }
+}
+
+private fun Variant.isApplicationOptimizationEnabled(): Boolean {
+  if (!AgpVersions.isAGP93(AgpVersions.CURRENT)) {
+    return false
+  }
+
+  // AGP 9.3's optimization.enable DSL does not update CanMinifyCode.isMinifyEnabled. The merged
+  // value is only exposed through an internal creation config, so use reflection to keep this
+  // plugin binary-compatible with older AGP versions.
+  return runCatching {
+      val optimizationCreationConfig =
+        javaClass.getMethod("getOptimizationCreationConfig").invoke(this)
+      optimizationCreationConfig
+        .javaClass
+        .getMethod("getApplicationOptimizationEnabled")
+        .invoke(optimizationCreationConfig) as Boolean
+    }
+    .getOrDefault(false)
 }
 
 fun <T : InstrumentationParameters> configureInstrumentationFor74(
