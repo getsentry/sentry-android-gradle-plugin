@@ -9,11 +9,12 @@ class SentryPluginCheckAndroidSdkTest :
   BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
 
   @Test
-  fun `when tracingInstrumentation is disabled does not check sentry-android sdk state`() {
+  fun `when instrumentation is disabled does not check sentry-android sdk state`() {
     appBuildFile.appendText(
       // language=Groovy
       """
             sentry.tracingInstrumentation.enabled = false
+            sentry.sdkOptimization.enabled = false
 
             ${captureSdkState()}
             """

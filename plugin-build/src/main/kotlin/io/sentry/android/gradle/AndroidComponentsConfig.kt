@@ -19,6 +19,7 @@ import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.instrumentation.SentrySdkOptimizationClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
@@ -177,35 +178,45 @@ fun ApplicationAndroidComponentsExtension.configure(
         }
       }
 
-      if (extension.tracingInstrumentation.enabled.get()) {
-        /**
-         * We detect sentry-android SDK version using configurations.incoming.afterResolve. This is
-         * guaranteed to be executed BEFORE any of the build tasks/transforms are started.
-         *
-         * After detecting the sdk state, we use Gradle's shared build service to persist the state
-         * between builds and also during a single build, because transforms are run in parallel.
-         */
-        val sentryModulesService =
+      val sdkOptimizationEnabled = extension.sdkOptimization.enabled.get()
+      val tracingInstrumentationEnabled = extension.tracingInstrumentation.enabled.get()
+      // Both visitor factories need the resolved dependency graph.
+      val modulesService =
+        if (sdkOptimizationEnabled || tracingInstrumentationEnabled) {
           SentryModulesService.register(
-            project,
-            extension.tracingInstrumentation.features,
-            extension.tracingInstrumentation.logcat.enabled,
-            extension.includeSourceContext,
-            extension.dexguardEnabled,
-            extension.tracingInstrumentation.appStart.enabled,
-          )
-        /**
-         * We have to register SentryModulesService as a build event listener, so it will not be
-         * discarded after the configuration phase (where we store the collected dependencies), and
-         * will be passed down to the InstrumentationFactory
-         */
-        buildEvents.onTaskCompletion(sentryModulesService)
+              project,
+              extension.tracingInstrumentation.features,
+              extension.tracingInstrumentation.logcat.enabled,
+              extension.includeSourceContext,
+              extension.dexguardEnabled,
+              extension.tracingInstrumentation.appStart.enabled,
+            )
+            .also {
+              // Keep the service alive after configuration so instrumentation can read it.
+              buildEvents.onTaskCompletion(it)
+            }
+        } else {
+          null
+        }
 
-        project.collectModules(
-          "${variant.name}RuntimeClasspath",
-          variant.name,
-          sentryModulesService,
+      if (modulesService != null) {
+        project.collectModules("${variant.name}RuntimeClasspath", variant.name, modulesService)
+      }
+
+      if (sdkOptimizationEnabled) {
+        variant.instrumentation.transformClassesWith(
+          SentrySdkOptimizationClassVisitorFactory::class.java,
+          InstrumentationScope.ALL,
+        ) { params ->
+          params.sentryModulesService.setDisallowChanges(checkNotNull(modulesService))
+        }
+        variant.instrumentation.setAsmFramesComputationMode(
+          FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
         )
+      }
+
+      if (tracingInstrumentationEnabled) {
+        val tracingModulesService = checkNotNull(modulesService)
 
         variant.configureInstrumentation(
           SpanAddingClassVisitorFactory::class.java,
@@ -219,7 +230,7 @@ fun ApplicationAndroidComponentsExtension.configure(
           params.debug.setDisallowChanges(extension.tracingInstrumentation.debug.get())
           params.logcatMinLevel.setDisallowChanges(extension.tracingInstrumentation.logcat.minLevel)
 
-          params.sentryModulesService.setDisallowChanges(sentryModulesService)
+          params.sentryModulesService.setDisallowChanges(tracingModulesService)
           params.features.setDisallowChanges(extension.tracingInstrumentation.features)
           params.logcatEnabled.setDisallowChanges(extension.tracingInstrumentation.logcat.enabled)
           params.appStartEnabled.setDisallowChanges(
@@ -235,7 +246,7 @@ fun ApplicationAndroidComponentsExtension.configure(
             project,
             extension,
             sentryTelemetryProvider,
-            sentryModulesService,
+            tracingModulesService,
             variant.name,
           )
 
