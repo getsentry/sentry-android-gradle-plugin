@@ -128,8 +128,7 @@ private fun Variant.isApplicationOptimizationEnabled(): Boolean {
   return runCatching {
       val optimizationCreationConfig =
         javaClass.getMethod("getOptimizationCreationConfig").invoke(this)
-      optimizationCreationConfig
-        .javaClass
+      optimizationCreationConfig.javaClass
         .getMethod("getApplicationOptimizationEnabled")
         .invoke(optimizationCreationConfig) as Boolean
     }
