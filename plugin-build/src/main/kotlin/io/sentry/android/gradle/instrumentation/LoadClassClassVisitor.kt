@@ -62,7 +62,8 @@ internal class LoadClassClassVisitor(
       visitor.visitCode()
       injectClassAvailability(visitor)
       visitor.visitInsn(Opcodes.RETURN)
-      visitor.visitMaxs(3, 0)
+      // Triggers ASM frame/max computation; arguments are ignored in compute mode.
+      visitor.visitMaxs(0, 0)
       visitor.visitEnd()
     }
     super.visitEnd()
