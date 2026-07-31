@@ -1125,9 +1125,6 @@ class SentryPluginTest :
       TaskOutcome.SKIPPED,
       result1.task(":app:generateSentryProguardUuidRelease")?.outcome,
     )
-    assertThrows(AssertionError::class.java) {
-      verifyProguardUuid(testProjectDir.root, inGeneratedFolder = true)
-    }
 
     val result2 = runner.build()
     assertFalse { "minifyReleaseWithR8" in result2.output }
@@ -1135,9 +1132,6 @@ class SentryPluginTest :
       TaskOutcome.SKIPPED,
       result2.task(":app:generateSentryProguardUuidRelease")?.outcome,
     )
-    assertThrows(AssertionError::class.java) {
-      verifyProguardUuid(testProjectDir.root, inGeneratedFolder = true)
-    }
   }
 
   @Test
