@@ -1120,26 +1120,24 @@ class SentryPluginTest :
     )
 
     val result1 = runner.appendArguments(":app:testReleaseUnitTest").build()
-    val uuid1 = verifyProguardUuid(testProjectDir.root, inGeneratedFolder = true)
     assertFalse { "minifyReleaseWithR8" in result1.output }
+    assertEquals(
+      TaskOutcome.SKIPPED,
+      result1.task(":app:generateSentryProguardUuidRelease")?.outcome,
+    )
+    assertThrows(AssertionError::class.java) {
+      verifyProguardUuid(testProjectDir.root, inGeneratedFolder = true)
+    }
 
     val result2 = runner.build()
-    val uuid2 = verifyProguardUuid(testProjectDir.root, inGeneratedFolder = true)
     assertFalse { "minifyReleaseWithR8" in result2.output }
-
-    // UUIDs may differ between runs when minify doesn't run, because there's no mapping file
-    // to generate a deterministic hash from. The important assertion is that minify doesn't run.
-    // When minify DOES run (in production builds), the UUID will be deterministic.
-    assertNotEquals(
-      "00000000-0000-0000-0000-000000000000",
-      uuid1.toString(),
-      "UUID should be generated",
+    assertEquals(
+      TaskOutcome.SKIPPED,
+      result2.task(":app:generateSentryProguardUuidRelease")?.outcome,
     )
-    assertNotEquals(
-      "00000000-0000-0000-0000-000000000000",
-      uuid2.toString(),
-      "UUID should be generated",
-    )
+    assertThrows(AssertionError::class.java) {
+      verifyProguardUuid(testProjectDir.root, inGeneratedFolder = true)
+    }
   }
 
   @Test
