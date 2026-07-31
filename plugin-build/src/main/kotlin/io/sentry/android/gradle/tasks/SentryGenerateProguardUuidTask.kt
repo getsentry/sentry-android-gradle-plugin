@@ -7,6 +7,7 @@ import io.sentry.android.gradle.util.contentHash
 import io.sentry.android.gradle.util.info
 import java.io.File
 import java.util.UUID
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
@@ -41,7 +42,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
     val mapping =
       try {
         mappingFile.orNull
-      } catch (_: IllegalStateException) {
+      } catch (_: GradleException) {
         // AGP uses a provider with no value for non-minified variants; treat it as no mapping.
         return null
       }
