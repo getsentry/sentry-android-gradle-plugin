@@ -5,6 +5,7 @@ import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
 import io.sentry.android.gradle.util.contentHash
 import io.sentry.android.gradle.util.info
+import java.io.File
 import java.util.UUID
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
@@ -36,15 +37,16 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
   // Used by AGP 8.3+ with toListenTo API - this property is wired to the mapping artifact
   @get:Internal abstract val mappingFile: RegularFileProperty
 
-  private fun hasMappingFile(): Boolean {
+  private fun findMappingFile(): File? {
     val mapping =
       try {
         mappingFile.orNull
       } catch (_: IllegalStateException) {
         // AGP uses a provider with no value for non-minified variants; treat it as no mapping.
-        return false
+        return null
       }
-    return mapping?.asFile?.exists() ?: fallbackMappingFiles.files.any { it.exists() }
+    return mapping?.asFile?.takeIf { it.exists() }
+      ?: fallbackMappingFiles.files.firstOrNull { it.exists() }
   }
 
   @TaskAction
@@ -52,14 +54,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
     val outputDir = output.get().asFile
     outputDir.mkdirs()
 
-    // Prefer mappingFile (set via toListenTo on AGP 8.3+) over fallbackMappingFiles
-    val mappingFile =
-      if (mappingFile.isPresent) {
-        mappingFile.get().asFile.takeIf { it.exists() }
-      } else {
-        // Fallback for AGP < 8.3: use conventional file paths
-        fallbackMappingFiles.files.firstOrNull { it.exists() }
-      }
+    val mappingFile = findMappingFile()
 
     val uuid =
       mappingFile?.let { UUID.nameUUIDFromBytes(it.contentHash().toByteArray()) }
@@ -94,7 +89,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
             task.fallbackMappingFiles.from(proguardMappingFile)
           }
           task.outputs.upToDateWhen { false }
-          task.onlyIf("a ProGuard mapping file was produced") { task.hasMappingFile() }
+          task.onlyIf("a ProGuard mapping file was produced") { task.findMappingFile() != null }
         }
       return generateUuidTask
     }
