@@ -37,14 +37,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
   @get:Internal abstract val mappingFile: RegularFileProperty
 
   private fun hasMappingFile(): Boolean =
-    runCatching {
-        if (mappingFile.isPresent) {
-          mappingFile.get().asFile.exists()
-        } else {
-          fallbackMappingFiles.files.any { it.exists() }
-        }
-      }
-      .getOrDefault(false)
+    mappingFile.orNull?.asFile?.exists() ?: fallbackMappingFiles.files.any { it.exists() }
 
   @TaskAction
   fun generateProperties() {
