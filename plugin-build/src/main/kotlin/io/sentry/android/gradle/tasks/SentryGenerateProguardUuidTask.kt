@@ -41,6 +41,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
       try {
         mappingFile.orNull
       } catch (_: IllegalStateException) {
+        // AGP uses a provider with no value for non-minified variants; treat it as no mapping.
         return false
       }
     return mapping?.asFile?.exists() ?: fallbackMappingFiles.files.any { it.exists() }
