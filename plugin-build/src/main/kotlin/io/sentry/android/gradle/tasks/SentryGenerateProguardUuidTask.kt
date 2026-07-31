@@ -38,17 +38,17 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
   // Used by AGP 8.3+ with toListenTo API - this property is wired to the mapping artifact
   @get:Internal abstract val mappingFile: RegularFileProperty
 
-  private fun findMappingFile(): File? {
-    val mapping =
-      try {
-        mappingFile.orNull
-      } catch (_: GradleException) {
-        // AGP uses a provider with no value for non-minified variants; treat it as no mapping.
-        return null
-      }
-    return mapping?.asFile?.takeIf { it.exists() }
-      ?: fallbackMappingFiles.files.firstOrNull { it.exists() }
-  }
+  internal fun findMappingFile(): File? =
+    try {
+      mappingFile.orNull?.asFile?.takeIf { it.exists() }
+        ?: fallbackMappingFiles.files.firstOrNull { it.exists() }
+    } catch (_: GradleException) {
+      // AGP uses a provider with no value for non-minified variants; treat it as no mapping.
+      null
+    } catch (_: IllegalStateException) {
+      // Gradle may realize a missing artifact provider before wrapping it in a GradleException.
+      null
+    }
 
   @TaskAction
   fun generateProperties() {
@@ -56,11 +56,16 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
     outputDir.mkdirs()
 
     val mappingFile = findMappingFile()
+    val outputFile = outputFile.get().asFile
+    if (mappingFile == null) {
+      // The task may have produced a UUID in an earlier minified build. Remove it so a later
+      // non-minified build cannot inject or upload that stale UUID.
+      outputFile.delete()
+      return
+    }
 
-    val uuid =
-      mappingFile?.let { UUID.nameUUIDFromBytes(it.contentHash().toByteArray()) }
-        ?: UUID.randomUUID()
-    outputFile.get().asFile.writer().use { writer ->
+    val uuid = UUID.nameUUIDFromBytes(mappingFile.contentHash().toByteArray())
+    outputFile.writer().use { writer ->
       writer.appendLine("$SENTRY_PROGUARD_MAPPING_UUID_PROPERTY=$uuid")
     }
 
@@ -90,7 +95,6 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
             task.fallbackMappingFiles.from(proguardMappingFile)
           }
           task.outputs.upToDateWhen { false }
-          task.onlyIf("a ProGuard mapping file was produced") { task.findMappingFile() != null }
         }
       return generateUuidTask
     }

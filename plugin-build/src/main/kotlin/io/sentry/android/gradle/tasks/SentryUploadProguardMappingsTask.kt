@@ -115,8 +115,9 @@ abstract class SentryUploadProguardMappingsTask : SentryCliExecTask() {
           sentryTelemetryProvider?.let { task.sentryTelemetryService.set(it) }
           task.asSentryCliExec()
           task.withSentryTelemetry(extension, sentryTelemetryProvider)
-          task.onlyIf("a ProGuard mapping file was produced") {
-            task.mappingsFiles.orNull?.files?.any { it.exists() } == true
+          task.onlyIf("a ProGuard mapping file and matching UUID were produced") {
+            task.uuidFile.asFile.orNull?.exists() == true &&
+              task.mappingsFiles.orNull?.files?.any { it.exists() } == true
           }
         }
       return uploadSentryProguardMappingsTask

@@ -376,7 +376,7 @@ class SentryPluginTest :
   fun `does not include a UUID in the APK`() {
     val build = runner.appendArguments(":app:assembleDebug").build()
 
-    assertEquals(TaskOutcome.SKIPPED, build.task(":app:generateSentryProguardUuidDebug")?.outcome)
+    assertEquals(TaskOutcome.SUCCESS, build.task(":app:generateSentryProguardUuidDebug")?.outcome)
     assertEquals(TaskOutcome.SKIPPED, build.task(":app:uploadSentryProguardMappingsDebug")?.outcome)
     assertThrows(AssertionError::class.java) {
       verifyProguardUuid(testProjectDir.root, variant = "debug", signed = false)
@@ -1122,14 +1122,14 @@ class SentryPluginTest :
     val result1 = runner.appendArguments(":app:testReleaseUnitTest").build()
     assertFalse { "minifyReleaseWithR8" in result1.output }
     assertEquals(
-      TaskOutcome.SKIPPED,
+      TaskOutcome.SUCCESS,
       result1.task(":app:generateSentryProguardUuidRelease")?.outcome,
     )
 
     val result2 = runner.build()
     assertFalse { "minifyReleaseWithR8" in result2.output }
     assertEquals(
-      TaskOutcome.SKIPPED,
+      TaskOutcome.SUCCESS,
       result2.task(":app:generateSentryProguardUuidRelease")?.outcome,
     )
   }
