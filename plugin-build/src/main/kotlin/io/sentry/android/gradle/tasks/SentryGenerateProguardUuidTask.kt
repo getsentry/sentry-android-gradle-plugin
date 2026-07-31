@@ -36,6 +36,13 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
   // Used by AGP 8.3+ with toListenTo API - this property is wired to the mapping artifact
   @get:Internal abstract val mappingFile: RegularFileProperty
 
+  private fun hasMappingFile(): Boolean =
+    if (mappingFile.isPresent) {
+      mappingFile.get().asFile.exists()
+    } else {
+      fallbackMappingFiles.files.any { it.exists() }
+    }
+
   @TaskAction
   fun generateProperties() {
     val outputDir = output.get().asFile
@@ -83,6 +90,7 @@ abstract class SentryGenerateProguardUuidTask : PropertiesFileOutputTask() {
             task.fallbackMappingFiles.from(proguardMappingFile)
           }
           task.outputs.upToDateWhen { false }
+          task.onlyIf("a ProGuard mapping file was produced") { task.hasMappingFile() }
         }
       return generateUuidTask
     }

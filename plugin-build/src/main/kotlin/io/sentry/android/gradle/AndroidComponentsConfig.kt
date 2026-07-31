@@ -38,7 +38,6 @@ import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.GroovyCompat
 import io.sentry.android.gradle.util.SentryModules
-import io.sentry.android.gradle.util.SentryPluginUtils.isMinificationEnabled
 import io.sentry.android.gradle.util.SentryPluginUtils.isVariantAllowed
 import io.sentry.android.gradle.util.collectModules
 import io.sentry.android.gradle.util.hookWithAssembleTasks
@@ -351,9 +350,8 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
     }
   val sentryProps = getPropertiesFilePath(project, variant)
   val dexguardEnabled = extension.dexguardEnabled.get()
-  val isMinifyEnabled = isMinificationEnabled(project, variant, dexguardEnabled)
 
-  if (isMinifyEnabled && extension.includeProguardMapping.get()) {
+  if (extension.includeProguardMapping.get()) {
     val mappings = getMappingFileProvider(project, variant, dexguardEnabled)
     val generateUuidTask =
       SentryGenerateProguardUuidTask.register(

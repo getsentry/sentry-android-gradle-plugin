@@ -374,9 +374,16 @@ class SentryPluginTest :
 
   @Test
   fun `does not include a UUID in the APK`() {
-    // isMinifyEnabled is disabled by default in debug builds
-    runner.appendArguments(":app:assembleDebug").build()
+    val build = runner.appendArguments(":app:assembleDebug").build()
 
+    assertEquals(
+      TaskOutcome.SKIPPED,
+      build.task(":app:generateSentryProguardUuidDebug")?.outcome,
+    )
+    assertEquals(
+      TaskOutcome.SKIPPED,
+      build.task(":app:uploadSentryProguardMappingsDebug")?.outcome,
+    )
     assertThrows(AssertionError::class.java) {
       verifyProguardUuid(testProjectDir.root, variant = "debug", signed = false)
     }
