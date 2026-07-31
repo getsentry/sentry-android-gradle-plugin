@@ -9,6 +9,8 @@ import java.io.File
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.gradle.api.Project
+import org.gradle.api.file.FileCollection
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
@@ -36,7 +38,7 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
         project.extensions.findByName("sentry") as SentryPluginExtension,
         null,
         project.layout.buildDirectory.dir("dummy/folder/"),
-        null,
+        createMappingFileProvider(project),
         "test",
       )
     val idGenerationTasks = listOf(bundleIdTask, proguardIdTask)
@@ -81,7 +83,7 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
         project.extensions.findByName("sentry") as SentryPluginExtension,
         null,
         project.layout.buildDirectory.dir("dummy/folder/"),
-        null,
+        createMappingFileProvider(project),
         "test",
       )
     val idGenerationTasks = listOf(bundleIdTask, proguardIdTask)
@@ -120,6 +122,16 @@ class SentryGenerateDebugMetaPropertiesTaskTest {
     val bundleId2 = props2.getProperty(SENTRY_BUNDLE_ID_PROPERTY)
     assertNotNull(bundleId2)
   }
+
+  private fun createMappingFileProvider(project: Project): Provider<FileCollection> =
+    project.provider {
+      project.files(
+        File(project.buildDir, "mapping.txt").also {
+          it.parentFile.mkdirs()
+          it.writeText("mapping")
+        }
+      )
+    }
 
   private fun createProject(): Project {
     with(ProjectBuilder.builder().build()) {
