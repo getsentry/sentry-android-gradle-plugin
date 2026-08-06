@@ -125,14 +125,20 @@ private fun Variant.isApplicationOptimizationEnabled(): Boolean {
   // AGP 9.3's optimization.enable DSL does not update CanMinifyCode.isMinifyEnabled. The merged
   // value is only exposed through an internal creation config, so use reflection to keep this
   // plugin binary-compatible with older AGP versions.
-  return runCatching {
-      val optimizationCreationConfig =
-        javaClass.getMethod("getOptimizationCreationConfig").invoke(this)
-      optimizationCreationConfig.javaClass
-        .getMethod("getApplicationOptimizationEnabled")
-        .invoke(optimizationCreationConfig) as Boolean
-    }
-    .getOrDefault(false)
+  return try {
+    val optimizationCreationConfig =
+      javaClass.getMethod("getOptimizationCreationConfig").invoke(this)
+    optimizationCreationConfig.javaClass
+      .getMethod("getApplicationOptimizationEnabled")
+      .invoke(optimizationCreationConfig) as Boolean
+  } catch (e: ReflectiveOperationException) {
+    SentryPlugin.logger.warn(
+      "Unable to determine whether AGP application optimization is enabled. " +
+        "ProGuard mapping tasks may not be registered.",
+      e,
+    )
+    false
+  }
 }
 
 fun <T : InstrumentationParameters> configureInstrumentationFor74(

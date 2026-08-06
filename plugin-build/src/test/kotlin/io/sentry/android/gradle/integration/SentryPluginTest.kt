@@ -79,10 +79,19 @@ class SentryPluginTest :
         .trimIndent()
     )
 
-    val build = runner.appendArguments(":app:assembleRelease", "--dry-run").build()
+    val build = runner.appendArguments(":app:assembleRelease").build()
 
-    assertTrue(":app:generateSentryProguardUuidRelease" in build.output)
-    assertTrue(":app:uploadSentryProguardMappingsRelease" in build.output)
+    assertEquals(
+      TaskOutcome.SUCCESS,
+      build.task(":app:generateSentryProguardUuidRelease")?.outcome,
+      build.output,
+    )
+    assertEquals(
+      TaskOutcome.SUCCESS,
+      build.task(":app:uploadSentryProguardMappingsRelease")?.outcome,
+      build.output,
+    )
+    verifyProguardUuid(testProjectDir.root)
   }
 
   @Test
