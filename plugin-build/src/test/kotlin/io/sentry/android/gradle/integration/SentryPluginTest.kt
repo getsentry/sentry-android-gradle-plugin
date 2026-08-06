@@ -55,6 +55,46 @@ class SentryPluginTest :
   }
 
   @Test
+  fun `creates proguard mapping tasks when app optimization is enabled`() {
+    assumeThat(
+      "The optimization DSL is available from AGP 9.3 onwards",
+      SemVer.parse(androidGradlePluginVersion) >= AgpVersions.VERSION_9_3_0,
+      `is`(true),
+    )
+    appBuildFile.appendText(
+      // language=Groovy
+      """
+
+      android {
+        buildTypes {
+          release {
+            minifyEnabled false
+            optimization {
+              enable = true
+            }
+          }
+        }
+      }
+      """
+        .trimIndent()
+    )
+
+    val build = runner.appendArguments(":app:assembleRelease").build()
+
+    assertEquals(
+      TaskOutcome.SUCCESS,
+      build.task(":app:generateSentryProguardUuidRelease")?.outcome,
+      build.output,
+    )
+    assertEquals(
+      TaskOutcome.SUCCESS,
+      build.task(":app:uploadSentryProguardMappingsRelease")?.outcome,
+      build.output,
+    )
+    verifyProguardUuid(testProjectDir.root)
+  }
+
+  @Test
   fun `generates the same UUID when mapping file stays the same with rerun tasks`() {
     runner.appendArguments(":app:assembleRelease")
 
