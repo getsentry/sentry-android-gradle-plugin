@@ -344,7 +344,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
   sentryProject: String?,
 ): TaskProvider<SentryGenerateProguardUuidTask>? {
   val variant =
-    if (AgpVersions.isAGP83(AgpVersions.CURRENT)) {
+    if (AgpVersions.isAGP83) {
       AndroidVariant83(this)
     } else {
       AndroidVariant74(this)
@@ -493,7 +493,7 @@ private fun ApplicationVariant.configureSnapshotsTasks(
           paparazziMajorVersion,
         )
 
-      if (AgpVersions.isAGP90(AgpVersions.CURRENT)) {
+      if (AgpVersions.isAGP90) {
         hostTests[UNIT_TEST_TYPE]?.apply {
           sources.java?.addGeneratedSourceDirectory(
             generateTask,

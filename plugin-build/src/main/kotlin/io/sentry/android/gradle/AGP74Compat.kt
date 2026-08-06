@@ -118,7 +118,7 @@ data class AndroidVariant74(private val variant: Variant) : SentryVariant {
 }
 
 private fun Variant.isApplicationOptimizationEnabled(): Boolean {
-  if (!AgpVersions.isAGP93(AgpVersions.CURRENT)) {
+  if (!AgpVersions.isAGP93) {
     return false
   }
 

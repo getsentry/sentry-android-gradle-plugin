@@ -12,13 +12,14 @@ internal object AgpVersions {
   val VERSION_9_0_0: SemVer = SemVer.parse("9.0.0")
   val VERSION_9_3_0: SemVer = SemVer.parse("9.3.0-alpha01")
 
-  fun isAGP74(current: SemVer) = current >= VERSION_7_4_0
+  val isAGP83: Boolean
+    get() = CURRENT >= VERSION_8_3_0
 
-  fun isAGP83(current: SemVer) = current >= VERSION_8_3_0
+  val isAGP90: Boolean
+    get() = CURRENT >= VERSION_9_0_0
 
-  fun isAGP90(current: SemVer) = current >= VERSION_9_0_0
-
-  fun isAGP93(current: SemVer) = current >= VERSION_9_3_0
+  val isAGP93: Boolean
+    get() = CURRENT >= VERSION_9_3_0
 }
 
 internal object GradleVersions {
