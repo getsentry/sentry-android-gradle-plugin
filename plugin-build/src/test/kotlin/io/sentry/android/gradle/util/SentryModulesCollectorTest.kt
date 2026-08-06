@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.util
 
+import com.google.common.truth.Truth.assertThat
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import io.sentry.android.gradle.services.SentryModulesService
@@ -189,13 +190,15 @@ class SentryModulesCollectorTest {
       }
 
     val project = fixture.getSut(testProjectDir.root, dependencies = setOf(sqliteDep))
-    project.collectModules(
-      fixture.configurationName,
-      fixture.variantName,
-      fixture.sentryModulesServiceProvider,
-    )
+    val modules =
+      project.collectModules(
+        fixture.configurationName,
+        fixture.variantName,
+        fixture.sentryModulesServiceProvider,
+      )
 
     assertTrue { fixture.getExternalModules()[moduleIdentifier]!! == SemVer.parse(version) }
+    assertThat(modules.get()).containsExactly(moduleIdentifier)
   }
 
   @Test

@@ -21,6 +21,7 @@ import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SentrySdkOptimizationClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
+import io.sentry.android.gradle.instrumentation.resolveClassAvailability
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
 import io.sentry.android.gradle.sourcecontext.OutputPaths
@@ -199,16 +200,19 @@ fun ApplicationAndroidComponentsExtension.configure(
           null
         }
 
-      if (modulesService != null) {
-        project.collectModules("${variant.name}RuntimeClasspath", variant.name, modulesService)
-      }
+      val modules =
+        modulesService?.let {
+          project.collectModules("${variant.name}RuntimeClasspath", variant.name, it)
+        }
 
       if (sdkOptimizationEnabled) {
         variant.instrumentation.transformClassesWith(
           SentrySdkOptimizationClassVisitorFactory::class.java,
           InstrumentationScope.ALL,
         ) { params ->
-          params.sentryModulesService.setDisallowChanges(checkNotNull(modulesService))
+          params.classAvailability.setDisallowChanges(
+            checkNotNull(modules).map(::resolveClassAvailability)
+          )
         }
         variant.instrumentation.setAsmFramesComputationMode(
           FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS

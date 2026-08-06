@@ -4,31 +4,28 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
-import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.util.SentryModules
 import org.gradle.api.artifacts.ModuleIdentifier
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Internal
+import org.gradle.api.provider.MapProperty
+import org.gradle.api.tasks.Input
 import org.objectweb.asm.ClassVisitor
 
 abstract class SentrySdkOptimizationClassVisitorFactory :
   AsmClassVisitorFactory<SentrySdkOptimizationClassVisitorFactory.SdkOptimizationParameters> {
 
   interface SdkOptimizationParameters : InstrumentationParameters {
-    @get:Internal val sentryModulesService: Property<SentryModulesService>
+    @get:Input val classAvailability: MapProperty<String, Boolean>
   }
 
   override fun createClassVisitor(
     classContext: ClassContext,
     nextClassVisitor: ClassVisitor,
   ): ClassVisitor {
-    val service = parameters.get().sentryModulesService.get()
-    val modules = service.sentryModules.keys + service.externalModules.keys
     return LoadClassClassVisitor(
       instrumentationContext.apiVersion.get(),
       nextClassVisitor,
-      resolveClassAvailability(modules),
+      parameters.get().classAvailability.get(),
     )
   }
 
