@@ -5,6 +5,24 @@ import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 
+/**
+ * Injects build-time knowledge of optional classes into `LoadClass`.
+ *
+ * `classAvailability` maps class names probed during SDK initialization to whether their owning
+ * dependency is present. Before instrumentation the field is uninitialized:
+ * ```java
+ * static Map<String, Boolean> classAvailability;
+ * ```
+ *
+ * After instrumentation the generated static initializer is equivalent to:
+ * ```java
+ * classAvailability = new HashMap<>();
+ * classAvailability.put("timber.log.Timber", true);
+ * ```
+ *
+ * Known entries avoid reflection; omitted class names still fall back to it. SDK versions without
+ * the field are left unchanged.
+ */
 internal class LoadClassClassVisitor(
   apiVersion: Int,
   nextClassVisitor: ClassVisitor,
