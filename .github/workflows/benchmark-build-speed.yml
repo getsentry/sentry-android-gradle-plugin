@@ -25,7 +25,8 @@ jobs:
 
       - name: Install SDKMAN, Gradle Profiler and Begin Profiling
         run: |
-          curl -s "https://get.sdkman.io" | bash
+          curl -s "https://get.sdkman.io" -o sdkman-install.sh
+          bash sdkman-install.sh
           source "$HOME/.sdkman/bin/sdkman-init.sh"
           sdk install gradleprofiler 0.24.0
           cd scripts/benchmark
