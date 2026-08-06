@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Support ProGuard mapping tasks when R8 is enabled with the AGP app optimization DSL ([#1376](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1376))
+- Support ProGuard mapping tasks when R8 is enabled with the AGP app `optimization.enable` DSL ([#1376](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1376))
 
 ### Dependencies
 
