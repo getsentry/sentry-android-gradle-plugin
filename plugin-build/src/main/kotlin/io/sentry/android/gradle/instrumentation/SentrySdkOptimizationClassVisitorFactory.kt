@@ -29,6 +29,8 @@ abstract class SentrySdkOptimizationClassVisitorFactory :
     )
   }
 
+  // Empty availability means the runtime classpath is unknown. Skip this transformation so
+  // LoadClass falls back to reflection.
   override fun isInstrumentable(classData: ClassData): Boolean =
     classData.className == LOAD_CLASS_NAME && parameters.get().classAvailability.get().isNotEmpty()
 
