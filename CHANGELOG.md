@@ -6,6 +6,11 @@
 
 - Support ProGuard mapping tasks when R8 is enabled with the AGP app `optimization.enable` DSL ([#1376](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1376))
 
+### Performance
+
+- Eliminate reflection for known optional Sentry SDK class-availability checks, reducing SDK initialization time by about 1% in an absent-heavy startup benchmark ([#1375](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1375))
+  - This optimization is enabled by default. If it causes problems, disable it with `sentry.runtimeOptimizations.enabled = false`.
+
 ### Dependencies
 
 - Bump Android SDK from v8.51.0 to v8.52.0 ([#1378](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1378))

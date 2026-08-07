@@ -97,6 +97,14 @@ abstract class SentryPluginExtension @Inject constructor(objects: ObjectFactory)
     tracingInstrumentationAction.execute(tracingInstrumentation)
   }
 
+  val runtimeOptimizations: RuntimeOptimizationsExtension =
+    objects.newInstance(RuntimeOptimizationsExtension::class.java)
+
+  /** Configure runtime optimizations of the Sentry SDK. Default configuration is enabled. */
+  fun runtimeOptimizations(runtimeOptimizationsAction: Action<RuntimeOptimizationsExtension>) {
+    runtimeOptimizationsAction.execute(runtimeOptimizations)
+  }
+
   val autoInstallation: AutoInstallExtension = objects.newInstance(AutoInstallExtension::class.java)
 
   /** Configure the auto installation feature. */

@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.util
 
+import com.google.common.truth.Truth.assertThat
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import io.sentry.android.gradle.services.SentryModulesService
@@ -84,14 +85,16 @@ class SentryModulesCollectorTest {
   private val fixture = Fixture()
 
   @Test
-  fun `configuration cannot be found - logs a warning and the modules list is empty`() {
+  fun `configuration cannot be found - logs a warning and does not provide modules`() {
     val project = fixture.getSut(testProjectDir.root)
-    project.collectModules(
-      "releaseRuntimeClasspath",
-      "release",
-      fixture.sentryModulesServiceProvider,
-    )
+    val modules =
+      project.collectModules(
+        "releaseRuntimeClasspath",
+        "release",
+        fixture.sentryModulesServiceProvider,
+      )
     assertTrue { fixture.getSentryModules().isEmpty() }
+    assertThat(modules.isPresent).isFalse()
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] Unable to find configuration releaseRuntimeClasspath for variant release."
@@ -189,13 +192,15 @@ class SentryModulesCollectorTest {
       }
 
     val project = fixture.getSut(testProjectDir.root, dependencies = setOf(sqliteDep))
-    project.collectModules(
-      fixture.configurationName,
-      fixture.variantName,
-      fixture.sentryModulesServiceProvider,
-    )
+    val modules =
+      project.collectModules(
+        fixture.configurationName,
+        fixture.variantName,
+        fixture.sentryModulesServiceProvider,
+      )
 
     assertTrue { fixture.getExternalModules()[moduleIdentifier]!! == SemVer.parse(version) }
+    assertThat(modules.get()).containsExactly(moduleIdentifier)
   }
 
   @Test
