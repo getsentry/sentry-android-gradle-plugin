@@ -19,9 +19,12 @@
 - This breaking change is only for customers using self-hosted Sentry together with a user auth token (not an org auth token) and the url and auth token are configured separately:
   - If so, this breaking change applies to you in order to patch a security flaw. [Please read this](https://github.com/getsentry/sentry-cli/issues/3380#issuecomment-5059013026) for further details.
 
-### Features
+### Performance
 
-- Resolve optional Sentry SDK class availability at build time to reduce SDK initialization overhead ([#1375](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1375))
+- Eliminate the reflection cost of known optional Sentry SDK class-availability checks by resolving them at build time ([#1375](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1375))
+  - On a Pixel 2 XL, constructing and querying the availability map was about 160x faster than an absent-heavy batch of 11 reflection checks.
+  - In an absent-heavy startup benchmark, SDK initialization was 1.08% faster and full startup was 0.88% faster. These differences were within benchmark variance.
+  - This optimization is enabled by default. If it causes problems, disable it with `sentry.runtimeOptimizations.enabled = false`.
 
 ### Dependencies
 
