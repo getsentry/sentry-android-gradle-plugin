@@ -85,14 +85,16 @@ class SentryModulesCollectorTest {
   private val fixture = Fixture()
 
   @Test
-  fun `configuration cannot be found - logs a warning and the modules list is empty`() {
+  fun `configuration cannot be found - logs a warning and does not provide modules`() {
     val project = fixture.getSut(testProjectDir.root)
-    project.collectModules(
-      "releaseRuntimeClasspath",
-      "release",
-      fixture.sentryModulesServiceProvider,
-    )
+    val modules =
+      project.collectModules(
+        "releaseRuntimeClasspath",
+        "release",
+        fixture.sentryModulesServiceProvider,
+      )
     assertTrue { fixture.getSentryModules().isEmpty() }
+    assertThat(modules).isNull()
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] Unable to find configuration releaseRuntimeClasspath for variant release."
@@ -198,7 +200,7 @@ class SentryModulesCollectorTest {
       )
 
     assertTrue { fixture.getExternalModules()[moduleIdentifier]!! == SemVer.parse(version) }
-    assertThat(modules.get()).containsExactly(moduleIdentifier)
+    assertThat(checkNotNull(modules).get()).containsExactly(moduleIdentifier)
   }
 
   @Test

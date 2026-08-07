@@ -205,14 +205,12 @@ fun ApplicationAndroidComponentsExtension.configure(
           project.collectModules("${variant.name}RuntimeClasspath", variant.name, it)
         }
 
-      if (runtimeOptimizationsEnabled) {
+      if (runtimeOptimizationsEnabled && modules != null) {
         variant.instrumentation.transformClassesWith(
           SentrySdkOptimizationClassVisitorFactory::class.java,
           InstrumentationScope.ALL,
         ) { params ->
-          params.classAvailability.setDisallowChanges(
-            checkNotNull(modules).map(::resolveClassAvailability)
-          )
+          params.classAvailability.setDisallowChanges(modules.map(::resolveClassAvailability))
         }
         variant.instrumentation.setAsmFramesComputationMode(
           FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
