@@ -94,7 +94,7 @@ class SentryModulesCollectorTest {
         fixture.sentryModulesServiceProvider,
       )
     assertTrue { fixture.getSentryModules().isEmpty() }
-    assertThat(modules).isNull()
+    assertThat(modules.isPresent).isFalse()
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] Unable to find configuration releaseRuntimeClasspath for variant release."
@@ -200,7 +200,7 @@ class SentryModulesCollectorTest {
       )
 
     assertTrue { fixture.getExternalModules()[moduleIdentifier]!! == SemVer.parse(version) }
-    assertThat(checkNotNull(modules).get()).containsExactly(moduleIdentifier)
+    assertThat(modules.get()).containsExactly(moduleIdentifier)
   }
 
   @Test

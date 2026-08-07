@@ -12,7 +12,7 @@ fun Project.collectModules(
   configurationName: String,
   variantName: String,
   sentryModulesService: Provider<SentryModulesService>,
-): Provider<Set<ModuleIdentifier>>? {
+): Provider<Set<ModuleIdentifier>> {
   val configProvider =
     try {
       configurations.named(configurationName)
@@ -20,7 +20,7 @@ fun Project.collectModules(
       logger.warn { "Unable to find configuration $configurationName for variant $variantName." }
       sentryModulesService.get().sentryModules = emptyMap()
       sentryModulesService.get().externalModules = emptyMap()
-      return null
+      return provider<Set<ModuleIdentifier>> { null }
     }
 
   configProvider.configure { configuration ->

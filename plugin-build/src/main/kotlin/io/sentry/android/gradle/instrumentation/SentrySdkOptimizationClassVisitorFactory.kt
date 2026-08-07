@@ -30,7 +30,7 @@ abstract class SentrySdkOptimizationClassVisitorFactory :
   }
 
   override fun isInstrumentable(classData: ClassData): Boolean =
-    classData.className == LOAD_CLASS_NAME
+    classData.className == LOAD_CLASS_NAME && parameters.get().classAvailability.get().isNotEmpty()
 
   internal companion object {
     const val LOAD_CLASS_NAME = "io.sentry.util.LoadClass"
