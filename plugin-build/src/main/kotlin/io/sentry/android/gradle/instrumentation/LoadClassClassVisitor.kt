@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.instrumentation
 
+import io.sentry.android.gradle.SentryPlugin
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
@@ -68,6 +69,11 @@ internal class LoadClassClassVisitor(
   }
 
   override fun visitEnd() {
+    if (!hasAvailabilityField) {
+      SentryPlugin.logger.info(
+        "Sentry SDK runtime reflection checks were not optimized because the current SDK version does not support this optimization."
+      )
+    }
     if (hasAvailabilityField && !hasStaticInitializer) {
       val visitor =
         super.visitMethod(
