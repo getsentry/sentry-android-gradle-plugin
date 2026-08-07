@@ -8,9 +8,7 @@
 
 ### Performance
 
-- Eliminate the reflection cost of known optional Sentry SDK class-availability checks by resolving them at build time ([#1375](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1375))
-  - On a Pixel 2 XL, constructing and querying the availability map was about 160x faster than an absent-heavy batch of 11 reflection checks.
-  - In an absent-heavy startup benchmark, SDK initialization was 1.08% faster and full startup was 0.88% faster. These differences were within benchmark variance.
+- Eliminate reflection for known optional Sentry SDK class-availability checks, reducing SDK initialization time by about 1% in an absent-heavy startup benchmark ([#1375](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1375))
   - This optimization is enabled by default. If it causes problems, disable it with `sentry.runtimeOptimizations.enabled = false`.
 
 ### Dependencies
