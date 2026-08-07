@@ -179,11 +179,11 @@ fun ApplicationAndroidComponentsExtension.configure(
         }
       }
 
-      val sdkOptimizationEnabled = extension.sdkOptimization.enabled.get()
+      val runtimeOptimizationsEnabled = extension.runtimeOptimizations.enabled.get()
       val tracingInstrumentationEnabled = extension.tracingInstrumentation.enabled.get()
       // Both visitor factories need the resolved dependency graph.
       val modulesService =
-        if (sdkOptimizationEnabled || tracingInstrumentationEnabled) {
+        if (runtimeOptimizationsEnabled || tracingInstrumentationEnabled) {
           SentryModulesService.register(
               project,
               extension.tracingInstrumentation.features,
@@ -205,7 +205,7 @@ fun ApplicationAndroidComponentsExtension.configure(
           project.collectModules("${variant.name}RuntimeClasspath", variant.name, it)
         }
 
-      if (sdkOptimizationEnabled) {
+      if (runtimeOptimizationsEnabled) {
         variant.instrumentation.transformClassesWith(
           SentrySdkOptimizationClassVisitorFactory::class.java,
           InstrumentationScope.ALL,

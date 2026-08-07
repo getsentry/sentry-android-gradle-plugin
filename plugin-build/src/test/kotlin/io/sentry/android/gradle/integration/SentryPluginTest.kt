@@ -492,7 +492,7 @@ class SentryPluginTest :
   fun `skips tracing instrumentation if tracingInstrumentation is disabled`() {
     applyTracingInstrumentation(
       tracingInstrumentation = false,
-      sdkOptimization = false,
+      runtimeOptimizations = false,
       appStart = false,
       logcat = false,
     )
@@ -503,7 +503,7 @@ class SentryPluginTest :
   }
 
   @Test
-  fun `registers sdk optimization independently from tracing instrumentation`() {
+  fun `registers runtime optimizations independently from tracing instrumentation`() {
     applyTracingInstrumentation(false, appStart = false, logcat = false)
 
     val build = runner.appendArguments(":app:assembleRelease", "--info").build()
@@ -1231,7 +1231,7 @@ class SentryPluginTest :
 
   private fun applyTracingInstrumentation(
     tracingInstrumentation: Boolean = true,
-    sdkOptimization: Boolean = true,
+    runtimeOptimizations: Boolean = true,
     features: Set<InstrumentationFeature> = emptySet(),
     logcat: Boolean = false,
     appStart: Boolean = false,
@@ -1252,8 +1252,8 @@ class SentryPluginTest :
 
                 sentry {
                   autoUploadProguardMapping = false
-                  sdkOptimization {
-                    enabled = $sdkOptimization
+                  runtimeOptimizations {
+                    enabled = $runtimeOptimizations
                   }
                   tracingInstrumentation {
                     forceInstrumentDependencies = $forceInstrumentDependencies

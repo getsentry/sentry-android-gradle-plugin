@@ -14,7 +14,7 @@ class SentryPluginCheckAndroidSdkTest :
       // language=Groovy
       """
             sentry.tracingInstrumentation.enabled = false
-            sentry.sdkOptimization.enabled = false
+            sentry.runtimeOptimizations.enabled = false
 
             ${captureSdkState()}
             """
