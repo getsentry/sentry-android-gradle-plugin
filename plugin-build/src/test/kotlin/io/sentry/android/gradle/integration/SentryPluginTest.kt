@@ -81,6 +81,11 @@ class SentryPluginTest :
 
     val build = runner.appendArguments(":app:assembleRelease").build()
 
+    assertNoAnalyticsUnwrapWarning(build)
+    assertFalse(
+      build.output.contains("Unable to determine whether AGP application optimization is enabled"),
+      build.output,
+    )
     assertEquals(
       TaskOutcome.SUCCESS,
       build.task(":app:generateSentryProguardUuidRelease")?.outcome,
@@ -92,6 +97,56 @@ class SentryPluginTest :
       build.output,
     )
     verifyProguardUuid(testProjectDir.root)
+  }
+
+  @Test
+  fun `resolves assemble install and debuggable with analytics-wrapped variants`() {
+    // Fixture forces android.enableProfileJson=true, so AGP serves AnalyticsEnabled* wrappers.
+    // assemble/install providers and isDebuggable must still resolve via unwrapImpl().
+    applyUploadNativeSymbols()
+    // AGP only registers install* tasks for signing-ready variants. Release has no signing by
+    // default (debug is automatic), so point release at the debug keystore for installRelease.
+    // Leading newline matters: after applyUploadNativeSymbols() the file ends with `}` and no
+    // trailing newline. Without `\n`, Groovy parses `}android {` as sentry.android { ... }.
+    appBuildFile.appendText(
+      // language=Groovy
+      "\n" +
+        """
+                android {
+                  buildTypes {
+                    release {
+                      signingConfig signingConfigs.debug
+                    }
+                  }
+                }
+            """
+          .trimIndent()
+    )
+
+    // Use withArguments (not appendArguments) so each build is an isolated scenario.
+    val releaseBuild =
+      runner.withArguments("--stacktrace", ":app:assembleRelease", "--dry-run").build()
+    assertNoAnalyticsUnwrapWarning(releaseBuild)
+    // Non-debuggable + uploadNativeSymbols => task registered (assembleProvider path used).
+    assertTrue(
+      ":app:uploadSentryNativeSymbolsForRelease" in releaseBuild.output,
+      releaseBuild.output,
+    )
+
+    val debugBuild = runner.withArguments("--stacktrace", ":app:assembleDebug", "--dry-run").build()
+    assertNoAnalyticsUnwrapWarning(debugBuild)
+    // isDebuggable must stay true under analytics wrappers, or we'd wrongly upload for debug.
+    assertFalse(":app:uploadSentryNativeSymbolsForDebug" in debugBuild.output, debugBuild.output)
+
+    // installRelease is finalizedBy the native-symbols upload task via installProvider unwrap.
+    val installBuild =
+      runner.withArguments("--stacktrace", ":app:installRelease", "--dry-run").build()
+    assertNoAnalyticsUnwrapWarning(installBuild)
+    assertTrue(":app:installRelease" in installBuild.output, installBuild.output)
+    assertTrue(
+      ":app:uploadSentryNativeSymbolsForRelease" in installBuild.output,
+      installBuild.output,
+    )
   }
 
   @Test
@@ -458,6 +513,7 @@ class SentryPluginTest :
 
     val build = runner.appendArguments(":app:assembleRelease", "--dry-run").build()
 
+    assertNoAnalyticsUnwrapWarning(build)
     assertTrue(":app:uploadSentryNativeSymbolsForRelease" in build.output)
   }
 
@@ -467,6 +523,7 @@ class SentryPluginTest :
 
     val build = runner.appendArguments(":app:assembleDebug", "--dry-run").build()
 
+    assertNoAnalyticsUnwrapWarning(build)
     assertFalse(":app:uploadSentryNativeSymbolsForDebug" in build.output)
   }
 
@@ -1197,6 +1254,10 @@ class SentryPluginTest :
     )
   }
 
+  private fun assertNoAnalyticsUnwrapWarning(build: BuildResult) {
+    assertFalse(build.output.contains("Unable to unwrap AGP analytics variant"), build.output)
+  }
+
   private fun applyUploadNativeSymbols() {
     appBuildFile.appendText(
       // language=Groovy
@@ -1209,7 +1270,7 @@ class SentryPluginTest :
                   }
                 }
             """
-        .trimIndent()
+        .trimIndent() + "\n"
     )
   }
 
