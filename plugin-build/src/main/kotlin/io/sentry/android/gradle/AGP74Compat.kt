@@ -126,11 +126,7 @@ private fun Variant.isApplicationOptimizationEnabled(): Boolean {
   // value is only exposed through an internal creation config, so use reflection to keep this
   // plugin binary-compatible with older AGP versions.
   return try {
-    val optimizationCreationConfig =
-      javaClass.getMethod("getOptimizationCreationConfig").invoke(this)
-    optimizationCreationConfig.javaClass
-      .getMethod("getApplicationOptimizationEnabled")
-      .invoke(optimizationCreationConfig) as Boolean
+    applicationOptimizationEnabled()
   } catch (e: ReflectiveOperationException) {
     SentryPlugin.logger.warn(
       "Unable to determine whether AGP application optimization is enabled. " +
@@ -139,6 +135,23 @@ private fun Variant.isApplicationOptimizationEnabled(): Boolean {
     )
     false
   }
+}
+
+internal fun Any.applicationOptimizationEnabled(): Boolean {
+  val variant =
+    try {
+      javaClass.getMethod("getOptimizationCreationConfig")
+      this
+    } catch (e: NoSuchMethodException) {
+      // The public Variant API is wrapped when AGP analytics are enabled. Internal creation config
+      // methods are only available on the delegate.
+      javaClass.getMethod("getDelegate").invoke(this)
+    }
+  val optimizationCreationConfig =
+    variant.javaClass.getMethod("getOptimizationCreationConfig").invoke(variant)
+  return optimizationCreationConfig.javaClass
+    .getMethod("getApplicationOptimizationEnabled")
+    .invoke(optimizationCreationConfig) as Boolean
 }
 
 fun <T : InstrumentationParameters> configureInstrumentationFor74(
