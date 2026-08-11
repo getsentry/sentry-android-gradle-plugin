@@ -133,10 +133,7 @@ class SentryPluginTest :
     val debugBuild = runner.withArguments("--stacktrace", ":app:assembleDebug", "--dry-run").build()
     assertNoAnalyticsUnwrapWarning(debugBuild)
     // isDebuggable must stay true under analytics wrappers, or we'd wrongly upload for debug.
-    assertFalse(
-      ":app:uploadSentryNativeSymbolsForDebug" in debugBuild.output,
-      debugBuild.output,
-    )
+    assertFalse(":app:uploadSentryNativeSymbolsForDebug" in debugBuild.output, debugBuild.output)
 
     // installRelease is finalizedBy the native-symbols upload task via installProvider unwrap.
     val installBuild =
@@ -1255,10 +1252,7 @@ class SentryPluginTest :
   }
 
   private fun assertNoAnalyticsUnwrapWarning(build: BuildResult) {
-    assertFalse(
-      build.output.contains("Unable to unwrap AGP analytics variant"),
-      build.output,
-    )
+    assertFalse(build.output.contains("Unable to unwrap AGP analytics variant"), build.output)
   }
 
   private fun applyUploadNativeSymbols() {
