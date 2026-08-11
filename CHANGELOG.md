@@ -7,7 +7,6 @@
 - Detect AGP `optimization.enable` when the variant is wrapped by AGP analytics ([#1382](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1382))
   - This fixes `java.lang.NoSuchMethodException: com.android.build.api.component.analytics.AnalyticsEnabledApplicationVariant_Decorated.getOptimizationCreationConfig()`
 
-  - This fixes `java.lang.NoSuchMethodException: com.android.build.api.component.analytics.AnalyticsEnabledApplicationVariant_Decorated.getOptimizationCreationConfig()`
 
 
 ### Dependencies
