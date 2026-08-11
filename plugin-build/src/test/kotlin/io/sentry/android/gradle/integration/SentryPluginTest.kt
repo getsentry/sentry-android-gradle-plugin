@@ -81,6 +81,10 @@ class SentryPluginTest :
 
     val build = runner.appendArguments(":app:assembleRelease").build()
 
+    assertFalse(
+      build.output.contains("Unable to determine whether AGP application optimization is enabled"),
+      build.output,
+    )
     assertEquals(
       TaskOutcome.SUCCESS,
       build.task(":app:generateSentryProguardUuidRelease")?.outcome,
