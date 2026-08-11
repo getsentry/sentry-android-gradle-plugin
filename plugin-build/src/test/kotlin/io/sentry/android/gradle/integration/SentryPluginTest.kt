@@ -105,7 +105,9 @@ class SentryPluginTest :
     // assemble/install providers and isDebuggable must still resolve via unwrapImpl().
     applyUploadNativeSymbols()
 
-    val releaseBuild = runner.appendArguments(":app:assembleRelease", "--dry-run").build()
+    // Use withArguments (not appendArguments) so each build is an isolated scenario.
+    val releaseBuild =
+      runner.withArguments("--stacktrace", ":app:assembleRelease", "--dry-run").build()
     assertNoAnalyticsUnwrapWarning(releaseBuild)
     // Non-debuggable + uploadNativeSymbols => task registered (assembleProvider path used).
     assertTrue(
@@ -113,7 +115,7 @@ class SentryPluginTest :
       releaseBuild.output,
     )
 
-    val debugBuild = runner.appendArguments(":app:assembleDebug", "--dry-run").build()
+    val debugBuild = runner.withArguments("--stacktrace", ":app:assembleDebug", "--dry-run").build()
     assertNoAnalyticsUnwrapWarning(debugBuild)
     // isDebuggable must stay true under analytics wrappers, or we'd wrongly upload for debug.
     assertFalse(
@@ -121,10 +123,15 @@ class SentryPluginTest :
       debugBuild.output,
     )
 
-    // Dry-run install resolves install task wiring through the analytics-wrapped variant.
-    val installBuild = runner.appendArguments(":app:installDebug", "--dry-run").build()
+    // installRelease is finalizedBy the native-symbols upload task via installProvider unwrap.
+    val installBuild =
+      runner.withArguments("--stacktrace", ":app:installRelease", "--dry-run").build()
     assertNoAnalyticsUnwrapWarning(installBuild)
-    assertTrue(":app:installDebug" in installBuild.output, installBuild.output)
+    assertTrue(":app:installRelease" in installBuild.output, installBuild.output)
+    assertTrue(
+      ":app:uploadSentryNativeSymbolsForRelease" in installBuild.output,
+      installBuild.output,
+    )
   }
 
   @Test
