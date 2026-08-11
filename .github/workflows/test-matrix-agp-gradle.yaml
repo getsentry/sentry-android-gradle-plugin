@@ -79,6 +79,7 @@ jobs:
         run: |
           unzip ./examples/android-gradle/build/outputs/apk/release/android-gradle-release-unsigned.apk -d output
           cat output/assets/sentry-debug-meta.properties
+          grep -q '^io.sentry.ProguardUuids=' output/assets/sentry-debug-meta.properties
           rm -r output
           unzip ./examples/android-gradle-kts/build/outputs/apk/release/android-gradle-kts-release-unsigned.apk -d output
           cat output/assets/sentry-debug-meta.properties

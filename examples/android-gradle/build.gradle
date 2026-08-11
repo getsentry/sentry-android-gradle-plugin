@@ -3,6 +3,11 @@ plugins {
   id("io.sentry.android.gradle")
 }
 
+def agpVersion = BuildPluginsVersion.AGP.split('\\.')
+def agpMajor = agpVersion[0].toInteger()
+def agpMinor = agpVersion[1].toInteger()
+def supportsOptimizationDsl = agpMajor > 9 || (agpMajor == 9 && agpMinor >= 3)
+
 android {
   compileSdk = LibsVersion.SDK_VERSION
   defaultConfig {
@@ -13,7 +18,14 @@ android {
   }
   buildTypes {
     release {
-      minifyEnabled true
+      if (supportsOptimizationDsl) {
+        minifyEnabled false
+        optimization {
+          enable = true
+        }
+      } else {
+        minifyEnabled true
+      }
       proguardFiles getDefaultProguardFile(
         'proguard-android-optimize.txt')
     }
