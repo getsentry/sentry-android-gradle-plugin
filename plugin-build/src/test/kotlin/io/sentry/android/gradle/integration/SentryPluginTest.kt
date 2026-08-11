@@ -104,6 +104,21 @@ class SentryPluginTest :
     // Fixture forces android.enableProfileJson=true, so AGP serves AnalyticsEnabled* wrappers.
     // assemble/install providers and isDebuggable must still resolve via unwrapImpl().
     applyUploadNativeSymbols()
+    // AGP only registers install* tasks for signing-ready variants. Release has no signing by
+    // default (debug is automatic), so point release at the debug keystore for installRelease.
+    appBuildFile.appendText(
+      // language=Groovy
+      """
+                android {
+                  buildTypes {
+                    release {
+                      signingConfig signingConfigs.debug
+                    }
+                  }
+                }
+            """
+        .trimIndent()
+    )
 
     // Use withArguments (not appendArguments) so each build is an isolated scenario.
     val releaseBuild =
