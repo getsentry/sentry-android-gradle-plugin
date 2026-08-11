@@ -128,8 +128,7 @@ private fun Variant.isApplicationOptimizationEnabled(): Boolean {
   // value is only exposed through an internal creation config, so use reflection to keep this
   // plugin binary-compatible with older AGP versions.
   return try {
-    // MUTATION: skip analytics unwrap to verify TestKit coverage fails without it.
-    val unwrappedVariant = this
+    val unwrappedVariant = unwrapImpl() ?: this
     val optimizationCreationConfig =
       unwrappedVariant.javaClass.getMethod("getOptimizationCreationConfig").invoke(unwrappedVariant)
     optimizationCreationConfig.javaClass
