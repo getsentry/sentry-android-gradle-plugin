@@ -46,6 +46,7 @@ val isDependencyResolutionRun =
     startParameter.lockedDependenciesToUpdate.isNotEmpty() ||
     startParameter.dependencyVerificationMode ==
       org.gradle.api.artifacts.verification.DependencyVerificationMode.LENIENT
+
 if (!isDependencyResolutionRun) {
   include(":examples:android-ndk")
 }
