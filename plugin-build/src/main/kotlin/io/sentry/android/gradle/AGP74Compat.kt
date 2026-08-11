@@ -126,17 +126,20 @@ private fun Variant.isApplicationOptimizationEnabled(): Boolean {
   // value is only exposed through an internal creation config, so use reflection to keep this
   // plugin binary-compatible with older AGP versions.
   return try {
-    val unwrappedVariant =
-      try {
-        javaClass.getMethod("getOptimizationCreationConfig")
-        this
-      } catch (e: NoSuchMethodException) {
-        // AGP analytics wraps the public Variant API; internal creation config methods are only on
-        // the delegate.
-        javaClass.getMethod("getDelegate").invoke(this)
-      }
+    // MUTATION: disable analytics unwrap to prove the sample/matrix coverage fails without it.
+    // val unwrappedVariant =
+    //   try {
+    //     javaClass.getMethod("getOptimizationCreationConfig")
+    //     this
+    //   } catch (e: NoSuchMethodException) {
+    //     // AGP analytics wraps the public Variant API; internal creation config methods are only on
+    //     // the delegate.
+    //     javaClass.getMethod("getDelegate").invoke(this)
+    //   }
+    // val optimizationCreationConfig =
+    //   unwrappedVariant.javaClass.getMethod("getOptimizationCreationConfig").invoke(unwrappedVariant)
     val optimizationCreationConfig =
-      unwrappedVariant.javaClass.getMethod("getOptimizationCreationConfig").invoke(unwrappedVariant)
+      javaClass.getMethod("getOptimizationCreationConfig").invoke(this)
     optimizationCreationConfig.javaClass
       .getMethod("getApplicationOptimizationEnabled")
       .invoke(optimizationCreationConfig) as Boolean
