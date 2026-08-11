@@ -20,7 +20,6 @@ import io.sentry.gradle.common.filterBuildConfig
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
@@ -105,17 +104,6 @@ data class AndroidVariant74(private val variant: Variant) : SentryVariant {
         task.configure { generateUuidTask -> generateUuidTask.mustRunAfter(composeTask) }
       }
     }
-  }
-
-  fun <T : Task> assetsWiredWithDirectories(
-    task: TaskProvider<T>,
-    inputDir: (T) -> DirectoryProperty,
-    outputDir: (T) -> DirectoryProperty,
-  ) {
-    variant.artifacts
-      .use(task)
-      .wiredWithDirectories(inputDir, outputDir)
-      .toTransform(SingleArtifact.ASSETS)
   }
 }
 
