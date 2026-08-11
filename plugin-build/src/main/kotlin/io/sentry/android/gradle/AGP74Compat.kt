@@ -125,19 +125,8 @@ private fun Variant.isApplicationOptimizationEnabled(): Boolean {
   // AGP 9.3's optimization.enable DSL does not update CanMinifyCode.isMinifyEnabled. The merged
   // value is only exposed through an internal creation config, so use reflection to keep this
   // plugin binary-compatible with older AGP versions.
+  // MUTATION: skip analytics unwrap so CI can prove the AGP 9.3 sample fails without it.
   return try {
-    // MUTATION: disable analytics unwrap to prove the sample/matrix coverage fails without it.
-    // val unwrappedVariant =
-    //   try {
-    //     javaClass.getMethod("getOptimizationCreationConfig")
-    //     this
-    //   } catch (e: NoSuchMethodException) {
-    //     // AGP analytics wraps the public Variant API; internal creation config methods are only on
-    //     // the delegate.
-    //     javaClass.getMethod("getDelegate").invoke(this)
-    //   }
-    // val optimizationCreationConfig =
-    //   unwrappedVariant.javaClass.getMethod("getOptimizationCreationConfig").invoke(unwrappedVariant)
     val optimizationCreationConfig =
       javaClass.getMethod("getOptimizationCreationConfig").invoke(this)
     optimizationCreationConfig.javaClass
