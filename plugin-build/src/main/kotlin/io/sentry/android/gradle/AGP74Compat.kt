@@ -147,14 +147,31 @@ private fun Variant.isApplicationOptimizationEnabled(): Boolean {
 /**
  * AGP analytics may wrap the public [Variant] API. Internal impl types and creation-config methods
  * live on the delegate, so unwrap when present.
+ *
+ * If unwrapping fails, internal accessors (assemble/install providers, debuggable, optimization)
+ * degrade. Callers that can fall back still do; this warning makes the failure visible.
  */
 private fun Variant.unwrapImpl(): VariantImpl<*>? {
   (this as? VariantImpl<*>)?.let {
     return it
   }
   return try {
-    javaClass.getMethod("getDelegate").invoke(this) as? VariantImpl<*>
-  } catch (_: ReflectiveOperationException) {
+    val delegate = javaClass.getMethod("getDelegate").invoke(this) as? VariantImpl<*>
+    if (delegate == null) {
+      SentryPlugin.logger.warn(
+        "Unable to unwrap AGP analytics variant ${javaClass.name}. " +
+          "Internal variant APIs (assemble/install providers, debuggable, optimization) may be " +
+          "incomplete."
+      )
+    }
+    delegate
+  } catch (e: ReflectiveOperationException) {
+    SentryPlugin.logger.warn(
+      "Unable to unwrap AGP analytics variant ${javaClass.name}. " +
+        "Internal variant APIs (assemble/install providers, debuggable, optimization) may be " +
+        "incomplete.",
+      e,
+    )
     null
   }
 }

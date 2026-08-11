@@ -81,6 +81,7 @@ class SentryPluginTest :
 
     val build = runner.appendArguments(":app:assembleRelease").build()
 
+    assertNoAnalyticsUnwrapWarning(build)
     assertFalse(
       build.output.contains("Unable to determine whether AGP application optimization is enabled"),
       build.output,
@@ -96,6 +97,34 @@ class SentryPluginTest :
       build.output,
     )
     verifyProguardUuid(testProjectDir.root)
+  }
+
+  @Test
+  fun `resolves assemble install and debuggable with analytics-wrapped variants`() {
+    // Fixture forces android.enableProfileJson=true, so AGP serves AnalyticsEnabled* wrappers.
+    // assemble/install providers and isDebuggable must still resolve via unwrapImpl().
+    applyUploadNativeSymbols()
+
+    val releaseBuild = runner.appendArguments(":app:assembleRelease", "--dry-run").build()
+    assertNoAnalyticsUnwrapWarning(releaseBuild)
+    // Non-debuggable + uploadNativeSymbols => task registered (assembleProvider path used).
+    assertTrue(
+      ":app:uploadSentryNativeSymbolsForRelease" in releaseBuild.output,
+      releaseBuild.output,
+    )
+
+    val debugBuild = runner.appendArguments(":app:assembleDebug", "--dry-run").build()
+    assertNoAnalyticsUnwrapWarning(debugBuild)
+    // isDebuggable must stay true under analytics wrappers, or we'd wrongly upload for debug.
+    assertFalse(
+      ":app:uploadSentryNativeSymbolsForDebug" in debugBuild.output,
+      debugBuild.output,
+    )
+
+    // Dry-run install resolves install task wiring through the analytics-wrapped variant.
+    val installBuild = runner.appendArguments(":app:installDebug", "--dry-run").build()
+    assertNoAnalyticsUnwrapWarning(installBuild)
+    assertTrue(":app:installDebug" in installBuild.output, installBuild.output)
   }
 
   @Test
@@ -462,6 +491,7 @@ class SentryPluginTest :
 
     val build = runner.appendArguments(":app:assembleRelease", "--dry-run").build()
 
+    assertNoAnalyticsUnwrapWarning(build)
     assertTrue(":app:uploadSentryNativeSymbolsForRelease" in build.output)
   }
 
@@ -471,6 +501,7 @@ class SentryPluginTest :
 
     val build = runner.appendArguments(":app:assembleDebug", "--dry-run").build()
 
+    assertNoAnalyticsUnwrapWarning(build)
     assertFalse(":app:uploadSentryNativeSymbolsForDebug" in build.output)
   }
 
@@ -1197,6 +1228,13 @@ class SentryPluginTest :
     assertEquals(
       TaskOutcome.SUCCESS,
       build.task(":app:copyFlutterAssetsDebug")?.outcome,
+      build.output,
+    )
+  }
+
+  private fun assertNoAnalyticsUnwrapWarning(build: BuildResult) {
+    assertFalse(
+      build.output.contains("Unable to unwrap AGP analytics variant"),
       build.output,
     )
   }
