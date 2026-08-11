@@ -106,9 +106,12 @@ class SentryPluginTest :
     applyUploadNativeSymbols()
     // AGP only registers install* tasks for signing-ready variants. Release has no signing by
     // default (debug is automatic), so point release at the debug keystore for installRelease.
+    // Leading newline matters: after applyUploadNativeSymbols() the file ends with `}` and no
+    // trailing newline. Without `\n`, Groovy parses `}android {` as sentry.android { ... }.
     appBuildFile.appendText(
       // language=Groovy
-      """
+      "\n" +
+        """
                 android {
                   buildTypes {
                     release {
@@ -117,7 +120,7 @@ class SentryPluginTest :
                   }
                 }
             """
-        .trimIndent()
+          .trimIndent()
     )
 
     // Use withArguments (not appendArguments) so each build is an isolated scenario.
@@ -1267,7 +1270,7 @@ class SentryPluginTest :
                   }
                 }
             """
-        .trimIndent()
+        .trimIndent() + "\n"
     )
   }
 
