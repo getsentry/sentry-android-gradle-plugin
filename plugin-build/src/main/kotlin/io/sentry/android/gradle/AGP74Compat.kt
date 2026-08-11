@@ -131,14 +131,12 @@ private fun Variant.isApplicationOptimizationEnabled(): Boolean {
         javaClass.getMethod("getOptimizationCreationConfig")
         this
       } catch (e: NoSuchMethodException) {
-        // The public Variant API is wrapped when AGP analytics are enabled. Internal creation config
-        // methods are only available on the delegate.
+        // AGP analytics wraps the public Variant API; internal creation config methods are only on
+        // the delegate.
         javaClass.getMethod("getDelegate").invoke(this)
       }
     val optimizationCreationConfig =
-      unwrappedVariant.javaClass
-        .getMethod("getOptimizationCreationConfig")
-        .invoke(unwrappedVariant)
+      unwrappedVariant.javaClass.getMethod("getOptimizationCreationConfig").invoke(unwrappedVariant)
     optimizationCreationConfig.javaClass
       .getMethod("getApplicationOptimizationEnabled")
       .invoke(optimizationCreationConfig) as Boolean
