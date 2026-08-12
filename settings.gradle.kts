@@ -32,15 +32,14 @@ dependencyResolutionManagement {
 
 rootProject.name = ("sentry-android-gradle-plugin-composite-build")
 
-include(":examples:android-gradle")
-
-include(":examples:android-gradle-kts")
-
-// Configuring this sample makes AGP download and set up the NDK, which isn't available when
-// Renovate regenerates the dependency lockfile/verification metadata and would fail the run.
-// The sample is never needed to resolve dependencies, so skip it on those runs. Renovate
-// always invokes Gradle with --write-locks/--update-locks and --dependency-verification
-// lenient; normal dev and CI builds don't, so they still build the sample.
+// Renovate updates dependencies by invoking the root wrapper with --write-locks/--update-locks
+// and --dependency-verification lenient, none of which normal dev and CI builds pass. A root
+// invocation can't refresh anything anyway: the only lockfile and verification metadata live in
+// plugin-build, and scripts/relock-plugin-build.sh regenerates those with -p plugin-build. But
+// configuring this build does break those runs, in two ways: the android-ndk sample makes AGP
+// download an NDK that Renovate's environment doesn't have, and --write-verification-metadata
+// calls getRootProject() on every build in the composite, which throws for the included builds
+// that a root `dependencies` task never configures. So configure nothing on those runs.
 val isDependencyResolutionRun =
   startParameter.isWriteDependencyLocks ||
     startParameter.lockedDependenciesToUpdate.isNotEmpty() ||
@@ -48,32 +47,37 @@ val isDependencyResolutionRun =
       org.gradle.api.artifacts.verification.DependencyVerificationMode.LENIENT
 
 if (!isDependencyResolutionRun) {
+  include(":examples:android-gradle")
+
+  include(":examples:android-gradle-kts")
+
   include(":examples:android-ndk")
-}
 
-include(":examples:android-instrumentation-sample")
+  include(":examples:android-instrumentation-sample")
 
-include(":examples:android-room-lib")
+  include(":examples:android-room-lib")
 
-include(":examples:spring-boot-sample")
+  include(":examples:spring-boot-sample")
 
-include(":examples:multi-module-sample")
+  include(":examples:multi-module-sample")
 
-include(":examples:multi-module-sample:spring-boot-in-multi-module-sample")
+  include(":examples:multi-module-sample:spring-boot-in-multi-module-sample")
 
-include(":examples:multi-module-sample:spring-boot-in-multi-module-sample2")
+  include(":examples:multi-module-sample:spring-boot-in-multi-module-sample2")
 
-includeBuild("plugin-build")
+  includeBuild("plugin-build")
 
-// this is needed so we can use kotlin-compiler-plugin directly in the sample app without publishing
-includeBuild("sentry-kotlin-compiler-plugin") {
-  dependencySubstitution {
-    substitute(module("io.sentry:sentry-kotlin-compiler-plugin")).using(project(":"))
+  // this is needed so we can use kotlin-compiler-plugin directly in the sample app without
+  // publishing
+  includeBuild("sentry-kotlin-compiler-plugin") {
+    dependencySubstitution {
+      substitute(module("io.sentry:sentry-kotlin-compiler-plugin")).using(project(":"))
+    }
   }
-}
 
-includeBuild("sentry-snapshots-runtime") {
-  dependencySubstitution {
-    substitute(module("io.sentry:sentry-snapshots-runtime")).using(project(":"))
+  includeBuild("sentry-snapshots-runtime") {
+    dependencySubstitution {
+      substitute(module("io.sentry:sentry-snapshots-runtime")).using(project(":"))
+    }
   }
 }
