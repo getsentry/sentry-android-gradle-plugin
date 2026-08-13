@@ -23,11 +23,12 @@ abstract class SentrySdkOptimizationClassVisitorFactory :
      * Optional SDK class availability produced by
      * [io.sentry.android.gradle.tasks.dependencies.ResolveSdkClassAvailabilityTask].
      *
-     * This must be a serializable [MapProperty] (not a nested `@InputFile`). Dependency jars are
-     * instrumented via AGP's isolated `AsmClassesTransform`, which does not promote nested visitor
-     * file inputs into transform inputs/dependencies — a file param is often missing/empty in the
-     * worker and yields a blank injection map. The map is still populated from the task output
-     * through a mapped provider so classpath resolution stays on the task.
+     * Must be a serializable [MapProperty] (not a nested `@InputFile`). Dependency jars are
+     * instrumented via AGP's isolated `AsmClassesTransform`, which does not reliably promote nested
+     * visitor file inputs into transform inputs/dependencies — workers then see a missing/empty
+     * file and inject a blank map. Wire this from `availabilityTask.flatMap { it.outputFile
+     * }.map(::readClassAvailability)` so Gradle depends on the task output and only reads the file
+     * after the resolve task runs.
      */
     @get:Input val classAvailability: MapProperty<String, Boolean>
   }

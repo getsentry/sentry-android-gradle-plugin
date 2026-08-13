@@ -74,9 +74,16 @@ class ResolveSdkClassAvailabilityTaskTest {
     // Realize the task object (runs the configure action) without reading moduleIds.
     task.get()
 
+    // Same wiring used for the ASM MapProperty: depends on the output file provider without
+    // reading it. Building this chain must stay lazy (no config-time resolution).
+    @Suppress("UNUSED_VARIABLE")
+    val availabilityProvider =
+      task.flatMap { it.outputFile }.map { file -> readClassAvailability(file.asFile) }
+
     // Mutation oracle: wiring the task must not force config-time resolution. Evaluating
     // resolutionResult during register (instead of inside a lazy Provider) would flip this to
-    // RESOLVED and fail the guard.
+    // RESOLVED and fail the guard. Likewise, TaskProvider.map { task.outputFile.get() } would
+    // read the file before the task runs and break the dependency edge.
     assertThat(configuration.state).isEqualTo(Configuration.State.UNRESOLVED)
   }
 

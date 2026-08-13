@@ -204,10 +204,13 @@ fun ApplicationAndroidComponentsExtension.configure(
             InstrumentationScope.ALL,
           ) { params ->
             // Map the task output into an @Input MapProperty so AsmClassesTransform workers receive
-            // the availability values. TaskProvider.map depends on the task output, so the file is
-            // read only after the resolve task runs (not at configuration time).
+            // the availability values by value (isolatable). Use flatMap on outputFile — not
+            // TaskProvider.map { task -> task.outputFile.get() } — so Gradle depends on the
+            // produced file and only reads it after the resolve task executes.
             params.classAvailability.setDisallowChanges(
-              availabilityTask.map { task -> readClassAvailability(task.outputFile.get().asFile) }
+              availabilityTask
+                .flatMap { it.outputFile }
+                .map { file -> readClassAvailability(file.asFile) }
             )
           }
           variant.instrumentation.setAsmFramesComputationMode(
