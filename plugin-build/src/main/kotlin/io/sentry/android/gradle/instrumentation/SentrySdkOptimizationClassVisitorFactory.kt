@@ -5,17 +5,28 @@ import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.util.SentryModules
+import java.util.Properties
 import org.gradle.api.artifacts.ModuleIdentifier
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
-import org.gradle.api.provider.MapProperty
-import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.objectweb.asm.ClassVisitor
 
 abstract class SentrySdkOptimizationClassVisitorFactory :
   AsmClassVisitorFactory<SentrySdkOptimizationClassVisitorFactory.SdkOptimizationParameters> {
 
   interface SdkOptimizationParameters : InstrumentationParameters {
-    @get:Input val classAvailability: MapProperty<String, Boolean>
+    /**
+     * Properties file produced by
+     * [io.sentry.android.gradle.tasks.dependencies.ResolveSdkClassAvailabilityTask]. Using a file
+     * input keeps classpath resolution on the producing task and lets AGP invalidate
+     * instrumentation when dependencies change.
+     */
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    val classAvailabilityFile: RegularFileProperty
   }
 
   override fun createClassVisitor(
@@ -25,14 +36,12 @@ abstract class SentrySdkOptimizationClassVisitorFactory :
     return LoadClassClassVisitor(
       instrumentationContext.apiVersion.get(),
       nextClassVisitor,
-      parameters.get().classAvailability.get(),
+      readClassAvailability(parameters.get().classAvailabilityFile),
     )
   }
 
-  // Empty availability means the runtime classpath is unknown. Skip this transformation so
-  // LoadClass falls back to reflection.
   override fun isInstrumentable(classData: ClassData): Boolean =
-    classData.className == LOAD_CLASS_NAME && parameters.get().classAvailability.get().isNotEmpty()
+    classData.className == LOAD_CLASS_NAME
 
   internal companion object {
     const val LOAD_CLASS_NAME = "io.sentry.util.LoadClass"
@@ -72,3 +81,16 @@ internal fun resolveClassAvailability(modules: Set<ModuleIdentifier>): Map<Strin
   SentrySdkOptimizationClassVisitorFactory.CLASS_MODULES.mapValues { (_, owners) ->
     owners.any { it in modules }
   }
+
+internal fun readClassAvailability(fileProperty: RegularFileProperty): Map<String, Boolean> {
+  val file = fileProperty.orNull?.asFile ?: return emptyMap()
+  if (!file.isFile || file.length() == 0L) {
+    return emptyMap()
+  }
+
+  val properties = Properties()
+  file.inputStream().use { properties.load(it) }
+  return properties.entries.associate { (key, value) ->
+    key.toString() to value.toString().toBooleanStrict()
+  }
+}

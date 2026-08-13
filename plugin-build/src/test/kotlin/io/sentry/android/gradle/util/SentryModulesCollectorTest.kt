@@ -87,14 +87,12 @@ class SentryModulesCollectorTest {
   @Test
   fun `configuration cannot be found - logs a warning and does not provide modules`() {
     val project = fixture.getSut(testProjectDir.root)
-    val modules =
-      project.collectModules(
-        "releaseRuntimeClasspath",
-        "release",
-        fixture.sentryModulesServiceProvider,
-      )
+    project.collectModules(
+      "releaseRuntimeClasspath",
+      "release",
+      fixture.sentryModulesServiceProvider,
+    )
     assertTrue { fixture.getSentryModules().isEmpty() }
-    assertThat(modules.isPresent).isFalse()
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] Unable to find configuration releaseRuntimeClasspath for variant release."
@@ -179,7 +177,7 @@ class SentryModulesCollectorTest {
   }
 
   @Test
-  fun `non sentry dependencies are provided via the modules provider`() {
+  fun `non sentry dependencies are persisted in the external modules service`() {
     val group = "androidx.sqlite"
     val name = "sqlite-framework"
     val moduleIdentifier = DefaultModuleIdentifier.newId(group, name)
@@ -192,15 +190,13 @@ class SentryModulesCollectorTest {
       }
 
     val project = fixture.getSut(testProjectDir.root, dependencies = setOf(sqliteDep))
-    val modules =
-      project.collectModules(
-        fixture.configurationName,
-        fixture.variantName,
-        fixture.sentryModulesServiceProvider,
-      )
+    project.collectModules(
+      fixture.configurationName,
+      fixture.variantName,
+      fixture.sentryModulesServiceProvider,
+    )
 
-    assertTrue { fixture.getExternalModules()[moduleIdentifier]!! == SemVer.parse(version) }
-    assertThat(modules.get()).containsExactly(moduleIdentifier)
+    assertThat(fixture.getExternalModules()[moduleIdentifier]).isEqualTo(SemVer.parse(version))
   }
 
   @Test

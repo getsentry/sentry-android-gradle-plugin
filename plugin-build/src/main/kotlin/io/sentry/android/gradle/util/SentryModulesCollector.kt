@@ -12,7 +12,7 @@ fun Project.collectModules(
   configurationName: String,
   variantName: String,
   sentryModulesService: Provider<SentryModulesService>,
-): Provider<Set<ModuleIdentifier>> {
+) {
   val configProvider =
     try {
       configurations.named(configurationName)
@@ -20,9 +20,11 @@ fun Project.collectModules(
       logger.warn { "Unable to find configuration $configurationName for variant $variantName." }
       sentryModulesService.get().sentryModules = emptyMap()
       sentryModulesService.get().externalModules = emptyMap()
-      return provider<Set<ModuleIdentifier>> { null }
+      return
     }
 
+  // Populate the shared service after the configuration resolves. Do not read
+  // resolutionResult during configuration: that forces config-time resolution.
   configProvider.configure { configuration ->
     configuration.incoming.afterResolve {
       val allModules = it.resolutionResult.allComponents.versionMap(logger)
@@ -39,12 +41,6 @@ fun Project.collectModules(
       sentryModulesService.get().sentryModules = sentryModules
       sentryModulesService.get().externalModules = externalModules
     }
-  }
-
-  return configProvider.map { configuration ->
-    configuration.incoming.resolutionResult.allComponents
-      .mapNotNull { it.moduleVersion?.module }
-      .toSet()
   }
 }
 

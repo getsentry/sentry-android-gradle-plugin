@@ -4,6 +4,8 @@
 
 ### Fixes
 
+- Avoid resolving the variant runtime classpath at configuration time for SDK runtime optimizations ([#1401](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1401))
+  - Fixes Gradle warnings like `Configuration 'devDebugRuntimeClasspath' was resolved during configuration time` introduced by the build-time class-availability optimization
 - Detect AGP `optimization.enable` when the variant is wrapped by AGP analytics ([#1382](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1382))
   - This fixes `java.lang.NoSuchMethodException: com.android.build.api.component.analytics.AnalyticsEnabledApplicationVariant_Decorated.getOptimizationCreationConfig()`
 

@@ -21,7 +21,6 @@ import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SentrySdkOptimizationClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
-import io.sentry.android.gradle.instrumentation.resolveClassAvailability
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
 import io.sentry.android.gradle.sourcecontext.OutputPaths
@@ -35,6 +34,7 @@ import io.sentry.android.gradle.tasks.SentryUploadAppArtifactTask
 import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.SentryUploadSnapshotsTask
 import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
+import io.sentry.android.gradle.tasks.dependencies.ResolveSdkClassAvailabilityTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.AgpVersions
@@ -181,9 +181,34 @@ fun ApplicationAndroidComponentsExtension.configure(
 
       val runtimeOptimizationsEnabled = extension.runtimeOptimizations.enabled.get()
       val tracingInstrumentationEnabled = extension.tracingInstrumentation.enabled.get()
-      // Both visitor factories need the resolved dependency graph.
-      val modulesService =
-        if (runtimeOptimizationsEnabled || tracingInstrumentationEnabled) {
+
+      // Runtime optimizations resolve the classpath via a task output so AGP does not force
+      // config-time resolution when snapshotting instrumentation inputs.
+      if (runtimeOptimizationsEnabled) {
+        val availabilityTask =
+          ResolveSdkClassAvailabilityTask.register(
+            project = project,
+            configurationName = "${variant.name}RuntimeClasspath",
+            taskSuffix = variant.name.capitalized,
+          )
+        if (availabilityTask != null) {
+          variant.instrumentation.transformClassesWith(
+            SentrySdkOptimizationClassVisitorFactory::class.java,
+            InstrumentationScope.ALL,
+          ) { params ->
+            params.classAvailabilityFile.setDisallowChanges(
+              availabilityTask.flatMap { it.outputFile }
+            )
+          }
+          variant.instrumentation.setAsmFramesComputationMode(
+            FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
+          )
+        }
+      }
+
+      // Tracing still uses the shared modules service filled via afterResolve.
+      if (tracingInstrumentationEnabled) {
+        val tracingModulesService =
           SentryModulesService.register(
               project,
               extension.tracingInstrumentation.features,
@@ -196,31 +221,11 @@ fun ApplicationAndroidComponentsExtension.configure(
               // Keep the service alive after configuration so instrumentation can read it.
               buildEvents.onTaskCompletion(it)
             }
-        } else {
-          null
-        }
-
-      val modules =
-        modulesService?.let {
-          project.collectModules("${variant.name}RuntimeClasspath", variant.name, it)
-        }
-
-      if (runtimeOptimizationsEnabled) {
-        variant.instrumentation.transformClassesWith(
-          SentrySdkOptimizationClassVisitorFactory::class.java,
-          InstrumentationScope.ALL,
-        ) { params ->
-          params.classAvailability.setDisallowChanges(
-            checkNotNull(modules).map(::resolveClassAvailability).orElse(emptyMap())
-          )
-        }
-        variant.instrumentation.setAsmFramesComputationMode(
-          FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
+        project.collectModules(
+          "${variant.name}RuntimeClasspath",
+          variant.name,
+          tracingModulesService,
         )
-      }
-
-      if (tracingInstrumentationEnabled) {
-        val tracingModulesService = checkNotNull(modulesService)
 
         variant.configureInstrumentation(
           SpanAddingClassVisitorFactory::class.java,
