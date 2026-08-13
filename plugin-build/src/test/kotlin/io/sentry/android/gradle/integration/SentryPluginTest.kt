@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.findLoadClassBytecode
+import io.sentry.android.gradle.readInjectedAvailability
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.SentryVersions
@@ -26,10 +27,6 @@ import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThrows
 import org.junit.Assume.assumeThat
 import org.junit.Test
-import org.objectweb.asm.ClassReader
-import org.objectweb.asm.Opcodes
-import org.objectweb.asm.tree.ClassNode
-import org.objectweb.asm.tree.LdcInsnNode
 
 class SentryPluginTest :
   BaseSentryPluginTest(BuildConfig.AgpVersion, GradleVersion.current().version) {
@@ -606,7 +603,14 @@ class SentryPluginTest :
     assertThat(availability["timber.log.Timber"]).isTrue()
     assertThat(availability["androidx.compose.ui.node.Owner"]).isFalse()
 
-    val loadClassBytes = findLoadClassBytecode(testProjectDir.root.resolve("app/build"))
+    // Search project build outputs and the TestKit transform cache. Dependency jars are
+    // instrumented via AsmClassesTransform, so the injected class may only exist under
+    // transforms-*/... rather than app/build intermediates.
+    val loadClassBytes =
+      findLoadClassBytecode(
+        testProjectDir.root.resolve("app/build"),
+        File("build/tmp/integrationTest/work/.gradle-test-kit"),
+      )
     assertThat(readInjectedAvailability(loadClassBytes))
       .containsAtLeastEntriesIn(
         mapOf("timber.log.Timber" to true, "androidx.compose.ui.node.Owner" to false)
@@ -1429,42 +1433,6 @@ class SentryPluginTest :
         }
       }
       .toMap()
-
-  /**
-   * Reconstructs the injected `classAvailability` map from `LoadClass` bytecode by pairing each
-   * string LDC in `<clinit>` with the following boolean constant.
-   */
-  private fun readInjectedAvailability(classBytes: ByteArray): Map<String, Boolean> {
-    val classNode = ClassNode()
-    ClassReader(classBytes).accept(classNode, 0)
-    val clinit =
-      classNode.methods.firstOrNull { it.name == "<clinit>" }
-        ?: error("LoadClass is missing <clinit>; availability was not injected")
-
-    val availability = linkedMapOf<String, Boolean>()
-    val instructions = clinit.instructions.toArray()
-    var index = 0
-    while (index < instructions.size) {
-      val insn = instructions[index]
-      if (insn is LdcInsnNode && insn.cst is String) {
-        val className = insn.cst as String
-        val boolInsn = instructions.getOrNull(index + 1)
-        val available =
-          when (boolInsn?.opcode) {
-            Opcodes.ICONST_1 -> true
-            Opcodes.ICONST_0 -> false
-            else -> null
-          }
-        if (available != null) {
-          availability[className] = available
-          index += 2
-          continue
-        }
-      }
-      index++
-    }
-    return availability
-  }
 
   companion object {
     private const val SQLITE = "androidx.sqlite:sqlite:2.6.2"

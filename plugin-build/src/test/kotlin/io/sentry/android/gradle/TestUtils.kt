@@ -19,6 +19,12 @@ import net.lingala.zip4j.exception.ZipException
 import net.lingala.zip4j.io.inputstream.ZipInputStream
 import org.gradle.api.Project
 import org.junit.rules.TemporaryFolder
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.Opcodes
+import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.tree.FieldInsnNode
+import org.objectweb.asm.tree.LdcInsnNode
+import org.objectweb.asm.tree.TypeInsnNode
 
 private val ASSET_PATTERN_PROGUARD =
   Regex(
@@ -184,29 +190,126 @@ internal fun extractZipBytes(zipFile: File, fileToExtract: String): ByteArray? {
   }
 }
 
-/** Finds instrumented `io/sentry/util/LoadClass.class` under a build directory. */
-internal fun findLoadClassBytecode(rootFile: File): ByteArray {
+/**
+ * Finds ASM-instrumented `io/sentry/util/LoadClass.class` under one or more roots.
+ *
+ * AGP keeps uninstrumented library jars/class dirs under `app/build`
+ * (`runtime_library_classes_jar`, compile jars, etc.) and writes dependency instrumentation into
+ * Gradle artifact-transform outputs. Never return the first path match — require the
+ * `classAvailability` injection marker, and prefer paths that look like ASM outputs when several
+ * instrumented copies exist.
+ */
+internal fun findLoadClassBytecode(vararg searchRoots: File): ByteArray {
   val classRelativePath = "io/sentry/util/LoadClass.class"
-  val classFile =
-    rootFile.walkTopDown().firstOrNull { file ->
-      file.isFile &&
-        file.name == "LoadClass.class" &&
-        file.invariantSeparatorsPath.endsWith(classRelativePath)
-    }
-  if (classFile != null) {
-    return classFile.readBytes()
-  }
+  val candidates = mutableListOf<Pair<String, ByteArray>>()
 
-  rootFile
-    .walkTopDown()
-    .filter { it.isFile && it.extension == "jar" }
-    .forEach { jar ->
-      extractZipBytes(jar, classRelativePath)?.let {
-        return it
+  for (root in searchRoots) {
+    if (!root.exists()) continue
+    root.walkTopDown().forEach { file ->
+      if (!file.isFile) return@forEach
+      val path = file.invariantSeparatorsPath
+      when {
+        file.name == "LoadClass.class" && path.endsWith(classRelativePath) ->
+          candidates += path to file.readBytes()
+        file.extension.equals("jar", ignoreCase = true) ->
+          extractZipBytes(file, classRelativePath)?.let { candidates += path to it }
       }
     }
+  }
 
-  error("Could not find instrumented $classRelativePath under ${rootFile.absolutePath}")
+  val instrumented =
+    candidates
+      .filter { (_, bytes) -> hasClassAvailabilityInjection(bytes) }
+      .sortedByDescending { (path, _) -> isLikelyAsmInstrumentedPath(path) }
+
+  return instrumented.firstOrNull()?.second
+    ?: error(
+      buildString {
+        append("Could not find instrumented $classRelativePath under ")
+        append(searchRoots.joinToString { it.absolutePath })
+        if (candidates.isNotEmpty()) {
+          append(". Candidates without injection marker: ")
+          append(candidates.joinToString { it.first })
+        }
+      }
+    )
+}
+
+/**
+ * True when [LoadClassClassVisitor] injected `classAvailability = new HashMap<>()` into `<clinit>`.
+ */
+internal fun hasClassAvailabilityInjection(classBytes: ByteArray): Boolean {
+  val classNode = ClassNode()
+  ClassReader(classBytes).accept(classNode, 0)
+  val clinit = classNode.methods.firstOrNull { it.name == "<clinit>" } ?: return false
+
+  var sawHashMap = false
+  var sawPutStatic = false
+  for (insn in clinit.instructions) {
+    when (insn) {
+      is TypeInsnNode -> {
+        if (insn.opcode == Opcodes.NEW && insn.desc == "java/util/HashMap") {
+          sawHashMap = true
+        }
+      }
+      is FieldInsnNode -> {
+        if (
+          insn.opcode == Opcodes.PUTSTATIC &&
+            insn.owner == "io/sentry/util/LoadClass" &&
+            insn.name == "classAvailability"
+        ) {
+          sawPutStatic = true
+        }
+      }
+    }
+  }
+  return sawHashMap && sawPutStatic
+}
+
+/**
+ * Reconstructs the injected `classAvailability` map from `LoadClass` bytecode by pairing each
+ * string LDC in `<clinit>` with the following boolean constant.
+ */
+internal fun readInjectedAvailability(classBytes: ByteArray): Map<String, Boolean> {
+  val classNode = ClassNode()
+  ClassReader(classBytes).accept(classNode, 0)
+  val clinit =
+    classNode.methods.firstOrNull { it.name == "<clinit>" }
+      ?: error("LoadClass is missing <clinit>; availability was not injected")
+
+  val availability = linkedMapOf<String, Boolean>()
+  val instructions = clinit.instructions.toArray()
+  var index = 0
+  while (index < instructions.size) {
+    val insn = instructions[index]
+    if (insn is LdcInsnNode && insn.cst is String) {
+      val className = insn.cst as String
+      val boolInsn = instructions.getOrNull(index + 1)
+      val available =
+        when (boolInsn?.opcode) {
+          Opcodes.ICONST_1 -> true
+          Opcodes.ICONST_0 -> false
+          else -> null
+        }
+      if (available != null) {
+        availability[className] = available
+        index += 2
+        continue
+      }
+    }
+    index++
+  }
+  return availability
+}
+
+private fun isLikelyAsmInstrumentedPath(path: String): Boolean {
+  val normalized = path.lowercase()
+  return "asm_instrumented" in normalized ||
+    "instrumented_classes" in normalized ||
+    "classeswithasm" in normalized ||
+    // Artifact-transform outputs for dependency jars (AsmClassesTransform).
+    (Regex("/transforms-\\d+/").containsMatchIn(normalized) &&
+      ("asm" in normalized || "instrument" in normalized))
 }
 
 private fun readZippedContent(zipInputStream: ZipInputStream): String {
