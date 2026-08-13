@@ -25,6 +25,10 @@ abstract class SentrySdkOptimizationClassVisitorFactory :
 
     @get:Input val buildTimeMetadataEnabled: Property<Boolean>
 
+    // The merged manifest cannot be read before dependency transforms are isolated, so use a
+    // per-build key to prevent AGP from reusing metadata injected for another app.
+    @get:Input val buildTimeMetadataCacheKey: Property<String>
+
     @get:InputFile @get:PathSensitive(PathSensitivity.NONE) val mergedManifest: RegularFileProperty
   }
 

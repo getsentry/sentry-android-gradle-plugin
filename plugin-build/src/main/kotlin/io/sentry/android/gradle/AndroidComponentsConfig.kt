@@ -262,6 +262,11 @@ fun ApplicationAndroidComponentsExtension.configure(
               .map { checkNotNull(modulesService).get().supportsBuildTimeMetadata() }
               .orElse(false)
           )
+          params.buildTimeMetadataCacheKey.setDisallowChanges(
+            params.buildTimeMetadataEnabled.map {
+              if (it) java.util.UUID.randomUUID().toString() else ""
+            }
+          )
           params.mergedManifest.set(variant.artifacts.get(SingleArtifact.MERGED_MANIFEST))
         }
         variant.instrumentation.setAsmFramesComputationMode(
