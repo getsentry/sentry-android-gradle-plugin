@@ -582,6 +582,28 @@ class SentryPluginTest :
   }
 
   @Test
+  fun `generates resolved manifest metadata`() {
+    configureFakeMetadataSdk("true")
+
+    runner.appendArguments(":app:assembleRelease").build()
+
+    assertTrue(releaseDexContains(BUILD_TIME_METADATA_KEY))
+  }
+
+  @Test
+  fun `falls back to PackageManager for resource metadata`() {
+    configureFakeMetadataSdk("@string/sentry_debug", "android:resource")
+    File(testProjectDir.root, "app/src/main/res/values/strings.xml").apply {
+      parentFile.mkdirs()
+      writeText("<resources><string name=\"sentry_debug\">true</string></resources>")
+    }
+
+    runner.appendArguments(":app:assembleRelease").build()
+
+    assertFalse(releaseDexContains(BUILD_TIME_METADATA_KEY))
+  }
+
+  @Test
   fun `register tracing instrumentation if tracingInstrumentation is enabled`() {
     applyTracingInstrumentation()
 
@@ -1358,6 +1380,71 @@ class SentryPluginTest :
     )
   }
 
+  private fun configureFakeMetadataSdk(value: String, attribute: String = "android:value") {
+    File(testProjectDir.root, "settings.gradle")
+      .appendText("\nproject(':module').name = 'sentry-android-core'")
+    File(
+        testProjectDir.root,
+        "module/src/main/java/io/sentry/android/core/ManifestMetadataReader.java",
+      )
+      .apply {
+        parentFile.mkdirs()
+        writeText(
+          """
+          package io.sentry.android.core;
+
+          import java.util.Map;
+
+          public final class ManifestMetadataReader {
+            static Map<String, Object> buildTimeMetadata;
+          }
+          """
+            .trimIndent()
+        )
+      }
+    appBuildFile.appendText(
+      """
+
+      dependencies {
+        implementation project(':sentry-android-core')
+      }
+
+      android {
+        buildTypes.release.minifyEnabled = false
+      }
+      """
+        .trimIndent()
+    )
+    File(testProjectDir.root, "app/src/main/AndroidManifest.xml").apply {
+      parentFile.mkdirs()
+      writeText(
+        """
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+          <application>
+            <meta-data android:name="$BUILD_TIME_METADATA_KEY" $attribute="$value"/>
+          </application>
+        </manifest>
+        """
+          .trimIndent()
+      )
+    }
+  }
+
+  private fun releaseDexContains(value: String): Boolean {
+    val apk = File(testProjectDir.root, "app/build/outputs/apk/release/app-release-unsigned.apk")
+    return java.util.zip.ZipFile(apk).use { zip ->
+      zip
+        .entries()
+        .asSequence()
+        .filter { it.name.matches(Regex("classes\\d*\\.dex")) }
+        .any { entry ->
+          zip.getInputStream(entry).use {
+            it.readBytes().toString(Charsets.ISO_8859_1).contains(value)
+          }
+        }
+    }
+  }
+
   private fun buildDatabaseInstrumentation(vararg dependencies: String): BuildResult {
     applyTracingInstrumentation(
       features = setOf(InstrumentationFeature.DATABASE),
@@ -1385,6 +1472,7 @@ class SentryPluginTest :
   }
 
   companion object {
+    private const val BUILD_TIME_METADATA_KEY = "io.sentry.test-build-time-injection"
     private const val SQLITE = "androidx.sqlite:sqlite:2.6.2"
     private const val SENTRY_ANDROID_SQLITE_OPEN_HELPER = "io.sentry:sentry-android-sqlite:6.21.0"
     private val SENTRY_ANDROID_SQLITE_DRIVER =
