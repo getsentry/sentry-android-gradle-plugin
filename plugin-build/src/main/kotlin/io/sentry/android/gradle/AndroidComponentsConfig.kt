@@ -250,6 +250,7 @@ fun ApplicationAndroidComponentsExtension.configure(
       }
 
       if (runtimeOptimizationsEnabled) {
+        val runtimeModulesService = checkNotNull(modulesService)
         variant.instrumentation.transformClassesWith(
           SentrySdkOptimizationClassVisitorFactory::class.java,
           InstrumentationScope.ALL,
@@ -259,12 +260,12 @@ fun ApplicationAndroidComponentsExtension.configure(
           )
           params.buildTimeMetadataEnabled.setDisallowChanges(
             checkNotNull(modules)
-              .map { checkNotNull(modulesService).get().supportsBuildTimeMetadata() }
+              .map { runtimeModulesService.get().supportsBuildTimeMetadata() }
               .orElse(false)
           )
           params.buildTimeMetadataCacheKey.setDisallowChanges(
             params.buildTimeMetadataEnabled.map {
-              if (it) java.util.UUID.randomUUID().toString() else ""
+              if (it) runtimeModulesService.get().buildTimeMetadataCacheKey else ""
             }
           )
           params.mergedManifest.set(variant.artifacts.get(SingleArtifact.MERGED_MANIFEST))

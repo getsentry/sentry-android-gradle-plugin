@@ -8,6 +8,7 @@ import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.util.getBuildServiceName
+import java.util.UUID
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ModuleIdentifier
 import org.gradle.api.provider.Property
@@ -21,6 +22,8 @@ import org.gradle.tooling.events.OperationCompletionListener
 
 abstract class SentryModulesService :
   BuildService<SentryModulesService.Parameters>, OperationCompletionListener {
+
+  val buildTimeMetadataCacheKey: String = UUID.randomUUID().toString()
 
   @get:Synchronized @set:Synchronized var sentryModules: Map<ModuleIdentifier, SemVer> = emptyMap()
 
