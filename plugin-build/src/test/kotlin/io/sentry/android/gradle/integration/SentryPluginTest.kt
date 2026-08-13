@@ -561,12 +561,24 @@ class SentryPluginTest :
 
   @Test
   fun `registers runtime optimizations independently from tracing instrumentation`() {
-    applyTracingInstrumentation(false, appStart = false, logcat = false)
+    applyTracingInstrumentation(
+      tracingInstrumentation = false,
+      appStart = false,
+      logcat = false,
+      dependencies = setOf("com.jakewharton.timber:timber:5.0.1"),
+      sdkVersion = BuildConfig.SdkVersion,
+    )
 
-    val build = runner.appendArguments(":app:assembleRelease", "--info").build()
+    val build =
+      runner.appendArguments(":app:assembleDebug", "--info", "--warning-mode", "all").build()
 
-    assertTrue(":app:transformReleaseClassesWithAsm" in build.output)
-    assertTrue("Detected Sentry modules" in build.output)
+    assertEquals(
+      TaskOutcome.SUCCESS,
+      build.task(":app:generateSentryBuildTimeOptionsDebug")?.outcome,
+      build.output,
+    )
+    assertTrue(":app:transformDebugClassesWithAsm" in build.output)
+    assertFalse("RuntimeClasspath' was resolved during configuration time" in build.output)
   }
 
   @Test

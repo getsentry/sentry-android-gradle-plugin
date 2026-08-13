@@ -17,18 +17,14 @@ import org.objectweb.asm.Opcodes
  *
  * After instrumentation the generated static initializer is equivalent to:
  * ```java
- * classAvailability = new HashMap<>();
- * classAvailability.put("timber.log.Timber", true);
+ * classAvailability = SentryGeneratedBuildTimeOptions.getClassAvailability();
  * ```
  *
  * Known entries avoid reflection; omitted class names still fall back to it. SDK versions without
  * the field are left unchanged.
  */
-internal class LoadClassClassVisitor(
-  apiVersion: Int,
-  nextClassVisitor: ClassVisitor,
-  private val classAvailability: Map<String, Boolean>,
-) : ClassVisitor(apiVersion, nextClassVisitor) {
+internal class LoadClassClassVisitor(apiVersion: Int, nextClassVisitor: ClassVisitor) :
+  ClassVisitor(apiVersion, nextClassVisitor) {
   private var hasAvailabilityField = false
   private var hasStaticInitializer = false
 
@@ -94,48 +90,27 @@ internal class LoadClassClassVisitor(
   }
 
   private fun injectClassAvailability(visitor: MethodVisitor) {
-    visitor.visitTypeInsn(Opcodes.NEW, HASH_MAP_NAME)
-    visitor.visitInsn(Opcodes.DUP)
-    visitor.visitMethodInsn(Opcodes.INVOKESPECIAL, HASH_MAP_NAME, "<init>", "()V", false)
+    visitor.visitMethodInsn(
+      Opcodes.INVOKESTATIC,
+      GENERATED_OPTIONS_INTERNAL_NAME,
+      "getClassAvailability",
+      "()Ljava/util/Map;",
+      false,
+    )
     visitor.visitFieldInsn(
       Opcodes.PUTSTATIC,
       LOAD_CLASS_INTERNAL_NAME,
       AVAILABILITY_FIELD,
       MAP_DESCRIPTOR,
     )
-
-    classAvailability.forEach { (className, available) ->
-      visitor.visitFieldInsn(
-        Opcodes.GETSTATIC,
-        LOAD_CLASS_INTERNAL_NAME,
-        AVAILABILITY_FIELD,
-        MAP_DESCRIPTOR,
-      )
-      visitor.visitLdcInsn(className)
-      visitor.visitInsn(if (available) Opcodes.ICONST_1 else Opcodes.ICONST_0)
-      visitor.visitMethodInsn(
-        Opcodes.INVOKESTATIC,
-        "java/lang/Boolean",
-        "valueOf",
-        "(Z)Ljava/lang/Boolean;",
-        false,
-      )
-      visitor.visitMethodInsn(
-        Opcodes.INVOKEINTERFACE,
-        "java/util/Map",
-        "put",
-        "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
-        true,
-      )
-      visitor.visitInsn(Opcodes.POP)
-    }
   }
 
   private companion object {
     const val LOAD_CLASS_INTERNAL_NAME = "io/sentry/util/LoadClass"
+    const val GENERATED_OPTIONS_INTERNAL_NAME =
+      "io/sentry/android/core/SentryGeneratedBuildTimeOptions"
     const val AVAILABILITY_FIELD = "classAvailability"
     const val MAP_DESCRIPTOR = "Ljava/util/Map;"
-    const val HASH_MAP_NAME = "java/util/HashMap"
     const val STATIC_INITIALIZER = "<clinit>"
     const val VOID_METHOD_DESCRIPTOR = "()V"
   }
