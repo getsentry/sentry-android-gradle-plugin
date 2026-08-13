@@ -213,6 +213,18 @@ fun ApplicationAndroidComponentsExtension.configure(
                 .map { file -> readClassAvailability(file.asFile) }
             )
           }
+          // AsmClassesTransform isolates nested visitor @Input values when dependency jars are
+          // consumed. Isolation cannot query a task-mapped MapProperty until the producing task
+          // has completed (Gradle error: "Querying the mapped value ... before task has
+          // completed is not supported"). Force the availability task to finish before variant
+          // consumers that resolve instrumented runtime jars and trigger those transforms.
+          val variantSuffix = variant.name.capitalized
+          project.tasks.configureEach { task ->
+            val name = task.name
+            if (shouldRunSdkClassAvailabilityBefore(name, variantSuffix)) {
+              task.dependsOn(availabilityTask)
+            }
+          }
           variant.instrumentation.setAsmFramesComputationMode(
             FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
           )
@@ -597,6 +609,25 @@ fun Variant.configureUploadAppTasks(
     getAssembleTaskProvider(project, variant)!!.configure { it.finalizedBy(uploadApkTask) }
   }
   return uploadBundleTask to uploadApkTask
+}
+
+/**
+ * Tasks that consume instrumented dependency jars and cause AGP to isolate AsmClassesTransform
+ * parameters. The SDK class-availability resolve task must complete before these run so nested
+ * visitor MapProperty inputs are queryable during isolation.
+ */
+private fun shouldRunSdkClassAvailabilityBefore(taskName: String, variantSuffix: String): Boolean {
+  if (taskName == "pre${variantSuffix}Build") return true
+  if (taskName == "transform${variantSuffix}ClassesWithAsm") return true
+  // Dex / merge tasks that pull runtime classpath jars through AsmClassesTransform.
+  if (!taskName.contains(variantSuffix)) return false
+  return taskName.startsWith("mergeExtDex") ||
+    taskName.startsWith("mergeLibDex") ||
+    taskName.startsWith("mergeProjectDex") ||
+    taskName.startsWith("mergeDex") ||
+    taskName.startsWith("dexBuilder") ||
+    (taskName.startsWith("check") && taskName.contains("DuplicateClasses")) ||
+    taskName.contains("ClassesWithAsm")
 }
 
 private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
