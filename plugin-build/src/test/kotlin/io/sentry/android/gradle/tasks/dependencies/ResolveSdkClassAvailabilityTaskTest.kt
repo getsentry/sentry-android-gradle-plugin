@@ -68,15 +68,15 @@ class ResolveSdkClassAvailabilityTaskTest {
       ResolveSdkClassAvailabilityTask.register(
         project = project,
         configurationName = "runtimeClasspath",
-        attributeValueJar = "jar",
         taskSuffix = "Test",
       )
     requireNotNull(task)
     // Realize the task object (runs the configure action) without reading moduleIds.
     task.get()
 
-    // Mutation oracle: wiring the task must not force config-time resolution. Reintroducing a
-    // resolutionResult/map read during register would flip this to RESOLVED and fail the guard.
+    // Mutation oracle: wiring the task must not force config-time resolution. Evaluating
+    // resolutionResult during register (instead of inside a lazy Provider) would flip this to
+    // RESOLVED and fail the guard.
     assertThat(configuration.state).isEqualTo(Configuration.State.UNRESOLVED)
   }
 

@@ -1,11 +1,9 @@
 package io.sentry.android.gradle.tasks.dependencies
 
 import io.sentry.android.gradle.instrumentation.resolveClassAvailability
-import io.sentry.android.gradle.util.artifactsFor
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.UnknownDomainObjectException
-import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.provider.SetProperty
@@ -30,7 +28,7 @@ abstract class ResolveSdkClassAvailabilityTask : DefaultTask() {
     description = "Resolves optional Sentry SDK class availability from the runtime classpath"
   }
 
-  /** External module coordinates in `group:module` form. */
+  /** Module coordinates in `group:module` form from the resolved dependency graph. */
   @get:Input abstract val moduleIds: SetProperty<String>
 
   @get:OutputFile abstract val outputFile: RegularFileProperty
@@ -65,7 +63,6 @@ abstract class ResolveSdkClassAvailabilityTask : DefaultTask() {
     fun register(
       project: Project,
       configurationName: String,
-      attributeValueJar: String = "android-classes",
       taskSuffix: String,
     ): TaskProvider<ResolveSdkClassAvailabilityTask>? {
       val configuration =
@@ -82,14 +79,14 @@ abstract class ResolveSdkClassAvailabilityTask : DefaultTask() {
         "resolveSentrySdkClassAvailability$taskSuffix",
         ResolveSdkClassAvailabilityTask::class.java,
       ) { task ->
-        // Lazy: artifactsFor(...).resolvedArtifacts only resolves when the task executes.
-        val artifacts = configuration.artifactsFor(attributeValueJar).resolvedArtifacts
+        // Lazy Provider: resolutionResult is only read when the task input is realized at
+        // execution time. Use allComponents (not artifactsFor) so presence matches the old
+        // graph-based path, including modules that do not publish android-classes artifacts.
         task.moduleIds.set(
-          artifacts.map { list ->
-            list
-              .map { artifact -> artifact.id.componentIdentifier }
-              .filterIsInstance<ModuleComponentIdentifier>()
-              .map { id -> "${id.group}:${id.module}" }
+          project.provider {
+            configuration.incoming.resolutionResult.allComponents
+              .mapNotNull { component -> component.moduleVersion?.module }
+              .map { module -> "${module.group}:${module.name}" }
               .toSet()
           }
         )
