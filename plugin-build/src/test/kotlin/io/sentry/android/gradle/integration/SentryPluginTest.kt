@@ -565,19 +565,19 @@ class SentryPluginTest :
       tracingInstrumentation = false,
       appStart = false,
       logcat = false,
-      dependencies = setOf("com.jakewharton.timber:timber:5.0.1"),
+      dependencies = setOf("androidx.compose.ui:ui:1.7.0", "com.jakewharton.timber:timber:5.0.1"),
       sdkVersion = BuildConfig.SdkVersion,
     )
 
     val build =
-      runner.appendArguments(":app:assembleDebug", "--info", "--warning-mode", "all").build()
+      runner.appendArguments(":app:assembleRelease", "--info", "--warning-mode", "all").build()
 
     assertEquals(
       TaskOutcome.SUCCESS,
-      build.task(":app:generateSentryBuildTimeOptionsDebug")?.outcome,
+      build.task(":app:generateSentryBuildTimeOptionsRelease")?.outcome,
       build.output,
     )
-    assertTrue(":app:transformDebugClassesWithAsm" in build.output)
+    assertTrue(":app:transformReleaseClassesWithAsm" in build.output)
     assertFalse("RuntimeClasspath' was resolved during configuration time" in build.output)
   }
 
