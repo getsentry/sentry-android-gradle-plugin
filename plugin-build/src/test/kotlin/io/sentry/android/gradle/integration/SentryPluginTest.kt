@@ -581,7 +581,7 @@ class SentryPluginTest :
 
   @Test
   fun `does not inject manifest metadata with resource references`() {
-    configureFakeMetadataSdk("@string/sentry_debug")
+    configureFakeMetadataSdk("@string/sentry_debug", "android:resource")
     File(testProjectDir.root, "app/src/main/res/values/strings.xml").apply {
       parentFile.mkdirs()
       writeText("<resources><string name=\"sentry_debug\">true</string></resources>")
@@ -1369,7 +1369,7 @@ class SentryPluginTest :
     )
   }
 
-  private fun configureFakeMetadataSdk(value: String) {
+  private fun configureFakeMetadataSdk(value: String, attribute: String = "android:value") {
     File(testProjectDir.root, "settings.gradle")
       .appendText("\nproject(':module').name = 'sentry-android-core'")
     moduleBuildFile.appendText(
@@ -1418,7 +1418,7 @@ class SentryPluginTest :
         """
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
           <application>
-            <meta-data android:name="$BUILD_TIME_METADATA_KEY" android:value="$value"/>
+            <meta-data android:name="$BUILD_TIME_METADATA_KEY" $attribute="$value"/>
           </application>
         </manifest>
         """
