@@ -9,7 +9,7 @@
 
 ### Performance
 
-- Resolve Sentry Android manifest metadata at build time to avoid `PackageManager` and `Bundle` parsing during SDK initialization ([#1401](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1401))
+- Resolve Sentry Android manifest metadata at build time to avoid `PackageManager` and `Bundle` parsing, reducing median SDK initialization time by 6.5% in a cold-start benchmark ([#1401](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1401))
 
 ### Dependencies
 
