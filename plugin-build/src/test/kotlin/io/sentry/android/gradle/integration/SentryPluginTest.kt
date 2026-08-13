@@ -605,16 +605,17 @@ class SentryPluginTest :
 
     // Search project build outputs and the TestKit transform cache. Dependency jars are
     // instrumented via AsmClassesTransform, so the injected class may only exist under
-    // transforms-*/... rather than app/build intermediates.
+    // transforms-*/... rather than app/build intermediates. Match the properties-file map so
+    // a stale instrumented jar from another TestKit run cannot win on walk order.
+    val expectedInjected =
+      mapOf("timber.log.Timber" to true, "androidx.compose.ui.node.Owner" to false)
     val loadClassBytes =
       findLoadClassBytecode(
         testProjectDir.root.resolve("app/build"),
         File("build/tmp/integrationTest/work/.gradle-test-kit"),
+        expectedAvailability = expectedInjected,
       )
-    assertThat(readInjectedAvailability(loadClassBytes))
-      .containsAtLeastEntriesIn(
-        mapOf("timber.log.Timber" to true, "androidx.compose.ui.node.Owner" to false)
-      )
+    assertThat(readInjectedAvailability(loadClassBytes)).containsAtLeastEntriesIn(expectedInjected)
   }
 
   @Test

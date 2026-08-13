@@ -58,6 +58,35 @@ class FindLoadClassBytecodeTest {
     assertThat(error!!.message).contains("Candidates without injection marker")
   }
 
+  @Test
+  fun `skips stale instrumented copies that do not match expected availability`() {
+    val root = tempDir.newFolder("stale-cache")
+    val jars = root.resolve("intermediates/asm_instrumented_jars/debug").apply { mkdirs() }
+
+    // Older transform output from a previous test (no timber on classpath).
+    writeJarWithEntry(
+      jars.resolve("stale-sentry.jar"),
+      "io/sentry/util/LoadClass.class",
+      instrumentedLoadClassBytes(
+        mapOf("timber.log.Timber" to false, "androidx.compose.ui.node.Owner" to false)
+      ),
+    )
+    // Fresh transform output for this build.
+    val fresh =
+      instrumentedLoadClassBytes(
+        mapOf("timber.log.Timber" to true, "androidx.compose.ui.node.Owner" to false)
+      )
+    writeJarWithEntry(jars.resolve("fresh-sentry.jar"), "io/sentry/util/LoadClass.class", fresh)
+
+    val found =
+      findLoadClassBytecode(
+        root,
+        expectedAvailability =
+          mapOf("timber.log.Timber" to true, "androidx.compose.ui.node.Owner" to false),
+      )
+    assertThat(readInjectedAvailability(found)["timber.log.Timber"]).isTrue()
+  }
+
   private fun originalLoadClassBytes(): ByteArray {
     val writer = ClassWriter(0)
     writer.visit(

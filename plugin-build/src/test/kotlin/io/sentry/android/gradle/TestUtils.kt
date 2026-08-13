@@ -195,13 +195,17 @@ internal fun extractZipBytes(zipFile: File, fileToExtract: String): ByteArray? {
  *
  * AGP keeps uninstrumented library jars/class dirs under `app/build`
  * (`runtime_library_classes_jar`, compile jars, etc.) and writes dependency instrumentation into
- * Gradle artifact-transform outputs. Never return the first path match — require the
- * `classAvailability` injection marker, and prefer paths that look like ASM outputs when several
- * instrumented copies exist.
+ * Gradle artifact-transform outputs. The shared TestKit transform cache can also retain older
+ * instrumented copies from other tests. Never return the first path match — require the
+ * `classAvailability` injection marker, optionally match [expectedAvailability], and prefer fresher
+ * ASM/transform outputs when several instrumented copies exist.
  */
-internal fun findLoadClassBytecode(vararg searchRoots: File): ByteArray {
+internal fun findLoadClassBytecode(
+  vararg searchRoots: File,
+  expectedAvailability: Map<String, Boolean> = emptyMap(),
+): ByteArray {
   val classRelativePath = "io/sentry/util/LoadClass.class"
-  val candidates = mutableListOf<Pair<String, ByteArray>>()
+  val candidates = mutableListOf<LoadClassCandidate>()
 
   for (root in searchRoots) {
     if (!root.exists()) continue
@@ -210,30 +214,57 @@ internal fun findLoadClassBytecode(vararg searchRoots: File): ByteArray {
       val path = file.invariantSeparatorsPath
       when {
         file.name == "LoadClass.class" && path.endsWith(classRelativePath) ->
-          candidates += path to file.readBytes()
+          candidates += LoadClassCandidate(path, file.lastModified(), file.readBytes())
         file.extension.equals("jar", ignoreCase = true) ->
-          extractZipBytes(file, classRelativePath)?.let { candidates += path to it }
+          extractZipBytes(file, classRelativePath)?.let {
+            candidates += LoadClassCandidate(path, file.lastModified(), it)
+          }
       }
     }
   }
 
   val instrumented =
     candidates
-      .filter { (_, bytes) -> hasClassAvailabilityInjection(bytes) }
-      .sortedByDescending { (path, _) -> isLikelyAsmInstrumentedPath(path) }
+      .filter { hasClassAvailabilityInjection(it.bytes) }
+      .filter { candidate ->
+        expectedAvailability.isEmpty() ||
+          readInjectedAvailability(candidate.bytes)
+            .entries
+            .containsAll(expectedAvailability.entries)
+      }
+      .sortedWith(
+        compareByDescending<LoadClassCandidate> { isLikelyAsmInstrumentedPath(it.path) }
+          .thenByDescending { it.lastModifiedMs }
+      )
 
-  return instrumented.firstOrNull()?.second
+  return instrumented.firstOrNull()?.bytes
     ?: error(
       buildString {
         append("Could not find instrumented $classRelativePath under ")
         append(searchRoots.joinToString { it.absolutePath })
-        if (candidates.isNotEmpty()) {
+        if (expectedAvailability.isNotEmpty()) {
+          append(" matching expected availability $expectedAvailability")
+        }
+        val injected =
+          candidates
+            .filter { hasClassAvailabilityInjection(it.bytes) }
+            .map { "${it.path} -> ${readInjectedAvailability(it.bytes)}" }
+        if (injected.isNotEmpty()) {
+          append(". Instrumented candidates: ")
+          append(injected.joinToString())
+        } else if (candidates.isNotEmpty()) {
           append(". Candidates without injection marker: ")
-          append(candidates.joinToString { it.first })
+          append(candidates.joinToString { it.path })
         }
       }
     )
 }
+
+private data class LoadClassCandidate(
+  val path: String,
+  val lastModifiedMs: Long,
+  val bytes: ByteArray,
+)
 
 /**
  * True when [LoadClassClassVisitor] injected `classAvailability = new HashMap<>()` into `<clinit>`.
