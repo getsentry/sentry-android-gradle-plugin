@@ -21,6 +21,7 @@ import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SentrySdkOptimizationClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
+import io.sentry.android.gradle.instrumentation.readClassAvailability
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
 import io.sentry.android.gradle.sourcecontext.OutputPaths
@@ -184,7 +185,10 @@ fun ApplicationAndroidComponentsExtension.configure(
 
       // Runtime optimizations need the dependency graph as an instrumentation @Input. Reading
       // resolutionResult while building params would resolve *RuntimeClasspath at configuration
-      // time, so a task produces the availability file and that output is wired in as the input.
+      // time, so a task produces the availability map and that output is mapped into a serializable
+      // MapProperty. Nested @InputFile params are not reliable for dependency jars: AGP instruments
+      // them via isolated AsmClassesTransform, which does not promote visitor file inputs into
+      // transform inputs/dependencies.
       if (runtimeOptimizationsEnabled) {
         val availabilityTask =
           ResolveSdkClassAvailabilityTask.register(
@@ -199,8 +203,11 @@ fun ApplicationAndroidComponentsExtension.configure(
             SentrySdkOptimizationClassVisitorFactory::class.java,
             InstrumentationScope.ALL,
           ) { params ->
-            params.classAvailabilityFile.setDisallowChanges(
-              availabilityTask.flatMap { it.outputFile }
+            // Map the task output into an @Input MapProperty so AsmClassesTransform workers receive
+            // the availability values. TaskProvider.map depends on the task output, so the file is
+            // read only after the resolve task runs (not at configuration time).
+            params.classAvailability.setDisallowChanges(
+              availabilityTask.map { task -> readClassAvailability(task.outputFile.get().asFile) }
             )
           }
           variant.instrumentation.setAsmFramesComputationMode(

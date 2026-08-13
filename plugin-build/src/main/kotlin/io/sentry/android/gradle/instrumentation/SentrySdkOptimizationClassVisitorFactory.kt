@@ -5,13 +5,14 @@ import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.util.SentryModules
+import java.io.File
 import java.util.Properties
 import org.gradle.api.artifacts.ModuleIdentifier
+import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.provider.MapProperty
+import org.gradle.api.tasks.Input
 import org.objectweb.asm.ClassVisitor
 
 abstract class SentrySdkOptimizationClassVisitorFactory :
@@ -19,14 +20,16 @@ abstract class SentrySdkOptimizationClassVisitorFactory :
 
   interface SdkOptimizationParameters : InstrumentationParameters {
     /**
-     * Properties file produced by
-     * [io.sentry.android.gradle.tasks.dependencies.ResolveSdkClassAvailabilityTask]. Using a file
-     * input keeps classpath resolution on the producing task and lets AGP invalidate
-     * instrumentation when dependencies change.
+     * Optional SDK class availability produced by
+     * [io.sentry.android.gradle.tasks.dependencies.ResolveSdkClassAvailabilityTask].
+     *
+     * This must be a serializable [MapProperty] (not a nested `@InputFile`). Dependency jars are
+     * instrumented via AGP's isolated `AsmClassesTransform`, which does not promote nested visitor
+     * file inputs into transform inputs/dependencies — a file param is often missing/empty in the
+     * worker and yields a blank injection map. The map is still populated from the task output
+     * through a mapped provider so classpath resolution stays on the task.
      */
-    @get:InputFile
-    @get:PathSensitive(PathSensitivity.NONE)
-    val classAvailabilityFile: RegularFileProperty
+    @get:Input val classAvailability: MapProperty<String, Boolean>
   }
 
   override fun createClassVisitor(
@@ -36,10 +39,13 @@ abstract class SentrySdkOptimizationClassVisitorFactory :
     return LoadClassClassVisitor(
       instrumentationContext.apiVersion.get(),
       nextClassVisitor,
-      readClassAvailability(parameters.get().classAvailabilityFile),
+      parameters.get().classAvailability.get(),
     )
   }
 
+  // Don't gate on classAvailability.isNotEmpty() here: AGP may probe isInstrumentable while
+  // snapshotting params, before the resolve task has produced values. An early empty read would
+  // permanently skip LoadClass. createClassVisitor always sees the realized map.
   override fun isInstrumentable(classData: ClassData): Boolean =
     classData.className == LOAD_CLASS_NAME
 
@@ -84,6 +90,13 @@ internal fun resolveClassAvailability(modules: Set<ModuleIdentifier>): Map<Strin
 
 internal fun readClassAvailability(fileProperty: RegularFileProperty): Map<String, Boolean> {
   val file = fileProperty.orNull?.asFile ?: return emptyMap()
+  return readClassAvailability(file)
+}
+
+internal fun readClassAvailability(file: RegularFile): Map<String, Boolean> =
+  readClassAvailability(file.asFile)
+
+internal fun readClassAvailability(file: File): Map<String, Boolean> {
   if (!file.isFile || file.length() == 0L) {
     return emptyMap()
   }
