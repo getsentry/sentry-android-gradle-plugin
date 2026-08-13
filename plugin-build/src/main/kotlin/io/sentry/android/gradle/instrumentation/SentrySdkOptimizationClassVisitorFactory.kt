@@ -4,11 +4,17 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
+import io.sentry.android.gradle.ManifestMetadataParser
 import io.sentry.android.gradle.util.SentryModules
 import org.gradle.api.artifacts.ModuleIdentifier
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.provider.MapProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.objectweb.asm.ClassVisitor
 
 abstract class SentrySdkOptimizationClassVisitorFactory :
@@ -16,26 +22,51 @@ abstract class SentrySdkOptimizationClassVisitorFactory :
 
   interface SdkOptimizationParameters : InstrumentationParameters {
     @get:Input val classAvailability: MapProperty<String, Boolean>
+
+    @get:Input val buildTimeMetadataEnabled: Property<Boolean>
+
+    @get:InputFile @get:PathSensitive(PathSensitivity.NONE) val mergedManifest: RegularFileProperty
   }
+
+  private fun buildTimeMetadata(): Map<String, Any>? =
+    if (parameters.get().buildTimeMetadataEnabled.get()) {
+      ManifestMetadataParser.parse(parameters.get().mergedManifest.asFile.get())
+    } else {
+      null
+    }
 
   override fun createClassVisitor(
     classContext: ClassContext,
     nextClassVisitor: ClassVisitor,
-  ): ClassVisitor {
-    return LoadClassClassVisitor(
-      instrumentationContext.apiVersion.get(),
-      nextClassVisitor,
-      parameters.get().classAvailability.get(),
-    )
-  }
+  ): ClassVisitor =
+    when (classContext.currentClassData.className) {
+      LOAD_CLASS_NAME ->
+        LoadClassClassVisitor(
+          instrumentationContext.apiVersion.get(),
+          nextClassVisitor,
+          parameters.get().classAvailability.get(),
+        )
+      MANIFEST_METADATA_READER_NAME ->
+        ManifestMetadataClassVisitor(
+          instrumentationContext.apiVersion.get(),
+          nextClassVisitor,
+          checkNotNull(buildTimeMetadata()),
+        )
+      else -> nextClassVisitor
+    }
 
   // Empty availability means the runtime classpath is unknown. Skip this transformation so
   // LoadClass falls back to reflection.
   override fun isInstrumentable(classData: ClassData): Boolean =
-    classData.className == LOAD_CLASS_NAME && parameters.get().classAvailability.get().isNotEmpty()
+    when (classData.className) {
+      LOAD_CLASS_NAME -> parameters.get().classAvailability.get().isNotEmpty()
+      MANIFEST_METADATA_READER_NAME -> buildTimeMetadata() != null
+      else -> false
+    }
 
   internal companion object {
     const val LOAD_CLASS_NAME = "io.sentry.util.LoadClass"
+    const val MANIFEST_METADATA_READER_NAME = "io.sentry.android.core.ManifestMetadataReader"
 
     val CLASS_MODULES: Map<String, Set<ModuleIdentifier>> =
       sortedMapOf(

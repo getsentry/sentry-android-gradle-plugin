@@ -129,6 +129,12 @@ abstract class SentryModulesService :
     sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_CORE, SentryVersions.VERSION_APP_START) &&
       parameters.appStartEnabled.get()
 
+  fun supportsBuildTimeMetadata(): Boolean =
+    sentryModules.isAtLeast(
+      SentryModules.SENTRY_ANDROID_CORE,
+      SentryVersions.VERSION_BUILD_TIME_METADATA,
+    )
+
   private fun Map<ModuleIdentifier, SemVer>.isAtLeast(
     module: ModuleIdentifier,
     minVersion: SemVer,

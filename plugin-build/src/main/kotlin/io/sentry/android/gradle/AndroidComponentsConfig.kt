@@ -205,20 +205,6 @@ fun ApplicationAndroidComponentsExtension.configure(
           project.collectModules("${variant.name}RuntimeClasspath", variant.name, it)
         }
 
-      if (runtimeOptimizationsEnabled) {
-        variant.instrumentation.transformClassesWith(
-          SentrySdkOptimizationClassVisitorFactory::class.java,
-          InstrumentationScope.ALL,
-        ) { params ->
-          params.classAvailability.setDisallowChanges(
-            checkNotNull(modules).map(::resolveClassAvailability).orElse(emptyMap())
-          )
-        }
-        variant.instrumentation.setAsmFramesComputationMode(
-          FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
-        )
-      }
-
       if (tracingInstrumentationEnabled) {
         val tracingModulesService = checkNotNull(modulesService)
 
@@ -262,6 +248,27 @@ fun ApplicationAndroidComponentsExtension.configure(
           )
           .toTransform(SingleArtifact.MERGED_MANIFEST)
       }
+
+      if (runtimeOptimizationsEnabled) {
+        variant.instrumentation.transformClassesWith(
+          SentrySdkOptimizationClassVisitorFactory::class.java,
+          InstrumentationScope.ALL,
+        ) { params ->
+          params.classAvailability.setDisallowChanges(
+            checkNotNull(modules).map(::resolveClassAvailability).orElse(emptyMap())
+          )
+          params.buildTimeMetadataEnabled.setDisallowChanges(
+            checkNotNull(modules)
+              .map { checkNotNull(modulesService).get().supportsBuildTimeMetadata() }
+              .orElse(false)
+          )
+          params.mergedManifest.set(variant.artifacts.get(SingleArtifact.MERGED_MANIFEST))
+        }
+        variant.instrumentation.setAsmFramesComputationMode(
+          FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
+        )
+      }
+
       val sizeAnalysisEnabled = extension.sizeAnalysis.enabled.get() == true
       val distributionEnabled = extension.distribution.enabled.get() == true
       if (sizeAnalysisEnabled || distributionEnabled) {
