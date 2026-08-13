@@ -565,8 +565,8 @@ class SentryPluginTest :
 
     val build = runner.appendArguments(":app:assembleRelease", "--info").build()
 
+    assertTrue(":app:resolveSentrySdkClassAvailabilityRelease" in build.output)
     assertTrue(":app:transformReleaseClassesWithAsm" in build.output)
-    assertTrue("Detected Sentry modules" in build.output)
   }
 
   @Test
