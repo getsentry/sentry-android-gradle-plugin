@@ -21,7 +21,6 @@ import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SentrySdkOptimizationClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
-import io.sentry.android.gradle.instrumentation.readClassAvailability
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
 import io.sentry.android.gradle.sourcecontext.OutputPaths
@@ -185,10 +184,10 @@ fun ApplicationAndroidComponentsExtension.configure(
 
       // Runtime optimizations need the dependency graph as an instrumentation @Input. Reading
       // resolutionResult while building params would resolve *RuntimeClasspath at configuration
-      // time, so a task produces the availability map and that output is mapped into a serializable
-      // MapProperty. Nested @InputFile params are not reliable for dependency jars: AGP instruments
-      // them via isolated AsmClassesTransform, which does not promote visitor file inputs into
-      // transform inputs/dependencies.
+      // time, so a task produces an availability file and that output is wired as `@InputFile`.
+      // Do not map the file into a MapProperty for visitor params: AsmClassesTransform isolation
+      // cannot query task-mapped nested @Input values ("Querying the mapped value of flatmap...
+      // before task has completed is not supported").
       if (runtimeOptimizationsEnabled) {
         val availabilityTask =
           ResolveSdkClassAvailabilityTask.register(
@@ -203,21 +202,12 @@ fun ApplicationAndroidComponentsExtension.configure(
             SentrySdkOptimizationClassVisitorFactory::class.java,
             InstrumentationScope.ALL,
           ) { params ->
-            // Map the task output into an @Input MapProperty so AsmClassesTransform workers receive
-            // the availability values by value (isolatable). Use flatMap on outputFile — not
-            // TaskProvider.map { task -> task.outputFile.get() } — so Gradle depends on the
-            // produced file and only reads it after the resolve task executes.
-            params.classAvailability.setDisallowChanges(
-              availabilityTask
-                .flatMap { it.outputFile }
-                .map { file -> readClassAvailability(file.asFile) }
+            params.classAvailabilityFile.setDisallowChanges(
+              availabilityTask.flatMap { it.outputFile }
             )
           }
-          // AsmClassesTransform isolates nested visitor @Input values when dependency jars are
-          // consumed. Isolation cannot query a task-mapped MapProperty until the producing task
-          // has completed (Gradle error: "Querying the mapped value ... before task has
-          // completed is not supported"). Force the availability task to finish before variant
-          // consumers that resolve instrumented runtime jars and trigger those transforms.
+          // Keep the resolve task ahead of consumers that pull instrumented runtime jars through
+          // AsmClassesTransform, so the @InputFile exists when workers run.
           val variantSuffix = variant.name.capitalized
           project.tasks.configureEach { task ->
             val name = task.name
@@ -613,8 +603,8 @@ fun Variant.configureUploadAppTasks(
 
 /**
  * Tasks that consume instrumented dependency jars and cause AGP to isolate AsmClassesTransform
- * parameters. The SDK class-availability resolve task must complete before these run so nested
- * visitor MapProperty inputs are queryable during isolation.
+ * parameters. The SDK class-availability resolve task must complete before these run so the nested
+ * visitor `@InputFile` exists when workers run.
  */
 private fun shouldRunSdkClassAvailabilityBefore(taskName: String, variantSuffix: String): Boolean {
   if (taskName == "pre${variantSuffix}Build") return true

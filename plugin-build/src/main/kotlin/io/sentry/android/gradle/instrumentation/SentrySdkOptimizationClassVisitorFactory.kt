@@ -11,8 +11,9 @@ import org.gradle.api.artifacts.ModuleIdentifier
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
-import org.gradle.api.provider.MapProperty
-import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.objectweb.asm.ClassVisitor
 
 abstract class SentrySdkOptimizationClassVisitorFactory :
@@ -20,17 +21,19 @@ abstract class SentrySdkOptimizationClassVisitorFactory :
 
   interface SdkOptimizationParameters : InstrumentationParameters {
     /**
-     * Optional SDK class availability produced by
+     * Properties file produced by
      * [io.sentry.android.gradle.tasks.dependencies.ResolveSdkClassAvailabilityTask].
      *
-     * Must be a serializable [MapProperty] (not a nested `@InputFile`). Dependency jars are
-     * instrumented via AGP's isolated `AsmClassesTransform`, which does not reliably promote nested
-     * visitor file inputs into transform inputs/dependencies — workers then see a missing/empty
-     * file and inject a blank map. Wire this from `availabilityTask.flatMap { it.outputFile
-     * }.map(::readClassAvailability)` so Gradle depends on the task output and only reads the file
-     * after the resolve task runs.
+     * Must stay a task-output [RegularFileProperty] (`@InputFile`), not a task-mapped
+     * `MapProperty`. AGP instruments dependency jars via isolated `AsmClassesTransform`, and Gradle
+     * refuses to isolate nested visitor `@Input` values that are mapped from unfinished (or even
+     * finished) task providers: `Querying the mapped value of flatmap(provider(task ...)) before
+     * task has completed is not supported`. A file input is isolatable; consumers that trigger
+     * those transforms must `dependsOn` the resolve task so the file exists when workers run.
      */
-    @get:Input val classAvailability: MapProperty<String, Boolean>
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    val classAvailabilityFile: RegularFileProperty
   }
 
   override fun createClassVisitor(
@@ -40,13 +43,12 @@ abstract class SentrySdkOptimizationClassVisitorFactory :
     return LoadClassClassVisitor(
       instrumentationContext.apiVersion.get(),
       nextClassVisitor,
-      parameters.get().classAvailability.get(),
+      readClassAvailability(parameters.get().classAvailabilityFile),
     )
   }
 
-  // Don't gate on classAvailability.isNotEmpty() here: AGP may probe isInstrumentable while
-  // snapshotting params, before the resolve task has produced values. An early empty read would
-  // permanently skip LoadClass. createClassVisitor always sees the realized map.
+  // Do not read the availability file here: AGP may probe isInstrumentable while snapshotting
+  // params, before the resolve task has produced the file.
   override fun isInstrumentable(classData: ClassData): Boolean =
     classData.className == LOAD_CLASS_NAME
 
