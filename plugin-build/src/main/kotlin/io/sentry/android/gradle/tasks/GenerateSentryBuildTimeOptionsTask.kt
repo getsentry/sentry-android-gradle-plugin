@@ -1,12 +1,17 @@
 package io.sentry.android.gradle.tasks
 
+import io.sentry.android.gradle.ManifestMetadataParser
 import io.sentry.android.gradle.instrumentation.resolveClassAvailability
 import org.gradle.api.Project
 import org.gradle.api.UnknownDomainObjectException
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 
@@ -14,6 +19,10 @@ import org.gradle.api.tasks.TaskProvider
 abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
 
   @get:Input abstract val moduleIds: SetProperty<String>
+
+  @get:InputFile
+  @get:PathSensitive(PathSensitivity.NONE)
+  abstract val mergedManifest: RegularFileProperty
 
   @TaskAction
   fun generate() {
@@ -26,6 +35,7 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
         }
         .toSet()
     val availability = resolveClassAvailability(modules)
+    val metadata = ManifestMetadataParser.parse(mergedManifest.get().asFile)
     val sourceFile = output.file(GENERATED_CLASS_PATH).get().asFile
     sourceFile.parentFile.mkdirs()
     sourceFile.writeText(
@@ -47,6 +57,22 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
       }
           return availability;
         }
+
+        public static Map<String, Object> getManifestMetadata() {
+      ${
+        if (metadata == null) {
+          "    return null;"
+        } else {
+          """    Map<String, Object> metadata = new HashMap<>();
+      ${
+            metadata.toSortedMap().entries.joinToString("\n") { (key, value) ->
+              "    metadata.put(${key.javaStringLiteral()}, ${value.javaLiteral()});"
+            }
+          }
+          return metadata;"""
+        }
+      }
+        }
       }
       """
         .trimIndent() + "\n"
@@ -56,6 +82,32 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
   companion object {
     private const val GENERATED_CLASS_PATH =
       "io/sentry/android/core/SentryGeneratedBuildTimeOptions.java"
+
+    private fun String.javaStringLiteral(): String = buildString {
+      append('"')
+      this@javaStringLiteral.forEach { character ->
+        append(
+          when (character) {
+            '\\' -> "\\\\"
+            '"' -> "\\\""
+            '\n' -> "\\n"
+            '\r' -> "\\r"
+            '\t' -> "\\t"
+            else -> character
+          }
+        )
+      }
+      append('"')
+    }
+
+    private fun Any.javaLiteral(): String =
+      when (this) {
+        is Boolean,
+        is Int -> toString()
+        is Float -> "${this}f"
+        is String -> javaStringLiteral()
+        else -> error("Unsupported manifest metadata value: $this")
+      }
 
     fun register(
       project: Project,
