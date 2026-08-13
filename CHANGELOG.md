@@ -7,6 +7,10 @@
 - Detect AGP `optimization.enable` when the variant is wrapped by AGP analytics ([#1382](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1382))
   - This fixes `java.lang.NoSuchMethodException: com.android.build.api.component.analytics.AnalyticsEnabledApplicationVariant_Decorated.getOptimizationCreationConfig()`
 
+### Performance
+
+- Resolve Sentry Android manifest metadata at build time to avoid `PackageManager` and `Bundle` parsing during SDK initialization ([#1401](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1401))
+
 ### Dependencies
 
 - Bump ComposablePreviewScanner from v0.9.1 to v0.9.2 ([#1381](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1381))
