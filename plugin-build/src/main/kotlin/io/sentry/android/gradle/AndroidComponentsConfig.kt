@@ -182,8 +182,9 @@ fun ApplicationAndroidComponentsExtension.configure(
       val runtimeOptimizationsEnabled = extension.runtimeOptimizations.enabled.get()
       val tracingInstrumentationEnabled = extension.tracingInstrumentation.enabled.get()
 
-      // Runtime optimizations resolve the classpath via a task output so AGP does not force
-      // config-time resolution when snapshotting instrumentation inputs.
+      // Runtime optimizations need the dependency graph as an instrumentation @Input. Reading
+      // resolutionResult while building params would resolve *RuntimeClasspath at configuration
+      // time, so a task produces the availability file and that output is wired in as the input.
       if (runtimeOptimizationsEnabled) {
         val availabilityTask =
           ResolveSdkClassAvailabilityTask.register(

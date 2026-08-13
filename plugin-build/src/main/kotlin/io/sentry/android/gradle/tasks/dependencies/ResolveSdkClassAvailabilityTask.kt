@@ -50,8 +50,9 @@ abstract class ResolveSdkClassAvailabilityTask : DefaultTask() {
 
     val availability = resolveClassAvailability(modules)
     val output = outputFile.get().asFile
-    output.parentFile?.mkdirs()
-    // Write manually so the file stays deterministic for build caching (no Properties timestamp).
+    // Deterministic one-entry-per-line properties (no java.util.Properties timestamp header):
+    //   androidx.core.view.ScrollingView=true
+    //   timber.log.Timber=false
     output.bufferedWriter().use { writer ->
       availability.toSortedMap().forEach { (className, available) ->
         writer.append(className).append('=').append(available.toString()).append('\n')
