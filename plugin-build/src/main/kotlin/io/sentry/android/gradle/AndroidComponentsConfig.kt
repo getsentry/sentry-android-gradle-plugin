@@ -90,7 +90,7 @@ fun ApplicationAndroidComponentsExtension.configure(
       variant.configureDependenciesTask(project, extension, sentryTelemetryProvider)
 
       // TODO: do this only once, and all other tasks should be SentryVariant.configureSomething
-      val sentryVariant = AndroidVariant74(variant)
+      val sentryVariant = variant.toSentryVariant()
 
       val additionalSourcesProvider =
         project.provider {
@@ -148,34 +148,34 @@ fun ApplicationAndroidComponentsExtension.configure(
       // and as our ProGuard UUID depends on minification itself; creating a
       // circular dependency
       // instead, we transform all assets and inject the properties file
-      sentryVariant.apply {
-        val injectAssetsTask =
-          InjectSentryMetaPropertiesIntoAssetsTask.register(
-            project,
-            extension,
-            sentryTelemetryProvider,
-            tasksGeneratingProperties,
-            variant.name.capitalized,
-          )
+      val injectAssetsTask =
+        InjectSentryMetaPropertiesIntoAssetsTask.register(
+          project,
+          extension,
+          sentryTelemetryProvider,
+          tasksGeneratingProperties,
+          variant.name.capitalized,
+        )
 
-        assetsWiredWithDirectories(
-          injectAssetsTask,
+      variant.artifacts
+        .use(injectAssetsTask)
+        .wiredWithDirectories(
           InjectSentryMetaPropertiesIntoAssetsTask::inputDir,
           InjectSentryMetaPropertiesIntoAssetsTask::outputDir,
         )
+        .toTransform(SingleArtifact.ASSETS)
 
-        // flutter doesn't use the transform API
-        // and manually wires up task dependencies,
-        // which causes errors like this:
-        //      Task ':app:injectSentryDebugMetaPropertiesIntoAssetsDebug' uses this output of task
-        // ':app:copyFlutterAssetsDebug' without declaring an explicit or implicit dependency
-        // thus we have to manually add the task dependency
-        project.afterEvaluate {
-          // https://github.com/flutter/flutter/blob/6ce591f7ea3ba827d9340ce03f7d8e3a37ebb03a/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy#L1295-L1298
-          project.tasks.findByName("copyFlutterAssets${variant.name.capitalized}")?.let {
-            flutterAssetsTask ->
-            injectAssetsTask.configure { injectTask -> injectTask.dependsOn(flutterAssetsTask) }
-          }
+      // flutter doesn't use the transform API
+      // and manually wires up task dependencies,
+      // which causes errors like this:
+      //      Task ':app:injectSentryDebugMetaPropertiesIntoAssetsDebug' uses this output of task
+      // ':app:copyFlutterAssetsDebug' without declaring an explicit or implicit dependency
+      // thus we have to manually add the task dependency
+      project.afterEvaluate {
+        // https://github.com/flutter/flutter/blob/6ce591f7ea3ba827d9340ce03f7d8e3a37ebb03a/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy#L1295-L1298
+        project.tasks.findByName("copyFlutterAssets${variant.name.capitalized}")?.let {
+          flutterAssetsTask ->
+          injectAssetsTask.configure { injectTask -> injectTask.dependsOn(flutterAssetsTask) }
         }
       }
 
@@ -283,7 +283,7 @@ private fun Variant.configureTelemetry(
   sentryOrg: String?,
   buildEvents: BuildEventListenerRegistryInternal,
 ): Provider<SentryTelemetryService> {
-  val variant = AndroidVariant74(this)
+  val variant = toSentryVariant()
   val sentryTelemetryProvider = SentryTelemetryService.register(project)
   project.gradle.taskGraph.whenReady {
     sentryTelemetryProvider.get().start {
@@ -305,7 +305,7 @@ private fun Variant.configureSourceBundleTasks(
 ): SourceContext.SourceContextTasks? {
   if (extension.includeSourceContext.get()) {
     val taskSuffix = name.capitalized
-    val variant = AndroidVariant74(this)
+    val variant = toSentryVariant()
 
     val sourceContextTasks =
       SourceContext.register(
@@ -358,12 +358,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
   sentryOrg: String?,
   sentryProject: String?,
 ): TaskProvider<SentryGenerateProguardUuidTask>? {
-  val variant =
-    if (AgpVersions.isAGP83) {
-      AndroidVariant83(this)
-    } else {
-      AndroidVariant74(this)
-    }
+  val variant = toSentryVariant()
   val sentryProps = getPropertiesFilePath(project, variant)
   val dexguardEnabled = extension.dexguardEnabled.get()
   val isMinifyEnabled = isMinificationEnabled(project, variant, dexguardEnabled)
@@ -424,7 +419,7 @@ private fun ApplicationVariant.configureDistributionPropertiesTask(
   val updateSdkVariants = extension.distribution.updateSdkVariants.get()
 
   if (updateSdkVariants.contains(variantName)) {
-    val variant = AndroidVariant74(this)
+    val variant = toSentryVariant()
     // Distribution uses a custom auto-install implementation instead of the standard
     // InstallStrategy approach (see AutoInstall.kt) because it requires variant-specific
     // installation based on extension.distribution.updateSdkVariants, whereas other integrations
@@ -466,7 +461,7 @@ private fun ApplicationVariant.configureSnapshotsTasks(
     "Sentry Snapshots require Android Gradle Plugin 8.0 or higher. " +
       "Current version: ${AgpVersions.CURRENT}"
   }
-  val variant = AndroidVariant74(this)
+  val variant = toSentryVariant()
   val sentryProps = getPropertiesFilePath(project, variant)
   val taskSuffix = name.capitalized
 
