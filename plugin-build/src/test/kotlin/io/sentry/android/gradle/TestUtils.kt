@@ -175,6 +175,40 @@ private fun extractZip(zipFile: File, fileToExtract: String): String {
   return ""
 }
 
+internal fun extractZipBytes(zipFile: File, fileToExtract: String): ByteArray? {
+  val zip = ZipFile(zipFile)
+  return try {
+    zip.getInputStream(zip.getFileHeader(fileToExtract)).use { zis -> zis.readBytes() }
+  } catch (_: ZipException) {
+    null
+  }
+}
+
+/** Finds instrumented `io/sentry/util/LoadClass.class` under a build directory. */
+internal fun findLoadClassBytecode(rootFile: File): ByteArray {
+  val classRelativePath = "io/sentry/util/LoadClass.class"
+  val classFile =
+    rootFile.walkTopDown().firstOrNull { file ->
+      file.isFile &&
+        file.name == "LoadClass.class" &&
+        file.invariantSeparatorsPath.endsWith(classRelativePath)
+    }
+  if (classFile != null) {
+    return classFile.readBytes()
+  }
+
+  rootFile
+    .walkTopDown()
+    .filter { it.isFile && it.extension == "jar" }
+    .forEach { jar ->
+      extractZipBytes(jar, classRelativePath)?.let {
+        return it
+      }
+    }
+
+  error("Could not find instrumented $classRelativePath under ${rootFile.absolutePath}")
+}
+
 private fun readZippedContent(zipInputStream: ZipInputStream): String {
   val baos = ByteArrayOutputStream()
   val content = ByteArray(1024)

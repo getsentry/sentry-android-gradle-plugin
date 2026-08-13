@@ -1,14 +1,21 @@
 package io.sentry.android.gradle.instrumentation
 
 import com.google.common.truth.Truth.assertThat
+import io.sentry.android.gradle.tasks.dependencies.ResolveSdkClassAvailabilityTask
 import io.sentry.android.gradle.util.SentryModules
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
+import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 
 class LoadClassClassVisitorTest {
+
+  @get:Rule val tempDir = TemporaryFolder()
+
   @Test
   fun `resolves every known class from the module graph`() {
     val modules = SentrySdkOptimizationClassVisitorFactory.CLASS_MODULES.values.flatten().toSet()
@@ -68,6 +75,35 @@ class LoadClassClassVisitorTest {
     val clazz = load(transformClass(hasAvailabilityField = false))
 
     assertThat(clazz.declaredFields.map { it.name }).doesNotContain("classAvailability")
+  }
+
+  @Test
+  fun `task file round-trips into injected LoadClass availability`() {
+    val project = ProjectBuilder.builder().withProjectDir(tempDir.newFolder("project")).build()
+    val output = tempDir.newFile("availability.properties")
+    val task =
+      project.tasks.register(
+        "glueResolveSdkClassAvailability",
+        ResolveSdkClassAvailabilityTask::class.java,
+      ) {
+        it.moduleIds.set(setOf("com.jakewharton.timber:timber", "androidx.core:core"))
+        it.outputFile.set(output)
+      }
+
+    task.get().action()
+
+    val availability = readClassAvailability(task.get().outputFile)
+    val clazz = load(transformClass(availability = availability))
+
+    assertThat(readAvailability(clazz))
+      .containsAtLeast(
+        "timber.log.Timber",
+        true,
+        "androidx.core.view.ScrollingView",
+        true,
+        "androidx.compose.ui.node.Owner",
+        false,
+      )
   }
 
   private fun transformClass(
