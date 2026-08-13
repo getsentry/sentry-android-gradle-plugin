@@ -191,6 +191,8 @@ fun ApplicationAndroidComponentsExtension.configure(
             configurationName = "${variant.name}RuntimeClasspath",
             taskSuffix = variant.name.capitalized,
           )
+        // A missing runtime classpath means availability is unknown; skip the transform so the SDK
+        // falls back to reflection.
         if (availabilityTask != null) {
           variant.instrumentation.transformClassesWith(
             SentrySdkOptimizationClassVisitorFactory::class.java,
