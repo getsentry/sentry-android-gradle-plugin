@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Avoid resolving the runtime classpath during Gradle configuration when SDK runtime optimizations are enabled ([#1404](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1404))
+
 ## 6.19.0
 
 ### Fixes
