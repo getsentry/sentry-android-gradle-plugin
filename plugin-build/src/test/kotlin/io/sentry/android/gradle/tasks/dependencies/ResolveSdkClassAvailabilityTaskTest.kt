@@ -3,6 +3,7 @@ package io.sentry.android.gradle.tasks.dependencies
 import com.google.common.truth.Truth.assertThat
 import io.sentry.android.gradle.instrumentation.readClassAvailability
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
@@ -57,6 +58,35 @@ class ResolveSdkClassAvailabilityTaskTest {
     assertThat(availability.values).doesNotContain(true)
   }
 
+  @Test
+  fun `register leaves the configuration unresolved`() {
+    val project = createJavaProjectWithRuntimeClasspath()
+    val configuration = project.configurations.getByName("runtimeClasspath")
+    assertThat(configuration.state).isEqualTo(Configuration.State.UNRESOLVED)
+
+    val task =
+      ResolveSdkClassAvailabilityTask.register(
+        project = project,
+        configurationName = "runtimeClasspath",
+        attributeValueJar = "jar",
+        taskSuffix = "Test",
+      )
+    requireNotNull(task)
+    // Realize the task object (runs the configure action) without reading moduleIds.
+    task.get()
+
+    // Mutation oracle: wiring the task must not force config-time resolution. Reintroducing a
+    // resolutionResult/map read during register would flip this to RESOLVED and fail the guard.
+    assertThat(configuration.state).isEqualTo(Configuration.State.UNRESOLVED)
+  }
+
   private fun createProject(): Project =
     ProjectBuilder.builder().withProjectDir(tempDir.newFolder("project")).build()
+
+  private fun createJavaProjectWithRuntimeClasspath(): Project {
+    val project = ProjectBuilder.builder().withProjectDir(tempDir.newFolder("java-project")).build()
+    project.plugins.apply("java")
+    // No external deps needed: we only assert that register() stays lazy.
+    return project
+  }
 }

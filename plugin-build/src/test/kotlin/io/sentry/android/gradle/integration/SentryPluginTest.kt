@@ -563,10 +563,18 @@ class SentryPluginTest :
   fun `registers runtime optimizations independently from tracing instrumentation`() {
     applyTracingInstrumentation(false, appStart = false, logcat = false)
 
-    val build = runner.appendArguments(":app:assembleRelease", "--info").build()
+    // --warning-mode all surfaces Gradle's config-time resolution warning if it regresses.
+    val build =
+      runner.appendArguments(":app:assembleRelease", "--info", "--warning-mode", "all").build()
 
     assertTrue(":app:resolveSentrySdkClassAvailabilityRelease" in build.output)
     assertTrue(":app:transformReleaseClassesWithAsm" in build.output)
+    // Regression guard for #1399 / #1402: runtime opts must not resolve *RuntimeClasspath while
+    // AGP snapshots instrumentation inputs during configuration.
+    assertFalse(
+      "RuntimeClasspath' was resolved during configuration time" in build.output,
+      build.output,
+    )
   }
 
   @Test
