@@ -1396,7 +1396,7 @@ class SentryPluginTest :
           import java.util.Map;
 
           public final class ManifestMetadataReader {
-            static Map<String, Object> buildTimeMetadata;
+            static Map<String, Object> manifestMetadata;
           }
           """
             .trimIndent()

@@ -53,7 +53,13 @@ class GenerateSentryBuildTimeOptionsTaskTest {
     project.plugins.apply("java")
     val runtimeClasspath = project.configurations.getByName("runtimeClasspath")
 
-    GenerateSentryBuildTimeOptionsTask.register(project, "runtimeClasspath", "Test")?.get()
+    GenerateSentryBuildTimeOptionsTask.register(
+        project,
+        "runtimeClasspath",
+        "Test",
+        project.layout.file(project.provider { project.file("AndroidManifest.xml") }),
+      )
+      ?.get()
 
     assertThat(runtimeClasspath.state).isEqualTo(Configuration.State.UNRESOLVED)
   }
@@ -79,7 +85,14 @@ class GenerateSentryBuildTimeOptionsTaskTest {
       app.dependencies.project(mapOf("path" to ":sentry-android-replay")),
     )
 
-    val task = GenerateSentryBuildTimeOptionsTask.register(app, "runtimeClasspath", "Test")!!.get()
+    val task =
+      GenerateSentryBuildTimeOptionsTask.register(
+          app,
+          "runtimeClasspath",
+          "Test",
+          app.layout.file(app.provider { app.file("AndroidManifest.xml") }),
+        )!!
+        .get()
 
     assertThat(task.moduleIds.get()).contains("io.sentry:sentry-android-replay")
   }
