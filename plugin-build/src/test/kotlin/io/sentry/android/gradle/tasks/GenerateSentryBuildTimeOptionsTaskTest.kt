@@ -40,4 +40,30 @@ class GenerateSentryBuildTimeOptionsTaskTest {
 
     assertThat(runtimeClasspath.state).isEqualTo(Configuration.State.UNRESOLVED)
   }
+
+  @Test
+  fun `register includes project dependencies`() {
+    val root = ProjectBuilder.builder().withProjectDir(tempDir.newFolder("root")).build()
+    val replayDir = root.file("sentry-android-replay").apply { mkdir() }
+    val replay =
+      ProjectBuilder.builder()
+        .withName("sentry-android-replay")
+        .withProjectDir(replayDir)
+        .withParent(root)
+        .build()
+    replay.group = "io.sentry"
+    replay.plugins.apply("java")
+    val appDir = root.file("app").apply { mkdir() }
+    val app =
+      ProjectBuilder.builder().withName("app").withProjectDir(appDir).withParent(root).build()
+    app.plugins.apply("java")
+    app.dependencies.add(
+      "implementation",
+      app.dependencies.project(mapOf("path" to ":sentry-android-replay")),
+    )
+
+    val task = GenerateSentryBuildTimeOptionsTask.register(app, "runtimeClasspath", "Test")!!.get()
+
+    assertThat(task.moduleIds.get()).contains("io.sentry:sentry-android-replay")
+  }
 }

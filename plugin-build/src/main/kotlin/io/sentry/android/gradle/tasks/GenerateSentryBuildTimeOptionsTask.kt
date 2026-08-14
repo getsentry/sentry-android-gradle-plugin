@@ -4,7 +4,6 @@ import io.sentry.android.gradle.instrumentation.resolveClassAvailability
 import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.UnknownDomainObjectException
-import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.CacheableTask
@@ -64,9 +63,9 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
       configurationName: String,
       taskSuffix: String,
     ): TaskProvider<GenerateSentryBuildTimeOptionsTask>? {
-      val configuration =
+      val configurationProvider =
         try {
-          project.configurations.getByName(configurationName)
+          project.configurations.named(configurationName)
         } catch (e: UnknownDomainObjectException) {
           project.logger.warn(
             "Unable to find configuration $configurationName for Sentry build-time options."
@@ -79,11 +78,10 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
         GenerateSentryBuildTimeOptionsTask::class.java,
       ) { task ->
         task.moduleIds.set(
-          configuration.incoming.artifacts.resolvedArtifacts.map { artifacts ->
-            artifacts.mapNotNullTo(mutableSetOf()) { artifact ->
-              (artifact.id.componentIdentifier as? ModuleComponentIdentifier)?.let {
-                "${it.group}:${it.module}"
-              }
+          configurationProvider.map { configuration ->
+            configuration.incoming.resolutionResult.allComponents.mapNotNullTo(mutableSetOf()) {
+              component ->
+              component.moduleVersion?.module?.let { "${it.group}:${it.name}" }
             }
           }
         )
