@@ -31,25 +31,43 @@ class ManifestMetadataClassVisitorTest {
   fun `does not modify SDK versions without the metadata field`() {
     val clazz = load(transformClass(hasMetadataField = false))
 
-    assertThat(clazz.declaredFields.map { it.name }).doesNotContain("buildTimeMetadata")
+    assertThat(clazz.declaredFields.map { it.name }).doesNotContain("manifestMetadata")
+  }
+
+  @Test
+  fun `does not modify a non-static metadata field`() {
+    val clazz = load(transformClass(staticMetadataField = false))
+
+    Class.forName(clazz.name, true, clazz.classLoader)
+    assertThat(
+        java.lang.reflect.Modifier.isStatic(clazz.getDeclaredField("manifestMetadata").modifiers)
+      )
+      .isFalse()
   }
 
   private fun transformClass(
     hasMetadataField: Boolean = true,
+    staticMetadataField: Boolean = true,
     hasStaticInitializer: Boolean = false,
   ): ByteArray {
     val original = ClassWriter(0)
     original.visit(
       Opcodes.V1_8,
       Opcodes.ACC_PUBLIC,
-      READER_INTERNAL_NAME,
+      MANIFEST_METADATA_READER_INTERNAL_NAME,
       null,
       "java/lang/Object",
       null,
     )
     if (hasMetadataField) {
       original
-        .visitField(Opcodes.ACC_STATIC, "buildTimeMetadata", "Ljava/util/Map;", null, null)
+        .visitField(
+          if (staticMetadataField) Opcodes.ACC_STATIC else Opcodes.ACC_PUBLIC,
+          "manifestMetadata",
+          "Ljava/util/Map;",
+          null,
+          null,
+        )
         .visitEnd()
     }
     if (hasStaticInitializer) {
@@ -59,7 +77,7 @@ class ManifestMetadataClassVisitorTest {
       original.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null).apply {
         visitCode()
         visitIntInsn(Opcodes.BIPUSH, 7)
-        visitFieldInsn(Opcodes.PUTSTATIC, READER_INTERNAL_NAME, "marker", "I")
+        visitFieldInsn(Opcodes.PUTSTATIC, MANIFEST_METADATA_READER_INTERNAL_NAME, "marker", "I")
         visitInsn(Opcodes.RETURN)
         visitMaxs(1, 0)
         visitEnd()
@@ -87,12 +105,13 @@ class ManifestMetadataClassVisitorTest {
 
   @Suppress("UNCHECKED_CAST")
   private fun readMetadata(clazz: Class<*>): Map<String, Any> =
-    clazz.getDeclaredField("buildTimeMetadata").run {
+    clazz.getDeclaredField("manifestMetadata").run {
       isAccessible = true
       get(null) as Map<String, Any>
     }
 
   private companion object {
-    const val READER_INTERNAL_NAME = "io/sentry/android/core/ManifestMetadataReader"
+    const val MANIFEST_METADATA_READER_INTERNAL_NAME =
+      "io/sentry/android/core/ManifestMetadataReader"
   }
 }

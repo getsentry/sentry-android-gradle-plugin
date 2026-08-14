@@ -209,12 +209,10 @@ fun ApplicationAndroidComponentsExtension.configure(
             project,
             "${variant.name}RuntimeClasspath",
             variant.name.capitalized,
+            variant.artifacts.get(SingleArtifact.MERGED_MANIFEST),
           )
         val javaSources = variant.sources.java
         if (buildTimeOptionsTask != null && javaSources != null) {
-          buildTimeOptionsTask.configure {
-            it.mergedManifest.set(variant.artifacts.get(SingleArtifact.MERGED_MANIFEST))
-          }
           javaSources.addGeneratedSourceDirectory(
             buildTimeOptionsTask,
             GenerateSentryBuildTimeOptionsTask::output,

@@ -6,7 +6,7 @@ import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 
-/** Injects a call to app-owned build-time manifest metadata into `ManifestMetadataReader`. */
+/** Injects app-owned manifest metadata into the SDK's manifest metadata reader. */
 internal class ManifestMetadataClassVisitor(apiVersion: Int, nextClassVisitor: ClassVisitor) :
   ClassVisitor(apiVersion, nextClassVisitor) {
   private var hasMetadataField = false
@@ -19,7 +19,11 @@ internal class ManifestMetadataClassVisitor(apiVersion: Int, nextClassVisitor: C
     signature: String?,
     value: Any?,
   ): FieldVisitor? {
-    if (name == METADATA_FIELD && descriptor == MAP_DESCRIPTOR) hasMetadataField = true
+    if (
+      name == METADATA_FIELD && descriptor == MAP_DESCRIPTOR && access and Opcodes.ACC_STATIC != 0
+    ) {
+      hasMetadataField = true
+    }
     return super.visitField(access, name, descriptor, signature, value)
   }
 
@@ -74,14 +78,20 @@ internal class ManifestMetadataClassVisitor(apiVersion: Int, nextClassVisitor: C
       "()Ljava/util/Map;",
       false,
     )
-    visitor.visitFieldInsn(Opcodes.PUTSTATIC, READER_INTERNAL_NAME, METADATA_FIELD, MAP_DESCRIPTOR)
+    visitor.visitFieldInsn(
+      Opcodes.PUTSTATIC,
+      MANIFEST_METADATA_READER_INTERNAL_NAME,
+      METADATA_FIELD,
+      MAP_DESCRIPTOR,
+    )
   }
 
   private companion object {
-    const val READER_INTERNAL_NAME = "io/sentry/android/core/ManifestMetadataReader"
+    const val MANIFEST_METADATA_READER_INTERNAL_NAME =
+      "io/sentry/android/core/ManifestMetadataReader"
     const val GENERATED_OPTIONS_INTERNAL_NAME =
       "io/sentry/android/core/SentryGeneratedBuildTimeOptions"
-    const val METADATA_FIELD = "buildTimeMetadata"
+    const val METADATA_FIELD = "manifestMetadata"
     const val MAP_DESCRIPTOR = "Ljava/util/Map;"
     const val STATIC_INITIALIZER = "<clinit>"
     const val VOID_METHOD_DESCRIPTOR = "()V"

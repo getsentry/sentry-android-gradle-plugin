@@ -4,8 +4,10 @@ import io.sentry.android.gradle.ManifestMetadataParser
 import io.sentry.android.gradle.instrumentation.resolveClassAvailability
 import org.gradle.api.Project
 import org.gradle.api.UnknownDomainObjectException
+import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
+import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
@@ -113,6 +115,7 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
       project: Project,
       configurationName: String,
       taskSuffix: String,
+      mergedManifest: Provider<RegularFile>,
     ): TaskProvider<GenerateSentryBuildTimeOptionsTask>? {
       val configurationProvider =
         try {
@@ -136,6 +139,7 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
             }
           }
         )
+        task.mergedManifest.set(mergedManifest)
         task.output.set(
           project.layout.buildDirectory.dir("generated/sentry/buildTimeOptions/$taskSuffix")
         )
