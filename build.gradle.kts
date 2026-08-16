@@ -1,11 +1,4 @@
-buildscript {
-  dependencies { classpath("org.apache.commons:commons-compress:1.28.0") }
-  if (BuildPluginsVersion.AGP.substringBefore(".").toInt() < 8) {
-    // AGP 7.x has troubles with compileSdk 34 due to some R8 shenanigans, so we have to use a newer
-    // version of R* here
-    dependencies { classpath("com.android.tools:r8:8.11.18") }
-  }
-}
+buildscript { dependencies { classpath("org.apache.commons:commons-compress:1.28.0") } }
 
 plugins {
   alias(libs.plugins.kotlin) version BuildPluginsVersion.KOTLIN apply false
