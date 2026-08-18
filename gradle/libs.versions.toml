@@ -12,7 +12,7 @@ sentryAndroidOkhttp = "7.22.6"
 
 sampleCoroutines = "1.11.0"
 sampleRoom = "2.7.2"
-sampleRetrofit = "2.9.0"
+sampleRetrofit = "3.0.0"
 sampleSpringBoot = "3.4.1"
 
 [plugins]
