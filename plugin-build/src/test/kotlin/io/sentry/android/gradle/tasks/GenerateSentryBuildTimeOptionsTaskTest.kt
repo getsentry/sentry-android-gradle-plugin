@@ -12,12 +12,27 @@ class GenerateSentryBuildTimeOptionsTaskTest {
   @get:Rule val tempDir = TemporaryFolder()
 
   @Test
-  fun `generates class availability source`() {
+  fun `generates build time options source`() {
     val project = ProjectBuilder.builder().withProjectDir(tempDir.newFolder("project")).build()
     val outputDir = tempDir.newFolder("generated")
+    val manifest =
+      tempDir.newFile("AndroidManifest.xml").apply {
+        writeText(
+          """
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <application>
+              <meta-data android:name="io.sentry.debug" android:value="true"/>
+              <meta-data android:name="io.sentry.dsn" android:value="quoted&amp;&quot;value"/>
+            </application>
+          </manifest>
+          """
+            .trimIndent()
+        )
+      }
     val task =
       project.tasks.register("generateOptions", GenerateSentryBuildTimeOptionsTask::class.java) {
         it.moduleIds.set(setOf("com.jakewharton.timber:timber", "androidx.core:core"))
+        it.mergedManifest.set(manifest)
         it.output.set(outputDir)
       }
 
@@ -28,6 +43,8 @@ class GenerateSentryBuildTimeOptionsTaskTest {
     assertThat(source).contains("availability.put(\"timber.log.Timber\", true);")
     assertThat(source).contains("availability.put(\"androidx.core.view.ScrollingView\", true);")
     assertThat(source).contains("availability.put(\"androidx.lifecycle.Lifecycle\", false);")
+    assertThat(source).contains("metadata.put(\"io.sentry.debug\", true);")
+    assertThat(source).contains("metadata.put(\"io.sentry.dsn\", \"quoted&\\\"value\");")
   }
 
   @Test
@@ -36,7 +53,13 @@ class GenerateSentryBuildTimeOptionsTaskTest {
     project.plugins.apply("java")
     val runtimeClasspath = project.configurations.getByName("runtimeClasspath")
 
-    GenerateSentryBuildTimeOptionsTask.register(project, "runtimeClasspath", "Test")?.get()
+    GenerateSentryBuildTimeOptionsTask.register(
+        project,
+        "runtimeClasspath",
+        "Test",
+        project.layout.file(project.provider { project.file("AndroidManifest.xml") }),
+      )
+      ?.get()
 
     assertThat(runtimeClasspath.state).isEqualTo(Configuration.State.UNRESOLVED)
   }
@@ -62,7 +85,14 @@ class GenerateSentryBuildTimeOptionsTaskTest {
       app.dependencies.project(mapOf("path" to ":sentry-android-replay")),
     )
 
-    val task = GenerateSentryBuildTimeOptionsTask.register(app, "runtimeClasspath", "Test")!!.get()
+    val task =
+      GenerateSentryBuildTimeOptionsTask.register(
+          app,
+          "runtimeClasspath",
+          "Test",
+          app.layout.file(app.provider { app.file("AndroidManifest.xml") }),
+        )!!
+        .get()
 
     assertThat(task.moduleIds.get()).contains("io.sentry:sentry-android-replay")
   }

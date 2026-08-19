@@ -6,6 +6,10 @@
 
 - Avoid resolving the runtime classpath during Gradle configuration when SDK runtime optimizations are enabled ([#1404](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1404))
 
+### Performance
+
+- Resolve Sentry manifest metadata at build time to reduce Android SDK initialization overhead ([#1405](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1405))
+
 ## 6.19.0
 
 ### Fixes
