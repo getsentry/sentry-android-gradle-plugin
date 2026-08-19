@@ -1,7 +1,6 @@
 package io.sentry.android.gradle.tasks
 
 import io.sentry.android.gradle.instrumentation.resolveClassAvailability
-import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
@@ -27,7 +26,7 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
         }
         .toSet()
     val availability = resolveClassAvailability(modules)
-    val sourceFile = File(output.get().asFile, GENERATED_CLASS_PATH)
+    val sourceFile = output.file(GENERATED_CLASS_PATH).get().asFile
     sourceFile.parentFile.mkdirs()
     sourceFile.writeText(
       """

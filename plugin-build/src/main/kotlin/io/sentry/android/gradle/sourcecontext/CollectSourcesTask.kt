@@ -74,14 +74,15 @@ internal class SourceCollector {
     sourceDirs.forEach { sourceDir ->
       if (sourceDir.exists()) {
         SentryPlugin.logger.debug { "Collecting sources in ${sourceDir.absolutePath}" }
+        val generatedBuildTimeOptions =
+          sourceDir
+            .resolve("io/sentry/android/core/SentryGeneratedBuildTimeOptions.java")
+            .normalize()
         for (sourceFile in sourceDir.walk()) {
           val relativePath = sourceFile.toRelativeString(sourceDir)
           val targetFile = outDir.resolve(File(relativePath))
           if (sourceFile.isFile) {
-            if (
-              relativePath.replace(File.separatorChar, '/') ==
-                "io/sentry/android/core/SentryGeneratedBuildTimeOptions.java"
-            ) {
+            if (sourceFile.normalize() == generatedBuildTimeOptions) {
               continue
             }
             if (relativePath.isBlank()) {
