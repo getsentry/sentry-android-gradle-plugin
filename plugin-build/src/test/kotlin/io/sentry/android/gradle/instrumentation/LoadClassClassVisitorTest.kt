@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.instrumentation
 
 import com.google.common.truth.Truth.assertThat
+import io.sentry.android.core.SentryGeneratedBuildTimeOptions
 import io.sentry.android.gradle.util.SentryModules
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.junit.Test
@@ -47,8 +48,9 @@ class LoadClassClassVisitorTest {
   @Test
   fun `injects availability map when static initializer is missing`() {
     val availability = mapOf("present.Class" to true, "missing.Class" to false)
+    SentryGeneratedBuildTimeOptions.availability = availability
 
-    val clazz = load(transformClass(hasStaticInitializer = false, availability = availability))
+    val clazz = load(transformClass(hasStaticInitializer = false))
 
     assertThat(readAvailability(clazz)).containsExactlyEntriesIn(availability)
   }
@@ -56,8 +58,9 @@ class LoadClassClassVisitorTest {
   @Test
   fun `injects availability map and preserves existing static initializer`() {
     val availability = mapOf("present.Class" to true)
+    SentryGeneratedBuildTimeOptions.availability = availability
 
-    val clazz = load(transformClass(hasStaticInitializer = true, availability = availability))
+    val clazz = load(transformClass(hasStaticInitializer = true))
 
     assertThat(clazz.getDeclaredField("marker").getInt(null)).isEqualTo(7)
     assertThat(readAvailability(clazz)).containsExactlyEntriesIn(availability)
@@ -73,7 +76,6 @@ class LoadClassClassVisitorTest {
   private fun transformClass(
     hasAvailabilityField: Boolean = true,
     hasStaticInitializer: Boolean = false,
-    availability: Map<String, Boolean> = emptyMap(),
   ): ByteArray {
     val original = ClassWriter(0)
     original.visit(
@@ -112,7 +114,7 @@ class LoadClassClassVisitorTest {
 
     val reader = ClassReader(original.toByteArray())
     val writer = ClassWriter(reader, ClassWriter.COMPUTE_FRAMES or ClassWriter.COMPUTE_MAXS)
-    reader.accept(LoadClassClassVisitor(Opcodes.ASM9, writer, availability), 0)
+    reader.accept(LoadClassClassVisitor(Opcodes.ASM9, writer), 0)
     return writer.toByteArray()
   }
 

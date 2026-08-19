@@ -21,12 +21,12 @@ import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.instrumentation.SentrySdkOptimizationClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
-import io.sentry.android.gradle.instrumentation.resolveClassAvailability
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.GenerateDistributionPropertiesTask
+import io.sentry.android.gradle.tasks.GenerateSentryBuildTimeOptionsTask
 import io.sentry.android.gradle.tasks.InjectSentryMetaPropertiesIntoAssetsTask
 import io.sentry.android.gradle.tasks.PropertiesFileOutputTask
 import io.sentry.android.gradle.tasks.SentryGenerateIntegrationListTask
@@ -181,9 +181,8 @@ fun ApplicationAndroidComponentsExtension.configure(
 
       val runtimeOptimizationsEnabled = extension.runtimeOptimizations.enabled.get()
       val tracingInstrumentationEnabled = extension.tracingInstrumentation.enabled.get()
-      // Both visitor factories need the resolved dependency graph.
       val modulesService =
-        if (runtimeOptimizationsEnabled || tracingInstrumentationEnabled) {
+        if (tracingInstrumentationEnabled) {
           SentryModulesService.register(
               project,
               extension.tracingInstrumentation.features,
@@ -200,23 +199,31 @@ fun ApplicationAndroidComponentsExtension.configure(
           null
         }
 
-      val modules =
-        modulesService?.let {
-          project.collectModules("${variant.name}RuntimeClasspath", variant.name, it)
-        }
+      modulesService?.let {
+        project.collectModules("${variant.name}RuntimeClasspath", variant.name, it)
+      }
 
       if (runtimeOptimizationsEnabled) {
-        variant.instrumentation.transformClassesWith(
-          SentrySdkOptimizationClassVisitorFactory::class.java,
-          InstrumentationScope.ALL,
-        ) { params ->
-          params.classAvailability.setDisallowChanges(
-            checkNotNull(modules).map(::resolveClassAvailability).orElse(emptyMap())
+        val buildTimeOptionsTask =
+          GenerateSentryBuildTimeOptionsTask.register(
+            project,
+            "${variant.name}RuntimeClasspath",
+            variant.name.capitalized,
+          )
+        val javaSources = variant.sources.java
+        if (buildTimeOptionsTask != null && javaSources != null) {
+          javaSources.addGeneratedSourceDirectory(
+            buildTimeOptionsTask,
+            GenerateSentryBuildTimeOptionsTask::output,
+          )
+          variant.instrumentation.transformClassesWith(
+            SentrySdkOptimizationClassVisitorFactory::class.java,
+            InstrumentationScope.ALL,
+          ) {}
+          variant.instrumentation.setAsmFramesComputationMode(
+            FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
           )
         }
-        variant.instrumentation.setAsmFramesComputationMode(
-          FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
-        )
       }
 
       if (tracingInstrumentationEnabled) {
