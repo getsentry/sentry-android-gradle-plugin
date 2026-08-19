@@ -8,7 +8,7 @@
 
 ### Performance
 
-- Generate resolved Sentry manifest metadata at build time, reducing SDK initialization time by about 6.5% in an all-options benchmark ([#1405](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1405))
+- Resolve Sentry manifest metadata at build time to reduce Android SDK initialization overhead ([#1405](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1405))
 
 ## 6.19.0
 
