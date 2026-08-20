@@ -13,6 +13,18 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
    */
   val enabled: Property<Boolean> = objects.property(Boolean::class.java).convention(true)
 
+  /** Android build variants for which tracing instrumentation should be disabled. */
+  val ignoredVariants: SetProperty<String> =
+    objects.setProperty(String::class.java).convention(emptySet())
+
+  /** Android build types for which tracing instrumentation should be disabled. */
+  val ignoredBuildTypes: SetProperty<String> =
+    objects.setProperty(String::class.java).convention(emptySet())
+
+  /** Android build flavors for which tracing instrumentation should be disabled. */
+  val ignoredFlavors: SetProperty<String> =
+    objects.setProperty(String::class.java).convention(emptySet())
+
   /**
    * Enabled debug output of the plugin. Useful when there are issues with code instrumentation,
    * shows the modified bytecode. Defaults to false.

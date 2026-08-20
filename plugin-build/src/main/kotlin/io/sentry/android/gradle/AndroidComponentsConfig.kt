@@ -179,8 +179,22 @@ fun ApplicationAndroidComponentsExtension.configure(
         }
       }
 
-      val runtimeOptimizationsEnabled = extension.runtimeOptimizations.enabled.get()
-      val tracingInstrumentationEnabled = extension.tracingInstrumentation.enabled.get()
+      val runtimeOptimizations = extension.runtimeOptimizations
+      val runtimeOptimizationsEnabled =
+        variant.isInstrumentationEnabled(
+          runtimeOptimizations.enabled.get(),
+          runtimeOptimizations.ignoredVariants,
+          runtimeOptimizations.ignoredBuildTypes,
+          runtimeOptimizations.ignoredFlavors,
+        )
+      val tracingInstrumentation = extension.tracingInstrumentation
+      val tracingInstrumentationEnabled =
+        variant.isInstrumentationEnabled(
+          tracingInstrumentation.enabled.get(),
+          tracingInstrumentation.ignoredVariants,
+          tracingInstrumentation.ignoredBuildTypes,
+          tracingInstrumentation.ignoredFlavors,
+        )
       // Both visitor factories need the resolved dependency graph.
       val modulesService =
         if (runtimeOptimizationsEnabled || tracingInstrumentationEnabled) {
@@ -580,6 +594,17 @@ fun Variant.configureUploadAppTasks(
   }
   return uploadBundleTask to uploadApkTask
 }
+
+private fun Variant.isInstrumentationEnabled(
+  enabled: Boolean,
+  ignoredVariants: SetProperty<String>,
+  ignoredBuildTypes: SetProperty<String>,
+  ignoredFlavors: SetProperty<String>,
+): Boolean =
+  enabled &&
+    name !in ignoredVariants.get() &&
+    flavorName !in ignoredFlavors.get() &&
+    buildType !in ignoredBuildTypes.get()
 
 private fun <T : InstrumentationParameters> Variant.configureInstrumentation(
   classVisitorFactoryImplClass: Class<out AsmClassVisitorFactory<T>>,

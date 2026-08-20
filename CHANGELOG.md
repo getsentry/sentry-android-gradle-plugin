@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Allow tracing instrumentation and runtime optimizations to be disabled for specific variants, build types, or flavors without disabling other Sentry plugin features ([#1409](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1409))
+
 ## 6.19.0
 
 ### Fixes
