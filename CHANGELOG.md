@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Internal
+
+- Stop publishing Build Scans by default for local builds of this repo; CI still publishes automatically, and local developers can opt in with `--scan` ([#1412](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1412))
+
 ### Dependencies
 
 - Bump ComposablePreviewScanner from v0.9.2 to v0.9.3 ([#1408](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1408))

@@ -15,10 +15,26 @@ plugins {
   id("com.gradle.common-custom-user-data-gradle-plugin") version "2.8.0"
 }
 
+val isCiBuild =
+  providers
+    .environmentVariable("CI")
+    .orElse(providers.systemProperty("CI"))
+    .map { value ->
+      value.isNotBlank() && !value.equals("false", ignoreCase = true) && value != "0"
+    }
+    .orElse(false)
+    .get()
+val isBuildScanRequested = startParameter.isBuildScan
+val shouldPublishBuildScan = isCiBuild || isBuildScanRequested
+
 develocity {
   buildScan {
     termsOfUseUrl.set("https://gradle.com/help/legal-terms-of-use")
     termsOfUseAgree.set("yes")
+    // Keep local scans opt-in via --scan, while still publishing automatically on CI.
+    if (!shouldPublishBuildScan) {
+      publishing.onlyIf { false }
+    }
   }
 }
 
