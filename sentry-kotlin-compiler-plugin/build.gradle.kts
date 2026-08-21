@@ -10,6 +10,9 @@ plugins {
   alias(libs.plugins.spotless)
 }
 
+// Composite substitution matches on project.group, which Vanniktech's GROUP does not set.
+group = providers.gradleProperty("GROUP").get()
+
 val kotlin1920: SourceSet by sourceSets.creating
 val kotlin2120: SourceSet by sourceSets.creating
 val kotlin2200: SourceSet by sourceSets.creating
