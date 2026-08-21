@@ -27,6 +27,12 @@ they belong. The compatibility test matrix overrides AGP/Kotlin/Gradle
 versions via env vars and deliberately skips locking, so you only need to
 regenerate against the canonical build.
 
+Renovate's PRs are handled for you: it cannot regenerate these files itself
+(it runs Gradle against the root build, and `plugin-build` is a separate build
+that run cannot reach), so
+[`relock-plugin-build.yml`](.github/workflows/relock-plugin-build.yml)
+regenerates them on its branches and pushes the result.
+
 # Overriding `sentry-cli` for local development
 
 If you want to use a local version of the sentry-cli for testing integration with the plugin, you can do so by setting the `cli.executable` property in the `sentry.properties` file of the target project.
