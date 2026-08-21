@@ -6,6 +6,9 @@ plugins {
   alias(libs.plugins.spotless)
 }
 
+// Composite substitution matches on project.group, which Vanniktech's GROUP does not set.
+group = providers.gradleProperty("GROUP").get()
+
 spotless {
   kotlin {
     ktfmt(libs.versions.ktfmt.get()).googleStyle()
