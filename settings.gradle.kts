@@ -15,10 +15,21 @@ plugins {
   id("com.gradle.common-custom-user-data-gradle-plugin") version "2.8.0"
 }
 
+val isCI = System.getenv("CI") != null
+val gradleTOUAgree = "true" == providers.gradleProperty("gradleTOUAgree").orNull
+
 develocity {
   buildScan {
     termsOfUseUrl.set("https://gradle.com/help/legal-terms-of-use")
-    termsOfUseAgree.set("yes")
+    termsOfUseAgree.set(if (isCI || gradleTOUAgree) "yes" else "no")
+    uploadInBackground = !isCI
+    // we can't pass the condition directly inside the onlyIf because of a CC bug in Gradle 8.X (this is fixed in 9.X)
+    if (!isCI && !gradleTOUAgree) {
+      publishing.onlyIf { false }
+    }
+    obfuscation {
+      ipAddresses { addresses -> addresses.map { _ -> "0.0.0.0" } }
+    }
   }
 }
 
@@ -30,7 +41,7 @@ dependencyResolutionManagement {
   repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 }
 
-rootProject.name = ("sentry-android-gradle-plugin-composite-build")
+rootProject.name = "sentry-android-gradle-plugin-composite-build"
 
 include(":examples:android-gradle")
 
