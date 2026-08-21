@@ -23,13 +23,12 @@ develocity {
     termsOfUseUrl.set("https://gradle.com/help/legal-terms-of-use")
     termsOfUseAgree.set(if (isCI || gradleTOUAgree) "yes" else "no")
     uploadInBackground = !isCI
-    // we can't pass the condition directly inside the onlyIf because of a CC bug in Gradle 8.X (this is fixed in 9.X)
+    // we can't pass the condition directly inside the onlyIf because of a CC bug in Gradle 8.X
+    // (this is fixed in 9.X)
     if (!isCI && !gradleTOUAgree) {
       publishing.onlyIf { false }
     }
-    obfuscation {
-      ipAddresses { addresses -> addresses.map { _ -> "0.0.0.0" } }
-    }
+    obfuscation { ipAddresses { addresses -> addresses.map { _ -> "0.0.0.0" } } }
   }
 }
 
