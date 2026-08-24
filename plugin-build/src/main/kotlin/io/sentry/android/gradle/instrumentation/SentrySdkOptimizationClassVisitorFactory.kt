@@ -7,32 +7,20 @@ import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.util.SentryModules
 import org.gradle.api.artifacts.ModuleIdentifier
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
-import org.gradle.api.provider.MapProperty
-import org.gradle.api.tasks.Input
 import org.objectweb.asm.ClassVisitor
 
 abstract class SentrySdkOptimizationClassVisitorFactory :
-  AsmClassVisitorFactory<SentrySdkOptimizationClassVisitorFactory.SdkOptimizationParameters> {
-
-  interface SdkOptimizationParameters : InstrumentationParameters {
-    @get:Input val classAvailability: MapProperty<String, Boolean>
-  }
+  AsmClassVisitorFactory<InstrumentationParameters.None> {
 
   override fun createClassVisitor(
     classContext: ClassContext,
     nextClassVisitor: ClassVisitor,
   ): ClassVisitor {
-    return LoadClassClassVisitor(
-      instrumentationContext.apiVersion.get(),
-      nextClassVisitor,
-      parameters.get().classAvailability.get(),
-    )
+    return LoadClassClassVisitor(instrumentationContext.apiVersion.get(), nextClassVisitor)
   }
 
-  // Empty availability means the runtime classpath is unknown. Skip this transformation so
-  // LoadClass falls back to reflection.
   override fun isInstrumentable(classData: ClassData): Boolean =
-    classData.className == LOAD_CLASS_NAME && parameters.get().classAvailability.get().isNotEmpty()
+    classData.className == LOAD_CLASS_NAME
 
   internal companion object {
     const val LOAD_CLASS_NAME = "io.sentry.util.LoadClass"

@@ -10,7 +10,7 @@ import org.junit.Test
 class CollectSourcesTaskTest {
 
   @Test
-  fun `cli-executable is set correctly`() {
+  fun `collects app sources and skips generated build-time options`() {
     val project = createProject()
 
     project.file("dummy/src/a/TestFile1.java").also {
@@ -24,6 +24,10 @@ class CollectSourcesTaskTest {
     project.file("dummy/src/b/TestFile3.java").also {
       it.parentFile.mkdirs()
       it.writeText("TestFile3")
+    }
+    project.file("dummy/src/a/io/sentry/android/core/SentryGeneratedBuildTimeOptions.java").also {
+      it.parentFile.mkdirs()
+      it.writeText("SentryGeneratedBuildTimeOptions")
     }
 
     val sourceDirs = project.files()

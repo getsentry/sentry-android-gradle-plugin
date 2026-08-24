@@ -74,10 +74,17 @@ internal class SourceCollector {
     sourceDirs.forEach { sourceDir ->
       if (sourceDir.exists()) {
         SentryPlugin.logger.debug { "Collecting sources in ${sourceDir.absolutePath}" }
-        sourceDir.walk().forEach { sourceFile ->
+        val generatedBuildTimeOptions =
+          sourceDir
+            .resolve("io/sentry/android/core/SentryGeneratedBuildTimeOptions.java")
+            .normalize()
+        for (sourceFile in sourceDir.walk()) {
           val relativePath = sourceFile.toRelativeString(sourceDir)
           val targetFile = outDir.resolve(File(relativePath))
           if (sourceFile.isFile) {
+            if (sourceFile.normalize() == generatedBuildTimeOptions) {
+              continue
+            }
             if (relativePath.isBlank()) {
               SentryPlugin.logger.debug {
                 "Skipping ${sourceFile.absolutePath} as the plugin was unable to determine a relative path for it."
