@@ -15,15 +15,21 @@ abstract class SentrySdkOptimizationClassVisitorFactory :
   override fun createClassVisitor(
     classContext: ClassContext,
     nextClassVisitor: ClassVisitor,
-  ): ClassVisitor {
-    return LoadClassClassVisitor(instrumentationContext.apiVersion.get(), nextClassVisitor)
-  }
+  ): ClassVisitor =
+    when (classContext.currentClassData.className) {
+      LOAD_CLASS_NAME ->
+        LoadClassClassVisitor(instrumentationContext.apiVersion.get(), nextClassVisitor)
+      MANIFEST_METADATA_READER_NAME ->
+        ManifestMetadataClassVisitor(instrumentationContext.apiVersion.get(), nextClassVisitor)
+      else -> nextClassVisitor
+    }
 
   override fun isInstrumentable(classData: ClassData): Boolean =
-    classData.className == LOAD_CLASS_NAME
+    classData.className == LOAD_CLASS_NAME || classData.className == MANIFEST_METADATA_READER_NAME
 
   internal companion object {
     const val LOAD_CLASS_NAME = "io.sentry.util.LoadClass"
+    const val MANIFEST_METADATA_READER_NAME = "io.sentry.android.core.ManifestMetadataReader"
 
     val CLASS_MODULES: Map<String, Set<ModuleIdentifier>> =
       sortedMapOf(

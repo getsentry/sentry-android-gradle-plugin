@@ -1,0 +1,89 @@
+package io.sentry.android.gradle
+
+import com.google.common.truth.Truth.assertThat
+import java.io.File
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
+
+class ManifestMetadataParserTest {
+  @get:Rule val temporaryFolder = TemporaryFolder()
+
+  @Test
+  fun `parses sentry metadata values`() {
+    val manifest =
+      manifest(
+        """
+        <meta-data android:name="io.sentry.debug" android:value="true"/>
+        <meta-data android:name="io.sentry.enabled" android:value="false"/>
+        <meta-data android:name="io.sentry.max-breadcrumbs" android:value="42"/>
+        <meta-data android:name="io.sentry.hex" android:value="-0x2A"/>
+        <meta-data android:name="io.sentry.sample-rate" android:value="0.5"/>
+        <meta-data android:name="io.sentry.dsn" android:value="https://example.invalid/1"/>
+        <meta-data android:name="other.metadata" android:value="ignored"/>
+        """
+      )
+
+    assertThat(ManifestMetadataParser.parse(manifest))
+      .containsExactly(
+        "io.sentry.debug",
+        "true",
+        "io.sentry.enabled",
+        "false",
+        "io.sentry.max-breadcrumbs",
+        "42",
+        "io.sentry.hex",
+        "-0x2A",
+        "io.sentry.sample-rate",
+        "0.5",
+        "io.sentry.dsn",
+        "https://example.invalid/1",
+      )
+  }
+
+  @Test
+  fun `infers PackageManager value types`() {
+    assertThat(
+        listOf("true", "false", "42", "-0x2A", "0.5", "https://example.invalid/1")
+          .map(ManifestMetadataParser::inferType)
+      )
+      .containsExactly(true, false, 42, -42, 0.5f, "https://example.invalid/1")
+      .inOrder()
+  }
+
+  @Test
+  fun `returns null for values that PackageManager must resolve`() {
+    assertThat(
+        ManifestMetadataParser.parse(
+          manifest("""<meta-data android:name="io.sentry.dsn" android:value="@string/dsn"/>""")
+        )
+      )
+      .isNull()
+    assertThat(
+        ManifestMetadataParser.parse(
+          manifest("""<meta-data android:name="io.sentry.dsn" android:resource="@string/dsn"/>""")
+        )
+      )
+      .isNull()
+    assertThat(
+        ManifestMetadataParser.parse(
+          manifest("""<meta-data android:name="io.sentry.dsn" android:value="${'$'}{dsn}"/>""")
+        )
+      )
+      .isNull()
+  }
+
+  private fun manifest(metadata: String): File =
+    temporaryFolder.newFile("AndroidManifest-${temporaryFolder.root.listFiles()?.size}.xml").apply {
+      writeText(
+        """
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+          <application>
+            $metadata
+          </application>
+        </manifest>
+        """
+          .trimIndent()
+      )
+    }
+}
