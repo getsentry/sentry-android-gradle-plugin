@@ -24,9 +24,6 @@ abstract class ParseSentryManifestMetadataTask : DefaultTask() {
   fun parse() {
     val metadata = ManifestMetadataParser.parse(mergedManifest.get().asFile)
     val json = JsonOutput.toJson(metadata?.toSortedMap())
-    outputFile.get().asFile.apply {
-      parentFile.mkdirs()
-      writeText(json, Charsets.UTF_8)
-    }
+    outputFile.get().asFile.apply { writeText(json, Charsets.UTF_8) }
   }
 }

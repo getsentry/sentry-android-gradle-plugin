@@ -29,9 +29,6 @@ abstract class ResolveSentryClassAvailabilityTask : DefaultTask() {
         }
         .toSet()
     val json = JsonOutput.toJson(resolveClassAvailability(modules).toSortedMap())
-    outputFile.get().asFile.apply {
-      parentFile.mkdirs()
-      writeText(json, Charsets.UTF_8)
-    }
+    outputFile.get().asFile.apply { writeText(json, Charsets.UTF_8) }
   }
 }
