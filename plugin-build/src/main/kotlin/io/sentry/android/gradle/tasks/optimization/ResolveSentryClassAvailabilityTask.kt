@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.tasks
+package io.sentry.android.gradle.tasks.optimization
 
 import groovy.json.JsonOutput
 import io.sentry.android.gradle.instrumentation.resolveClassAvailability

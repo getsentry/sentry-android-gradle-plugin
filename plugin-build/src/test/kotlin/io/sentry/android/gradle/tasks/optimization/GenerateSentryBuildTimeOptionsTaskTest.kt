@@ -1,4 +1,4 @@
-package io.sentry.android.gradle.tasks
+package io.sentry.android.gradle.tasks.optimization
 
 import com.google.common.truth.Truth.assertThat
 import org.gradle.api.artifacts.Configuration

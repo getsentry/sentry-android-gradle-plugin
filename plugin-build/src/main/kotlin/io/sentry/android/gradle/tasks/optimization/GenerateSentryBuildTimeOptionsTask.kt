@@ -1,7 +1,8 @@
-package io.sentry.android.gradle.tasks
+package io.sentry.android.gradle.tasks.optimization
 
 import groovy.json.JsonSlurper
 import io.sentry.android.gradle.ManifestMetadataParser
+import io.sentry.android.gradle.tasks.DirectoryOutputTask
 import org.gradle.api.Project
 import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.file.RegularFile
