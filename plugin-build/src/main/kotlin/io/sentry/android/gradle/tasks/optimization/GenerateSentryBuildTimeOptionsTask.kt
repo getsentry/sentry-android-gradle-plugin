@@ -144,7 +144,7 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
         }
 
       val intermediateDir =
-        project.layout.buildDirectory.dir("intermediates/sentry/buildTimeOptions/$taskSuffix")
+        project.layout.buildDirectory.dir("sentry/intermediates/buildTimeOptions/$taskSuffix")
       val availabilityTask =
         project.tasks.register(
           "resolveSentryClassAvailability$taskSuffix",
@@ -176,7 +176,7 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
         task.classAvailabilityFile.set(availabilityTask.flatMap { it.outputFile })
         task.manifestMetadataFile.set(metadataTask.flatMap { it.outputFile })
         task.output.set(
-          project.layout.buildDirectory.dir("generated/sentry/buildTimeOptions/$taskSuffix")
+          project.layout.buildDirectory.dir("sentry/generated/buildTimeOptions/$taskSuffix")
         )
       }
     }
