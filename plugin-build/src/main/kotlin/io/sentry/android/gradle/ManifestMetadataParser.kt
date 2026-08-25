@@ -5,14 +5,14 @@ import javax.xml.parsers.DocumentBuilderFactory
 import org.w3c.dom.Element
 
 internal object ManifestMetadataParser {
-  fun parse(manifest: File): Map<String, Any>? =
+  fun parse(manifest: File): Map<String, String>? =
     runCatching {
         val document =
           manifest.inputStream().buffered().use {
             DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it)
           }
         val application = document.getElementsByTagName("application").item(0) ?: return emptyMap()
-        val metadata = linkedMapOf<String, Any>()
+        val metadata = linkedMapOf<String, String>()
 
         for (index in 0 until application.childNodes.length) {
           val element = application.childNodes.item(index) as? Element ?: continue
@@ -32,7 +32,7 @@ internal object ManifestMetadataParser {
             )
             return null
           }
-          metadata[name] = inferType(value)
+          metadata[name] = value
         }
         metadata
       }

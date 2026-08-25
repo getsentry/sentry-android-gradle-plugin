@@ -1,16 +1,13 @@
 package io.sentry.android.gradle.tasks
 
+import groovy.json.JsonSlurper
 import io.sentry.android.gradle.ManifestMetadataParser
-import io.sentry.android.gradle.instrumentation.resolveClassAvailability
 import org.gradle.api.Project
 import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
 import org.gradle.api.provider.Provider
-import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -20,24 +17,41 @@ import org.gradle.api.tasks.TaskProvider
 @CacheableTask
 abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
 
-  @get:Input abstract val moduleIds: SetProperty<String>
+  @get:InputFile
+  @get:PathSensitive(PathSensitivity.NONE)
+  abstract val classAvailabilityFile: RegularFileProperty
 
   @get:InputFile
   @get:PathSensitive(PathSensitivity.NONE)
-  abstract val mergedManifest: RegularFileProperty
+  abstract val manifestMetadataFile: RegularFileProperty
 
   @TaskAction
   fun generate() {
-    val modules =
-      moduleIds
-        .get()
-        .mapNotNull { coordinate ->
-          val parts = coordinate.split(':', limit = 2)
-          if (parts.size == 2) DefaultModuleIdentifier.newId(parts[0], parts[1]) else null
-        }
-        .toSet()
-    val availability = resolveClassAvailability(modules)
-    val metadata = ManifestMetadataParser.parse(mergedManifest.get().asFile)
+    val json = JsonSlurper()
+    val availability =
+      (json.parseText(classAvailabilityFile.get().asFile.readText(Charsets.UTF_8)) as Map<*, *>)
+        .map { (key, value) -> key as String to value as Boolean }
+        .toMap()
+    val parsedMetadata = json.parseText(manifestMetadataFile.get().asFile.readText(Charsets.UTF_8))
+    val metadata =
+      if (parsedMetadata == null) {
+        null
+      } else {
+        runCatching {
+            (parsedMetadata as Map<*, *>)
+              .map { (key, value) ->
+                key as String to ManifestMetadataParser.inferType(value as String)
+              }
+              .toMap()
+          }
+          .onFailure {
+            logger.info(
+              "Sentry manifest metadata types could not be inferred for optimization.",
+              it,
+            )
+          }
+          .getOrNull()
+      }
     val sourceFile = output.file(GENERATED_CLASS_PATH).get().asFile
     sourceFile.parentFile.mkdirs()
     sourceFile.writeText(
@@ -77,7 +91,8 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
         }
       }
       """
-        .trimIndent() + "\n"
+        .trimIndent() + "\n",
+      Charsets.UTF_8,
     )
   }
 
@@ -127,19 +142,38 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
           return null
         }
 
+      val intermediateDir =
+        project.layout.buildDirectory.dir("intermediates/sentry/buildTimeOptions/$taskSuffix")
+      val availabilityTask =
+        project.tasks.register(
+          "resolveSentryClassAvailability$taskSuffix",
+          ResolveSentryClassAvailabilityTask::class.java,
+        ) { task ->
+          task.moduleIds.set(
+            configurationProvider.map { configuration ->
+              configuration.incoming.resolutionResult.allComponents.mapNotNullTo(mutableSetOf()) {
+                component ->
+                component.moduleVersion?.module?.let { "${it.group}:${it.name}" }
+              }
+            }
+          )
+          task.outputFile.set(intermediateDir.map { it.file("class-availability.json") })
+        }
+      val metadataTask =
+        project.tasks.register(
+          "parseSentryManifestMetadata$taskSuffix",
+          ParseSentryManifestMetadataTask::class.java,
+        ) { task ->
+          task.mergedManifest.set(mergedManifest)
+          task.outputFile.set(intermediateDir.map { it.file("manifest-metadata.json") })
+        }
+
       return project.tasks.register(
         "generateSentryBuildTimeOptions$taskSuffix",
         GenerateSentryBuildTimeOptionsTask::class.java,
       ) { task ->
-        task.moduleIds.set(
-          configurationProvider.map { configuration ->
-            configuration.incoming.resolutionResult.allComponents.mapNotNullTo(mutableSetOf()) {
-              component ->
-              component.moduleVersion?.module?.let { "${it.group}:${it.name}" }
-            }
-          }
-        )
-        task.mergedManifest.set(mergedManifest)
+        task.classAvailabilityFile.set(availabilityTask.flatMap { it.outputFile })
+        task.manifestMetadataFile.set(metadataTask.flatMap { it.outputFile })
         task.output.set(
           project.layout.buildDirectory.dir("generated/sentry/buildTimeOptions/$taskSuffix")
         )

@@ -10,7 +10,7 @@ class ManifestMetadataParserTest {
   @get:Rule val temporaryFolder = TemporaryFolder()
 
   @Test
-  fun `parses sentry metadata with PackageManager value types`() {
+  fun `parses sentry metadata values`() {
     val manifest =
       manifest(
         """
@@ -27,18 +27,28 @@ class ManifestMetadataParserTest {
     assertThat(ManifestMetadataParser.parse(manifest))
       .containsExactly(
         "io.sentry.debug",
-        true,
+        "true",
         "io.sentry.enabled",
-        false,
+        "false",
         "io.sentry.max-breadcrumbs",
-        42,
+        "42",
         "io.sentry.hex",
-        -42,
+        "-0x2A",
         "io.sentry.sample-rate",
-        0.5f,
+        "0.5",
         "io.sentry.dsn",
         "https://example.invalid/1",
       )
+  }
+
+  @Test
+  fun `infers PackageManager value types`() {
+    assertThat(
+        listOf("true", "false", "42", "-0x2A", "0.5", "https://example.invalid/1")
+          .map(ManifestMetadataParser::inferType)
+      )
+      .containsExactly(true, false, 42, -42, 0.5f, "https://example.invalid/1")
+      .inOrder()
   }
 
   @Test

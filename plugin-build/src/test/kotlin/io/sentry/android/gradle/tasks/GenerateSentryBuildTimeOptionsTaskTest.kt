@@ -15,6 +15,8 @@ class GenerateSentryBuildTimeOptionsTaskTest {
   fun `generates build time options source`() {
     val project = ProjectBuilder.builder().withProjectDir(tempDir.newFolder("project")).build()
     val outputDir = tempDir.newFolder("generated")
+    val availabilityFile = tempDir.newFile("class-availability.json")
+    val metadataFile = tempDir.newFile("manifest-metadata.json")
     val manifest =
       tempDir.newFile("AndroidManifest.xml").apply {
         writeText(
@@ -29,14 +31,29 @@ class GenerateSentryBuildTimeOptionsTaskTest {
             .trimIndent()
         )
       }
-    val task =
-      project.tasks.register("generateOptions", GenerateSentryBuildTimeOptionsTask::class.java) {
+    val availabilityTask =
+      project.tasks.register(
+        "resolveAvailability",
+        ResolveSentryClassAvailabilityTask::class.java,
+      ) {
         it.moduleIds.set(setOf("com.jakewharton.timber:timber", "androidx.core:core"))
+        it.outputFile.set(availabilityFile)
+      }
+    val metadataTask =
+      project.tasks.register("parseMetadata", ParseSentryManifestMetadataTask::class.java) {
         it.mergedManifest.set(manifest)
+        it.outputFile.set(metadataFile)
+      }
+    val generateTask =
+      project.tasks.register("generateOptions", GenerateSentryBuildTimeOptionsTask::class.java) {
+        it.classAvailabilityFile.set(availabilityFile)
+        it.manifestMetadataFile.set(metadataFile)
         it.output.set(outputDir)
       }
 
-    task.get().generate()
+    availabilityTask.get().resolve()
+    metadataTask.get().parse()
+    generateTask.get().generate()
 
     val source =
       outputDir.resolve("io/sentry/android/core/SentryGeneratedBuildTimeOptions.java").readText()
@@ -45,6 +62,25 @@ class GenerateSentryBuildTimeOptionsTaskTest {
     assertThat(source).contains("availability.put(\"androidx.lifecycle.Lifecycle\", false);")
     assertThat(source).contains("metadata.put(\"io.sentry.debug\", true);")
     assertThat(source).contains("metadata.put(\"io.sentry.dsn\", \"quoted&\\\"value\");")
+  }
+
+  @Test
+  fun `preserves manifest metadata fallback`() {
+    assertThat(generateSource("null")).contains("    return null;")
+  }
+
+  @Test
+  fun `falls back when manifest metadata type cannot be inferred`() {
+    assertThat(generateSource("""{"io.sentry.max-breadcrumbs":"0xFFFFFFFFFFFFFFFF"}"""))
+      .contains("    return null;")
+  }
+
+  @Test
+  fun `preserves authoritative empty manifest metadata`() {
+    val source = generateSource("{}")
+
+    assertThat(source).contains("Map<String, Object> metadata = new HashMap<>();")
+    assertThat(source).doesNotContain("metadata.put(")
   }
 
   @Test
@@ -85,15 +121,37 @@ class GenerateSentryBuildTimeOptionsTaskTest {
       app.dependencies.project(mapOf("path" to ":sentry-android-replay")),
     )
 
+    GenerateSentryBuildTimeOptionsTask.register(
+        app,
+        "runtimeClasspath",
+        "Test",
+        app.layout.file(app.provider { app.file("AndroidManifest.xml") }),
+      )!!
+      .get()
     val task =
-      GenerateSentryBuildTimeOptionsTask.register(
-          app,
-          "runtimeClasspath",
-          "Test",
-          app.layout.file(app.provider { app.file("AndroidManifest.xml") }),
-        )!!
+      app.tasks
+        .named("resolveSentryClassAvailabilityTest", ResolveSentryClassAvailabilityTask::class.java)
         .get()
 
     assertThat(task.moduleIds.get()).contains("io.sentry:sentry-android-replay")
+  }
+
+  private fun generateSource(metadata: String): String {
+    val project = ProjectBuilder.builder().withProjectDir(tempDir.newFolder()).build()
+    val availabilityFile = tempDir.newFile().apply { writeText("{}") }
+    val metadataFile = tempDir.newFile().apply { writeText(metadata) }
+    val outputDir = tempDir.newFolder()
+    val task =
+      project.tasks.register("generateOptions", GenerateSentryBuildTimeOptionsTask::class.java) {
+        it.classAvailabilityFile.set(availabilityFile)
+        it.manifestMetadataFile.set(metadataFile)
+        it.output.set(outputDir)
+      }
+
+    task.get().generate()
+
+    return outputDir
+      .resolve("io/sentry/android/core/SentryGeneratedBuildTimeOptions.java")
+      .readText()
   }
 }
