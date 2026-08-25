@@ -1,11 +1,16 @@
 package io.sentry.android.gradle.tasks.optimization
 
 import com.google.common.truth.Truth.assertThat
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import org.gradle.api.artifacts.Configuration
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 
 class GenerateSentryBuildTimeOptionsTaskTest {
 
@@ -71,8 +76,11 @@ class GenerateSentryBuildTimeOptionsTaskTest {
 
   @Test
   fun `falls back when manifest metadata type cannot be inferred`() {
-    assertThat(generateSource("""{"io.sentry.max-breadcrumbs":"0xFFFFFFFFFFFFFFFF"}"""))
+    val telemetry = mock<SentryTelemetryService>()
+
+    assertThat(generateSource("""{"io.sentry.max-breadcrumbs":"0xFFFFFFFFFFFFFFFF"}""", telemetry))
       .contains("    return null;")
+    verify(telemetry).captureHandledError(any(), eq("manifest metadata type inference"))
   }
 
   @Test
@@ -136,7 +144,7 @@ class GenerateSentryBuildTimeOptionsTaskTest {
     assertThat(task.moduleIds.get()).contains("io.sentry:sentry-android-replay")
   }
 
-  private fun generateSource(metadata: String): String {
+  private fun generateSource(metadata: String, telemetry: SentryTelemetryService? = null): String {
     val project = ProjectBuilder.builder().withProjectDir(tempDir.newFolder()).build()
     val availabilityFile = tempDir.newFile().apply { writeText("{}") }
     val metadataFile = tempDir.newFile().apply { writeText(metadata) }
@@ -146,6 +154,7 @@ class GenerateSentryBuildTimeOptionsTaskTest {
         it.classAvailabilityFile.set(availabilityFile)
         it.manifestMetadataFile.set(metadataFile)
         it.output.set(outputDir)
+        telemetry?.let { service -> it.sentryTelemetryService.set(service) }
       }
 
     task.get().generate()

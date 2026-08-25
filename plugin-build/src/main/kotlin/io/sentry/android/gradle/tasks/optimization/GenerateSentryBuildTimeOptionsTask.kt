@@ -3,13 +3,16 @@ package io.sentry.android.gradle.tasks.optimization
 import groovy.json.JsonSlurper
 import io.sentry.android.gradle.ManifestMetadataParser
 import io.sentry.android.gradle.tasks.DirectoryOutputTask
+import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import org.gradle.api.Project
 import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
@@ -25,6 +28,8 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
   @get:InputFile
   @get:PathSensitive(PathSensitivity.NONE)
   abstract val manifestMetadataFile: RegularFileProperty
+
+  @get:Internal abstract val sentryTelemetryService: Property<SentryTelemetryService>
 
   @TaskAction
   fun generate() {
@@ -49,6 +54,10 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
             logger.info(
               "Sentry manifest metadata types could not be inferred for optimization.",
               it,
+            )
+            sentryTelemetryService.orNull?.captureHandledError(
+              it,
+              "manifest metadata type inference",
             )
           }
           .getOrNull()
@@ -132,6 +141,7 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
       configurationName: String,
       taskSuffix: String,
       mergedManifest: Provider<RegularFile>,
+      sentryTelemetryProvider: Provider<SentryTelemetryService>? = null,
     ): TaskProvider<GenerateSentryBuildTimeOptionsTask>? {
       val configurationProvider =
         try {
@@ -178,6 +188,10 @@ abstract class GenerateSentryBuildTimeOptionsTask : DirectoryOutputTask() {
         task.output.set(
           project.layout.buildDirectory.dir("sentry/generated/buildTimeOptions/$taskSuffix")
         )
+        sentryTelemetryProvider?.let {
+          task.sentryTelemetryService.set(it)
+          task.usesService(it)
+        }
       }
     }
   }

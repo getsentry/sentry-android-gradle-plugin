@@ -210,6 +210,7 @@ fun ApplicationAndroidComponentsExtension.configure(
             "${variant.name}RuntimeClasspath",
             variant.name.capitalized,
             variant.artifacts.get(SingleArtifact.MERGED_MANIFEST),
+            sentryTelemetryProvider,
           )
         val javaSources = variant.sources.java
         if (buildTimeOptionsTask != null && javaSources != null) {
