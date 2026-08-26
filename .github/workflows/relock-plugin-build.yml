@@ -1,0 +1,113 @@
+name: Relock plugin-build
+
+# Renovate resolves ./gradlew by walking up from the package file it edited, so its lock refresh
+# always runs against the root build. Every lockfile and verification metadata entry we have lives
+# in plugin-build, which is a separate build the root `dependencies` task cannot reach, so Renovate
+# opens its PRs with those files untouched and STRICT-mode locking then rejects the new version in
+# pre-merge. Regenerate them here and push the result back onto the PR branch.
+#
+# This job builds a tree it did not write, so it treats that tree as untrusted: it runs Gradle only
+# when the PR edits nothing but version-carrying files, and the deploy key is loaded in the push
+# step alone -- never on disk while Gradle resolves and executes third-party plugins, which the
+# relock deliberately does with checksum verification in write mode.
+
+on:
+  pull_request:
+    paths:
+      # Everything that feeds plugin-build's dependency graph. buildSrc is in the list because
+      # plugin-build/buildSrc compiles ../../buildSrc/src/main/java, where the AGP and Kotlin
+      # versions are declared.
+      - 'gradle/libs.versions.toml'
+      - 'buildSrc/**'
+      - 'plugin-build/**'
+      - '.github/workflows/relock-plugin-build.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  relock:
+    name: Relock plugin-build
+    # Only Renovate's PRs, and only from branches in this repository — a fork has no access to the
+    # deploy key, and pushing to someone else's branch uninvited is not the point of this job.
+    if: >-
+      startsWith(github.head_ref, 'renovate/') &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          # Leave no credential in .git/config while we build this tree.
+          persist-credentials: false
+
+      - name: Check the PR only edits version-carrying files
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # Gradle executes the build logic of whatever tree it is pointed at: buildSrc, settings and
+          # build scripts, the wrapper, and the relock script itself. Renovate only ever rewrites
+          # version strings, so anything else in the diff means relocking would run code nobody has
+          # reviewed. The two generated files are allowed because our own push re-triggers this job.
+          allowed='^(gradle/libs\.versions\.toml|plugin-build/gradle\.lockfile|plugin-build/gradle/verification-metadata\.xml)$'
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --jq '.[].filename' > changed.txt
+          if grep -vE "$allowed" changed.txt; then
+            echo "::warning::Not relocking: the files listed above are outside the allowlist. Run scripts/relock-plugin-build.sh locally and commit the result."
+            echo 'run=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'run=true' >> "$GITHUB_OUTPUT"
+          fi
+          rm changed.txt
+
+      - name: Set up Java
+        if: steps.guard.outputs.run == 'true'
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # No cache-encryption-key here: that secret encrypts saved configuration-cache entries, and
+      # this job has no reason to hand it to a build whose tree it does not fully trust.
+      - name: Setup Gradle
+        if: steps.guard.outputs.run == 'true'
+        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # pin@v6
+
+      - name: Regenerate lockfile and verification metadata
+        if: steps.guard.outputs.run == 'true'
+        run: scripts/relock-plugin-build.sh
+
+      - name: Push the result
+        if: steps.guard.outputs.run == 'true'
+        run: |
+          generated=(plugin-build/gradle.lockfile plugin-build/gradle/verification-metadata.xml)
+          if git diff --quiet -- "${generated[@]}"; then
+            echo "Lockfile and verification metadata are already up to date."
+            exit 0
+          fi
+          # The identity every CI-authored commit in this repo already carries, from
+          # getsentry/github-workflows/updater. Cosmetic: what re-triggers the checks is the
+          # deploy key we push with, not the author.
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'build(deps): Regenerate plugin-build lockfile and verification metadata' \
+              -- "${generated[@]}"
+          # Only now, with Gradle finished, does the key reach the runner. Pushed over SSH rather
+          # than with GITHUB_TOKEN, whose commits would not re-trigger the checks that are failing
+          # on the stale lock.
+          eval "$(ssh-agent -s)"
+          printf '%s\n' "$DEPLOY_KEY" | ssh-add -
+          # The resulting `synchronize` event runs this job again, which finds nothing to do.
+          GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=accept-new' \
+            git push "git@github.com:$GITHUB_REPOSITORY.git" "HEAD:$HEAD_REF"
+          ssh-agent -k
+        env:
+          DEPLOY_KEY: ${{ secrets.CI_DEPLOY_KEY }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
