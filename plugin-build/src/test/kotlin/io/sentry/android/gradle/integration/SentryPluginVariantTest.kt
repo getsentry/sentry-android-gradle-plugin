@@ -85,7 +85,7 @@ class SentryPluginVariantTest :
   }
 
   @Test
-  fun `disables tracing for build type via reverse dsl while preserving mapping upload`() {
+  fun `disables tracing for build type via reverse dsl while preserving other sentry tasks`() {
     applyReverseBuildTypeOverrides(
       buildType = "debug",
       tracingEnabled = false,
@@ -94,13 +94,17 @@ class SentryPluginVariantTest :
 
     val ignoredBuild = runner.appendArguments(":app:assembleFullDebug", "--dry-run").build()
 
+    // instrumentation off for debug
     assertThat(ignoredBuild.output).doesNotContain(":app:transformFullDebugClassesWithAsm")
     assertThat(ignoredBuild.output).doesNotContain(":app:generateSentryBuildTimeOptionsFullDebug")
-    assertThat(ignoredBuild.output).contains(":app:uploadSentryProguardMappingsFullDebug")
+    // other plugin features still run (debug is not minified, so no mapping upload task)
+    assertThat(ignoredBuild.output)
+      .contains(":app:injectSentryDebugMetaPropertiesIntoAssetsFullDebug")
 
     val allowedBuild = runner.appendArguments(":app:assembleFullRelease", "--dry-run").build()
 
     assertThat(allowedBuild.output).contains(":app:transformFullReleaseClassesWithAsm")
+    assertThat(allowedBuild.output).contains(":app:uploadSentryProguardMappingsFullRelease")
   }
 
   @Test
