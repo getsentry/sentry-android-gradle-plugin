@@ -19,6 +19,7 @@ import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.extensions.SentryVariantConfigResolver
 import io.sentry.android.gradle.instrumentation.SentrySdkOptimizationClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
@@ -179,8 +180,15 @@ fun ApplicationAndroidComponentsExtension.configure(
         }
       }
 
-      val runtimeOptimizationsEnabled = extension.runtimeOptimizations.enabled.get()
-      val tracingInstrumentationEnabled = extension.tracingInstrumentation.enabled.get()
+      val instrumentationConfig =
+        SentryVariantConfigResolver.resolve(
+          extension = extension,
+          variantName = variant.name,
+          buildType = variant.buildType,
+          productFlavors = variant.productFlavors.map { it.second },
+        )
+      val runtimeOptimizationsEnabled = instrumentationConfig.runtimeOptimizationsEnabled
+      val tracingInstrumentationEnabled = instrumentationConfig.tracingInstrumentationEnabled
       val modulesService =
         if (tracingInstrumentationEnabled) {
           SentryModulesService.register(

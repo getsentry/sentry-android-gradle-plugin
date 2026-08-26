@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.integration
 
+import com.google.common.truth.Truth.assertThat
 import io.sentry.BuildConfig
 import org.gradle.util.GradleVersion
 import org.junit.Assert.assertFalse
@@ -83,6 +84,78 @@ class SentryPluginVariantTest :
     assertTrue(":app:uploadSentryProguardMappingsDemoRelease" in build.output)
   }
 
+  @Test
+  fun `disables tracing for build type via reverse dsl while preserving mapping upload`() {
+    applyReverseBuildTypeOverrides(
+      buildType = "debug",
+      tracingEnabled = false,
+      runtimeOptimizationsEnabled = false,
+    )
+
+    val ignoredBuild = runner.appendArguments(":app:assembleFullDebug", "--dry-run").build()
+
+    assertThat(ignoredBuild.output).doesNotContain(":app:transformFullDebugClassesWithAsm")
+    assertThat(ignoredBuild.output).doesNotContain(":app:generateSentryBuildTimeOptionsFullDebug")
+    assertThat(ignoredBuild.output).contains(":app:uploadSentryProguardMappingsFullDebug")
+
+    val allowedBuild = runner.appendArguments(":app:assembleFullRelease", "--dry-run").build()
+
+    assertThat(allowedBuild.output).contains(":app:transformFullReleaseClassesWithAsm")
+  }
+
+  @Test
+  fun `disables tracing for product flavor via reverse dsl while preserving mapping upload`() {
+    applyReverseFlavorOverrides(flavor = "full", tracingEnabled = false)
+
+    val ignoredBuild = runner.appendArguments(":app:assembleFullRelease", "--dry-run").build()
+
+    assertThat(ignoredBuild.output).doesNotContain(":app:transformFullReleaseClassesWithAsm")
+    assertThat(ignoredBuild.output).contains(":app:uploadSentryProguardMappingsFullRelease")
+
+    val allowedBuild = runner.appendArguments(":app:assembleDemoRelease", "--dry-run").build()
+
+    assertThat(allowedBuild.output).contains(":app:transformDemoReleaseClassesWithAsm")
+  }
+
+  @Test
+  fun `variant override wins over build type in reverse dsl`() {
+    appBuildFile.appendText(
+      // language=Groovy
+      """
+                sentry {
+                  autoUploadProguardMapping = false
+                  runtimeOptimizations {
+                    enabled = false
+                  }
+                  tracingInstrumentation {
+                    enabled = true
+                  }
+                  buildTypes {
+                    debug {
+                      tracingInstrumentation {
+                        enabled = false
+                      }
+                    }
+                  }
+                  variants {
+                    fullDebug {
+                      tracingInstrumentation {
+                        enabled = true
+                      }
+                    }
+                  }
+                }
+            """
+        .trimIndent()
+    )
+
+    val overridden = runner.appendArguments(":app:assembleFullDebug", "--dry-run").build()
+    assertThat(overridden.output).contains(":app:transformFullDebugClassesWithAsm")
+
+    val buildTypeOnly = runner.appendArguments(":app:assembleDemoDebug", "--dry-run").build()
+    assertThat(buildTypeOnly.output).doesNotContain(":app:transformDemoDebugClassesWithAsm")
+  }
+
   private fun applyIgnores(
     ignoredVariants: Set<String> = setOf(),
     ignoredBuildTypes: Set<String> = setOf(),
@@ -101,6 +174,63 @@ class SentryPluginVariantTest :
                   ignoredFlavors = [$flavors]
                   tracingInstrumentation {
                     enabled = false
+                  }
+                }
+            """
+        .trimIndent()
+    )
+  }
+
+  private fun applyReverseBuildTypeOverrides(
+    buildType: String,
+    tracingEnabled: Boolean,
+    runtimeOptimizationsEnabled: Boolean,
+  ) {
+    appBuildFile.appendText(
+      // language=Groovy
+      """
+                sentry {
+                  autoUploadProguardMapping = false
+                  tracingInstrumentation {
+                    enabled = true
+                  }
+                  runtimeOptimizations {
+                    enabled = true
+                  }
+                  buildTypes {
+                    $buildType {
+                      tracingInstrumentation {
+                        enabled = $tracingEnabled
+                      }
+                      runtimeOptimizations {
+                        enabled = $runtimeOptimizationsEnabled
+                      }
+                    }
+                  }
+                }
+            """
+        .trimIndent()
+    )
+  }
+
+  private fun applyReverseFlavorOverrides(flavor: String, tracingEnabled: Boolean) {
+    appBuildFile.appendText(
+      // language=Groovy
+      """
+                sentry {
+                  autoUploadProguardMapping = false
+                  runtimeOptimizations {
+                    enabled = false
+                  }
+                  tracingInstrumentation {
+                    enabled = true
+                  }
+                  productFlavors {
+                    $flavor {
+                      tracingInstrumentation {
+                        enabled = $tracingEnabled
+                      }
+                    }
                   }
                 }
             """

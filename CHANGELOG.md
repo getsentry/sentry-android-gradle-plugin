@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Allow per-build-type / product-flavor / variant overrides for tracing instrumentation and runtime optimizations via reverse DSL (`sentry { buildTypes { debug { ... } } }`) ([#0](https://github.com/getsentry/sentry-android-gradle-plugin/pull/0))
+
 ### Fixes
 
 - Avoid resolving the runtime classpath during Gradle configuration when SDK runtime optimizations are enabled ([#1404](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1404))
