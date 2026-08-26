@@ -4,7 +4,7 @@
 
 ### Features
 
-- Allow per-build-type / product-flavor / variant overrides for tracing instrumentation and runtime optimizations via reverse DSL (`sentry { buildTypes { debug { ... } } }`) ([#0](https://github.com/getsentry/sentry-android-gradle-plugin/pull/0))
+- Allow per-build-type / product-flavor / variant overrides for tracing instrumentation and runtime optimizations via reverse DSL (`sentry { buildTypes { debug { ... } } }`) ([#1420](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1420))
 
 ### Fixes
 
