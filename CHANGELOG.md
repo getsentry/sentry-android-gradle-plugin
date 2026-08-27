@@ -4,7 +4,20 @@
 
 ### Features
 
-- Allow per-variant overrides for tracing instrumentation and runtime optimizations via reverse DSL (`sentry { variants { debug { ... } } }`) ([#1420](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1420))
+- Allow per-variant overrides for tracing instrumentation and runtime optimizations via reverse DSL ([#1420](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1420))
+  - This allows you to enable and disable features per variant.  
+  ```kotlin
+  sentry {
+    tracingInstrumentation { enabled.set(false) }
+  
+    variants {
+      create("debug") {
+        tracingInstrumentation { enabled.set(true) }
+        runtimeOptimizations { enabled.set(true) }
+      }
+    }
+  }
+  ```
 
 ### Fixes
 
