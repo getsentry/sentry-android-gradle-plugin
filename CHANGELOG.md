@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Allow per-variant overrides for tracing instrumentation and runtime optimizations via reverse DSL (`sentry { variants { debug { ... } } }`) ([#1420](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1420))
+
 ### Fixes
 
 - Avoid resolving the runtime classpath during Gradle configuration when SDK runtime optimizations are enabled ([#1404](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1404))

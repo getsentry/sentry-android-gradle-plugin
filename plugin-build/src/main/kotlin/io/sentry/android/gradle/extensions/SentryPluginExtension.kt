@@ -3,6 +3,7 @@ package io.sentry.android.gradle.extensions
 import io.sentry.android.gradle.telemetry.SentryTelemetryService.Companion.SENTRY_SAAS_DSN
 import javax.inject.Inject
 import org.gradle.api.Action
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
@@ -79,6 +80,29 @@ abstract class SentryPluginExtension @Inject constructor(objects: ObjectFactory)
   /** List of Android build flavors that should be ignored by the Sentry plugin. */
   val ignoredFlavors: SetProperty<String> =
     objects.setProperty(String::class.java).convention(emptySet())
+
+  /**
+   * Per-variant overrides for Sentry features. Matching is by full Android variant name (e.g.
+   * `debug`, `fullRelease`). Unset properties inherit from the global extension.
+   *
+   * Example:
+   * ```
+   * sentry {
+   *   variants {
+   *     debug {
+   *       tracingInstrumentation { enabled = false }
+   *       runtimeOptimizations { enabled = false }
+   *     }
+   *   }
+   * }
+   * ```
+   */
+  val variants: NamedDomainObjectContainer<SentryVariantConfig> =
+    objects.domainObjectContainer(SentryVariantConfig::class.java)
+
+  fun variants(action: Action<NamedDomainObjectContainer<SentryVariantConfig>>) {
+    action.execute(variants)
+  }
 
   val tracingInstrumentation: TracingInstrumentationExtension =
     objects.newInstance(TracingInstrumentationExtension::class.java)
