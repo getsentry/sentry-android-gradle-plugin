@@ -8,15 +8,15 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Nested
 
 /**
- * Per-variant / build-type / product-flavor overrides for the Sentry plugin.
+ * Per-variant overrides for the Sentry plugin.
  *
- * Unset properties mean "inherit" from a more specific scope or the global extension. Do not set
- * conventions on override properties — only the global extension owns defaults.
+ * Unset properties mean "inherit" from the global extension. Do not set conventions on override
+ * properties — only the global extension owns defaults.
  *
  * Example:
  * ```
  * sentry {
- *   buildTypes {
+ *   variants {
  *     debug {
  *       tracingInstrumentation { enabled = false }
  *       runtimeOptimizations { enabled = false }

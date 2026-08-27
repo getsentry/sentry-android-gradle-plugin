@@ -181,12 +181,7 @@ fun ApplicationAndroidComponentsExtension.configure(
       }
 
       val instrumentationConfig =
-        SentryVariantConfigResolver.resolve(
-          extension = extension,
-          variantName = variant.name,
-          buildType = variant.buildType,
-          productFlavors = variant.productFlavors.map { it.second },
-        )
+        SentryVariantConfigResolver.resolve(extension = extension, variantName = variant.name)
       val runtimeOptimizationsEnabled = instrumentationConfig.runtimeOptimizationsEnabled
       val tracingInstrumentationEnabled = instrumentationConfig.tracingInstrumentationEnabled
       val modulesService =
