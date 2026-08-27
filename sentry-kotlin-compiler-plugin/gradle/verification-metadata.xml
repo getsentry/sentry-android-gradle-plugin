@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Generated; see CONTRIBUTING.md for how to regenerate it.
+
+   Regeneration preserves existing entries, so two trust scopes deliberately narrower than the
+   ones Gradle's bootstrap infers survive it. Do not widen them back. The JetBrains Compose key
+   is scoped to the groups it actually signs rather than all of org.jetbrains, which would let it
+   vouch for Kotlin itself; the Error Prone key to errorprone and googlejavaformat rather than
+   all of com.google, which would cover Guava, Gson and AutoService.
+-->
+<verification-metadata xmlns="https://schema.gradle.org/dependency-verification" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://schema.gradle.org/dependency-verification https://schema.gradle.org/dependency-verification/dependency-verification-1.3.xsd">
+   <configuration>
+      <verify-metadata>true</verify-metadata>
+      <verify-signatures>true</verify-signatures>
+      <keyring-format>armored</keyring-format>
+      <key-servers enabled="false"/>
+      <trusted-keys>
+         <trusted-key id="015479E1055341431B4545AB72475FD306B9CAB7" group="com.googlecode.javaewah" name="JavaEWAH" version="1.2.3"/>
+         <trusted-key id="19BEAB2D799C020F17C69126B16698A4ADF4D638" group="org.checkerframework" name="checker-qual"/>
+         <trusted-key id="1D217F8475EEE9F19AB8DD6B793FD5751A0F0780" group="^com[.]squareup($|([.].*))" regex="true"/>
+         <trusted-key id="1D2C7EF8ADA0F794B58C7C63436902AF59EDF60E" group="dev.equo.ide" name="solstice" version="1.8.2"/>
+         <trusted-key id="1F47744C9B6E14F2049C2857F1F111AF65925306" group="io.github.classgraph" name="classgraph" version="4.8.184"/>
+         <trusted-key id="20723A6399BC060154283B37CFAE163B64AC9189">
+            <trusting group="org.jetbrains.androidx.lifecycle"/>
+            <trusting group="org.jetbrains.skiko"/>
+            <trusting group="^org[.]jetbrains[.]compose($|([.].*))" regex="true"/>
+         </trusted-key>
+         <trusted-key id="2E3A1AFFE42B5F53AF19F780BCF4173966770193" group="org.jetbrains" name="annotations" version="13.0"/>
+         <trusted-key id="33FD4BFD33554634053D73C0C2148900BCD3C2AF" group="org.jetbrains" name="annotations" version="23.0.0"/>
+         <trusted-key id="3690C240CE51B4670D30AD1C38EE757D69184620" group="org.tukaani" name="xz" version="1.9"/>
+         <trusted-key id="475F3B8E59E6E63AA78067482C7B12F2A511E325" group="org.slf4j"/>
+         <trusted-key id="4797B4F5DCC46CEA61059071A1AE06236CA2BA62" group="com.diffplug.durian" name="durian-swt.os" version="4.3.0"/>
+         <trusted-key id="4DB1A49729B053CAF015CEE9A6ADFC93EF34893E" group="org.hamcrest"/>
+         <trusted-key id="60200AC4AE761F1614D6C46766D68DAA073BE985" group="org.slf4j"/>
+         <trusted-key id="648190996EC0930A6D7D49A978178478013521D0" group="com.facebook"/>
+         <trusted-key id="694621A7227D8D5289699830ABE9F3126BB741C1" group="com.google.guava"/>
+         <trusted-key id="6F538074CCEBF35F28AF9B066A0975F8B1127B83" group="org.jetbrains.kotlin"/>
+         <trusted-key id="719F7C29985A8E95F58F47194D8159D6A1159B69" group="dev.zacsweers.kctfork" name="core" version="0.13.0"/>
+         <trusted-key id="7616EB882DAF57A11477AAF559A252FB1199D873" group="com.google.code.findbugs" name="jsr305" version="3.0.2"/>
+         <trusted-key id="7B72C18D9C362314BF8E981B0CAEBC0883C5BB65" group="^com[.]vanniktech($|([.].*))" regex="true"/>
+         <trusted-key id="7C669810892CBD3148FA92995B05CCDE140C2876" group="org.eclipse.jgit"/>
+         <trusted-key id="8461EFA0E74ABAE010DE66994EB27DB2A3B88B8B" group="androidx.collection"/>
+         <trusted-key id="8756C4F765C9AC3CB6B85D62379CE192D401AB61">
+            <trusting group="com.diffplug.durian"/>
+            <trusting group="org.jetbrains.intellij.deps"/>
+         </trusted-key>
+         <trusted-key id="9E3044071B758EBCB7E45673700E4F39BC05364B" group="org.eclipse.platform" name="org.eclipse.osgi" version="3.24.200"/>
+         <trusted-key id="A31DDE881C3E3C4C985BD0D02C7F998F4272C851" group="com.diffplug.spotless"/>
+         <trusted-key id="A5F483CD733A4EBAEA378B2AE88979FB9B30ACF2">
+            <trusting group="androidx.annotation"/>
+            <trusting group="androidx.lifecycle"/>
+         </trusted-key>
+         <trusted-key id="A6D6C97108B8585F91B158748671A8DF71296252" group="com.squareup.okhttp3"/>
+         <trusted-key id="A9789342F598AD5B1175EF357EB97D110DFADD60" group="com.googlecode.concurrent-trees" name="concurrent-trees" version="2.6.1"/>
+         <trusted-key id="BDB5FA4FE719D787FB3D3197F6D4A1D411E9D1AE" group="com.google.guava"/>
+         <trusted-key id="C7BE5BCC9FEC15518CFDA882B0F3710FA64900E7">
+            <trusting group="com.google.code.gson"/>
+            <trusting group="^com[.]google[.]auto($|([.].*))" regex="true"/>
+         </trusted-key>
+         <trusted-key id="D477D51812E692011DB11E66A6EA2E2BF22E0543" group="io.github.java-diff-utils"/>
+         <trusted-key id="DBD744ACE7ADE6AA50DD591F66B50994442D2D40" group="^com[.]squareup($|([.].*))" regex="true"/>
+         <trusted-key id="E7DC75FC24FB3C8DFE8086AD3D5839A2262CBBFB" group="org.jetbrains.kotlinx"/>
+         <trusted-key id="EB1B3DE71713C9EC2E87CC26EE92349AD86DE446" group="com.google.j2objc" name="j2objc-annotations" version="2.8"/>
+         <trusted-key id="EE0CA873074092F806F59B65D364ABAA39A47320">
+            <trusting group="com.google.errorprone"/>
+            <trusting group="com.google.googlejavaformat"/>
+         </trusted-key>
+         <trusted-key id="F4DD59C90148BDC52BEB90A4530AA5F25C25011F" group="commons-codec"/>
+         <trusted-key id="FA7929F83AD44C4590F6CC6815C71C0A4E0B8EDD" group="net.java.dev.jna" name="jna" version="5.6.0"/>
+         <trusted-key id="FF6E2C001948C5F2F38B0CC385911F425EC61B51">
+            <trusting group="junit"/>
+            <trusting group="org.junit"/>
+         </trusted-key>
+      </trusted-keys>
+   </configuration>
+   <components>
+      <component group="androidx.arch.core" name="core-common" version="2.2.0">
+         <artifact name="core-common-2.2.0.jar">
+            <sha256 value="65308a06b1c00ee186cb9e19321383f043b993813f1522c47f4a3e3303bdba41" origin="Generated by Gradle" reason="Artifact is not signed"/>
+         </artifact>
+         <artifact name="core-common-2.2.0.module">
+            <sha256 value="edf4200cfdc2d946232252c99e5dcb9c61bb909eb5450b2613d1d4fdc974b981" origin="Generated by Gradle" reason="Artifact is not signed"/>
+         </artifact>
+      </component>
+      <component group="com.diffplug.spotless" name="com.diffplug.spotless.gradle.plugin" version="8.10.0">
+         <artifact name="com.diffplug.spotless.gradle.plugin-8.10.0.pom">
+            <sha256 value="adafcd9697fe2a9f00beecfaf89da448b781f636a5cadeaacac12d472a653ee1" origin="Generated by Gradle" reason="Artifact is not signed"/>
+         </artifact>
+      </component>
+      <component group="net.java.dev.jna" name="jna" version="4.2.2">
+         <artifact name="jna-4.2.2.pom">
+            <pgp value="78DA3333F653B1C54A938BE24DB7BC57DFDBCEA4"/>
+         </artifact>
+      </component>
+      <component group="org.apache" name="apache" version="37">
+         <artifact name="apache-37.pom">
+            <pgp value="84789D24DF77A32433CE1F079EB80E92EB2135B1"/>
+         </artifact>
+      </component>
+      <component group="org.apache.commons" name="commons-parent" version="98">
+         <artifact name="commons-parent-98.pom">
+            <pgp value="F4DD59C90148BDC52BEB90A4530AA5F25C25011F"/>
+         </artifact>
+      </component>
+      <component group="org.jetbrains.kotlin.jvm" name="org.jetbrains.kotlin.jvm.gradle.plugin" version="2.3.21">
+         <artifact name="org.jetbrains.kotlin.jvm.gradle.plugin-2.3.21.pom">
+            <sha256 value="2e866ef85881195943d04e0f2082357b484c8eb2051f2c21972d00d9a0685dd0" origin="Generated by Gradle" reason="Artifact is not signed"/>
+         </artifact>
+      </component>
+      <component group="org.jetbrains.kotlin.kapt" name="org.jetbrains.kotlin.kapt.gradle.plugin" version="2.3.21">
+         <artifact name="org.jetbrains.kotlin.kapt.gradle.plugin-2.3.21.pom">
+            <sha256 value="8c035d823480f8c4a4cab43d4b83d520f393a97f9deb517aed32f9b2e3275d13" origin="Generated by Gradle" reason="Artifact is not signed"/>
+         </artifact>
+      </component>
+      <component group="org.sonatype.oss" name="oss-parent" version="5">
+         <artifact name="oss-parent-5.pom">
+            <pgp value="2BCBDD0F23EA1CAFCC11D4860374CF2E8DD1BDFD"/>
+         </artifact>
+      </component>
+      <component group="org.sonatype.oss" name="oss-parent" version="7">
+         <artifact name="oss-parent-7.pom">
+            <sha256 value="b51f8867c92b6a722499557fc3a1fdea77bdf9ef574722fe90ce436a29559454" origin="Generated by Gradle" reason="Artifact is not signed"/>
+         </artifact>
+      </component>
+      <component group="org.sonatype.oss" name="oss-parent" version="9">
+         <artifact name="oss-parent-9.pom">
+            <pgp value="44FBDBBC1A00FE414F1C1873586654072EAD6677"/>
+         </artifact>
+      </component>
+   </components>
+</verification-metadata>
