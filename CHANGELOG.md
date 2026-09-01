@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Security
+
+- Verify the Kotlin compiler plugin's build dependencies with PGP signatures ([#1423](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1423))
+
 ### Dependencies
 
 - Bump CLI from v3.6.2 to v3.7.0 ([#1428](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1428))

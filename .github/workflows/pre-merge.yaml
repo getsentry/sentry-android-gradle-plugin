@@ -45,3 +45,28 @@ jobs:
           name: test-results-${{ matrix.os }}
           path: plugin-build/build/reports/tests/
         if: always()
+
+  verify-compiler-plugin-dependencies:
+    name: Verify compiler plugin dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Java Version
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # pin@v6
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+
+      # Verification is scoped to the root of a build tree, so `preMerge` from the repo root
+      # ignores it — the compiler plugin has to be built on its own for it to apply. spotlessCheck
+      # is here because Spotless resolves ktfmt itself, outside any declared configuration.
+      - name: Resolve dependencies with verification enabled
+        run: ./gradlew -p sentry-kotlin-compiler-plugin resolveAll spotlessCheck
