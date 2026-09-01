@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fix snapshot task wiring failing with `InvalidUserDataException` on application modules with multiple flavors ([#1431](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1431))
+
 ### Security
 
 - Verify the Kotlin compiler plugin's build dependencies with PGP signatures ([#1423](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1423), [#1430](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1430))
