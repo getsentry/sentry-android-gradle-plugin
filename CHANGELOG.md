@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Security
+
+- Verify the plugin's own build dependencies with PGP signatures instead of checksums ([#1433](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1433))
+
 ## 6.21.0
 
 ### Fixes
