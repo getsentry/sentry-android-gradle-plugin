@@ -535,9 +535,11 @@ private fun ApplicationVariant.configureSnapshotsTasks(
 
     project.afterEvaluate {
       // Not all variants have unit test tasks (e.g. users can disable them),
-      // so skip wiring if the task doesn't exist.
+      // so skip wiring if the task doesn't exist. Filter by Test type because AGP
+      // registers DefaultTask stubs for variants without full unit test support on
+      // multi-flavor application modules, and named(name, Test::class) throws on those.
       val testTaskName = "test${taskSuffix}UnitTest"
-      if (testTaskName !in project.tasks.names) return@afterEvaluate
+      if (testTaskName !in project.tasks.withType(Test::class.java).names) return@afterEvaluate
 
       val testTask = project.tasks.named(testTaskName, Test::class.java)
       uploadTask.configure { task ->
