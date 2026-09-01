@@ -27,6 +27,77 @@ they belong. The compatibility test matrix overrides AGP/Kotlin/Gradle
 versions via env vars and deliberately skips locking, so you only need to
 regenerate against the canonical build.
 
+# Dependency verification in `sentry-kotlin-compiler-plugin`
+
+The compiler plugin build verifies its dependencies with PGP signatures
+rather than checksums. Trust lives in
+`sentry-kotlin-compiler-plugin/gradle/verification-metadata.xml`, and the
+public keys in `verification-keyring.keys` next to it, kept in armored
+(text) form so the keyring diffs readably.
+
+Trusting a publisher's key instead of an artifact's checksum means a version
+bump usually changes nothing here. That is the point: a diff to these files
+should be rare enough that it gets read. Checksums remain as the fallback for
+the handful of artifacts nobody signs — mostly the Gradle Plugin Portal
+marker POMs — and those do change on every bump of the module in question.
+
+Key servers are disabled. They are slow, they rate-limit, and a key Gradle
+fetches silently at build time is a trust decision no human made. Keys are
+added deliberately instead.
+
+## Regenerating
+
+```bash
+./gradlew -p sentry-kotlin-compiler-plugin resolveAll spotlessCheck \
+  --write-verification-metadata pgp,sha256 --export-keys
+```
+
+This is idempotent, and preserves both the explanatory header comment and any
+entry already in the file. That last part matters: two trust scopes are
+deliberately narrower than the ones Gradle's bootstrap infers, and
+regenerating keeps them. Don't widen them back.
+
+| Key | What the bootstrap infers | Why it's narrowed |
+| --- | --- | --- |
+| JetBrains Compose | all of `org.jetbrains` | would let it vouch for Kotlin itself |
+| Error Prone | all of `com.google` | would cover Guava, Gson and AutoService |
+
+`spotlessCheck` is in the command because Spotless resolves ktfmt through a
+detached configuration only when the task actually runs; `resolveAll` alone
+never sees it and silently leaves those artifacts out of the metadata.
+
+Review the diff before committing. New keys should belong to someone you can
+identify — the keyring's `pub`/`uid` headers name most of them, and
+`keyserver.ubuntu.com` covers the rest:
+
+```bash
+curl -s "https://keyserver.ubuntu.com/pks/lookup?op=index&options=mr&search=0x<FINGERPRINT>"
+```
+
+For a new signed dependency, add its key to the keyring first. With key
+servers off the bootstrap cannot fetch it, and will quietly fall back to a
+checksum instead:
+
+```bash
+curl -s "https://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0x<FINGERPRINT>" \
+  >> sentry-kotlin-compiler-plugin/gradle/verification-keyring.keys
+```
+
+## Where it applies
+
+Dependency verification is scoped to the root of a build tree, so an included
+build's own configuration is ignored. Running `preMerge` from the repo root
+therefore does *not* verify this build — it only takes effect when the
+compiler plugin is built on its own:
+
+```bash
+./gradlew -p sentry-kotlin-compiler-plugin resolveAll spotlessCheck
+```
+
+No PR job runs that today, so the first thing to actually verify these
+dependencies is the snapshot publish, which builds the compiler plugin from
+its own directory. Run the command above before pushing a dependency change.
+
 # Overriding `sentry-cli` for local development
 
 If you want to use a local version of the sentry-cli for testing integration with the plugin, you can do so by setting the `cli.executable` property in the `sentry.properties` file of the target project.

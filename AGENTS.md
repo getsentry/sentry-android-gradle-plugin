@@ -44,6 +44,14 @@ Run from the repo root (the root build delegates into the included builds):
   regenerate both:
   `./gradlew -p plugin-build resolveAndLockAll --write-locks --write-verification-metadata sha256`.
   See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+- `sentry-kotlin-compiler-plugin` verifies its dependencies with PGP signatures
+  (`sentry-kotlin-compiler-plugin/gradle/verification-metadata.xml` plus an armored keyring).
+  Regenerate with
+  `./gradlew -p sentry-kotlin-compiler-plugin resolveAll spotlessCheck --write-verification-metadata pgp,sha256 --export-keys`,
+  which is idempotent and preserves two deliberately narrowed trust scopes — don't widen those
+  back. Verification only applies when that build runs standalone
+  (`./gradlew -p sentry-kotlin-compiler-plugin ...`), not via the root composite. See
+  [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Some tests upload mappings/source context and fail without an auth token:
 
