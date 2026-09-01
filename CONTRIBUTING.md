@@ -61,6 +61,7 @@ regenerating keeps them. Don't widen them back.
 | --- | --- | --- |
 | JetBrains Compose | all of `org.jetbrains` | would let it vouch for Kotlin itself |
 | Error Prone | all of `com.google` | would cover Guava, Gson and AutoService |
+| Ktfmt Team | all of `com.facebook` | would cover every artifact Facebook publishes |
 
 `spotlessCheck` is in the command because Spotless resolves ktfmt through a
 detached configuration only when the task actually runs; `resolveAll` alone
@@ -94,9 +95,10 @@ compiler plugin is built on its own:
 ./gradlew -p sentry-kotlin-compiler-plugin resolveAll spotlessCheck
 ```
 
-No PR job runs that today, so the first thing to actually verify these
-dependencies is the snapshot publish, which builds the compiler plugin from
-its own directory. Run the command above before pushing a dependency change.
+The `verify-compiler-plugin-dependencies` job in
+[pre-merge.yaml](.github/workflows/pre-merge.yaml) runs exactly that on every PR,
+so a stale entry fails there rather than in the snapshot publish. Run the command
+above locally before pushing a dependency change.
 
 # Overriding `sentry-cli` for local development
 
