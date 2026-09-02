@@ -1,0 +1,58 @@
+# Categorizes pull requests into the changelog that Craft generates on release.
+# https://getsentry.github.io/craft/configuration/#auto-mode
+#
+# A pull request's title becomes its changelog entry. To write a different
+# entry, add a "### Changelog Entry" section to the pull request description.
+# To leave a pull request out entirely, add `#skip-changelog` to its
+# description or apply the `skip-changelog` label.
+changelog:
+  exclude:
+    labels:
+      - skip-changelog
+    authors:
+      # Renovate only bumps this repo's own build tooling, which users never see.
+      # The dependencies users do care about (CLI, Android SDK) are bumped by
+      # getsentry/github-workflows/updater, which runs as github-actions[bot].
+      - renovate[bot]
+      - dependabot[bot]
+
+  categories:
+    - title: Breaking Changes
+      commit_patterns:
+        - "^(?<type>\\w+(?:\\((?<scope>[^)]+)\\))?!:\\s*)"
+      semver: major
+
+    - title: Security
+      labels:
+        - Security
+      commit_patterns:
+        - "^(?<type>security(?:\\((?<scope>[^)]+)\\))?!?:\\s*)"
+      semver: patch
+
+    - title: Features
+      commit_patterns:
+        - "^(?<type>feat(?:\\((?<scope>[^)]+)\\))?!?:\\s*)"
+      semver: minor
+
+    - title: Fixes
+      commit_patterns:
+        - "^(?<type>fix(?:\\((?<scope>[^)]+)\\))?!?:\\s*)"
+        - '^Revert "'
+      semver: patch
+
+    - title: Performance
+      commit_patterns:
+        - "^(?<type>perf(?:\\((?<scope>[^)]+)\\))?!?:\\s*)"
+      semver: patch
+
+    # Only the updater bot uses the `chore(deps)` scope; humans relocking or
+    # regenerating verification metadata use `build(deps)` and land below.
+    - title: Dependencies
+      commit_patterns:
+        - "^(?<type>chore\\(deps\\):\\s*)"
+      semver: minor
+
+    - title: Internal Changes
+      commit_patterns:
+        - "^(?<type>(?:build|chore|ci|docs?|meta|ref|refactor|style|tests?)(?:\\((?<scope>[^)]+)\\))?!?:\\s*)"
+      semver: patch

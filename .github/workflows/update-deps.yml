@@ -4,7 +4,7 @@ on:
   # Run every day.
   schedule:
     - cron: '0 3 * * *'
-  # And on on every PR merge so we get the updated dependencies ASAP, and to make sure the changelog doesn't conflict.
+  # And on every PR merge so we get the updated dependencies ASAP.
   push:
     branches:
       - main
@@ -24,6 +24,8 @@ jobs:
           path: plugin-build/sentry-cli.properties
           name: CLI
           ssh-key: ${{ secrets.CI_DEPLOY_KEY }}
+          # Craft generates the changelog from PR titles on release.
+          changelog-entry: false
 
   android:
     runs-on: ubuntu-latest
@@ -47,6 +49,8 @@ jobs:
           path: scripts/update-android.sh
           name: Android SDK
           ssh-key: ${{ secrets.CI_DEPLOY_KEY }}
+          # Craft generates the changelog from PR titles on release.
+          changelog-entry: false
           post-update-script: scripts/relock-plugin-build.sh
 
   composable-preview-scanner:
@@ -57,3 +61,5 @@ jobs:
           path: plugin-build/composable-preview-scanner.properties
           name: ComposablePreviewScanner
           ssh-key: ${{ secrets.CI_DEPLOY_KEY }}
+          # Craft generates the changelog from PR titles on release.
+          changelog-entry: false

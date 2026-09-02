@@ -1,5 +1,9 @@
-minVersion: 0.28.1
-changelogPolicy: auto
+minVersion: 2.30.1
+changelog:
+  policy: auto
+# Craft 2.21+ bumps versions from the publish targets when no command is set,
+# and the maven target cannot bump a Gradle build, so keep the script explicit.
+preReleaseCommand: bash scripts/bump-version.sh
 targets:
   - name: maven
     gradleCliPath: ./gradlew
