@@ -9,7 +9,7 @@ name: Relock plugin-build
 # This job builds a tree it did not write, so it treats that tree as untrusted: it runs Gradle only
 # when the PR edits nothing but version-carrying files, and the deploy key is loaded in the push
 # step alone -- never on disk while Gradle resolves and executes third-party plugins, which the
-# relock deliberately does with checksum verification in write mode.
+# relock deliberately does with dependency verification in write mode.
 
 on:
   pull_request:
