@@ -84,14 +84,20 @@ if (!isVersionOverrideBuild) {
   dependencyLocking { lockAllConfigurations() }
 }
 
-tasks.register("resolveAndLockAll") {
+// Resolves every configuration so verification covers the whole graph, not just what the requested
+// tasks need. CI verifies through this without writing anything; mirrors the compiler plugin's.
+tasks.register("resolveAll") {
   notCompatibleWithConfigurationCache("Filters configurations at execution time")
+  doLast { configurations.filter { it.isCanBeResolved }.forEach { it.resolve() } }
+}
+
+tasks.register("resolveAndLockAll") {
+  dependsOn("resolveAll")
   doFirst {
     require(gradle.startParameter.isWriteDependencyLocks) {
       "$path must be run from the command line with the `--write-locks` flag"
     }
   }
-  doLast { configurations.filter { it.isCanBeResolved }.forEach { it.resolve() } }
 }
 
 java {

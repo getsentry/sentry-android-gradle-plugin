@@ -39,20 +39,22 @@ Run from the repo root (the root build delegates into the included builds):
   compiler plugin to a local test repo first).
 - Plugin unit tests live in `plugin-build`: `./gradlew :plugin-build:test` (or via the
   `plugin-build` included build).
-- `plugin-build` pins its full dependency graph (lockfile + SHA-256 verification metadata)
-  in STRICT mode. Adding, removing, or bumping a dependency there fails the build until you
-  regenerate both:
-  `./gradlew -p plugin-build resolveAndLockAll --write-locks --write-verification-metadata sha256`.
-  See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-- `sentry-kotlin-compiler-plugin` verifies its dependencies with PGP signatures
-  (`sentry-kotlin-compiler-plugin/gradle/verification-metadata.xml` plus an armored keyring).
-  Regenerate with
-  `./gradlew -p sentry-kotlin-compiler-plugin resolveAll spotlessCheck --write-verification-metadata pgp,sha256 --export-keys`,
-  which is idempotent and preserves three deliberately narrowed trust scopes — don't widen those
-  back. Verification only applies when that build runs standalone
-  (`./gradlew -p sentry-kotlin-compiler-plugin ...`), not via the root composite, which is why
-  CI has a dedicated `verify-compiler-plugin-dependencies` job. See
-  [CONTRIBUTING.md](CONTRIBUTING.md).
+- Both published builds verify their dependencies with PGP signatures, with checksums only as
+  the fallback for unsigned artifacts. Trust lives in each build's
+  `gradle/verification-metadata.xml` plus an armored `verification-keyring.keys`. Verification
+  runs with key servers off, so a new signed dependency needs its key added to the keyring by
+  hand: regeneration records the `trusted-key` entry but not the key, and the build fails until
+  someone adds it. Each file's header comment lists trust scopes deliberately narrower than the
+  ones Gradle's bootstrap infers — regeneration preserves them, don't widen them back.
+  Regenerate with:
+  - `plugin-build`: `scripts/relock-plugin-build.sh`. It also pins resolved versions in
+    `plugin-build/gradle.lockfile` with STRICT-mode locking, so adding, removing, or bumping a
+    dependency fails the build until both files are regenerated.
+  - `sentry-kotlin-compiler-plugin`:
+    `./gradlew -p sentry-kotlin-compiler-plugin resolveAll spotlessCheck --write-verification-metadata pgp,sha256 --export-keys`
+  Verification only applies when a build runs standalone (`-p <build>`), not via the root
+  composite, which is why CI has dedicated `verify-plugin-build-dependencies` and
+  `verify-compiler-plugin-dependencies` jobs. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Some tests upload mappings/source context and fail without an auth token:
 
