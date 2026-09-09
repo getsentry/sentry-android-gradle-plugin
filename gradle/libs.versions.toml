@@ -4,7 +4,7 @@ agp = "8.10.1"
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
 ktfmt = "0.51"
 sqlite = "2.3.0"
-sentry = "8.54.0"
+sentry = "8.55.0"
 # Pinned to the last release that shipped sentry-android-okhttp; the module was removed
 # in 8.0.0, so there is no newer version to update to. Used only to verify the legacy
 # okhttp instrumentation path in tests.
@@ -23,7 +23,7 @@ kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring" }
 kapt = { id = "org.jetbrains.kotlin.kapt" }
 ksp = { id = "com.google.devtools.ksp" }
 dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
-spotless = { id = "com.diffplug.spotless", version = "8.10.0" }
+spotless = { id = "com.diffplug.spotless", version = "8.10.1" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.35.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
@@ -34,7 +34,7 @@ composeCompiler =  { id = "org.jetbrains.kotlin.plugin.compose", version = "2.1.
 
 [libraries]
 junit = { group = "junit", name = "junit", version = "4.13.2" }
-androidxAnnotation = { group = "androidx.annotation", name = "annotation", version = "1.9.1" }
+androidxAnnotation = { group = "androidx.annotation", name = "annotation", version = "1.10.0" }
 proguard = { group = "com.guardsquare", name = "proguard-gradle", version = "7.5.0" }
 # this allows us to develop against a fixed version of Gradle, as opposed to depending on the
 # locally available version. kotlin-gradle-plugin follows the same approach.
@@ -63,9 +63,9 @@ sentrySpringBootJakarta = { group = "io.sentry", name = "sentry-spring-boot-star
 androidxCore = { group = "androidx.core", name = "core", version = "1.19.0" }
 arscLib = { group = "io.github.reandroid", name = "ARSCLib", version = "1.1.4" }
 mockitoKotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.0" }
-roomRuntimeAndroid = { group = "androidx.room", name = "room-runtime-android", version = "2.7.0" }
-room3RuntimeAndroid = { group = "androidx.room3", name = "room3-runtime-android", version = "3.0.0-alpha06" }
-zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.5" }
+roomRuntimeAndroid = { group = "androidx.room", name = "room-runtime-android", version = "2.8.4" }
+room3RuntimeAndroid = { group = "androidx.room3", name = "room3-runtime-android", version = "3.0.2" }
+zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.6" }
 
 # samples
 sample-androidx-recyclerView = "androidx.recyclerview:recyclerview:1.4.0"
