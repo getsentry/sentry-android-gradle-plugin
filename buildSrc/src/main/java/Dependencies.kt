@@ -1,5 +1,5 @@
 object BuildPluginsVersion {
-    val AGP = System.getenv("VERSION_AGP") ?: "8.10.1"
+    val AGP = System.getenv("VERSION_AGP") ?: "8.13.2"
     // Bumping this may implicitly raise the language level: plugin-build derives its
     // languageVersion/apiVersion from the oldest the compiler still supports (current minus
     // three, floored at 1.8), so e.g. Kotlin 2.1 keeps 1.8 but Kotlin 2.3 forces 2.0.
