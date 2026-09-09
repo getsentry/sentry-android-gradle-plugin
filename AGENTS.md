@@ -39,11 +39,41 @@ Run from the repo root (the root build delegates into the included builds):
   compiler plugin to a local test repo first).
 - Plugin unit tests live in `plugin-build`: `./gradlew :plugin-build:test` (or via the
   `plugin-build` included build).
+- Both published builds verify their dependencies with PGP signatures, with checksums only as
+  the fallback for unsigned artifacts. Trust lives in each build's
+  `gradle/verification-metadata.xml` plus an armored `verification-keyring.keys`. Verification
+  runs with key servers off, so a new signed dependency needs its key added to the keyring by
+  hand: regeneration records the `trusted-key` entry but not the key, and the build fails until
+  someone adds it. Each file's header comment lists trust scopes deliberately narrower than the
+  ones Gradle's bootstrap infers — regeneration preserves them, don't widen them back.
+  Regenerate with:
+  - `plugin-build`: `scripts/relock-plugin-build.sh`. It also pins resolved versions in
+    `plugin-build/gradle.lockfile` with STRICT-mode locking, so adding, removing, or bumping a
+    dependency fails the build until both files are regenerated.
+  - `sentry-kotlin-compiler-plugin`:
+    `./gradlew -p sentry-kotlin-compiler-plugin resolveAll spotlessCheck --write-verification-metadata pgp,sha256 --export-keys`
+  Verification only applies when a build runs standalone (`-p <build>`), not via the root
+  composite, which is why CI has dedicated `verify-plugin-build-dependencies` and
+  `verify-compiler-plugin-dependencies` jobs. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Some tests upload mappings/source context and fail without an auth token:
 
 ```bash
 export SENTRY_AUTH_TOKEN=<your_token>
+```
+
+## Testing conventions
+
+- Prefer [Google Truth](https://truth.dev/) for assertions in new unit tests
+  (`import com.google.common.truth.Truth.assertThat`). Much of the existing suite still
+  uses `kotlin.test`/JUnit assertions; don't rewrite those wholesale, but reach for Truth
+  when adding new tests or touching assertions in a test you're already editing.
+
+```kotlin
+import com.google.common.truth.Truth.assertThat
+
+assertThat(actual).isEqualTo(expected)
+assertThat(list).containsExactly("a", "b").inOrder()
 ```
 
 ## Local sentry-cli

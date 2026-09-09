@@ -4,6 +4,7 @@ import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.SemVer
+import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.verifyDebugMetaPropertiesNotInApk
 import io.sentry.android.gradle.verifyDependenciesReportAndroid
 import io.sentry.android.gradle.verifyIntegrationList
@@ -16,6 +17,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 import org.gradle.util.GradleVersion
 import org.hamcrest.CoreMatchers.`is`
@@ -50,6 +52,101 @@ class SentryPluginTest :
     configuredTasks.remove(":app:clean")
 
     assertTrue(configuredTasks.isEmpty(), configuredTasks.joinToString("\n"))
+  }
+
+  @Test
+  fun `creates proguard mapping tasks when app optimization is enabled`() {
+    assumeThat(
+      "The optimization DSL is available from AGP 9.3 onwards",
+      SemVer.parse(androidGradlePluginVersion) >= AgpVersions.VERSION_9_3_0,
+      `is`(true),
+    )
+    appBuildFile.appendText(
+      // language=Groovy
+      """
+
+      android {
+        buildTypes {
+          release {
+            minifyEnabled false
+            optimization {
+              enable = true
+            }
+          }
+        }
+      }
+      """
+        .trimIndent()
+    )
+
+    val build = runner.appendArguments(":app:assembleRelease").build()
+
+    assertNoAnalyticsUnwrapWarning(build)
+    assertFalse(
+      build.output.contains("Unable to determine whether AGP application optimization is enabled"),
+      build.output,
+    )
+    assertEquals(
+      TaskOutcome.SUCCESS,
+      build.task(":app:generateSentryProguardUuidRelease")?.outcome,
+      build.output,
+    )
+    assertEquals(
+      TaskOutcome.SUCCESS,
+      build.task(":app:uploadSentryProguardMappingsRelease")?.outcome,
+      build.output,
+    )
+    verifyProguardUuid(testProjectDir.root)
+  }
+
+  @Test
+  fun `resolves assemble install and debuggable with analytics-wrapped variants`() {
+    // Fixture forces android.enableProfileJson=true, so AGP serves AnalyticsEnabled* wrappers.
+    // assemble/install providers and isDebuggable must still resolve via unwrapImpl().
+    applyUploadNativeSymbols()
+    // AGP only registers install* tasks for signing-ready variants. Release has no signing by
+    // default (debug is automatic), so point release at the debug keystore for installRelease.
+    // Leading newline matters: after applyUploadNativeSymbols() the file ends with `}` and no
+    // trailing newline. Without `\n`, Groovy parses `}android {` as sentry.android { ... }.
+    appBuildFile.appendText(
+      // language=Groovy
+      "\n" +
+        """
+                android {
+                  buildTypes {
+                    release {
+                      signingConfig signingConfigs.debug
+                    }
+                  }
+                }
+            """
+          .trimIndent()
+    )
+
+    // Use withArguments (not appendArguments) so each build is an isolated scenario.
+    val releaseBuild =
+      runner.withArguments("--stacktrace", ":app:assembleRelease", "--dry-run").build()
+    assertNoAnalyticsUnwrapWarning(releaseBuild)
+    // Non-debuggable + uploadNativeSymbols => task registered (assembleProvider path used).
+    assertTrue(
+      ":app:uploadSentryNativeSymbolsForRelease" in releaseBuild.output,
+      releaseBuild.output,
+    )
+
+    val debugBuild = runner.withArguments("--stacktrace", ":app:assembleDebug", "--dry-run").build()
+    assertNoAnalyticsUnwrapWarning(debugBuild)
+    // isDebuggable must stay true under analytics wrappers, or we'd wrongly upload for debug.
+    assertFalse(":app:uploadSentryNativeSymbolsForDebug" in debugBuild.output, debugBuild.output)
+
+    // installRelease is finalizedBy the native-symbols upload task via installProvider unwrap.
+    val installBuild =
+      runner.withArguments("--stacktrace", ":app:installRelease", "--dry-run").build()
+    assertNoAnalyticsUnwrapWarning(installBuild)
+    assertTrue(":app:installRelease" in installBuild.output, installBuild.output)
+    assertTrue(
+      ":app:uploadSentryNativeSymbolsForRelease" in installBuild.output,
+      installBuild.output,
+    )
   }
 
   @Test
@@ -416,6 +513,7 @@ class SentryPluginTest :
 
     val build = runner.appendArguments(":app:assembleRelease", "--dry-run").build()
 
+    assertNoAnalyticsUnwrapWarning(build)
     assertTrue(":app:uploadSentryNativeSymbolsForRelease" in build.output)
   }
 
@@ -425,6 +523,7 @@ class SentryPluginTest :
 
     val build = runner.appendArguments(":app:assembleDebug", "--dry-run").build()
 
+    assertNoAnalyticsUnwrapWarning(build)
     assertFalse(":app:uploadSentryNativeSymbolsForDebug" in build.output)
   }
 
@@ -448,11 +547,60 @@ class SentryPluginTest :
 
   @Test
   fun `skips tracing instrumentation if tracingInstrumentation is disabled`() {
-    applyTracingInstrumentation(false, appStart = false, logcat = false)
+    applyTracingInstrumentation(
+      tracingInstrumentation = false,
+      runtimeOptimizations = false,
+      appStart = false,
+      logcat = false,
+    )
 
     val build = runner.appendArguments(":app:assembleRelease", "--dry-run").build()
 
     assertFalse(":app:transformReleaseClassesWithAsm" in build.output)
+  }
+
+  @Test
+  fun `registers runtime optimizations independently from tracing instrumentation`() {
+    applyTracingInstrumentation(
+      tracingInstrumentation = false,
+      appStart = false,
+      logcat = false,
+      dependencies = setOf("androidx.compose.ui:ui:1.7.0", "com.jakewharton.timber:timber:5.0.1"),
+      sdkVersion = BuildConfig.SdkVersion,
+    )
+
+    val build =
+      runner.appendArguments(":app:assembleRelease", "--info", "--warning-mode", "all").build()
+
+    assertEquals(
+      TaskOutcome.SUCCESS,
+      build.task(":app:generateSentryBuildTimeOptionsRelease")?.outcome,
+      build.output,
+    )
+    assertTrue(":app:transformReleaseClassesWithAsm" in build.output)
+    assertFalse("RuntimeClasspath' was resolved during configuration time" in build.output)
+  }
+
+  @Test
+  fun `generates resolved manifest metadata`() {
+    configureFakeMetadataSdk("true")
+
+    runner.appendArguments(":app:assembleRelease").build()
+
+    assertTrue(releaseDexContains(BUILD_TIME_METADATA_KEY))
+  }
+
+  @Test
+  fun `falls back to PackageManager for resource metadata`() {
+    configureFakeMetadataSdk("@string/sentry_debug", "android:resource")
+    File(testProjectDir.root, "app/src/main/res/values/strings.xml").apply {
+      parentFile.mkdirs()
+      writeText("<resources><string name=\"sentry_debug\">true</string></resources>")
+    }
+
+    runner.appendArguments(":app:assembleRelease").build()
+
+    assertFalse(releaseDexContains(BUILD_TIME_METADATA_KEY))
   }
 
   @Test
@@ -529,6 +677,82 @@ class SentryPluginTest :
     }
   }
 
+  @Test
+  fun `applies sqliteDriver instrumentable when sentry gate passes with room2`() {
+    val build =
+      buildDatabaseInstrumentation(SQLITE, ROOM2_AT_DRIVER_FLOOR, SENTRY_ANDROID_SQLITE_DRIVER)
+
+    assertInstrumentableChain(
+      build,
+      "AndroidXSQLiteOpenHelper",
+      "AndroidXSQLiteDriver",
+      "AndroidXRoomDao",
+    )
+  }
+
+  @Test
+  fun `applies sqliteDriver instrumentable when sentry gate passes with room3`() {
+    val build =
+      buildDatabaseInstrumentation(SQLITE, ROOM3_AT_DRIVER_FLOOR, SENTRY_ANDROID_SQLITE_DRIVER)
+
+    assertInstrumentableChain(
+      build,
+      "AndroidXSQLiteOpenHelper",
+      "AndroidXSQLiteDriver",
+      "AndroidXRoomDao",
+    )
+  }
+
+  @Test
+  fun `does not apply sqliteDriver instrumentable when sentry gate fails without room on classpath`() {
+    val build = buildDatabaseInstrumentation(SQLITE, SENTRY_ANDROID_SQLITE_OPEN_HELPER)
+
+    assertInstrumentableChain(build, "AndroidXSQLiteOpenHelper", "AndroidXRoomDao")
+  }
+
+  @Test
+  fun `does not apply sqliteDriver instrumentable when sentry gate fails with room2`() {
+    val build =
+      buildDatabaseInstrumentation(SQLITE, ROOM2_AT_DRIVER_FLOOR, SENTRY_ANDROID_SQLITE_OPEN_HELPER)
+
+    assertInstrumentableChain(build, "AndroidXSQLiteOpenHelper", "AndroidXRoomDao")
+  }
+
+  @Test
+  fun `does not apply sqliteDriver instrumentable when sentry gate fails with room3`() {
+    val build =
+      buildDatabaseInstrumentation(SQLITE, ROOM3_AT_DRIVER_FLOOR, SENTRY_ANDROID_SQLITE_OPEN_HELPER)
+
+    assertInstrumentableChain(build, "AndroidXSQLiteOpenHelper", "AndroidXRoomDao")
+  }
+
+  @Test
+  fun `applies sqliteDriver instrumentable when sentry gate passes without room on classpath`() {
+    val build = buildDatabaseInstrumentation(SQLITE, SENTRY_ANDROID_SQLITE_DRIVER)
+
+    assertInstrumentableChain(
+      build,
+      "AndroidXSQLiteOpenHelper",
+      "AndroidXSQLiteDriver",
+      "AndroidXRoomDao",
+    )
+  }
+
+  @Test
+  fun `applies sqliteDriver instrumentable when sentry gate passes with room below 2_7`() {
+    val build =
+      buildDatabaseInstrumentation(SQLITE, ROOM2_BELOW_DRIVER_FLOOR, SENTRY_ANDROID_SQLITE_DRIVER)
+
+    assertInstrumentableChain(
+      build,
+      "AndroidXSQLiteOpenHelper",
+      "AndroidXSQLiteDriver",
+      "AndroidXRoomDao",
+    )
+  }
+
+  // Database path when sentry-android-sqlite is absent (old AndroidXSQLiteDatabase/Statement).
+  // Orthogonal to the SQLiteDriver gate matrix above.
   @Test
   fun `apply old Database instrumentable when app does not depend on sentry-android-sqlite`() {
     applyTracingInstrumentation(
@@ -1064,6 +1288,10 @@ class SentryPluginTest :
     )
   }
 
+  private fun assertNoAnalyticsUnwrapWarning(build: BuildResult) {
+    assertFalse(build.output.contains("Unable to unwrap AGP analytics variant"), build.output)
+  }
+
   private fun applyUploadNativeSymbols() {
     appBuildFile.appendText(
       // language=Groovy
@@ -1076,7 +1304,7 @@ class SentryPluginTest :
                   }
                 }
             """
-        .trimIndent()
+        .trimIndent() + "\n"
     )
   }
 
@@ -1098,6 +1326,7 @@ class SentryPluginTest :
 
   private fun applyTracingInstrumentation(
     tracingInstrumentation: Boolean = true,
+    runtimeOptimizations: Boolean = true,
     features: Set<InstrumentationFeature> = emptySet(),
     logcat: Boolean = false,
     appStart: Boolean = false,
@@ -1106,6 +1335,7 @@ class SentryPluginTest :
     excludes: Set<String> = emptySet(),
     sdkVersion: String = "7.1.0",
     forceInstrumentDependencies: Boolean = true,
+    minSdk: Int? = null,
   ) {
     appBuildFile.appendText(
       // language=Groovy
@@ -1117,6 +1347,9 @@ class SentryPluginTest :
 
                 sentry {
                   autoUploadProguardMapping = false
+                  runtimeOptimizations {
+                    enabled = $runtimeOptimizations
+                  }
                   tracingInstrumentation {
                     forceInstrumentDependencies = $forceInstrumentDependencies
                     enabled = $tracingInstrumentation
@@ -1131,8 +1364,123 @@ class SentryPluginTest :
                     excludes = ["${excludes.joinToString()}"]
                   }
                 }
+                ${
+                  minSdk?.let {
+                    """
+                android {
+                  defaultConfig {
+                    minSdkVersion $it
+                  }
+                }
+                """
+                  } ?: ""
+                }
             """
         .trimIndent()
     )
+  }
+
+  private fun configureFakeMetadataSdk(value: String, attribute: String = "android:value") {
+    File(testProjectDir.root, "settings.gradle")
+      .appendText("\nproject(':module').name = 'sentry-android-core'")
+    File(
+        testProjectDir.root,
+        "module/src/main/java/io/sentry/android/core/ManifestMetadataReader.java",
+      )
+      .apply {
+        parentFile.mkdirs()
+        writeText(
+          """
+          package io.sentry.android.core;
+
+          import java.util.Map;
+
+          public final class ManifestMetadataReader {
+            static Map<String, Object> manifestMetadata;
+          }
+          """
+            .trimIndent()
+        )
+      }
+    appBuildFile.appendText(
+      """
+
+      dependencies {
+        implementation project(':sentry-android-core')
+      }
+
+      android {
+        buildTypes.release.minifyEnabled = false
+      }
+      """
+        .trimIndent()
+    )
+    File(testProjectDir.root, "app/src/main/AndroidManifest.xml").apply {
+      parentFile.mkdirs()
+      writeText(
+        """
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+          <application>
+            <meta-data android:name="$BUILD_TIME_METADATA_KEY" $attribute="$value"/>
+          </application>
+        </manifest>
+        """
+          .trimIndent()
+      )
+    }
+  }
+
+  private fun releaseDexContains(value: String): Boolean {
+    val apk = File(testProjectDir.root, "app/build/outputs/apk/release/app-release-unsigned.apk")
+    return java.util.zip.ZipFile(apk).use { zip ->
+      zip
+        .entries()
+        .asSequence()
+        .filter { it.name.matches(Regex("classes\\d*\\.dex")) }
+        .any { entry ->
+          zip.getInputStream(entry).use {
+            it.readBytes().toString(Charsets.ISO_8859_1).contains(value)
+          }
+        }
+    }
+  }
+
+  private fun buildDatabaseInstrumentation(vararg dependencies: String): BuildResult {
+    applyTracingInstrumentation(
+      features = setOf(InstrumentationFeature.DATABASE),
+      dependencies = dependencies.toSet(),
+      appStart = false,
+      logcat = false,
+      minSdk = DRIVER_PATH_MIN_SDK,
+    )
+    return runner.appendArguments(":app:assembleDebug", "--info").build()
+  }
+
+  private fun assertInstrumentableChain(build: BuildResult, vararg expected: String) {
+    assertEquals(expected.toList(), instrumentables(build))
+  }
+
+  private fun instrumentables(build: BuildResult): List<String> {
+    val line =
+      build.output.lines().first {
+        it.contains("[sentry] Instrumentable: ChainedInstrumentable(instrumentables=")
+      }
+    val prefix = "ChainedInstrumentable(instrumentables="
+    val start = line.indexOf(prefix) + prefix.length
+    val end = line.lastIndexOf(')')
+    return line.substring(start, end).split(", ").filter { it.isNotEmpty() }
+  }
+
+  companion object {
+    private const val BUILD_TIME_METADATA_KEY = "io.sentry.test-build-time-injection"
+    private const val SQLITE = "androidx.sqlite:sqlite:2.6.2"
+    private const val SENTRY_ANDROID_SQLITE_OPEN_HELPER = "io.sentry:sentry-android-sqlite:6.21.0"
+    private val SENTRY_ANDROID_SQLITE_DRIVER =
+      "io.sentry:sentry-android-sqlite:${SentryVersions.VERSION_SQLITE_DRIVER}"
+    private const val ROOM2_AT_DRIVER_FLOOR = "androidx.room:room-runtime:2.7.0"
+    private const val ROOM2_BELOW_DRIVER_FLOOR = "androidx.room:room-runtime:2.6.1"
+    private const val ROOM3_AT_DRIVER_FLOOR = "androidx.room3:room3-runtime:3.0.0-alpha06"
+    /** androidx.sqlite 2.6.x and room3-runtime both require minSdk 23 in the test fixture. */
+    private const val DRIVER_PATH_MIN_SDK = 23
   }
 }

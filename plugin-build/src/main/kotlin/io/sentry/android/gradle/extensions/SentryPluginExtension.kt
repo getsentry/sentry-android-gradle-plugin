@@ -3,6 +3,7 @@ package io.sentry.android.gradle.extensions
 import io.sentry.android.gradle.telemetry.SentryTelemetryService.Companion.SENTRY_SAAS_DSN
 import javax.inject.Inject
 import org.gradle.api.Action
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
@@ -80,6 +81,29 @@ abstract class SentryPluginExtension @Inject constructor(objects: ObjectFactory)
   val ignoredFlavors: SetProperty<String> =
     objects.setProperty(String::class.java).convention(emptySet())
 
+  /**
+   * Per-variant overrides for Sentry features. Matching is by full Android variant name (e.g.
+   * `debug`, `fullRelease`). Unset properties inherit from the global extension.
+   *
+   * Example:
+   * ```
+   * sentry {
+   *   variants {
+   *     debug {
+   *       tracingInstrumentation { enabled = false }
+   *       runtimeOptimizations { enabled = false }
+   *     }
+   *   }
+   * }
+   * ```
+   */
+  val variants: NamedDomainObjectContainer<SentryVariantConfig> =
+    objects.domainObjectContainer(SentryVariantConfig::class.java)
+
+  fun variants(action: Action<NamedDomainObjectContainer<SentryVariantConfig>>) {
+    action.execute(variants)
+  }
+
   val tracingInstrumentation: TracingInstrumentationExtension =
     objects.newInstance(TracingInstrumentationExtension::class.java)
 
@@ -97,6 +121,14 @@ abstract class SentryPluginExtension @Inject constructor(objects: ObjectFactory)
     tracingInstrumentationAction.execute(tracingInstrumentation)
   }
 
+  val runtimeOptimizations: RuntimeOptimizationsExtension =
+    objects.newInstance(RuntimeOptimizationsExtension::class.java)
+
+  /** Configure runtime optimizations of the Sentry SDK. Default configuration is enabled. */
+  fun runtimeOptimizations(runtimeOptimizationsAction: Action<RuntimeOptimizationsExtension>) {
+    runtimeOptimizationsAction.execute(runtimeOptimizations)
+  }
+
   val autoInstallation: AutoInstallExtension = objects.newInstance(AutoInstallExtension::class.java)
 
   /** Configure the auto installation feature. */
@@ -104,9 +136,16 @@ abstract class SentryPluginExtension @Inject constructor(objects: ObjectFactory)
     autoInstallationAction.execute(autoInstallation)
   }
 
+  /**
+   * Whether to verify that the OpenTelemetry versions resolved on the runtime classpath satisfy
+   * what the Sentry OpenTelemetry integration requires, failing the build if any were downgraded.
+   * Defaults to `true`.
+   */
+  val verifyOpenTelemetryVersions: Property<Boolean> =
+    objects.property(Boolean::class.java).convention(true)
+
   val sizeAnalysis: SizeAnalysisExtension = objects.newInstance(SizeAnalysisExtension::class.java)
 
-  @Experimental
   fun sizeAnalysis(sizeAnalysisAction: Action<SizeAnalysisExtension>) {
     sizeAnalysisAction.execute(sizeAnalysis)
   }

@@ -2,17 +2,210 @@
 
 ## Unreleased
 
+### Security
+
+- Verify the plugin's own build dependencies with PGP signatures instead of checksums ([#1433](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1433))
+
+## 6.21.0
+
+### Fixes
+
+- Fix snapshot task wiring failing with `InvalidUserDataException` on application modules with multiple flavors ([#1431](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1431))
+
+### Security
+
+- Verify the Kotlin compiler plugin's build dependencies with PGP signatures ([#1423](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1423), [#1430](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1430))
+
 ### Dependencies
 
-- Bump Android SDK from v8.43.1 to v8.43.2 ([#1291](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1291))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8432)
-  - [diff](https://github.com/getsentry/sentry-java/compare/8.43.1...8.43.2)
+- Bump CLI from v3.6.2 to v3.7.0 ([#1428](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1428))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#370)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.6.2...3.7.0)
+- Bump Android SDK from v8.54.0 to v8.55.0 ([#1435](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1435))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8550)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.54.0...8.55.0)
+
+## 6.20.0
+
+### Features
+
+- Allow per-variant overrides for tracing instrumentation and runtime optimizations via reverse DSL ([#1420](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1420))
+  - This allows you to enable and disable features per variant.  
+  ```kotlin
+  sentry {
+    tracingInstrumentation { enabled.set(false) }
+  
+    variants {
+      create("debug") {
+        tracingInstrumentation { enabled.set(true) }
+        runtimeOptimizations { enabled.set(true) }
+      }
+    }
+  }
+  ```
+
+### Fixes
+
+- Avoid resolving the runtime classpath during Gradle configuration when SDK runtime optimizations are enabled ([#1404](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1404))
+
+### Performance
+
+- Resolve Sentry manifest metadata at build time to reduce Android SDK initialization overhead ([#1405](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1405))
+
+### Dependencies
+
+- Bump ComposablePreviewScanner from v0.9.2 to v0.9.3 ([#1408](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1408))
+  - [changelog](https://github.com/sergio-sastre/ComposablePreviewScanner/blob/master/CHANGELOG.md#093)
+  - [diff](https://github.com/sergio-sastre/ComposablePreviewScanner/compare/0.9.2...0.9.3)
+- Bump Android SDK from v8.53.0 to v8.54.0 ([#1421](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1421))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8540)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.53.0...8.54.0)
+
+## 6.19.0
+
+### Fixes
+
+- Detect AGP `optimization.enable` when the variant is wrapped by AGP analytics ([#1382](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1382))
+  - This fixes `java.lang.NoSuchMethodException: com.android.build.api.component.analytics.AnalyticsEnabledApplicationVariant_Decorated.getOptimizationCreationConfig()`
+
+### Dependencies
+
+- Bump ComposablePreviewScanner from v0.9.1 to v0.9.2 ([#1381](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1381))
+  - [changelog](https://github.com/sergio-sastre/ComposablePreviewScanner/blob/master/CHANGELOG.md#092)
+  - [diff](https://github.com/sergio-sastre/ComposablePreviewScanner/compare/0.9.1...0.9.2)
+- Bump Android SDK from v8.52.0 to v8.53.0 ([#1400](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1400))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8530)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.52.0...8.53.0)
+
+## 6.18.0
+
+### Fixes
+
+- Support ProGuard mapping tasks when R8 is enabled with the AGP app `optimization.enable` DSL ([#1376](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1376))
+
+### Performance
+
+- Eliminate reflection for known optional Sentry SDK class-availability checks, reducing SDK initialization time by about 1% in an absent-heavy startup benchmark ([#1375](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1375))
+  - This optimization is enabled by default. If it causes problems, disable it with `sentry.runtimeOptimizations.enabled = false`.
+
+### Dependencies
+
+- Bump Android SDK from v8.51.0 to v8.52.0 ([#1378](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1378))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8520)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.51.0...8.52.0)
+
+## 6.17.0
+
+### Breaking Changes
+
+- This breaking change is only for customers using self-hosted Sentry together with a user auth token (not an org auth token) and the url and auth token are configured separately:
+  - If so, this breaking change applies to you in order to patch a security flaw. [Please read this](https://github.com/getsentry/sentry-cli/issues/3380#issuecomment-5059013026) for further details.
+
+### Dependencies
+
+- Bump CLI from v3.6.1 to v3.6.2 ([#1373](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1373))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#362)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.6.1...3.6.2)
+- Bump Android SDK from v8.50.1 to v8.51.0 ([#1374](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1374))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8510)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.50.1...8.51.0)
+
+## 6.16.0
+
+### Features
+
+- Emit `canvas_theme` (`light`/`dark`) in the generated snapshot sidecar metadata, derived from the Compose `@Preview` `uiMode` ([#1364](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1364))
+
+### Dependencies
+
+- Bump CLI from v3.6.0 to v3.6.1 ([#1367](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1367))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#361)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.6.0...3.6.1)
+- Bump Android SDK from v8.49.0 to v8.50.1 ([#1372](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1372))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8501)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.49.0...8.50.1)
+
+## 6.15.0
+
+### Features
+
+- Mark the `sizeAnalysis` extension as stable by removing its `@Experimental` annotation ([#1361](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1361))
+- Fail the build when OpenTelemetry is downgraded below the version the Sentry OpenTelemetry integration requires ([#1350](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1350))
+  - The `sentry-opentelemetry-*` artifacts are built against specific OpenTelemetry versions. When another dependency management mechanism (most commonly Spring Boot `io.spring.dependency-management`) forces OpenTelemetry below the version a Sentry integration requires, running against those downgraded versions can cause `ClassNotFoundException` / `NoSuchMethodError` at runtime. The new `verifySentryOpenTelemetryVersions` task detects this downgrade and fails the build early with guidance on how to fix it.
+  - You may disable this check by setting `sentry.verifyOpenTelemetryVersions = false`
+
+### Fixes
+
+- Use Sentry BOM versions for auto-installed SDK dependencies ([#1349](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1349))
+
+### Dependencies
+
+- Bump Android SDK from v8.47.0 to v8.49.0 ([#1359](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1359), [#1362](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1362))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8490)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.47.0...8.49.0)
+- Bump ComposablePreviewScanner from v0.9.0 to v0.9.1 ([#1357](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1357))
+  - [changelog](https://github.com/sergio-sastre/ComposablePreviewScanner/blob/master/CHANGELOG.md#091)
+  - [diff](https://github.com/sergio-sastre/ComposablePreviewScanner/compare/0.9.0...0.9.1)
+
+## 6.14.0
+
+### Dependencies
+
+- Bump Android SDK from v8.45.0 to v8.47.0 ([#1343](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1343), [#1353](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1353))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8470)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.45.0...8.47.0)
+- Bump CLI from v3.5.1 to v3.6.0 ([#1344](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1344))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#360)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.5.1...3.6.0)
+
+## 6.13.0
+
+### Features
+
+- Auto-instrument SQLiteDriver for Room users ([#1285](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1285))
+  - Gated on `sentry-android-sqlite` >= 8.45.0 and the existing `tracingInstrumentation` `DATABASE` feature (enabled by default)
+  - For users of the `androidx.sqlite.driver.SupportSQLiteDriver` bridge, auto-instrumentation wraps only the `SupportSQLiteOpenHelper` consumed by the bridge and not the bridge itself (avoids duplicate spans)
+
+### Security
+
+- Pin the plugin's build dependencies with Gradle dependency locking and SHA-256 dependency verification ([#1256](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1256))
+
+### Dependencies
+
+- Bump Android SDK from v8.44.1 to v8.45.0 ([#1285](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1285))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8450)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.44.1...8.45.0)
+- Bump Android SDK from v8.44.0 to v8.44.1 ([#1305](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1305))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8441)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.44.0...8.44.1)
+- Bump Vanniktech Maven Publish plugin from v0.27.0 to v0.35.0 ([#1335](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1335))
+
+## 6.12.0
+
+### Dependencies
+
+- Bump CLI from v3.5.0 to v3.5.1 ([#1300](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1300))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#351)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/3.5.0...3.5.1)
+- Bump Android SDK from v8.43.2 to v8.44.0 ([#1302](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1302))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8440)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.43.2...8.44.0)
+
+## 6.11.0
 
 ### Fixes
 
 - Resolve the sentry-cli path as a task input instead of memoizing it in a static field, fixing stale-path build failures when switching branches with the configuration cache enabled ([#1264](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1264))
   - This fixed the issue where sentry-cli could not be found (`A problem occurred starting process 'command  ../sentry-cliXXX.exe'`)
 - Defer the telemetry default-org lookup to execution time so the configuration cache no longer re-runs `sentry-cli` on every build ([#1263](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1263))
+- The published Gradle plugin and `sentry-snapshots-runtime` POMs no longer declare a transitive `kotlin-stdlib` dependency ([#1276](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1276))
+- Normalize Linux ARM64 architecture name for bundled sentry-cli binary lookup ([#1201](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1201))
+
+### Dependencies
+
+- Bump Android SDK from v8.43.1 to v8.43.2 ([#1291](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1291))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8432)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.43.1...8.43.2)
 
 ## 6.10.0
 
@@ -23,7 +216,6 @@
 ### Fixes
 
 - Compose tracing no longer adds the Sentry modifier multiple times for chained modifiers (e.g. `Modifier.fillMaxSize().padding()`) on Kotlin 2.2 and newer ([#1253](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1253))
-- The published Gradle plugin and `sentry-snapshots-runtime` POMs no longer declare a transitive `kotlin-stdlib` dependency ([#1276](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1276))
 
 ### Dependencies
 

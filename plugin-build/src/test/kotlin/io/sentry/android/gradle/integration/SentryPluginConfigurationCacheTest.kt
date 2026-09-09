@@ -146,6 +146,11 @@ class SentryPluginConfigurationCacheTest :
       runner.withArguments("--configuration-cache", "--build-cache", ":app:assembleDebug")
 
     val run0 = runner.build()
+    val run0Outcome = run0.task(":app:generateSentryBuildTimeOptionsDebug")?.outcome
+    assertTrue(
+      run0Outcome == TaskOutcome.SUCCESS || run0Outcome == TaskOutcome.FROM_CACHE,
+      run0.output,
+    )
     assertFalse(
       "Reusing configuration cache." in run0.output ||
         "Configuration cache entry reused." in run0.output,
@@ -153,6 +158,10 @@ class SentryPluginConfigurationCacheTest :
     )
 
     val run1 = runner.build()
+    assertEquals(
+      TaskOutcome.UP_TO_DATE,
+      run1.task(":app:generateSentryBuildTimeOptionsDebug")?.outcome,
+    )
     assertTrue(
       "Reusing configuration cache." in run1.output ||
         "Configuration cache entry reused." in run1.output,

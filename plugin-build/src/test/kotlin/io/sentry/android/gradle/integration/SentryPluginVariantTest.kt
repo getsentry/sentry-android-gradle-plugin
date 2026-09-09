@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.integration
 
+import com.google.common.truth.Truth.assertThat
 import io.sentry.BuildConfig
 import org.gradle.util.GradleVersion
 import org.junit.Assert.assertFalse
@@ -83,6 +84,54 @@ class SentryPluginVariantTest :
     assertTrue(":app:uploadSentryProguardMappingsDemoRelease" in build.output)
   }
 
+  @Test
+  fun `disables tracing for variant via reverse dsl while preserving other sentry tasks`() {
+    applyReverseVariantOverrides(
+      variant = "fullDebug",
+      tracingEnabled = false,
+      runtimeOptimizationsEnabled = false,
+    )
+
+    val ignoredBuild = runner.appendArguments(":app:assembleFullDebug", "--dry-run").build()
+
+    // instrumentation off for the overridden variant
+    assertThat(ignoredBuild.output).doesNotContain(":app:transformFullDebugClassesWithAsm")
+    assertThat(ignoredBuild.output).doesNotContain(":app:generateSentryBuildTimeOptionsFullDebug")
+    // other plugin features still run (debug is not minified, so no mapping upload task)
+    assertThat(ignoredBuild.output)
+      .contains(":app:injectSentryDebugMetaPropertiesIntoAssetsFullDebug")
+
+    val allowedBuild = runner.appendArguments(":app:assembleFullRelease", "--dry-run").build()
+
+    assertThat(allowedBuild.output).contains(":app:transformFullReleaseClassesWithAsm")
+    assertThat(allowedBuild.output).contains(":app:uploadSentryProguardMappingsFullRelease")
+  }
+
+  @Test
+  fun `disables tracing for release variant via reverse dsl while preserving mapping upload`() {
+    applyReverseVariantOverrides(variant = "fullRelease", tracingEnabled = false)
+
+    val ignoredBuild = runner.appendArguments(":app:assembleFullRelease", "--dry-run").build()
+
+    assertThat(ignoredBuild.output).doesNotContain(":app:transformFullReleaseClassesWithAsm")
+    assertThat(ignoredBuild.output).contains(":app:uploadSentryProguardMappingsFullRelease")
+
+    val allowedBuild = runner.appendArguments(":app:assembleDemoRelease", "--dry-run").build()
+
+    assertThat(allowedBuild.output).contains(":app:transformDemoReleaseClassesWithAsm")
+  }
+
+  @Test
+  fun `variant override only affects the named variant`() {
+    applyReverseVariantOverrides(variant = "fullDebug", tracingEnabled = false)
+
+    val overridden = runner.appendArguments(":app:assembleFullDebug", "--dry-run").build()
+    assertThat(overridden.output).doesNotContain(":app:transformFullDebugClassesWithAsm")
+
+    val sibling = runner.appendArguments(":app:assembleDemoDebug", "--dry-run").build()
+    assertThat(sibling.output).contains(":app:transformDemoDebugClassesWithAsm")
+  }
+
   private fun applyIgnores(
     ignoredVariants: Set<String> = setOf(),
     ignoredBuildTypes: Set<String> = setOf(),
@@ -101,6 +150,38 @@ class SentryPluginVariantTest :
                   ignoredFlavors = [$flavors]
                   tracingInstrumentation {
                     enabled = false
+                  }
+                }
+            """
+        .trimIndent()
+    )
+  }
+
+  private fun applyReverseVariantOverrides(
+    variant: String,
+    tracingEnabled: Boolean,
+    runtimeOptimizationsEnabled: Boolean = false,
+  ) {
+    appBuildFile.appendText(
+      // language=Groovy
+      """
+                sentry {
+                  autoUploadProguardMapping = false
+                  tracingInstrumentation {
+                    enabled = true
+                  }
+                  runtimeOptimizations {
+                    enabled = true
+                  }
+                  variants {
+                    $variant {
+                      tracingInstrumentation {
+                        enabled = $tracingEnabled
+                      }
+                      runtimeOptimizations {
+                        enabled = $runtimeOptimizationsEnabled
+                      }
+                    }
                   }
                 }
             """

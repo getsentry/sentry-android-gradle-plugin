@@ -8,6 +8,7 @@ import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
 import io.sentry.android.gradle.tasks.SentryGenerateDebugMetaPropertiesTask
+import io.sentry.android.gradle.tasks.SentryOpenTelemetryVersionCheckTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.SentryPluginUtils
@@ -130,6 +131,23 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
       }
 
       project.installDependencies(extension, false)
+
+      val verifyOpenTelemetryVersionsTask =
+        SentryOpenTelemetryVersionCheckTask.register(
+          project = project,
+          extension = extension,
+          sentryTelemetryProvider = sentryTelemetryProvider,
+          configurationName = "runtimeClasspath",
+          docsUrl = OPENTELEMETRY_VERSION_MISMATCH_DOCS_URL,
+        )
+      // Gate compilation so any build that compiles, packages, runs or tests (assemble, bootJar,
+      // bootRun, check, ...) fails fast on an OpenTelemetry version mismatch.
+      project.tasks.named("classes").configure { it.dependsOn(verifyOpenTelemetryVersionsTask) }
     }
+  }
+
+  companion object {
+    internal const val OPENTELEMETRY_VERSION_MISMATCH_DOCS_URL =
+      "https://docs.sentry.io/platforms/java/opentelemetry/troubleshooting/"
   }
 }

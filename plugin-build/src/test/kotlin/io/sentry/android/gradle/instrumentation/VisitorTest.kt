@@ -5,6 +5,7 @@ import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigati
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
+import io.sentry.android.gradle.instrumentation.androidx.sqlite.driver.AndroidXSQLiteDriver
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.statement.AndroidXSQLiteStatement
 import io.sentry.android.gradle.instrumentation.appstart.Application
 import io.sentry.android.gradle.instrumentation.appstart.ContentProvider
@@ -49,11 +50,15 @@ class VisitorTest(
   fun `instrumented class passes Java verifier`() {
     // first we read the original bytecode and pass it through the ClassWriter, so it computes
     // MAXS for us automatically (that's what AGP will do as well)
-    val inputStream =
-      FileInputStream(
-        "src/test/resources/testFixtures/instrumentation/" + "$instrumentedProject/$className.class"
-      )
-    val classReader = ClassReader(inputStream)
+    val inputBytes =
+      when {
+        classContext != null ->
+          InstrumentationBytecodeTestUtil.loadClasspathFixture(
+            classContext.currentClassData.className
+          ) ?: loadFilesystemFixture()
+        else -> loadFilesystemFixture()
+      }
+    val classReader = ClassReader(inputBytes)
     val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
     val classContext = this.classContext ?: TestClassContext(instrumentable.fqName)
     val classVisitor =
@@ -92,6 +97,12 @@ class VisitorTest(
     )
   }
 
+  private fun loadFilesystemFixture(): ByteArray =
+    FileInputStream(
+        "src/test/resources/testFixtures/instrumentation/" + "$instrumentedProject/$className.class"
+      )
+      .use { it.readBytes() }
+
   @After
   fun printLogs() {
     // only print bytecode when running locally
@@ -110,17 +121,41 @@ class VisitorTest(
     fun parameters() =
       listOf(
         arrayOf(
-          "androidxSqlite",
+          "androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory",
           "FrameworkSQLiteOpenHelperFactory",
           AndroidXSQLiteOpenHelper(),
-          null,
+          TestClassContext(
+            TestClassData(
+              className = "androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory",
+              interfaces = listOf("androidx.sqlite.db.SupportSQLiteOpenHelper\$Factory"),
+            )
+          ),
         ),
-        arrayOf("androidxSqlite", "FrameworkSQLiteDatabase", AndroidXSQLiteDatabase(), null),
         arrayOf(
-          "androidxSqlite",
+          "androidx.sqlite.db.framework.FrameworkSQLiteDatabase",
+          "FrameworkSQLiteDatabase",
+          AndroidXSQLiteDatabase(),
+          TestClassContext("androidx.sqlite.db.framework.FrameworkSQLiteDatabase"),
+        ),
+        arrayOf(
+          "androidx.sqlite.db.framework.FrameworkSQLiteStatement",
           "FrameworkSQLiteStatement",
           AndroidXSQLiteStatement(SemVer(2, 3, 0)),
-          null,
+          TestClassContext("androidx.sqlite.db.framework.FrameworkSQLiteStatement"),
+        ),
+        // RoomDatabase$Builder bytecode: loaded by FQN from Room runtime AARs on the test
+        // classpath.
+        arrayOf(
+          "androidx.room.RoomDatabase\$Builder",
+          "RoomDatabase\$Builder",
+          AndroidXSQLiteDriver(),
+          TestClassContext("androidx.room.RoomDatabase\$Builder"),
+        ),
+        arrayOf(
+          "androidx.room3.RoomDatabase\$Builder",
+          "RoomDatabase\$Builder",
+          AndroidXSQLiteDriver(),
+          TestClassContext("androidx.room3.RoomDatabase\$Builder"),
         ),
         roomDaoTestParameters("DeleteAndReturnUnit"),
         roomDaoTestParameters("InsertAndReturnLong"),
@@ -157,7 +192,12 @@ class VisitorTest(
         kspTracksDaoTestParameters("insertAll"),
         kspTracksDaoTestParameters("update"),
         arrayOf("fileIO", "SQLiteCopyOpenHelper", WrappingInstrumentable(), null),
-        arrayOf("fileIO", "TypefaceCompatUtil", WrappingInstrumentable(), null),
+        arrayOf(
+          "androidx.core.graphics.TypefaceCompatUtil",
+          "TypefaceCompatUtil",
+          WrappingInstrumentable(),
+          TestClassContext("androidx.core.graphics.TypefaceCompatUtil"),
+        ),
         arrayOf(
           "fileIO",
           "Test",

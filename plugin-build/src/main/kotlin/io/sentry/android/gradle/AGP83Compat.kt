@@ -5,9 +5,19 @@ package io.sentry.android.gradle
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.Variant
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
+import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.gradle.common.SentryVariant
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
+
+/**
+ * Returns the [SentryVariant] implementation matching the current AGP version.
+ *
+ * On AGP 8.3+ this prefers [AndroidVariant83], which reads [Variant.debuggable] via the public API,
+ * so it stays correct when AGP analytics wraps the variant (see `Variant.unwrapImpl`).
+ */
+internal fun Variant.toSentryVariant(): SentryVariant =
+  if (AgpVersions.isAGP83) AndroidVariant83(this) else AndroidVariant74(this)
 
 /**
  * Compatibility layer for AGP 8.3+.

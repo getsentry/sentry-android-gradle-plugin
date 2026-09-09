@@ -10,6 +10,9 @@ plugins {
   alias(libs.plugins.spotless)
 }
 
+// Composite substitution matches on project.group, which Vanniktech's GROUP does not set.
+group = providers.gradleProperty("GROUP").get()
+
 val kotlin1920: SourceSet by sourceSets.creating
 val kotlin2120: SourceSet by sourceSets.creating
 val kotlin2200: SourceSet by sourceSets.creating
@@ -71,6 +74,17 @@ dependencies {
 }
 
 kapt { correctErrorTypes = true }
+
+// Verification metadata records the graph resolution produced, so resolution has to stay stable:
+// a range could otherwise resolve to an artifact with no recorded checksum. Covers transitives too.
+configurations.configureEach { resolutionStrategy.failOnNonReproducibleResolution() }
+
+// Resolves every configuration so `--write-verification-metadata` sees the whole graph rather than
+// only what the requested tasks happen to need. Mirrors plugin-build's resolveAndLockAll.
+tasks.register("resolveAll") {
+  notCompatibleWithConfigurationCache("Filters configurations at execution time")
+  doLast { configurations.filter { it.isCanBeResolved }.forEach { it.resolve() } }
+}
 
 plugins.withId("com.vanniktech.maven.publish.base") {
   configure<PublishingExtension> {

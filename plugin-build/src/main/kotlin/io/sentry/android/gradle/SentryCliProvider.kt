@@ -136,8 +136,19 @@ internal object SentryCliProvider {
     val osName = System.getProperty("os.name").lowercase(Locale.ROOT)
     val osArch = System.getProperty("os.arch")
     return when {
-      "mac" in osName -> "Darwin-universal"
-      "linux" in osName -> if (osArch == "amd64") "Linux-x86_64" else "Linux-$osArch"
+      "mac" in osName ->
+        if (osArch == "aarch64" || osArch == "arm64") "Darwin-arm64" else "Darwin-x86_64"
+      "linux" in osName -> {
+        val normalizedArch =
+          when (osArch) {
+            "amd64",
+            "x86_64" -> "x86_64"
+            "arm64",
+            "aarch64" -> "aarch64"
+            else -> osArch
+          }
+        "Linux-$normalizedArch"
+      }
       "win" in osName -> "Windows-i686.exe"
       else -> null
     }

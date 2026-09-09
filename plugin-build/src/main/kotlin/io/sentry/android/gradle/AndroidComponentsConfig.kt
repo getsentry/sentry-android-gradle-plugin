@@ -19,6 +19,8 @@ import io.sentry.android.gradle.SentryTasksProvider.getAssembleTaskProvider
 import io.sentry.android.gradle.SentryTasksProvider.getBundleTask
 import io.sentry.android.gradle.SentryTasksProvider.getMappingFileProvider
 import io.sentry.android.gradle.extensions.SentryPluginExtension
+import io.sentry.android.gradle.extensions.SentryVariantConfigResolver
+import io.sentry.android.gradle.instrumentation.SentrySdkOptimizationClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
@@ -34,6 +36,7 @@ import io.sentry.android.gradle.tasks.SentryUploadProguardMappingsTask
 import io.sentry.android.gradle.tasks.SentryUploadSnapshotsTask
 import io.sentry.android.gradle.tasks.configureNativeSymbolsTask
 import io.sentry.android.gradle.tasks.dependencies.SentryExternalDependenciesReportTaskV2
+import io.sentry.android.gradle.tasks.optimization.GenerateSentryBuildTimeOptionsTask
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.GroovyCompat
@@ -88,7 +91,7 @@ fun ApplicationAndroidComponentsExtension.configure(
       variant.configureDependenciesTask(project, extension, sentryTelemetryProvider)
 
       // TODO: do this only once, and all other tasks should be SentryVariant.configureSomething
-      val sentryVariant = AndroidVariant74(variant)
+      val sentryVariant = variant.toSentryVariant()
 
       val additionalSourcesProvider =
         project.provider {
@@ -146,66 +149,90 @@ fun ApplicationAndroidComponentsExtension.configure(
       // and as our ProGuard UUID depends on minification itself; creating a
       // circular dependency
       // instead, we transform all assets and inject the properties file
-      sentryVariant.apply {
-        val injectAssetsTask =
-          InjectSentryMetaPropertiesIntoAssetsTask.register(
-            project,
-            extension,
-            sentryTelemetryProvider,
-            tasksGeneratingProperties,
-            variant.name.capitalized,
-          )
+      val injectAssetsTask =
+        InjectSentryMetaPropertiesIntoAssetsTask.register(
+          project,
+          extension,
+          sentryTelemetryProvider,
+          tasksGeneratingProperties,
+          variant.name.capitalized,
+        )
 
-        assetsWiredWithDirectories(
-          injectAssetsTask,
+      variant.artifacts
+        .use(injectAssetsTask)
+        .wiredWithDirectories(
           InjectSentryMetaPropertiesIntoAssetsTask::inputDir,
           InjectSentryMetaPropertiesIntoAssetsTask::outputDir,
         )
+        .toTransform(SingleArtifact.ASSETS)
 
-        // flutter doesn't use the transform API
-        // and manually wires up task dependencies,
-        // which causes errors like this:
-        //      Task ':app:injectSentryDebugMetaPropertiesIntoAssetsDebug' uses this output of task
-        // ':app:copyFlutterAssetsDebug' without declaring an explicit or implicit dependency
-        // thus we have to manually add the task dependency
-        project.afterEvaluate {
-          // https://github.com/flutter/flutter/blob/6ce591f7ea3ba827d9340ce03f7d8e3a37ebb03a/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy#L1295-L1298
-          project.tasks.findByName("copyFlutterAssets${variant.name.capitalized}")?.let {
-            flutterAssetsTask ->
-            injectAssetsTask.configure { injectTask -> injectTask.dependsOn(flutterAssetsTask) }
-          }
+      // flutter doesn't use the transform API
+      // and manually wires up task dependencies,
+      // which causes errors like this:
+      //      Task ':app:injectSentryDebugMetaPropertiesIntoAssetsDebug' uses this output of task
+      // ':app:copyFlutterAssetsDebug' without declaring an explicit or implicit dependency
+      // thus we have to manually add the task dependency
+      project.afterEvaluate {
+        // https://github.com/flutter/flutter/blob/6ce591f7ea3ba827d9340ce03f7d8e3a37ebb03a/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy#L1295-L1298
+        project.tasks.findByName("copyFlutterAssets${variant.name.capitalized}")?.let {
+          flutterAssetsTask ->
+          injectAssetsTask.configure { injectTask -> injectTask.dependsOn(flutterAssetsTask) }
         }
       }
 
-      if (extension.tracingInstrumentation.enabled.get()) {
-        /**
-         * We detect sentry-android SDK version using configurations.incoming.afterResolve. This is
-         * guaranteed to be executed BEFORE any of the build tasks/transforms are started.
-         *
-         * After detecting the sdk state, we use Gradle's shared build service to persist the state
-         * between builds and also during a single build, because transforms are run in parallel.
-         */
-        val sentryModulesService =
+      val instrumentationConfig =
+        SentryVariantConfigResolver.resolve(extension = extension, variantName = variant.name)
+      val runtimeOptimizationsEnabled = instrumentationConfig.runtimeOptimizationsEnabled
+      val tracingInstrumentationEnabled = instrumentationConfig.tracingInstrumentationEnabled
+      val modulesService =
+        if (tracingInstrumentationEnabled) {
           SentryModulesService.register(
-            project,
-            extension.tracingInstrumentation.features,
-            extension.tracingInstrumentation.logcat.enabled,
-            extension.includeSourceContext,
-            extension.dexguardEnabled,
-            extension.tracingInstrumentation.appStart.enabled,
-          )
-        /**
-         * We have to register SentryModulesService as a build event listener, so it will not be
-         * discarded after the configuration phase (where we store the collected dependencies), and
-         * will be passed down to the InstrumentationFactory
-         */
-        buildEvents.onTaskCompletion(sentryModulesService)
+              project,
+              extension.tracingInstrumentation.features,
+              extension.tracingInstrumentation.logcat.enabled,
+              extension.includeSourceContext,
+              extension.dexguardEnabled,
+              extension.tracingInstrumentation.appStart.enabled,
+            )
+            .also {
+              // Keep the service alive after configuration so instrumentation can read it.
+              buildEvents.onTaskCompletion(it)
+            }
+        } else {
+          null
+        }
 
-        project.collectModules(
-          "${variant.name}RuntimeClasspath",
-          variant.name,
-          sentryModulesService,
-        )
+      modulesService?.let {
+        project.collectModules("${variant.name}RuntimeClasspath", variant.name, it)
+      }
+
+      if (runtimeOptimizationsEnabled) {
+        val buildTimeOptionsTask =
+          GenerateSentryBuildTimeOptionsTask.register(
+            project,
+            "${variant.name}RuntimeClasspath",
+            variant.name.capitalized,
+            variant.artifacts.get(SingleArtifact.MERGED_MANIFEST),
+            sentryTelemetryProvider,
+          )
+        val javaSources = variant.sources.java
+        if (buildTimeOptionsTask != null && javaSources != null) {
+          javaSources.addGeneratedSourceDirectory(
+            buildTimeOptionsTask,
+            GenerateSentryBuildTimeOptionsTask::output,
+          )
+          variant.instrumentation.transformClassesWith(
+            SentrySdkOptimizationClassVisitorFactory::class.java,
+            InstrumentationScope.ALL,
+          ) {}
+          variant.instrumentation.setAsmFramesComputationMode(
+            FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
+          )
+        }
+      }
+
+      if (tracingInstrumentationEnabled) {
+        val tracingModulesService = checkNotNull(modulesService)
 
         variant.configureInstrumentation(
           SpanAddingClassVisitorFactory::class.java,
@@ -219,7 +246,7 @@ fun ApplicationAndroidComponentsExtension.configure(
           params.debug.setDisallowChanges(extension.tracingInstrumentation.debug.get())
           params.logcatMinLevel.setDisallowChanges(extension.tracingInstrumentation.logcat.minLevel)
 
-          params.sentryModulesService.setDisallowChanges(sentryModulesService)
+          params.sentryModulesService.setDisallowChanges(tracingModulesService)
           params.features.setDisallowChanges(extension.tracingInstrumentation.features)
           params.logcatEnabled.setDisallowChanges(extension.tracingInstrumentation.logcat.enabled)
           params.appStartEnabled.setDisallowChanges(
@@ -235,7 +262,7 @@ fun ApplicationAndroidComponentsExtension.configure(
             project,
             extension,
             sentryTelemetryProvider,
-            sentryModulesService,
+            tracingModulesService,
             variant.name,
           )
 
@@ -268,7 +295,7 @@ private fun Variant.configureTelemetry(
   sentryOrg: String?,
   buildEvents: BuildEventListenerRegistryInternal,
 ): Provider<SentryTelemetryService> {
-  val variant = AndroidVariant74(this)
+  val variant = toSentryVariant()
   val sentryTelemetryProvider = SentryTelemetryService.register(project)
   project.gradle.taskGraph.whenReady {
     sentryTelemetryProvider.get().start {
@@ -290,7 +317,7 @@ private fun Variant.configureSourceBundleTasks(
 ): SourceContext.SourceContextTasks? {
   if (extension.includeSourceContext.get()) {
     val taskSuffix = name.capitalized
-    val variant = AndroidVariant74(this)
+    val variant = toSentryVariant()
 
     val sourceContextTasks =
       SourceContext.register(
@@ -343,12 +370,7 @@ private fun ApplicationVariant.configureProguardMappingsTasks(
   sentryOrg: String?,
   sentryProject: String?,
 ): TaskProvider<SentryGenerateProguardUuidTask>? {
-  val variant =
-    if (AgpVersions.isAGP83(AgpVersions.CURRENT)) {
-      AndroidVariant83(this)
-    } else {
-      AndroidVariant74(this)
-    }
+  val variant = toSentryVariant()
   val sentryProps = getPropertiesFilePath(project, variant)
   val dexguardEnabled = extension.dexguardEnabled.get()
   val isMinifyEnabled = isMinificationEnabled(project, variant, dexguardEnabled)
@@ -409,7 +431,7 @@ private fun ApplicationVariant.configureDistributionPropertiesTask(
   val updateSdkVariants = extension.distribution.updateSdkVariants.get()
 
   if (updateSdkVariants.contains(variantName)) {
-    val variant = AndroidVariant74(this)
+    val variant = toSentryVariant()
     // Distribution uses a custom auto-install implementation instead of the standard
     // InstallStrategy approach (see AutoInstall.kt) because it requires variant-specific
     // installation based on extension.distribution.updateSdkVariants, whereas other integrations
@@ -451,7 +473,7 @@ private fun ApplicationVariant.configureSnapshotsTasks(
     "Sentry Snapshots require Android Gradle Plugin 8.0 or higher. " +
       "Current version: ${AgpVersions.CURRENT}"
   }
-  val variant = AndroidVariant74(this)
+  val variant = toSentryVariant()
   val sentryProps = getPropertiesFilePath(project, variant)
   val taskSuffix = name.capitalized
 
@@ -493,7 +515,7 @@ private fun ApplicationVariant.configureSnapshotsTasks(
           paparazziMajorVersion,
         )
 
-      if (AgpVersions.isAGP90(AgpVersions.CURRENT)) {
+      if (AgpVersions.isAGP90) {
         hostTests[UNIT_TEST_TYPE]?.apply {
           sources.java?.addGeneratedSourceDirectory(
             generateTask,
@@ -513,9 +535,11 @@ private fun ApplicationVariant.configureSnapshotsTasks(
 
     project.afterEvaluate {
       // Not all variants have unit test tasks (e.g. users can disable them),
-      // so skip wiring if the task doesn't exist.
+      // so skip wiring if the task doesn't exist. Filter by Test type because AGP
+      // registers DefaultTask stubs for variants without full unit test support on
+      // multi-flavor application modules, and named(name, Test::class) throws on those.
       val testTaskName = "test${taskSuffix}UnitTest"
-      if (testTaskName !in project.tasks.names) return@afterEvaluate
+      if (testTaskName !in project.tasks.withType(Test::class.java).names) return@afterEvaluate
 
       val testTask = project.tasks.named(testTaskName, Test::class.java)
       uploadTask.configure { task ->

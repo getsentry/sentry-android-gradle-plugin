@@ -1,6 +1,7 @@
 package io.sentry.android.gradle.integration
 
 import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
+import java.io.File
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.gradle.util.GradleVersion
@@ -30,6 +31,40 @@ class SentryPluginAutoInstallNonAndroidTest :
 
     val result = runListDependenciesTask()
     assertTrue { "io.sentry:sentry:$SENTRY_SDK_VERSION" in result.output }
+  }
+
+  @Test
+  fun `uses sentry-opentelemetry-bom version for auto installed dependencies`() {
+    writeSentryOpenTelemetryBom("8.0.0")
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+                id "java"
+                id "io.sentry.jvm.gradle"
+            }
+
+            repositories {
+              maven { url file('../repo') }
+            }
+
+            dependencies {
+              implementation platform('io.sentry:sentry-opentelemetry-bom:8.0.0')
+              implementation 'ch.qos.logback:logback-classic:1.0.0'
+            }
+
+            sentry.autoInstallation.enabled = true
+            sentry.autoInstallation.sentryVersion = "6.28.0"
+            """
+        .trimIndent()
+    )
+
+    val result = runListDependenciesTask()
+    assertTrue { "io.sentry:sentry:8.0.0" in result.output }
+    assertTrue { "io.sentry:sentry-logback:8.0.0" in result.output }
+    assertFalse { "io.sentry:sentry:6.28.0" in result.output }
+    assertFalse { "io.sentry:sentry-logback:6.28.0" in result.output }
+    assertFalse { "FAILED" in result.output }
   }
 
   @Test
@@ -597,6 +632,29 @@ class SentryPluginAutoInstallNonAndroidTest :
   }
 
   private fun runListDependenciesTask() = runner.appendArguments("app:dependencies").build()
+
+  private fun writeSentryOpenTelemetryBom(version: String) {
+    val pomFile =
+      File(
+        testProjectDir.root,
+        "repo/io/sentry/sentry-opentelemetry-bom/$version/sentry-opentelemetry-bom-$version.pom",
+      )
+    pomFile.parentFile.mkdirs()
+    pomFile.writeText(
+      """
+      <project xmlns="http://maven.apache.org/POM/4.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+        <modelVersion>4.0.0</modelVersion>
+        <groupId>io.sentry</groupId>
+        <artifactId>sentry-opentelemetry-bom</artifactId>
+        <version>$version</version>
+        <packaging>pom</packaging>
+      </project>
+      """
+        .trimIndent()
+    )
+  }
 
   private fun getJavaVersion(): Int {
     var version = System.getProperty("java.version")

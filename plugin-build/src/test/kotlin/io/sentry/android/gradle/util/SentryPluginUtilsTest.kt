@@ -36,7 +36,8 @@ class SentryPluginUtilsTest(private val agpVersion: SemVer) {
 
   @Test
   fun `isMinificationEnabled returns false for debug builds`() {
-    val (project, _) = createTestAndroidProject(forceEvaluate = !AgpVersions.isAGP74(agpVersion))
+    val (project, _) =
+      createTestAndroidProject(forceEvaluate = agpVersion < AgpVersions.VERSION_7_4_0)
     val variant = project.retrieveAndroidVariant("debug")
 
     assertEquals(false, isMinificationEnabled(project, variant))

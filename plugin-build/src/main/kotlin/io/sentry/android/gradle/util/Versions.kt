@@ -10,12 +10,16 @@ internal object AgpVersions {
   val VERSION_8_0_0: SemVer = SemVer.parse("8.0.0")
   val VERSION_8_3_0: SemVer = SemVer.parse("8.3.0")
   val VERSION_9_0_0: SemVer = SemVer.parse("9.0.0")
+  val VERSION_9_3_0: SemVer = SemVer.parse("9.3.0-alpha01")
 
-  fun isAGP74(current: SemVer) = current >= VERSION_7_4_0
+  val isAGP83: Boolean
+    get() = CURRENT >= VERSION_8_3_0
 
-  fun isAGP83(current: SemVer) = current >= VERSION_8_3_0
+  val isAGP90: Boolean
+    get() = CURRENT >= VERSION_9_0_0
 
-  fun isAGP90(current: SemVer) = current >= VERSION_9_0_0
+  val isAGP93: Boolean
+    get() = CURRENT >= VERSION_9_3_0
 }
 
 internal object GradleVersions {
@@ -33,6 +37,7 @@ internal object SentryVersions {
   internal val VERSION_LOGCAT = SemVer(6, 17, 0)
   internal val VERSION_APP_START = SemVer(7, 1, 0)
   internal val VERSION_SQLITE = SemVer(6, 21, 0)
+  internal val VERSION_SQLITE_DRIVER = SemVer(8, 45, 0)
   internal val VERSION_ANDROID_OKHTTP_LISTENER = SemVer(6, 20, 0)
   internal val VERSION_OKHTTP = SemVer(7, 0, 0)
 }
@@ -55,6 +60,8 @@ internal object SentryModules {
     DefaultModuleIdentifier.newId("io.sentry", "sentry-android-navigation")
   internal val SENTRY_ANDROID_TIMBER =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-android-timber")
+  internal val SENTRY_ANDROID_REPLAY =
+    DefaultModuleIdentifier.newId("io.sentry", "sentry-android-replay")
   internal val SENTRY_ANDROID_DISTRIBUTION =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-android-distribution")
   internal val SENTRY_OKHTTP = DefaultModuleIdentifier.newId("io.sentry", "sentry-okhttp")
@@ -75,6 +82,8 @@ internal object SentryModules {
   internal val SENTRY_SPRING_BOOT4 =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-spring-boot-4")
   internal val SENTRY_BOM = DefaultModuleIdentifier.newId("io.sentry", "sentry-bom")
+  internal val SENTRY_OPENTELEMETRY_BOM =
+    DefaultModuleIdentifier.newId("io.sentry", "sentry-opentelemetry-bom")
   internal val SENTRY_OPENTELEMETRY_AGENTLESS =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-opentelemetry-agentless")
   internal val SENTRY_OPENTELEMETRY_AGENTLESS_SPRING =

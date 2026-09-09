@@ -14,12 +14,12 @@ import com.android.build.api.variant.impl.VariantImpl
 import io.sentry.android.gradle.SentryTasksProvider.getComposeMappingMergeTask
 import io.sentry.android.gradle.SentryTasksProvider.getMinifyTask
 import io.sentry.android.gradle.tasks.SentryGenerateProguardUuidTask
+import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.gradle.common.SentryVariant
 import io.sentry.gradle.common.filterBuildConfig
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
@@ -31,19 +31,23 @@ data class AndroidVariant74(private val variant: Variant) : SentryVariant {
   override val flavorName: String? = variant.flavorName
   override val buildTypeName: String? = variant.buildType
   override val productFlavors: List<String> = variant.productFlavors.map { it.second }
-  override val isMinifyEnabled: Boolean = (variant as? CanMinifyCode)?.isMinifyEnabled == true
+  override val isMinifyEnabled: Boolean =
+    (variant as? CanMinifyCode)?.isMinifyEnabled == true ||
+      variant.isApplicationOptimizationEnabled()
 
   // TODO: replace this eventually (when targeting AGP 8.3.0) with
   // https://cs.android.com/android-studio/platform/tools/base/+/mirror-goog-studio-main:build-system/gradle-api/src/main/java/com/android/build/api/variant/Component.kt;l=103-104;bpv=1
-  override val isDebuggable: Boolean = (variant as? ApplicationVariantImpl)?.debuggable == true
+  // AGP analytics may wrap the public Variant API; internal impl types are only on the delegate.
+  override val isDebuggable: Boolean =
+    (variant.unwrapImpl() as? ApplicationVariantImpl)?.debuggable == true
 
   // internal APIs are a bit dirty, but our plugin would need a lot of rework to make proper
   // dependencies via artifacts API.
   override val assembleProvider: TaskProvider<out Task>?
-    get() = (variant as? VariantImpl<*>)?.taskContainer?.assembleTask
+    get() = variant.unwrapImpl()?.taskContainer?.assembleTask
 
   override val installProvider: TaskProvider<out Task>?
-    get() = (variant as? VariantImpl<*>)?.taskContainer?.installTask
+    get() = variant.unwrapImpl()?.taskContainer?.installTask
 
   val bundle: Provider<RegularFile> = variant.artifacts.get(SingleArtifact.BUNDLE)
   val apk: Provider<Directory> = variant.artifacts.get(SingleArtifact.APK)
@@ -101,16 +105,62 @@ data class AndroidVariant74(private val variant: Variant) : SentryVariant {
       }
     }
   }
+}
 
-  fun <T : Task> assetsWiredWithDirectories(
-    task: TaskProvider<T>,
-    inputDir: (T) -> DirectoryProperty,
-    outputDir: (T) -> DirectoryProperty,
-  ) {
-    variant.artifacts
-      .use(task)
-      .wiredWithDirectories(inputDir, outputDir)
-      .toTransform(SingleArtifact.ASSETS)
+private fun Variant.isApplicationOptimizationEnabled(): Boolean {
+  if (!AgpVersions.isAGP93) {
+    return false
+  }
+
+  // AGP 9.3's optimization.enable DSL does not update CanMinifyCode.isMinifyEnabled. The merged
+  // value is only exposed through an internal creation config, so use reflection to keep this
+  // plugin binary-compatible with older AGP versions.
+  return try {
+    val unwrappedVariant = unwrapImpl() ?: this
+    val optimizationCreationConfig =
+      unwrappedVariant.javaClass.getMethod("getOptimizationCreationConfig").invoke(unwrappedVariant)
+    optimizationCreationConfig.javaClass
+      .getMethod("getApplicationOptimizationEnabled")
+      .invoke(optimizationCreationConfig) as Boolean
+  } catch (e: ReflectiveOperationException) {
+    SentryPlugin.logger.warn(
+      "Unable to determine whether AGP application optimization is enabled. " +
+        "ProGuard mapping tasks may not be registered.",
+      e,
+    )
+    false
+  }
+}
+
+/**
+ * AGP analytics may wrap the public [Variant] API. Internal impl types and creation-config methods
+ * live on the delegate, so unwrap when present.
+ *
+ * If unwrapping fails, internal accessors (assemble/install providers, debuggable, optimization)
+ * degrade. Callers that can fall back still do; this warning makes the failure visible.
+ */
+private fun Variant.unwrapImpl(): VariantImpl<*>? {
+  (this as? VariantImpl<*>)?.let {
+    return it
+  }
+  return try {
+    val delegate = javaClass.getMethod("getDelegate").invoke(this) as? VariantImpl<*>
+    if (delegate == null) {
+      SentryPlugin.logger.warn(
+        "Unable to unwrap AGP analytics variant ${javaClass.name}. " +
+          "Internal variant APIs (assemble/install providers, debuggable, optimization) may be " +
+          "incomplete."
+      )
+    }
+    delegate
+  } catch (e: ReflectiveOperationException) {
+    SentryPlugin.logger.warn(
+      "Unable to unwrap AGP analytics variant ${javaClass.name}. " +
+        "Internal variant APIs (assemble/install providers, debuggable, optimization) may be " +
+        "incomplete.",
+      e,
+    )
+    null
   }
 }
 

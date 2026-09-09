@@ -147,6 +147,14 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
   }
 
   fun captureError(exception: Throwable, operation: String?) {
+    captureError(exception, operation, handled = false)
+  }
+
+  fun captureHandledError(exception: Throwable, operation: String?) {
+    captureError(exception, operation, handled = true)
+  }
+
+  private fun captureError(exception: Throwable, operation: String?, handled: Boolean) {
     val message =
       if (exception is SentryCliException) {
         "$operation failed with SentryCliException and reason ${exception.reason}"
@@ -157,7 +165,7 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
     val mechanism =
       Mechanism().also {
         it.type = MECHANISM_TYPE
-        it.isHandled = false
+        it.isHandled = handled
       }
     val mechanismException: Throwable =
       ExceptionMechanismException(
@@ -165,7 +173,10 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
         SentryMinimalException(message),
         Thread.currentThread(),
       )
-    val event = SentryEvent(mechanismException).also { it.level = SentryLevel.FATAL }
+    val event =
+      SentryEvent(mechanismException).also {
+        it.level = if (handled) SentryLevel.ERROR else SentryLevel.FATAL
+      }
     scopes.captureEvent(event)
   }
 
@@ -314,6 +325,10 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
       tags.put(
         "autoInstallation_sentryVersion",
         extension.autoInstallation.sentryVersion.get().toString(),
+      )
+      tags.put(
+        "verifyOpenTelemetryVersions",
+        extension.verifyOpenTelemetryVersions.get().toString(),
       )
       tags.put("includeDependenciesReport", extension.includeDependenciesReport.get().toString())
       tags.put("includeSourceContext", extension.includeSourceContext.get().toString())

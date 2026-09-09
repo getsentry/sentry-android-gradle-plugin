@@ -55,16 +55,49 @@ dependencies {
   testImplementation(libs.asmCommons)
 
   // we need these dependencies for tests, because the bytecode verifier also analyzes superclasses
+  testImplementationAar(libs.androidxCore)
+  testImplementationAar(libs.roomRuntimeAndroid)
+  testImplementationAar(libs.room3RuntimeAndroid)
+  testImplementation(libs.sample.coroutines.core)
+  testImplementationAar(libs.sentryAndroid)
   testImplementationAar(libs.sqlite)
   testImplementationAar(libs.sqliteFramework)
-  testRuntimeOnly(files(androidSdkPath))
-  testImplementationAar(libs.sentryAndroid)
-  testImplementation(libs.sentryOkhttp)
   testImplementationAar(libs.sentryAndroidOkhttp)
+  testImplementation(libs.sentryOkhttp)
+
+  testRuntimeOnly(files(androidSdkPath))
 
   // Needed to read contents from APK/Source Bundles
   testImplementation(libs.arscLib)
   testImplementation(libs.zip4j)
+}
+
+// The compatibility test matrix (test-matrix-agp-gradle.yaml) overrides AGP/Kotlin/Gradle
+// versions via env vars, which deliberately diverges from the lockfile. Only lock the
+// canonical build; matrix builds resolve their own versions.
+val isVersionOverrideBuild =
+  System.getenv("VERSION_AGP") != null || System.getenv("VERSION_KOTLIN") != null
+
+// Regenerate the lockfile and verification metadata after changing dependencies; see
+// CONTRIBUTING.md.
+if (!isVersionOverrideBuild) {
+  dependencyLocking { lockAllConfigurations() }
+}
+
+// Resolves every configuration so verification covers the whole graph, not just what the requested
+// tasks need. CI verifies through this without writing anything; mirrors the compiler plugin's.
+tasks.register("resolveAll") {
+  notCompatibleWithConfigurationCache("Filters configurations at execution time")
+  doLast { configurations.filter { it.isCanBeResolved }.forEach { it.resolve() } }
+}
+
+tasks.register("resolveAndLockAll") {
+  dependsOn("resolveAll")
+  doFirst {
+    require(gradle.startParameter.isWriteDependencyLocks) {
+      "$path must be run from the command line with the `--write-locks` flag"
+    }
+  }
 }
 
 java {
