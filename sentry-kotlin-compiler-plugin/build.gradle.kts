@@ -75,6 +75,17 @@ dependencies {
 
 kapt { correctErrorTypes = true }
 
+// Verification metadata records the graph resolution produced, so resolution has to stay stable:
+// a range could otherwise resolve to an artifact with no recorded checksum. Covers transitives too.
+configurations.configureEach { resolutionStrategy.failOnNonReproducibleResolution() }
+
+// Resolves every configuration so `--write-verification-metadata` sees the whole graph rather than
+// only what the requested tasks happen to need. Mirrors plugin-build's resolveAndLockAll.
+tasks.register("resolveAll") {
+  notCompatibleWithConfigurationCache("Filters configurations at execution time")
+  doLast { configurations.filter { it.isCanBeResolved }.forEach { it.resolve() } }
+}
+
 plugins.withId("com.vanniktech.maven.publish.base") {
   configure<PublishingExtension> {
     repositories {
