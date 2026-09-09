@@ -43,6 +43,7 @@
             <trusting group="androidx.room3" name="room3-runtime-android" version="3.0.2"/>
          </trusted-key>
          <trusted-key id="0F06FF86BEEAF4E71866EE5232EE5355A6BC6E42">
+            <trusting group="androidx.core" name="core" version="1.19.0"/>
             <trusting group="androidx.databinding"/>
             <trusting group="androidx.room"/>
             <trusting group="^com[.]android($|([.].*))" regex="true"/>
