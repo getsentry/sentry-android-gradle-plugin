@@ -1,5 +1,5 @@
 [versions]
-agp = "8.10.1"
+agp = "8.13.2"
 
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
 ktfmt = "0.51"
@@ -12,7 +12,7 @@ sentryAndroidOkhttp = "7.22.6"
 
 sampleCoroutines = "1.11.0"
 sampleRoom = "2.7.2"
-sampleRetrofit = "2.9.0"
+sampleRetrofit = "3.0.0"
 sampleSpringBoot = "3.4.1"
 
 [plugins]
@@ -23,7 +23,7 @@ kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring" }
 kapt = { id = "org.jetbrains.kotlin.kapt" }
 ksp = { id = "com.google.devtools.ksp" }
 dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
-spotless = { id = "com.diffplug.spotless", version = "8.10.1" }
+spotless = { id = "com.diffplug.spotless", version = "8.10.2" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.35.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
@@ -60,11 +60,12 @@ sentryAndroidOkhttp = { group = "io.sentry", name = "sentry-android-okhttp", ver
 sentrySpringBootJakarta = { group = "io.sentry", name = "sentry-spring-boot-starter-jakarta", version.ref = "sentry" }
 
 # test
-androidxCore = { group = "androidx.core", name = "core", version = "1.15.0" }
+# core 1.19+ requires minSdk 23 as an Android AAR; keep this on testImplementationAar only.
+androidxCore = { group = "androidx.core", name = "core", version = "1.19.0" }
 arscLib = { group = "io.github.reandroid", name = "ARSCLib", version = "1.1.4" }
 mockitoKotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.0" }
-roomRuntimeAndroid = { group = "androidx.room", name = "room-runtime-android", version = "2.7.0" }
-room3RuntimeAndroid = { group = "androidx.room3", name = "room3-runtime-android", version = "3.0.1" }
+roomRuntimeAndroid = { group = "androidx.room", name = "room-runtime-android", version = "2.8.4" }
+room3RuntimeAndroid = { group = "androidx.room3", name = "room3-runtime-android", version = "3.0.2" }
 zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.6" }
 
 # samples
