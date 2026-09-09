@@ -120,7 +120,10 @@
          <trusted-key id="8E3A02905A1AE67E7B0F9ACD3967D4EDA591B991" group="org.jetbrains.kotlinx" name="kotlinx-html-jvm" version="0.9.1"/>
          <trusted-key id="90EE19787A7BCF6FD37A1E9180C08B1C29100955" group="com.squareup" name="javawriter" version="2.5.0"/>
          <trusted-key id="98465301A4939C0279F2E847D89D05374952262B" group="org.jetbrains.dokka"/>
-         <trusted-key id="98D78261CB7155AB905280ADA2E7C34BC6E270AE" group="io.github.reandroid" name="ARSCLib" version="1.1.4"/>
+         <trusted-key id="98D78261CB7155AB905280ADA2E7C34BC6E270AE">
+            <trusting group="io.github.reandroid" name="ARSCLib" version="1.1.4"/>
+            <trusting group="io.github.reandroid" name="ARSCLib" version="1.4.0"/>
+         </trusted-key>
          <trusted-key id="9D0A56AAA0D60E0C0C7DCCC0B4C70893B62BABE8" group="org.apache.logging" name="logging-parent" version="5"/>
          <trusted-key id="9E3044071B758EBCB7E45673700E4F39BC05364B" group="org.eclipse.platform" name="org.eclipse.osgi" version="3.24.200"/>
          <trusted-key id="A31DDE881C3E3C4C985BD0D02C7F998F4272C851" group="com.diffplug.spotless"/>
