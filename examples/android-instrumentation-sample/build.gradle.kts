@@ -24,7 +24,9 @@ if (getKotlinPluginVersion() >= "2.0.0") {
 android {
   compileSdk = LibsVersion.SDK_VERSION
   defaultConfig {
-    minSdk = LibsVersion.MIN_SDK_VERSION
+    // androidx.room:room-runtime-android 2.8.4 and androidx.room3:room3-runtime-android 3.0.2
+    // require minSdk 23.
+    minSdk = 23
     targetSdk = LibsVersion.SDK_VERSION
     versionCode = 1
     versionName = "1.0"
