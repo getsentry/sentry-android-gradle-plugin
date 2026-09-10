@@ -6,6 +6,12 @@
 
 - Verify the plugin's own build dependencies with PGP signatures instead of checksums ([#1433](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1433))
 
+### Dependencies
+
+- Bump Android SDK from v8.55.0 to v8.56.0 ([#1445](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1445))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8560)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.55.0...8.56.0)
+
 ## 6.21.0
 
 ### Fixes
