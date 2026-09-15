@@ -26,8 +26,7 @@ class SentryTelemetryServiceTest {
 
   @Test
   fun `reads Kotlin Gradle plugin version`() {
-    assertThat(SentryTelemetryService.pluginVersion(FakeKotlinGradlePlugin()))
-      .isEqualTo("2.3.0")
+    assertThat(SentryTelemetryService.pluginVersion(FakeKotlinGradlePlugin())).isEqualTo("2.3.0")
   }
 
   @Test
