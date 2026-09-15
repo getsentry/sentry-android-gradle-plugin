@@ -253,6 +253,14 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
     val SENTRY_SAAS_DSN: String =
       "https://000e5dea9770b4537055f8a6d28c021e@o1.ingest.sentry.io/4506241308295168"
     val MECHANISM_TYPE: String = "GradleTelemetry"
+    private val KOTLIN_GRADLE_PLUGIN_IDS =
+      listOf(
+        "org.jetbrains.kotlin.android",
+        "org.jetbrains.kotlin.jvm",
+        "org.jetbrains.kotlin.multiplatform",
+        "org.jetbrains.kotlin.js",
+        "org.jetbrains.kotlin.wasm",
+      )
 
     fun createParameters(
       project: Project,
@@ -261,7 +269,8 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
       sentryOrg: String?,
       buildType: String,
     ): SentryTelemetryServiceParams {
-      val tags = extraTagsFromExtension(project, extension)
+      val tags = extraTagsFromExtension(project, extension).toMutableMap()
+      kotlinGradlePluginVersion(project)?.let { tags["KGP_VERSION"] = it }
       val org = sentryOrg ?: extension.org.orNull
 
       return SentryTelemetryServiceParams(
@@ -288,6 +297,20 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
         SentryTelemetryService::class.java,
       ) {}
     }
+
+    internal fun kotlinGradlePluginVersion(project: Project): String? =
+      KOTLIN_GRADLE_PLUGIN_IDS.asSequence()
+        .mapNotNull { project.plugins.findPlugin(it) }
+        .mapNotNull(::pluginVersion)
+        .firstOrNull()
+
+    internal fun pluginVersion(plugin: Any): String? =
+      runCatching {
+          plugin.javaClass.methods
+            .firstOrNull { it.name == "getPluginVersion" && it.parameterCount == 0 }
+            ?.invoke(plugin) as? String
+        }
+        .getOrNull()
 
     private fun extraTagsFromExtension(
       project: Project,

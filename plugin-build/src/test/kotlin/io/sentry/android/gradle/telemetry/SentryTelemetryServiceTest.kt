@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.telemetry
 
+import com.google.common.truth.Truth.assertThat
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import kotlin.test.assertEquals
@@ -24,6 +25,27 @@ class SentryTelemetryServiceTest {
   }
 
   @Test
+  fun `reads Kotlin Gradle plugin version`() {
+    assertThat(SentryTelemetryService.pluginVersion(FakeKotlinGradlePlugin()))
+      .isEqualTo("2.3.0")
+  }
+
+  @Test
+  fun `ignores plugins without a version`() {
+    assertThat(SentryTelemetryService.pluginVersion(Any())).isNull()
+  }
+
+  @Test
+  fun `createParameters omits Kotlin Gradle plugin version when Kotlin is not applied`() {
+    val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
+    val extension = project.extensions.create("sentry", SentryPluginExtension::class.java)
+
+    val params = SentryTelemetryService.createParameters(project, null, extension, null, "test")
+
+    assertThat(params.extraTags).doesNotContainKey("KGP_VERSION")
+  }
+
+  @Test
   fun `createParameters detects SaaS when no URL is set`() {
     val project = ProjectBuilder.builder().withProjectDir(testProjectDir.root).build()
     val extension = project.extensions.create("sentry", SentryPluginExtension::class.java)
@@ -43,4 +65,8 @@ class SentryTelemetryServiceTest {
 
     assertTrue(params.saas == false)
   }
+}
+
+class FakeKotlinGradlePlugin {
+  @Suppress("unused") fun getPluginVersion(): String = "2.3.0"
 }
