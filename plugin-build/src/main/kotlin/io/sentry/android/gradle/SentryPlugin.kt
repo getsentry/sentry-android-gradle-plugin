@@ -8,10 +8,10 @@ import io.sentry.android.gradle.util.AgpVersions
 import javax.inject.Inject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.StopExecutionException
 import org.gradle.internal.build.event.BuildEventListenerRegistryInternal
-import org.slf4j.LoggerFactory
 
 abstract class SentryPlugin
 @Inject
@@ -74,6 +74,6 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
     internal const val SENTRY_SDK_VERSION = BuildConfig.SdkVersion
 
     // a single unified logger used by instrumentation
-    internal val logger by lazy { LoggerFactory.getLogger(SentryPlugin::class.java) }
+    internal val logger by lazy { Logging.getLogger(SentryPlugin::class.java) }
   }
 }
