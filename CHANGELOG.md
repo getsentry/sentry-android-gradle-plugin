@@ -6,6 +6,10 @@
 
 - Track the Kotlin Gradle plugin version in build telemetry ([#1452](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1452))
 
+### Fixes
+
+- Stop warning about AGP application optimization on AGP 9.5.0-alpha06 and newer, where the public `isMinifyEnabled` API covers it ([#1453](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1453))
+
 ### Dependencies
 
 - Bump Android SDK from v8.56.0 to v8.57.0 ([#1451](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1451))
