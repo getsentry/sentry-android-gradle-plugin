@@ -122,6 +122,11 @@ private fun Variant.isApplicationOptimizationEnabled(): Boolean {
     optimizationCreationConfig.javaClass
       .getMethod("getApplicationOptimizationEnabled")
       .invoke(optimizationCreationConfig) as Boolean
+  } catch (_: NoSuchMethodException) {
+    // AGP 9.5.0-alpha06 folded optimization.enable into the code shrinker flag that backs
+    // CanMinifyCode.isMinifyEnabled, then dropped this accessor as redundant. A missing method
+    // therefore means the public API the caller already checked is authoritative.
+    false
   } catch (e: ReflectiveOperationException) {
     SentryPlugin.logger.warn(
       "Unable to determine whether AGP application optimization is enabled. " +
