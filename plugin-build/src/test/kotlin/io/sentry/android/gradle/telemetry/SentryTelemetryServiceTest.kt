@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.telemetry
 
+import com.google.common.truth.Truth.assertThat
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import kotlin.test.assertEquals
@@ -21,6 +22,14 @@ class SentryTelemetryServiceTest {
     val params = SentryTelemetryService.createParameters(project, null, extension, null, "test")
 
     assertEquals(BuildConfig.CliVersion, params.cliVersion)
+  }
+
+  // KGP is compileOnly and therefore absent from the test classpath, which is exactly the
+  // situation of a build with no Kotlin plugin: the version read must degrade to null instead
+  // of letting a NoClassDefFoundError escape.
+  @Test
+  fun `kotlin plugin version is null when KGP is not on the classpath`() {
+    assertThat(SentryTelemetryService.kotlinPluginVersion()).isNull()
   }
 
   @Test

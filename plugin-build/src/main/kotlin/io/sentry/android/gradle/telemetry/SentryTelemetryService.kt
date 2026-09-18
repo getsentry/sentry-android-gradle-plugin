@@ -42,6 +42,7 @@ import org.gradle.internal.operations.OperationIdentifier
 import org.gradle.internal.operations.OperationProgressEvent
 import org.gradle.internal.operations.OperationStartEvent
 import org.gradle.util.GradleVersion
+import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
 
 abstract class SentryTelemetryService : BuildService<None>, BuildOperationListener, AutoCloseable {
 
@@ -92,6 +93,7 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
             try {
               options.setTag("AGP_VERSION", AgpVersions.CURRENT.toString())
             } catch (t: Throwable) {}
+            kotlinPluginVersion()?.let { options.setTag("KGP_VERSION", it) }
           }
         }
         scopes = Sentry.getCurrentScopes()
@@ -231,8 +233,8 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
     }
   }
 
-  fun endTask(span: ISpan?, task: Task) {
-    span?.let { span ->
+  fun endTask(nullableSpan: ISpan?, task: Task) {
+    nullableSpan?.let { span ->
       task.state.failure?.let { throwable ->
         captureError(throwable, span.operation)
         span.status = SpanStatus.UNKNOWN_ERROR
@@ -288,6 +290,16 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
         SentryTelemetryService::class.java,
       ) {}
     }
+
+    // KGP is a compileOnly dependency, so this call may fail to link: NoClassDefFoundError when
+    // the build has no Kotlin plugin on its classpath, or NoSuchMethodError on a KGP older than
+    // the Logger overload (added in 1.7). Both are LinkageError, and neither is an Exception.
+    internal fun kotlinPluginVersion(): String? =
+      try {
+        getKotlinPluginVersion(SentryPlugin.logger)
+      } catch (_: LinkageError) {
+        null
+      }
 
     private fun extraTagsFromExtension(
       project: Project,
