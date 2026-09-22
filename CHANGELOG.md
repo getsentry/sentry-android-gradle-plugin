@@ -8,7 +8,7 @@
 
 ### Fixes
 
-- Stop warning about AGP application optimization on AGP 9.5.0-alpha06 and newer, where the public `isMinifyEnabled` API covers it ([#1453](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1453))
+- Stop warning about AGP application optimization on AGP versions where the public `isMinifyEnabled` API covers it (9.3.3, 9.4.1, 9.5.0-alpha06) ([#1453](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1453))
 
 ### Dependencies
 

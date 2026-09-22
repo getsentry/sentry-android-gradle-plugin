@@ -112,9 +112,9 @@ private fun Variant.isApplicationOptimizationEnabled(): Boolean {
     return false
   }
 
-  // AGP 9.3's optimization.enable DSL does not update CanMinifyCode.isMinifyEnabled. The merged
-  // value is only exposed through an internal creation config, so use reflection to keep this
-  // plugin binary-compatible with older AGP versions.
+  // Up to AGP 9.3.2 and 9.4.0, optimization.enable does not update CanMinifyCode.isMinifyEnabled.
+  // The merged value is only exposed through an internal creation config, so use reflection to
+  // keep this plugin binary-compatible across AGP versions.
   return try {
     val unwrappedVariant = unwrapImpl() ?: this
     val optimizationCreationConfig =
@@ -123,9 +123,10 @@ private fun Variant.isApplicationOptimizationEnabled(): Boolean {
       .getMethod("getApplicationOptimizationEnabled")
       .invoke(optimizationCreationConfig) as Boolean
   } catch (_: NoSuchMethodException) {
-    // AGP 9.5.0-alpha06 folded optimization.enable into the code shrinker flag that backs
-    // CanMinifyCode.isMinifyEnabled, then dropped this accessor as redundant. A missing method
-    // therefore means the public API the caller already checked is authoritative.
+    // AGP 9.3.3, 9.4.1 and 9.5.0-alpha06 folded optimization.enable into the code shrinker flag
+    // behind CanMinifyCode.isMinifyEnabled and dropped this accessor. The method is missing only
+    // when CanMinifyCode.isMinifyEnabled includes that flag so we can trust it. Patch releases
+    // mid-line, hence probing for the method rather than checking a version.
     false
   } catch (e: ReflectiveOperationException) {
     SentryPlugin.logger.warn(
