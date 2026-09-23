@@ -64,6 +64,16 @@ class GenerateSnapshotTestsTaskTest {
   }
 
   @Test
+  fun `generated file derives screen orientation from the final screen dimensions`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"))
+
+    assertThat(content)
+      .contains("orientation = when (dimensions.screenWidthInPx > dimensions.screenHeightInPx) {")
+    assertThat(content)
+      .doesNotContain("orientation = ScreenOrientation.valueOf(parsedDevice.orientation.name)")
+  }
+
+  @Test
   fun `generated file scans configured package tree`() {
     val content = generateAndRead(packageTrees = listOf("com.example.app"))
 

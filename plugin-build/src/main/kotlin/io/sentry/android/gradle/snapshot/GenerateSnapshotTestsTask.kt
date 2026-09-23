@@ -128,6 +128,8 @@ import com.android.resources.*
 import java.io.File
 import java.util.Locale
 import kotlin.math.ceil
+import kotlin.math.max
+import kotlin.math.min
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -154,14 +156,21 @@ private object ScreenDimensions {
         val conversionFactor = parsedDevice.densityDpi / 160f
         val previewWidthInPx = ceil(widthDp * conversionFactor).toInt()
         val previewHeightInPx = ceil(heightDp * conversionFactor).toInt()
+        // A spec with orientation=landscape keeps its portrait dimensions, so rotate them here.
+        val longSide = max(parsedDevice.dimensions.width, parsedDevice.dimensions.height).toInt()
+        val shortSide = min(parsedDevice.dimensions.width, parsedDevice.dimensions.height).toInt()
+        val isLandscape =
+            ScreenOrientation.valueOf(parsedDevice.orientation.name) == ScreenOrientation.LANDSCAPE
         return Dimensions(
-            screenWidthInPx = when (widthDp > 0) {
-                true -> previewWidthInPx
-                false -> parsedDevice.dimensions.width.toInt()
+            screenWidthInPx = when {
+                widthDp > 0 -> previewWidthInPx
+                isLandscape -> longSide
+                else -> shortSide
             },
-            screenHeightInPx = when (heightDp > 0) {
-                true -> previewHeightInPx
-                false -> parsedDevice.dimensions.height.toInt()
+            screenHeightInPx = when {
+                heightDp > 0 -> previewHeightInPx
+                isLandscape -> shortSide
+                else -> longSide
             },
         )
     }
@@ -187,7 +196,12 @@ private object DeviceConfigBuilder {
             size = ScreenSize.valueOf(parsedDevice.screenSize.name),
             ratio = ScreenRatio.valueOf(parsedDevice.screenRatio.name),
             screenRound = ScreenRound.valueOf(parsedDevice.shape.name),
-            orientation = ScreenOrientation.valueOf(parsedDevice.orientation.name),
+            // Layoutlib swaps the screen dimensions to match the orientation, so it must agree
+            // with the final size rather than the device's.
+            orientation = when (dimensions.screenWidthInPx > dimensions.screenHeightInPx) {
+                true -> ScreenOrientation.LANDSCAPE
+                false -> ScreenOrientation.PORTRAIT
+            },
             locale = preview.locale.ifBlank { "en" },
             fontScale = preview.fontScale,
             nightMode = when (preview.uiMode and UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES) {
