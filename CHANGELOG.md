@@ -8,6 +8,7 @@
 
 ### Fixes
 
+- Fix snapshot tests failing for previews that set both `widthDp` and `heightDp` and contain lazy lists or other scrollables ([#1457](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1457))
 - Stop warning about AGP application optimization on AGP versions where the public `isMinifyEnabled` API covers it (9.3.3, 9.4.1, 9.5.0-alpha06) ([#1453](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1453))
 
 ### Dependencies
