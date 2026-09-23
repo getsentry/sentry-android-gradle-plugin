@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.snapshot
 
+import com.google.common.truth.Truth.assertThat
 import io.sentry.android.gradle.parseMajorVersion
 import java.io.File
 import kotlin.test.assertEquals
@@ -49,6 +50,17 @@ class GenerateSnapshotTestsTaskTest {
     val content = generateAndRead(packageTrees = listOf("com.example"))
 
     assertTrue(content.contains("package io.sentry.snapshot"))
+  }
+
+  @Test
+  fun `generated file renders previews with explicit width and height in normal mode`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"))
+
+    assertThat(content)
+      .contains(
+        "previewInfo.widthDp > 0 && previewInfo.heightDp > 0 -> SessionParams.RenderingMode.NORMAL"
+      )
+    assertThat(content).doesNotContain("RenderingMode.FULL_EXPAND")
   }
 
   @Test
