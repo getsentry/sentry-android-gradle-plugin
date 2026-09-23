@@ -243,7 +243,9 @@ private object PaparazziPreviewRule {
             showSystemUi = previewInfo.showSystemUi,
             renderingMode = when {
                 previewInfo.showSystemUi -> SessionParams.RenderingMode.NORMAL
-                previewInfo.widthDp > 0 && previewInfo.heightDp > 0 -> SessionParams.RenderingMode.FULL_EXPAND
+                // The screen is already sized to widthDp x heightDp. FULL_EXPAND would measure
+                // with unbounded constraints, which crashes lazy lists and other scrollables.
+                previewInfo.widthDp > 0 && previewInfo.heightDp > 0 -> SessionParams.RenderingMode.NORMAL
                 else -> SessionParams.RenderingMode.SHRINK
             },
             snapshotHandler = TestNameOverrideHandler(
