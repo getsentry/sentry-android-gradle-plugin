@@ -153,9 +153,10 @@ private class Size(val width: Int, val height: Int)
 private fun Device.orientedSize(): Size {
     val longSide = max(dimensions.width, dimensions.height).toInt()
     val shortSide = min(dimensions.width, dimensions.height).toInt()
-    return when (ScreenOrientation.valueOf(orientation.name) == ScreenOrientation.LANDSCAPE) {
-        true -> Size(width = longSide, height = shortSide)
-        false -> Size(width = shortSide, height = longSide)
+    return if (ScreenOrientation.valueOf(orientation.name) == ScreenOrientation.LANDSCAPE) {
+        Size(width = longSide, height = shortSide)
+    } else {
+        Size(width = shortSide, height = longSide)
     }
 }
 
@@ -170,14 +171,8 @@ private object ScreenDimensions {
         val previewHeightInPx = ceil(heightDp * conversionFactor).toInt()
         val deviceSize = parsedDevice.orientedSize()
         return Dimensions(
-            screenWidthInPx = when (widthDp > 0) {
-                true -> previewWidthInPx
-                false -> deviceSize.width
-            },
-            screenHeightInPx = when (heightDp > 0) {
-                true -> previewHeightInPx
-                false -> deviceSize.height
-            },
+            screenWidthInPx = if (widthDp > 0) previewWidthInPx else deviceSize.width,
+            screenHeightInPx = if (heightDp > 0) previewHeightInPx else deviceSize.height,
         )
     }
 }
@@ -204,9 +199,10 @@ private object DeviceConfigBuilder {
             screenRound = ScreenRound.valueOf(parsedDevice.shape.name),
             // Layoutlib swaps the screen dimensions to match the orientation, so it must agree
             // with the final size rather than the device's.
-            orientation = when (dimensions.screenWidthInPx > dimensions.screenHeightInPx) {
-                true -> ScreenOrientation.LANDSCAPE
-                false -> ScreenOrientation.PORTRAIT
+            orientation = if (dimensions.screenWidthInPx > dimensions.screenHeightInPx) {
+                ScreenOrientation.LANDSCAPE
+            } else {
+                ScreenOrientation.PORTRAIT
             },
             locale = preview.locale.ifBlank { "en" },
             fontScale = preview.fontScale,

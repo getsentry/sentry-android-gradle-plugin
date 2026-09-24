@@ -68,7 +68,7 @@ class GenerateSnapshotTestsTaskTest {
     val content = generateAndRead(packageTrees = listOf("com.example"))
 
     assertThat(content)
-      .contains("orientation = when (dimensions.screenWidthInPx > dimensions.screenHeightInPx) {")
+      .contains("orientation = if (dimensions.screenWidthInPx > dimensions.screenHeightInPx) {")
     assertThat(content)
       .doesNotContain("orientation = ScreenOrientation.valueOf(parsedDevice.orientation.name)")
   }
