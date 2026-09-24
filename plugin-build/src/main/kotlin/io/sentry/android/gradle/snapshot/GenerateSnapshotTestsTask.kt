@@ -147,6 +147,18 @@ private class Dimensions(
     val screenHeightInPx: Int,
 )
 
+private class Size(val width: Int, val height: Int)
+
+// A spec with orientation=landscape keeps its portrait dimensions, so rotate them here.
+private fun Device.orientedSize(): Size {
+    val longSide = max(dimensions.width, dimensions.height).toInt()
+    val shortSide = min(dimensions.width, dimensions.height).toInt()
+    return when (ScreenOrientation.valueOf(orientation.name) == ScreenOrientation.LANDSCAPE) {
+        true -> Size(width = longSide, height = shortSide)
+        false -> Size(width = shortSide, height = longSide)
+    }
+}
+
 private object ScreenDimensions {
     fun dimensions(
         parsedDevice: Device,
@@ -156,21 +168,15 @@ private object ScreenDimensions {
         val conversionFactor = parsedDevice.densityDpi / 160f
         val previewWidthInPx = ceil(widthDp * conversionFactor).toInt()
         val previewHeightInPx = ceil(heightDp * conversionFactor).toInt()
-        // A spec with orientation=landscape keeps its portrait dimensions, so rotate them here.
-        val longSide = max(parsedDevice.dimensions.width, parsedDevice.dimensions.height).toInt()
-        val shortSide = min(parsedDevice.dimensions.width, parsedDevice.dimensions.height).toInt()
-        val isLandscape =
-            ScreenOrientation.valueOf(parsedDevice.orientation.name) == ScreenOrientation.LANDSCAPE
+        val deviceSize = parsedDevice.orientedSize()
         return Dimensions(
-            screenWidthInPx = when {
-                widthDp > 0 -> previewWidthInPx
-                isLandscape -> longSide
-                else -> shortSide
+            screenWidthInPx = when (widthDp > 0) {
+                true -> previewWidthInPx
+                false -> deviceSize.width
             },
-            screenHeightInPx = when {
-                heightDp > 0 -> previewHeightInPx
-                isLandscape -> shortSide
-                else -> longSide
+            screenHeightInPx = when (heightDp > 0) {
+                true -> previewHeightInPx
+                false -> deviceSize.height
             },
         )
     }
@@ -350,9 +356,10 @@ class $CLASS_NAME(
 
                 true -> {
                     val parsedDevice = (DevicePreviewInfoParser.parse(previewInfo.device) ?: DEFAULT).inDp()
+                    val deviceSize = parsedDevice.orientedSize()
                     SystemUiSize(
-                        widthInDp = parsedDevice.dimensions.width.toInt(),
-                        heightInDp = parsedDevice.dimensions.height.toInt(),
+                        widthInDp = deviceSize.width,
+                        heightInDp = deviceSize.height,
                     ) {
                         PreviewBackground(
                             showBackground = true,

@@ -74,6 +74,14 @@ class GenerateSnapshotTestsTaskTest {
   }
 
   @Test
+  fun `generated file rotates the system UI size to match the device orientation`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"))
+
+    assertThat(content).contains("widthInDp = deviceSize.width,")
+    assertThat(content).doesNotContain("widthInDp = parsedDevice.dimensions.width.toInt(),")
+  }
+
+  @Test
   fun `generated file scans configured package tree`() {
     val content = generateAndRead(packageTrees = listOf("com.example.app"))
 
