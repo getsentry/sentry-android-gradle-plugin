@@ -52,6 +52,15 @@ class ManifestMetadataParserTest {
   }
 
   @Test
+  fun `infers booleans with the same spellings as aapt2`() {
+    assertThat(
+        listOf("True", "TRUE", "False", "FALSE", "tRuE").map(ManifestMetadataParser::inferType)
+      )
+      .containsExactly(true, true, false, false, "tRuE")
+      .inOrder()
+  }
+
+  @Test
   fun `returns null for values that PackageManager must resolve`() {
     assertThat(
         ManifestMetadataParser.parse(
