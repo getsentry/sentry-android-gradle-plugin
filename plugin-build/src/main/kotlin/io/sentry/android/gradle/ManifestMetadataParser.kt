@@ -46,8 +46,13 @@ internal object ManifestMetadataParser {
 
   internal fun inferType(value: String): Any =
     when (value) {
-      "true" -> true
-      "false" -> false
+      // aapt2 only compiles these spellings to booleans; others such as "tRuE" stay Strings.
+      "true",
+      "True",
+      "TRUE" -> true
+      "false",
+      "False",
+      "FALSE" -> false
       else -> parseInteger(value) ?: value.toFloatOrNull()?.takeIf { it.isFinite() } ?: value
     }
 
