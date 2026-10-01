@@ -6,6 +6,12 @@
 
 - Fix capitalized boolean manifest metadata values such as `False` being ignored, which crashed apps on startup that disable auto-init with `io.sentry.auto-init="False"` ([#1460](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1460))
 
+### Dependencies
+
+- Bump Android SDK from v8.58.0 to v8.59.0 ([#1461](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1461))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8590)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.58.0...8.59.0)
+
 ## 6.23.0
 
 ### Features
