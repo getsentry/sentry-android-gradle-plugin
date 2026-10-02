@@ -98,6 +98,8 @@ class JetpackComposeInstrumentationTest {
             compilerPluginRegistrars = listOf(SentryKotlinCompilerPlugin())
             commandLineProcessors = listOf(SentryKotlinCompilerPluginCommandLineProcessor())
             inheritClassPath = true
+            // Compose Desktop 1.12+ test dependencies are built for JVM 11.
+            jvmTarget = "11"
             messageOutputStream = System.out // see diagnostics in real time
           }
           .compile()
