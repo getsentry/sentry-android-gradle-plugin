@@ -98,6 +98,7 @@ class JetpackComposeInstrumentationTest {
             compilerPluginRegistrars = listOf(SentryKotlinCompilerPlugin())
             commandLineProcessors = listOf(SentryKotlinCompilerPluginCommandLineProcessor())
             inheritClassPath = true
+            jvmTarget = "11"
             messageOutputStream = System.out // see diagnostics in real time
           }
           .compile()
