@@ -19,10 +19,10 @@ import io.sentry.android.gradle.instrumentation.logcat.LogcatLevel
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttp
 import io.sentry.android.gradle.instrumentation.okhttp.OkHttpEventListener
 import io.sentry.android.gradle.instrumentation.remap.RemappingInstrumentable
-import io.sentry.android.gradle.instrumentation.util.disableComputeLimits
 import io.sentry.android.gradle.instrumentation.util.findClassReader
 import io.sentry.android.gradle.instrumentation.util.findClassWriter
 import io.sentry.android.gradle.instrumentation.util.isMinifiedClass
+import io.sentry.android.gradle.instrumentation.util.raiseComputeLimits
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.util.SemVer
@@ -126,7 +126,7 @@ abstract class SpanAddingClassVisitorFactory :
     val className = classContext.currentClassData.className
 
     val classWriter = nextClassVisitor.findClassWriter()
-    classWriter?.disableComputeLimits()
+    classWriter?.raiseComputeLimits()
     val classReader = classWriter?.findClassReader()
     val isMinifiedClass = classReader?.isMinifiedClass() ?: false
     if (isMinifiedClass) {

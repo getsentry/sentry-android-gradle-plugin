@@ -28,19 +28,25 @@ internal fun ClassVisitor.findClassWriter(): ClassWriter? {
  * ASM 9.11 added per-method limits for frame/max computation (`ClassWriter.setComputeLimits`,
  * default 10MB / 100M operations) which large but legit methods (obfuscated `<clinit>`s, Compose
  * `copy` methods with dozens of params) exceed, failing with `LimitExceededException`. We compile
- * against an older ASM, so call it reflectively and lift the limits to restore the pre-9.11
- * behavior. Must be called before any method is visited, as each `MethodWriter` snapshots the
- * limits on creation.
+ * against an older ASM, so raise the operations limit reflectively. 10B operations is ~35x what the
+ * largest method we've seen needs (~280M) and still bounds a pathological method to roughly a
+ * second of frame computation. Must be called before any method is visited, as each `MethodWriter`
+ * snapshots the limits on creation.
  */
-internal fun ClassWriter.disableComputeLimits() {
+internal fun ClassWriter.raiseComputeLimits() {
   try {
     javaClass
       .getMethod("setComputeLimits", Int::class.javaPrimitiveType, Long::class.javaPrimitiveType)
-      .invoke(this, Int.MAX_VALUE, Long.MAX_VALUE)
+      .invoke(this, COMPUTE_LIMIT_MAX_BYTES, COMPUTE_LIMIT_MAX_OPERATIONS)
   } catch (_: NoSuchMethodException) {
-    // ASM < 9.11, no limits to lift
+    // ASM < 9.11, no limits to raise
   } catch (_: Throwable) {}
 }
+
+/** Same as ASM's default (`ClassWriter.DEFAULT_MAX_MEMORY_LIMIT`). */
+private const val COMPUTE_LIMIT_MAX_BYTES = 10 * 1024 * 1024
+/** 100x ASM's default (`ClassWriter.DEFAULT_MAX_OPERATIONS_LIMIT`). */
+private const val COMPUTE_LIMIT_MAX_OPERATIONS = 10_000_000_000L
 
 /** Looks up for [ClassReader] of the [ClassWriter] through intermediate SymbolTable field. */
 internal fun ClassWriter.findClassReader(): ClassReader? {
