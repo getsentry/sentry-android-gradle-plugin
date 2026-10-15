@@ -24,6 +24,24 @@ internal fun ClassVisitor.findClassWriter(): ClassWriter? {
   return classWriter as ClassWriter
 }
 
+/**
+ * ASM 9.11 added per-method limits for frame/max computation (`ClassWriter.setComputeLimits`,
+ * default 10MB / 100M operations) which large but legit methods (obfuscated `<clinit>`s, Compose
+ * `copy` methods with dozens of params) exceed, failing with `LimitExceededException`. We compile
+ * against an older ASM, so call it reflectively and lift the limits to restore the pre-9.11
+ * behavior. Must be called before any method is visited, as each `MethodWriter` snapshots the
+ * limits on creation.
+ */
+internal fun ClassWriter.disableComputeLimits() {
+  try {
+    javaClass
+      .getMethod("setComputeLimits", Int::class.javaPrimitiveType, Long::class.javaPrimitiveType)
+      .invoke(this, Int.MAX_VALUE, Long.MAX_VALUE)
+  } catch (_: NoSuchMethodException) {
+    // ASM < 9.11, no limits to lift
+  } catch (_: Throwable) {}
+}
+
 /** Looks up for [ClassReader] of the [ClassWriter] through intermediate SymbolTable field. */
 internal fun ClassWriter.findClassReader(): ClassReader? {
   val clazz: Class<out ClassWriter> = this::class.java

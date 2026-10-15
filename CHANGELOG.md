@@ -4,6 +4,7 @@
 
 ### Fixes
 
+- Fix `LimitExceededException: Too many operations` during instrumentation when ASM 9.11+ is on the build classpath ([#1472](https://github.com/getsentry/sentry-android-gradle-plugin/issues/1472))
 - Fix capitalized boolean manifest metadata values such as `False` being ignored, which crashed apps on startup that disable auto-init with `io.sentry.auto-init="False"` ([#1460](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1460))
 
 ### Dependencies
