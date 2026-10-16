@@ -1,6 +1,9 @@
 package io.sentry.android.gradle.instrumentation.util
 
+import io.sentry.android.gradle.SentryPlugin
+import io.sentry.android.gradle.util.info
 import java.lang.reflect.Field
+import java.lang.reflect.Method
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
@@ -34,13 +37,23 @@ internal fun ClassVisitor.findClassWriter(): ClassWriter? {
  * snapshots the limits on creation.
  */
 internal fun ClassWriter.raiseComputeLimits() {
+  val setComputeLimits = setComputeLimitsMethod ?: return
   try {
-    javaClass
+    setComputeLimits.invoke(this, COMPUTE_LIMIT_MAX_BYTES, COMPUTE_LIMIT_MAX_OPERATIONS)
+  } catch (e: ReflectiveOperationException) {
+    SentryPlugin.logger.info { "Could not raise ASM compute limits: $e" }
+  }
+}
+
+/** `ClassWriter.setComputeLimits`, or null on ASM < 9.11 where it doesn't exist. */
+private val setComputeLimitsMethod: Method? by lazy {
+  try {
+    ClassWriter::class
+      .java
       .getMethod("setComputeLimits", Int::class.javaPrimitiveType, Long::class.javaPrimitiveType)
-      .invoke(this, COMPUTE_LIMIT_MAX_BYTES, COMPUTE_LIMIT_MAX_OPERATIONS)
   } catch (_: NoSuchMethodException) {
-    // ASM < 9.11, no limits to raise
-  } catch (_: Throwable) {}
+    null
+  }
 }
 
 /** Same as ASM's default (`ClassWriter.DEFAULT_MAX_MEMORY_LIMIT`). */

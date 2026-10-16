@@ -224,6 +224,7 @@ org.ow2.asm:asm-tree:9.4=compileClasspath,implementationDependenciesMetadata,run
 org.ow2.asm:asm-tree:9.8=testRuntimeClasspath
 org.ow2.asm:asm-util:9.4=compileClasspath,implementationDependenciesMetadata,runtimeClasspath,testCompileClasspath,testImplementationDependenciesMetadata
 org.ow2.asm:asm-util:9.8=testRuntimeClasspath
+org.ow2.asm:asm:9.11=asmLatestClasspath
 org.ow2.asm:asm:9.4=implementationDependenciesMetadata,runtimeClasspath
 org.ow2.asm:asm:9.8=compileClasspath,compileOnlyDependenciesMetadata,testCompileClasspath,testImplementationDependenciesMetadata,testRuntimeClasspath
 org.slf4j:slf4j-api:1.7.30=testRuntimeClasspath
