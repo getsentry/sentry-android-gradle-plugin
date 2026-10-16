@@ -1,7 +1,6 @@
 package io.sentry.android.gradle.instrumentation.util
 
 import io.sentry.android.gradle.SentryPlugin
-import io.sentry.android.gradle.util.debug
 import io.sentry.android.gradle.util.info
 import java.lang.reflect.Field
 import java.lang.reflect.Method
@@ -55,7 +54,6 @@ private val setComputeLimitsMethod: Method? by lazy {
   } catch (_: NoSuchMethodException) {
     // Expected on ASM < 9.11: there are no limits to raise, so this isn't a failure. Unlike an
     // `invoke` failure above, which means the API exists but we couldn't use it.
-    SentryPlugin.logger.debug { "ASM < 9.11 on the classpath, no compute limits to raise" }
     null
   }
 }
