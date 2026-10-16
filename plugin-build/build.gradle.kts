@@ -53,6 +53,7 @@ dependencies {
 
   testImplementation(libs.asm)
   testImplementation(libs.asmCommons)
+  testRuntimeOnly(libs.asmLatest)
 
   // we need these dependencies for tests, because the bytecode verifier also analyzes superclasses
   testImplementationAar(libs.androidxCore)

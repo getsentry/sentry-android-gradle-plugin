@@ -1,6 +1,7 @@
 [versions]
 agp = "8.13.2"
 
+asmLatest = "9.11" # tests only, to cover ASM 9.11+ compute limits (#1472)
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
 ktfmt = "0.51"
 sqlite = "2.3.0"
@@ -51,6 +52,7 @@ composeDesktop = { group = "org.jetbrains.compose.desktop", name = "desktop", ve
 # bytecode instrumentation
 asm = { group = "org.ow2.asm", name = "asm-util", version.ref = "asm" }
 asmCommons = { group = "org.ow2.asm", name = "asm-commons", version.ref = "asm" }
+asmLatest = { group = "org.ow2.asm", name = "asm", version.ref = "asmLatest" }
 sqlite = { group = "androidx.sqlite", name = "sqlite", version.ref = "sqlite" }
 sqliteFramework = { group = "androidx.sqlite", name = "sqlite-framework", version.ref = "sqlite" }
 sentry = { group = "io.sentry", name = "sentry", version.ref = "sentry" }

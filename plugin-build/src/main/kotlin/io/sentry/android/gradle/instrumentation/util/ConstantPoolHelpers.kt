@@ -1,6 +1,9 @@
 package io.sentry.android.gradle.instrumentation.util
 
+import io.sentry.android.gradle.SentryPlugin
+import io.sentry.android.gradle.util.info
 import java.lang.reflect.Field
+import java.lang.reflect.Method
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
@@ -23,6 +26,42 @@ internal fun ClassVisitor.findClassWriter(): ClassWriter? {
   }
   return classWriter as ClassWriter
 }
+
+/**
+ * ASM 9.11 added per-method limits for frame/max computation (`ClassWriter.setComputeLimits`,
+ * default 10MB / 100M operations) which large but legit methods (obfuscated `<clinit>`s, Compose
+ * `copy` methods with dozens of params) exceed, failing with `LimitExceededException`. We compile
+ * against an older ASM, so raise the operations limit reflectively. 10B operations is ~35x what the
+ * largest method we've seen needs (~280M) and still bounds a pathological method to roughly a
+ * second of frame computation. Must be called before any method is visited, as each `MethodWriter`
+ * snapshots the limits on creation.
+ */
+internal fun ClassWriter.raiseComputeLimits() {
+  val setComputeLimits = setComputeLimitsMethod ?: return
+  try {
+    setComputeLimits.invoke(this, COMPUTE_LIMIT_MAX_BYTES, COMPUTE_LIMIT_MAX_OPERATIONS)
+  } catch (e: ReflectiveOperationException) {
+    SentryPlugin.logger.info { "Could not raise ASM compute limits: $e" }
+  }
+}
+
+/** `ClassWriter.setComputeLimits`, or null on ASM < 9.11 where it doesn't exist. */
+private val setComputeLimitsMethod: Method? by lazy {
+  try {
+    ClassWriter::class
+      .java
+      .getMethod("setComputeLimits", Int::class.javaPrimitiveType, Long::class.javaPrimitiveType)
+  } catch (_: NoSuchMethodException) {
+    // Expected on ASM < 9.11: there are no limits to raise, so this isn't a failure. Unlike an
+    // `invoke` failure above, which means the API exists but we couldn't use it.
+    null
+  }
+}
+
+/** Same as ASM's default (`ClassWriter.DEFAULT_MAX_MEMORY_LIMIT`). */
+private const val COMPUTE_LIMIT_MAX_BYTES = 10 * 1024 * 1024
+/** 100x ASM's default (`ClassWriter.DEFAULT_MAX_OPERATIONS_LIMIT`). */
+private const val COMPUTE_LIMIT_MAX_OPERATIONS = 10_000_000_000L
 
 /** Looks up for [ClassReader] of the [ClassWriter] through intermediate SymbolTable field. */
 internal fun ClassWriter.findClassReader(): ClassReader? {
