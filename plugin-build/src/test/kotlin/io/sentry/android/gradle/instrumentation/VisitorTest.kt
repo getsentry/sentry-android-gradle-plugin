@@ -77,7 +77,13 @@ class VisitorTest(
     // accepted by JVM
     val bytes = classWriter.toByteArray()
     val verifyReader = ClassReader(bytes)
-    val checkAdapter = CheckClassAdapter(ClassWriter(ClassWriter.COMPUTE_FRAMES), true)
+    // resolve common super classes through the same class loader as the verifier below, as
+    // fixtures can reference classes (e.g. obfuscated gms ones) that aren't on the test classpath
+    val frameComputingWriter =
+      object : ClassWriter(ClassWriter.COMPUTE_FRAMES) {
+        override fun getClassLoader(): ClassLoader = GeneratingMissingClassesClassLoader()
+      }
+    val checkAdapter = CheckClassAdapter(frameComputingWriter, true)
     //        val methodNamePrintingVisitor = MethodNamePrintingVisitor(Opcodes.ASM7, checkAdapter)
     verifyReader.accept(checkAdapter, 0)
 

@@ -2,8 +2,6 @@ package io.sentry.android.gradle.instrumentation.util
 
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import org.junit.Assume.assumeTrue
-import org.junit.Before
 import org.junit.Test
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
@@ -12,17 +10,8 @@ import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 
-/**
- * Covers ASM 9.11+ per-method compute limits. Runs via the `asmLatestTest` task; skipped under
- * `test`, which uses the older ASM that AGP brings in.
- */
+/** Covers ASM 9.11+ per-method compute limits; tests run on ASM 9.11+ (see `asmLatest`). */
 class ComputeLimitsTest {
-
-  @Before
-  fun requireAsmWithComputeLimits() {
-    val hasComputeLimits = ClassWriter::class.java.methods.any { it.name == "setComputeLimits" }
-    assumeTrue("Requires ASM 9.11+", hasComputeLimits)
-  }
 
   @Test
   fun `large method exceeds ASM default compute limits`() {

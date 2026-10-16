@@ -31,12 +31,6 @@ val testImplementationAar by configurations.getting // this converts .aar into .
 
 val fixtureClasspath: Configuration by configurations.creating
 
-val asmLatestClasspath: Configuration by
-  configurations.creating {
-    isCanBeConsumed = false
-    isTransitive = false
-  }
-
 dependencies {
   compileOnly(libs.gradleApi)
   compileOnly(libs.agp)
@@ -59,7 +53,7 @@ dependencies {
 
   testImplementation(libs.asm)
   testImplementation(libs.asmCommons)
-  asmLatestClasspath(libs.asmLatest)
+  testRuntimeOnly(libs.asmLatest)
 
   // we need these dependencies for tests, because the bytecode verifier also analyzes superclasses
   testImplementationAar(libs.androidxCore)
@@ -171,21 +165,6 @@ tasks.withType<Test>().named("test").configure {
 
   filter { excludeTestsMatching("io.sentry.android.gradle.integration.*") }
 }
-
-// ASM 9.11 added per-method compute limits (#1472). Run the tests covering them with the latest ASM
-// placed ahead of the one AGP brings in, while the rest of the unit tests stay on AGP's ASM.
-val asmLatestTest =
-  tasks.register<Test>("asmLatestTest") {
-    group = "verification"
-    description = "Runs the ASM compute limits tests against the latest ASM"
-    testClassesDirs = sourceSets["test"].output.classesDirs
-    classpath = asmLatestClasspath + sourceSets["test"].runtimeClasspath
-    filter {
-      includeTestsMatching("io.sentry.android.gradle.instrumentation.util.ComputeLimitsTest")
-    }
-  }
-
-tasks.named("check").configure { dependsOn(asmLatestTest) }
 
 tasks.register<Test>("integrationTest").configure {
   group = "verification"
