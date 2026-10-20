@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- (Experimental) Add `sentry.ndkBackend.set("native")` to select `sentry-android-ndk-outproc` while keeping the inproc backend as the default.
+
 ## 6.24.0
 
 ### Fixes

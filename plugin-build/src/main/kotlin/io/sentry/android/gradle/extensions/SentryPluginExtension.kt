@@ -12,6 +12,14 @@ import org.jetbrains.annotations.ApiStatus.Experimental
 abstract class SentryPluginExtension @Inject constructor(objects: ObjectFactory) {
 
   /**
+   * Native crash backend to package: `inproc` (default) or `native` (experimental). The native
+   * backend replaces sentry-android-ndk with sentry-android-ndk-outproc, including its crash
+   * service.
+   */
+  @Experimental
+  val ndkBackend: Property<String> = objects.property(String::class.java).convention("inproc")
+
+  /**
    * Disables or enables the handling of Proguard mapping for Sentry. If enabled the plugin will
    * generate a UUID and will take care of uploading the mapping to Sentry. If disabled, all the
    * logic related to proguard mapping will be excluded. Default is enabled.
