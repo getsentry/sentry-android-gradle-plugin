@@ -6,6 +6,7 @@ import java.io.File
 import java.util.jar.JarOutputStream
 import kotlin.test.assertFailsWith
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.logging.Logger
 import org.gradle.testfixtures.ProjectBuilder
@@ -102,6 +103,22 @@ class NdkBackendTest {
         "[sentry] The 'native' backend on Android is experimental. " +
           "It may have incomplete features or unexpected behavior."
       )
+  }
+
+  @Test
+  fun `keeps native dependencies unresolved when collecting task dependencies`() {
+    val project = project()
+    project.extensions.getByType(SentryPluginExtension::class.java).ndkBackend.set("native")
+    project.dependencies.add("runtime", "io.sentry:sentry-android:1.0")
+    val runtime = project.configurations.getByName("runtime")
+
+    assertThat(runtime.buildDependencies.getDependencies(project.tasks.register("consume").get()))
+      .isEmpty()
+    assertThat(runtime.state).isEqualTo(Configuration.State.UNRESOLVED)
+    verifyNoInteractions(logger)
+
+    assertThat(resolve(project))
+      .containsExactly("sentry-android", "sentry-android-ndk-outproc", "native")
   }
 
   private fun project(): Project {
