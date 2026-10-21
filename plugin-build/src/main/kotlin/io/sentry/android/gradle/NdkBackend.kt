@@ -5,11 +5,10 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.component.ModuleComponentSelector
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
-import org.gradle.api.logging.Logger
 import org.gradle.api.provider.Property
 import org.gradle.internal.component.external.model.DefaultModuleComponentSelector
 
-internal fun Project.configureNdkBackend(backend: Property<String>, logger: Logger = this.logger) {
+internal fun Project.configureNdkBackend(backend: Property<String>) {
   backend.finalizeValueOnRead()
   val warned = AtomicBoolean()
   configurations.configureEach { configuration ->
