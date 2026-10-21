@@ -13,35 +13,38 @@ internal fun Project.configureNdkBackend(backend: Property<String>, logger: Logg
   backend.finalizeValueOnRead()
   val warned = AtomicBoolean()
   configurations.configureEach { configuration ->
-    configuration.resolutionStrategy.dependencySubstitution { substitutions ->
-      substitutions.all { dependency ->
-        val selected = backend.get()
-        if (selected != "inproc" && selected != "native") {
-          throw GradleException(
-            "sentry.ndkBackend must be 'inproc' or 'native', but was '$selected'."
-          )
-        }
-        if (selected == "native" && warned.compareAndSet(false, true)) {
-          logger.warn(
-            "[sentry] The 'native' backend on Android is experimental. " +
-              "It may have incomplete features or unexpected behavior."
-          )
-        }
-        val requested = dependency.requested
-        if (
-          selected == "native" &&
-            requested is ModuleComponentSelector &&
-            requested.group == "io.sentry" &&
-            requested.module == "sentry-android-ndk"
-        ) {
-          dependency.useTarget(
-            // string notation rejects versionless dependencies managed by a BOM
-            DefaultModuleComponentSelector.newSelector(
-              DefaultModuleIdentifier.newId(requested.group, "sentry-android-ndk-outproc"),
-              requested.versionConstraint,
-            ),
-            "sentry.ndkBackend selects the service-managed native crash backend",
-          )
+    // defer substitution rules to avoid eager resolution during task graph construction
+    configuration.incoming.beforeResolve {
+      configuration.resolutionStrategy.dependencySubstitution { substitutions ->
+        substitutions.all { dependency ->
+          val selected = backend.get()
+          if (selected != "inproc" && selected != "native") {
+            throw GradleException(
+              "sentry.ndkBackend must be 'inproc' or 'native', but was '$selected'."
+            )
+          }
+          if (selected == "native" && warned.compareAndSet(false, true)) {
+            logger.warn(
+              "[sentry] The 'native' backend on Android is experimental. " +
+                "It may have incomplete features or unexpected behavior."
+            )
+          }
+          val requested = dependency.requested
+          if (
+            selected == "native" &&
+              requested is ModuleComponentSelector &&
+              requested.group == "io.sentry" &&
+              requested.module == "sentry-android-ndk"
+          ) {
+            dependency.useTarget(
+              // string notation rejects versionless dependencies managed by a BOM
+              DefaultModuleComponentSelector.newSelector(
+                DefaultModuleIdentifier.newId(requested.group, "sentry-android-ndk-outproc"),
+                requested.versionConstraint,
+              ),
+              "sentry.ndkBackend selects the service-managed native crash backend",
+            )
+          }
         }
       }
     }
