@@ -3,7 +3,6 @@ package io.sentry.android.gradle
 import com.google.common.truth.Truth.assertThat
 import io.sentry.android.gradle.extensions.SentryPluginExtension
 import java.io.File
-import java.util.jar.JarOutputStream
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.testfixtures.ProjectBuilder
@@ -25,8 +24,7 @@ class NdkBackendTest {
 
   @Test
   fun `native replaces transitive and direct ndk dependencies`() {
-    val project = project()
-    project.extensions.getByType(SentryPluginExtension::class.java).ndkBackend.set("native")
+    val project = project("native")
     publish("sentry-android-ndk-outproc", version = "2.0")
     project.dependencies.add("runtime", "io.sentry:sentry-android:1.0")
     project.dependencies.add("runtime", "io.sentry:sentry-android-ndk:2.0")
@@ -41,36 +39,30 @@ class NdkBackendTest {
 
   @Test
   fun `supports versionless dependencies with a BOM`() {
-    val project = project()
-    project.extensions.getByType(SentryPluginExtension::class.java).ndkBackend.set("native")
-    val path = File(directory.root, "repository/io/sentry/sentry-bom/1.0").apply { mkdirs() }
-    File(path, "sentry-bom-1.0.pom")
-      .writeText(
-        """
-      <project><modelVersion>4.0.0</modelVersion>
-      <groupId>io.sentry</groupId><artifactId>sentry-bom</artifactId><version>1.0</version>
-      <packaging>pom</packaging><dependencyManagement><dependencies>
-      <dependency><groupId>io.sentry</groupId><artifactId>sentry-android-ndk</artifactId><version>1.0</version></dependency>
-      <dependency><groupId>io.sentry</groupId><artifactId>sentry-android-ndk-outproc</artifactId><version>1.0</version></dependency>
-      </dependencies></dependencyManagement></project>
-      """
-          .trimIndent()
-      )
+    val project = project("native")
+    publish(
+      "sentry-bom",
+      body =
+        "<dependencyManagement>" +
+          dependencies("sentry-android-ndk", "sentry-android-ndk-outproc") +
+          "</dependencyManagement>",
+    )
     project.dependencies.add("runtime", project.dependencies.platform("io.sentry:sentry-bom:1.0"))
     project.dependencies.add("runtime", "io.sentry:sentry-android-ndk")
 
     assertThat(resolve(project)).containsExactly("sentry-android-ndk-outproc-1.0.jar")
   }
 
-  private fun project(): Project {
+  private fun project(backend: String? = null): Project {
     publish("sentry-android-ndk")
     publish("sentry-android-ndk-outproc")
-    publish("sentry-android", "sentry-android-ndk")
+    publish("sentry-android", body = dependencies("sentry-android-ndk"))
     return ProjectBuilder.builder().withProjectDir(directory.newFolder("project")).build().also {
       it.pluginManager.apply("java-library")
       it.repositories.maven { repo -> repo.url = File(directory.root, "repository").toURI() }
       it.configurations.create("runtime").resolutionStrategy.disableDependencyVerification()
       val extension = it.extensions.create("sentry", SentryPluginExtension::class.java)
+      backend?.let(extension.ndkBackend::set)
       it.configureNdkBackend(extension.ndkBackend)
     }
   }
@@ -78,20 +70,19 @@ class NdkBackendTest {
   private fun resolve(project: Project): List<String> =
     project.configurations.getByName("runtime").resolve().map { it.name }
 
-  private fun publish(name: String, dependency: String? = null, version: String = "1.0") {
+  private fun publish(name: String, version: String = "1.0", body: String = "") {
     val path = File(directory.root, "repository/io/sentry/$name/$version").apply { mkdirs() }
-    JarOutputStream(File(path, "$name-$version.jar").outputStream()).close()
-    val dependencies =
-      dependency
-        ?.let {
-          "<dependencies><dependency><groupId>io.sentry</groupId><artifactId>$it</artifactId>" +
-            "<version>$version</version></dependency></dependencies>"
-        }
-        .orEmpty()
+    File(path, "$name-$version.jar").createNewFile()
     File(path, "$name-$version.pom")
       .writeText(
         "<project><modelVersion>4.0.0</modelVersion><groupId>io.sentry</groupId>" +
-          "<artifactId>$name</artifactId><version>$version</version>$dependencies</project>"
+          "<artifactId>$name</artifactId><version>$version</version>$body</project>"
       )
   }
+
+  private fun dependencies(vararg names: String): String =
+    names.joinToString("", "<dependencies>", "</dependencies>") {
+      "<dependency><groupId>io.sentry</groupId><artifactId>$it</artifactId>" +
+        "<version>1.0</version></dependency>"
+    }
 }
