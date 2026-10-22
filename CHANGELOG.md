@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- (Experimental) Add native crash backend selection via `sentry.ndkBackend.set("native")` ([#1474](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1474))
+
 ## 6.24.0
 
 ### Fixes
