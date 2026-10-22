@@ -5,7 +5,7 @@ asmLatest = "9.11" # tests only, to cover ASM 9.11+ compute limits (#1472)
 asm = "9.4" # // compatibility matrix -> https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/instrumentation/InstrumentationContext#apiversion
 ktfmt = "0.51"
 sqlite = "2.3.0"
-sentry = "8.61.0"
+sentry = "8.61.1"
 # Pinned to the last release that shipped sentry-android-okhttp; the module was removed
 # in 8.0.0, so there is no newer version to update to. Used only to verify the legacy
 # okhttp instrumentation path in tests.
