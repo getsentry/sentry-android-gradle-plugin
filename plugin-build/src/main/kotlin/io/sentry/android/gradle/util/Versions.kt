@@ -40,6 +40,18 @@ internal object SentryVersions {
   internal val VERSION_SQLITE_DRIVER = SemVer(8, 45, 0)
   internal val VERSION_ANDROID_OKHTTP_LISTENER = SemVer(6, 20, 0)
   internal val VERSION_OKHTTP = SemVer(7, 0, 0)
+  // First sentry-android-navigation3 release with
+  // SentryNavAutoInstrumentation.rememberSentryDecoratedNavEntries.
+  // TODO: confirm once the sentry-java side is released.
+  internal val VERSION_NAVIGATION3 = SemVer(8, 62, 0)
+}
+
+internal object ExternalModules {
+  internal val NAVIGATION3_UI =
+    DefaultModuleIdentifier.newId("androidx.navigation3", "navigation3-ui")
+  internal val NAVIGATION3_UI_ANDROID =
+    DefaultModuleIdentifier.newId("androidx.navigation3", "navigation3-ui-android")
+  internal val VERSION_NAVIGATION3_UI = SemVer(1, 0, 0)
 }
 
 internal object SentryModules {
@@ -58,6 +70,8 @@ internal object SentryModules {
     DefaultModuleIdentifier.newId("io.sentry", "sentry-android-fragment")
   internal val SENTRY_ANDROID_NAVIGATION =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-android-navigation")
+  internal val SENTRY_ANDROID_NAVIGATION3 =
+    DefaultModuleIdentifier.newId("io.sentry", "sentry-android-navigation3")
   internal val SENTRY_ANDROID_TIMBER =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-android-timber")
   internal val SENTRY_ANDROID_REPLAY =

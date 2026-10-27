@@ -29,7 +29,8 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
 
   /**
    * Specifies a set of [InstrumentationFeature] features that are eligible for bytecode
-   * manipulation. Defaults to all available features of [InstrumentationFeature].
+   * manipulation. Defaults to all available features of [InstrumentationFeature], except
+   * [InstrumentationFeature.NAVIGATION3], which is opt-in while it is experimental.
    */
   val features: SetProperty<InstrumentationFeature> =
     objects
@@ -109,4 +110,20 @@ enum class InstrumentationFeature(val integrationName: String) {
    * OnDestinationChangedListener to all navigation controllers used in Jetpack Compose.
    */
   COMPOSE("ComposeInstrumentation"),
+
+  /**
+   * Experimental. When enabled the SDK will create navigation transactions, breadcrumbs, and screen
+   * names for Jetpack Navigation 3, without having to call `SentryNavEffect` manually. Back stack
+   * entries are named after their kotlinx.serialization serial names; entries that aren't
+   * `@Serializable` are recorded as `/unknown`. Arguments are not recorded.
+   *
+   * This feature uses bytecode manipulation and observes the back stack of every
+   * `NavDisplay(backStack = ...)` call. `NavDisplay(entries = ...)` and `NavDisplay(sceneState =
+   * ...)` aren't covered; call `SentryNavEffect` manually for those.
+   *
+   * Requires `io.sentry:sentry-android-navigation3` and `androidx.navigation3:navigation3-ui` 1.0.0
+   * or newer. Not enabled by default; add it to [TracingInstrumentationExtension.features] to opt
+   * in.
+   */
+  NAVIGATION3("Navigation3Instrumentation"),
 }

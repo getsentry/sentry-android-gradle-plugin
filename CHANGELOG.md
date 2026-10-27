@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Features
+
+- Add experimental Navigation 3 auto-instrumentation, opt-in via `tracingInstrumentation.features` (`InstrumentationFeature.NAVIGATION3`)
+  - Records navigation transactions, breadcrumbs, and screen names for `NavDisplay(backStack = ...)` without calling `SentryNavEffect` manually
+  - Requires `androidx.navigation3:navigation3-ui` 1.0.0+ and a `sentry-android-navigation3` version that supports auto-instrumentation
+
 ### Dependencies
 
 - Bump CLI from v3.8.0 to v3.8.2 ([#1476](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1476), [#1478](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1478))

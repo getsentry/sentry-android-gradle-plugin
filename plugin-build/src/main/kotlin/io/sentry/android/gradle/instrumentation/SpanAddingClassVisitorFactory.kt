@@ -7,6 +7,7 @@ import com.android.build.api.instrumentation.InstrumentationParameters
 import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
+import io.sentry.android.gradle.instrumentation.androidx.navigation3.Navigation3Display
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
@@ -109,6 +110,7 @@ abstract class SpanAddingClassVisitorFactory :
             WrappingInstrumentable().takeIf { sentryModulesService.isFileIOInstrEnabled() },
             RemappingInstrumentable().takeIf { sentryModulesService.isFileIOInstrEnabled() },
             ComposeNavigation().takeIf { sentryModulesService.isComposeInstrEnabled() },
+            Navigation3Display().takeIf { sentryModulesService.isNavigation3InstrEnabled() },
             Logcat().takeIf { sentryModulesService.isLogcatInstrEnabled() },
             Application().takeIf { sentryModulesService.isAppStartInstrEnabled() },
             ContentProvider().takeIf { sentryModulesService.isAppStartInstrEnabled() },

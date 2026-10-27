@@ -19,6 +19,7 @@ class SentryModulesServiceTest {
       tmpDir: File,
       features: Set<InstrumentationFeature> = emptySet(),
       sentryModules: Map<ModuleIdentifier, SemVer> = emptyMap(),
+      externalModules: Map<ModuleIdentifier, SemVer> = emptyMap(),
     ): SentryModulesService {
       val fakeProject = ProjectBuilder.builder().withProjectDir(tmpDir).build()
 
@@ -39,6 +40,7 @@ class SentryModulesServiceTest {
         )
       val service = serviceProvider.get()
       service.sentryModules = sentryModules
+      service.externalModules = externalModules
       return service
     }
   }
@@ -164,5 +166,107 @@ class SentryModulesServiceTest {
     assertTrue(service.isSQLiteDriverInstrEnabled())
     assertTrue(service.isNewDatabaseInstrEnabled()) // superset relationship
     assertFalse(service.isOldDatabaseInstrEnabled()) // suppressed by !isNewDatabaseInstrEnabled()
+  }
+
+  private fun navigation3SentryModules(
+    version: SemVer = SentryVersions.VERSION_NAVIGATION3
+  ): Map<ModuleIdentifier, SemVer> = mapOf(SentryModules.SENTRY_ANDROID_NAVIGATION3 to version)
+
+  private fun navigation3ExternalModules(
+    version: SemVer = SemVer(1, 0, 0),
+    module: ModuleIdentifier = ExternalModules.NAVIGATION3_UI,
+  ): Map<ModuleIdentifier, SemVer> = mapOf(module to version)
+
+  @Test
+  fun `isNavigation3InstrEnabled is true when all requirements are met`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        features = setOf(InstrumentationFeature.NAVIGATION3),
+        sentryModules = navigation3SentryModules(),
+        externalModules = navigation3ExternalModules(),
+      )
+
+    assertTrue(service.isNavigation3InstrEnabled())
+  }
+
+  @Test
+  fun `isNavigation3InstrEnabled accepts the navigation3-ui-android artifact`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        features = setOf(InstrumentationFeature.NAVIGATION3),
+        sentryModules = navigation3SentryModules(),
+        externalModules =
+          navigation3ExternalModules(
+            version = SemVer(1, 2, 0),
+            module = ExternalModules.NAVIGATION3_UI_ANDROID,
+          ),
+      )
+
+    assertTrue(service.isNavigation3InstrEnabled())
+  }
+
+  @Test
+  fun `isNavigation3InstrEnabled is false when NAVIGATION3 is disabled`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        features = setOf(InstrumentationFeature.COMPOSE),
+        sentryModules = navigation3SentryModules(),
+        externalModules = navigation3ExternalModules(),
+      )
+
+    assertFalse(service.isNavigation3InstrEnabled())
+  }
+
+  @Test
+  fun `isNavigation3InstrEnabled is false when sentry-android-navigation3 is absent`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        features = setOf(InstrumentationFeature.NAVIGATION3),
+        externalModules = navigation3ExternalModules(),
+      )
+
+    assertFalse(service.isNavigation3InstrEnabled())
+  }
+
+  @Test
+  fun `isNavigation3InstrEnabled is false when sentry-android-navigation3 predates the entry point`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        features = setOf(InstrumentationFeature.NAVIGATION3),
+        sentryModules = navigation3SentryModules(SemVer(8, 61, 1)),
+        externalModules = navigation3ExternalModules(),
+      )
+
+    assertFalse(service.isNavigation3InstrEnabled())
+  }
+
+  @Test
+  fun `isNavigation3InstrEnabled is false when Navigation 3 is absent`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        features = setOf(InstrumentationFeature.NAVIGATION3),
+        sentryModules = navigation3SentryModules(),
+      )
+
+    assertFalse(service.isNavigation3InstrEnabled())
+  }
+
+  @Test
+  fun `isNavigation3InstrEnabled is false for Navigation 3 pre-releases before 1_0_0`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        features = setOf(InstrumentationFeature.NAVIGATION3),
+        sentryModules = navigation3SentryModules(),
+        externalModules = navigation3ExternalModules(SemVer.parse("1.0.0-rc01")),
+      )
+
+    assertFalse(service.isNavigation3InstrEnabled())
   }
 }
