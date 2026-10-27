@@ -4,6 +4,7 @@ package io.sentry.android.gradle.services
 
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.extensions.InstrumentationFeature
+import io.sentry.android.gradle.util.ExternalModules
 import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryVersions
@@ -61,6 +62,7 @@ abstract class SentryModulesService :
       InstrumentationFeature.FILE_IO -> isFileIOInstrEnabled()
       InstrumentationFeature.OKHTTP -> isOkHttpInstrEnabled()
       InstrumentationFeature.COMPOSE -> isComposeInstrEnabled()
+      InstrumentationFeature.NAVIGATION3 -> isNavigation3InstrEnabled()
     }
   }
 
@@ -124,6 +126,26 @@ abstract class SentryModulesService :
   fun isComposeInstrEnabled(): Boolean =
     sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_COMPOSE, SentryVersions.VERSION_COMPOSE) &&
       parameters.features.get().contains(InstrumentationFeature.COMPOSE)
+
+  /**
+   * Returns true when the app uses a sentry-android-navigation3 version that contains the Nav3
+   * auto-instrumentation entry point, Navigation 3 1.0.0 or newer, and the NAVIGATION3 feature is
+   * enabled.
+   */
+  fun isNavigation3InstrEnabled(): Boolean =
+    sentryModules.isAtLeast(
+      SentryModules.SENTRY_ANDROID_NAVIGATION3,
+      SentryVersions.VERSION_NAVIGATION3,
+    ) &&
+      (externalModules.isAtLeast(
+        ExternalModules.NAVIGATION3_UI,
+        ExternalModules.VERSION_NAVIGATION3_UI,
+      ) ||
+        externalModules.isAtLeast(
+          ExternalModules.NAVIGATION3_UI_ANDROID,
+          ExternalModules.VERSION_NAVIGATION3_UI,
+        )) &&
+      parameters.features.get().contains(InstrumentationFeature.NAVIGATION3)
 
   fun isAppStartInstrEnabled(): Boolean =
     sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_CORE, SentryVersions.VERSION_APP_START) &&

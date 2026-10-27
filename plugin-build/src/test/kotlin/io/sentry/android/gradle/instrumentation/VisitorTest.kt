@@ -2,6 +2,7 @@ package io.sentry.android.gradle.instrumentation
 
 import com.android.build.api.instrumentation.ClassContext
 import io.sentry.android.gradle.instrumentation.androidx.compose.ComposeNavigation
+import io.sentry.android.gradle.instrumentation.androidx.navigation3.Navigation3Display
 import io.sentry.android.gradle.instrumentation.androidx.room.AndroidXRoomDao
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.AndroidXSQLiteOpenHelper
 import io.sentry.android.gradle.instrumentation.androidx.sqlite.database.AndroidXSQLiteDatabase
@@ -225,6 +226,24 @@ class VisitorTest(
         arrayOf("okhttp/v3", "OkHttpClient", OkHttpEventListener(false, SemVer(3, 0, 0)), null),
         arrayOf("okhttp/v4", "OkHttpClient", OkHttpEventListener(false, SemVer(4, 0, 0)), null),
         arrayOf("androidxCompose", "NavHostControllerKt", ComposeNavigation(), null),
+        arrayOf(
+          "androidxNavigation3/1_0_1",
+          "NavDisplayKt__NavDisplayKt",
+          Navigation3Display(),
+          null,
+        ),
+        arrayOf(
+          "androidxNavigation3/1_2_0",
+          "NavDisplayKt__NavDisplayKt",
+          Navigation3Display(),
+          null,
+        ),
+        arrayOf(
+          "androidxNavigation3/1_3_0_alpha03",
+          "NavDisplayKt__NavDisplayKt",
+          Navigation3Display(),
+          null,
+        ),
         arrayOf("logcat", "LogcatTest", Logcat(), null),
         arrayOf("appstart", "MyApplication", Application(), null),
         arrayOf("appstart", "MyContentProvider", ContentProvider(), null),

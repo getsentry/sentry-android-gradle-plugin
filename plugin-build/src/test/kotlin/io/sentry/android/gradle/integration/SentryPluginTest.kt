@@ -678,6 +678,23 @@ class SentryPluginTest :
   }
 
   @Test
+  fun `does not apply Navigation3 instrumentable when sentry-android-navigation3 is too old`() {
+    applyTracingInstrumentation(
+      features = setOf(InstrumentationFeature.NAVIGATION3),
+      // Predates the Nav3 auto-instrumentation entry point.
+      dependencies = setOf("io.sentry:sentry-android-navigation3:8.61.1"),
+      sdkVersion = "8.61.1",
+      appStart = false,
+      logcat = false,
+    )
+
+    val build = runner.appendArguments(":app:assembleDebug", "--info").build()
+    assertTrue {
+      "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=)" in build.output
+    }
+  }
+
+  @Test
   fun `applies sqliteDriver instrumentable when sentry gate passes with room2`() {
     val build =
       buildDatabaseInstrumentation(SQLITE, ROOM2_AT_DRIVER_FLOOR, SENTRY_ANDROID_SQLITE_DRIVER)
