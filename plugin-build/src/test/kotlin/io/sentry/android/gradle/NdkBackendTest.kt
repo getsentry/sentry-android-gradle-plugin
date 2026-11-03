@@ -16,25 +16,32 @@ class NdkBackendTest {
   @Test
   fun `defaults to inproc`() {
     val project = project()
-    project.dependencies.add("runtime", "io.sentry:sentry-android:1.0")
+    project.dependencies.add("implementation", "io.sentry:sentry-android:1.0")
 
     assertThat(resolve(project))
-      .containsExactly("sentry-android-1.0.jar", "sentry-android-ndk-1.0.jar")
+      .containsExactly(
+        "sentry-android-1.0.jar",
+        "sentry-android-ndk-1.0.jar",
+        "sentry-native-ndk-1.0.jar",
+      )
   }
 
   @Test
-  fun `native replaces transitive and direct ndk dependencies`() {
+  fun `native adds the outproc package and swaps the native library`() {
     val project = project("native")
-    publish("sentry-android-ndk-outproc", version = "2.0")
-    project.dependencies.add("runtime", "io.sentry:sentry-android:1.0")
-    project.dependencies.add("runtime", "io.sentry:sentry-android-ndk:2.0")
-    val runtime = project.configurations.getByName("runtime")
+    project.dependencies.add("implementation", "io.sentry:sentry-android:1.0")
+    val runtime = project.configurations.getByName("runtimeClasspath")
 
     runtime.buildDependencies.getDependencies(null)
     assertThat(runtime.state).isEqualTo(Configuration.State.UNRESOLVED)
 
     assertThat(resolve(project))
-      .containsExactly("sentry-android-1.0.jar", "sentry-android-ndk-outproc-2.0.jar")
+      .containsExactly(
+        "sentry-android-1.0.jar",
+        "sentry-android-ndk-1.0.jar",
+        "sentry-android-ndk-outproc-1.0.jar",
+        "sentry-native-ndk-outproc-1.0.jar",
+      )
   }
 
   @Test
@@ -44,31 +51,48 @@ class NdkBackendTest {
       "sentry-bom",
       body =
         "<dependencyManagement>" +
-          dependencies("sentry-android-ndk", "sentry-android-ndk-outproc") +
+          dependencies("sentry-android", "sentry-android-ndk-outproc") +
           "</dependencyManagement>",
     )
-    project.dependencies.add("runtime", project.dependencies.platform("io.sentry:sentry-bom:1.0"))
-    project.dependencies.add("runtime", "io.sentry:sentry-android-ndk")
+    project.dependencies.add(
+      "implementation",
+      project.dependencies.platform("io.sentry:sentry-bom:1.0"),
+    )
+    project.dependencies.add("implementation", "io.sentry:sentry-android")
 
-    assertThat(resolve(project)).containsExactly("sentry-android-ndk-outproc-1.0.jar")
+    assertThat(resolve(project))
+      .containsExactly(
+        "sentry-android-1.0.jar",
+        "sentry-android-ndk-1.0.jar",
+        "sentry-android-ndk-outproc-1.0.jar",
+        "sentry-native-ndk-outproc-1.0.jar",
+      )
   }
 
   private fun project(backend: String? = null): Project {
-    publish("sentry-android-ndk")
-    publish("sentry-android-ndk-outproc")
+    publish("sentry-native-ndk")
+    publish("sentry-native-ndk-outproc")
+    publish("sentry-android-ndk", body = dependencies("sentry-native-ndk"))
+    publish(
+      "sentry-android-ndk-outproc",
+      body = dependencies("sentry-android-ndk", "sentry-native-ndk-outproc"),
+    )
     publish("sentry-android", body = dependencies("sentry-android-ndk"))
     return ProjectBuilder.builder().withProjectDir(directory.newFolder("project")).build().also {
       it.pluginManager.apply("java-library")
       it.repositories.maven { repo -> repo.url = File(directory.root, "repository").toURI() }
-      it.configurations.create("runtime").resolutionStrategy.disableDependencyVerification()
+      it.configurations
+        .getByName("runtimeClasspath")
+        .resolutionStrategy
+        .disableDependencyVerification()
       val extension = it.extensions.create("sentry", SentryPluginExtension::class.java)
       backend?.let(extension.ndkBackend::set)
-      it.configureNdkBackend(extension.ndkBackend)
+      it.configureNdkBackend(extension)
     }
   }
 
   private fun resolve(project: Project): List<String> =
-    project.configurations.getByName("runtime").resolve().map { it.name }
+    project.configurations.getByName("runtimeClasspath").resolve().map { it.name }
 
   private fun publish(name: String, version: String = "1.0", body: String = "") {
     val path = File(directory.root, "repository/io/sentry/$name/$version").apply { mkdirs() }

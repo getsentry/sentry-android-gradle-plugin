@@ -50,6 +50,9 @@ internal object SentryModules {
   internal val SENTRY_ANDROID_NDK = DefaultModuleIdentifier.newId("io.sentry", "sentry-android-ndk")
   internal val SENTRY_ANDROID_NDK_OUTPROC =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-android-ndk-outproc")
+  internal val SENTRY_NATIVE_NDK = DefaultModuleIdentifier.newId("io.sentry", "sentry-native-ndk")
+  internal val SENTRY_NATIVE_NDK_OUTPROC =
+    DefaultModuleIdentifier.newId("io.sentry", "sentry-native-ndk-outproc")
   internal val SENTRY_ANDROID_SQLITE =
     DefaultModuleIdentifier.newId("io.sentry", "sentry-android-sqlite")
   internal val SENTRY_ANDROID_OKHTTP =

@@ -108,9 +108,9 @@ private fun Project.installSentrySdk(
   }
 }
 
-private data class SentryDependency(val version: String?, val isInstalled: Boolean)
+internal data class SentryDependency(val version: String?, val isInstalled: Boolean)
 
-private fun DependencySet.findSentryDependency(isAndroid: Boolean): SentryDependency {
+internal fun DependencySet.findSentryDependency(isAndroid: Boolean): SentryDependency {
   val installedDependency = find {
     it.group == SENTRY_GROUP && it.name in installedSentryModuleNames(isAndroid)
   }

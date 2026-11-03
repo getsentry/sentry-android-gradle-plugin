@@ -65,7 +65,7 @@ constructor(private val buildEvents: BuildEventListenerRegistryInternal) : Plugi
       )
 
       project.installDependencies(extension, true)
-      project.configureNdkBackend(extension.ndkBackend)
+      project.configureNdkBackend(extension)
     }
   }
 

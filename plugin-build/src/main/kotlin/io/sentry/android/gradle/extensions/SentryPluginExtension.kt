@@ -13,8 +13,8 @@ abstract class SentryPluginExtension @Inject constructor(objects: ObjectFactory)
 
   /**
    * Native crash backend to package: `inproc` (default) or `native` (experimental). The native
-   * backend replaces sentry-android-ndk with sentry-android-ndk-outproc, including its crash
-   * service.
+   * backend adds sentry-android-ndk-outproc, including its crash service, and replaces
+   * sentry-native-ndk with sentry-native-ndk-outproc.
    */
   @Experimental
   val ndkBackend: Property<String> = objects.property(String::class.java).convention("inproc")
