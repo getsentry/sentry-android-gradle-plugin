@@ -4,8 +4,10 @@ import com.google.common.truth.Truth.assertThat
 import io.sentry.android.gradle.parseMajorVersion
 import java.io.File
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
@@ -285,14 +287,101 @@ class GenerateSnapshotTestsTaskTest {
     assertTrue(content.contains("val tolerance = 0.05"))
   }
 
+  @Test
+  fun `generated file has an abstract base and one test class by default`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"))
+
+    assertThat(content).contains("\nabstract class ComposablePreviewSnapshotTest(")
+    assertThat(testClassNames(content)).containsExactly("ComposablePreviewSnapshotTest0")
+    assertThat(content).contains("= ComposablePreviewSnapshotTest.previewsForTestClass(0)")
+  }
+
+  @Test
+  fun `generated file splits previews across the configured number of test classes`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"), testClassCount = 3)
+
+    assertThat(content).contains("\nabstract class ComposablePreviewSnapshotTest(")
+    assertThat(content).doesNotContain("@RunWith(Parameterized::class)\nabstract class")
+    assertThat(testClassNames(content))
+      .containsExactly(
+        "ComposablePreviewSnapshotTest0",
+        "ComposablePreviewSnapshotTest1",
+        "ComposablePreviewSnapshotTest2",
+      )
+      .inOrder()
+    for (index in 0 until 3) {
+      assertThat(content)
+        .contains(
+          "class ComposablePreviewSnapshotTest$index(\n" +
+            "    preview: ComposablePreview<AndroidPreviewInfo>,\n" +
+            ") : ComposablePreviewSnapshotTest(preview) {"
+        )
+      assertThat(content).contains("= ComposablePreviewSnapshotTest.previewsForTestClass($index)")
+    }
+  }
+
+  @Test
+  fun `generated test classes assign each preview by a hash of its own screenshot id`() {
+    val content = generateAndRead(packageTrees = listOf("com.example"), testClassCount = 3)
+
+    assertThat(content)
+      .contains(
+        "cachedPreviews.filter { Math.floorMod(screenshotIdOf(it).hashCode(), 3) == index }"
+      )
+  }
+
+  @Test
+  fun `generated file is identical for identical inputs`() {
+    for (testClassCount in listOf(1, 3)) {
+      val first =
+        generateAndRead(packageTrees = listOf("com.example"), testClassCount = testClassCount)
+      val second =
+        generateAndRead(packageTrees = listOf("com.example"), testClassCount = testClassCount)
+
+      assertThat(second).isEqualTo(first)
+    }
+  }
+
+  @Test
+  fun `generated file depends only on configuration and not on project sources`() {
+    val task = createTask(packageTrees = listOf("com.example"), testClassCount = 3)
+
+    assertTrue(task.inputs.files.isEmpty)
+    assertThat(task.inputs.properties).containsEntry("testClassCount", 3)
+    assertThat(GenerateSnapshotTestsTask::class.java.isAnnotationPresent(CacheableTask::class.java))
+      .isTrue()
+  }
+
+  @Test
+  fun `generation fails when testClassCount is below one`() {
+    val task = createTask(packageTrees = listOf("com.example"), testClassCount = 0)
+
+    val error = assertFailsWith<IllegalArgumentException> { task.generate() }
+
+    assertThat(error).hasMessageThat().contains("testClassCount must be at least 1, but was 0")
+  }
+
+  private fun testClassNames(content: String): List<String> =
+    Regex("""@RunWith\(Parameterized::class\)\nclass (ComposablePreviewSnapshotTest\d+)\(""")
+      .findAll(content)
+      .map { it.groupValues[1] }
+      .toList()
+
   private fun generateAndRead(
     packageTrees: List<String>,
     includePrivatePreviews: Boolean = false,
     diffThreshold: Double = 0.0,
     paparazziMajorVersion: Int = 2,
+    testClassCount: Int = 1,
   ): String {
     val task =
-      createTask(packageTrees, includePrivatePreviews, diffThreshold, paparazziMajorVersion)
+      createTask(
+        packageTrees,
+        includePrivatePreviews,
+        diffThreshold,
+        paparazziMajorVersion,
+        testClassCount,
+      )
     task.generate()
     val file =
       File(task.outputDir.get().asFile, "io/sentry/snapshot/ComposablePreviewSnapshotTest.kt")
@@ -304,6 +393,7 @@ class GenerateSnapshotTestsTaskTest {
     includePrivatePreviews: Boolean = false,
     diffThreshold: Double = 0.0,
     paparazziMajorVersion: Int = 2,
+    testClassCount: Int = 1,
   ): GenerateSnapshotTestsTask {
     val project = ProjectBuilder.builder().build()
     return project.tasks
@@ -312,7 +402,8 @@ class GenerateSnapshotTestsTaskTest {
         task.packageTrees.set(packageTrees)
         task.diffThreshold.set(diffThreshold)
         task.paparazziMajorVersion.set(paparazziMajorVersion)
-        task.outputDir.set(tmpDir.newFolder("output"))
+        task.testClassCount.set(testClassCount)
+        task.outputDir.set(tmpDir.newFolder())
       }
       .get()
   }
