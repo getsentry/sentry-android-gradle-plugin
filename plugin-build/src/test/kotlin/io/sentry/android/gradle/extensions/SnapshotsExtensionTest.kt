@@ -78,6 +78,14 @@ class SnapshotsExtensionTest {
   }
 
   @Test
+  fun `previews testClassCount is one by default`() {
+    val project = ProjectBuilder.builder().build()
+    val extension = project.objects.newInstance(SnapshotsExtension::class.java)
+
+    assertEquals(1, extension.previews.testClassCount.get())
+  }
+
+  @Test
   fun `previews block configures sub-extension`() {
     val project = ProjectBuilder.builder().build()
     val extension = project.objects.newInstance(SnapshotsExtension::class.java)
@@ -87,11 +95,13 @@ class SnapshotsExtensionTest {
       previews.includePrivatePreviews.set(false)
       previews.packageTrees.set(listOf("com.example"))
       previews.theme.set("AppTheme")
+      previews.testClassCount.set(8)
     }
 
     assertFalse(extension.previews.generateTests.get())
     assertFalse(extension.previews.includePrivatePreviews.get())
     assertTrue(extension.previews.packageTrees.get() == listOf("com.example"))
     assertTrue(extension.previews.theme.get() == "AppTheme")
+    assertEquals(8, extension.previews.testClassCount.get())
   }
 }
