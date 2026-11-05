@@ -7,6 +7,9 @@
 - Bump ComposablePreviewScanner from v0.9.3 to v0.10.0 ([#1493](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1493))
   - [changelog](https://github.com/sergio-sastre/ComposablePreviewScanner/blob/master/CHANGELOG.md#0100)
   - [diff](https://github.com/sergio-sastre/ComposablePreviewScanner/compare/0.9.3...0.10.0)
+- Bump Android SDK from v8.62.0 to v8.63.0 ([#1495](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1495))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8630)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.62.0...8.63.0)
 
 ## 6.25.0
 
