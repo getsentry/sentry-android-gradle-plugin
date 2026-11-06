@@ -124,7 +124,8 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
     val details = buildOperationDescriptor.details
 
     operationFinishEvent.failure?.let { error ->
-      if (isSentryError(error, details)) {
+      // Skip task-level operations; endTask() already captures those errors.
+      if (details !is ExecuteTaskBuildOperationDetails && isSentryError(error, details)) {
         captureError(error, "build")
         transaction?.status = SpanStatus.UNKNOWN_ERROR
       }
@@ -148,6 +149,19 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
       }
   }
 
+  internal fun unwrapGradleException(t: Throwable): Throwable {
+    val wrapperTypes =
+      setOf(
+        "org.gradle.internal.UncheckedException",
+        "org.gradle.api.tasks.TaskExecutionException",
+      )
+    var current = t
+    while (current.javaClass.name in wrapperTypes && current.cause != null) {
+      current = current.cause!!
+    }
+    return current
+  }
+
   fun captureError(exception: Throwable, operation: String?) {
     captureError(exception, operation, handled = false)
   }
@@ -157,11 +171,12 @@ abstract class SentryTelemetryService : BuildService<None>, BuildOperationListen
   }
 
   private fun captureError(exception: Throwable, operation: String?, handled: Boolean) {
+    val rootCause = unwrapGradleException(exception)
     val message =
-      if (exception is SentryCliException) {
-        "$operation failed with SentryCliException and reason ${exception.reason}"
+      if (rootCause is SentryCliException) {
+        "$operation failed with SentryCliException and reason ${rootCause.reason}"
       } else {
-        "$operation failed with ${exception.javaClass}"
+        "$operation failed with ${rootCause.javaClass}"
       }
 
     val mechanism =
