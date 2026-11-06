@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Unwrap Gradle's `UncheckedException`/`TaskExecutionException` in telemetry error reporting so the real failure cause is captured instead of the opaque wrapper type ([#PRNUM](https://github.com/getsentry/sentry-android-gradle-plugin/pull/PRNUM))
+- Unwrap Gradle's `UncheckedException`/`TaskExecutionException` in telemetry error reporting so the real failure cause is captured instead of the opaque wrapper type ([#1497](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1497))
 
 ## 6.26.0
 
