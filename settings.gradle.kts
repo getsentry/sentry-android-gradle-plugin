@@ -34,6 +34,11 @@ develocity {
 
 dependencyResolutionManagement {
   repositories {
+    // Opt-in, for trying unreleased SDK features in the samples: resolve io.sentry artifacts that
+    // sentry-java published to Maven Local (./gradlew publishToMavenLocal) before Maven Central.
+    if (providers.gradleProperty("useLocalSentrySdk").isPresent) {
+      mavenLocal { content { includeGroup("io.sentry") } }
+    }
     mavenCentral()
     google()
   }
@@ -62,6 +67,29 @@ if (!isDependencyResolutionRun) {
 }
 
 include(":examples:android-instrumentation-sample")
+
+// Navigation 3 requires AGP 8.9.1+ and is compiled with Kotlin 2; the compatibility matrix may run
+// older versions (VERSION_AGP, VERSION_KOTLIN), so skip the sample there.
+fun isAtLeast(version: String?, minimum: List<Int>): Boolean {
+  if (version == null) {
+    return true
+  }
+  val parts = version.split('.', '-').take(3).map { it.toIntOrNull() ?: 0 }
+  for (i in minimum.indices) {
+    val part = parts.getOrElse(i) { 0 }
+    if (part != minimum[i]) {
+      return part > minimum[i]
+    }
+  }
+  return true
+}
+
+if (
+  isAtLeast(System.getenv("VERSION_AGP"), listOf(8, 9, 1)) &&
+    isAtLeast(System.getenv("VERSION_KOTLIN"), listOf(2, 0, 0))
+) {
+  include(":examples:android-navigation3-sample")
+}
 
 include(":examples:android-room-lib")
 
