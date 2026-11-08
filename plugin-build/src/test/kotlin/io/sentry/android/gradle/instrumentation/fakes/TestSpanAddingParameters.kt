@@ -47,4 +47,7 @@ class TestSpanAddingParameters(
 
   override val appStartEnabled: Property<Boolean>
     get() = TODO()
+
+  override val navigation3Enabled: Property<Boolean>
+    get() = TODO()
 }

@@ -193,6 +193,7 @@ fun ApplicationAndroidComponentsExtension.configure(
               extension.includeSourceContext,
               extension.dexguardEnabled,
               extension.tracingInstrumentation.appStart.enabled,
+              extension.tracingInstrumentation.navigation3.enabled,
             )
             .also {
               // Keep the service alive after configuration so instrumentation can read it.
@@ -251,6 +252,9 @@ fun ApplicationAndroidComponentsExtension.configure(
           params.logcatEnabled.setDisallowChanges(extension.tracingInstrumentation.logcat.enabled)
           params.appStartEnabled.setDisallowChanges(
             extension.tracingInstrumentation.appStart.enabled
+          )
+          params.navigation3Enabled.setDisallowChanges(
+            extension.tracingInstrumentation.navigation3.enabled
           )
           params.tmpDir.set(
             project.layout.buildDirectory.dir("sentry-logs/instrumentation/${variant.name}")
