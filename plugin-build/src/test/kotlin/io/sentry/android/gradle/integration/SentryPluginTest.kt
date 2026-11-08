@@ -1,5 +1,6 @@
 package io.sentry.android.gradle.integration
 
+import com.google.common.truth.Truth.assertThat
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.util.AgpVersions
@@ -13,6 +14,9 @@ import io.sentry.android.gradle.verifySourceContextId
 import io.sentry.android.gradle.withDummyKtFile
 import java.io.File
 import java.util.EnumSet
+import java.util.jar.JarEntry
+import java.util.jar.JarOutputStream
+import java.util.jar.Manifest
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
@@ -695,6 +699,66 @@ class SentryPluginTest :
   }
 
   @Test
+  fun `applies Navigation3 instrumentable when navigation3 is enabled and both modules qualify`() {
+    applyTracingInstrumentation(
+      navigation3 = true,
+      dependencies = publishNavigation3Stubs(),
+      appStart = false,
+      logcat = false,
+    )
+
+    val build = runner.appendArguments(":app:assembleDebug", "--info").build()
+
+    assertThat(instrumentables(build)).containsExactly("Navigation3Display")
+  }
+
+  @Test
+  fun `does not apply Navigation3 instrumentable when navigation3 is disabled`() {
+    applyTracingInstrumentation(
+      navigation3 = false,
+      dependencies = publishNavigation3Stubs(),
+      appStart = false,
+      logcat = false,
+    )
+
+    val build = runner.appendArguments(":app:assembleDebug", "--info").build()
+
+    assertThat(instrumentables(build)).isEmpty()
+  }
+
+  @Test
+  fun `redirects the NavDisplay rememberDecoratedNavEntries call to Sentry when navigation3 is enabled`() {
+    applyTracingInstrumentation(
+      navigation3 = true,
+      dependencies = publishNavigation3Stubs(),
+      appStart = false,
+      logcat = false,
+      debug = true,
+    )
+
+    runner.appendArguments(":app:assembleDebug").build()
+
+    // The debug log traces the bytecode emitted by the instrumentation for every NavDisplay method.
+    val instrumentedBytecode =
+      testProjectDir.root
+        .resolve(
+          "app/build/sentry-logs/instrumentation/debug/" +
+            "androidx.navigation3.ui.NavDisplayKt__NavDisplayKt-instrumentation.log"
+        )
+        .readText()
+    assertThat(instrumentedBytecode)
+      .contains(
+        "INVOKESTATIC io/sentry/compose/navigation3/SentryNavAutoInstrumentation" +
+          ".rememberSentryDecoratedNavEntries $REMEMBER_DECORATED_NAV_ENTRIES_DESCRIPTOR"
+      )
+    assertThat(instrumentedBytecode)
+      .doesNotContain(
+        "INVOKESTATIC androidx/navigation3/runtime/DecoratedNavEntriesKt" +
+          ".rememberDecoratedNavEntries $REMEMBER_DECORATED_NAV_ENTRIES_DESCRIPTOR"
+      )
+  }
+
+  @Test
   fun `applies sqliteDriver instrumentable when sentry gate passes with room2`() {
     val build =
       buildDatabaseInstrumentation(SQLITE, ROOM2_AT_DRIVER_FLOOR, SENTRY_ANDROID_SQLITE_DRIVER)
@@ -1135,6 +1199,21 @@ class SentryPluginTest :
   }
 
   @Test
+  fun `Navigation3Instrumentation is written to manifest when navigation3 is enabled`() {
+    applyTracingInstrumentation(
+      navigation3 = true,
+      dependencies = publishNavigation3Stubs(),
+      appStart = false,
+      logcat = false,
+    )
+
+    runner.appendArguments(":app:assembleDebug").build()
+
+    val integrations = verifyIntegrationList(testProjectDir.root, variant = "debug", signed = false)
+    assertThat(integrations).containsExactly("Navigation3Instrumentation")
+  }
+
+  @Test
   fun `no integrations are written to manifest if not configured`() {
     applyTracingInstrumentation(
       dependencies =
@@ -1401,6 +1480,76 @@ class SentryPluginTest :
     )
   }
 
+  /**
+   * Publishes stand-ins for sentry-android-navigation3 and navigation3-ui to a local Maven repo and
+   * registers it for the app. Their unpublished version satisfies the plugin's version gates
+   * without the real navigation3-ui's compileSdk, minSdk, and AGP requirements. The navigation3-ui
+   * stub carries a real `NavDisplay` class so the instrumentation has a call to rewrite.
+   *
+   * @return the dependency notations of both stubs
+   */
+  private fun publishNavigation3Stubs(): Set<String> {
+    val repo = testProjectDir.root.resolve("nav3-stub-repo")
+    val navDisplayClass =
+      File(
+        "src/test/resources/testFixtures/instrumentation/androidxNavigation3/1_2_0/" +
+          "NavDisplayKt__NavDisplayKt.class"
+      )
+    publishStubArtifact(repo, "io.sentry", "sentry-android-navigation3", emptyMap())
+    publishStubArtifact(
+      repo,
+      "androidx.navigation3",
+      "navigation3-ui",
+      mapOf("androidx/navigation3/ui/NavDisplayKt__NavDisplayKt.class" to navDisplayClass),
+    )
+    appBuildFile.appendText(
+      // language=Groovy
+      """
+      repositories {
+        maven { url = '${repo.toURI()}' }
+      }
+      """
+        .trimIndent()
+        .let { "\n$it\n" }
+    )
+    return setOf(
+      "io.sentry:sentry-android-navigation3:$NAVIGATION3_STUB_VERSION",
+      "androidx.navigation3:navigation3-ui:$NAVIGATION3_STUB_VERSION",
+    )
+  }
+
+  private fun publishStubArtifact(
+    repo: File,
+    group: String,
+    artifact: String,
+    entries: Map<String, File>,
+  ) {
+    val version = NAVIGATION3_STUB_VERSION
+    val dir = repo.resolve("${group.replace('.', '/')}/$artifact/$version").apply { mkdirs() }
+    dir
+      .resolve("$artifact-$version.pom")
+      .writeText(
+        """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <project xmlns="http://maven.apache.org/POM/4.0.0">
+          <modelVersion>4.0.0</modelVersion>
+          <groupId>$group</groupId>
+          <artifactId>$artifact</artifactId>
+          <version>$version</version>
+          <packaging>jar</packaging>
+        </project>
+        """
+          .trimIndent()
+      )
+    JarOutputStream(dir.resolve("$artifact-$version.jar").outputStream(), Manifest()).use { jar ->
+      entries.forEach { (name, file) ->
+        jar.putNextEntry(JarEntry(name))
+        file.inputStream().use { it.copyTo(jar) }
+        jar.closeEntry()
+      }
+    }
+  }
+
   private fun configureFakeMetadataSdk(value: String, attribute: String = "android:value") {
     File(testProjectDir.root, "settings.gradle")
       .appendText("\nproject(':module').name = 'sentry-android-core'")
@@ -1494,6 +1643,11 @@ class SentryPluginTest :
 
   companion object {
     private const val BUILD_TIME_METADATA_KEY = "io.sentry.test-build-time-injection"
+    // Never published, so it only resolves from the stub repo.
+    private const val NAVIGATION3_STUB_VERSION = "99.0.0"
+    private const val REMEMBER_DECORATED_NAV_ENTRIES_DESCRIPTOR =
+      "(Ljava/util/List;Ljava/util/List;Lkotlin/jvm/functions/Function1;" +
+        "Landroidx/compose/runtime/Composer;II)Ljava/util/List;"
     private const val SQLITE = "androidx.sqlite:sqlite:2.6.2"
     private const val SENTRY_ANDROID_SQLITE_OPEN_HELPER = "io.sentry:sentry-android-sqlite:6.21.0"
     private val SENTRY_ANDROID_SQLITE_DRIVER =
