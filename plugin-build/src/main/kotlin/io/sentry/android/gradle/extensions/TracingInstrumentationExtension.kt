@@ -71,6 +71,12 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
   fun appStart(appStartExtensionAction: Action<AppStartExtension>) {
     appStartExtensionAction.execute(appStart)
   }
+
+  val navigation3: Navigation3Extension = objects.newInstance(Navigation3Extension::class.java)
+
+  fun navigation3(navigation3ExtensionAction: Action<Navigation3Extension>) {
+    navigation3ExtensionAction.execute(navigation3)
+  }
 }
 
 enum class InstrumentationFeature(val integrationName: String) {

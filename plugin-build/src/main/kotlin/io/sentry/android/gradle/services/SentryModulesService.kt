@@ -4,6 +4,7 @@ package io.sentry.android.gradle.services
 
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.extensions.InstrumentationFeature
+import io.sentry.android.gradle.util.ExternalModules
 import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryVersions
@@ -42,6 +43,10 @@ abstract class SentryModulesService :
 
     if (isAppStartInstrEnabled()) {
       features.add("AppStartInstrumentation")
+    }
+
+    if (isNavigation3InstrEnabled()) {
+      features.add("Navigation3Instrumentation")
     }
 
     if (parameters.sourceContextEnabled.getOrElse(false)) {
@@ -125,6 +130,26 @@ abstract class SentryModulesService :
     sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_COMPOSE, SentryVersions.VERSION_COMPOSE) &&
       parameters.features.get().contains(InstrumentationFeature.COMPOSE)
 
+  /**
+   * Returns true when Navigation 3 auto-instrumentation is enabled (`navigation3.enabled`) and the
+   * app uses both a sentry-android-navigation3 version that contains the auto-instrumentation entry
+   * point and Navigation 3 1.0.0 or newer.
+   */
+  fun isNavigation3InstrEnabled(): Boolean =
+    sentryModules.isAtLeast(
+      SentryModules.SENTRY_ANDROID_NAVIGATION3,
+      SentryVersions.VERSION_NAVIGATION3,
+    ) &&
+      (externalModules.isAtLeast(
+        ExternalModules.NAVIGATION3_UI,
+        ExternalModules.VERSION_NAVIGATION3_UI,
+      ) ||
+        externalModules.isAtLeast(
+          ExternalModules.NAVIGATION3_UI_ANDROID,
+          ExternalModules.VERSION_NAVIGATION3_UI,
+        )) &&
+      parameters.navigation3Enabled.get()
+
   fun isAppStartInstrEnabled(): Boolean =
     sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_CORE, SentryVersions.VERSION_APP_START) &&
       parameters.appStartEnabled.get()
@@ -142,6 +167,7 @@ abstract class SentryModulesService :
       sourceContextEnabled: Provider<Boolean>,
       dexguardEnabled: Provider<Boolean>,
       appStartEnabled: Provider<Boolean>,
+      navigation3Enabled: Provider<Boolean>,
     ): Provider<SentryModulesService> {
       return project.gradle.sharedServices.registerIfAbsent(
         getBuildServiceName(SentryModulesService::class.java),
@@ -152,6 +178,7 @@ abstract class SentryModulesService :
         it.parameters.sourceContextEnabled.setDisallowChanges(sourceContextEnabled)
         it.parameters.dexguardEnabled.setDisallowChanges(dexguardEnabled)
         it.parameters.appStartEnabled.setDisallowChanges(appStartEnabled)
+        it.parameters.navigation3Enabled.setDisallowChanges(navigation3Enabled)
       }
     }
   }
@@ -169,5 +196,7 @@ abstract class SentryModulesService :
     @get:Input val dexguardEnabled: Property<Boolean>
 
     @get:Input val appStartEnabled: Property<Boolean>
+
+    @get:Input val navigation3Enabled: Property<Boolean>
   }
 }

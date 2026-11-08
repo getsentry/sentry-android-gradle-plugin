@@ -1,0 +1,53 @@
+name: Check Navigation 3 instrumentation
+
+# The NAVIGATION3 instrumentation rewrites an implementation detail of androidx's NavDisplay (see
+# Navigation3Display). If a new Navigation 3 release changes it, the instrumentation silently stops
+# applying, so check the newest release every week and open an issue when it fails.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Navigation 3 version to check (defaults to the newest)'
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Java
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Check Navigation 3
+        id: check
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -o pipefail
+          scripts/check-navigation3-instrumentation.sh "$VERSION" | tee check-output.txt
+
+      - name: Open or update issue
+        if: failure() && steps.check.outcome == 'failure' && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Navigation 3 instrumentation check failed"
+          body="$(printf 'The newest Navigation 3 release no longer has the shape the NAVIGATION3 instrumentation relies on, so it will not be applied for that release. See Navigation3Display.\n\nRun: %s\n\n```\n%s\n```' "$RUN_URL" "$(cat check-output.txt)")"
+          existing=$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi

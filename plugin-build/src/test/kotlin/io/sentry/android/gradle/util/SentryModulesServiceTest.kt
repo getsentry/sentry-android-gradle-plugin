@@ -1,10 +1,12 @@
 package io.sentry.android.gradle.util
 
+import com.google.common.truth.Truth.assertThat
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.services.SentryModulesService
 import java.io.File
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.gradle.api.Project
 import org.gradle.api.artifacts.ModuleIdentifier
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
@@ -15,18 +17,24 @@ class SentryModulesServiceTest {
 
   class Fixture {
 
+    lateinit var project: Project
+
     fun getSut(
       tmpDir: File,
       features: Set<InstrumentationFeature> = emptySet(),
+      navigation3Enabled: Boolean = false,
       sentryModules: Map<ModuleIdentifier, SemVer> = emptyMap(),
+      externalModules: Map<ModuleIdentifier, SemVer> = emptyMap(),
     ): SentryModulesService {
       val fakeProject = ProjectBuilder.builder().withProjectDir(tmpDir).build()
+      project = fakeProject
 
       val featureProvider = fakeProject.provider { features }
       val logcatEnabled = fakeProject.provider { true }
       val sourceContextEnabled = fakeProject.provider { false }
       val dexguardEnabled = fakeProject.provider { false }
       val appStartEnabled = fakeProject.provider { false }
+      val navigation3EnabledProvider = fakeProject.provider { navigation3Enabled }
 
       val serviceProvider =
         SentryModulesService.register(
@@ -36,9 +44,11 @@ class SentryModulesServiceTest {
           sourceContextEnabled,
           dexguardEnabled,
           appStartEnabled,
+          navigation3EnabledProvider,
         )
       val service = serviceProvider.get()
       service.sentryModules = sentryModules
+      service.externalModules = externalModules
       return service
     }
   }
@@ -164,5 +174,152 @@ class SentryModulesServiceTest {
     assertTrue(service.isSQLiteDriverInstrEnabled())
     assertTrue(service.isNewDatabaseInstrEnabled()) // superset relationship
     assertFalse(service.isOldDatabaseInstrEnabled()) // suppressed by !isNewDatabaseInstrEnabled()
+  }
+
+  private fun navigation3SentryModules(
+    version: SemVer = SentryVersions.VERSION_NAVIGATION3
+  ): Map<ModuleIdentifier, SemVer> = mapOf(SentryModules.SENTRY_ANDROID_NAVIGATION3 to version)
+
+  private fun navigation3ExternalModules(
+    version: SemVer = SemVer(1, 0, 0),
+    module: ModuleIdentifier = ExternalModules.NAVIGATION3_UI,
+  ): Map<ModuleIdentifier, SemVer> = mapOf(module to version)
+
+  @Test
+  fun `isNavigation3InstrEnabled is true when navigation3 is enabled and both modules qualify`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        navigation3Enabled = true,
+        sentryModules = navigation3SentryModules(),
+        externalModules = navigation3ExternalModules(),
+      )
+
+    assertThat(service.isNavigation3InstrEnabled()).isTrue()
+  }
+
+  @Test
+  fun `isNavigation3InstrEnabled accepts the navigation3-ui-android artifact`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        navigation3Enabled = true,
+        sentryModules = navigation3SentryModules(),
+        externalModules =
+          navigation3ExternalModules(
+            version = SemVer(1, 2, 0),
+            module = ExternalModules.NAVIGATION3_UI_ANDROID,
+          ),
+      )
+
+    assertThat(service.isNavigation3InstrEnabled()).isTrue()
+  }
+
+  @Test
+  fun `isNavigation3InstrEnabled is false when navigation3 is disabled and both modules qualify`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        navigation3Enabled = false,
+        sentryModules = navigation3SentryModules(),
+        externalModules = navigation3ExternalModules(),
+      )
+
+    assertThat(service.isNavigation3InstrEnabled()).isFalse()
+  }
+
+  @Test
+  fun `isNavigation3InstrEnabled is false when sentry-android-navigation3 is absent`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        navigation3Enabled = true,
+        externalModules = navigation3ExternalModules(),
+      )
+
+    assertThat(service.isNavigation3InstrEnabled()).isFalse()
+  }
+
+  @Test
+  fun `isNavigation3InstrEnabled is false when sentry-android-navigation3 predates the entry point`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        navigation3Enabled = true,
+        sentryModules = navigation3SentryModules(SemVer(8, 61, 1)),
+        externalModules = navigation3ExternalModules(),
+      )
+
+    assertThat(service.isNavigation3InstrEnabled()).isFalse()
+  }
+
+  @Test
+  fun `isNavigation3InstrEnabled is false when Navigation 3 is absent`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        navigation3Enabled = true,
+        sentryModules = navigation3SentryModules(),
+      )
+
+    assertThat(service.isNavigation3InstrEnabled()).isFalse()
+  }
+
+  @Test
+  fun `isNavigation3InstrEnabled is false for Navigation 3 pre-releases before 1_0_0`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        navigation3Enabled = true,
+        sentryModules = navigation3SentryModules(),
+        externalModules = navigation3ExternalModules(SemVer.parse("1.0.0-rc01")),
+      )
+
+    assertThat(service.isNavigation3InstrEnabled()).isFalse()
+  }
+
+  @Test
+  fun `retrieveEnabledInstrumentationFeatures includes Navigation3Instrumentation when Navigation 3 instrumentation is enabled`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        navigation3Enabled = true,
+        sentryModules = navigation3SentryModules(),
+        externalModules = navigation3ExternalModules(),
+      )
+
+    val features = service.retrieveEnabledInstrumentationFeatures(fixture.project).get()
+
+    assertThat(features).contains("Navigation3Instrumentation")
+  }
+
+  @Test
+  fun `retrieveEnabledInstrumentationFeatures excludes Navigation3Instrumentation when navigation3 is disabled`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        navigation3Enabled = false,
+        sentryModules = navigation3SentryModules(),
+        externalModules = navigation3ExternalModules(),
+      )
+
+    val features = service.retrieveEnabledInstrumentationFeatures(fixture.project).get()
+
+    assertThat(features).doesNotContain("Navigation3Instrumentation")
+  }
+
+  @Test
+  fun `retrieveEnabledInstrumentationFeatures excludes Navigation3Instrumentation when sentry-android-navigation3 predates the entry point`() {
+    val service =
+      fixture.getSut(
+        tmpDir = testProjectDir.root,
+        navigation3Enabled = true,
+        sentryModules = navigation3SentryModules(SemVer(8, 61, 1)),
+        externalModules = navigation3ExternalModules(),
+      )
+
+    val features = service.retrieveEnabledInstrumentationFeatures(fixture.project).get()
+
+    assertThat(features).doesNotContain("Navigation3Instrumentation")
   }
 }
