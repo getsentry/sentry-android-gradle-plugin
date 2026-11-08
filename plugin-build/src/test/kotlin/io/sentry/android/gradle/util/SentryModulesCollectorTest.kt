@@ -58,6 +58,7 @@ class SentryModulesCollectorTest {
       val sourceContextEnabled = fakeProject.provider { true }
       val dexguardEnabled = fakeProject.provider { true }
       val appStartEnabled = fakeProject.provider { true }
+      val navigation3Enabled = fakeProject.provider { false }
 
       val project = spy(fakeProject)
       whenever(project.logger).thenReturn(logger)
@@ -70,6 +71,7 @@ class SentryModulesCollectorTest {
           sourceContextEnabled,
           dexguardEnabled,
           appStartEnabled,
+          navigation3Enabled,
         )
 
       return project
