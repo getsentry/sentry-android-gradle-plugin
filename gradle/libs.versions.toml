@@ -28,7 +28,7 @@ spotless = { id = "com.diffplug.spotless", version = "8.10.2" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.35.0" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
-buildConfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.10" }
+buildConfig = { id = "com.github.gmazzo.buildconfig", version = "6.1.2" }
 springBoot = { id = "org.springframework.boot", version = "3.4.1" }
 springDependencyManagement = { id = "io.spring.dependency-management", version = "1.1.7" }
 composeCompiler =  { id = "org.jetbrains.kotlin.plugin.compose", version = "2.1.0" }
