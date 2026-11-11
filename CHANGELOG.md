@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add experimental `testClassCount` option to split the generated snapshot test into several classes so that Gradle can run them in parallel forks ([#1496](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1496))
+
 ### Dependencies
 
 - Bump Android SDK from v8.63.0 to v8.64.0 ([#1504](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1504))

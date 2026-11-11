@@ -41,13 +41,13 @@ abstract class GenerateSnapshotTestsTask : DefaultTask() {
 
   @TaskAction
   fun generate() {
+    val classCount = testClassCount.get()
+    require(classCount >= 1) { "Snapshot testClassCount must be at least 1, but was $classCount." }
+
     val outDir = outputDir.get().asFile
     if (outDir.exists()) {
       outDir.deleteRecursively()
     }
-
-    val classCount = testClassCount.get()
-    require(classCount >= 1) { "Snapshot testClassCount must be at least 1, but was $classCount." }
 
     val packageDir = File(outDir, PACKAGE_NAME.replace('.', '/'))
     packageDir.mkdirs()
@@ -337,11 +337,11 @@ abstract class $CLASS_NAME(
             AndroidComposablePreviewScanner()
                 $scanExpr$includePrivateExpr
                 .getPreviews()
+                .sortedBy { screenshotIdOf(it) }
         }
 
-        // Hash the screenshot ID so a preview's class doesn't depend on scan order or other previews.
         internal fun previewsForTestClass(index: Int): List<ComposablePreview<AndroidPreviewInfo>> =
-            cachedPreviews.filter { Math.floorMod(screenshotIdOf(it).hashCode(), $testClassCount) == index }
+            cachedPreviews.filterIndexed { i, _ -> i % $testClassCount == index }
     }
 
     @get:Rule

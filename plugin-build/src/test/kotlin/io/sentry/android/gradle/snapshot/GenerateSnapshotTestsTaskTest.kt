@@ -321,13 +321,11 @@ class GenerateSnapshotTestsTaskTest {
   }
 
   @Test
-  fun `generated test classes assign each preview by a hash of its own screenshot id`() {
+  fun `generated test classes split previews evenly in screenshot id order`() {
     val content = generateAndRead(packageTrees = listOf("com.example"), testClassCount = 3)
 
-    assertThat(content)
-      .contains(
-        "cachedPreviews.filter { Math.floorMod(screenshotIdOf(it).hashCode(), 3) == index }"
-      )
+    assertThat(content).contains(".sortedBy { screenshotIdOf(it) }")
+    assertThat(content).contains("cachedPreviews.filterIndexed { i, _ -> i % 3 == index }")
   }
 
   @Test
@@ -356,9 +354,12 @@ class GenerateSnapshotTestsTaskTest {
   fun `generation fails when testClassCount is below one`() {
     val task = createTask(packageTrees = listOf("com.example"), testClassCount = 0)
 
+    val existingFile = File(task.outputDir.get().asFile, "Existing.kt").apply { writeText("") }
+
     val error = assertFailsWith<IllegalArgumentException> { task.generate() }
 
     assertThat(error).hasMessageThat().contains("testClassCount must be at least 1, but was 0")
+    assertTrue(existingFile.exists())
   }
 
   private fun testClassNames(content: String): List<String> =
