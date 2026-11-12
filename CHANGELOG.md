@@ -4,7 +4,7 @@
 
 ### Features
 
-- Add experimental `testClassCount` option to split the generated snapshot test into several classes so that Gradle can run them in parallel forks ([#1496](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1496))
+- Add experimental `sentry.snapshots.previews.testClassCount` option to split the generated Compose preview snapshot tests across several test classes, so that Gradle can run them in parallel forks ([#1496](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1496))
 
 ### Dependencies
 
