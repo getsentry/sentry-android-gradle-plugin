@@ -29,7 +29,8 @@ open class TracingInstrumentationExtension @Inject constructor(objects: ObjectFa
 
   /**
    * Specifies a set of [InstrumentationFeature] features that are eligible for bytecode
-   * manipulation. Defaults to all available features of [InstrumentationFeature].
+   * manipulation. Defaults to all available features of [InstrumentationFeature], except for
+   * [InstrumentationFeature.WEBVIEW].
    */
   val features: SetProperty<InstrumentationFeature> =
     objects
@@ -109,4 +110,12 @@ enum class InstrumentationFeature(val integrationName: String) {
    * OnDestinationChangedListener to all navigation controllers used in Jetpack Compose.
    */
   COMPOSE("ComposeInstrumentation"),
+
+  /**
+   * When enabled the SDK will connect the app's trace with web content in a
+   * [android.webkit.WebView]. This feature uses bytecode manipulation and replaces `loadUrl` calls
+   * with calls to a Sentry adapter, which refreshes the trace before each load for the hosts set in
+   * `SentryAndroidOptions.webViewTracing.allowedHosts`. Not enabled by default.
+   */
+  WEBVIEW("WebViewInstrumentation"),
 }
