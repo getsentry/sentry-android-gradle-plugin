@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Features
+
+- Add the opt-in `WEBVIEW` instrumentation feature, which connects the app's trace with web content in a `WebView` on every `loadUrl` call ([#1505](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1505))
+  - Set the allowed hosts in the SDK options with `options.webViewTracing.allowedHosts`.
+  - Requires a Sentry Android SDK version with the WebView adapter (getsentry/sentry-java#6592).
+
 ### Dependencies
 
 - Bump Android SDK from v8.63.0 to v8.64.0 ([#1504](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1504))
