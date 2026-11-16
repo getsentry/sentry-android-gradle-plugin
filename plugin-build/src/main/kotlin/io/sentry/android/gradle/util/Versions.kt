@@ -41,7 +41,8 @@ internal object SentryVersions {
   internal val VERSION_ANDROID_OKHTTP_LISTENER = SemVer(6, 20, 0)
   internal val VERSION_OKHTTP = SemVer(7, 0, 0)
   // First sentry-android-navigation3 release with
-  // SentryNavAutoInstrumentation.rememberSentryDecoratedNavEntries.
+  // io.sentry.compose.navigation3.internal.SentryNavAutoInstrumentation
+  // .rememberSentryDecoratedNavEntries.
   // TODO: confirm once the sentry-java side is released.
   internal val VERSION_NAVIGATION3 = SemVer(8, 64, 0)
 }

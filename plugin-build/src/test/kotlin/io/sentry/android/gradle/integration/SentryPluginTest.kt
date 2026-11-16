@@ -748,7 +748,7 @@ class SentryPluginTest :
         .readText()
     assertThat(instrumentedBytecode)
       .contains(
-        "INVOKESTATIC io/sentry/compose/navigation3/SentryNavAutoInstrumentation" +
+        "INVOKESTATIC io/sentry/compose/navigation3/internal/SentryNavAutoInstrumentation" +
           ".rememberSentryDecoratedNavEntries $REMEMBER_DECORATED_NAV_ENTRIES_DESCRIPTOR"
       )
     assertThat(instrumentedBytecode)

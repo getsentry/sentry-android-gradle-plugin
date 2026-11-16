@@ -18,10 +18,14 @@ import org.objectweb.asm.MethodVisitor
  *
  * The back stack overload of `NavDisplay` turns its back stack into entries with exactly one call
  * to `rememberDecoratedNavEntries(backStack, entryDecorators, entryProvider)`. This instrumentable
- * redirects that call to `SentryNavAutoInstrumentation.rememberSentryDecoratedNavEntries` in
- * sentry-android-navigation3, which has the same compiled signature: it observes the back stack and
- * then calls the original function. Only the call's owner and name change; its arguments, return
- * value, and Compose bookkeeping stay as they are.
+ * redirects that call to
+ * `io.sentry.compose.navigation3.internal.SentryNavAutoInstrumentation.rememberSentryDecoratedNavEntries`
+ * in sentry-android-navigation3, which has the same compiled signature: it observes the back stack
+ * and then calls the original function. Only the call's owner and name change; its arguments,
+ * return value, and Compose bookkeeping stay as they are.
+ *
+ * Once a plugin release ships this redirect, the target's class name and signature can't change in
+ * any SDK version that release supports (from `SentryVersions.VERSION_NAVIGATION3` on).
  *
  * The call is an implementation detail of `NavDisplay`, unchanged from navigation3-ui 1.0.0 through
  * at least 1.3.0-alpha03. If a future release drops it, nothing is rewritten and a warning is

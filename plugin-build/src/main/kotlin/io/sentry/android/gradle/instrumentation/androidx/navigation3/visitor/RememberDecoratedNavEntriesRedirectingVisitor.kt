@@ -47,8 +47,12 @@ class RememberDecoratedNavEntriesRedirectingVisitor(
       "(Ljava/util/List;Ljava/util/List;Lkotlin/jvm/functions/Function1;" +
         "Landroidx/compose/runtime/Composer;II)Ljava/util/List;"
 
+    /**
+     * Binary name of the sentry-android-navigation3 class that declares the redirect target. The
+     * SDK freezes it, and its `SentryNavAutoInstrumentationSignatureTest` pins this same string.
+     */
     internal const val REPLACEMENT_OWNER =
-      "io/sentry/compose/navigation3/SentryNavAutoInstrumentation"
+      "io/sentry/compose/navigation3/internal/SentryNavAutoInstrumentation"
     internal const val REPLACEMENT_NAME = "rememberSentryDecoratedNavEntries"
   }
 }
