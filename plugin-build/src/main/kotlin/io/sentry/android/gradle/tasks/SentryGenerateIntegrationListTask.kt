@@ -2,9 +2,10 @@ package io.sentry.android.gradle.tasks
 
 import io.sentry.android.gradle.ManifestWriter
 import io.sentry.android.gradle.extensions.SentryPluginExtension
-import io.sentry.android.gradle.services.SentryModulesService
+import io.sentry.android.gradle.instrumentation.EnabledInstrumentations
 import io.sentry.android.gradle.telemetry.SentryTelemetryService
 import io.sentry.android.gradle.telemetry.withSentryTelemetry
+import io.sentry.android.gradle.util.SentryModuleVersions
 import io.sentry.android.gradle.util.info
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -69,19 +70,40 @@ abstract class SentryGenerateIntegrationListTask : DefaultTask() {
       project: Project,
       extension: SentryPluginExtension,
       sentryTelemetryProvider: Provider<SentryTelemetryService>?,
-      sentryModulesService: Provider<SentryModulesService>,
+      moduleVersions: Provider<Map<String, String>>,
       variantName: String,
     ): TaskProvider<SentryGenerateIntegrationListTask> {
+      val features = extension.tracingInstrumentation.features
+      val logcatEnabled = extension.tracingInstrumentation.logcat.enabled
+      val appStartEnabled = extension.tracingInstrumentation.appStart.enabled
+      val sourceContextEnabled = extension.includeSourceContext
+      val dexguardEnabled = extension.dexguardEnabled
+
       return project.tasks.register(
         "${variantName}SentryGenerateIntegrationListTask",
         SentryGenerateIntegrationListTask::class.java,
       ) {
         it.integrations.set(
-          sentryModulesService.flatMap { service ->
-            service.retrieveEnabledInstrumentationFeatures(project)
+          moduleVersions.map { versions ->
+            buildSet {
+              addAll(
+                EnabledInstrumentations(
+                    SentryModuleVersions(versions),
+                    features.get(),
+                    logcatEnabled.get(),
+                    appStartEnabled.get(),
+                  )
+                  .integrationNames
+              )
+              if (sourceContextEnabled.getOrElse(false)) {
+                add("SourceContext")
+              }
+              if (dexguardEnabled.getOrElse(false)) {
+                add("DexGuard")
+              }
+            }
           }
         )
-        it.usesService(sentryModulesService)
         it.withSentryTelemetry(extension, sentryTelemetryProvider)
       }
     }

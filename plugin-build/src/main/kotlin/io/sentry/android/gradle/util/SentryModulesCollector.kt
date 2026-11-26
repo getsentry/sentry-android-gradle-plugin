@@ -1,69 +1,67 @@
 package io.sentry.android.gradle.util
 
-import io.sentry.android.gradle.services.SentryModulesService
+import io.sentry.android.gradle.util.SentryModuleVersions.Companion.key
 import org.gradle.api.Project
 import org.gradle.api.UnknownDomainObjectException
-import org.gradle.api.artifacts.ModuleIdentifier
+import org.gradle.api.artifacts.component.ComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedComponentResult
-import org.gradle.api.logging.Logger
+import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.provider.Provider
 
+/**
+ * Resolved versions of the modules the instrumentation reasons about, as a provider over the
+ * configuration's resolution result.
+ *
+ * Reading them through a provider rather than an `afterResolve` hook is what makes instrumentation
+ * survive a reused configuration cache entry: the hook only runs on builds that configure, while
+ * Gradle re-evaluates the provider on every build.
+ */
 fun Project.collectModules(
   configurationName: String,
   variantName: String,
-  sentryModulesService: Provider<SentryModulesService>,
-): Provider<Set<ModuleIdentifier>> {
+): Provider<Map<String, String>> {
   val configProvider =
     try {
       configurations.named(configurationName)
     } catch (e: UnknownDomainObjectException) {
       logger.warn { "Unable to find configuration $configurationName for variant $variantName." }
-      sentryModulesService.get().sentryModules = emptyMap()
-      sentryModulesService.get().externalModules = emptyMap()
-      return provider<Set<ModuleIdentifier>> { null }
+      return provider { emptyMap() }
     }
 
-  configProvider.configure { configuration ->
-    configuration.incoming.afterResolve {
-      val allModules = it.resolutionResult.allComponents.versionMap(logger)
-      val sentryModules =
-        allModules.filter { (identifier, _) -> identifier.group == "io.sentry" }.toMap()
-
-      val externalModules =
-        allModules.filter { (identifier, _) -> identifier.group != "io.sentry" }.toMap()
-
-      logger.info {
-        "Detected Sentry modules $sentryModules " +
-          "for variant: $variantName, config: $configurationName"
-      }
-      sentryModulesService.get().sentryModules = sentryModules
-      sentryModulesService.get().externalModules = externalModules
-    }
-  }
-
-  return configProvider.map { configuration ->
-    configuration.incoming.resolutionResult.allComponents
-      .mapNotNull { it.moduleVersion?.module }
-      .toSet()
-  }
+  return configProvider
+    .flatMap { it.incoming.resolutionResult.rootComponent }
+    .map { it.relevantModuleVersions() }
 }
 
-private fun Set<ResolvedComponentResult>.versionMap(
-  logger: Logger
-): List<Pair<ModuleIdentifier, SemVer>> {
-  return mapNotNull {
-    it.moduleVersion?.let { moduleVersion ->
-      val identifier = moduleVersion.module
-      val version = it.moduleVersion?.version ?: ""
-      val semver =
-        try {
-          SemVer.parse(version)
-        } catch (e: Throwable) {
-          logger.info { "Unable to parse version $version of $identifier" }
-          SemVer()
-        }
-      return@mapNotNull Pair(identifier, semver)
+/**
+ * Only the modules the instrumentation actually branches on, so that bumping an unrelated
+ * dependency doesn't invalidate every instrumented class.
+ */
+private fun String.isRelevantModule(): Boolean =
+  startsWith("io.sentry:") ||
+    this == ExternalModules.ANDROIDX_SQLITE_FRAMEWORK.key() ||
+    this == ExternalModules.OKHTTP.key()
+
+private fun ResolvedComponentResult.relevantModuleVersions(): Map<String, String> {
+  val versions = sortedMapOf<String, String>()
+  val visited = mutableSetOf<ComponentIdentifier>()
+  val queue = ArrayDeque<ResolvedComponentResult>()
+  queue.add(this)
+
+  while (queue.isNotEmpty()) {
+    val component = queue.removeFirst()
+    if (!visited.add(component.id)) {
+      continue
     }
-    null
+    component.moduleVersion?.let { moduleVersion ->
+      val key = moduleVersion.module.key()
+      if (key.isRelevantModule()) {
+        versions[key] = moduleVersion.version
+      }
+    }
+    component.dependencies.filterIsInstance<ResolvedDependencyResult>().forEach {
+      queue.add(it.selected)
+    }
   }
+  return versions
 }

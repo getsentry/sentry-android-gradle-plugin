@@ -293,3 +293,11 @@ internal fun verifySourceBundleContents(
 
   assertEquals(contents, sourceFileContents, "$sourceFilePath contents do not match $contents")
 }
+
+internal const val READ_MODULES_PREFIX = "[sentry] Read sentry modules:"
+
+/** The resolved module versions the instrumentation branched on, from an `--info` build log. */
+internal fun String.readSentryModules(): String? = findInfoLine(READ_MODULES_PREFIX)
+
+private fun String.findInfoLine(prefix: String): String? =
+  lines().firstOrNull { it.trimStart().startsWith(prefix) }?.substringAfter(prefix)?.trim()

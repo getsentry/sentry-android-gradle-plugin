@@ -2,6 +2,7 @@ package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryCliProvider
+import io.sentry.android.gradle.readSentryModules
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.GradleVersions
 import io.sentry.android.gradle.util.SemVer
@@ -80,7 +81,7 @@ class SentryPluginConfigurationCacheTest :
   }
 
   @Test
-  fun `SentryModulesService is not discarded at configuration phase`() {
+  fun `sentry modules are read from the resolved runtime classpath`() {
     appBuildFile.writeText(
       // language=Groovy
       """
@@ -114,15 +115,16 @@ class SentryPluginConfigurationCacheTest :
       .appendArguments("--info")
 
     val output = runner.build().output
-    val readSentryModules =
-      output
-        .lines()
-        .find { it.startsWith("[sentry] Read sentry modules:") }
-        ?.substringAfter("[sentry] Read sentry modules:")
-        ?.trim()
+
+    // androidx.work itself is absent on purpose: only the modules the instrumentation branches on
+    // are collected, so unrelated dependency bumps don't re-instrument everything. It does drag in
+    // androidx.sqlite:sqlite-framework, which the database instrumentation does branch on.
     assertEquals(
-      "{io.sentry:sentry-android-core=6.30.0, io.sentry:sentry=6.30.0, io.sentry:sentry-android-okhttp=6.30.0}",
-      readSentryModules,
+      "{androidx.sqlite:sqlite-framework=2.1.0, " +
+        "io.sentry:sentry=6.30.0, " +
+        "io.sentry:sentry-android-core=6.30.0, " +
+        "io.sentry:sentry-android-okhttp=6.30.0}",
+      output.readSentryModules(),
     )
   }
 
