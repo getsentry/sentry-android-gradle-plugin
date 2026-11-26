@@ -29,13 +29,11 @@ spotless {
   }
 }
 
-val sep = File.separator
-
 distributions {
   main {
     contents {
-      from("build${sep}libs")
-      from("build${sep}publications${sep}maven")
+      from("build/libs")
+      from("build/publications/maven")
     }
   }
 }
