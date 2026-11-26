@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Fix tracing instrumentation being skipped when Gradle reuses the configuration cache ([#TODO](https://github.com/getsentry/sentry-android-gradle-plugin/pull/TODO))
+- Fix tracing instrumentation being skipped when Gradle reuses the configuration cache ([#1516](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1516))
 
 ### Dependencies
 
