@@ -28,6 +28,12 @@ internal object GradleVersions {
   val VERSION_8_8: SemVer = SemVer.parse("8.8")
 }
 
+internal object ExternalModules {
+  internal val ANDROIDX_SQLITE_FRAMEWORK =
+    DefaultModuleIdentifier.newId("androidx.sqlite", "sqlite-framework")
+  internal val OKHTTP = DefaultModuleIdentifier.newId("com.squareup.okhttp3", "okhttp")
+}
+
 internal object SentryVersions {
   internal val VERSION_DEFAULT = SemVer()
   internal val VERSION_PERFORMANCE = SemVer(4, 0, 0)

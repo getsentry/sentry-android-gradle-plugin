@@ -22,7 +22,6 @@ import io.sentry.android.gradle.extensions.SentryPluginExtension
 import io.sentry.android.gradle.extensions.SentryVariantConfigResolver
 import io.sentry.android.gradle.instrumentation.SentrySdkOptimizationClassVisitorFactory
 import io.sentry.android.gradle.instrumentation.SpanAddingClassVisitorFactory
-import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.snapshot.GenerateSnapshotTestsTask
 import io.sentry.android.gradle.sourcecontext.OutputPaths
 import io.sentry.android.gradle.sourcecontext.SourceContext
@@ -184,27 +183,12 @@ fun ApplicationAndroidComponentsExtension.configure(
         SentryVariantConfigResolver.resolve(extension = extension, variantName = variant.name)
       val runtimeOptimizationsEnabled = instrumentationConfig.runtimeOptimizationsEnabled
       val tracingInstrumentationEnabled = instrumentationConfig.tracingInstrumentationEnabled
-      val modulesService =
+      val moduleVersions =
         if (tracingInstrumentationEnabled) {
-          SentryModulesService.register(
-              project,
-              extension.tracingInstrumentation.features,
-              extension.tracingInstrumentation.logcat.enabled,
-              extension.includeSourceContext,
-              extension.dexguardEnabled,
-              extension.tracingInstrumentation.appStart.enabled,
-            )
-            .also {
-              // Keep the service alive after configuration so instrumentation can read it.
-              buildEvents.onTaskCompletion(it)
-            }
+          project.collectModules("${variant.name}RuntimeClasspath", variant.name)
         } else {
           null
         }
-
-      modulesService?.let {
-        project.collectModules("${variant.name}RuntimeClasspath", variant.name, it)
-      }
 
       if (runtimeOptimizationsEnabled) {
         val buildTimeOptionsTask =
@@ -232,7 +216,7 @@ fun ApplicationAndroidComponentsExtension.configure(
       }
 
       if (tracingInstrumentationEnabled) {
-        val tracingModulesService = checkNotNull(modulesService)
+        val tracingModuleVersions = checkNotNull(moduleVersions)
 
         variant.configureInstrumentation(
           SpanAddingClassVisitorFactory::class.java,
@@ -246,7 +230,7 @@ fun ApplicationAndroidComponentsExtension.configure(
           params.debug.setDisallowChanges(extension.tracingInstrumentation.debug.get())
           params.logcatMinLevel.setDisallowChanges(extension.tracingInstrumentation.logcat.minLevel)
 
-          params.sentryModulesService.setDisallowChanges(tracingModulesService)
+          params.moduleVersions.setDisallowChanges(tracingModuleVersions)
           params.features.setDisallowChanges(extension.tracingInstrumentation.features)
           params.logcatEnabled.setDisallowChanges(extension.tracingInstrumentation.logcat.enabled)
           params.appStartEnabled.setDisallowChanges(
@@ -262,7 +246,7 @@ fun ApplicationAndroidComponentsExtension.configure(
             project,
             extension,
             sentryTelemetryProvider,
-            tracingModulesService,
+            tracingModuleVersions,
             variant.name,
           )
 

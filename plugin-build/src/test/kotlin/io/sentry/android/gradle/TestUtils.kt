@@ -293,3 +293,23 @@ internal fun verifySourceBundleContents(
 
   assertEquals(contents, sourceFileContents, "$sourceFilePath contents do not match $contents")
 }
+
+internal const val READ_MODULES_PREFIX = "[sentry] Read sentry modules:"
+
+internal const val INSTRUMENTABLE_PREFIX = "[sentry] Instrumentable:"
+
+/** The resolved module versions the instrumentation branched on, from an `--info` build log. */
+internal fun String.readSentryModules(): String? = findInfoLine(READ_MODULES_PREFIX)
+
+/** Every distinct set of module versions read during the build, one per instrumented variant. */
+internal fun String.readAllSentryModules(): Set<String> =
+  lines()
+    .filter { it.trimStart().startsWith(READ_MODULES_PREFIX) }
+    .map { it.substringAfter(READ_MODULES_PREFIX).trim() }
+    .toSet()
+
+/** The instrumentables the plugin chained together, from an `--info` build log. */
+internal fun String.readInstrumentable(): String? = findInfoLine(INSTRUMENTABLE_PREFIX)
+
+private fun String.findInfoLine(prefix: String): String? =
+  lines().firstOrNull { it.trimStart().startsWith(prefix) }?.substringAfter(prefix)?.trim()

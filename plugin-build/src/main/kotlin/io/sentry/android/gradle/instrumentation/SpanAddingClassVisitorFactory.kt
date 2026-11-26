@@ -24,13 +24,13 @@ import io.sentry.android.gradle.instrumentation.util.findClassWriter
 import io.sentry.android.gradle.instrumentation.util.isMinifiedClass
 import io.sentry.android.gradle.instrumentation.util.raiseComputeLimits
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
-import io.sentry.android.gradle.services.SentryModulesService
-import io.sentry.android.gradle.util.SemVer
+import io.sentry.android.gradle.util.ExternalModules
+import io.sentry.android.gradle.util.SentryModuleVersions
 import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.util.info
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
@@ -54,7 +54,12 @@ abstract class SpanAddingClassVisitorFactory :
 
     @get:Input val logcatMinLevel: Property<LogcatLevel>
 
-    @get:Internal val sentryModulesService: Property<SentryModulesService>
+    /**
+     * Resolved versions of the modules the instrumentation branches on, keyed by `"group:name"`. An
+     * `@Input` so that it keys the build cache, and so Gradle recomputes it when it reuses a
+     * configuration cache entry.
+     */
+    @get:Input val moduleVersions: MapProperty<String, String>
 
     @get:Internal val tmpDir: DirectoryProperty
 
@@ -74,48 +79,46 @@ abstract class SpanAddingClassVisitorFactory :
         return memoized
       }
 
-      val sentryModules = parameters.get().sentryModulesService.get().sentryModules
-      val externalModules = parameters.get().sentryModulesService.get().externalModules
-      val androidXSqliteFrameWorkModule =
-        DefaultModuleIdentifier.newId("androidx.sqlite", "sqlite-framework")
-      val androidXSqliteFrameWorkVersion =
-        externalModules.getOrDefault(androidXSqliteFrameWorkModule, SemVer())
-      val okHttpModule = DefaultModuleIdentifier.newId("com.squareup.okhttp3", "okhttp")
-      val okHttpVersion = externalModules.getOrDefault(okHttpModule, SemVer())
-      val sentryOkhttpVersion = sentryModules.getOrDefault(SentryModules.SENTRY_OKHTTP, SemVer())
-      val useSentryAndroidOkHttp = sentryOkhttpVersion < SentryVersions.VERSION_OKHTTP
+      val params = parameters.get()
+      val versions = SentryModuleVersions(params.moduleVersions.get())
+      val enabled =
+        EnabledInstrumentations(
+          versions,
+          params.features.get(),
+          params.logcatEnabled.get(),
+          params.appStartEnabled.get(),
+        )
 
-      SentryPlugin.logger.info { "Read sentry modules: $sentryModules" }
+      val androidXSqliteFrameWorkVersion = versions[ExternalModules.ANDROIDX_SQLITE_FRAMEWORK]
+      val okHttpVersion = versions[ExternalModules.OKHTTP]
+      val useSentryAndroidOkHttp =
+        versions[SentryModules.SENTRY_OKHTTP] < SentryVersions.VERSION_OKHTTP
 
-      val sentryModulesService = parameters.get().sentryModulesService.get()
+      SentryPlugin.logger.info { "Read sentry modules: ${versions.versions}" }
+
       val instrumentable =
         ChainedInstrumentable(
           listOfNotNull(
-            AndroidXSQLiteOpenHelper().takeIf { sentryModulesService.isNewDatabaseInstrEnabled() },
-            AndroidXSQLiteDriver().takeIf { sentryModulesService.isSQLiteDriverInstrEnabled() },
-            AndroidXSQLiteDatabase().takeIf { sentryModulesService.isOldDatabaseInstrEnabled() },
-            AndroidXSQLiteStatement(androidXSqliteFrameWorkVersion).takeIf {
-              sentryModulesService.isOldDatabaseInstrEnabled()
-            },
+            AndroidXSQLiteOpenHelper().takeIf { enabled.newDatabase },
+            AndroidXSQLiteDriver().takeIf { enabled.sqliteDriver },
+            AndroidXSQLiteDatabase().takeIf { enabled.oldDatabase },
+            AndroidXSQLiteStatement(androidXSqliteFrameWorkVersion).takeIf { enabled.oldDatabase },
             // Note that DAO spans no longer work on Room 2.7+ or Room 3.0+ due to Room API changes.
-            AndroidXRoomDao().takeIf {
-              sentryModulesService.isNewDatabaseInstrEnabled() ||
-                sentryModulesService.isOldDatabaseInstrEnabled()
-            },
+            AndroidXRoomDao().takeIf { enabled.newDatabase || enabled.oldDatabase },
             OkHttpEventListener(useSentryAndroidOkHttp, okHttpVersion).takeIf {
-              sentryModulesService.isOkHttpListenerInstrEnabled()
+              enabled.okHttpListener
             },
-            OkHttp(useSentryAndroidOkHttp).takeIf { sentryModulesService.isOkHttpInstrEnabled() },
-            WrappingInstrumentable().takeIf { sentryModulesService.isFileIOInstrEnabled() },
-            RemappingInstrumentable().takeIf { sentryModulesService.isFileIOInstrEnabled() },
-            ComposeNavigation().takeIf { sentryModulesService.isComposeInstrEnabled() },
-            Logcat().takeIf { sentryModulesService.isLogcatInstrEnabled() },
-            Application().takeIf { sentryModulesService.isAppStartInstrEnabled() },
-            ContentProvider().takeIf { sentryModulesService.isAppStartInstrEnabled() },
+            OkHttp(useSentryAndroidOkHttp).takeIf { enabled.okHttp },
+            WrappingInstrumentable().takeIf { enabled.fileIO },
+            RemappingInstrumentable().takeIf { enabled.fileIO },
+            ComposeNavigation().takeIf { enabled.compose },
+            Logcat().takeIf { enabled.logcat },
+            Application().takeIf { enabled.appStart },
+            ContentProvider().takeIf { enabled.appStart },
           )
         )
       SentryPlugin.logger.info { "Instrumentable: $instrumentable" }
-      parameters.get()._instrumentable = instrumentable
+      params._instrumentable = instrumentable
       return instrumentable
     }
 
