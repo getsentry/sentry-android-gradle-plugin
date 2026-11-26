@@ -87,31 +87,26 @@ abstract class SpanAddingClassVisitorFactory :
 
       SentryPlugin.logger.info { "Read sentry modules: $sentryModules" }
 
-      val sentryModulesService = parameters.get().sentryModulesService.get()
+      val enabled = parameters.get().sentryModulesService.get().enabledInstrumentations()
       val instrumentable =
         ChainedInstrumentable(
           listOfNotNull(
-            AndroidXSQLiteOpenHelper().takeIf { sentryModulesService.isNewDatabaseInstrEnabled() },
-            AndroidXSQLiteDriver().takeIf { sentryModulesService.isSQLiteDriverInstrEnabled() },
-            AndroidXSQLiteDatabase().takeIf { sentryModulesService.isOldDatabaseInstrEnabled() },
-            AndroidXSQLiteStatement(androidXSqliteFrameWorkVersion).takeIf {
-              sentryModulesService.isOldDatabaseInstrEnabled()
-            },
+            AndroidXSQLiteOpenHelper().takeIf { enabled.newDatabase },
+            AndroidXSQLiteDriver().takeIf { enabled.sqliteDriver },
+            AndroidXSQLiteDatabase().takeIf { enabled.oldDatabase },
+            AndroidXSQLiteStatement(androidXSqliteFrameWorkVersion).takeIf { enabled.oldDatabase },
             // Note that DAO spans no longer work on Room 2.7+ or Room 3.0+ due to Room API changes.
-            AndroidXRoomDao().takeIf {
-              sentryModulesService.isNewDatabaseInstrEnabled() ||
-                sentryModulesService.isOldDatabaseInstrEnabled()
-            },
+            AndroidXRoomDao().takeIf { enabled.newDatabase || enabled.oldDatabase },
             OkHttpEventListener(useSentryAndroidOkHttp, okHttpVersion).takeIf {
-              sentryModulesService.isOkHttpListenerInstrEnabled()
+              enabled.okHttpListener
             },
-            OkHttp(useSentryAndroidOkHttp).takeIf { sentryModulesService.isOkHttpInstrEnabled() },
-            WrappingInstrumentable().takeIf { sentryModulesService.isFileIOInstrEnabled() },
-            RemappingInstrumentable().takeIf { sentryModulesService.isFileIOInstrEnabled() },
-            ComposeNavigation().takeIf { sentryModulesService.isComposeInstrEnabled() },
-            Logcat().takeIf { sentryModulesService.isLogcatInstrEnabled() },
-            Application().takeIf { sentryModulesService.isAppStartInstrEnabled() },
-            ContentProvider().takeIf { sentryModulesService.isAppStartInstrEnabled() },
+            OkHttp(useSentryAndroidOkHttp).takeIf { enabled.okHttp },
+            WrappingInstrumentable().takeIf { enabled.fileIO },
+            RemappingInstrumentable().takeIf { enabled.fileIO },
+            ComposeNavigation().takeIf { enabled.compose },
+            Logcat().takeIf { enabled.logcat },
+            Application().takeIf { enabled.appStart },
+            ContentProvider().takeIf { enabled.appStart },
           )
         )
       SentryPlugin.logger.info { "Instrumentable: $instrumentable" }

@@ -4,9 +4,10 @@ package io.sentry.android.gradle.services
 
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import io.sentry.android.gradle.extensions.InstrumentationFeature
+import io.sentry.android.gradle.instrumentation.EnabledInstrumentations
 import io.sentry.android.gradle.util.SemVer
-import io.sentry.android.gradle.util.SentryModules
-import io.sentry.android.gradle.util.SentryVersions
+import io.sentry.android.gradle.util.SentryModuleVersions
+import io.sentry.android.gradle.util.SentryModuleVersions.Companion.key
 import io.sentry.android.gradle.util.getBuildServiceName
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ModuleIdentifier
@@ -28,21 +29,17 @@ abstract class SentryModulesService :
   @set:Synchronized
   var externalModules: Map<ModuleIdentifier, SemVer> = emptyMap()
 
+  /** Which instrumentations apply, given the modules detected for the last resolved variant. */
+  fun enabledInstrumentations(): EnabledInstrumentations =
+    EnabledInstrumentations(
+      SentryModuleVersions(sentryModules.entries.associate { (id, v) -> id.key() to v.toString() }),
+      parameters.features.get(),
+      parameters.logcatEnabled.get(),
+      parameters.appStartEnabled.get(),
+    )
+
   fun retrieveEnabledInstrumentationFeatures(project: Project): Provider<Set<String>> {
-    val features =
-      parameters.features
-        .get()
-        .filter { isInstrumentationEnabled(it) }
-        .map { it.integrationName }
-        .toMutableSet()
-
-    if (isLogcatInstrEnabled()) {
-      features.add("LogcatInstrumentation")
-    }
-
-    if (isAppStartInstrEnabled()) {
-      features.add("AppStartInstrumentation")
-    }
+    val features = enabledInstrumentations().integrationNames.toMutableSet()
 
     if (parameters.sourceContextEnabled.getOrElse(false)) {
       features.add("SourceContext")
@@ -54,85 +51,6 @@ abstract class SentryModulesService :
 
     return project.provider { features }
   }
-
-  private fun isInstrumentationEnabled(feature: InstrumentationFeature): Boolean {
-    return when (feature) {
-      InstrumentationFeature.DATABASE -> isOldDatabaseInstrEnabled() || isNewDatabaseInstrEnabled()
-      InstrumentationFeature.FILE_IO -> isFileIOInstrEnabled()
-      InstrumentationFeature.OKHTTP -> isOkHttpInstrEnabled()
-      InstrumentationFeature.COMPOSE -> isComposeInstrEnabled()
-    }
-  }
-
-  fun isLogcatInstrEnabled(): Boolean =
-    sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_CORE, SentryVersions.VERSION_LOGCAT) &&
-      parameters.logcatEnabled.get()
-
-  fun isNewDatabaseInstrEnabled(): Boolean =
-    sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_SQLITE, SentryVersions.VERSION_SQLITE) &&
-      parameters.features.get().contains(InstrumentationFeature.DATABASE)
-
-  /**
-   * Returns true when the owning app uses a version of sentry-android-sqlite that contains
-   * `SentrySQLiteDriver` and the DATABASE feature is enabled.
-   *
-   * For simplicity we avoid gating on the Room version and rely on visitor behavior instead (no-ops
-   * for versions of Room without a `SQLiteDriver`).
-   */
-  fun isSQLiteDriverInstrEnabled(): Boolean =
-    sentryModules.isAtLeast(
-      SentryModules.SENTRY_ANDROID_SQLITE,
-      SentryVersions.VERSION_SQLITE_DRIVER,
-    ) && parameters.features.get().contains(InstrumentationFeature.DATABASE)
-
-  fun isOldDatabaseInstrEnabled(): Boolean =
-    !isNewDatabaseInstrEnabled() &&
-      sentryModules.isAtLeast(
-        SentryModules.SENTRY_ANDROID_CORE,
-        SentryVersions.VERSION_PERFORMANCE,
-      ) &&
-      parameters.features.get().contains(InstrumentationFeature.DATABASE)
-
-  fun isFileIOInstrEnabled(): Boolean =
-    sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_CORE, SentryVersions.VERSION_FILE_IO) &&
-      parameters.features.get().contains(InstrumentationFeature.FILE_IO)
-
-  fun isOkHttpListenerInstrEnabled(): Boolean {
-    val isSentryAndroidOkHttpListener =
-      sentryModules.isAtLeast(
-        SentryModules.SENTRY_ANDROID_OKHTTP,
-        SentryVersions.VERSION_ANDROID_OKHTTP_LISTENER,
-      )
-    val isSentryOkHttpListener =
-      sentryModules.isAtLeast(SentryModules.SENTRY_OKHTTP, SentryVersions.VERSION_OKHTTP)
-    return (isSentryAndroidOkHttpListener || isSentryOkHttpListener) &&
-      parameters.features.get().contains(InstrumentationFeature.OKHTTP)
-  }
-
-  fun isOkHttpInstrEnabled(): Boolean {
-    val isSentryAndroidOkHttp =
-      sentryModules.isAtLeast(
-        SentryModules.SENTRY_ANDROID_OKHTTP,
-        SentryVersions.VERSION_ANDROID_OKHTTP,
-      )
-    val isSentryOkHttp =
-      sentryModules.isAtLeast(SentryModules.SENTRY_OKHTTP, SentryVersions.VERSION_OKHTTP)
-    return (isSentryAndroidOkHttp || isSentryOkHttp) &&
-      parameters.features.get().contains(InstrumentationFeature.OKHTTP)
-  }
-
-  fun isComposeInstrEnabled(): Boolean =
-    sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_COMPOSE, SentryVersions.VERSION_COMPOSE) &&
-      parameters.features.get().contains(InstrumentationFeature.COMPOSE)
-
-  fun isAppStartInstrEnabled(): Boolean =
-    sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_CORE, SentryVersions.VERSION_APP_START) &&
-      parameters.appStartEnabled.get()
-
-  private fun Map<ModuleIdentifier, SemVer>.isAtLeast(
-    module: ModuleIdentifier,
-    minVersion: SemVer,
-  ): Boolean = getOrDefault(module, SentryVersions.VERSION_DEFAULT) >= minVersion
 
   companion object {
     fun register(
