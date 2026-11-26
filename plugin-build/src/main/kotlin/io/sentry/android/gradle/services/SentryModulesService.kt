@@ -3,30 +3,49 @@
 package io.sentry.android.gradle.services
 
 import com.android.build.gradle.internal.utils.setDisallowChanges
+import io.sentry.android.gradle.SentryPlugin
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.SentryModules
 import io.sentry.android.gradle.util.SentryVersions
 import io.sentry.android.gradle.util.getBuildServiceName
+import io.sentry.android.gradle.util.info
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ModuleIdentifier
+import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 import org.gradle.api.tasks.Input
-import org.gradle.tooling.events.FinishEvent
-import org.gradle.tooling.events.OperationCompletionListener
 
-abstract class SentryModulesService :
-  BuildService<SentryModulesService.Parameters>, OperationCompletionListener {
+abstract class SentryModulesService : BuildService<SentryModulesService.Parameters> {
 
-  @get:Synchronized @set:Synchronized var sentryModules: Map<ModuleIdentifier, SemVer> = emptyMap()
+  // Derived from the parameters and not stored in fields, because Gradle keeps only the parameters
+  // when it reuses the configuration cache.
+  private val moduleVersions: Map<ModuleIdentifier, SemVer> by lazy {
+    parameters.moduleVersions.get().entries.associate { (module, version) ->
+      val (group, name) = module.split(":", limit = 2)
+      val semver =
+        try {
+          SemVer.parse(version)
+        } catch (e: Throwable) {
+          SentryPlugin.logger.info { "Unable to parse version $version of $module" }
+          SemVer()
+        }
+      DefaultModuleIdentifier.newId(group, name) to semver
+    }
+  }
 
-  @get:Synchronized
-  @set:Synchronized
-  var externalModules: Map<ModuleIdentifier, SemVer> = emptyMap()
+  val sentryModules: Map<ModuleIdentifier, SemVer> by lazy {
+    moduleVersions.filterKeys { it.group == SentryModules.SENTRY.group }
+  }
+
+  val externalModules: Map<ModuleIdentifier, SemVer> by lazy {
+    moduleVersions.filterKeys { it.group != SentryModules.SENTRY.group }
+  }
 
   fun retrieveEnabledInstrumentationFeatures(project: Project): Provider<Set<String>> {
     val features =
@@ -135,8 +154,14 @@ abstract class SentryModulesService :
   ): Boolean = getOrDefault(module, SentryVersions.VERSION_DEFAULT) >= minVersion
 
   companion object {
+    // One service for each variant, because each variant can resolve different module versions.
+    fun serviceName(project: Project, variantName: String): String =
+      "${getBuildServiceName(SentryModulesService::class.java)}_${project.path}_$variantName"
+
     fun register(
       project: Project,
+      variantName: String,
+      moduleVersions: Provider<Map<String, String>>,
       features: Provider<Set<InstrumentationFeature>>,
       logcatEnabled: Provider<Boolean>,
       sourceContextEnabled: Provider<Boolean>,
@@ -144,9 +169,10 @@ abstract class SentryModulesService :
       appStartEnabled: Provider<Boolean>,
     ): Provider<SentryModulesService> {
       return project.gradle.sharedServices.registerIfAbsent(
-        getBuildServiceName(SentryModulesService::class.java),
+        serviceName(project, variantName),
         SentryModulesService::class.java,
       ) {
+        it.parameters.moduleVersions.setDisallowChanges(moduleVersions)
         it.parameters.features.setDisallowChanges(features)
         it.parameters.logcatEnabled.setDisallowChanges(logcatEnabled)
         it.parameters.sourceContextEnabled.setDisallowChanges(sourceContextEnabled)
@@ -156,9 +182,12 @@ abstract class SentryModulesService :
     }
   }
 
-  override fun onFinish(event: FinishEvent?) = Unit // no-op
-
   interface Parameters : BuildServiceParameters {
+
+    /**
+     * Module versions keyed by `group:name`, see [io.sentry.android.gradle.util.collectModules].
+     */
+    @get:Input val moduleVersions: MapProperty<String, String>
 
     @get:Input val features: SetProperty<InstrumentationFeature>
 

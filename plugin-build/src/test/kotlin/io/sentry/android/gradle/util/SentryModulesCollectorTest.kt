@@ -1,12 +1,10 @@
 package io.sentry.android.gradle.util
 
-import com.google.common.truth.Truth.assertThat
 import io.sentry.android.gradle.extensions.InstrumentationFeature
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import io.sentry.android.gradle.services.SentryModulesService
 import java.io.File
 import kotlin.test.assertTrue
-import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvableDependencies
@@ -19,8 +17,6 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
@@ -36,7 +32,7 @@ class SentryModulesCollectorTest {
     val configurationName: String = "debugRuntimeClasspath"
     val variantName: String = "debug"
 
-    lateinit var sentryModulesServiceProvider: Provider<SentryModulesService>
+    private lateinit var sentryModulesServiceProvider: Provider<SentryModulesService>
     val logger = CapturingTestLogger()
 
     fun getSut(tmpDir: File, dependencies: Set<ResolvedComponentResult> = emptySet()): Project {
@@ -44,35 +40,24 @@ class SentryModulesCollectorTest {
       whenever(configuration.incoming).thenReturn(resolvableDependencies)
       whenever(resolvableDependencies.resolutionResult).thenReturn(resolutionResult)
       whenever(resolutionResult.allComponents).thenReturn(dependencies)
-      doAnswer {
-          // trigger the callback registered in tests
-          (it.arguments[0] as Action<ResolvableDependencies>).execute(resolvableDependencies)
-        }
-        .whenever(resolvableDependencies)
-        .afterResolve(any<Action<ResolvableDependencies>>())
-
-      val fakeProject = ProjectBuilder.builder().withProjectDir(tmpDir).build()
-
-      val featureProvider = fakeProject.provider { emptySet<InstrumentationFeature>() }
-      val logcatEnabled = fakeProject.provider { true }
-      val sourceContextEnabled = fakeProject.provider { true }
-      val dexguardEnabled = fakeProject.provider { true }
-      val appStartEnabled = fakeProject.provider { true }
-
-      val project = spy(fakeProject)
+      val project = spy(ProjectBuilder.builder().withProjectDir(tmpDir).build())
       whenever(project.logger).thenReturn(logger)
       project.configurations.add(configuration)
+      return project
+    }
+
+    fun collect(project: Project, configurationName: String, variantName: String) {
       sentryModulesServiceProvider =
         SentryModulesService.register(
           project,
-          featureProvider,
-          logcatEnabled,
-          sourceContextEnabled,
-          dexguardEnabled,
-          appStartEnabled,
+          variantName,
+          project.collectModules(configurationName, variantName),
+          project.provider { emptySet<InstrumentationFeature>() },
+          project.provider { true },
+          project.provider { true },
+          project.provider { true },
+          project.provider { true },
         )
-
-      return project
     }
 
     fun getSentryModules() = sentryModulesServiceProvider.get().sentryModules
@@ -87,14 +72,8 @@ class SentryModulesCollectorTest {
   @Test
   fun `configuration cannot be found - logs a warning and does not provide modules`() {
     val project = fixture.getSut(testProjectDir.root)
-    val modules =
-      project.collectModules(
-        "releaseRuntimeClasspath",
-        "release",
-        fixture.sentryModulesServiceProvider,
-      )
+    fixture.collect(project, "releaseRuntimeClasspath", "release")
     assertTrue { fixture.getSentryModules().isEmpty() }
-    assertThat(modules.isPresent).isFalse()
     assertTrue {
       fixture.logger.capturedMessage ==
         "[sentry] Unable to find configuration releaseRuntimeClasspath for variant release."
@@ -110,11 +89,7 @@ class SentryModulesCollectorTest {
       }
 
     val project = fixture.getSut(testProjectDir.root, dependencies = setOf(sqliteDep))
-    project.collectModules(
-      fixture.configurationName,
-      fixture.variantName,
-      fixture.sentryModulesServiceProvider,
-    )
+    fixture.collect(project, fixture.configurationName, fixture.variantName)
 
     assertTrue { fixture.getSentryModules().isEmpty() }
   }
@@ -131,11 +106,7 @@ class SentryModulesCollectorTest {
       }
 
     val project = fixture.getSut(testProjectDir.root, dependencies = setOf(sentryAndroidDep))
-    project.collectModules(
-      fixture.configurationName,
-      fixture.variantName,
-      fixture.sentryModulesServiceProvider,
-    )
+    fixture.collect(project, fixture.configurationName, fixture.variantName)
 
     val moduleIdentifier = DefaultModuleIdentifier.newId("io.sentry", "sentry-android-core")
     assertTrue {
@@ -144,7 +115,7 @@ class SentryModulesCollectorTest {
     }
     assertTrue {
       fixture.logger.capturedMessage ==
-        "[sentry] Detected Sentry modules {io.sentry:sentry-android-core=0.0.0} " +
+        "[sentry] Detected Sentry modules {io.sentry:sentry-android-core=unspecified} " +
           "for variant: debug, config: debugRuntimeClasspath"
     }
   }
@@ -160,11 +131,7 @@ class SentryModulesCollectorTest {
       }
 
     val project = fixture.getSut(testProjectDir.root, dependencies = setOf(sentryAndroidDep))
-    project.collectModules(
-      fixture.configurationName,
-      fixture.variantName,
-      fixture.sentryModulesServiceProvider,
-    )
+    fixture.collect(project, fixture.configurationName, fixture.variantName)
 
     val moduleIdentifier = DefaultModuleIdentifier.newId("io.sentry", "sentry-android-core")
     assertTrue {
@@ -192,15 +159,9 @@ class SentryModulesCollectorTest {
       }
 
     val project = fixture.getSut(testProjectDir.root, dependencies = setOf(sqliteDep))
-    val modules =
-      project.collectModules(
-        fixture.configurationName,
-        fixture.variantName,
-        fixture.sentryModulesServiceProvider,
-      )
+    fixture.collect(project, fixture.configurationName, fixture.variantName)
 
     assertTrue { fixture.getExternalModules()[moduleIdentifier]!! == SemVer.parse(version) }
-    assertThat(modules.get()).containsExactly(moduleIdentifier)
   }
 
   @Test
@@ -230,11 +191,7 @@ class SentryModulesCollectorTest {
         testProjectDir.root,
         dependencies = setOf(firstLevelDep, transitiveSentryDep, okHttpDep),
       )
-    project.collectModules(
-      fixture.configurationName,
-      fixture.variantName,
-      fixture.sentryModulesServiceProvider,
-    )
+    fixture.collect(project, fixture.configurationName, fixture.variantName)
 
     val sentryAndroidModule = DefaultModuleIdentifier.newId("io.sentry", "sentry-android")
     val sentryAndroidCoreModule = DefaultModuleIdentifier.newId("io.sentry", "sentry-android-core")

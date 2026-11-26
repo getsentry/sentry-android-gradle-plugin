@@ -97,9 +97,9 @@ class SentryPluginCheckAndroidSdkTest :
         BuildFinishedListenerService.@Companion.getInstance(project.gradle).onClose {
             println(
                 "SENTRY MODULES: " +
-                    BuildServicesKt
-                        .getBuildService(project.gradle.sharedServices, SentryModulesService.class)
-                        .get().sentryModules
+                    project.gradle.sharedServices.registrations
+                        .getByName(SentryModulesService.@Companion.serviceName(project, "debug"))
+                        .service.get().sentryModules
             )
         }
         """

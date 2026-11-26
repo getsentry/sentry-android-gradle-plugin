@@ -187,24 +187,18 @@ fun ApplicationAndroidComponentsExtension.configure(
       val modulesService =
         if (tracingInstrumentationEnabled) {
           SentryModulesService.register(
-              project,
-              extension.tracingInstrumentation.features,
-              extension.tracingInstrumentation.logcat.enabled,
-              extension.includeSourceContext,
-              extension.dexguardEnabled,
-              extension.tracingInstrumentation.appStart.enabled,
-            )
-            .also {
-              // Keep the service alive after configuration so instrumentation can read it.
-              buildEvents.onTaskCompletion(it)
-            }
+            project,
+            variant.name,
+            project.collectModules("${variant.name}RuntimeClasspath", variant.name),
+            extension.tracingInstrumentation.features,
+            extension.tracingInstrumentation.logcat.enabled,
+            extension.includeSourceContext,
+            extension.dexguardEnabled,
+            extension.tracingInstrumentation.appStart.enabled,
+          )
         } else {
           null
         }
-
-      modulesService?.let {
-        project.collectModules("${variant.name}RuntimeClasspath", variant.name, it)
-      }
 
       if (runtimeOptimizationsEnabled) {
         val buildTimeOptionsTask =

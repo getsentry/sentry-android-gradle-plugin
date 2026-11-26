@@ -31,15 +31,19 @@ class SentryModulesServiceTest {
       val serviceProvider =
         SentryModulesService.register(
           fakeProject,
+          "debug",
+          fakeProject.provider {
+            sentryModules.entries.associate { (module, version) ->
+              module.toString() to version.toString()
+            }
+          },
           featureProvider,
           logcatEnabled,
           sourceContextEnabled,
           dexguardEnabled,
           appStartEnabled,
         )
-      val service = serviceProvider.get()
-      service.sentryModules = sentryModules
-      return service
+      return serviceProvider.get()
     }
   }
 

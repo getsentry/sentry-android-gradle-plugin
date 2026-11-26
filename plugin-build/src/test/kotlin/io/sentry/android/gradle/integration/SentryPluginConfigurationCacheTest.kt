@@ -80,53 +80,6 @@ class SentryPluginConfigurationCacheTest :
   }
 
   @Test
-  fun `SentryModulesService is not discarded at configuration phase`() {
-    appBuildFile.writeText(
-      // language=Groovy
-      """
-            plugins {
-              id "com.android.application"
-              id "io.sentry.android.gradle"
-            }
-
-            android {
-              namespace 'com.example'
-            }
-
-            dependencies {
-              implementation 'io.sentry:sentry-android-core:6.30.0'
-              implementation 'io.sentry:sentry-android-okhttp:6.30.0'
-              implementation 'androidx.work:work-runtime:2.5.0'
-            }
-
-            sentry {
-              autoUploadProguardMapping = false
-              autoInstallation.enabled = false
-              telemetry = false
-            }
-            """
-        .trimIndent()
-    )
-
-    runner
-      .appendArguments(":app:assembleDebug")
-      .appendArguments("--configuration-cache")
-      .appendArguments("--info")
-
-    val output = runner.build().output
-    val readSentryModules =
-      output
-        .lines()
-        .find { it.startsWith("[sentry] Read sentry modules:") }
-        ?.substringAfter("[sentry] Read sentry modules:")
-        ?.trim()
-    assertEquals(
-      "{io.sentry:sentry-android-core=6.30.0, io.sentry:sentry=6.30.0, io.sentry:sentry-android-okhttp=6.30.0}",
-      readSentryModules,
-    )
-  }
-
-  @Test
   fun `works well with configuration cache`() {
     // configuration cache doesn't seem to work well on older Gradle/AGP combinations
     // producing the following output:
@@ -362,5 +315,105 @@ class SentryPluginConfigurationCacheTest :
       listOf("AppStartInstrumentation", "LogcatInstrumentation"),
       integrationsSecond.sorted(),
     )
+  }
+
+  @Test
+  fun `instrumentation is applied when configuration cache is reused`() {
+    assumeThat(
+      "We only support configuration cache from AGP 7.4.0 and Gradle 8.0.0 onwards",
+      SemVer.parse(BuildConfig.AgpVersion) >= AgpVersions.VERSION_7_4_0 &&
+        GradleVersions.CURRENT >= GradleVersions.VERSION_8_0,
+      `is`(true),
+    )
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+            }
+
+            dependencies {
+              implementation 'io.sentry:sentry-android-core:6.30.0'
+            }
+
+            sentry {
+              autoUploadProguardMapping = false
+              autoInstallation.enabled = false
+              telemetry = false
+              tracingInstrumentation.features = [
+                io.sentry.android.gradle.extensions.InstrumentationFeature.FILE_IO
+              ]
+            }
+            """
+        .trimIndent()
+    )
+    val sourceFile =
+      File(testProjectDir.root, "app/src/main/java/com/example/FileReader.java").apply {
+        parentFile.mkdirs()
+      }
+    fun writeSource(extraMethod: String = "") =
+      sourceFile.writeText(
+        // language=Java
+        """
+          package com.example;
+
+          import java.io.File;
+          import java.io.FileInputStream;
+          import java.io.IOException;
+
+          public class FileReader {
+            public int read(File file) throws IOException {
+              try (FileInputStream stream = new FileInputStream(file)) {
+                return stream.read();
+              }
+            }
+            $extraMethod
+          }
+          """
+          .trimIndent()
+      )
+
+    writeSource()
+    runner.appendArguments(":app:assembleDebug").appendArguments("--configuration-cache")
+
+    val firstBuild = runner.build()
+    assertTrue("Configuration cache entry stored." in firstBuild.output, firstBuild.output)
+    assertTrue(
+      instrumentedClassBytes("FileReader.class").contains(SENTRY_FILE_INPUT_STREAM_FACTORY),
+      "FileReader should be instrumented when the configuration cache entry is stored",
+    )
+
+    // A source change does not invalidate the configuration cache, but re-runs the ASM transform
+    writeSource(extraMethod = "public void unused() {}")
+
+    val secondBuild = runner.build()
+    assertTrue("Configuration cache entry reused." in secondBuild.output, secondBuild.output)
+    assertEquals(
+      TaskOutcome.SUCCESS,
+      secondBuild.task(":app:transformDebugClassesWithAsm")?.outcome,
+      secondBuild.output,
+    )
+    assertTrue(
+      instrumentedClassBytes("FileReader.class").contains(SENTRY_FILE_INPUT_STREAM_FACTORY),
+      "FileReader should be instrumented when the configuration cache entry is reused",
+    )
+  }
+
+  private fun instrumentedClassBytes(className: String): String {
+    val classFile =
+      File(testProjectDir.root, "app/build/intermediates/classes/debug").walkTopDown().single {
+        it.name == className && "transformDebugClassesWithAsm" in it.path
+      }
+    return String(classFile.readBytes(), Charsets.ISO_8859_1)
+  }
+
+  companion object {
+    private const val SENTRY_FILE_INPUT_STREAM_FACTORY =
+      "io/sentry/instrumentation/file/SentryFileInputStream\$Factory"
   }
 }

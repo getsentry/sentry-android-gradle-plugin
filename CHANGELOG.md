@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fix tracing instrumentation being skipped when Gradle reuses the configuration cache ([#TODO](https://github.com/getsentry/sentry-android-gradle-plugin/pull/TODO))
+
 ### Dependencies
 
 - Bump Android SDK from v8.64.0 to v8.65.0 ([#1507](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1507))
