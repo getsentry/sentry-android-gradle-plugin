@@ -11,13 +11,13 @@ import org.slf4j.Logger
 // @CacheableRule
 abstract class SpringBoot3InstallStrategy : AbstractInstallStrategy {
 
-  constructor(logger: Logger) : super() {
+  constructor(sentryVersion: String, logger: Logger) : super(sentryVersion) {
     this.logger = logger
   }
 
   @Suppress("unused") // used by Gradle
   @Inject // inject is needed to avoid Gradle error
-  constructor() : this(SentryPlugin.logger)
+  constructor(sentryVersion: String) : this(sentryVersion, SentryPlugin.logger)
 
   override val sentryModuleId: String
     get() = SENTRY_SPRING_BOOT_3_ID
@@ -39,11 +39,13 @@ abstract class SpringBoot3InstallStrategy : AbstractInstallStrategy {
     private val MIN_SUPPORTED_VERSION = SemVer(3, 0, 0)
     private val MAX_SUPPORTED_VERSION = SemVer(3, 9999, 9999)
 
-    override fun register(component: ComponentMetadataHandler) {
+    override fun register(component: ComponentMetadataHandler, sentryVersion: String) {
       component.withModule(
         "$SPRING_GROUP:$SPRING_BOOT_3_ID",
         SpringBoot3InstallStrategy::class.java,
-      ) {}
+      ) {
+        it.params(sentryVersion)
+      }
     }
   }
 }

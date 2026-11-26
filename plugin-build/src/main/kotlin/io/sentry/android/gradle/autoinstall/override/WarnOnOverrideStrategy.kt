@@ -1,7 +1,6 @@
 package io.sentry.android.gradle.autoinstall.override
 
 import io.sentry.android.gradle.SentryPlugin
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.autoinstall.InstallStrategyRegistrar
 import io.sentry.android.gradle.util.SemVer
 import io.sentry.android.gradle.util.SentryModules
@@ -15,23 +14,19 @@ import org.slf4j.Logger
 abstract class WarnOnOverrideStrategy : ComponentMetadataRule {
 
   private var logger: Logger
+  private val sentryVersion: String
 
-  constructor(logger: Logger) : super() {
+  constructor(sentryVersion: String, logger: Logger) : super() {
+    this.sentryVersion = sentryVersion
     this.logger = logger
   }
 
   @Suppress("unused") // used by Gradle
   @Inject // inject is needed to avoid Gradle error
-  constructor() : this(SentryPlugin.logger)
+  constructor(sentryVersion: String) : this(sentryVersion, SentryPlugin.logger)
 
   override fun execute(context: ComponentMetadataContext) {
-    val autoInstallState = AutoInstallState.getInstance()
-
-    if (!autoInstallState.enabled) {
-      return
-    }
-
-    val providedVersion = parseVersionSafely(autoInstallState.sentryVersion) ?: return
+    val providedVersion = parseVersionSafely(sentryVersion) ?: return
     val userVersion = parseVersionSafely(context.details.id.version) ?: return
 
     if (userVersion < providedVersion) {
@@ -82,9 +77,11 @@ abstract class WarnOnOverrideStrategy : ComponentMetadataRule {
         SentryModules.SENTRY_SPRING_BOOT4,
       )
 
-    override fun register(component: ComponentMetadataHandler) {
+    override fun register(component: ComponentMetadataHandler, sentryVersion: String) {
       sentryModules.forEach { module ->
-        component.withModule(module.toString(), WarnOnOverrideStrategy::class.java) {}
+        component.withModule(module.toString(), WarnOnOverrideStrategy::class.java) {
+          it.params(sentryVersion)
+        }
       }
     }
   }

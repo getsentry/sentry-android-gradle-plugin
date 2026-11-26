@@ -11,13 +11,13 @@ import org.slf4j.Logger
 // @CacheableRule
 abstract class KotlinExtensionsInstallStrategy : AbstractInstallStrategy {
 
-  constructor(logger: Logger) : super() {
+  constructor(sentryVersion: String, logger: Logger) : super(sentryVersion) {
     this.logger = logger
   }
 
   @Suppress("unused") // used by Gradle
   @Inject // inject is needed to avoid Gradle error
-  constructor() : this(SentryPlugin.logger)
+  constructor(sentryVersion: String) : this(sentryVersion, SentryPlugin.logger)
 
   override val sentryModuleId: String
     get() = SENTRY_KOTLIN_EXTENSIONS_ID
@@ -37,11 +37,13 @@ abstract class KotlinExtensionsInstallStrategy : AbstractInstallStrategy {
 
     private val MIN_SUPPORTED_VERSION = SemVer(1, 6, 1)
 
-    override fun register(component: ComponentMetadataHandler) {
+    override fun register(component: ComponentMetadataHandler, sentryVersion: String) {
       component.withModule(
         "$KOTLINX_GROUP:$KOTLIN_COROUTINES_ID",
         KotlinExtensionsInstallStrategy::class.java,
-      ) {}
+      ) {
+        it.params(sentryVersion)
+      }
     }
   }
 }

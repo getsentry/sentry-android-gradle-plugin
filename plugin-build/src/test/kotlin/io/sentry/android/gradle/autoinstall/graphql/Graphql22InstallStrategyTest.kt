@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.autoinstall.graphql
 
-import io.sentry.android.gradle.autoinstall.AutoInstallState
 import io.sentry.android.gradle.instrumentation.fakes.CapturingTestLogger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -45,11 +44,7 @@ class Graphql22InstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(graphqlVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      with(AutoInstallState.getInstance()) {
-        this.enabled = true
-        this.sentryVersion = "8.0.0"
-      }
-      return Graphql22InstallStrategyImpl(logger)
+      return Graphql22InstallStrategyImpl(sentryVersion = "8.0.0", logger)
     }
   }
 
@@ -83,5 +78,6 @@ class Graphql22InstallStrategyTest {
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
 
-  private class Graphql22InstallStrategyImpl(logger: Logger) : Graphql22InstallStrategy(logger)
+  private class Graphql22InstallStrategyImpl(sentryVersion: String, logger: Logger) :
+    Graphql22InstallStrategy(sentryVersion, logger)
 }

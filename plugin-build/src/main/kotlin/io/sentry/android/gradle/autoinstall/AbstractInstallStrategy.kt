@@ -8,7 +8,7 @@ import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
 import org.slf4j.Logger
 
-abstract class AbstractInstallStrategy : ComponentMetadataRule {
+abstract class AbstractInstallStrategy(private val sentryVersion: String) : ComponentMetadataRule {
 
   protected lateinit var logger: Logger
 
@@ -23,11 +23,6 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
   protected open val maxSupportedSentryVersion: SemVer = SemVer(0, 0, 0)
 
   override fun execute(context: ComponentMetadataContext) {
-    val autoInstallState = AutoInstallState.getInstance()
-    if (!autoInstallState.enabled) {
-      logger.info { "$sentryModuleId won't be installed because autoInstallation is disabled" }
-      return
-    }
     minSupportedThirdPartyVersion?.let {
       parseVersion(context.details.id.version)?.let { thirdPartySemVersion ->
         if (thirdPartySemVersion < it) {
@@ -53,7 +48,7 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
 
     if (minSupportedSentryVersion.major > 0) {
       try {
-        val sentrySemVersion = SemVer.parse(autoInstallState.sentryVersion)
+        val sentrySemVersion = SemVer.parse(sentryVersion)
         if (sentrySemVersion < minSupportedSentryVersion) {
           logger.warn {
             "$sentryModuleId won't be installed because the current sentry version " +
@@ -65,7 +60,7 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
       } catch (ex: IllegalArgumentException) {
         logger.warn {
           "$sentryModuleId won't be installed because the provided " +
-            "sentry version(${autoInstallState.sentryVersion}) could not be " +
+            "sentry version(${sentryVersion}) could not be " +
             "processed as a semantic version."
         }
         return
@@ -74,7 +69,7 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
 
     if (maxSupportedSentryVersion.major > 0) {
       try {
-        val sentrySemVersion = SemVer.parse(autoInstallState.sentryVersion)
+        val sentrySemVersion = SemVer.parse(sentryVersion)
         if (sentrySemVersion > maxSupportedSentryVersion) {
           logger.debug {
             "$sentryModuleId won't be installed because the current sentry version " +
@@ -86,7 +81,7 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
       } catch (ex: IllegalArgumentException) {
         logger.warn {
           "$sentryModuleId won't be installed because the provided " +
-            "sentry version(${autoInstallState.sentryVersion}) could not be " +
+            "sentry version(${sentryVersion}) could not be " +
             "processed as a semantic version."
         }
         return
@@ -95,7 +90,6 @@ abstract class AbstractInstallStrategy : ComponentMetadataRule {
 
     context.details.allVariants { metadata ->
       metadata.withDependencies { dependencies ->
-        val sentryVersion = autoInstallState.sentryVersion
         dependencies.add("$SENTRY_GROUP:$sentryModuleId:$sentryVersion")
 
         logger.info { "$sentryModuleId was successfully installed with version: $sentryVersion" }

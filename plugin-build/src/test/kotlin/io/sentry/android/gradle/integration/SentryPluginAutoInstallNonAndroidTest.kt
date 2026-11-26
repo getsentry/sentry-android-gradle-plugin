@@ -631,6 +631,58 @@ class SentryPluginAutoInstallNonAndroidTest :
     assertFalse { "FAILED" in result.output }
   }
 
+  @Test
+  fun `auto-install settings of one project do not leak into another`() {
+    // The auto-install state used to live in a build-wide singleton: app wrote enabled=true into
+    // it, and module's rules read that instead of module's own enabled=false.
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+                id "java"
+                id "io.sentry.jvm.gradle"
+            }
+
+            sentry.autoInstallation.enabled = true
+            sentry.autoInstallation.sentryVersion = "6.28.0"
+            """
+        .trimIndent()
+    )
+    moduleBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+                id "java"
+                id "io.sentry.jvm.gradle"
+            }
+
+            dependencies {
+              implementation 'ch.qos.logback:logback-classic:1.0.0'
+            }
+
+            sentry.autoInstallation.enabled = false
+            """
+        .trimIndent()
+    )
+
+    // app must resolve first, so that on the old code it has written the singleton by the time
+    // module resolves.
+    val result =
+      runner
+        .appendArguments(
+          ":app:dependencies",
+          "--configuration",
+          "runtimeClasspath",
+          ":module:dependencies",
+          "--configuration",
+          "runtimeClasspath",
+        )
+        .build()
+
+    assertTrue { "io.sentry:sentry:6.28.0" in result.output }
+    assertFalse { "io.sentry:sentry-logback" in result.output }
+  }
+
   private fun runListDependenciesTask() = runner.appendArguments("app:dependencies").build()
 
   private fun writeSentryOpenTelemetryBom(version: String) {
