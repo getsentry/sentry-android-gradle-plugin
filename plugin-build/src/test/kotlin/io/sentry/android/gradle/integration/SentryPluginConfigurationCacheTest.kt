@@ -2,6 +2,7 @@ package io.sentry.android.gradle.integration
 
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.SentryCliProvider
+import io.sentry.android.gradle.readInstrumentable
 import io.sentry.android.gradle.readSentryModules
 import io.sentry.android.gradle.util.AgpVersions
 import io.sentry.android.gradle.util.GradleVersions
@@ -126,6 +127,70 @@ class SentryPluginConfigurationCacheTest :
         "io.sentry:sentry-android-okhttp=6.30.0}",
       output.readSentryModules(),
     )
+  }
+
+  @Test
+  fun `instrumentation is applied when the configuration cache is reused`() {
+    assumeThat(
+      "We only support configuration cache from AGP 7.4.0 and Gradle 8.0.0 onwards",
+      SemVer.parse(BuildConfig.AgpVersion) >= AgpVersions.VERSION_7_4_0 &&
+        GradleVersions.CURRENT >= GradleVersions.VERSION_8_0,
+      `is`(true),
+    )
+
+    appBuildFile.writeText(
+      // language=Groovy
+      """
+            plugins {
+              id "com.android.application"
+              id "io.sentry.android.gradle"
+            }
+
+            android {
+              namespace 'com.example'
+            }
+
+            dependencies {
+              implementation 'io.sentry:sentry-android:8.0.0'
+            }
+
+            sentry {
+              autoUploadProguardMapping = false
+              autoInstallation.enabled = false
+              telemetry = false
+              tracingInstrumentation {
+                enabled = true
+                appStart.enabled = true
+                logcat.enabled = true
+              }
+            }
+            """
+        .trimIndent()
+    )
+
+    runner.appendArguments(
+      ":app:assembleDebug",
+      "--configuration-cache",
+      "--no-build-cache",
+      "--info",
+    )
+
+    val storingRun = runner.build().output
+    assertTrue("Configuration cache entry stored." in storingRun, storingRun)
+    val modules = storingRun.readSentryModules()
+    val instrumentable = storingRun.readInstrumentable()
+    assertTrue(
+      instrumentable?.contains("Application") == true,
+      "app start instrumentation missing from $instrumentable",
+    )
+
+    // The transform only re-runs on inputs it hasn't seen, and that is the build we care about.
+    assertTrue(File(testProjectDir.root, "app/build").deleteRecursively())
+
+    val reusingRun = runner.build().output
+    assertTrue("Configuration cache entry reused." in reusingRun, reusingRun)
+    assertEquals(modules, reusingRun.readSentryModules())
+    assertEquals(instrumentable, reusingRun.readInstrumentable())
   }
 
   @Test

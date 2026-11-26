@@ -3,6 +3,7 @@ package io.sentry.android.gradle.integration
 import com.google.common.truth.Truth.assertThat
 import io.sentry.BuildConfig
 import io.sentry.android.gradle.READ_MODULES_PREFIX
+import io.sentry.android.gradle.readAllSentryModules
 import io.sentry.android.gradle.readSentryModules
 import org.gradle.util.GradleVersion
 import org.junit.Test
@@ -75,6 +76,48 @@ class SentryPluginCheckAndroidSdkTest :
           "io.sentry:sentry-android=5.4.0, " +
           "io.sentry:sentry-android-core=5.4.0, " +
           "io.sentry:sentry-android-ndk=5.4.0}"
+      )
+  }
+
+  @Test
+  fun `each variant is instrumented against its own resolved versions`() {
+    // The versions used to live on a build-wide build service, so whichever variant resolved last
+    // decided the instrumentation for all of them. They are now a per-variant transform input.
+    appBuildFile.appendText(
+      // language=Groovy
+      """
+            sentry {
+              tracingInstrumentation.enabled = true
+              autoInstallation.enabled = false
+              includeProguardMapping = false
+            }
+
+            configurations {
+              debugImplementation
+              releaseImplementation
+            }
+
+            dependencies {
+              debugImplementation 'io.sentry:sentry-android:5.4.0'
+              releaseImplementation 'io.sentry:sentry-android:5.5.0'
+            }
+            """
+        .trimIndent()
+    )
+
+    val result =
+      runner.appendArguments("app:assembleDebug", "app:assembleRelease", "--info").build()
+
+    assertThat(result.output.readAllSentryModules())
+      .containsExactly(
+        "{io.sentry:sentry=5.4.0, " +
+          "io.sentry:sentry-android=5.4.0, " +
+          "io.sentry:sentry-android-core=5.4.0, " +
+          "io.sentry:sentry-android-ndk=5.4.0}",
+        "{io.sentry:sentry=5.5.0, " +
+          "io.sentry:sentry-android=5.5.0, " +
+          "io.sentry:sentry-android-core=5.5.0, " +
+          "io.sentry:sentry-android-ndk=5.5.0}",
       )
   }
 }
