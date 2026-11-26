@@ -48,11 +48,7 @@ class AndroidOkHttpInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(okHttpVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      return AndroidOkHttpInstallStrategyImpl(
-        autoInstallEnabled = true,
-        sentryVersion = sentryVersion,
-        logger,
-      )
+      return AndroidOkHttpInstallStrategyImpl(sentryVersion = sentryVersion, logger)
     }
   }
 
@@ -97,9 +93,6 @@ class AndroidOkHttpInstallStrategyTest {
       .add(check<String> { assertEquals("io.sentry:sentry-android-okhttp:5.6.1", it) })
   }
 
-  private class AndroidOkHttpInstallStrategyImpl(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : AndroidOkHttpInstallStrategy(autoInstallEnabled, sentryVersion, logger)
+  private class AndroidOkHttpInstallStrategyImpl(sentryVersion: String, logger: Logger) :
+    AndroidOkHttpInstallStrategy(sentryVersion, logger)
 }

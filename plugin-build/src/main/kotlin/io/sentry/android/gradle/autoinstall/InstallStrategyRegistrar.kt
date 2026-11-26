@@ -3,9 +3,5 @@ package io.sentry.android.gradle.autoinstall
 import org.gradle.api.artifacts.dsl.ComponentMetadataHandler
 
 interface InstallStrategyRegistrar {
-  fun register(
-    component: ComponentMetadataHandler,
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-  )
+  fun register(component: ComponentMetadataHandler, sentryVersion: String)
 }

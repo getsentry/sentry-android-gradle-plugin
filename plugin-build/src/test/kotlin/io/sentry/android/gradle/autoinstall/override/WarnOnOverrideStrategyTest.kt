@@ -11,8 +11,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.slf4j.Logger
 
@@ -23,10 +21,7 @@ class WarnOnOverrideStrategyTest {
     val metadataContext =
       mock<ComponentMetadataContext> { whenever(it.details).thenReturn(metadataDetails) }
 
-    fun getSut(
-      enabled: Boolean = true,
-      userDefinedVersion: String = "6.0.0",
-    ): WarnOnOverrideStrategy {
+    fun getSut(userDefinedVersion: String = "6.0.0"): WarnOnOverrideStrategy {
       val id =
         mock<ModuleVersionIdentifier> {
           whenever(it.module).doReturn(SentryModules.SENTRY_ANDROID)
@@ -34,23 +29,11 @@ class WarnOnOverrideStrategyTest {
         }
       whenever(metadataDetails.id).thenReturn(id)
 
-      return WarnOnOverrideStrategyImpl(
-        autoInstallEnabled = enabled,
-        sentryVersion = "6.34.0",
-        logger,
-      )
+      return WarnOnOverrideStrategyImpl(sentryVersion = "6.34.0", logger)
     }
   }
 
   private val fixture = Fixture()
-
-  @Test
-  fun `when autoInstall is disabled does nothing`() {
-    val sut = fixture.getSut(enabled = false)
-    sut.execute(fixture.metadataContext)
-
-    verify(fixture.metadataContext, never()).details
-  }
 
   @Test
   fun `when unknown version does nothing`() {
@@ -82,9 +65,6 @@ class WarnOnOverrideStrategyTest {
     }
   }
 
-  private class WarnOnOverrideStrategyImpl(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : WarnOnOverrideStrategy(autoInstallEnabled, sentryVersion, logger)
+  private class WarnOnOverrideStrategyImpl(sentryVersion: String, logger: Logger) :
+    WarnOnOverrideStrategy(sentryVersion, logger)
 }

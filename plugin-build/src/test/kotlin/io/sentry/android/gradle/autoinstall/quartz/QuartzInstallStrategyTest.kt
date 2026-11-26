@@ -43,7 +43,7 @@ class QuartzInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(quartzVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      return QuartzInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "6.30.0", logger)
+      return QuartzInstallStrategyImpl(sentryVersion = "6.30.0", logger)
     }
   }
 
@@ -62,9 +62,6 @@ class QuartzInstallStrategyTest {
       .add(org.mockito.kotlin.check<String> { assertEquals("io.sentry:sentry-quartz:6.30.0", it) })
   }
 
-  private class QuartzInstallStrategyImpl(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : QuartzInstallStrategy(autoInstallEnabled, sentryVersion, logger)
+  private class QuartzInstallStrategyImpl(sentryVersion: String, logger: Logger) :
+    QuartzInstallStrategy(sentryVersion, logger)
 }

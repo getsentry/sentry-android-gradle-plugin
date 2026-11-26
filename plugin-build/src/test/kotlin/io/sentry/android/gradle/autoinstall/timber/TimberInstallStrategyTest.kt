@@ -45,7 +45,7 @@ class TimberInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(timberVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      return TimberInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "5.6.1", logger)
+      return TimberInstallStrategyImpl(sentryVersion = "5.6.1", logger)
     }
   }
 
@@ -77,9 +77,6 @@ class TimberInstallStrategyTest {
       .add(check<String> { assertEquals("io.sentry:sentry-android-timber:5.6.1", it) })
   }
 
-  private class TimberInstallStrategyImpl(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : TimberInstallStrategy(autoInstallEnabled, sentryVersion, logger)
+  private class TimberInstallStrategyImpl(sentryVersion: String, logger: Logger) :
+    TimberInstallStrategy(sentryVersion, logger)
 }

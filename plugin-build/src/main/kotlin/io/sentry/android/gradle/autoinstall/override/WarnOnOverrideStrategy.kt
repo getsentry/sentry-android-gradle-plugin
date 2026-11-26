@@ -14,27 +14,18 @@ import org.slf4j.Logger
 abstract class WarnOnOverrideStrategy : ComponentMetadataRule {
 
   private var logger: Logger
-  private val autoInstallEnabled: Boolean
   private val sentryVersion: String
 
-  constructor(autoInstallEnabled: Boolean, sentryVersion: String, logger: Logger) : super() {
-    this.autoInstallEnabled = autoInstallEnabled
+  constructor(sentryVersion: String, logger: Logger) : super() {
     this.sentryVersion = sentryVersion
     this.logger = logger
   }
 
   @Suppress("unused") // used by Gradle
   @Inject // inject is needed to avoid Gradle error
-  constructor(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-  ) : this(autoInstallEnabled, sentryVersion, SentryPlugin.logger)
+  constructor(sentryVersion: String) : this(sentryVersion, SentryPlugin.logger)
 
   override fun execute(context: ComponentMetadataContext) {
-    if (!autoInstallEnabled) {
-      return
-    }
-
     val providedVersion = parseVersionSafely(sentryVersion) ?: return
     val userVersion = parseVersionSafely(context.details.id.version) ?: return
 
@@ -86,14 +77,10 @@ abstract class WarnOnOverrideStrategy : ComponentMetadataRule {
         SentryModules.SENTRY_SPRING_BOOT4,
       )
 
-    override fun register(
-      component: ComponentMetadataHandler,
-      autoInstallEnabled: Boolean,
-      sentryVersion: String,
-    ) {
+    override fun register(component: ComponentMetadataHandler, sentryVersion: String) {
       sentryModules.forEach { module ->
         component.withModule(module.toString(), WarnOnOverrideStrategy::class.java) {
-          it.params(autoInstallEnabled, sentryVersion)
+          it.params(sentryVersion)
         }
       }
     }

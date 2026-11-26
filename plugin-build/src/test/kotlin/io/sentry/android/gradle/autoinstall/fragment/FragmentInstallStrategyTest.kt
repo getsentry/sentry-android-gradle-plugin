@@ -44,7 +44,7 @@ class FragmentInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn("1.3.5") }
       whenever(metadataDetails.id).thenReturn(id)
 
-      return FragmentInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "5.6.1", logger)
+      return FragmentInstallStrategyImpl(sentryVersion = "5.6.1", logger)
     }
   }
 
@@ -63,9 +63,6 @@ class FragmentInstallStrategyTest {
       .add(check<String> { assertEquals("io.sentry:sentry-android-fragment:5.6.1", it) })
   }
 
-  private class FragmentInstallStrategyImpl(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : FragmentInstallStrategy(autoInstallEnabled, sentryVersion, logger)
+  private class FragmentInstallStrategyImpl(sentryVersion: String, logger: Logger) :
+    FragmentInstallStrategy(sentryVersion, logger)
 }

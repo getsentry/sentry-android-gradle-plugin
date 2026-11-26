@@ -44,11 +44,7 @@ class Graphql22InstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(graphqlVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      return Graphql22InstallStrategyImpl(
-        autoInstallEnabled = true,
-        sentryVersion = "8.0.0",
-        logger,
-      )
+      return Graphql22InstallStrategyImpl(sentryVersion = "8.0.0", logger)
     }
   }
 
@@ -82,9 +78,6 @@ class Graphql22InstallStrategyTest {
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
 
-  private class Graphql22InstallStrategyImpl(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : Graphql22InstallStrategy(autoInstallEnabled, sentryVersion, logger)
+  private class Graphql22InstallStrategyImpl(sentryVersion: String, logger: Logger) :
+    Graphql22InstallStrategy(sentryVersion, logger)
 }

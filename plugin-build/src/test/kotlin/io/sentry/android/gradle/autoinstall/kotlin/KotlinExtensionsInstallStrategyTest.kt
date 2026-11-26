@@ -45,11 +45,7 @@ class KotlinExtensionsInstallStrategyTest {
         mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(kotlinExtensionsVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      return KotlinExtensionsInstallStrategyImpl(
-        autoInstallEnabled = true,
-        sentryVersion = "6.25.2",
-        logger,
-      )
+      return KotlinExtensionsInstallStrategyImpl(sentryVersion = "6.25.2", logger)
     }
   }
 
@@ -85,9 +81,6 @@ class KotlinExtensionsInstallStrategyTest {
       )
   }
 
-  private class KotlinExtensionsInstallStrategyImpl(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : KotlinExtensionsInstallStrategy(autoInstallEnabled, sentryVersion, logger)
+  private class KotlinExtensionsInstallStrategyImpl(sentryVersion: String, logger: Logger) :
+    KotlinExtensionsInstallStrategy(sentryVersion, logger)
 }

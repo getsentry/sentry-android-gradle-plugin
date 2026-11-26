@@ -44,7 +44,7 @@ class SqliteInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(sqliteVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      return SQLiteInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "6.21.0", logger)
+      return SQLiteInstallStrategyImpl(sentryVersion = "6.21.0", logger)
     }
   }
 
@@ -80,9 +80,6 @@ class SqliteInstallStrategyTest {
       )
   }
 
-  private class SQLiteInstallStrategyImpl(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : SQLiteInstallStrategy(autoInstallEnabled, sentryVersion, logger)
+  private class SQLiteInstallStrategyImpl(sentryVersion: String, logger: Logger) :
+    SQLiteInstallStrategy(sentryVersion, logger)
 }

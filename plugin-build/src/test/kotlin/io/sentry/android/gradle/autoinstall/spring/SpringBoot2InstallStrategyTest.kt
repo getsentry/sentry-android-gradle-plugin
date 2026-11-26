@@ -44,11 +44,7 @@ class SpringBoot2InstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(springVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      return SpringBoot2InstallStrategyImpl(
-        autoInstallEnabled = true,
-        sentryVersion = "6.28.0",
-        logger,
-      )
+      return SpringBoot2InstallStrategyImpl(sentryVersion = "6.28.0", logger)
     }
   }
 
@@ -95,9 +91,6 @@ class SpringBoot2InstallStrategyTest {
       )
   }
 
-  private class SpringBoot2InstallStrategyImpl(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : SpringBoot2InstallStrategy(autoInstallEnabled, sentryVersion, logger)
+  private class SpringBoot2InstallStrategyImpl(sentryVersion: String, logger: Logger) :
+    SpringBoot2InstallStrategy(sentryVersion, logger)
 }

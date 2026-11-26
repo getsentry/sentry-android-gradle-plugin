@@ -44,7 +44,7 @@ class Spring5InstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(springVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      return Spring5InstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "6.21.0", logger)
+      return Spring5InstallStrategyImpl(sentryVersion = "6.21.0", logger)
     }
   }
 
@@ -89,9 +89,6 @@ class Spring5InstallStrategyTest {
       .add(org.mockito.kotlin.check<String> { assertEquals("io.sentry:sentry-spring:6.21.0", it) })
   }
 
-  private class Spring5InstallStrategyImpl(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : Spring5InstallStrategy(autoInstallEnabled, sentryVersion, logger)
+  private class Spring5InstallStrategyImpl(sentryVersion: String, logger: Logger) :
+    Spring5InstallStrategy(sentryVersion, logger)
 }

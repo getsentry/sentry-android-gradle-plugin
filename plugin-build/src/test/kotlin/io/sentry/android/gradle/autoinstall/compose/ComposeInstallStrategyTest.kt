@@ -45,7 +45,7 @@ class ComposeInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(composeVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      return ComposeInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "6.7.0", logger)
+      return ComposeInstallStrategyImpl(sentryVersion = "6.7.0", logger)
     }
   }
 
@@ -77,9 +77,6 @@ class ComposeInstallStrategyTest {
       .add(check<String> { assertEquals("io.sentry:sentry-compose-android:6.7.0", it) })
   }
 
-  private class ComposeInstallStrategyImpl(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : ComposeInstallStrategy(autoInstallEnabled, sentryVersion, logger)
+  private class ComposeInstallStrategyImpl(sentryVersion: String, logger: Logger) :
+    ComposeInstallStrategy(sentryVersion, logger)
 }

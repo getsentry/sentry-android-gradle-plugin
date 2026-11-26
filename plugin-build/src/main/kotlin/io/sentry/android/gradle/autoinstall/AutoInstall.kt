@@ -1,6 +1,5 @@
 package io.sentry.android.gradle.autoinstall
 
-import io.sentry.android.gradle.SentryPlugin.Companion.SENTRY_SDK_VERSION
 import io.sentry.android.gradle.autoinstall.compose.ComposeInstallStrategy
 import io.sentry.android.gradle.autoinstall.fragment.FragmentInstallStrategy
 import io.sentry.android.gradle.autoinstall.graphql.Graphql22InstallStrategy
@@ -34,6 +33,11 @@ internal const val SENTRY_GROUP = "io.sentry"
 // dependencies are detected, distribution must be installed per-variant based on
 // extension.distribution.updateSdkVariants. See
 // AndroidComponentsConfig.configureDistributionPropertiesTask.
+//
+// All rules are registered from `withDependencies`, after the build script has run. Two reasons:
+// the rules take the Sentry version as a parameter, and that version comes from the declared
+// dependencies; and the Spring rules must run after the ones spring-dependency-management
+// registers, or they see versions it is about to replace.
 private val strategies =
   listOf(
     AndroidOkHttpInstallStrategy.Registrar,
@@ -50,10 +54,6 @@ private val strategies =
     QuartzInstallStrategy.Registrar,
     KotlinExtensionsInstallStrategy.Registrar,
     WarnOnOverrideStrategy.Registrar,
-  )
-
-private val delayedStrategies =
-  listOf(
     Spring5InstallStrategy.Registrar,
     Spring6InstallStrategy.Registrar,
     Spring7InstallStrategy.Registrar,
@@ -65,28 +65,26 @@ private val delayedStrategies =
 fun Project.installDependencies(extension: SentryPluginExtension, isAndroid: Boolean) {
   configurations.named("implementation").configure { configuration ->
     configuration.withDependencies { dependencies ->
-      val autoInstallEnabled = extension.autoInstallation.enabled.get()
+      if (!extension.autoInstallation.enabled.get()) {
+        return@withDependencies
+      }
 
-      // The version and enabled flag are resolved here and passed to the component metadata rules
-      // as parameters, so the rules don't rely on shared mutable state across projects.
-      val sentryVersion =
-        if (autoInstallEnabled) {
-          val sentryDependency = dependencies.findSentryDependency(isAndroid)
-          val sentryArtifactId =
-            if (isAndroid) {
-              SentryModules.SENTRY_ANDROID.name
-            } else {
-              SentryModules.SENTRY.name
-            }
-          installSentrySdk(sentryDependency, dependencies, sentryArtifactId, extension)
+      val sentryArtifactId =
+        if (isAndroid) {
+          SentryModules.SENTRY_ANDROID.name
         } else {
-          SENTRY_SDK_VERSION
+          SentryModules.SENTRY.name
         }
+      val sentryVersion =
+        installSentrySdk(
+          dependencies.findSentryDependency(isAndroid),
+          dependencies,
+          sentryArtifactId,
+          extension,
+        )
 
       project.dependencies.components { component ->
-        (strategies + delayedStrategies).forEach {
-          it.register(component, autoInstallEnabled, sentryVersion)
-        }
+        strategies.forEach { it.register(component, sentryVersion) }
       }
     }
   }

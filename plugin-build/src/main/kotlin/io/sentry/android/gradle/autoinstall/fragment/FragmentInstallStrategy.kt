@@ -11,20 +11,13 @@ import org.slf4j.Logger
 // @CacheableRule // TODO: make it cacheable somehow (probably depends on parameters)
 abstract class FragmentInstallStrategy : AbstractInstallStrategy {
 
-  constructor(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : super(autoInstallEnabled, sentryVersion) {
+  constructor(sentryVersion: String, logger: Logger) : super(sentryVersion) {
     this.logger = logger
   }
 
   @Suppress("unused") // used by Gradle
   @Inject // inject is needed to avoid Gradle error
-  constructor(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-  ) : this(autoInstallEnabled, sentryVersion, SentryPlugin.logger)
+  constructor(sentryVersion: String) : this(sentryVersion, SentryPlugin.logger)
 
   override val sentryModuleId: String
     get() = SENTRY_FRAGMENT_ID
@@ -37,13 +30,9 @@ abstract class FragmentInstallStrategy : AbstractInstallStrategy {
     private const val FRAGMENT_ID = "fragment"
     internal const val SENTRY_FRAGMENT_ID = "sentry-android-fragment"
 
-    override fun register(
-      component: ComponentMetadataHandler,
-      autoInstallEnabled: Boolean,
-      sentryVersion: String,
-    ) {
+    override fun register(component: ComponentMetadataHandler, sentryVersion: String) {
       component.withModule("$FRAGMENT_GROUP:$FRAGMENT_ID", FragmentInstallStrategy::class.java) {
-        it.params(autoInstallEnabled, sentryVersion)
+        it.params(sentryVersion)
       }
     }
   }

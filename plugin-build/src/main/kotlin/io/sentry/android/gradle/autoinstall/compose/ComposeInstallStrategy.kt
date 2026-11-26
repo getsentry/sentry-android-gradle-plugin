@@ -10,20 +10,13 @@ import org.slf4j.Logger
 
 abstract class ComposeInstallStrategy : AbstractInstallStrategy {
 
-  constructor(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : super(autoInstallEnabled, sentryVersion) {
+  constructor(sentryVersion: String, logger: Logger) : super(sentryVersion) {
     this.logger = logger
   }
 
   @Suppress("unused") // used by Gradle
   @Inject // inject is needed to avoid Gradle error
-  constructor(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-  ) : this(autoInstallEnabled, sentryVersion, SentryPlugin.logger)
+  constructor(sentryVersion: String) : this(sentryVersion, SentryPlugin.logger)
 
   override val sentryModuleId: String
     get() = SENTRY_COMPOSE_ID
@@ -38,13 +31,9 @@ abstract class ComposeInstallStrategy : AbstractInstallStrategy {
 
     internal const val SENTRY_COMPOSE_ID = "sentry-compose-android"
 
-    override fun register(
-      component: ComponentMetadataHandler,
-      autoInstallEnabled: Boolean,
-      sentryVersion: String,
-    ) {
+    override fun register(component: ComponentMetadataHandler, sentryVersion: String) {
       component.withModule("androidx.compose.runtime:runtime", ComposeInstallStrategy::class.java) {
-        it.params(autoInstallEnabled, sentryVersion)
+        it.params(sentryVersion)
       }
     }
   }

@@ -44,7 +44,7 @@ class GraphqlInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(graphqlVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      return GraphqlInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "6.25.2", logger)
+      return GraphqlInstallStrategyImpl(sentryVersion = "6.25.2", logger)
     }
   }
 
@@ -76,9 +76,6 @@ class GraphqlInstallStrategyTest {
     verify(fixture.metadataDetails, never()).allVariants(any())
   }
 
-  private class GraphqlInstallStrategyImpl(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : GraphqlInstallStrategy(autoInstallEnabled, sentryVersion, logger)
+  private class GraphqlInstallStrategyImpl(sentryVersion: String, logger: Logger) :
+    GraphqlInstallStrategy(sentryVersion, logger)
 }

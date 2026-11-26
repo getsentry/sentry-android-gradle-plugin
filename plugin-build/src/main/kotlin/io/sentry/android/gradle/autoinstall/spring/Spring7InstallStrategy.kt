@@ -11,20 +11,13 @@ import org.slf4j.Logger
 // @CacheableRule
 abstract class Spring7InstallStrategy : AbstractInstallStrategy {
 
-  constructor(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : super(autoInstallEnabled, sentryVersion) {
+  constructor(sentryVersion: String, logger: Logger) : super(sentryVersion) {
     this.logger = logger
   }
 
   @Suppress("unused") // used by Gradle
   @Inject // inject is needed to avoid Gradle error
-  constructor(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-  ) : this(autoInstallEnabled, sentryVersion, SentryPlugin.logger)
+  constructor(sentryVersion: String) : this(sentryVersion, SentryPlugin.logger)
 
   override val sentryModuleId: String
     get() = SENTRY_SPRING_7_ID
@@ -46,13 +39,9 @@ abstract class Spring7InstallStrategy : AbstractInstallStrategy {
     private val MIN_SUPPORTED_VERSION = SemVer(7, 0, 0, "M1")
     private val MAX_SUPPORTED_VERSION = SemVer(7, 9999, 9999)
 
-    override fun register(
-      component: ComponentMetadataHandler,
-      autoInstallEnabled: Boolean,
-      sentryVersion: String,
-    ) {
+    override fun register(component: ComponentMetadataHandler, sentryVersion: String) {
       component.withModule("$SPRING_GROUP:$SPRING_7_ID", Spring7InstallStrategy::class.java) {
-        it.params(autoInstallEnabled, sentryVersion)
+        it.params(sentryVersion)
       }
     }
   }

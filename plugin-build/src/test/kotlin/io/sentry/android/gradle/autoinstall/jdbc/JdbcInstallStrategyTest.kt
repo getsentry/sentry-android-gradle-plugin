@@ -43,7 +43,7 @@ class JdbcInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(jdbcVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      return JdbcInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "6.21.0", logger)
+      return JdbcInstallStrategyImpl(sentryVersion = "6.21.0", logger)
     }
   }
 
@@ -62,9 +62,6 @@ class JdbcInstallStrategyTest {
       .add(org.mockito.kotlin.check<String> { assertEquals("io.sentry:sentry-jdbc:6.21.0", it) })
   }
 
-  private class JdbcInstallStrategyImpl(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : JdbcInstallStrategy(autoInstallEnabled, sentryVersion, logger)
+  private class JdbcInstallStrategyImpl(sentryVersion: String, logger: Logger) :
+    JdbcInstallStrategy(sentryVersion, logger)
 }

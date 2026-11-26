@@ -8,10 +8,7 @@ import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
 import org.slf4j.Logger
 
-abstract class AbstractInstallStrategy(
-  private val autoInstallEnabled: Boolean,
-  private val sentryVersion: String,
-) : ComponentMetadataRule {
+abstract class AbstractInstallStrategy(private val sentryVersion: String) : ComponentMetadataRule {
 
   protected lateinit var logger: Logger
 
@@ -26,10 +23,6 @@ abstract class AbstractInstallStrategy(
   protected open val maxSupportedSentryVersion: SemVer = SemVer(0, 0, 0)
 
   override fun execute(context: ComponentMetadataContext) {
-    if (!autoInstallEnabled) {
-      logger.info { "$sentryModuleId won't be installed because autoInstallation is disabled" }
-      return
-    }
     minSupportedThirdPartyVersion?.let {
       parseVersion(context.details.id.version)?.let { thirdPartySemVersion ->
         if (thirdPartySemVersion < it) {

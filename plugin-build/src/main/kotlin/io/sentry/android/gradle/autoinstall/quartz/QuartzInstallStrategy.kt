@@ -11,20 +11,13 @@ import org.slf4j.Logger
 // @CacheableRule
 abstract class QuartzInstallStrategy : AbstractInstallStrategy {
 
-  constructor(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : super(autoInstallEnabled, sentryVersion) {
+  constructor(sentryVersion: String, logger: Logger) : super(sentryVersion) {
     this.logger = logger
   }
 
   @Suppress("unused") // used by Gradle
   @Inject // inject is needed to avoid Gradle error
-  constructor(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-  ) : this(autoInstallEnabled, sentryVersion, SentryPlugin.logger)
+  constructor(sentryVersion: String) : this(sentryVersion, SentryPlugin.logger)
 
   override val sentryModuleId: String
     get() = SENTRY_QUARTZ_ID
@@ -37,13 +30,9 @@ abstract class QuartzInstallStrategy : AbstractInstallStrategy {
     private const val QUARTZ_ID = "quartz"
     internal const val SENTRY_QUARTZ_ID = "sentry-quartz"
 
-    override fun register(
-      component: ComponentMetadataHandler,
-      autoInstallEnabled: Boolean,
-      sentryVersion: String,
-    ) {
+    override fun register(component: ComponentMetadataHandler, sentryVersion: String) {
       component.withModule("$QUARTZ_GROUP:$QUARTZ_ID", QuartzInstallStrategy::class.java) {
-        it.params(autoInstallEnabled, sentryVersion)
+        it.params(sentryVersion)
       }
     }
   }

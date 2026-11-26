@@ -44,7 +44,7 @@ class LogbackInstallStrategyTest {
       val id = mock<ModuleVersionIdentifier> { whenever(it.version).doReturn(logbackVersion) }
       whenever(metadataDetails.id).thenReturn(id)
 
-      return LogbackInstallStrategyImpl(autoInstallEnabled = true, sentryVersion = "6.25.2", logger)
+      return LogbackInstallStrategyImpl(sentryVersion = "6.25.2", logger)
     }
   }
 
@@ -76,9 +76,6 @@ class LogbackInstallStrategyTest {
       .add(org.mockito.kotlin.check<String> { assertEquals("io.sentry:sentry-logback:6.25.2", it) })
   }
 
-  private class LogbackInstallStrategyImpl(
-    autoInstallEnabled: Boolean,
-    sentryVersion: String,
-    logger: Logger,
-  ) : LogbackInstallStrategy(autoInstallEnabled, sentryVersion, logger)
+  private class LogbackInstallStrategyImpl(sentryVersion: String, logger: Logger) :
+    LogbackInstallStrategy(sentryVersion, logger)
 }
