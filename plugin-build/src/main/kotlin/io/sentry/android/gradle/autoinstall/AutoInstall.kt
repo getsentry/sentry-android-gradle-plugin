@@ -37,7 +37,7 @@ internal const val SENTRY_GROUP = "io.sentry"
 // All rules are registered from `withDependencies`, after the build script has run. Two reasons:
 // the rules take the Sentry version as a parameter, and that version comes from the declared
 // dependencies; and the Spring rules must run after the ones spring-dependency-management
-// registers, or they see versions it is about to replace.
+// registers, or the strategies see versions the spring-dependency-management is about to replace.
 private val strategies =
   listOf(
     AndroidOkHttpInstallStrategy.Registrar,
