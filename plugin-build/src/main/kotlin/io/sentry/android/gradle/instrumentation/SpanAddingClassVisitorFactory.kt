@@ -23,6 +23,7 @@ import io.sentry.android.gradle.instrumentation.util.findClassReader
 import io.sentry.android.gradle.instrumentation.util.findClassWriter
 import io.sentry.android.gradle.instrumentation.util.isMinifiedClass
 import io.sentry.android.gradle.instrumentation.util.raiseComputeLimits
+import io.sentry.android.gradle.instrumentation.webview.WebViewLoadUrl
 import io.sentry.android.gradle.instrumentation.wrap.WrappingInstrumentable
 import io.sentry.android.gradle.services.SentryModulesService
 import io.sentry.android.gradle.util.SemVer
@@ -110,6 +111,7 @@ abstract class SpanAddingClassVisitorFactory :
             RemappingInstrumentable().takeIf { sentryModulesService.isFileIOInstrEnabled() },
             ComposeNavigation().takeIf { sentryModulesService.isComposeInstrEnabled() },
             Logcat().takeIf { sentryModulesService.isLogcatInstrEnabled() },
+            WebViewLoadUrl().takeIf { sentryModulesService.isWebViewInstrEnabled() },
             Application().takeIf { sentryModulesService.isAppStartInstrEnabled() },
             ContentProvider().takeIf { sentryModulesService.isAppStartInstrEnabled() },
           )

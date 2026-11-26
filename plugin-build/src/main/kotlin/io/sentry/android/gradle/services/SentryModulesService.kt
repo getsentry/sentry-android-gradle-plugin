@@ -61,6 +61,7 @@ abstract class SentryModulesService :
       InstrumentationFeature.FILE_IO -> isFileIOInstrEnabled()
       InstrumentationFeature.OKHTTP -> isOkHttpInstrEnabled()
       InstrumentationFeature.COMPOSE -> isComposeInstrEnabled()
+      InstrumentationFeature.WEBVIEW -> isWebViewInstrEnabled()
     }
   }
 
@@ -124,6 +125,10 @@ abstract class SentryModulesService :
   fun isComposeInstrEnabled(): Boolean =
     sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_COMPOSE, SentryVersions.VERSION_COMPOSE) &&
       parameters.features.get().contains(InstrumentationFeature.COMPOSE)
+
+  fun isWebViewInstrEnabled(): Boolean =
+    sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_CORE, SentryVersions.VERSION_WEBVIEW) &&
+      parameters.features.get().contains(InstrumentationFeature.WEBVIEW)
 
   fun isAppStartInstrEnabled(): Boolean =
     sentryModules.isAtLeast(SentryModules.SENTRY_ANDROID_CORE, SentryVersions.VERSION_APP_START) &&

@@ -812,6 +812,19 @@ class SentryPluginTest :
   }
 
   @Test
+  fun `does not apply webview instrumentation when the SDK has no adapter for it`() {
+    applyTracingInstrumentation(
+      features = setOf(InstrumentationFeature.WEBVIEW),
+      sdkVersion = "8.64.0",
+    )
+    val build = runner.appendArguments(":app:assembleDebug", "--info").build()
+
+    assertTrue {
+      "[sentry] Instrumentable: ChainedInstrumentable(instrumentables=)" in build.output
+    }
+  }
+
+  @Test
   fun `applies app start instrumentations when enabled`() {
     applyTracingInstrumentation(appStart = true)
     val build = runner.appendArguments(":app:assembleDebug", "--info").build()
