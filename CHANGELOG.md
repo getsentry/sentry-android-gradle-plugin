@@ -11,9 +11,9 @@
 
 ### Dependencies
 
-- Bump Android SDK from v8.64.0 to v8.65.0 ([#1507](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1507))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8650)
-  - [diff](https://github.com/getsentry/sentry-java/compare/8.64.0...8.65.0)
+- Bump Android SDK from v8.64.0 to v8.66.0 ([#1507](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1507), [#1511](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1511))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8660)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.64.0...8.66.0)
 - Bump ComposablePreviewScanner from v0.10.0 to v0.10.1 ([#1510](https://github.com/getsentry/sentry-android-gradle-plugin/pull/1510))
   - [changelog](https://github.com/sergio-sastre/ComposablePreviewScanner/blob/master/CHANGELOG.md#0101)
   - [diff](https://github.com/sergio-sastre/ComposablePreviewScanner/compare/0.10.0...0.10.1)
