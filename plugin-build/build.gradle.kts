@@ -229,26 +229,24 @@ spotless {
   }
 }
 
-val sep = File.separator
-
 distributions {
   main {
     contents {
-      from("build${sep}libs")
-      from("build${sep}publications${sep}pluginMaven")
+      from("build/libs")
+      from("build/publications/pluginMaven")
     }
   }
   create("sentryPluginMarker") {
-    contents { from("build${sep}publications${sep}sentryPluginPluginMarkerMaven") }
+    contents { from("build/publications/sentryPluginPluginMarkerMaven") }
   }
   create("sentryKotlinCompilerPluginMarker") {
-    contents { from("build${sep}publications${sep}kotlinCompilerPluginPluginMarkerMaven") }
+    contents { from("build/publications/kotlinCompilerPluginPluginMarkerMaven") }
   }
   create("sentryJvmPluginMarker") {
-    contents { from("build${sep}publications${sep}sentryJvmPluginPluginMarkerMaven") }
+    contents { from("build/publications/sentryJvmPluginPluginMarkerMaven") }
   }
   create("sentrySnapshotMetadataPluginMarker") {
-    contents { from("build${sep}publications${sep}sentrySnapshotMetadataPluginPluginMarkerMaven") }
+    contents { from("build/publications/sentrySnapshotMetadataPluginPluginMarkerMaven") }
   }
 }
 
