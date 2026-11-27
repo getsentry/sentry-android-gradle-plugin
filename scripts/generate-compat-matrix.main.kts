@@ -10,6 +10,9 @@
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.ProgramResult
 import com.github.ajalt.clikt.core.main
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.types.file
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -31,8 +34,10 @@ data class VersionRange(val min: Version, val max: Version) {
   }
 }
 
-/** Generates a matrix of different build tools we use. */
+/** Generates a matrix of different build tools we use and writes it to `--output`. */
 class GenerateMatrix : CliktCommand() {
+
+  private val output: File by option("--output").file().required()
 
   // TODO: introduce params if needed
   //  private val gradleProperties: File by option("--gradle-properties").file().required()
@@ -148,10 +153,9 @@ class GenerateMatrix : CliktCommand() {
 
     val allIncludes = baseIncludes + extraIncludes(baseIncludes)
 
-    val json = moshi.adapter<Matrix>().toJson(Matrix(allIncludes))
-
-    // Example output:
-    // {"include":[{"agp":"8.11.0-alpha08","gradle":"8.11.1","java":"17","groovy":"1.7.1"},{"agp":"8.10.0-rc04","gradle":"8.11.1","java":"17","groovy":"1.7.1"},{"agp":"8.9.2","gradle":"8.11.1","java":"17","groovy":"1.7.1"},{"agp":"7.4.2","gradle":"7.5","java":"17","groovy":"1.2"}]}
+    // Indented so the nightly update PR shows one changed version per line
+    val json = moshi.adapter<Matrix>().indent("  ").toJson(Matrix(allIncludes))
+    output.writeText(json + "\n")
     echo(json)
   }
 
