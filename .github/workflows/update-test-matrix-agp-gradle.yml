@@ -61,8 +61,9 @@ jobs:
           name: test-matrix
           path: .github
 
+      # The values reach the Test Matrix workflow's inputs, so allow version characters only.
       - name: Validate Compat Matrix
-        run: jq -e '.include | length > 0' "$MATRIX_FILE"
+        run: jq -e '.include | length > 0 and all(.[]; all(.[]; test("^[0-9A-Za-z.-]+$")))' "$MATRIX_FILE"
 
       - name: Create or update PR
         uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8.1.3
